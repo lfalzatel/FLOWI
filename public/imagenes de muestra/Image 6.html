@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flowi - Reportes</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#003824",
+                    "text-low": "rgba(255, 255, 255, 0.20)",
+                    "surface-container-lowest": "#0e0e13",
+                    "inverse-primary": "#006c49",
+                    "on-surface-variant": "#bacbbf",
+                    "primary": "#6effc0",
+                    "on-primary-fixed": "#002114",
+                    "surface-tint": "#00e29e",
+                    "on-tertiary-container": "#006142",
+                    "on-secondary-fixed-variant": "#45455b",
+                    "tertiary": "#74fec3",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-secondary-fixed": "#1a1a2e",
+                    "inverse-surface": "#e4e1e9",
+                    "on-secondary-container": "#b8b6d0",
+                    "outline-variant": "#3b4a41",
+                    "surface-container": "#1f1f25",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#e2e0fc",
+                    "surface-container-highest": "#35343a",
+                    "glass-border": "rgba(255, 255, 255, 0.10)",
+                    "primary-container": "#00e5a0",
+                    "error": "#ffb4ab",
+                    "on-tertiary-fixed": "#002114",
+                    "secondary-fixed-dim": "#c6c4df",
+                    "primary-fixed": "#47ffb8",
+                    "primary-fixed-dim": "#00e29e",
+                    "secondary": "#c6c4df",
+                    "tertiary-container": "#54e1a8",
+                    "on-secondary": "#2f2e43",
+                    "error-container": "#93000a",
+                    "background": "#131318",
+                    "surface-container-high": "#2a292f",
+                    "surface": "#131318",
+                    "on-primary-container": "#006141",
+                    "outline": "#84958a",
+                    "tertiary-fixed": "#71fbc0",
+                    "inverse-on-surface": "#303036",
+                    "off-white": "#F0F4F8",
+                    "surface-container-low": "#1b1b20",
+                    "on-tertiary-fixed-variant": "#005137",
+                    "surface-dim": "#131318",
+                    "secondary-container": "#47475d",
+                    "text-high": "rgba(255, 255, 255, 0.90)",
+                    "on-tertiary": "#003825",
+                    "error-red": "#EF4444",
+                    "surface-variant": "#35343a",
+                    "on-background": "#e4e1e9",
+                    "text-med": "rgba(255, 255, 255, 0.50)",
+                    "glass-surface": "rgba(255, 255, 255, 0.06)",
+                    "on-surface": "#e4e1e9",
+                    "tertiary-fixed-dim": "#50dea5",
+                    "surface-bright": "#39383e",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding-desktop": "24px",
+                    "container-padding-mobile": "16px",
+                    "stack-lg": "32px",
+                    "gutter": "16px",
+                    "base": "4px",
+                    "stack-sm": "8px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Syne"],
+                    "title-md": ["Syne"],
+                    "label-lg": ["DM Sans"],
+                    "body-md": ["DM Sans"],
+                    "label-sm": ["DM Sans"],
+                    "headline-lg": ["Syne"],
+                    "body-lg": ["DM Sans"],
+                    "headline-lg-mobile": ["Syne"],
+                    "caption": ["DM Sans"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "title-md": ["20px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                    "label-lg": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "caption": ["10px", {"lineHeight": "1.2", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0A0A0F;
+            color: #e4e1e9;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+        .chart-pulse {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(110, 255, 192, 0.2)); }
+            50% { filter: drop-shadow(0 0 15px rgba(110, 255, 192, 0.5)); }
+        }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-glass-surface backdrop-blur-2xl border-b border-glass-border flex justify-between items-center px-container-padding-mobile py-stack-sm h-16">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-headline-lg-mobile" data-icon="bubble_chart">bubble_chart</span>
+<h1 class="font-display-lg text-headline-lg-mobile text-primary tracking-tighter">Flowi</h1>
+</div>
+<div class="active:scale-95 transition-transform hover:opacity-80 cursor-pointer">
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden p-0.5">
+<img class="w-full h-full object-cover rounded-full" data-alt="A portrait of a stylish young professional with a confident expression, set against a dark architectural background with subtle green ambient lighting. The style is cinematic and high-contrast, matching a premium dark-mode financial application aesthetic. Sharp focus on facial details with a soft, blurred background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrh3_V81K1PkxBt6ySV8B0f_aUJfXclt6IM3DIMCm1mZL_lHKFIE2wPZL85yF8PQechOjPU9cznz-fPbh1SGk7E1WUgpb6F-cs6crSgEDwPDj-pFUUT_Zikx12kbovPk_p9u1JI2eolgOpoaqCI4DEjgic21ndIiRyiISJEYFBinnn27WDYSgSyT1VJ8VH6UWeOoZGPJB4v00RJuLbF2r2EuccJCBxthMQt_BpMlJS6BLoWp_nK-M55bL61tIP3FdskD3A0wPfCwg"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-32 px-container-padding-mobile min-h-screen max-w-lg mx-auto">
+<!-- Header Section & Period Selector -->
+<section class="mt-4 flex flex-col gap-stack-md">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-title-md text-headline-lg-mobile text-text-high">Reportes</h2>
+<p class="font-body-md text-text-med">Análisis de flujo financiero</p>
+</div>
+<!-- Selector de periodo -->
+<div class="flex bg-surface-container-low rounded-full p-1 border border-glass-border">
+<button class="px-4 py-1.5 rounded-full text-label-sm font-label-sm bg-primary text-on-primary transition-all duration-300" id="btn-mensual">Mensual</button>
+<button class="px-4 py-1.5 rounded-full text-label-sm font-label-sm text-text-med hover:text-text-high transition-all duration-300" id="btn-anual">Anual</button>
+</div>
+</div>
+</section>
+<!-- Summary Grid (Bento Style) -->
+<section class="mt-stack-lg grid grid-cols-2 gap-4">
+<div class="glass-card col-span-2 p-stack-md rounded-xl flex flex-col gap-2 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 blur-3xl rounded-full"></div>
+<div class="flex justify-between items-center">
+<span class="text-label-sm font-label-sm text-text-med uppercase tracking-wider">Ahorro Mensual</span>
+<span class="material-symbols-outlined text-primary text-body-lg" data-icon="trending_up">trending_up</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-headline-lg text-primary">$1,240</span>
+<span class="text-label-sm font-label-sm text-primary-container bg-primary-container/10 px-2 py-0.5 rounded-full">+12.5%</span>
+</div>
+<p class="text-caption font-caption text-text-med">Respecto a $1,102 del mes anterior</p>
+</div>
+</section>
+<!-- Category Distribution (Visual Chart Area) -->
+<section class="mt-stack-lg">
+<h3 class="font-label-lg text-label-lg text-text-high mb-4 px-1">Distribución de Gastos</h3>
+<div class="glass-card p-stack-md rounded-xl flex flex-col items-center">
+<!-- Mockup of a sleek glassmorphic bar chart -->
+<div class="w-full flex items-end justify-between h-40 gap-3 px-2 mb-6">
+<div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative overflow-hidden h-[60%] transition-all group-hover:h-[65%] group-hover:shadow-[0_0_15px_rgba(110,255,192,0.4)]">
+<div class="absolute bottom-0 w-full h-full bg-gradient-to-t from-primary/40 to-primary/10"></div>
+</div>
+<span class="text-caption font-caption text-text-med">Comida</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative overflow-hidden h-[85%] transition-all group-hover:h-[90%] group-hover:shadow-[0_0_15px_rgba(110,255,192,0.4)]">
+<div class="absolute bottom-0 w-full h-full bg-gradient-to-t from-primary/60 to-primary/20"></div>
+</div>
+<span class="text-caption font-caption text-text-med">Renta</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative overflow-hidden h-[40%] transition-all group-hover:h-[45%] group-hover:shadow-[0_0_15px_rgba(110,255,192,0.4)]">
+<div class="absolute bottom-0 w-full h-full bg-gradient-to-t from-primary/30 to-primary/5"></div>
+</div>
+<span class="text-caption font-caption text-text-med">Ocio</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative overflow-hidden h-[55%] transition-all group-hover:h-[60%] group-hover:shadow-[0_0_15px_rgba(110,255,192,0.4)]">
+<div class="absolute bottom-0 w-full h-full bg-gradient-to-t from-primary/40 to-primary/10"></div>
+</div>
+<span class="text-caption font-caption text-text-med">Transp.</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full bg-surface-container-highest rounded-t-lg relative overflow-hidden h-[30%] transition-all group-hover:h-[35%] group-hover:shadow-[0_0_15px_rgba(110,255,192,0.4)]">
+<div class="absolute bottom-0 w-full h-full bg-gradient-to-t from-primary/20 to-primary/5"></div>
+</div>
+<span class="text-caption font-caption text-text-med">Otros</span>
+</div>
+</div>
+<!-- Legend / Details List -->
+<div class="w-full flex flex-col gap-3">
+<div class="flex justify-between items-center p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(110,255,192,0.8)]"></div>
+<span class="font-body-md text-text-high">Vivienda y Renta</span>
+</div>
+<span class="font-title-md text-text-high text-body-lg">$850.00</span>
+</div>
+<div class="flex justify-between items-center p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary/60"></div>
+<span class="font-body-md text-text-high">Alimentación</span>
+</div>
+<span class="font-title-md text-text-high text-body-lg">$420.00</span>
+</div>
+<div class="flex justify-between items-center p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-primary/30"></div>
+<span class="font-body-md text-text-high">Entretenimiento</span>
+</div>
+<span class="font-title-md text-text-high text-body-lg">$185.00</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Insights Banner -->
+<section class="mt-stack-lg">
+<div class="glass-card p-stack-md rounded-xl border-l-4 border-primary bg-gradient-to-r from-primary/5 to-transparent">
+<div class="flex gap-4">
+<div class="p-2 bg-primary/10 rounded-lg h-fit">
+<span class="material-symbols-outlined text-primary" data-icon="lightbulb">lightbulb</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-primary">Consejo de ahorro</h4>
+<p class="text-body-md text-text-med mt-1">Has reducido tus gastos en 'Ocio' un 15% este mes. ¡Sigue así para alcanzar tu meta de viaje!</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-6 left-6 right-6 rounded-full bg-glass-surface backdrop-blur-2xl border border-glass-border shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
+<div class="flex justify-around items-center h-16 w-full px-2">
+<!-- Inicio -->
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Inicio</span>
+</button>
+<!-- Gastos -->
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">Gastos</span>
+</button>
+<!-- Add (FAB logic) -->
+<button class="bg-primary text-on-primary rounded-full p-4 shadow-[0_0_20px_rgba(110,255,192,0.3)] scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined font-bold" data-icon="add">add</span>
+</button>
+<!-- Ingresos -->
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-sm text-label-sm">Ingresos</span>
+</button>
+<!-- Reportes (ACTIVE) -->
+<button class="text-primary flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="bar_chart" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+<span class="font-label-sm text-label-sm">Reportes</span>
+</button>
+</div>
+</nav>
+<script>
+        // Period Toggle Interaction
+        const btnMensual = document.getElementById('btn-mensual');
+        const btnAnual = document.getElementById('btn-anual');
+
+        btnMensual.addEventListener('click', () => {
+            btnMensual.classList.add('bg-primary', 'text-on-primary');
+            btnMensual.classList.remove('text-text-med');
+            btnAnual.classList.remove('bg-primary', 'text-on-primary');
+            btnAnual.classList.add('text-text-med');
+        });
+
+        btnAnual.addEventListener('click', () => {
+            btnAnual.classList.add('bg-primary', 'text-on-primary');
+            btnAnual.classList.remove('text-text-med');
+            btnMensual.classList.remove('bg-primary', 'text-on-primary');
+            btnMensual.classList.add('text-text-med');
+        });
+
+        // Add subtle parallax hover effect to cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body></html>

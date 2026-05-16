@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flowi - Ingresos</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Syne:wght@400..800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#003824",
+                        "text-low": "rgba(255, 255, 255, 0.20)",
+                        "surface-container-lowest": "#0e0e13",
+                        "inverse-primary": "#006c49",
+                        "on-surface-variant": "#bacbbf",
+                        "primary": "#6effc0",
+                        "on-primary-fixed": "#002114",
+                        "surface-tint": "#00e29e",
+                        "on-tertiary-container": "#006142",
+                        "on-secondary-fixed-variant": "#45455b",
+                        "tertiary": "#74fec3",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-secondary-fixed": "#1a1a2e",
+                        "inverse-surface": "#e4e1e9",
+                        "on-secondary-container": "#b8b6d0",
+                        "outline-variant": "#3b4a41",
+                        "surface-container": "#1f1f25",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#e2e0fc",
+                        "surface-container-highest": "#35343a",
+                        "glass-border": "rgba(255, 255, 255, 0.10)",
+                        "primary-container": "#00e5a0",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#002114",
+                        "secondary-fixed-dim": "#c6c4df",
+                        "primary-fixed": "#47ffb8",
+                        "primary-fixed-dim": "#00e29e",
+                        "secondary": "#c6c4df",
+                        "tertiary-container": "#54e1a8",
+                        "on-secondary": "#2f2e43",
+                        "error-container": "#93000a",
+                        "background": "#131318",
+                        "surface-container-high": "#2a292f",
+                        "surface": "#131318",
+                        "on-primary-container": "#006141",
+                        "outline": "#84958a",
+                        "tertiary-fixed": "#71fbc0",
+                        "inverse-on-surface": "#303036",
+                        "off-white": "#F0F4F8",
+                        "surface-container-low": "#1b1b20",
+                        "on-tertiary-fixed-variant": "#005137",
+                        "surface-dim": "#131318",
+                        "secondary-container": "#47475d",
+                        "text-high": "rgba(255, 255, 255, 0.90)",
+                        "on-tertiary": "#003825",
+                        "error-red": "#EF4444",
+                        "surface-variant": "#35343a",
+                        "on-background": "#e4e1e9",
+                        "text-med": "rgba(255, 255, 255, 0.50)",
+                        "glass-surface": "rgba(255, 255, 255, 0.06)",
+                        "on-surface": "#e4e1e9",
+                        "tertiary-fixed-dim": "#50dea5",
+                        "surface-bright": "#39383e",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding-desktop": "24px",
+                        "container-padding-mobile": "16px",
+                        "stack-lg": "32px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Syne"],
+                        "title-md": ["Syne"],
+                        "label-lg": ["DM Sans"],
+                        "body-md": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "headline-lg": ["Syne"],
+                        "body-lg": ["DM Sans"],
+                        "headline-lg-mobile": ["Syne"],
+                        "caption": ["DM Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "title-md": ["20px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                        "label-lg": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "caption": ["10px", {"lineHeight": "1.2", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-mint {
+            box-shadow: 0 0 20px rgba(110, 255, 192, 0.15);
+        }
+        body {
+            background-color: #0A0A0F;
+            color: #e4e1e9;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131318;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #35343a;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-glass-surface backdrop-blur-2xl border-b border-glass-border">
+<div class="flex justify-between items-center px-container-padding-mobile py-stack-sm w-full md:px-container-padding-desktop">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="bubble_chart">bubble_chart</span>
+<h1 class="font-display-lg text-headline-lg-mobile text-primary tracking-tighter">Flowi</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-text-med md:hidden" data-icon="search">search</span>
+<div class="w-8 h-8 rounded-full border-2 border-primary overflow-hidden hover:opacity-80 transition-opacity cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="A professional male user profile portrait with soft studio lighting. The aesthetic is clean and modern, set against a dark, minimalist background that complements a sleek fintech application interface. The lighting highlights a confident expression, using cool tones and subtle mint green accents to match the brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZRFZ21D4UzDfsu7zVi62r8lukjxZY1LDmk6fIP8Gi98KmZEi4tkJ94ULDiROtnLZD_OL-bt_ICiKBtU8yu6t7DavRJcyIWcuo5Jxcg62pOQ4ip-oNqCKngGOmVVvQosA0hBOHy7gxDd6VIShnwu37zmrIn8l71f9T1geLBvhNYP1RFYL6syu0pBb-aTp3EGvEfXIIJm1VeqENcBkYtdP2caF8QRAvU0FUxSG0F5HO46VbDe_MIeta_G3VpTrPPS4A3ZA0Xi5_VS0"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Navigation Drawer (Desktop) -->
+<aside class="hidden md:flex fixed left-0 top-0 h-full w-[280px] bg-surface-container-lowest border-r border-glass-border flex-col gap-stack-md p-stack-md pt-24 z-40">
+<div class="flex items-center gap-stack-md px-4 py-2 mb-4">
+<div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="dashboard">dashboard</span>
+</div>
+<div>
+<p class="font-title-md text-primary">Financial Flow</p>
+<p class="text-caption text-text-med">Premium Account</p>
+</div>
+</div>
+<nav class="space-y-2">
+<a class="flex items-center gap-4 p-4 rounded-xl text-text-med hover:bg-glass-surface/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 p-4 rounded-xl text-text-med hover:bg-glass-surface/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-4 p-4 rounded-xl bg-glass-surface text-primary border-r-2 border-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-body-md">Ingresos</span>
+</a>
+<a class="flex items-center gap-4 p-4 rounded-xl text-text-med hover:bg-glass-surface/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="pt-20 pb-32 px-container-padding-mobile md:pl-[300px] md:pr-container-padding-desktop max-w-[1400px] mx-auto min-h-screen">
+<!-- Summary Section -->
+<section class="mt-stack-lg">
+<div class="glass-card rounded-[32px] p-8 flex flex-col gap-4 relative overflow-hidden">
+<!-- Background decoration -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[60px] rounded-full -mr-16 -mt-16"></div>
+<p class="text-label-lg font-label-lg text-text-med">Total Ingresos este Mes</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary-container tracking-tighter">$12,450.00</span>
+<span class="text-primary font-label-sm">+12% vs mes pasado</span>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-4">
+<div class="flex flex-col">
+<span class="text-caption text-text-low">Proyectado</span>
+<span class="font-title-md text-text-high">$15,000</span>
+</div>
+<div class="flex flex-col">
+<span class="text-caption text-text-low">Frecuencia</span>
+<span class="font-title-md text-text-high">Mensual</span>
+</div>
+<div class="flex flex-col">
+<span class="text-caption text-text-low">Activos</span>
+<span class="font-title-md text-text-high">4 Fuentes</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Dynamic Content Grid -->
+<div class="mt-stack-lg grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Quick Entry List -->
+<section class="lg:col-span-7 flex flex-col gap-stack-md">
+<div class="flex justify-between items-center px-2">
+<h2 class="font-title-md text-text-high">Entradas de Dinero</h2>
+<button class="text-primary flex items-center gap-1 font-label-sm hover:opacity-80 transition-opacity">
+                        Ver todo <span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Entry Item: Salary -->
+<div class="glass-card p-stack-md rounded-2xl flex items-center justify-between hover:bg-glass-surface/10 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+</div>
+<div>
+<h3 class="font-label-lg text-text-high">Sueldo Principal</h3>
+<p class="text-caption text-text-med">Tech Solutions Corp • 01 Oct</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-primary-container group-active:scale-95 transition-transform">+$8,500.00</p>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase font-bold tracking-wider">Recurrente</span>
+</div>
+</div>
+<!-- Entry Item: Sales -->
+<div class="glass-card p-stack-md rounded-2xl flex items-center justify-between hover:bg-glass-surface/10 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+</div>
+<div>
+<h3 class="font-label-lg text-text-high">Ventas Online</h3>
+<p class="text-caption text-text-med">Marketplace • 05 Oct</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-primary-container group-active:scale-95 transition-transform">+$2,150.00</p>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary uppercase font-bold tracking-wider">Variable</span>
+</div>
+</div>
+<!-- Entry Item: Others -->
+<div class="glass-card p-stack-md rounded-2xl flex items-center justify-between hover:bg-glass-surface/10 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="redeem">redeem</span>
+</div>
+<div>
+<h3 class="font-label-lg text-text-high">Dividendos</h3>
+<p class="text-caption text-text-med">Inversiones Globl • 08 Oct</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-primary-container group-active:scale-95 transition-transform">+$1,800.00</p>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-secondary/10 text-secondary uppercase font-bold tracking-wider">Inversión</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Form / Actions Side -->
+<section class="lg:col-span-5 flex flex-col gap-stack-md">
+<div class="glass-card rounded-[24px] p-6 flex flex-col gap-6">
+<h2 class="font-title-md text-text-high">Nuevo Ingreso</h2>
+<div class="space-y-4">
+<div class="flex flex-col gap-2">
+<label class="text-caption text-text-med ml-1">Concepto</label>
+<input class="w-full bg-[#0D0D1A] border-none border-b-2 border-transparent focus:border-primary-container focus:ring-0 text-on-surface rounded-lg px-4 py-3 transition-all placeholder:text-text-low" placeholder="Ej. Freelance Project" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-caption text-text-med ml-1">Monto</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-primary-container font-bold">$</span>
+<input class="w-full bg-[#0D0D1A] border-none border-b-2 border-transparent focus:border-primary-container focus:ring-0 text-on-surface rounded-lg pl-8 pr-4 py-3 transition-all placeholder:text-text-low font-bold text-lg" placeholder="0.00" type="number"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 p-3 rounded-xl bg-glass-surface border border-glass-border hover:bg-glass-surface/20 transition-all text-label-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="calendar_today">calendar_today</span> Hoy
+                            </button>
+<button class="flex items-center justify-center gap-2 p-3 rounded-xl bg-glass-surface border border-glass-border hover:bg-glass-surface/20 transition-all text-label-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="category">category</span> Otros
+                            </button>
+</div>
+</div>
+<button class="w-full py-4 bg-primary-container text-on-primary font-bold rounded-2xl shadow-[0_0_20px_rgba(110,255,192,0.3)] hover:scale-[1.02] active:scale-95 transition-all">
+                        Registrar Ingreso
+                    </button>
+</div>
+<!-- Monthly Projection Mini-Card -->
+<div class="glass-card rounded-[24px] p-6 relative overflow-hidden group h-full flex flex-col justify-between min-h-[160px]">
+<div class="z-10">
+<h3 class="font-label-lg text-text-high">Tendencia de Ingresos</h3>
+<p class="text-caption text-text-med">Vas por buen camino este mes</p>
+</div>
+<div class="flex items-end gap-1 h-12 mt-4 z-10">
+<div class="w-full bg-primary/20 h-[30%] rounded-t-sm"></div>
+<div class="w-full bg-primary/20 h-[45%] rounded-t-sm"></div>
+<div class="w-full bg-primary/20 h-[35%] rounded-t-sm"></div>
+<div class="w-full bg-primary/20 h-[60%] rounded-t-sm"></div>
+<div class="w-full bg-primary-container h-[85%] rounded-t-sm glow-mint"></div>
+<div class="w-full bg-primary/10 h-[20%] rounded-t-sm border border-dashed border-primary/30"></div>
+</div>
+<img class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none" data-alt="A sophisticated macro shot of abstract digital wave patterns representing financial data growth. The scene features deep obsidian backgrounds with fluid, glowing neon green and mint lines that simulate an energetic market trend. The lighting is moody and cinematic, creating a high-tech atmosphere that feels like a native fintech application visualization." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWS8msoanwQMB4MdhmXdFpXv0z38nLtDQUl8LbnmPBgcRasy0adkUXa2_UuzRDF2lKyYnbcAxdizbqBuU8QQTijHhCv0B7rbS3wuVfJAFDZzYxHBcBguy9l8CzQVU_uEUHKoJwoU9RDM9T8y1Lgkjwd8lMJu9nAWvHxnAoZT8BFv1rjUbNe82SgTEs94M8hgOJJRMf9CFbvXuRNTpcpXKRp9zR3XS1I-M4VL_6ZTlwPjGoXJjqIzrxxOq5DKu5RKM8hf3ToPUwS5k"/>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-6 left-6 right-6 rounded-full bg-glass-surface backdrop-blur-2xl border border-glass-border shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
+<div class="flex justify-around items-center h-16 w-full px-2">
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Inicio</span>
+</button>
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">Gastos</span>
+</button>
+<button class="bg-primary text-on-primary rounded-full p-4 shadow-[0_0_20px_rgba(110,255,192,0.3)] scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+<button class="text-primary flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="payments" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-label-sm text-label-sm">Ingresos</span>
+</button>
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-label-sm">Reportes</span>
+</button>
+</div>
+</nav>
+<script>
+        // Micro-interactions for inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('glow-mint');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('glow-mint');
+            });
+        });
+
+        // Simple animation for the "Trend" bars
+        const bars = document.querySelectorAll('.rounded-t-sm');
+        bars.forEach((bar, index) => {
+            bar.style.transition = `height 1s ease-out ${index * 0.1}s`;
+            const finalHeight = bar.style.height;
+            bar.style.height = '0%';
+            setTimeout(() => {
+                bar.style.height = finalHeight;
+            }, 100);
+        });
+    </script>
+</body></html>

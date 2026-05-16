@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flowi - Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Syne:wght@400..800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary": "#003824",
+                      "text-low": "rgba(255, 255, 255, 0.20)",
+                      "surface-container-lowest": "#0e0e13",
+                      "inverse-primary": "#006c49",
+                      "on-surface-variant": "#bacbbf",
+                      "primary": "#6effc0",
+                      "on-primary-fixed": "#002114",
+                      "surface-tint": "#00e29e",
+                      "on-tertiary-container": "#006142",
+                      "on-secondary-fixed-variant": "#45455b",
+                      "tertiary": "#74fec3",
+                      "on-primary-fixed-variant": "#005236",
+                      "on-secondary-fixed": "#1a1a2e",
+                      "inverse-surface": "#e4e1e9",
+                      "on-secondary-container": "#b8b6d0",
+                      "outline-variant": "#3b4a41",
+                      "surface-container": "#1f1f25",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed": "#e2e0fc",
+                      "surface-container-highest": "#35343a",
+                      "glass-border": "rgba(255, 255, 255, 0.10)",
+                      "primary-container": "#00e5a0",
+                      "error": "#ffb4ab",
+                      "on-tertiary-fixed": "#002114",
+                      "secondary-fixed-dim": "#c6c4df",
+                      "primary-fixed": "#47ffb8",
+                      "primary-fixed-dim": "#00e29e",
+                      "secondary": "#c6c4df",
+                      "tertiary-container": "#54e1a8",
+                      "on-secondary": "#2f2e43",
+                      "error-container": "#93000a",
+                      "background": "#131318",
+                      "surface-container-high": "#2a292f",
+                      "surface": "#131318",
+                      "on-primary-container": "#006141",
+                      "outline": "#84958a",
+                      "tertiary-fixed": "#71fbc0",
+                      "inverse-on-surface": "#303036",
+                      "off-white": "#F0F4F8",
+                      "surface-container-low": "#1b1b20",
+                      "on-tertiary-fixed-variant": "#005137",
+                      "surface-dim": "#131318",
+                      "secondary-container": "#47475d",
+                      "text-high": "rgba(255, 255, 255, 0.90)",
+                      "on-tertiary": "#003825",
+                      "error-red": "#EF4444",
+                      "surface-variant": "#35343a",
+                      "on-background": "#e4e1e9",
+                      "text-med": "rgba(255, 255, 255, 0.50)",
+                      "glass-surface": "rgba(255, 255, 255, 0.06)",
+                      "on-surface": "#e4e1e9",
+                      "tertiary-fixed-dim": "#50dea5",
+                      "surface-bright": "#39383e",
+                      "on-error": "#690005"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-padding-desktop": "24px",
+                      "container-padding-mobile": "16px",
+                      "stack-lg": "32px",
+                      "gutter": "16px",
+                      "base": "4px",
+                      "stack-sm": "8px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Syne"],
+                      "title-md": ["Syne"],
+                      "label-lg": ["DM Sans"],
+                      "body-md": ["DM Sans"],
+                      "label-sm": ["DM Sans"],
+                      "headline-lg": ["Syne"],
+                      "body-lg": ["DM Sans"],
+                      "headline-lg-mobile": ["Syne"],
+                      "caption": ["DM Sans"]
+              },
+              "fontSize": {
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "title-md": ["20px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                      "label-lg": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "caption": ["10px", {"lineHeight": "1.2", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0A0F;
+            color: #e4e1e9;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+        }
+        .neon-glow-primary {
+            box-shadow: 0 0 20px rgba(110, 255, 192, 0.15);
+        }
+        @keyframes pulse-neon {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        .pulse-layer {
+            animation: pulse-neon 4s ease-in-out infinite;
+        }
+        .mask-chart {
+            mask-image: linear-gradient(to top, transparent, black);
+            -webkit-mask-image: linear-gradient(to top, transparent, black);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md antialiased pb-32">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 bg-glass-surface backdrop-blur-2xl border-b border-glass-border flex justify-between items-center px-container-padding-mobile py-stack-sm md:px-container-padding-desktop">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[28px]">bubble_chart</span>
+<h1 class="font-display-lg text-headline-lg-mobile text-primary tracking-tighter">Flowi</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-8 mr-8">
+<a class="font-label-lg text-primary hover:opacity-80 transition-opacity" href="#">Panel</a>
+<a class="font-label-lg text-text-med hover:text-primary transition-colors" href="#">Historial</a>
+<a class="font-label-lg text-text-med hover:text-primary transition-colors" href="#">Metas</a>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden hover:opacity-80 transition-opacity cursor-pointer active:scale-95 transition-transform" title="Perfil">
+<img class="w-full h-full object-cover" data-alt="A professional close-up portrait of a tech-savvy individual with a modern haircut, looking confidently at the camera. The background is a blurred high-tech workspace with subtle green and purple lighting accents, maintaining the sleek dark glassmorphism aesthetic of the Flowi app. The lighting is soft yet dramatic, highlighting the contours of the face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoxOmmnJBIw82CVDuUUCSTfTz7aOQqkaoE1DyB_u-pqaF4EP_yWesYvrnlyb0Zh_x9T-QWV5H8z3L2eEvGYEgmfqhM2zFhQuUcH__V3o-c0_utpvsy9CQm4eXtkDkSePEBZDiqBnW8ZSZ0prUsTbXWQuaylBsihLB2GRiYDEznEJ74He9spwRJv1WfAs81Byk3DRX_q5nN4QC6m9TfLkkGaVwwFs2glGwyYeGzyQwSa4elOhG4C37tZd1QtD1Lny6LmfGXXimQ7zE"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="mt-24 px-container-padding-mobile max-w-[1200px] mx-auto md:px-container-padding-desktop">
+<!-- Welcome Section -->
+<section class="mb-stack-lg">
+<p class="font-label-sm text-primary mb-1 uppercase tracking-widest">Resumen General</p>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:text-headline-lg text-text-high">Hola, Alex</h2>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- 1. Balance Total Glass Card -->
+<div class="md:col-span-8 glass-card rounded-[32px] p-8 flex flex-col justify-between min-h-[280px] relative">
+<!-- Background Pulse Effect -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pulse-layer"></div>
+<div>
+<div class="flex items-center justify-between mb-stack-md">
+<span class="text-text-med font-label-lg uppercase tracking-wider">Balance Disponible</span>
+<div class="bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                            +12.4%
+                        </div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-[48px] md:text-[64px] text-text-high">$42.850</span>
+<span class="text-text-med font-title-md">,00</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-md mt-stack-lg pt-stack-md border-t border-glass-border">
+<div>
+<p class="text-text-med text-caption uppercase mb-1">Ingresos este mes</p>
+<p class="font-title-md text-primary">$8.400,00</p>
+</div>
+<div>
+<p class="text-text-med text-caption uppercase mb-1">Gastos realizados</p>
+<p class="font-title-md text-text-high">$2.150,40</p>
+</div>
+</div>
+</div>
+<!-- 2. Weekly Chart Card -->
+<div class="md:col-span-4 glass-card rounded-[32px] p-8 flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<h3 class="font-title-md text-text-high">Flujo Semanal</h3>
+<span class="material-symbols-outlined text-text-med">calendar_today</span>
+</div>
+<div class="flex-1 flex items-end gap-2 h-32 relative">
+<!-- SVG Chart Representation -->
+<svg class="absolute bottom-0 left-0 w-full h-full mask-chart" preserveaspectratio="none" viewbox="0 0 100 40">
+<path d="M0,40 C10,35 20,38 30,25 C40,12 50,15 60,8 C70,1 80,5 90,15 L100,40 L0,40 Z" fill="url(#grad1)"></path>
+<path d="M0,40 C10,35 20,38 30,25 C40,12 50,15 60,8 C70,1 80,5 90,15" fill="none" stroke="#6effc0" stroke-width="2"></path>
+<defs>
+<lineargradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#6effc0;stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:#6effc0;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Chart Tooltip Simulation -->
+<div class="absolute top-2 left-1/2 -translate-x-1/2 bg-surface-container rounded-lg px-2 py-1 border border-glass-border shadow-lg">
+<p class="text-caption text-primary font-bold">$340 hoy</p>
+</div>
+</div>
+<div class="flex justify-between mt-4 text-caption text-text-low font-bold">
+<span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+</div>
+</div>
+<!-- 3. Transactions List Section -->
+<div class="md:col-span-12 mt-stack-md">
+<div class="flex items-center justify-between mb-stack-md">
+<h3 class="font-headline-lg-mobile text-text-high">Últimas transacciones</h3>
+<button class="text-primary font-label-lg flex items-center gap-1 hover:underline">
+                        Ver todo
+                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+<div class="space-y-stack-sm">
+<!-- Transaction Item 1 -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-glass-surface/10 transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-glass-border">
+<span class="material-symbols-outlined text-primary">restaurant</span>
+</div>
+<div>
+<p class="font-label-lg text-text-high">Sushi Night Out</p>
+<p class="text-caption text-text-med">Alimentación • 18:30 PM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-lg text-text-high">-$64.00</p>
+<p class="text-caption text-text-low">Pendiente</p>
+</div>
+</div>
+<!-- Transaction Item 2 -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-glass-surface/10 transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-glass-border">
+<span class="material-symbols-outlined text-primary">commute</span>
+</div>
+<div>
+<p class="font-label-lg text-text-high">Uber Ride</p>
+<p class="text-caption text-text-med">Transporte • 14:15 PM</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-lg text-text-high">-$12.50</p>
+<p class="text-caption text-primary">Completado</p>
+</div>
+</div>
+<!-- Transaction Item 3 -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-glass-surface/10 transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-glass-border">
+<span class="material-symbols-outlined text-primary">shopping_bag</span>
+</div>
+<div>
+<p class="font-label-lg text-text-high">Nike Store</p>
+<p class="text-caption text-text-med">Compras • Ayer</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-lg text-text-high">-$120.00</p>
+<p class="text-caption text-primary">Completado</p>
+</div>
+</div>
+<!-- Transaction Item 4 (Income) -->
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between hover:bg-glass-surface/10 transition-all active:scale-[0.98] cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<div>
+<p class="font-label-lg text-text-high">Salario Semanal</p>
+<p class="text-caption text-text-med">Ingreso • Hace 2 días</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-lg text-primary">+$1,200.00</p>
+<p class="text-caption text-primary">Recibido</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile Focused Pill) -->
+<nav class="fixed bottom-6 left-6 right-6 h-16 rounded-full bg-glass-surface backdrop-blur-2xl border border-glass-border flex justify-around items-center shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-50 md:max-w-md md:left-1/2 md:-translate-x-1/2">
+<button class="text-primary flex flex-col items-center gap-1 group transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-label-sm font-label-sm">Inicio</span>
+</button>
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-label-sm font-label-sm">Gastos</span>
+</button>
+<!-- Center Action Button -->
+<button class="bg-primary text-on-primary rounded-full p-4 shadow-[0_0_20px_rgba(110,255,192,0.3)] scale-110 active:scale-95 transition-transform -translate-y-2 relative group overflow-hidden">
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+<span class="material-symbols-outlined text-[28px] relative z-10">add</span>
+</button>
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-label-sm font-label-sm">Ingresos</span>
+</button>
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-label-sm font-label-sm">Reportes</span>
+</button>
+</nav>
+<!-- Micro-interactions Script -->
+<script>
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Simple entrance animation
+        window.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flowi - Gastos</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Syne:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#003824",
+                        "text-low": "rgba(255, 255, 255, 0.20)",
+                        "surface-container-lowest": "#0e0e13",
+                        "inverse-primary": "#006c49",
+                        "on-surface-variant": "#bacbbf",
+                        "primary": "#6effc0",
+                        "on-primary-fixed": "#002114",
+                        "surface-tint": "#00e29e",
+                        "on-tertiary-container": "#006142",
+                        "on-secondary-fixed-variant": "#45455b",
+                        "tertiary": "#74fec3",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-secondary-fixed": "#1a1a2e",
+                        "inverse-surface": "#e4e1e9",
+                        "on-secondary-container": "#b8b6d0",
+                        "outline-variant": "#3b4a41",
+                        "surface-container": "#1f1f25",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#e2e0fc",
+                        "surface-container-highest": "#35343a",
+                        "glass-border": "rgba(255, 255, 255, 0.10)",
+                        "primary-container": "#00e5a0",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#002114",
+                        "secondary-fixed-dim": "#c6c4df",
+                        "primary-fixed": "#47ffb8",
+                        "primary-fixed-dim": "#00e29e",
+                        "secondary": "#c6c4df",
+                        "tertiary-container": "#54e1a8",
+                        "on-secondary": "#2f2e43",
+                        "error-container": "#93000a",
+                        "background": "#131318",
+                        "surface-container-high": "#2a292f",
+                        "surface": "#131318",
+                        "on-primary-container": "#006141",
+                        "outline": "#84958a",
+                        "tertiary-fixed": "#71fbc0",
+                        "inverse-on-surface": "#303036",
+                        "off-white": "#F0F4F8",
+                        "surface-container-low": "#1b1b20",
+                        "on-tertiary-fixed-variant": "#005137",
+                        "surface-dim": "#131318",
+                        "secondary-container": "#47475d",
+                        "text-high": "rgba(255, 255, 255, 0.90)",
+                        "on-tertiary": "#003825",
+                        "error-red": "#EF4444",
+                        "surface-variant": "#35343a",
+                        "on-background": "#e4e1e9",
+                        "text-med": "rgba(255, 255, 255, 0.50)",
+                        "glass-surface": "rgba(255, 255, 255, 0.06)",
+                        "on-surface": "#e4e1e9",
+                        "tertiary-fixed-dim": "#50dea5",
+                        "surface-bright": "#39383e",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding-desktop": "24px",
+                        "container-padding-mobile": "16px",
+                        "stack-lg": "32px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Syne"],
+                        "title-md": ["Syne"],
+                        "label-lg": ["DM Sans"],
+                        "body-md": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "headline-lg": ["Syne"],
+                        "body-lg": ["DM Sans"],
+                        "headline-lg-mobile": ["Syne"],
+                        "caption": ["DM Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0A0F;
+            color: #e4e1e9;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(110, 255, 192, 0.2);
+            border-radius: 10px;
+        }
+        .neon-glow-primary {
+            box-shadow: 0 0 20px rgba(110, 255, 192, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-glass-surface backdrop-blur-2xl border-b border-glass-border shadow-none flex justify-between items-center px-container-padding-mobile py-stack-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="bubble_chart">bubble_chart</span>
+<h1 class="font-display-lg text-headline-lg-mobile text-primary tracking-tighter">Flowi</h1>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-primary/50 overflow-hidden hover:opacity-80 transition-opacity active:scale-95 cursor-pointer">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a young tech professional with a friendly expression. The lighting is soft and cinematic with subtle hints of mint green and deep blue reflections, matching a futuristic dark-mode UI aesthetic. The background is a blurred high-tech workspace with glowing atmospheric light panels." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtp8kOp_qQTVCytlowOinRap-p9hSeg6-Xrgw-UvIoXpXVzEiL-Qb2Ys63X_IJ3R77eAG6ELd5CsZfsY1foCkJmXH8xbRI8Ws8duhBRteD4IbqEjGwAgnfQE4jI_-SjDlB-G23z3cKAehcriN4Mow7Z2NzxnbGNW4uDyOYLbjRUoqFMKFXfP1t-Myw6jRGHNFGs0KmcBYP_x2haZUpEo4c9qQc2jdpnbBBGTe3dWk7xd3WMGe6F_vXxMou2K1bpU47BDyNUnfVRYc"/>
+</div>
+</header>
+<!-- NavigationDrawer (Desktop Only) -->
+<aside class="hidden md:flex fixed left-0 top-0 h-full w-[280px] bg-surface-container-lowest border-r border-glass-border flex-col gap-stack-md p-stack-md z-40 pt-24">
+<div class="flex items-center gap-stack-md px-base mb-stack-lg">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="dashboard">dashboard</span>
+</div>
+<div>
+<p class="font-title-md text-primary">Financial Flow</p>
+<p class="text-caption text-text-med">Premium Account</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-med hover:bg-glass-surface/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-glass-surface text-primary border-r-2 border-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-body-md">Gastos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-med hover:bg-glass-surface/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-med hover:bg-glass-surface/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="savings">savings</span>
+<span class="font-body-md">Budgets</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-med hover:bg-glass-surface/50 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-[280px] pt-24 pb-32 px-container-padding-mobile md:px-container-padding-desktop max-w-[1200px] mx-auto min-h-screen">
+<!-- Header Section -->
+<section class="mb-stack-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
+<h2 class="font-display-lg text-display-lg text-text-high mb-2">Mis Gastos</h2>
+<p class="text-text-med font-body-lg">Gestiona tu flujo de caja mensual con precisión digital.</p>
+</section>
+<!-- Search & Filter Area -->
+<section class="flex flex-col gap-stack-md mb-stack-lg sticky top-20 z-30 bg-background/80 backdrop-blur-md py-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-med group-focus-within:text-primary transition-colors" data-icon="search">search</span>
+<input class="w-full h-14 pl-12 pr-4 bg-surface-container-low border-b-2 border-glass-border focus:border-primary focus:ring-0 text-text-high placeholder:text-text-low rounded-t-xl transition-all outline-none" placeholder="Buscar transacciones..." type="text"/>
+</div>
+<div class="flex gap-stack-sm overflow-x-auto no-scrollbar pb-1">
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary font-label-lg whitespace-nowrap active:scale-95 transition-transform">Todos</button>
+<button class="px-6 py-2 rounded-full glass-card text-text-high border-glass-border font-label-lg whitespace-nowrap hover:bg-white/10 active:scale-95 transition-all">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="restaurant">restaurant</span> Comida</span>
+</button>
+<button class="px-6 py-2 rounded-full glass-card text-text-high border-glass-border font-label-lg whitespace-nowrap hover:bg-white/10 active:scale-95 transition-all">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="confirmation_number">confirmation_number</span> Ocio</span>
+</button>
+<button class="px-6 py-2 rounded-full glass-card text-text-high border-glass-border font-label-lg whitespace-nowrap hover:bg-white/10 active:scale-95 transition-all">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="medical_services">medical_services</span> Salud</span>
+</button>
+<button class="px-6 py-2 rounded-full glass-card text-text-high border-glass-border font-label-lg whitespace-nowrap hover:bg-white/10 active:scale-95 transition-all">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm" data-icon="shopping_bag">shopping_bag</span> Compras</span>
+</button>
+</div>
+</section>
+<!-- Expense List -->
+<section class="space-y-stack-sm">
+<h3 class="text-label-sm font-label-sm text-text-med uppercase tracking-widest mb-4 px-2">Hoy, 24 Mayo</h3>
+<!-- Expense Item 1 -->
+<div class="glass-card p-stack-md rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary border border-glass-border group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+</div>
+<div>
+<p class="font-title-md text-text-high">Restaurante La Pausa</p>
+<p class="text-caption text-text-med">Almuerzo ejecutivo</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-text-high">- $24.50</p>
+<p class="text-caption text-text-med">14:20</p>
+</div>
+</div>
+<!-- Expense Item 2 -->
+<div class="glass-card p-stack-md rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary border border-glass-border group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+</div>
+<div>
+<p class="font-title-md text-text-high">Apple Store</p>
+<p class="text-caption text-text-med">Accesorios</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-text-high">- $129.00</p>
+<p class="text-caption text-text-med">10:05</p>
+</div>
+</div>
+<h3 class="text-label-sm font-label-sm text-text-med uppercase tracking-widest mt-stack-lg mb-4 px-2">Ayer, 23 Mayo</h3>
+<!-- Expense Item 3 -->
+<div class="glass-card p-stack-md rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary border border-glass-border group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+</div>
+<div>
+<p class="font-title-md text-text-high">Cinepolis Digital</p>
+<p class="text-caption text-text-med">2x Entradas VIP</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-text-high">- $32.00</p>
+<p class="text-caption text-text-med">21:30</p>
+</div>
+</div>
+<!-- Expense Item 4 -->
+<div class="glass-card p-stack-md rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary border border-glass-border group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+</div>
+<div>
+<p class="font-title-md text-text-high">Farmacia Central</p>
+<p class="text-caption text-text-med">Vitaminas y cuidado</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-text-high">- $15.80</p>
+<p class="text-caption text-text-med">18:15</p>
+</div>
+</div>
+<!-- Expense Item 5 -->
+<div class="glass-card p-stack-md rounded-xl flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary border border-glass-border group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
+</div>
+<div>
+<p class="font-title-md text-text-high">Gasolinera Shell</p>
+<p class="text-caption text-text-med">Carga combustible</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-title-md text-text-high">- $45.00</p>
+<p class="text-caption text-text-med">08:45</p>
+</div>
+</div>
+</section>
+<!-- Desktop Empty State Decoration -->
+<div class="hidden lg:block fixed right-12 top-1/2 -translate-y-1/2 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-6 left-6 right-6 rounded-full bg-glass-surface backdrop-blur-2xl border border-glass-border shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex justify-around items-center h-16 w-[calc(100%-48px)] mx-auto z-50">
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Inicio</span>
+</button>
+<button class="text-primary flex flex-col items-center gap-1 hover:text-primary transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">Gastos</span>
+</button>
+<button class="bg-primary text-on-primary rounded-full p-4 shadow-[0_0_20px_rgba(110,255,192,0.3)] scale-110 -translate-y-4 active:scale-100 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-sm text-label-sm">Ingresos</span>
+</button>
+<button class="text-text-med flex flex-col items-center gap-1 hover:text-primary transition-colors active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-label-sm">Reportes</span>
+</button>
+</nav>
+<script>
+        // Micro-interactions and subtle effects
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Add expense pulse effect
+        const fab = document.querySelector('button[data-icon="add"]');
+        if (fab) {
+            setInterval(() => {
+                fab.classList.add('neon-glow-primary');
+                setTimeout(() => fab.classList.remove('neon-glow-primary'), 1000);
+            }, 3000);
+        }
+    </script>
+</body></html>
