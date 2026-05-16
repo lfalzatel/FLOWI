@@ -1,0 +1,39 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        syne: ['Syne', 'sans-serif'],
+        dm:   ['DM Sans', 'sans-serif'],
+      },
+      colors: {
+        accent: '#00E5A0',
+        'accent-dim': '#00B37E',
+        deep: '#0A0A0F',
+        card: '#1A1A2E',
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.4s ease-out forwards',
+        'slide-down': 'slideDown 0.2s ease-out forwards',
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%':   { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideDown: {
+          '0%':   { opacity: '0', transform: 'translateY(-8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+    },
+  },
+  plugins: [],
+}
