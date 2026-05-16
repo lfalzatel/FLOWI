@@ -27,7 +27,12 @@ export default function DashboardPage() {
 
   if (!user) {
     router.push('/login');
-    return null;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0F] text-white">
+        <p className="text-white/40 text-sm mb-2">Redirigiendo al login...</p>
+        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   const hour    = new Date().getHours();
