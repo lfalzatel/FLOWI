@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useExpenses } from '@/hooks/useExpenses';
 import { addExpense, updateExpense, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Transaction } from '@/lib/firestore';
 
 interface AddExpenseModalProps {
@@ -21,6 +22,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
   const [loading, setLoading] = useState(false);
 
   const categories = type === 'gasto' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  const { transactions } = useExpenses(type);
+  
+  const customCategories = Array.from(new Set(transactions.map(t => t.category)))
+    .filter(cat => cat && !categories.some(c => c.label === cat));
 
   useEffect(() => {
     if (transactionToEdit) {
@@ -136,6 +141,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
               {categories.map((cat) => (
                 <option key={cat.label} value={cat.label} className="bg-[#0A0A0F]">
                   {cat.icon} {cat.label}
+                </option>
+              ))}
+              {customCategories.map((cat) => (
+                <option key={cat} value={cat} className="bg-[#0A0A0F]">
+                  🏷️ {cat}
                 </option>
               ))}
               <option value="custom" className="bg-[#0A0A0F]">➕ Nueva categoría...</option>
