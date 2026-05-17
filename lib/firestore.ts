@@ -70,3 +70,56 @@ export async function deleteExpense(id: string) {
   const docRef = doc(db, 'expenses', id);
   await deleteDoc(docRef);
 }
+
+// === DEUDAS ===
+
+export interface Debt {
+  id?: string;
+  userId: string;
+  title: string;
+  totalAmount: number;
+  paidAmount: number;
+  status: 'pending' | 'paid';
+  createdAt?: Timestamp | Date;
+}
+
+export async function getUserDebts(userId: string) {
+  const debtsRef = collection(db, 'debts');
+  const q = query(debtsRef, where('userId', '==', userId));
+  const querySnapshot = await getDocs(q);
+  
+  const debts = querySnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(),
+    };
+  }) as Debt[];
+
+  // Ordenar por fecha de creación descendente
+  return debts.sort((a, b) => {
+    const dateA = a.createdAt instanceof Date ? a.createdAt : new Date();
+    const dateB = b.createdAt instanceof Date ? b.createdAt : new Date();
+    return dateB.getTime() - dateA.getTime();
+  });
+}
+
+export async function addDebt(debt: Omit<Debt, 'id'>) {
+  const debtsRef = collection(db, 'debts');
+  const docRef = await addDoc(debtsRef, {
+    ...debt,
+    createdAt: serverTimestamp(),
+  });
+  return { id: docRef.id, ...debt, createdAt: new Date() };
+}
+
+export async function updateDebt(id: string, debt: Partial<Debt>) {
+  const docRef = doc(db, 'debts', id);
+  await updateDoc(docRef, debt);
+}
+
+export async function deleteDebt(id: string) {
+  const docRef = doc(db, 'debts', id);
+  await deleteDoc(docRef);
+}

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
-import { addExpense, updateExpense, deleteExpense, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Transaction } from '@/lib/firestore';
+import { addExpense, updateExpense, deleteExpense, addDebt, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Transaction } from '@/lib/firestore';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -104,7 +104,29 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
       setLoading(false);
     }
   };
+  const handleConvertToDebt = async () => {
+    if (!transactionToEdit?.id || !user) return;
+    if (!window.confirm('¿Estás seguro de que quieres convertir este gasto en una deuda?')) return;
 
+    setLoading(true);
+    try {
+      const finalCategory = category === 'custom' ? customCategory : category;
+      await addDebt({
+        userId: user.uid,
+        title: `${finalCategory} - ${description || 'Deuda'}`,
+        totalAmount: parseFloat(amount),
+        paidAmount: 0,
+        status: 'pending',
+      });
+      await deleteExpense(transactionToEdit.id);
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      console.error('Error converting to debt:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
       <div className="bg-[#0A0A0F] border border-white/10 p-6 rounded-t-3xl sm:rounded-3xl w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto">
@@ -258,6 +280,17 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
             >
               {loading ? 'Guardando...' : (transactionToEdit ? 'Guardar Cambios' : 'Guardar Transacción')}
             </button>
+
+            {transactionToEdit && type === 'gasto' && (
+              <button
+                type="button"
+                onClick={handleConvertToDebt}
+                disabled={loading}
+                className="w-full py-3.5 rounded-xl bg-orange-500/10 text-orange-500 font-semibold hover:bg-orange-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+              >
+                {loading ? 'Procesando...' : 'Convertir en Deuda'}
+              </button>
+            )}
 
             {transactionToEdit && (
               <button

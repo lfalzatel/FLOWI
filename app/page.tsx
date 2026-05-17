@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
+import { useDebts } from '@/hooks/useDebts';
 import { Transaction } from '@/lib/firestore';
 import { BalanceCard }     from '@/components/dashboard/BalanceCard';
 import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
@@ -16,6 +17,7 @@ import { SplashScreen } from '@/components/layout/SplashScreen';
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
+  const { totalDeudas } = useDebts();
   const [showAdd, setShowAdd] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -111,7 +113,7 @@ export default function DashboardPage() {
             <div className="h-3 bg-white/5 rounded w-1/4" />
           </div>
         ) : (
-          <BalanceCard balance={balance} totalGastos={totalGastos} totalIngresos={totalIngresos} />
+          <BalanceCard balance={balance} totalGastos={totalGastos} totalIngresos={totalIngresos} totalDeudas={totalDeudas} />
         )}
 
         {/* Chart */}

@@ -5,13 +5,14 @@ interface Props {
   balance:       number;
   totalGastos:   number;
   totalIngresos: number;
+  totalDeudas:   number;
 }
 
 function fmt(n: number) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
 }
 
-export function BalanceCard({ balance, totalGastos, totalIngresos }: Props) {
+export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }: Props) {
   return (
     <div className="space-y-4">
       {/* Main balance */}
@@ -41,7 +42,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos }: Props) {
         </div>
       </div>
 
-      {/* Gastos + Ingresos row */}
+      {/* Gastos + Ingresos row + Deudas */}
       <div className="grid grid-cols-2 gap-3">
         <div className="glass-card p-4 rounded-2xl">
           <div className="flex items-center gap-2 mb-2">
@@ -60,6 +61,17 @@ export function BalanceCard({ balance, totalGastos, totalIngresos }: Props) {
             <span className="text-[11px] text-white/40 font-medium">Ingresos</span>
           </div>
           <p className="font-syne font-bold text-lg text-accent">{fmt(totalIngresos)}</p>
+        </div>
+        
+        {/* Tarjeta de Deudas a lo ancho */}
+        <div className="glass-card p-4 rounded-2xl col-span-2">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-lg bg-orange-500/15 flex items-center justify-center">
+              <TrendingDown className="w-3 h-3 text-orange-400" />
+            </div>
+            <span className="text-[11px] text-white/40 font-medium">Deudas Pendientes</span>
+          </div>
+          <p className="font-syne font-bold text-lg text-orange-400">{fmt(totalDeudas)}</p>
         </div>
       </div>
     </div>

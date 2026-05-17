@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, TrendingDown, TrendingUp,
-  PieChart, Plus, X,
+  PieChart, Plus, X, CreditCard,
 } from 'lucide-react';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 
@@ -12,7 +12,7 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Inicio',   href: '/' },
   { icon: TrendingDown,    label: 'Gastos',   href: '/gastos' },
   { icon: TrendingUp,      label: 'Ingresos', href: '/ingresos' },
-  { icon: PieChart,        label: 'Reportes', href: '/reportes' },
+  { icon: CreditCard,      label: 'Deudas',   href: '/deudas' },
 ];
 
 export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
