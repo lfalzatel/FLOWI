@@ -21,6 +21,19 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <>
+      <style>{`
+        @keyframes push-and-settle {
+          0% { transform: scale(1) translateY(0); }
+          40% { transform: scale(0.8) translateY(2px); }
+          70% { transform: scale(1.2) translateY(-10px) rotate(-4deg); }
+          100% { transform: scale(1.1) translateY(-8px) rotate(-2deg); }
+        }
+        @keyframes micro-bounce {
+          from { transform: translateY(0); }
+          to { transform: translateY(-3px); }
+        }
+      `}</style>
+
       <nav
         className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50
                    flex items-center gap-0.5 px-2.5 py-2
@@ -71,14 +84,11 @@ function NavItem({ icon: Icon, label, href, active }: any) {
       className={`relative flex flex-col items-center gap-0.5 px-3.5 py-2
                   rounded-[20px] transition-all duration-200
                   ${active
-                    ? 'text-accent'
+                    ? 'bg-accent text-black shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]'
                     : 'text-white/35 hover:text-white/60 active:text-white/80'
                   }`}
     >
-      {active && (
-        <span className="absolute inset-0 rounded-[20px] bg-accent/8" />
-      )}
-      <Icon className="w-[18px] h-[18px] relative z-10" />
+      <Icon className={`w-[18px] h-[18px] relative z-10 ${active ? 'animate-[micro-bounce_0.4s_infinite_alternate] [animation-delay:0.45s]' : ''}`} />
       <span className="text-[9px] font-medium relative z-10 leading-none">{label}</span>
     </Link>
   );
