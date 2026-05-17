@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const [showAdd, setShowAdd] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
