@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 
 export interface Transaction {
   id?: string;
@@ -126,5 +126,5 @@ export async function deleteDebt(id: string) {
 
 export async function updateUserProfile(userId: string, data: any) {
   const docRef = doc(db, 'users', userId);
-  await updateDoc(docRef, data);
+  await setDoc(docRef, data, { merge: true });
 }
