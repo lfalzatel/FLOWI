@@ -52,11 +52,11 @@ export async function getUserTransactions(userId: string, type?: 'gasto' | 'ingr
   });
 }
 
-export async function addExpense(expense: Omit<Transaction, 'id' | 'date'> & { userId: string }) {
+export async function addExpense(expense: Omit<Transaction, 'id'> & { userId: string }) {
   const expensesRef = collection(db, 'expenses');
   const docRef = await addDoc(expensesRef, {
     ...expense,
-    date: serverTimestamp(),
+    date: expense.date || serverTimestamp(),
   });
-  return { id: docRef.id, ...expense, date: new Date() };
+  return { id: docRef.id, ...expense, date: expense.date || new Date() };
 }

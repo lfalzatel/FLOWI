@@ -15,13 +15,16 @@ export function AddExpenseModal({ onClose, onSuccess }: Props) {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
   const categories = type === 'gasto' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !amount || !category) return;
+    const finalCategory = category === 'custom' ? customCategory : category;
+    if (!user || !amount || !finalCategory) return;
 
     setLoading(true);
     try {
@@ -30,7 +33,8 @@ export function AddExpenseModal({ onClose, onSuccess }: Props) {
         type,
         amount: parseFloat(amount),
         description,
-        category,
+        category: finalCategory,
+        date: new Date(date + 'T12:00:00'), // Usar mediodía para evitar problemas de zona horaria
       });
       onSuccess?.();
       onClose();
@@ -101,7 +105,35 @@ export function AddExpenseModal({ onClose, onSuccess }: Props) {
                   {cat.icon} {cat.label}
                 </option>
               ))}
+              <option value="custom" className="bg-[#0A0A0F]">➕ Nueva categoría...</option>
             </select>
+          </div>
+
+          {/* Custom Category Input */}
+          {category === 'custom' && (
+            <div>
+              <label className="text-white/40 text-xs font-medium mb-1.5 block">Nombre de la Categoría</label>
+              <input
+                type="text"
+                placeholder="Ej. Gimnasio"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent"
+                required
+              />
+            </div>
+          )}
+
+          {/* Date */}
+          <div>
+            <label className="text-white/40 text-xs font-medium mb-1.5 block">Fecha</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent"
+              required
+            />
           </div>
 
           {/* Description */}
