@@ -83,7 +83,11 @@ export default function DashboardPage() {
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
 
   const filteredTransactions = transactions.filter(t => {
-    const d = t.date instanceof Date ? t.date : new Date(t.date);
+    const d = t.date instanceof Date 
+      ? t.date 
+      : (t.date && typeof (t.date as any).toDate === 'function')
+        ? (t.date as any).toDate()
+        : new Date(t.date as any);
     const dateStr = d.toISOString().split('T')[0];
     if (filterType === 'month') {
       return dateStr.startsWith(filterValue);
