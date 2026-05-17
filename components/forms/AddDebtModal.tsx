@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { addDebt, updateDebt, deleteDebt, Debt } from '@/lib/firestore';
+import { addDebt, updateDebt, deleteDebt, addExpense, Debt } from '@/lib/firestore';
 
 interface Props {
   onClose: () => void;
@@ -16,6 +16,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   const [totalAmount, setTotalAmount] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [abono, setAbono] = useState('');
+  const [abonoDate, setAbonoDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,7 +37,18 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       let paid = parseFloat(paidAmount) || 0;
 
       if (debtToEdit && abono) {
-        paid += parseFloat(abono);
+        const abonoAmount = parseFloat(abono);
+        paid += abonoAmount;
+        
+        // Registrar el abono como un gasto
+        await addExpense({
+          userId: user.uid,
+          type: 'gasto',
+          category: 'Deudas',
+          amount: abonoAmount,
+          description: `Abono a: ${title}`,
+          date: new Date(abonoDate),
+        });
       }
 
       const status = paid >= total ? 'paid' : 'pending';
@@ -157,6 +169,17 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                   onChange={(e) => setAbono(e.target.value)}
                   className="w-full bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent font-syne font-bold"
                   placeholder="0.00"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/40 text-xs font-medium mb-1.5 block">Fecha del Abono</label>
+                <input
+                  type="date"
+                  value={abonoDate}
+                  onChange={(e) => setAbonoDate(e.target.value)}
+                  className="w-full bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent"
+                  required
                 />
               </div>
             </div>

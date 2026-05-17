@@ -113,7 +113,7 @@ export default function DashboardPage() {
             <div className="h-3 bg-white/5 rounded w-1/4" />
           </div>
         ) : (
-          <BalanceCard balance={balance} totalGastos={totalGastos} totalIngresos={totalIngresos} totalDeudas={totalDeudas} />
+          <BalanceCard balance={balance - totalDeudas} totalGastos={totalGastos} totalIngresos={totalIngresos} totalDeudas={totalDeudas} />
         )}
 
         {/* Chart */}
