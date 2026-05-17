@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 
 export default function GastosPage() {
   const { user, loading: authLoading } = useAuth();
-  const { expenses, loading: expensesLoading, refresh } = useExpenses(user?.uid || '');
+  const { transactions, loading: expensesLoading, refresh } = useExpenses('gasto');
   const router = useRouter();
 
   useEffect(() => {
@@ -26,8 +26,6 @@ export default function GastosPage() {
     );
   }
 
-  const onlyExpenses = expenses.filter((e) => e.type === 'gasto');
-
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-white flex flex-col">
       <Header />
@@ -42,12 +40,12 @@ export default function GastosPage() {
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
           <p className="text-white/40 text-xs font-medium uppercase tracking-wider">Total Gastado</p>
           <h2 className="text-4xl font-syne font-bold text-white mt-1">
-            ${onlyExpenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+            ${transactions.reduce((sum, e) => sum + e.amount, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
           </h2>
         </div>
 
-        {/* Lista filtrada */}
-        <TransactionList transactions={onlyExpenses} />
+        {/* Lista */}
+        <TransactionList transactions={transactions} />
       </main>
 
       <BottomNav onSuccess={refresh} />
