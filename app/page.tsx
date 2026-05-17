@@ -18,23 +18,23 @@ export default function DashboardPage() {
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const [showAdd, setShowAdd] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('login') === 'true') return true;
-      return !sessionStorage.getItem('appHasLoaded');
-    }
-    return true;
-  });
+  const [mounted, setMounted] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
     const params = new URLSearchParams(window.location.search);
+    const hasLoaded = sessionStorage.getItem('appHasLoaded');
+    
     if (params.get('login') === 'true') {
       setSplashDuration(2500);
+      setShowSplash(true);
+    } else if (hasLoaded) {
+      setShowSplash(false);
     }
-    // Marcar que la app ya cargó en esta sesión
+    
     sessionStorage.setItem('appHasLoaded', 'true');
   }, []);
  
@@ -49,6 +49,10 @@ export default function DashboardPage() {
       }
     }
   }, [user, authLoading, router]);
+
+  if (!mounted) {
+    return null;
+  }
 
   if (showSplash) {
     return <SplashScreen duration={splashDuration} onComplete={() => setShowSplash(false)} />;
