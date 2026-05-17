@@ -15,7 +15,7 @@ const navItems = [
   { icon: PieChart,        label: 'Reportes', href: '/reportes' },
 ];
 
-export function BottomNav() {
+export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const pathname        = usePathname();
   const [showAdd, setShowAdd] = useState(false);
 
@@ -60,7 +60,7 @@ export function BottomNav() {
         ))}
       </nav>
 
-      {showAdd && <AddExpenseModal onClose={() => setShowAdd(false)} />}
+      {showAdd && <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={onSuccess} />}
     </>
   );
 }

@@ -120,7 +120,7 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      <BottomNav />
+      <BottomNav onSuccess={refresh} />
 
       {showAdd && (
         <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={refresh} />
