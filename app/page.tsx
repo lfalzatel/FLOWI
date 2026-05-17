@@ -17,8 +17,14 @@ export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const [showAdd, setShowAdd] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('login') === 'true') return true;
+      return !sessionStorage.getItem('appHasLoaded');
+    }
+    return true;
+  });
   const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
 
@@ -27,6 +33,8 @@ export default function DashboardPage() {
     if (params.get('login') === 'true') {
       setSplashDuration(2500);
     }
+    // Marcar que la app ya cargó en esta sesión
+    sessionStorage.setItem('appHasLoaded', 'true');
   }, []);
  
   useEffect(() => {
