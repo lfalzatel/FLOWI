@@ -28,8 +28,8 @@ export function SplashScreen({ duration = 2500, onComplete }: SplashScreenProps)
       {/* Logo */}
       <div className="w-24 h-24 rounded-[36px] bg-gradient-to-br from-accent to-accent-dim
                       flex items-center justify-center shadow-2xl shadow-accent/25
-                      animate-pulse relative z-10">
-        <span className="font-syne font-black text-black text-5xl">₣</span>
+                      animate-pulse relative z-10 p-4">
+        <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-contain" />
       </div>
       
       {/* Text */}

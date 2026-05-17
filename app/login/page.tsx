@@ -38,8 +38,8 @@ export default function LoginPage() {
         <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-violet-500/10 blur-3xl rounded-full" />
 
         <div className="relative z-10 text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-emerald-500/5 border border-emerald-500/20">
-            <Wallet className="w-8 h-8 text-emerald-400" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-accent to-accent-dim shadow-lg shadow-accent/25 p-4 animate-pulse">
+            <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           
           <div className="space-y-2">

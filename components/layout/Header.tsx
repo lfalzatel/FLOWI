@@ -26,8 +26,8 @@ export function Header() {
       {/* Logo */}
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-accent to-accent-dim
-                        flex items-center justify-center shadow-lg shadow-accent/25">
-          <span className="font-syne font-black text-black text-base">₣</span>
+                        flex items-center justify-center shadow-lg shadow-accent/25 p-1.5">
+          <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-contain" />
         </div>
         <span className="font-syne font-bold text-lg tracking-tight text-white hidden sm:block">
           flowi
