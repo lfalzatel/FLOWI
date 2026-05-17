@@ -1,16 +1,30 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Wallet } from 'lucide-react';
+import { SplashScreen } from '@/components/layout/SplashScreen';
 
 export default function LoginPage() {
   const router = useRouter();
+  const [showSplash, setShowSplash] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('logout') === 'true') {
+      setShowSplash(true);
+    }
+  }, []);
+
+  if (showSplash) {
+    return <SplashScreen duration={2500} onComplete={() => setShowSplash(false)} />;
+  }
 
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      router.push('/');
+      router.push('/?login=true');
     } catch (error) {
       console.error('Error logging in:', error);
     }

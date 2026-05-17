@@ -10,18 +10,38 @@ import { TransactionList } from '@/components/dashboard/TransactionList';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { SplashScreen } from '@/components/layout/SplashScreen';
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const [showAdd, setShowAdd] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('login') === 'true') {
+      setSplashDuration(2500);
+    }
+  }, []);
  
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      const justLoggedOut = sessionStorage.getItem('justLoggedOut');
+      if (justLoggedOut === 'true') {
+        sessionStorage.removeItem('justLoggedOut');
+        router.push('/login?logout=true');
+      } else {
+        router.push('/login');
+      }
     }
   }, [user, authLoading, router]);
+
+  if (showSplash) {
+    return <SplashScreen duration={splashDuration} onComplete={() => setShowSplash(false)} />;
+  }
 
   if (authLoading) {
     return (

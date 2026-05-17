@@ -44,6 +44,7 @@ export function ProfileCapsule() {
 
   async function handleSignOut() {
     setOpen(false);
+    sessionStorage.setItem('justLoggedOut', 'true');
     await signOut();
   }
 
