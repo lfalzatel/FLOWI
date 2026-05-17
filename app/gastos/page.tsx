@@ -22,10 +22,10 @@ export default function GastosPage() {
     }
   }, [user, authLoading, router]);
 
-  if (authLoading || expensesLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-[#0A0A0F] text-white flex flex-col items-center justify-center">
-        <div className="animate-pulse font-syne font-bold text-xl text-accent">Cargando gastos...</div>
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
