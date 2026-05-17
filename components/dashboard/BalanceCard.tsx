@@ -16,10 +16,11 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
   return (
     <div className="space-y-4">
       {/* Main balance */}
-      <div className="relative overflow-hidden rounded-3xl p-6 md:p-8"
+      <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix"
            style={{
              background: 'linear-gradient(135deg, #0D2E1F 0%, #0A1929 50%, #150D2E 100%)',
              border: '1px solid rgba(0,229,160,0.15)',
+             animationDelay: '0.05s',
            }}>
         {/* Decorative circles */}
         <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
@@ -44,7 +45,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
 
       {/* Gastos + Ingresos row + Deudas */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.15s' }}>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-red-500/15 flex items-center justify-center">
               <TrendingDown className="w-3 h-3 text-red-400" />
@@ -53,7 +54,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
           </div>
           <p className="font-syne font-bold text-lg text-red-400">{fmt(totalGastos)}</p>
         </div>
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.25s' }}>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">
               <TrendingUp className="w-3 h-3 text-accent" />
@@ -64,7 +65,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
         </div>
         
         {/* Tarjeta de Deudas a lo ancho */}
-        <div className="glass-card p-4 rounded-2xl col-span-2">
+        <div className="glass-card p-4 rounded-2xl col-span-2 animate-card-mix" style={{ animationDelay: '0.35s' }}>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-orange-500/15 flex items-center justify-center">
               <TrendingDown className="w-3 h-3 text-orange-400" />
