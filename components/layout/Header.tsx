@@ -25,9 +25,35 @@ export function Header() {
     >
       {/* Logo */}
       <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-accent to-accent-dim
-                        flex items-center justify-center shadow-lg shadow-accent/25 p-1.5">
-          <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-contain" />
+        <div className="relative w-9 h-9">
+          {/* SVG Lines */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+            {/* Circle 1 (Outer, Green, Clockwise) */}
+            <circle
+              cx="50" cy="50" r="46"
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="3"
+              strokeDasharray="150 100"
+              className="animate-[spin_4s_linear_infinite] origin-center"
+              strokeLinecap="round"
+            />
+            {/* Circle 2 (Inner, Blue, Counter-clockwise) */}
+            <circle
+              cx="50" cy="50" r="41"
+              fill="none"
+              stroke="#3B82F6"
+              strokeWidth="3"
+              strokeDasharray="120 80"
+              className="animate-[spin_6s_linear_infinite_reverse] origin-center"
+              strokeLinecap="round"
+            />
+          </svg>
+
+          {/* Logo Container */}
+          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527]">
+            <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
+          </div>
         </div>
         <span className="font-syne font-bold text-lg tracking-tight text-white hidden sm:block">
           flowi

@@ -70,8 +70,8 @@ export function ProfileCapsule() {
           />
         </div>
 
-        {/* Name + role (md+) */}
-        <div className="hidden md:flex flex-col items-start leading-none gap-0.5 mr-0.5">
+        {/* Name + role */}
+        <div className="flex flex-col items-start leading-none gap-0.5 mr-0.5">
           <span className="text-[11px] font-semibold text-white/90 leading-none">
             {displayName.split(' ')[0]}
           </span>
