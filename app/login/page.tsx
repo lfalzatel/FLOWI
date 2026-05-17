@@ -65,7 +65,7 @@ export default function LoginPage() {
 
             {/* Logo Container */}
             <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527]">
-              <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover" />
+              <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
             </div>
           </div>
           
