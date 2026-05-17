@@ -24,6 +24,8 @@ export default function DashboardPage() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
+  const [filterType, setFilterType] = useState<'month' | 'day'>('month');
+  const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
 
   useEffect(() => {
     setMounted(true);
@@ -80,6 +82,26 @@ export default function DashboardPage() {
   const hour    = new Date().getHours();
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
 
+  const filteredTransactions = transactions.filter(t => {
+    const d = t.date instanceof Date ? t.date : new Date(t.date);
+    const dateStr = d.toISOString().split('T')[0];
+    if (filterType === 'month') {
+      return dateStr.startsWith(filterValue);
+    } else {
+      return dateStr === filterValue;
+    }
+  });
+
+  const filteredGastos = filteredTransactions
+    .filter(t => t.type === 'gasto')
+    .reduce((acc, t) => acc + t.amount, 0);
+    
+  const filteredIngresos = filteredTransactions
+    .filter(t => t.type === 'ingreso')
+    .reduce((acc, t) => acc + t.amount, 0);
+    
+  const filteredBalance = filteredIngresos - filteredGastos;
+
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0F]">
       <Header />
@@ -105,6 +127,43 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        {/* Filter */}
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-2xl">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setFilterType('month');
+                setFilterValue(new Date().toISOString().split('T')[0].substring(0, 7));
+              }}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'month' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Mes
+            </button>
+            <button
+              onClick={() => {
+                setFilterType('day');
+                setFilterValue(new Date().toISOString().split('T')[0]);
+              }}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'day' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Día
+            </button>
+          </div>
+          
+          <div className="flex-1">
+            <input
+              type={filterType === 'month' ? 'month' : 'date'}
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              className="w-full bg-transparent text-white text-sm focus:outline-none border-none text-right"
+            />
+          </div>
+        </div>
+
         {/* Balance */}
         {loading ? (
           <div className="glass-card rounded-3xl p-8 animate-pulse">
@@ -113,11 +172,11 @@ export default function DashboardPage() {
             <div className="h-3 bg-white/5 rounded w-1/4" />
           </div>
         ) : (
-          <BalanceCard balance={balance - totalDeudas} totalGastos={totalGastos} totalIngresos={totalIngresos} totalDeudas={totalDeudas} />
+          <BalanceCard balance={filteredBalance - totalDeudas} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
         )}
 
         {/* Chart */}
-        <ExpenseChart transactions={transactions} />
+        <ExpenseChart transactions={filteredTransactions} />
 
         {/* Recent transactions */}
         <div>
@@ -132,7 +191,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <TransactionList transactions={transactions} limit={5} onEdit={(tx) => setEditingTransaction(tx)} />
+             <TransactionList transactions={filteredTransactions} limit={5} onEdit={(tx) => setEditingTransaction(tx)} />
           )}
         </div>
       </main>

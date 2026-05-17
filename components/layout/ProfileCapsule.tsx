@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ProfileModal } from '@/components/forms/ProfileModal';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import {
@@ -24,6 +25,7 @@ const menuItems = [
 export function ProfileCapsule() {
   const { user, profile } = useAuth();
   const [open, setOpen]   = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const ref               = useRef<HTMLDivElement>(null);
   const router            = useRouter();
 
@@ -49,6 +51,7 @@ export function ProfileCapsule() {
   }
 
   return (
+    <>
     <div ref={ref} className="relative">
       {/* ── Capsule button ── */}
       <button
@@ -118,7 +121,15 @@ export function ProfileCapsule() {
             {menuItems.map(({ icon: Icon, label, href, divider }, i) => (
               <div key={i}>
                 {divider && <div className="my-1 border-t border-white/5" />}
-                <Link href={href} onClick={() => setOpen(false)}
+                <Link href={href} onClick={(e) => {
+                  if (label === 'Mi Perfil') {
+                    e.preventDefault();
+                    setOpen(false);
+                    setIsProfileModalOpen(true);
+                  } else {
+                    setOpen(false);
+                  }
+                }}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl
                              text-white/65 hover:text-white hover:bg-white/6
                              active:bg-white/10
@@ -152,5 +163,9 @@ export function ProfileCapsule() {
         </div>
       )}
     </div>
+      {isProfileModalOpen && (
+        <ProfileModal onClose={() => setIsProfileModalOpen(false)} />
+      )}
+    </>
   );
 }
