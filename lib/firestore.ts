@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 export interface Transaction {
   id?: string;
@@ -64,4 +64,9 @@ export async function addExpense(expense: Omit<Transaction, 'id'> & { userId: st
 export async function updateExpense(id: string, expense: Partial<Transaction>) {
   const docRef = doc(db, 'expenses', id);
   await updateDoc(docRef, expense);
+}
+
+export async function deleteExpense(id: string) {
+  const docRef = doc(db, 'expenses', id);
+  await deleteDoc(docRef);
 }
