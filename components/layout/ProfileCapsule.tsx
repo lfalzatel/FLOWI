@@ -9,13 +9,14 @@ import { signOut } from '@/lib/auth';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
-  BarChart2, Shield,
+  BarChart2, Shield, Share2
 } from 'lucide-react';
 
 const menuItems = [
   { icon: User,     label: 'Mi Perfil',      href: '/ajustes',         divider: false },
   { icon: CreditCard, label: 'Presupuesto',  href: '/presupuesto',     divider: false },
   { icon: BarChart2,  label: 'Reportes',     href: '/reportes',        divider: false },
+  { icon: Share2,     label: 'Compartir App',  href: '#',                divider: true  },
   { icon: Bell,       label: 'Notificaciones', href: '/ajustes',       divider: true  },
   { icon: Settings,   label: 'Configuración', href: '/ajustes',        divider: false },
   { icon: Shield,     label: 'Privacidad',   href: '/ajustes',         divider: false },
@@ -43,6 +44,19 @@ export function ProfileCapsule() {
   const photoURL = profile?.photoURL || user.photoURL || '/default-avatar.png';
   const role = profile?.role || 'Usuario';
   const email = profile?.email || user.email || '';
+
+  const handleShare = () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'FLOWI',
+        text: '¡Gestiona tus gastos e ingresos con FLOWI!',
+        url: 'https://flowi-woad.vercel.app/',
+      });
+    } else if (typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText('https://flowi-woad.vercel.app/');
+      alert('¡Enlace copiado al portapapeles!');
+    }
+  };
 
   async function handleSignOut() {
     setOpen(false);
@@ -126,6 +140,10 @@ export function ProfileCapsule() {
                     e.preventDefault();
                     setOpen(false);
                     setIsProfileModalOpen(true);
+                  } else if (label === 'Compartir App') {
+                    e.preventDefault();
+                    setOpen(false);
+                    handleShare();
                   } else {
                     setOpen(false);
                   }

@@ -123,3 +123,8 @@ export async function deleteDebt(id: string) {
   const docRef = doc(db, 'debts', id);
   await deleteDoc(docRef);
 }
+
+export async function updateUserProfile(userId: string, data: any) {
+  const docRef = doc(db, 'users', userId);
+  await updateDoc(docRef, data);
+}
