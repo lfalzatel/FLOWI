@@ -35,7 +35,12 @@ export function ProfileCapsule() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  if (!user || !profile) return null;
+  if (!user) return null;
+ 
+  const displayName = profile?.name || user.displayName || 'Usuario';
+  const photoURL = profile?.photoURL || user.photoURL || '/default-avatar.png';
+  const role = profile?.role || 'Usuario';
+  const email = profile?.email || user.email || '';
 
   async function handleSignOut() {
     setOpen(false);
@@ -57,8 +62,8 @@ export function ProfileCapsule() {
         <div className="relative w-7 h-7 rounded-full overflow-hidden
                         ring-2 ring-accent/40 ring-offset-1 ring-offset-transparent">
           <Image
-            src={profile.photoURL || '/default-avatar.png'}
-            alt={profile.name}
+            src={photoURL}
+            alt={displayName}
             fill
             className="object-cover"
           />
@@ -67,10 +72,10 @@ export function ProfileCapsule() {
         {/* Name + role (md+) */}
         <div className="hidden md:flex flex-col items-start leading-none gap-0.5 mr-0.5">
           <span className="text-[11px] font-semibold text-white/90 leading-none">
-            {profile.name.split(' ')[0]}
+            {displayName.split(' ')[0]}
           </span>
           <span className="text-[9px] text-accent font-medium leading-none tracking-wide uppercase">
-            {profile.role}
+            {role}
           </span>
         </div>
 
@@ -95,14 +100,14 @@ export function ProfileCapsule() {
                           bg-gradient-to-r from-accent/5 to-transparent">
             <div className="relative w-11 h-11 rounded-full overflow-hidden
                             ring-2 ring-accent/30 flex-shrink-0">
-              <Image src={profile.photoURL} alt={profile.name} fill className="object-cover" />
+              <Image src={photoURL} alt={displayName} fill className="object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{profile.name}</p>
-              <p className="text-xs text-white/40 truncate">{profile.email}</p>
+              <p className="text-sm font-semibold text-white truncate">{displayName}</p>
+              <p className="text-xs text-white/40 truncate">{email}</p>
               <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full
                                bg-accent/15 text-accent font-semibold tracking-wide uppercase">
-                {profile.role}
+                {role}
               </span>
             </div>
           </div>

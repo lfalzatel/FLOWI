@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +16,12 @@ export default function DashboardPage() {
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const [showAdd, setShowAdd] = useState(false);
   const router = useRouter();
+ 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   if (authLoading) {
     return (
@@ -26,7 +32,6 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    router.push('/login');
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0F] text-white">
         <p className="text-white/40 text-sm mb-2">Redirigiendo al login...</p>
