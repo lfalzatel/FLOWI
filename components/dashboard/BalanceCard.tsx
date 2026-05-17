@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 
 interface Props {
@@ -10,6 +11,32 @@ interface Props {
 
 function fmt(n: number) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+}
+
+function AnimatedNumber({ value, delay = 0 }: { value: number, delay?: number }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    let startTimestamp: number | null = null;
+    const duration = 1000; // 1 segundo
+    
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      setDisplayValue(Math.floor(progress * value));
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      window.requestAnimationFrame(step);
+    }, delay * 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [value, delay]);
+
+  return <span>{fmt(displayValue)}</span>;
 }
 
 export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }: Props) {
@@ -37,7 +64,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
           </div>
 
           <p className="font-syne font-bold text-4xl md:text-5xl text-white mb-1 leading-none">
-            {fmt(balance)}
+            <AnimatedNumber value={balance} delay={0.05} />
           </p>
           <p className="text-xs text-white/30">Este mes</p>
         </div>
@@ -52,7 +79,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             </div>
             <span className="text-[11px] text-white/40 font-medium">Gastos</span>
           </div>
-          <p className="font-syne font-bold text-lg text-red-400">{fmt(totalGastos)}</p>
+          <p className="font-syne font-bold text-lg text-red-400"><AnimatedNumber value={totalGastos} delay={0.15} /></p>
         </div>
         <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.25s' }}>
           <div className="flex items-center gap-2 mb-2">
@@ -61,7 +88,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             </div>
             <span className="text-[11px] text-white/40 font-medium">Ingresos</span>
           </div>
-          <p className="font-syne font-bold text-lg text-accent">{fmt(totalIngresos)}</p>
+          <p className="font-syne font-bold text-lg text-accent"><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
         </div>
         
         {/* Tarjeta de Deudas a lo ancho */}
@@ -72,7 +99,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             </div>
             <span className="text-[11px] text-white/40 font-medium">Deudas Pendientes</span>
           </div>
-          <p className="font-syne font-bold text-lg text-orange-400">{fmt(totalDeudas)}</p>
+          <p className="font-syne font-bold text-lg text-orange-400"><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
         </div>
       </div>
     </div>
