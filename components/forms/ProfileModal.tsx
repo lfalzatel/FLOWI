@@ -5,9 +5,6 @@ import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { updateUserProfile } from '@/lib/firestore';
-import { storage } from '@/lib/firebase';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-
 interface Props {
   onClose: () => void;
 }
@@ -60,17 +57,25 @@ export function ProfileModal({ onClose }: Props) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    // Validar tamaño máximo de 500KB para no saturar Firestore
+    if (file.size > 500 * 1024) {
+      alert('La imagen es muy pesada. Por favor elige una de menos de 500 KB.');
+      return;
+    }
+
     setUploadingPhoto(true);
     try {
-      const fileRef = storageRef(storage, `profile_pictures/${user.uid}`);
-      await uploadBytes(fileRef, file);
-      const photoURL = await getDownloadURL(fileRef);
-      await updateUserProfile(user.uid, { photoURL });
-      alert('Foto de perfil actualizada. Los cambios pueden tardar unos segundos en reflejarse.');
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        await updateUserProfile(user.uid, { photoURL: base64String });
+        alert('Foto de perfil actualizada correctamente.');
+        setUploadingPhoto(false);
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
-      console.error('Error uploading photo:', error);
-      alert('Error al subir la foto');
-    } finally {
+      console.error('Error saving photo:', error);
+      alert('Error al guardar la foto');
       setUploadingPhoto(false);
     }
   };
