@@ -2,15 +2,19 @@
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { TransactionList } from '@/components/dashboard/TransactionList';
+import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
+import { Transaction } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function IngresosPage() {
   const { user, loading: authLoading } = useAuth();
   const { transactions, loading: expensesLoading, refresh } = useExpenses('ingreso');
   const router = useRouter();
+  
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -45,10 +49,22 @@ export default function IngresosPage() {
         </div>
 
         {/* Lista */}
-        <TransactionList transactions={transactions} />
+        <TransactionList 
+          transactions={transactions} 
+          onEdit={(tx) => setEditingTransaction(tx)} 
+        />
       </main>
 
       <BottomNav onSuccess={refresh} />
+
+      {/* Modal de Edición */}
+      {editingTransaction && (
+        <AddExpenseModal
+          onClose={() => setEditingTransaction(null)}
+          onSuccess={refresh}
+          transactionToEdit={editingTransaction}
+        />
+      )}
     </div>
   );
 }

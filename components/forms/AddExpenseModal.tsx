@@ -1,15 +1,16 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { addExpense, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/firestore';
+import { addExpense, updateExpense, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Transaction } from '@/lib/firestore';
 
-interface Props {
+interface AddExpenseModalProps {
   onClose: () => void;
   onSuccess?: () => void;
+  transactionToEdit?: Transaction;
 }
 
-export function AddExpenseModal({ onClose, onSuccess }: Props) {
+export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddExpenseModalProps) {
   const { user } = useAuth();
   const [type, setType] = useState<'gasto' | 'ingreso'>('gasto');
   const [amount, setAmount] = useState('');
@@ -21,6 +22,27 @@ export function AddExpenseModal({ onClose, onSuccess }: Props) {
 
   const categories = type === 'gasto' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
+  useEffect(() => {
+    if (transactionToEdit) {
+      setType(transactionToEdit.type);
+      setAmount(transactionToEdit.amount.toString());
+      setDescription(transactionToEdit.description || '');
+      
+      const isPredefined = categories.some(cat => cat.label === transactionToEdit.category);
+      if (isPredefined) {
+        setCategory(transactionToEdit.category);
+      } else {
+        setCategory('custom');
+        setCustomCategory(transactionToEdit.category);
+      }
+      
+      if (transactionToEdit.date) {
+        const d = transactionToEdit.date instanceof Date ? transactionToEdit.date : new Date();
+        setDate(d.toISOString().split('T')[0]);
+      }
+    }
+  }, [transactionToEdit, categories]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalCategory = category === 'custom' ? customCategory : category;
@@ -28,18 +50,25 @@ export function AddExpenseModal({ onClose, onSuccess }: Props) {
 
     setLoading(true);
     try {
-      await addExpense({
+      const data = {
         userId: user.uid,
         type,
         amount: parseFloat(amount),
         description,
         category: finalCategory,
-        date: new Date(date + 'T12:00:00'), // Usar mediodía para evitar problemas de zona horaria
-      });
+        date: new Date(date + 'T12:00:00'), // Evitar problemas de zona horaria
+      };
+
+      if (transactionToEdit?.id) {
+        await updateExpense(transactionToEdit.id, data);
+      } else {
+        await addExpense(data);
+      }
+      
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error('Error adding transaction:', error);
+      console.error('Error saving transaction:', error);
     } finally {
       setLoading(false);
     }
@@ -52,22 +81,26 @@ export function AddExpenseModal({ onClose, onSuccess }: Props) {
           <X className="w-5 h-5" />
         </button>
         
-        <h2 className="font-syne font-bold text-xl text-white mb-6">Nueva Transacción</h2>
+        <h2 className="font-syne font-bold text-xl text-white mb-6">
+          {transactionToEdit ? 'Editar Transacción' : 'Nueva Transacción'}
+        </h2>
         
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Type Toggle */}
           <div className="flex bg-white/5 p-1 rounded-xl">
             <button
               type="button"
-              onClick={() => { setType('gasto'); setCategory(''); }}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type === 'gasto' ? 'bg-accent text-black' : 'text-white/60'}`}
+              onClick={() => { if (!transactionToEdit) { setType('gasto'); setCategory(''); } }}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type === 'gasto' ? 'bg-accent text-black' : 'text-white/60'} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!!transactionToEdit}
             >
               Gasto
             </button>
             <button
               type="button"
-              onClick={() => { setType('ingreso'); setCategory(''); }}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type === 'ingreso' ? 'bg-accent text-black' : 'text-white/60'}`}
+              onClick={() => { if (!transactionToEdit) { setType('ingreso'); setCategory(''); } }}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type === 'ingreso' ? 'bg-accent text-black' : 'text-white/60'} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!!transactionToEdit}
             >
               Ingreso
             </button>
@@ -154,7 +187,7 @@ export function AddExpenseModal({ onClose, onSuccess }: Props) {
             disabled={loading}
             className="w-full py-3.5 rounded-xl bg-accent text-black font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
           >
-            {loading ? 'Guardando...' : 'Guardar Transacción'}
+            {loading ? 'Guardando...' : (transactionToEdit ? 'Guardar Cambios' : 'Guardar Transacción')}
           </button>
         </form>
       </div>

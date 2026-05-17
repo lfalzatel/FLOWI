@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
+import { Transaction } from '@/lib/firestore';
 import { BalanceCard }     from '@/components/dashboard/BalanceCard';
 import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
 import { TransactionList } from '@/components/dashboard/TransactionList';
@@ -16,6 +17,7 @@ export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const [showAdd, setShowAdd] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
@@ -115,7 +117,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <TransactionList transactions={transactions} limit={5} />
+            <TransactionList transactions={transactions} limit={5} onEdit={(tx) => setEditingTransaction(tx)} />
           )}
         </div>
       </main>
@@ -124,6 +126,14 @@ export default function DashboardPage() {
 
       {showAdd && (
         <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={refresh} />
+      )}
+
+      {editingTransaction && (
+        <AddExpenseModal
+          onClose={() => setEditingTransaction(null)}
+          onSuccess={refresh}
+          transactionToEdit={editingTransaction}
+        />
       )}
     </div>
   );

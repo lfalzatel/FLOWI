@@ -2,7 +2,11 @@
 import { Transaction, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 
-interface Props { transactions: Transaction[]; limit?: number; }
+interface Props { 
+  transactions: Transaction[]; 
+  limit?: number; 
+  onEdit?: (transaction: Transaction) => void;
+}
 
 function fmt(n: number) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
@@ -18,7 +22,7 @@ function getCategoryIcon(category: string, type: string) {
   return cats.find(c => c.label === category) || { icon: '💡', color: '#6B7280' };
 }
 
-export function TransactionList({ transactions, limit }: Props) {
+export function TransactionList({ transactions, limit, onEdit }: Props) {
   const items = limit ? transactions.slice(0, limit) : transactions;
 
   if (items.length === 0) {
@@ -36,8 +40,10 @@ export function TransactionList({ transactions, limit }: Props) {
         const cat = getCategoryIcon(t.category, t.type);
         return (
           <div key={t.id || i}
-               className="glass-card flex items-center gap-3 p-3.5 rounded-2xl
-                          hover:border-white/15 transition-all duration-200">
+               onClick={() => onEdit && onEdit(t)}
+               className={`glass-card flex items-center gap-3 p-3.5 rounded-2xl
+                          hover:border-white/15 transition-all duration-200
+                          ${onEdit ? 'cursor-pointer hover:bg-white/5' : ''}`}>
             {/* Icon */}
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
                  style={{ background: `${cat.color}15` }}>
