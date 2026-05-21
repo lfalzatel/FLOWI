@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
-  const [filterType, setFilterType] = useState<'month' | 'day'>('month');
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'day'>('month');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
 
   useEffect(() => {
@@ -83,6 +83,9 @@ export default function DashboardPage() {
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
 
   const filteredTransactions = transactions.filter(t => {
+    if (filterType === 'all') {
+      return true;
+    }
     const d = t.date instanceof Date 
       ? t.date 
       : (t.date && typeof (t.date as any).toDate === 'function')
@@ -135,6 +138,14 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-2xl">
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setFilterType('all')}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'all' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Todo
+            </button>
+            <button
               onClick={() => {
                 setFilterType('month');
                 setFilterValue(new Date().toISOString().split('T')[0].substring(0, 7));
@@ -159,12 +170,14 @@ export default function DashboardPage() {
           </div>
           
           <div className="flex-1">
-            <input
-              type={filterType === 'month' ? 'month' : 'date'}
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              className="w-full bg-transparent text-white text-sm focus:outline-none border-none text-right"
-            />
+            {filterType !== 'all' && (
+              <input
+                type={filterType === 'month' ? 'month' : 'date'}
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                className="w-full bg-transparent text-white text-sm focus:outline-none border-none text-right"
+              />
+            )}
           </div>
         </div>
 
