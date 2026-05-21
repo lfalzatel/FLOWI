@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
-  const [filterType, setFilterType] = useState<'all' | 'month' | 'day'>('month');
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
 
   useEffect(() => {
