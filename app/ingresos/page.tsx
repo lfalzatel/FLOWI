@@ -16,6 +16,8 @@ export default function IngresosPage() {
   const router = useRouter();
   
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'day'>('all');
+  const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,6 +33,23 @@ export default function IngresosPage() {
     );
   }
 
+  const filteredTransactions = transactions.filter(t => {
+    if (filterType === 'all') {
+      return true;
+    }
+    const d = t.date instanceof Date 
+      ? t.date 
+      : (t.date && typeof (t.date as any).toDate === 'function')
+        ? (t.date as any).toDate()
+        : new Date(t.date as any);
+    const dateStr = d.toISOString().split('T')[0];
+    if (filterType === 'month') {
+      return dateStr.startsWith(filterValue);
+    } else {
+      return dateStr === filterValue;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-white flex flex-col">
       <Header />
@@ -39,6 +58,53 @@ export default function IngresosPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-syne font-bold text-white">Mis Ingresos</h1>
           <p className="text-white/40 text-sm mt-1">Historial completo de tus entradas</p>
+        </div>
+
+        {/* Filter */}
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-2xl mb-6">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFilterType('all')}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'all' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Todo
+            </button>
+            <button
+              onClick={() => {
+                setFilterType('month');
+                setFilterValue(new Date().toISOString().split('T')[0].substring(0, 7));
+              }}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'month' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Mes
+            </button>
+            <button
+              onClick={() => {
+                setFilterType('day');
+                setFilterValue(new Date().toISOString().split('T')[0]);
+              }}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'day' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Día
+            </button>
+          </div>
+          
+          <div className="flex-1">
+            {filterType !== 'all' && (
+              <input
+                type={filterType === 'month' ? 'month' : 'date'}
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                className="w-full bg-transparent text-white text-sm focus:outline-none border-none text-right"
+              />
+            )}
+          </div>
         </div>
 
         {/* Card de Total */}
@@ -62,15 +128,15 @@ export default function IngresosPage() {
             </div>
 
             <p className="font-syne font-bold text-4xl text-white mb-1 leading-none">
-              ${transactions.reduce((sum, e) => sum + e.amount, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+              ${filteredTransactions.reduce((sum, e) => sum + e.amount, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-white/30">Este mes</p>
+            <p className="text-xs text-white/30">{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
           </div>
         </div>
 
         {/* Lista */}
         <TransactionList 
-          transactions={transactions} 
+          transactions={filteredTransactions} 
           onEdit={(tx) => setEditingTransaction(tx)} 
         />
       </main>
