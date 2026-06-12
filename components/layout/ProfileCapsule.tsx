@@ -14,15 +14,15 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { icon: User,     label: 'Mi Perfil',      href: '/ajustes',         divider: false },
-  { icon: CreditCard, label: 'Presupuesto',  href: '/presupuesto',     divider: false },
-  { icon: BarChart2,  label: 'Reportes',     href: '/reportes',        divider: false },
-  { icon: List,       label: 'Editar Categorías', href: '#',           divider: true  },
-  { icon: Share2,     label: 'Compartir App',  href: '#',                divider: true  },
-  { icon: Bell,       label: 'Notificaciones', href: '/ajustes',       divider: true  },
-  { icon: Settings,   label: 'Configuración', href: '/ajustes',        divider: false },
-  { icon: Shield,     label: 'Privacidad',   href: '/ajustes',         divider: false },
-  { icon: HelpCircle, label: 'Ayuda y soporte', href: '/ajustes',     divider: false },
+  { icon: User,     label: 'Mi Perfil',      href: '#',         divider: false, soon: true },
+  { icon: CreditCard, label: 'Presupuesto',  href: '/presupuesto',     divider: false, soon: false },
+  { icon: BarChart2,  label: 'Reportes',     href: '/reportes',        divider: false, soon: false },
+  { icon: List,       label: 'Editar Categorías', href: '#',           divider: true, soon: false },
+  { icon: Share2,     label: 'Compartir App',  href: '#',                divider: true, soon: false  },
+  { icon: Bell,       label: 'Notificaciones', href: '#',       divider: true, soon: true  },
+  { icon: Settings,   label: 'Configuración', href: '/configuracion',        divider: false, soon: false },
+  { icon: Shield,     label: 'Privacidad',   href: '#',         divider: false, soon: true },
+  { icon: HelpCircle, label: 'Ayuda y soporte', href: '#',     divider: false, soon: true },
 ];
 
 export function ProfileCapsule() {
@@ -135,36 +135,68 @@ export function ProfileCapsule() {
 
           {/* Menu items */}
           <div className="p-1.5">
-            {menuItems.map(({ icon: Icon, label, href, divider }, i) => (
+            {menuItems.map((item, i) => (
               <div key={i}>
-                {divider && <div className="my-1 border-t border-white/5" />}
-                <Link href={href} onClick={(e) => {
-                  if (label === 'Mi Perfil') {
-                    e.preventDefault();
-                    setOpen(false);
-                    setIsProfileModalOpen(true);
-                  } else if (label === 'Editar Categorías') {
-                    e.preventDefault();
-                    setOpen(false);
-                    setIsCategoriesModalOpen(true);
-                  } else if (label === 'Compartir App') {
-                    e.preventDefault();
-                    setOpen(false);
-                    handleShare();
-                  } else {
-                    setOpen(false);
-                  }
-                }}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl
-                             text-white/65 hover:text-white hover:bg-white/6
-                             active:bg-white/10
-                             transition-all duration-150 group/item">
-                  <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center
-                                  group-hover/item:bg-accent/10 transition-colors">
-                    <Icon className="w-3.5 h-3.5 group-hover/item:text-accent transition-colors" />
-                  </div>
-                  <span className="text-sm">{label}</span>
-                </Link>
+                {item.divider && <div className="my-1 border-t border-glass-border" />}
+                {item.label === 'Compartir App' ? (
+                  <button
+                    onClick={() => { handleShare(); setOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                      <item.icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-sm">{item.label}</span>
+                  </button>
+                ) : item.label === 'Editar Categorías' ? (
+                  <button
+                    onClick={() => { setIsCategoriesModalOpen(true); setOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                      <item.icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-sm">{item.label}</span>
+                  </button>
+                ) : item.label === 'Mi Perfil' ? (
+                  <button
+                    onClick={() => { setIsProfileModalOpen(true); setOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                      <item.icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-sm">{item.label}</span>
+                  </button>
+                ) : item.soon ? (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert('¡Próximamente!');
+                      setOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                        <item.icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-sm opacity-70">{item.label}</span>
+                    </div>
+                    <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider">Pronto</span>
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                      <item.icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+                )}
               </div>
             ))}
           </div>

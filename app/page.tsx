@@ -74,8 +74,8 @@ export default function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0A0F] text-white">
-        <p className="text-white/40 text-sm mb-2">Redirigiendo al login...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-deep text-text-primary">
+        <p className="text-text-muted text-sm mb-2">Redirigiendo al login...</p>
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -114,15 +114,15 @@ export default function DashboardPage() {
   const filteredBalance = filteredIngresos - filteredGastos;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0A0A0F]">
+    <div className="min-h-screen flex flex-col bg-deep">
       <Header />
       
       <main className="flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
         {/* Greeting */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-white/40">{greeting} 👋</p>
-            <h1 className="font-syne font-bold text-2xl text-white">
+            <p className="text-sm text-text-secondary">{greeting} 👋</p>
+            <h1 className="font-syne font-bold text-2xl text-text-primary">
               {profile?.name?.split(' ')[0] || 'Usuario'}
             </h1>
           </div>
@@ -150,9 +150,9 @@ export default function DashboardPage() {
         {/* Balance */}
         {loading ? (
           <div className="glass-card rounded-3xl p-8 animate-pulse">
-            <div className="h-4 bg-white/5 rounded w-1/3 mb-4" />
-            <div className="h-12 bg-white/5 rounded w-2/3 mb-2" />
-            <div className="h-3 bg-white/5 rounded w-1/4" />
+            <div className="h-4 bg-glass rounded w-1/3 mb-4" />
+            <div className="h-12 bg-glass rounded w-2/3 mb-2" />
+            <div className="h-3 bg-glass rounded w-1/4" />
           </div>
         ) : (
           <BalanceCard balance={filteredBalance - totalDeudas} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
@@ -164,7 +164,7 @@ export default function DashboardPage() {
         {/* Recent transactions */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-syne font-semibold text-base text-white">Últimas transacciones</h2>
+            <h2 className="font-syne font-semibold text-base text-text-primary">Últimas transacciones</h2>
             <a href="/gastos" className="text-xs text-accent hover:underline">Ver todo</a>
           </div>
           {loading ? (

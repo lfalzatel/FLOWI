@@ -11,10 +11,13 @@ module.exports = {
         dm:   ['DM Sans', 'sans-serif'],
       },
       colors: {
-        accent: '#00E5A0',
-        'accent-dim': '#00B37E',
-        deep: '#0A0A0F',
-        card: '#1A1A2E',
+        accent: 'var(--accent)',
+        'accent-dim': 'var(--accent-dim)',
+        deep: 'var(--bg-deep)',
+        card: 'var(--bg-card)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-muted': 'var(--text-muted)',
       },
       backdropBlur: {
         xs: '2px',

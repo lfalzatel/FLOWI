@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface Props {
   balance:       number;
@@ -40,33 +41,49 @@ function AnimatedNumber({ value, delay = 0 }: { value: number, delay?: number })
 }
 
 export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }: Props) {
+  const { theme } = useTheme();
+  const isCyberpunk = theme === 'cyberpunk';
+  const isLight = theme === 'light';
+
+  const cardGradient = isLight 
+    ? 'linear-gradient(135deg, var(--bg-card) 0%, #F9FAFB 100%)' 
+    : isCyberpunk
+      ? 'linear-gradient(135deg, #0A0A16 0%, #070714 100%)'
+      : 'linear-gradient(135deg, #0D2E1F 0%, #0A1929 50%, #150D2E 100%)';
+
   return (
     <div className="space-y-4">
       {/* Main balance */}
-      <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix"
+      <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix shadow-sm"
            style={{
-             background: 'linear-gradient(135deg, #0D2E1F 0%, #0A1929 50%, #150D2E 100%)',
-             border: '1px solid rgba(0,229,160,0.15)',
+             background: cardGradient,
+             border: '1px solid var(--glass-border)',
              animationDelay: '0.05s',
+             borderRadius: isCyberpunk ? '0' : '1.5rem',
+             clipPath: isCyberpunk ? 'polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)' : 'none'
            }}>
         {/* Decorative circles */}
-        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
-                        bg-accent/5 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full
-                        bg-blue-500/5 blur-xl pointer-events-none" />
+        {!isLight && !isCyberpunk && (
+          <>
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
+                            bg-accent/5 blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full
+                            bg-blue-500/5 blur-xl pointer-events-none" />
+          </>
+        )}
 
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
               <Wallet className="w-3.5 h-3.5 text-accent" />
             </div>
-            <span className="text-xs font-medium text-white/50">Balance total</span>
+            <span className="text-xs font-medium text-text-secondary">Balance total</span>
           </div>
 
-          <p className="font-syne font-bold text-4xl md:text-5xl text-white mb-1 leading-none">
+          <p className={`font-syne font-bold text-4xl md:text-5xl text-text-primary mb-1 leading-none ${isCyberpunk ? 'font-mono' : ''}`}>
             <AnimatedNumber value={balance} delay={0.05} />
           </p>
-          <p className="text-xs text-white/30">Este mes</p>
+          <p className="text-xs text-text-muted">Este mes</p>
         </div>
       </div>
 
@@ -74,32 +91,32 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
       <div className="grid grid-cols-2 gap-3">
         <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.15s' }}>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-red-500/15 flex items-center justify-center">
-              <TrendingDown className="w-3 h-3 text-red-400" />
+            <div className="w-6 h-6 rounded-lg bg-[var(--red)]/15 flex items-center justify-center">
+              <TrendingDown className="w-3 h-3 text-[var(--red)]" />
             </div>
-            <span className="text-[11px] text-white/40 font-medium">Gastos</span>
+            <span className="text-[11px] text-text-secondary font-medium">Gastos</span>
           </div>
-          <p className="font-syne font-bold text-lg text-red-400"><AnimatedNumber value={totalGastos} delay={0.15} /></p>
+          <p className={`font-syne font-bold text-lg text-[var(--red)] ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={totalGastos} delay={0.15} /></p>
         </div>
         <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.25s' }}>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">
               <TrendingUp className="w-3 h-3 text-accent" />
             </div>
-            <span className="text-[11px] text-white/40 font-medium">Ingresos</span>
+            <span className="text-[11px] text-text-secondary font-medium">Ingresos</span>
           </div>
-          <p className="font-syne font-bold text-lg text-accent"><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
+          <p className={`font-syne font-bold text-lg text-accent ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
         </div>
         
         {/* Tarjeta de Deudas a lo ancho */}
         <div className="glass-card p-4 rounded-2xl col-span-2 animate-card-mix" style={{ animationDelay: '0.35s' }}>
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-orange-500/15 flex items-center justify-center">
-              <TrendingDown className="w-3 h-3 text-orange-400" />
+            <div className="w-6 h-6 rounded-lg bg-[var(--yellow)]/15 flex items-center justify-center">
+              <TrendingDown className="w-3 h-3 text-[var(--yellow)]" />
             </div>
-            <span className="text-[11px] text-white/40 font-medium">Deudas Pendientes</span>
+            <span className="text-[11px] text-text-secondary font-medium">Deudas Pendientes</span>
           </div>
-          <p className="font-syne font-bold text-lg text-orange-400"><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
+          <p className={`font-syne font-bold text-lg text-[var(--yellow)] ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
         </div>
       </div>
     </div>
