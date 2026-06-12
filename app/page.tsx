@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useDebts } from '@/hooks/useDebts';
@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
+  const [showNewUserMsg, setShowNewUserMsg] = useState(false);
   const router = useRouter();
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
@@ -37,9 +38,15 @@ export default function DashboardPage() {
     const params = new URLSearchParams(window.location.search);
     const hasLoaded = sessionStorage.getItem('appHasLoaded');
     
-    if (params.get('login') === 'true') {
+    if (params.get('login') === 'true' || params.get('newuser') === 'true') {
       setSplashDuration(2500);
       setShowSplash(true);
+      if (params.get('newuser') === 'true') {
+        setShowNewUserMsg(true);
+        window.history.replaceState({}, '', '/');
+      } else {
+        window.history.replaceState({}, '', '/');
+      }
     } else if (hasLoaded) {
       setShowSplash(false);
     }
@@ -121,6 +128,21 @@ export default function DashboardPage() {
       <Header />
       
       <main className="flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
+        {/* Welcome Message for New Users */}
+        {showNewUserMsg && (
+          <div className={`p-4 mb-2 animate-slide-down flex justify-between items-start ${isTechTheme ? 'bg-accent/10 border border-accent rounded-none' : 'glass-card'}`}>
+            <div>
+               <h3 className={`font-bold mb-1 ${isTechTheme ? 'text-accent font-mono uppercase tracking-widest text-sm' : 'text-text-primary'}`}>¡Bienvenido a Flowi!</h3>
+               <p className={`text-sm ${isTechTheme ? 'text-accent/80 font-mono' : 'text-text-secondary'}`}>
+                 El modo por defecto es <b>Cyberpunk</b>. Puedes cambiar el diseño y los colores de la aplicación en cualquier momento tocando tu foto de perfil (arriba a la derecha).
+               </p>
+            </div>
+            <button onClick={() => setShowNewUserMsg(false)} className={`ml-4 mt-0.5 ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-muted hover:text-text-primary'}`}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
         {/* Greeting */}
         <div className="flex items-center justify-between">
           <div>

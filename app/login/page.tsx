@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { auth, googleProvider } from '@/lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, getAdditionalUserInfo } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Wallet } from 'lucide-react';
 import { SplashScreen } from '@/components/layout/SplashScreen';
@@ -23,8 +23,13 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-      router.push('/?login=true');
+      const credential = await signInWithPopup(auth, googleProvider);
+      const additionalInfo = getAdditionalUserInfo(credential);
+      if (additionalInfo?.isNewUser) {
+        router.push('/?newuser=true');
+      } else {
+        router.push('/?login=true');
+      }
     } catch (error) {
       console.error('Error logging in:', error);
     }
