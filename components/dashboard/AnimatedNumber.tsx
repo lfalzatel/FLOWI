@@ -28,5 +28,5 @@ export function AnimatedNumber({ value, delay = 0, prefix = '' }: { value: numbe
     return () => clearTimeout(timeoutId);
   }, [value, delay]);
 
-  return <span>{(!prefix || prefix === '$') ? fmt(displayValue) : `${prefix}${displayValue}`}</span>;
+  return <span>{prefix === '$' ? fmt(displayValue) : `${prefix}${fmt(displayValue)}`}</span>;
 }

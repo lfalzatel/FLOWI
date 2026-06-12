@@ -93,7 +93,7 @@ export default function DeudasPage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {debts.map((debt) => {
+              {debts.map((debt, i) => {
                 const pending = debt.totalAmount - debt.paidAmount;
                 const progress = (debt.paidAmount / debt.totalAmount) * 100;
                 const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
@@ -102,7 +102,8 @@ export default function DeudasPage() {
                   <div
                     key={debt.id}
                     onClick={() => setSelectedDebt(debt)}
-                    className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer"
+                    className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer animate-card-mix"
+                    style={{ animationDelay: `${i * 0.1}s` }}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -120,7 +121,9 @@ export default function DeudasPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`text-text-primary font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>{fmt(pending)}</p>
+                        <p className={`text-text-primary font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
+                          <AnimatedNumber value={pending} prefix="$" delay={i * 0.1} />
+                        </p>
                         <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
                       </div>
                     </div>

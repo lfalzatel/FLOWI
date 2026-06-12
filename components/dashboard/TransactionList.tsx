@@ -2,6 +2,7 @@
 import { Transaction, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { useTheme } from '@/components/ThemeProvider';
+import { AnimatedNumber } from './AnimatedNumber';
 
 interface Props { 
   transactions: Transaction[]; 
@@ -51,15 +52,15 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
             <div key={t.id || i}
                  onClick={() => onEdit && onEdit(t)}
                  className={`glass-card flex items-center justify-between p-4 rounded-none border-y border-r border-glass-border
-                            hover:bg-glass-hover transition-all duration-200
+                            hover:bg-glass-hover transition-all duration-200 animate-card-mix
                             ${onEdit ? 'cursor-pointer' : ''}`}
-                 style={{ borderLeft: `3px solid ${cat.color}` }}>
+                 style={{ borderLeft: `3px solid ${cat.color}`, animationDelay: `${i * 0.1}s` }}>
               <p className="text-sm font-bold text-text-primary font-mono truncate uppercase tracking-widest">
                 {displayLabel}
               </p>
               <p className={`text-sm font-bold flex-shrink-0 font-mono tracking-widest
                              ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
-                {t.type === 'gasto' ? '-' : '+'}{fmt(t.amount)}
+                <AnimatedNumber value={t.amount} prefix={t.type === 'gasto' ? '-' : '+'} delay={i * 0.1} />
               </p>
             </div>
           );
@@ -69,8 +70,9 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
           <div key={t.id || i}
                onClick={() => onEdit && onEdit(t)}
                className={`glass-card flex items-center gap-3 p-3.5 rounded-2xl
-                          hover:border-glass-strong transition-all duration-200
-                          ${onEdit ? 'cursor-pointer hover:bg-glass-hover' : ''}`}>
+                          hover:border-glass-strong transition-all duration-200 animate-card-mix
+                          ${onEdit ? 'cursor-pointer hover:bg-glass-hover' : ''}`}
+               style={{ animationDelay: `${i * 0.1}s` }}>
             {/* Icon */}
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
                  style={{ background: `${cat.color}15` }}>
@@ -86,7 +88,7 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
             {/* Amount */}
             <p className={`text-sm font-bold flex-shrink-0
                            ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
-              {t.type === 'gasto' ? '-' : '+'}{fmt(t.amount)}
+              <AnimatedNumber value={t.amount} prefix={t.type === 'gasto' ? '-' : '+'} delay={i * 0.1} />
             </p>
           </div>
         );

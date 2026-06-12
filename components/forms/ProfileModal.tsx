@@ -194,7 +194,7 @@ export function ProfileModal({ onClose }: Props) {
             className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-transparent border border-white text-white rounded-none uppercase font-mono tracking-widest hover:bg-white hover:text-black' : 'bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 active:scale-[0.98]'}`}
           >
             <LogOut className="w-4 h-4" />
-            {isCyberpunk ? '>_ LOGOUT' : 'Cerrar Sesión'}
+            {isCyberpunk ? '>_ CERRAR_SESION' : 'Cerrar Sesión'}
           </button>
 
           <button
@@ -202,7 +202,7 @@ export function ProfileModal({ onClose }: Props) {
             className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-black border border-red-500/50 text-red-500 rounded-none uppercase font-mono tracking-widest hover:bg-red-500/10' : 'bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500/20 active:scale-[0.98]'}`}
           >
             <Trash2 className="w-4 h-4" />
-            {isCyberpunk ? '>_ PURGE_DATA' : 'Eliminar Cuenta'}
+            {isCyberpunk ? '>_ ELIMINAR_CUENTA' : 'Eliminar Cuenta'}
           </button>
         </div>
       </div>
