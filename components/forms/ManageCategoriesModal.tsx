@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Plus, Trash2, Edit2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories, CategoryOption } from '@/hooks/useCategories';
@@ -27,6 +28,14 @@ export function ManageCategoriesModal({ onClose }: Props) {
   const [icon, setIcon] = useState('📦');
   const [color, setColor] = useState('#6B7280');
   const [loading, setLoading] = useState(false);
+
+  // Bloquear scroll del body mientras el modal esté abierto
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const resetForm = () => {
     setLabel('');
@@ -103,8 +112,10 @@ export function ManageCategoriesModal({ onClose }: Props) {
     }
   };
 
-  return (
-    <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
       <div className={`w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'}`}>
         <button onClick={onClose} className={`absolute top-4 right-4 hover:text-white transition-colors ${isTechTheme ? 'text-accent' : 'text-white/50'}`}>
           <X className="w-5 h-5" />
@@ -248,6 +259,7 @@ export function ManageCategoriesModal({ onClose }: Props) {
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
