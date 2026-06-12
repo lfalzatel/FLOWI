@@ -12,7 +12,7 @@ import { useTheme } from '@/components/ThemeProvider';
 
 export default function DeudasPage() {
   const { theme } = useTheme();
-  const isCyberpunk = theme === 'cyberpunk';
+  const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const { user, loading: authLoading } = useAuth();
   const { debts, loading: debtsLoading, refresh, totalDeudas } = useDebts();
   const router = useRouter();

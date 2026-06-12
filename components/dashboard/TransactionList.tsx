@@ -25,7 +25,7 @@ function getCategoryIcon(category: string, type: string) {
 
 export function TransactionList({ transactions, limit, onEdit }: Props) {
   const { theme } = useTheme();
-  const isCyberpunk = theme === 'cyberpunk';
+  const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const items = limit ? transactions.slice(0, limit) : transactions;
 
   if (items.length === 0) {
