@@ -43,6 +43,52 @@
   -webkit-backdrop-filter: none !important;
 }
 
+[data-theme='kiloCode'] {
+  --accent:        #FACC15;
+  --accent-dim:    #EAB308;
+  --accent-glow:   rgba(250, 204, 21, 0.15);
+  --bg-deep:       #0A0A0A;
+  --bg-card:       rgba(255, 255, 255, 0.04);
+  --bg-card-hover: rgba(255, 255, 255, 0.08);
+  --glass:         rgba(255, 255, 255, 0.03);
+  --glass-hover:   rgba(255, 255, 255, 0.06);
+  --glass-border:  rgba(255, 255, 255, 0.1);
+  --glass-strong:  rgba(255, 255, 255, 0.08);
+  --text-primary:  rgba(255, 255, 255, 0.95);
+  --text-secondary:rgba(255, 255, 255, 0.6);
+  --text-muted:    rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='kiloCode'] body::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(circle at center, var(--accent-glow) 0%, transparent 60%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+[data-theme='kiloCode'] body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle at center, rgba(250, 204, 21, 0.08) 0%, transparent 60%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+[data-theme='kiloCode'] .glass-card, [data-theme='kiloCode'] .glass-card-strong {
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+}
+
 [data-theme='light'] {
   --accent:        #00B37E;
   --accent-dim:    #00805B;
@@ -227,4 +273,5 @@ body {
 .stagger > *:nth-child(3) { animation-delay: 0.15s; }
 .stagger > *:nth-child(4) { animation-delay: 0.20s; }
 .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+
 

@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sun, Moon, Terminal, Layers } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Terminal, Layers, Zap } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { BottomNav } from '@/components/layout/BottomNav';
 
@@ -79,6 +79,20 @@ export default function ConfigPage() {
               </div>
             </button>
 
+                        {/* Modo KiloCode */}
+            <button 
+              onClick={() => setTheme('kiloCode')}
+              className={lex items-center p-4 rounded-xl border text-left transition-all }
+            >
+              <div className={p-3 rounded-full mr-4 }>
+                <Zap className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold font-syne text-lg">KiloCode</h3>
+                <p className="text-sm text-text-secondary mt-1">Estilo developer dark mode con acento amarillo y glows sutiles.</p>
+              </div>
+            </button>
+
             {/* Modo Cyberpunk */}
             <button 
               onClick={() => setTheme('cyberpunk')}
@@ -105,4 +119,5 @@ export default function ConfigPage() {
     </main>
   );
 }
+
 
