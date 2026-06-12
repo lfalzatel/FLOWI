@@ -89,10 +89,10 @@ export function ProfileCapsule() {
       {/* ── Capsule button ── */}
       <button
         onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-accent/10 border border-accent/40 hover:bg-accent/20 hover:border-accent' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
+        className={`flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-[var(--accent-glow)] border border-accent hover:bg-accent hover:text-black' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
       >
         {/* Avatar */}
-        <div className={`relative w-7 h-7 overflow-hidden ring-2 ring-offset-1 ring-offset-transparent ${isTechTheme ? 'rounded-none ring-accent/60' : 'rounded-full ring-accent/40'}`}>
+        <div className={`relative w-7 h-7 overflow-hidden ring-1 ring-offset-1 ring-offset-transparent ${isTechTheme ? 'rounded-none ring-accent' : 'rounded-full ring-transparent group-hover:ring-[var(--accent-glow)]'}`}>
           <Image
             src={photoURL}
             alt={displayName}
@@ -106,7 +106,7 @@ export function ProfileCapsule() {
           <span className={`text-[11px] font-semibold leading-none ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : 'text-text-primary'}`}>
             {displayName.split(' ')[0]}
           </span>
-          <span className={`text-[9px] font-medium leading-none tracking-wide uppercase ${isTechTheme ? 'font-mono text-accent/70' : 'text-accent'}`}>
+          <span className={`text-[9px] font-medium leading-none tracking-wide uppercase ${isTechTheme ? 'font-mono text-accent opacity-70' : 'text-accent'}`}>
             {role}
           </span>
         </div>
@@ -137,15 +137,14 @@ export function ProfileCapsule() {
                           max-h-[calc(100vh-120px)] scrollbar-hide"
                style={{ width: '272px' }}>
 
-          {/* Profile header */}
-          <div className="px-4 py-4 flex items-center gap-3 border-b border-glass-border bg-gradient-to-r from-accent/5 to-transparent">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden ring-2 ring-accent/30 flex-shrink-0">
+          <div className="px-4 py-4 flex items-center gap-3 border-b border-glass-border bg-gradient-to-r from-[var(--accent-glow)] to-transparent">
+            <div className="relative w-11 h-11 rounded-full overflow-hidden ring-2 ring-accent flex-shrink-0">
               <Image src={photoURL} alt={displayName} fill className="object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-text-primary truncate">{displayName}</p>
               <p className="text-xs text-text-secondary truncate">{email}</p>
-              <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-accent/15 text-accent font-semibold tracking-wide uppercase">
+              <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-[var(--accent-glow)] border border-accent text-accent font-semibold tracking-wide uppercase">
                 {role}
               </span>
             </div>
