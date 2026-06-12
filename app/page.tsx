@@ -25,8 +25,16 @@ export default function DashboardPage() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [splashDuration, setSplashDuration] = useState(1500);
-  const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
+  const [splashMode, setSplashMode] = useState<'login' | 'reload'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('login') === 'true' || params.get('newuser') === 'true') {
+        return 'login';
+      }
+    }
+    return 'reload';
+  });
+  const [splashDuration, setSplashDuration] = useState(() => splashMode === 'login' ? 2500 : 1000);
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
   const router = useRouter();
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
@@ -36,25 +44,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
-    const params = new URLSearchParams(window.location.search);
-    const hasLoaded = sessionStorage.getItem('appHasLoaded');
-    
-    if (params.get('login') === 'true' || params.get('newuser') === 'true') {
-      setSplashDuration(2500);
-      setSplashMode('login');
-      setShowSplash(true);
+    if (splashMode === 'login') {
+      const params = new URLSearchParams(window.location.search);
       if (params.get('newuser') === 'true') {
         setShowNewUserMsg(true);
       }
       window.history.replaceState({}, '', '/');
-    } else {
-      setSplashDuration(1000);
-      setSplashMode('reload');
-      setShowSplash(true);
     }
-    
     sessionStorage.setItem('appHasLoaded', 'true');
-  }, []);
+  }, [splashMode]);
  
   useEffect(() => {
     if (!authLoading && !user) {
