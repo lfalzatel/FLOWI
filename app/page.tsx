@@ -14,6 +14,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { getISOWeekString } from '@/lib/dateUtils';
+import { DateFilter } from '@/components/dashboard/DateFilter';
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -138,62 +139,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Filter */}
-        <div className="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-2xl">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFilterType('all')}
-              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                filterType === 'all' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
-              }`}
-            >
-              Todo
-            </button>
-            <button
-              onClick={() => {
-                setFilterType('month');
-                setFilterValue(new Date().toISOString().split('T')[0].substring(0, 7));
-              }}
-              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                filterType === 'month' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
-              }`}
-            >
-              Mes
-            </button>
-            <button
-              onClick={() => {
-                setFilterType('week');
-                setFilterValue(getISOWeekString(new Date()));
-              }}
-              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                filterType === 'week' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
-              }`}
-            >
-              Semana
-            </button>
-            <button
-              onClick={() => {
-                setFilterType('day');
-                setFilterValue(new Date().toISOString().split('T')[0]);
-              }}
-              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                filterType === 'day' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
-              }`}
-            >
-              Día
-            </button>
-          </div>
-          
-          <div className="flex-1">
-            {filterType !== 'all' && (
-              <input
-                type={filterType === 'month' ? 'month' : filterType === 'week' ? 'week' : 'date'}
-                value={filterValue}
-                onChange={(e) => setFilterValue(e.target.value)}
-                className="w-full bg-transparent text-white text-sm focus:outline-none border-none text-right"
-              />
-            )}
-          </div>
-        </div>
+        <DateFilter 
+          filterType={filterType} 
+          filterValue={filterValue} 
+          onChangeType={setFilterType} 
+          onChangeValue={setFilterValue} 
+        />
 
         {/* Balance */}
         {loading ? (
