@@ -111,13 +111,21 @@ export function ProfileCapsule() {
 
       {/* 🚀 Dropdown 🚀 */}
       {open && (
-        <div className="absolute right-0 top-full mt-2.5 w-68
-                        bg-deep
-                        border border-glass-border rounded-2xl
-                        shadow-2xl shadow-black/10
-                        animate-slide-down origin-top-right
-                        overflow-hidden z-50"
-             style={{ width: '272px' }}>
+        <>
+          {/* Fondo oscuro overlay */}
+          <div 
+            className="fixed inset-0 bg-black/60 z-40" 
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="absolute right-0 top-full mt-2.5 w-68
+                          bg-deep
+                          border border-glass-border rounded-2xl
+                          shadow-2xl shadow-black/10
+                          animate-slide-down origin-top-right
+                          overflow-y-auto z-50
+                          max-h-[95vh] scrollbar-hide"
+               style={{ width: '272px' }}>
 
           {/* Profile header */}
           <div className="px-4 py-4 flex items-center gap-3 border-b border-glass-border
@@ -247,6 +255,7 @@ export function ProfileCapsule() {
             </button>
           </div>
         </div>
+        </>
       )}
     </div>
       {isProfileModalOpen && (
