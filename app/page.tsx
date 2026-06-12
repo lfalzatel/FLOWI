@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,16 +25,8 @@ export default function DashboardPage() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [splashMode, setSplashMode] = useState<'login' | 'reload'>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('login') === 'true' || params.get('newuser') === 'true') {
-        return 'login';
-      }
-    }
-    return 'reload';
-  });
-  const [splashDuration, setSplashDuration] = useState(() => splashMode === 'login' ? 2500 : 1000);
+  const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
+  const [splashDuration, setSplashDuration] = useState(1000);
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
   const router = useRouter();
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
@@ -42,21 +34,38 @@ export default function DashboardPage() {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
+  const processedUrl = useRef(false);
+
   useEffect(() => {
     setMounted(true);
-    if (splashMode === 'login') {
-      const params = new URLSearchParams(window.location.search);
+    if (processedUrl.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const isLogin = params.get('login') === 'true' || params.get('newuser') === 'true';
+
+    if (isLogin) {
+      processedUrl.current = true;
+      setSplashDuration(2500);
+      setSplashMode('login');
       if (params.get('newuser') === 'true') {
         setShowNewUserMsg(true);
       }
       window.history.replaceState({}, '', '/');
+    } else {
+      setSplashDuration(1000);
+      setSplashMode('reload');
     }
     sessionStorage.setItem('appHasLoaded', 'true');
-  }, [splashMode]);
+  }, []);
  
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      if (sessionStorage.getItem('justLoggedOut') === 'true') {
+        sessionStorage.removeItem('justLoggedOut');
+        router.push('/login?logout=true');
+      } else {
+        router.push('/login');
+      }
     }
   }, [user, authLoading, router]);
 

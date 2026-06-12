@@ -28,7 +28,12 @@ export default function GastosPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      if (sessionStorage.getItem('justLoggedOut') === 'true') {
+        sessionStorage.removeItem('justLoggedOut');
+        router.push('/login?logout=true');
+      } else {
+        router.push('/login');
+      }
     }
   }, [user, authLoading, router]);
 

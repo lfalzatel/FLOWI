@@ -21,6 +21,6 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
+  sessionStorage.setItem('justLoggedOut', 'true');
   await firebaseSignOut(auth);
-  window.location.href = '/login?logout=true';
 }
