@@ -4,18 +4,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ProfileModal } from '@/components/forms/ProfileModal';
+import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
-  BarChart2, Shield, Share2
+  BarChart2, Shield, Share2, List
 } from 'lucide-react';
 
 const menuItems = [
   { icon: User,     label: 'Mi Perfil',      href: '/ajustes',         divider: false },
   { icon: CreditCard, label: 'Presupuesto',  href: '/presupuesto',     divider: false },
   { icon: BarChart2,  label: 'Reportes',     href: '/reportes',        divider: false },
+  { icon: List,       label: 'Editar Categorías', href: '#',           divider: true  },
   { icon: Share2,     label: 'Compartir App',  href: '#',                divider: true  },
   { icon: Bell,       label: 'Notificaciones', href: '/ajustes',       divider: true  },
   { icon: Settings,   label: 'Configuración', href: '/ajustes',        divider: false },
@@ -27,6 +29,7 @@ export function ProfileCapsule() {
   const { user, profile } = useAuth();
   const [open, setOpen]   = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const ref               = useRef<HTMLDivElement>(null);
   const router            = useRouter();
 
@@ -140,6 +143,10 @@ export function ProfileCapsule() {
                     e.preventDefault();
                     setOpen(false);
                     setIsProfileModalOpen(true);
+                  } else if (label === 'Editar Categorías') {
+                    e.preventDefault();
+                    setOpen(false);
+                    setIsCategoriesModalOpen(true);
                   } else if (label === 'Compartir App') {
                     e.preventDefault();
                     setOpen(false);
@@ -183,6 +190,9 @@ export function ProfileCapsule() {
     </div>
       {isProfileModalOpen && (
         <ProfileModal onClose={() => setIsProfileModalOpen(false)} />
+      )}
+      {isCategoriesModalOpen && (
+        <ManageCategoriesModal onClose={() => setIsCategoriesModalOpen(false)} />
       )}
     </>
   );

@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useExpenses } from '@/hooks/useExpenses';
-import { addExpense, updateExpense, deleteExpense, addDebt, EXPENSE_CATEGORIES, INCOME_CATEGORIES, Transaction } from '@/lib/firestore';
+import { useCategories } from '@/hooks/useCategories';
+import { addExpense, updateExpense, deleteExpense, addDebt, Transaction } from '@/lib/firestore';
+import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -13,28 +14,20 @@ interface AddExpenseModalProps {
 
 export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddExpenseModalProps) {
   const { user } = useAuth();
+  const { allCategories } = useCategories();
+  
   const [type, setType] = useState<'gasto' | 'ingreso'>('gasto');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [customCategory, setCustomCategory] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
- 
-  const categories = type === 'gasto' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
-  const { transactions } = useExpenses(type);
-  
-  const customCategories = Array.from(new Set(transactions.map(t => t.category)))
-    .filter(cat => cat && !categories.some(c => c.label === cat));
+  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
 
-  const filteredCategories = categories.filter(cat => 
+  const filteredCategories = allCategories.filter(cat => 
     cat.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const filteredCustomCategories = customCategories.filter(cat => 
-    cat.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   useEffect(() => {
@@ -42,26 +35,18 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
       setType(transactionToEdit.type);
       setAmount(transactionToEdit.amount.toString());
       setDescription(transactionToEdit.description || '');
-      
-      const isPredefined = categories.some(cat => cat.label === transactionToEdit.category);
-      if (isPredefined) {
-        setCategory(transactionToEdit.category);
-      } else {
-        setCategory('custom');
-        setCustomCategory(transactionToEdit.category);
-      }
+      setCategory(transactionToEdit.category);
       
       if (transactionToEdit.date) {
         const d = transactionToEdit.date instanceof Date ? transactionToEdit.date : new Date();
         setDate(d.toISOString().split('T')[0]);
       }
     }
-  }, [transactionToEdit, categories]);
+  }, [transactionToEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalCategory = category === 'custom' ? customCategory : category;
-    if (!user || !amount || !finalCategory) return;
+    if (!user || !amount || !category) return;
 
     setLoading(true);
     try {
@@ -70,7 +55,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
         type,
         amount: parseFloat(amount),
         description,
-        category: finalCategory,
+        category,
         date: new Date(date + 'T12:00:00'), // Evitar problemas de zona horaria
       };
 
@@ -104,16 +89,16 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
       setLoading(false);
     }
   };
+
   const handleConvertToDebt = async () => {
     if (!transactionToEdit?.id || !user) return;
     if (!window.confirm('¿Estás seguro de que quieres convertir este gasto en una deuda?')) return;
 
     setLoading(true);
     try {
-      const finalCategory = category === 'custom' ? customCategory : category;
       await addDebt({
         userId: user.uid,
-        title: `${finalCategory} - ${description || 'Deuda'}`,
+        title: `${category} - ${description || 'Deuda'}`,
         totalAmount: parseFloat(amount),
         paidAmount: 0,
         status: 'pending',
@@ -127,7 +112,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
       setLoading(false);
     }
   };
+
   return (
+    <>
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
       <div className="bg-[#0A0A0F] border border-white/10 p-6 rounded-t-3xl sm:rounded-3xl w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white">
@@ -171,7 +158,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                 value={amount}
                 onChange={(e) => {
                   const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
-                  if (val.split('.').length > 2) return; // evitar múltiples puntos
+                  if (val.split('.').length > 2) return;
                   setAmount(val);
                 }}
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-8 pr-4 text-white placeholder-white/20 focus:outline-none focus:border-accent"
@@ -188,7 +175,18 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent text-left flex justify-between items-center"
             >
-              <span>{category || 'Selecciona una categoría'}</span>
+              <div className="flex items-center gap-2">
+                {category ? (
+                  <>
+                    <span className="text-xl">
+                      {allCategories.find(c => c.label === category)?.icon || '📝'}
+                    </span>
+                    <span>{category}</span>
+                  </>
+                ) : (
+                  <span>Selecciona una categoría</span>
+                )}
+              </div>
               <ChevronDown className="w-4 h-4 text-white/40" />
             </button>
 
@@ -210,46 +208,27 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                       className="w-full text-left py-2 px-3 hover:bg-white/5 rounded-lg text-white text-sm flex items-center gap-2"
                     >
                       <span>{cat.icon}</span>
-                      <span>{cat.label}</span>
+                      <span className="flex-1">{cat.label}</span>
+                      {cat.isCustom && <span className="text-[10px] text-accent/50 border border-accent/20 px-1.5 py-0.5 rounded uppercase">Pers.</span>}
                     </button>
                   ))}
-                  {filteredCustomCategories.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => { setCategory(cat); setIsDropdownOpen(false); setSearchQuery(''); }}
-                      className="w-full text-left py-2 px-3 hover:bg-white/5 rounded-lg text-white text-sm flex items-center gap-2"
-                    >
-                      <span>🏷️</span>
-                      <span>{cat}</span>
-                    </button>
-                  ))}
+                  
                   <button
                     type="button"
-                    onClick={() => { setCategory('custom'); setIsDropdownOpen(false); setSearchQuery(''); }}
-                    className="w-full text-left py-2 px-3 hover:bg-white/5 rounded-lg text-white text-sm text-accent"
+                    onClick={() => { 
+                      setIsDropdownOpen(false); 
+                      setSearchQuery('');
+                      setIsManageCategoriesOpen(true);
+                    }}
+                    className="w-full text-left py-3 px-3 hover:bg-white/5 rounded-lg text-sm text-accent font-semibold flex items-center gap-2 mt-2 border-t border-white/5"
                   >
-                    ➕ Nueva categoría...
+                    <span>+</span>
+                    <span>Nueva categoría...</span>
                   </button>
                 </div>
               </div>
             )}
           </div>
-
-          {/* Custom Category Input */}
-          {category === 'custom' && (
-            <div>
-              <label className="text-white/40 text-xs font-medium mb-1.5 block">Nombre de la Categoría</label>
-              <input
-                type="text"
-                placeholder="Ej. Gimnasio"
-                value={customCategory}
-                onChange={(e) => setCustomCategory(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent"
-                required
-              />
-            </div>
-          )}
 
           {/* Date */}
           <div>
@@ -258,7 +237,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent"
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent [color-scheme:dark]"
               required
             />
           </div>
@@ -268,47 +247,54 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
             <label className="text-white/40 text-xs font-medium mb-1.5 block">Descripción (Opcional)</label>
             <input
               type="text"
-              placeholder="Ej. Almuerzo con amigos"
+              placeholder="Ej. Cena con amigos"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent"
             />
           </div>
 
-          {/* Submit Button */}
-          <div className="space-y-3">
+          {/* Submit */}
+          <div className="pt-2">
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-accent text-black font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+              disabled={loading || !amount || !category}
+              className="w-full py-4 rounded-xl font-bold bg-accent text-black hover:bg-accent/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
             >
-              {loading ? 'Guardando...' : (transactionToEdit ? 'Guardar Cambios' : 'Guardar Transacción')}
+              {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : 'Añadir Transacción'}
             </button>
-
-            {transactionToEdit && type === 'gasto' && (
-              <button
-                type="button"
-                onClick={handleConvertToDebt}
-                disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-orange-500/10 text-orange-500 font-semibold hover:bg-orange-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
-              >
-                {loading ? 'Procesando...' : 'Convertir en Deuda'}
-              </button>
-            )}
-
-            {transactionToEdit && (
+          </div>
+          
+          {transactionToEdit && (
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-red-500/10 text-red-500 font-semibold hover:bg-red-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+                className="flex-1 py-3 rounded-xl font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
               >
-                {loading ? 'Eliminando...' : 'Eliminar Transacción'}
+                Eliminar
               </button>
-            )}
-          </div>
+              
+              {type === 'gasto' && (
+                <button
+                  type="button"
+                  onClick={handleConvertToDebt}
+                  disabled={loading}
+                  className="flex-1 py-3 rounded-xl font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  Pasar a Deuda
+                </button>
+              )}
+            </div>
+          )}
         </form>
       </div>
     </div>
+    
+    {isManageCategoriesOpen && (
+      <ManageCategoriesModal onClose={() => setIsManageCategoriesOpen(false)} />
+    )}
+    </>
   );
 }

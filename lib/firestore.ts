@@ -11,20 +11,41 @@ export interface Transaction {
   userId?: string;
 }
 
-export const EXPENSE_CATEGORIES = [
+export interface CustomCategory {
+  id?: string;
+  label: string;
+  icon: string;
+  color: string;
+  userId: string;
+}
+
+export const BASE_CATEGORIES = [
+  // Originales
   { label: 'Comida', icon: '🍔', color: '#FF5B5B' },
-  { label: 'Transporte', icon: '🚗', color: '#F5A623' },
+  { label: 'Transporte', icon: '🚌', color: '#F5A623' },
   { label: 'Entretenimiento', icon: '🎮', color: '#A855F7' },
   { label: 'Hogar', icon: '🏠', color: '#00E5A0' },
-  { label: 'Otros', icon: '💡', color: '#6B7280' },
-];
-
-export const INCOME_CATEGORIES = [
   { label: 'Sueldo', icon: '💰', color: '#00E5A0' },
   { label: 'Inversiones', icon: '📈', color: '#3B82F6' },
   { label: 'Regalos', icon: '🎁', color: '#EC4899' },
-  { label: 'Otros', icon: '💡', color: '#6B7280' },
+  // Nuevas pedidas por el usuario
+  { label: 'Claro Hogar', icon: '🌐', color: '#E11D48' },
+  { label: 'Claro Móvil', icon: '📱', color: '#E11D48' },
+  { label: 'Netflix', icon: '🍿', color: '#E50914' },
+  { label: 'Agua', icon: '💧', color: '#3B82F6' },
+  { label: 'Luz', icon: '💡', color: '#F5A623' },
+  { label: 'EPM', icon: '🏢', color: '#10B981' },
+  { label: 'Administración', icon: '🔑', color: '#8B5CF6' },
+  { label: 'Alcanos', icon: '⛽', color: '#F97316' },
+  { label: 'Gas natural', icon: '🔥', color: '#EF4444' },
+  { label: 'BBVA', icon: '🏦', color: '#1D4ED8' },
+  { label: 'Bancolombia', icon: '🏦', color: '#FBBF24' },
+  { label: 'Nequi', icon: '💳', color: '#D946EF' },
+  { label: 'Otros', icon: '📦', color: '#6B7280' },
 ];
+
+export const EXPENSE_CATEGORIES = BASE_CATEGORIES;
+export const INCOME_CATEGORIES = BASE_CATEGORIES;
 
 export async function getUserTransactions(userId: string, type?: 'gasto' | 'ingreso') {
   const expensesRef = collection(db, 'expenses');
@@ -127,4 +148,26 @@ export async function deleteDebt(id: string) {
 export async function updateUserProfile(userId: string, data: any) {
   const docRef = doc(db, 'users', userId);
   await setDoc(docRef, data, { merge: true });
+}
+export async function getCustomCategories(userId: string) {
+  const categoriesRef = collection(db, 'customCategories');
+  const q = query(categoriesRef, where('userId', '==', userId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as CustomCategory[];
+}
+
+export async function addCustomCategory(category: Omit<CustomCategory, 'id'>) {
+  const categoriesRef = collection(db, 'customCategories');
+  const docRef = await addDoc(categoriesRef, category);
+  return docRef.id;
+}
+
+export async function updateCustomCategory(id: string, category: Partial<CustomCategory>) {
+  const docRef = doc(db, 'customCategories', id);
+  await updateDoc(docRef, category);
+}
+
+export async function deleteCustomCategory(id: string) {
+  const docRef = doc(db, 'customCategories', id);
+  await deleteDoc(docRef);
 }
