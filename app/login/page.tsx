@@ -25,7 +25,18 @@ export default function LoginPage() {
     try {
       const credential = await signInWithPopup(auth, googleProvider);
       const additionalInfo = getAdditionalUserInfo(credential);
+      
       if (additionalInfo?.isNewUser) {
+        // Creamos el perfil si no existe
+        const { doc, setDoc } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        await setDoc(doc(db, 'users', credential.user.uid), {
+          name: credential.user.displayName || 'Usuario',
+          email: credential.user.email || '',
+          photoURL: credential.user.photoURL || '',
+          role: 'user'
+        }, { merge: true });
+        
         router.push('/?newuser=true');
       } else {
         router.push('/?login=true');

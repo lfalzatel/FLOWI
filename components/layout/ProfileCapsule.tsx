@@ -134,14 +134,14 @@ export function ProfileCapsule() {
                           max-h-[calc(100vh-120px)] scrollbar-hide"
                style={{ width: '272px' }}>
 
-          <div className="px-4 py-4 flex items-center gap-3 border-b border-glass-border bg-gradient-to-r from-[var(--accent-glow)] to-transparent">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden ring-2 ring-accent flex-shrink-0">
+          <div className={`px-4 py-4 flex items-center gap-3 border-b border-glass-border ${isTechTheme ? 'bg-black' : 'bg-gradient-to-r from-[var(--accent-glow)] to-transparent'}`}>
+            <div className={`relative w-11 h-11 overflow-hidden ring-2 ring-accent flex-shrink-0 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
               <Image src={photoURL} alt={displayName} fill className="object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-text-primary truncate">{displayName}</p>
-              <p className="text-xs text-text-secondary truncate">{email}</p>
-              <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-[var(--accent-glow)] border border-accent text-accent font-semibold tracking-wide uppercase">
+              <p className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : 'text-text-primary'}`}>{displayName}</p>
+              <p className={`text-xs truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-secondary'}`}>{email}</p>
+              <span className={`inline-block mt-1 text-[9px] px-2 py-0.5 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-[var(--accent-glow)] border border-accent text-accent'}`}>
                 {role}
               </span>
             </div>

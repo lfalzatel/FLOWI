@@ -10,35 +10,7 @@ interface Props {
   totalDeudas:   number;
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
-}
-
-function AnimatedNumber({ value, delay = 0 }: { value: number, delay?: number }) {
-  const [displayValue, setDisplayValue] = useState(0);
-
-  useEffect(() => {
-    let startTimestamp: number | null = null;
-    const duration = 1000; // 1 segundo
-    
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      setDisplayValue(Math.floor(progress * value));
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-
-    const timeoutId = setTimeout(() => {
-      window.requestAnimationFrame(step);
-    }, delay * 1000);
-
-    return () => clearTimeout(timeoutId);
-  }, [value, delay]);
-
-  return <span>{fmt(displayValue)}</span>;
-}
+import { AnimatedNumber } from './AnimatedNumber';
 
 export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }: Props) {
   const { theme } = useTheme();

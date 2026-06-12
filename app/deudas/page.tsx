@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { CreditCard, Plus, Check, Clock } from 'lucide-react';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { useTheme } from '@/components/ThemeProvider';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 
 export default function DeudasPage() {
   const { theme } = useTheme();
@@ -40,7 +41,7 @@ export default function DeudasPage() {
     <div className="min-h-screen flex flex-col bg-deep">
       <Header />
       
-      <main className="flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-24">
+      <main className="flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
         {/* Header section */}
         <div className="flex items-center justify-between">
           <div>
@@ -70,7 +71,7 @@ export default function DeudasPage() {
             </div>
 
             <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-orange-400 tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-orange-400'}`}>
-              {fmt(totalDeudas)}
+              <AnimatedNumber value={totalDeudas} prefix="$" />
             </p>
             <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>Suma de todas tus deudas activas</p>
           </div>

@@ -12,6 +12,7 @@ import { TrendingUp, Plus } from 'lucide-react';
 import { getISOWeekString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 
 export default function IngresosPage() {
   const { user, loading: authLoading } = useAuth();
@@ -62,7 +63,7 @@ export default function IngresosPage() {
     <div className="min-h-screen bg-deep flex flex-col">
       <Header />
       
-      <main className="flex-1 p-4 pb-24 max-w-2xl mx-auto w-full">
+      <main className="flex-1 p-4 pb-24 max-w-2xl mx-auto w-full animate-fade-in-up stagger">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>Mis Ingresos</h1>
@@ -104,7 +105,7 @@ export default function IngresosPage() {
             </div>
 
             <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-accent'}`}>
-              ${filteredTransactions.reduce((sum, e) => sum + e.amount, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+              <AnimatedNumber value={filteredTransactions.reduce((sum, e) => sum + e.amount, 0)} prefix="$" />
             </p>
             <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
           </div>
