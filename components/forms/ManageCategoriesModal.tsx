@@ -138,8 +138,14 @@ export function ManageCategoriesModal({ onClose }: Props) {
                       <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
                         {cat.icon}
                       </div>
-                      <span className={`font-medium break-words ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
-                      {!cat.isCustom && <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/70 border border-accent/30' : 'bg-white/10 text-white/50 rounded'}`}>Defecto</span>}
+                      <div className="flex flex-col flex-1 min-w-0 justify-center">
+                        <span className={`font-medium break-words whitespace-normal leading-tight ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
+                        {!cat.isCustom && (
+                          <span className={`w-max mt-1.5 text-[9px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/70 border border-accent/30' : 'bg-white/10 text-white/50 rounded'}`}>
+                            Defecto
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0 ml-2">
                       <button onClick={() => handleEdit(cat)} className={`p-2 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
