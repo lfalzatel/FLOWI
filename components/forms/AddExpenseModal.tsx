@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useTheme } from '@/components/ThemeProvider';
 import { X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
@@ -25,6 +27,16 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
+
+  const { theme } = useTheme();
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const filteredCategories = allCategories.filter(cat => 
     cat.label.toLowerCase().includes(searchQuery.toLowerCase())
@@ -113,25 +125,31 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
     }
   };
 
+  if (typeof document === 'undefined') return null;
+
   return (
     <>
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-4">
-      <div className="bg-[#0A0A0F] border border-white/10 p-6 rounded-t-3xl sm:rounded-3xl w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto">
-        <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white">
-          <X className="w-5 h-5" />
-        </button>
+      {createPortal(
+        <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`} onClick={onClose}>
+          <div 
+            className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-t-3xl sm:rounded-3xl'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-white/50 hover:text-white'}`}>
+              <X className="w-5 h-5" />
+            </button>
         
-        <h2 className="font-syne font-bold text-xl text-white mb-6">
+        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-white mb-6'}`}>
           {transactionToEdit ? 'Editar Transacción' : 'Nueva Transacción'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Type Toggle */}
-          <div className="flex bg-white/5 p-1 rounded-xl">
+          <div className={`flex p-1 ${isTechTheme ? 'bg-black/40 border border-accent/20 rounded-none' : 'bg-white/5 rounded-xl'}`}>
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('gasto'); setCategory(''); } }}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type === 'gasto' ? 'bg-accent text-black' : 'text-white/60'} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-semibold transition-all ${isTechTheme ? 'rounded-none border border-transparent' : 'rounded-lg'} ${type === 'gasto' ? (isTechTheme ? 'bg-accent/20 text-accent border-accent/50' : 'bg-accent text-black') : (isTechTheme ? 'text-accent/40 hover:text-accent/60' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Gasto
@@ -139,7 +157,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('ingreso'); setCategory(''); } }}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${type === 'ingreso' ? 'bg-accent text-black' : 'text-white/60'} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-semibold transition-all ${isTechTheme ? 'rounded-none border border-transparent' : 'rounded-lg'} ${type === 'ingreso' ? (isTechTheme ? 'bg-accent/20 text-accent border-accent/50' : 'bg-accent text-black') : (isTechTheme ? 'text-accent/40 hover:text-accent/60' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Ingreso
@@ -148,9 +166,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
 
           {/* Amount */}
           <div>
-            <label className="text-white/40 text-xs font-medium mb-1.5 block">Monto</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-medium">$</span>
+              <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-medium ${isTechTheme ? 'text-accent/70' : 'text-white/40'}`}>$</span>
               <input
                 type="text"
                 inputMode="decimal"
@@ -161,7 +179,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                   if (val.split('.').length > 2) return;
                   setAmount(val);
                 }}
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-8 pr-4 text-white placeholder-white/20 focus:outline-none focus:border-accent"
+                className={`w-full bg-white/5 border py-3 pl-8 pr-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent'}`}
                 required
               />
             </div>
@@ -169,11 +187,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
 
           {/* Category */}
           <div className="relative">
-            <label className="text-white/40 text-xs font-medium mb-1.5 block">Categoría</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Categoría</label>
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent text-left flex justify-between items-center"
+              className={`w-full bg-white/5 border py-3 px-4 focus:outline-none text-left flex justify-between items-center ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent text-accent' : 'border-white/10 rounded-xl focus:border-accent text-white'}`}
             >
               <div className="flex items-center gap-2">
                 {category ? (
@@ -184,20 +202,20 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                     <span>{category}</span>
                   </>
                 ) : (
-                  <span>Selecciona una categoría</span>
+                  <span className={isTechTheme ? 'text-accent/50' : 'text-white/50'}>Selecciona una categoría</span>
                 )}
               </div>
-              <ChevronDown className="w-4 h-4 text-white/40" />
+              <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent/70' : 'text-white/40'}`} />
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute z-20 top-full mt-2 w-full bg-[#0A0A0F] border border-white/10 rounded-xl shadow-2xl p-2 max-h-60 overflow-y-auto">
+              <div className={`absolute z-20 top-full mt-2 w-full border shadow-2xl p-2 max-h-60 overflow-y-auto ${isTechTheme ? 'bg-deep border-accent/50 rounded-none' : 'bg-[#0A0A0F] border-white/10 rounded-xl'}`}>
                 <input
                   type="text"
                   placeholder="Buscar categoría..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-white placeholder-white/20 focus:outline-none focus:border-accent mb-2"
+                  className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none mb-2 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-lg focus:border-accent'}`}
                 />
                 <div className="space-y-1">
                   {filteredCategories.map((cat) => (
@@ -205,11 +223,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                       key={cat.label}
                       type="button"
                       onClick={() => { setCategory(cat.label); setIsDropdownOpen(false); setSearchQuery(''); }}
-                      className="w-full text-left py-2 px-3 hover:bg-white/5 rounded-lg text-white text-sm flex items-center gap-2"
+                      className={`w-full text-left py-2 px-3 hover:bg-white/5 text-sm flex items-center gap-2 ${isTechTheme ? 'rounded-none text-accent' : 'rounded-lg text-white'}`}
                     >
                       <span>{cat.icon}</span>
-                      <span className="flex-1">{cat.label}</span>
-                      {cat.isCustom && <span className="text-[10px] text-accent/50 border border-accent/20 px-1.5 py-0.5 rounded uppercase">Pers.</span>}
+                      <span className="flex-1 truncate">{cat.label}</span>
+                      {cat.isCustom && <span className={`text-[10px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/50 border border-accent/30' : 'text-accent/50 border border-accent/20 rounded'}`}>Pers.</span>}
                     </button>
                   ))}
                   
@@ -220,7 +238,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                       setSearchQuery('');
                       setIsManageCategoriesOpen(true);
                     }}
-                    className="w-full text-left py-3 px-3 hover:bg-white/5 rounded-lg text-sm text-accent font-semibold flex items-center gap-2 mt-2 border-t border-white/5"
+                    className={`w-full text-left py-3 px-3 hover:bg-white/5 text-sm font-semibold flex items-center gap-2 mt-2 border-t ${isTechTheme ? 'rounded-none text-accent border-accent/20' : 'rounded-lg text-accent border-white/5'}`}
                   >
                     <span>+</span>
                     <span>Nueva categoría...</span>
@@ -232,25 +250,25 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
 
           {/* Date */}
           <div>
-            <label className="text-white/40 text-xs font-medium mb-1.5 block">Fecha</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Fecha</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-accent [color-scheme:dark]"
+              className={`w-full bg-white/5 border py-3 px-4 text-white focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-white/10 rounded-xl focus:border-accent'}`}
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="text-white/40 text-xs font-medium mb-1.5 block">Descripción (Opcional)</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
             <input
               type="text"
               placeholder="Ej. Cena con amigos"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent"
+              className={`w-full bg-white/5 border py-3 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent'}`}
             />
           </div>
 
@@ -259,7 +277,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
             <button
               type="submit"
               disabled={loading || !amount || !category}
-              className="w-full py-4 rounded-xl font-bold bg-accent text-black hover:bg-accent/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+              className={`w-full py-4 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : 'rounded-xl bg-accent text-black hover:bg-accent/90'}`}
             >
               {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : 'Añadir Transacción'}
             </button>
@@ -271,7 +289,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="flex-1 py-3 rounded-xl font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
+                className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}
               >
                 Eliminar
               </button>
@@ -281,20 +299,22 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
                   type="button"
                   onClick={handleConvertToDebt}
                   disabled={loading}
-                  className="flex-1 py-3 rounded-xl font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
+                  className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-blue-500/10 border border-blue-500/50 text-blue-400 hover:bg-blue-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'}`}
                 >
                   Pasar a Deuda
                 </button>
               )}
             </div>
           )}
-        </form>
-      </div>
-    </div>
-    
-    {isManageCategoriesOpen && (
-      <ManageCategoriesModal onClose={() => setIsManageCategoriesOpen(false)} />
-    )}
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+      
+      {isManageCategoriesOpen && (
+        <ManageCategoriesModal onClose={() => setIsManageCategoriesOpen(false)} />
+      )}
     </>
   );
 }
