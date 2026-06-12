@@ -89,8 +89,8 @@ export default function LoginPage() {
           </div>
           
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-text-primary">Bienvenido a Flowi</h1>
-            <p className="text-text-secondary text-sm">Gestiona tus gastos de forma inteligente</p>
+            <h1 className="text-3xl font-bold text-white">Bienvenido a Flowi</h1>
+            <p className="text-white/60 text-sm">Gestiona tus gastos de forma inteligente</p>
           </div>
         </div>
 
@@ -105,7 +105,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 text-center">
-          <p className="text-text-muted text-xs">
+          <p className="text-white/40 text-xs">
             Al continuar, aceptas los términos y condiciones.
           </p>
         </div>
