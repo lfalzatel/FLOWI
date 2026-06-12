@@ -46,6 +46,17 @@ export function ProfileCapsule() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
   if (!user) return null;
  
   const displayName = profile?.name || user.displayName || 'Usuario';
