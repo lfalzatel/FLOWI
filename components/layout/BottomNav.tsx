@@ -80,7 +80,7 @@ function NavItem({ icon: Icon, label, href, active }: any) {
                   rounded-[20px] transition-all duration-200
                   ${active
                     ? 'bg-accent text-black shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]'
-                    : 'text-accent/80 hover:text-accent active:text-black'
+                    : 'text-accent hover:opacity-80 active:text-black'
                   }`}
     >
       <Icon className={`w-[18px] h-[18px] relative z-10 ${active ? 'animate-[micro-bounce_0.4s_infinite_alternate] [animation-delay:0.45s]' : ''}`} />
