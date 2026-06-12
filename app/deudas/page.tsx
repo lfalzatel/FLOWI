@@ -57,11 +57,7 @@ export default function DeudasPage() {
         </div>
 
         {/* Premium Card for Total Debts */}
-        <div className="relative overflow-hidden rounded-3xl p-6 md:p-8"
-             style={{
-               background: 'linear-gradient(135deg, #2E150D 0%, #190A05 100%)',
-               border: '1px solid rgba(249, 115, 22, 0.15)',
-             }}>
+        <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-card border border-orange-500/20 shadow-sm">
           <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-orange-500/10 blur-2xl pointer-events-none" />
           
           <div className="relative z-10">
@@ -161,5 +157,6 @@ export default function DeudasPage() {
     </div>
   );
 }
+
 
 

@@ -75,8 +75,8 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#1A1A2E]/95 border border-white/10 rounded-xl px-3 py-2 shadow-xl">
-      <p className="text-xs text-white/50 mb-1">{label}</p>
+    <div className="bg-card border border-glass-border rounded-xl px-3 py-2 shadow-xl">
+      <p className="text-xs text-text-secondary mb-1">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} className="text-xs font-semibold" style={{ color: p.color }}>
           {p.name === 'gastos' ? 'Gastos' : 'Ingresos'}: ${p.value.toLocaleString('es-MX')}
@@ -108,12 +108,12 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
   return (
     <div className="glass-card p-5 rounded-2xl">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-syne font-bold text-sm text-white">{titleMap[filterType] || 'Resumen'}</h3>
+        <h3 className="font-syne font-bold text-sm text-text-primary">{titleMap[filterType] || 'Resumen'}</h3>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 text-[10px] text-white/40">
+          <span className="flex items-center gap-1 text-[10px] text-text-muted">
             <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Gastos
           </span>
-          <span className="flex items-center gap-1 text-[10px] text-white/40">
+          <span className="flex items-center gap-1 text-[10px] text-text-muted">
             <span className="w-2 h-2 rounded-full bg-accent inline-block" /> Ingresos
           </span>
         </div>
@@ -130,9 +130,9 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
               <stop offset="95%" stopColor="#00E5A0" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="day" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }}
+          <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
                  axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9 }}
+          <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
                  axisLine={false} tickLine={false} />
           <Tooltip content={<CustomTooltip />} />
           <Area type="monotone" dataKey="gastos"   stroke="#FF5B5B" strokeWidth={2}
@@ -144,3 +144,4 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
     </div>
   );
 }
+

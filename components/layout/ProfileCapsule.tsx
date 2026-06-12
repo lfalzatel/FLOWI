@@ -92,7 +92,7 @@ export function ProfileCapsule() {
 
         {/* Name + role */}
         <div className="flex flex-col items-start leading-none gap-0.5 mr-0.5">
-          <span className="text-[11px] font-semibold text-white/90 leading-none">
+          <span className="text-[11px] font-semibold text-text-primary leading-none">
             {displayName.split(' ')[0]}
           </span>
           <span className="text-[9px] text-accent font-medium leading-none tracking-wide uppercase">
