@@ -38,7 +38,7 @@ export default function ConfigPage() {
             
             {/* Modo Oscuro (Original) */}
             <button 
-              onClick={() => setTheme('dark')}
+              onClick={() => { setTheme('dark'); router.back(); }}
               className={`flex items-center p-4 rounded-xl border text-left transition-all ${
                 theme === 'dark' 
                   ? 'border-accent bg-accent/10 shadow-[0_0_15px_rgba(0,229,160,0.1)]' 
@@ -56,7 +56,7 @@ export default function ConfigPage() {
 
             {/* Modo Día */}
             <button 
-              onClick={() => setTheme('light')}
+              onClick={() => { setTheme('light'); router.back(); }}
               className={`flex items-center p-4 rounded-xl border text-left transition-all ${
                 theme === 'light' 
                   ? 'border-accent bg-accent/10 shadow-[0_0_15px_rgba(0,229,160,0.1)]' 
@@ -74,7 +74,7 @@ export default function ConfigPage() {
 
             {/* Modo Glassmorphism */}
             <button 
-              onClick={() => setTheme('glassmorphism')}
+              onClick={() => { setTheme('glassmorphism'); router.back(); }}
               className={`flex items-center p-4 rounded-xl border text-left transition-all ${
                 theme === 'glassmorphism' 
                   ? 'border-accent bg-accent/10 shadow-[0_0_15px_rgba(0,229,160,0.1)]' 
@@ -92,7 +92,7 @@ export default function ConfigPage() {
 
             {/* Modo KiloCode */}
             <button 
-              onClick={() => setTheme('kiloCode')}
+              onClick={() => { setTheme('kiloCode'); router.back(); }}
               className={`flex items-center p-4 rounded-xl border text-left transition-all ${
                 theme === 'kiloCode' 
                   ? 'border-accent bg-accent/10 shadow-[0_0_15px_rgba(250,204,21,0.15)]' 
@@ -110,7 +110,7 @@ export default function ConfigPage() {
 
             {/* Modo Cyberpunk */}
             <button 
-              onClick={() => setTheme('cyberpunk')}
+              onClick={() => { setTheme('cyberpunk'); router.back(); }}
               className={`flex items-center p-4 rounded-xl border text-left transition-all ${
                 theme === 'cyberpunk' 
                   ? 'border-accent bg-accent/10 shadow-[0_0_15px_rgba(0,229,160,0.1)]' 

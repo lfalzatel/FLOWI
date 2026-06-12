@@ -89,15 +89,10 @@ export function ProfileCapsule() {
       {/* ── Capsule button ── */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-2 py-1.5 rounded-full
-                   bg-glass border border-glass-border
-                   hover:bg-glass-hover hover:border-glass-strong
-                   active:scale-[0.97]
-                   transition-all duration-200 group"
+        className={`flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-accent/10 border border-accent/40 hover:bg-accent/20 hover:border-accent' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
       >
         {/* Avatar */}
-        <div className="relative w-7 h-7 rounded-full overflow-hidden
-                        ring-2 ring-accent/40 ring-offset-1 ring-offset-transparent">
+        <div className={`relative w-7 h-7 overflow-hidden ring-2 ring-offset-1 ring-offset-transparent ${isTechTheme ? 'rounded-none ring-accent/60' : 'rounded-full ring-accent/40'}`}>
           <Image
             src={photoURL}
             alt={displayName}
@@ -108,10 +103,10 @@ export function ProfileCapsule() {
 
         {/* Name + role */}
         <div className="flex flex-col items-start leading-none gap-0.5 mr-0.5">
-          <span className="text-[11px] font-semibold text-text-primary leading-none">
+          <span className={`text-[11px] font-semibold leading-none ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : 'text-text-primary'}`}>
             {displayName.split(' ')[0]}
           </span>
-          <span className="text-[9px] text-accent font-medium leading-none tracking-wide uppercase">
+          <span className={`text-[9px] font-medium leading-none tracking-wide uppercase ${isTechTheme ? 'font-mono text-accent/70' : 'text-accent'}`}>
             {role}
           </span>
         </div>
