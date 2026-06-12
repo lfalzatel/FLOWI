@@ -164,7 +164,9 @@ export default function DashboardPage() {
         {/* Recent transactions */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-syne font-semibold text-base text-text-primary">Últimas transacciones</h2>
+            <h2 className="font-syne font-semibold text-base text-text-primary">
+              {filterType === 'all' ? 'Últimas transacciones' : 'Transacciones'}
+            </h2>
             <a href="/gastos" className="text-xs text-accent hover:underline">Ver todo</a>
           </div>
           {loading ? (
@@ -174,7 +176,11 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-             <TransactionList transactions={filteredTransactions} limit={5} onEdit={(tx) => setEditingTransaction(tx)} />
+             <TransactionList 
+                transactions={filteredTransactions} 
+                limit={filterType === 'all' ? 5 : undefined} 
+                onEdit={(tx) => setEditingTransaction(tx)} 
+             />
           )}
         </div>
       </main>

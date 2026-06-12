@@ -46,6 +46,25 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
           ? displayName.toUpperCase().replace(/\s+/g, '_') 
           : displayName;
 
+        if (isCyberpunk) {
+          return (
+            <div key={t.id || i}
+                 onClick={() => onEdit && onEdit(t)}
+                 className={`glass-card flex items-center justify-between p-4 rounded-xl border-y border-r border-glass-border
+                            hover:bg-glass-hover transition-all duration-200
+                            ${onEdit ? 'cursor-pointer' : ''}`}
+                 style={{ borderLeft: `3px solid ${cat.color}` }}>
+              <p className="text-sm font-semibold text-text-primary font-mono truncate">
+                {displayLabel}
+              </p>
+              <p className={`text-sm font-bold flex-shrink-0 font-mono
+                             ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
+                {t.type === 'gasto' ? '-' : '+'}{t.amount}
+              </p>
+            </div>
+          );
+        }
+
         return (
           <div key={t.id || i}
                onClick={() => onEdit && onEdit(t)}
@@ -59,14 +78,14 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
             </div>
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-semibold text-text-primary truncate ${isCyberpunk ? 'font-mono' : ''}`}>
+              <p className="text-sm font-semibold text-text-primary truncate">
                 {displayLabel}
               </p>
               <p className="text-xs text-text-secondary">{t.category} • {fmtDate(t.date as Timestamp)}</p>
             </div>
             {/* Amount */}
             <p className={`text-sm font-bold flex-shrink-0
-                           ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'} ${isCyberpunk ? 'font-mono' : ''}`}>
+                           ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
               {t.type === 'gasto' ? '-' : '+'}{fmt(t.amount)}
             </p>
           </div>
