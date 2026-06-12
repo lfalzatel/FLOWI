@@ -35,6 +35,41 @@ export function ProfileCapsule() {
   const ref               = useRef<HTMLDivElement>(null);
   const router            = useRouter();
 
+  const [knownAccounts, setKnownAccounts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem('knownAccounts');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setKnownAccounts(parsed.filter((acc: any) => acc.uid !== user?.uid));
+        }
+      } catch (e) {}
+    }
+  }, [user]);
+
+  const handleAddAccount = async () => {
+    try {
+      const { signInWithGoogle } = await import('@/lib/auth');
+      const { isNewUser } = await signInWithGoogle(true);
+      window.location.href = isNewUser ? '/?newuser=true' : '/?login=true';
+    } catch (error) {
+      console.error('Error adding account:', error);
+    }
+  };
+
+  const handleSwitchAccount = async (email: string) => {
+    try {
+      const { signInWithGoogle } = await import('@/lib/auth');
+      const { isNewUser } = await signInWithGoogle(false, email);
+      window.location.href = isNewUser ? '/?newuser=true' : '/?login=true';
+    } catch (error) {
+      console.error('Error switching account:', error);
+    }
+  };
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -239,6 +274,48 @@ export function ProfileCapsule() {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Account Switcher */}
+          <div className="p-1.5 border-t border-glass-border">
+            {knownAccounts.length > 0 && (
+              <div className="mb-2">
+                <p className={`px-2 py-1.5 text-[10px] uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>
+                  {isTechTheme ? '>_ OTRAS_CUENTAS' : 'Otras Cuentas'}
+                </p>
+                {knownAccounts.map((acc, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => handleSwitchAccount(acc.email)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-glass transition-colors text-left group"
+                  >
+                    <div className={`relative w-6 h-6 overflow-hidden ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                      {acc.photoURL ? (
+                        <Image src={acc.photoURL} alt={acc.displayName} fill className="object-cover grayscale group-hover:grayscale-0 transition-all" />
+                      ) : (
+                        <div className="w-full h-full bg-glass flex items-center justify-center"><User className="w-3 h-3 text-text-secondary" /></div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs truncate ${isTechTheme ? 'font-mono text-text-primary' : 'text-text-primary font-medium'}`}>{acc.displayName}</p>
+                      <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-secondary'}`}>{acc.email}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            <button
+              onClick={handleAddAccount}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors ${isTechTheme ? 'font-mono uppercase tracking-widest' : ''}`}
+            >
+              <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                <span className="text-lg leading-none">+</span>
+              </div>
+              <span className={`text-sm ${isTechTheme ? 'font-mono tracking-widest uppercase' : ''}`}>
+                {isTechTheme ? '>_ ANADIR_CUENTA' : 'Añadir Cuenta'}
+              </span>
+            </button>
           </div>
 
           {/* Sign out */}

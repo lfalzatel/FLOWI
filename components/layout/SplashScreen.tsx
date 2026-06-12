@@ -88,8 +88,9 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
       </h1>
       
       {/* Dynamic Subtitle / Message */}
-      <p className="mt-2 text-white/60 text-sm font-mono tracking-wider relative z-10 h-5">
-        {`>_ ${currentMessage.toUpperCase()}`}
+      <p className="mt-2 text-white/60 text-sm font-mono tracking-wider relative z-10 h-5 flex items-center justify-center gap-2">
+        <span>{`>_ ${currentMessage.toUpperCase()}`}</span>
+        <span className="text-accent font-bold">[{Math.round(progress)}%]</span>
       </p>
 
       {/* Loading bar */}
