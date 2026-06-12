@@ -25,7 +25,7 @@ export default function DeudasPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0F] text-white flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-deep flex flex-col items-center justify-center">
         <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -34,15 +34,15 @@ export default function DeudasPage() {
   const fmt = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0A0A0F]">
+    <div className="min-h-screen flex flex-col bg-deep">
       <Header />
       
       <main className="flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-24">
         {/* Header section */}
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs font-medium text-white/30 uppercase tracking-wider">Mis Finanzas</span>
-            <h1 className="font-syne font-bold text-3xl text-white">Deudas</h1>
+            <span className="text-xs font-medium text-text-muted uppercase tracking-wider">Mis Finanzas</span>
+            <h1 className="font-syne font-bold text-3xl text-text-primary">Deudas</h1>
           </div>
           <button
             onClick={() => setShowAdd(true)}
@@ -69,19 +69,19 @@ export default function DeudasPage() {
               <div className="w-7 h-7 rounded-xl bg-orange-500/15 flex items-center justify-center">
                 <CreditCard className="w-3.5 h-3.5 text-orange-400" />
               </div>
-              <span className="text-xs font-medium text-white/50">Total Pendiente</span>
+              <span className="text-xs font-medium text-text-secondary">Total Pendiente</span>
             </div>
 
             <p className="font-syne font-bold text-4xl text-orange-400 mb-1 leading-none">
               {fmt(totalDeudas)}
             </p>
-            <p className="text-xs text-white/30">Suma de todas tus deudas activas</p>
+            <p className="text-xs text-text-muted">Suma de todas tus deudas activas</p>
           </div>
         </div>
 
         {/* Debts List */}
         <div className="space-y-3">
-          <h2 className="font-syne font-semibold text-base text-white">Todas las deudas</h2>
+          <h2 className="font-syne font-semibold text-base text-text-primary">Todas las deudas</h2>
           
           {debtsLoading ? (
             <div className="space-y-2">
@@ -90,7 +90,7 @@ export default function DeudasPage() {
               ))}
             </div>
           ) : debts.length === 0 ? (
-            <div className="glass-card rounded-2xl p-6 text-center text-white/30 text-sm">
+            <div className="glass-card rounded-2xl p-6 text-center text-text-muted text-sm">
               No tienes deudas registradas. ¡Buen trabajo!
             </div>
           ) : (
@@ -107,7 +107,7 @@ export default function DeudasPage() {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-white font-medium text-sm">{debt.title}</p>
+                        <p className="text-text-primary font-medium text-sm">{debt.title}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           {debt.status === 'paid' ? (
                             <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium">
@@ -121,8 +121,8 @@ export default function DeudasPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-white font-bold text-sm">{fmt(pending)}</p>
-                        <p className="text-[10px] text-white/30">Total: {fmt(debt.totalAmount)}</p>
+                        <p className="text-text-primary font-bold text-sm">{fmt(pending)}</p>
+                        <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
                       </div>
                     </div>
                     
@@ -134,8 +134,8 @@ export default function DeudasPage() {
                       />
                     </div>
                     <div className="flex justify-between mt-1">
-                      <span className="text-[9px] text-white/30">Pagado: {fmt(debt.paidAmount)}</span>
-                      <span className="text-[9px] text-white/30">{Math.round(progress)}%</span>
+                      <span className="text-[9px] text-text-muted">Pagado: {fmt(debt.paidAmount)}</span>
+                      <span className="text-[9px] text-text-muted">{Math.round(progress)}%</span>
                     </div>
                   </div>
                 );
@@ -161,3 +161,5 @@ export default function DeudasPage() {
     </div>
   );
 }
+
+
