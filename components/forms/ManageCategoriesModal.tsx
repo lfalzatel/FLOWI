@@ -138,7 +138,7 @@ export function ManageCategoriesModal({ onClose }: Props) {
                       <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
                         {cat.icon}
                       </div>
-                      <span className={`font-medium truncate ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
+                      <span className={`font-medium break-words ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
                       {!cat.isCustom && <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/70 border border-accent/30' : 'bg-white/10 text-white/50 rounded'}`}>Defecto</span>}
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0 ml-2">
