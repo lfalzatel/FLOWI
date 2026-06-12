@@ -12,14 +12,14 @@ import { useTheme } from '@/components/ThemeProvider';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
-  BarChart2, Shield, Share2, List,
+  BarChart2, Shield, Share2, Download,
   Sun, Monitor, Terminal
 } from 'lucide-react';
 
 const menuItems = [
   { icon: User,       label: 'Mi perfil',         href: '#',              divider: false, soon: false },
   { icon: BarChart2,  label: 'Reportes',          href: '/reportes',      divider: false, soon: false },
-  { icon: List,       label: 'Editar Categorías', href: '#',              divider: false, soon: false },
+  { icon: Download,   label: 'Instalar app',      href: '#',              divider: false, soon: false },
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
   { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: true  },
   { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: true,  soon: false },
@@ -34,6 +34,27 @@ export function ProfileCapsule() {
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const ref               = useRef<HTMLDivElement>(null);
   const router            = useRouter();
+
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
+      setIsInstallable(false);
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
 
   const [knownAccounts, setKnownAccounts] = useState<any[]>([]);
 
@@ -213,19 +234,30 @@ export function ProfileCapsule() {
             {menuItems.map((item, i) => (
               <div key={i}>
                 {item.divider && <div className="my-1 border-t border-glass-border" />}
-                {item.label === 'Compartir app' ? (
+                {item.label === 'Instalar app' ? (
+                  isInstallable && (
+                    <button
+                      onClick={async () => {
+                        if (!deferredPrompt) return;
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                          setIsInstallable(false);
+                          setDeferredPrompt(null);
+                        }
+                        setOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                        <item.icon className="w-3.5 h-3.5 text-accent" />
+                      </div>
+                      <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : 'text-accent font-medium'}`}>{isTechTheme ? '>_ INSTALAR_APP' : item.label}</span>
+                    </button>
+                  )
+                ) : item.label === 'Compartir app' ? (
                   <button
                     onClick={() => { handleShare(); setOpen(false); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
-                      <item.icon className="w-3.5 h-3.5" />
-                    </div>
-                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
-                  </button>
-                ) : item.label === 'Editar Categorías' ? (
-                  <button
-                    onClick={() => { setIsCategoriesModalOpen(true); setOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
                   >
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
