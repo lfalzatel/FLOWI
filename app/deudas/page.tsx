@@ -8,8 +8,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CreditCard, Plus, Check, Clock } from 'lucide-react';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function DeudasPage() {
+  const { theme } = useTheme();
+  const isCyberpunk = theme === 'cyberpunk';
   const { user, loading: authLoading } = useAuth();
   const { debts, loading: debtsLoading, refresh, totalDeudas } = useDebts();
   const router = useRouter();
@@ -94,6 +97,7 @@ export default function DeudasPage() {
               {debts.map((debt) => {
                 const pending = debt.totalAmount - debt.paidAmount;
                 const progress = (debt.paidAmount / debt.totalAmount) * 100;
+                const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
                 
                 return (
                   <div
@@ -103,7 +107,7 @@ export default function DeudasPage() {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-text-primary font-medium text-sm">{debt.title}</p>
+                        <p className={`text-text-primary font-medium text-sm ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           {debt.status === 'paid' ? (
                             <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium">
@@ -117,7 +121,7 @@ export default function DeudasPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-text-primary font-bold text-sm">{fmt(pending)}</p>
+                        <p className={`text-text-primary font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>{fmt(pending)}</p>
                         <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
                       </div>
                     </div>
