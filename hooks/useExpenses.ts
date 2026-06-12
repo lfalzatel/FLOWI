@@ -1,32 +1,18 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from './useAuth';
-import { getUserTransactions, Transaction } from '@/lib/firestore';
+import { useData } from '@/components/DataProvider';
 
 export function useExpenses(type?: 'gasto' | 'ingreso') {
-  const { user } = useAuth();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState<string | null>(null);
+  const { transactions: allTransactions, loadingTransactions: loading, error } = useData();
 
-  const refresh = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const data = await getUserTransactions(user.uid, type);
-      setTransactions(data);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [user, type]);
+  const transactions = type 
+    ? allTransactions.filter(t => t.type === type)
+    : allTransactions;
 
-  useEffect(() => { refresh(); }, [refresh]);
-
-  const totalGastos  = transactions.filter(t => t.type === 'gasto') .reduce((s, t) => s + t.amount, 0);
-  const totalIngresos= transactions.filter(t => t.type === 'ingreso').reduce((s, t) => s + t.amount, 0);
+  const totalGastos  = allTransactions.filter(t => t.type === 'gasto').reduce((s, t) => s + t.amount, 0);
+  const totalIngresos= allTransactions.filter(t => t.type === 'ingreso').reduce((s, t) => s + t.amount, 0);
   const balance      = totalIngresos - totalGastos;
+
+  const refresh = async () => {}; // No-op para mantener compatibilidad
 
   return { transactions, loading, error, refresh, totalGastos, totalIngresos, balance };
 }

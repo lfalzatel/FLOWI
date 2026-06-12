@@ -31,6 +31,8 @@ export const viewport: Viewport = {
   viewportFit:         'cover',
 };
 
+import { DataProvider } from '@/components/DataProvider';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
@@ -43,7 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-deep text-text-primary antialiased">
         <ThemeProvider>
-          {children}
+          <DataProvider>
+            {children}
+          </DataProvider>
         </ThemeProvider>
       </body>
     </html>
