@@ -103,7 +103,7 @@ export default function IngresosPage() {
               <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Ingresado</span>
             </div>
 
-            <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-text-primary tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-text-primary'}`}>
+            <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-accent'}`}>
               ${filteredTransactions.reduce((sum, e) => sum + e.amount, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
             </p>
             <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
