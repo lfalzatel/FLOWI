@@ -9,16 +9,19 @@ import { SplashScreen } from '@/components/layout/SplashScreen';
 export default function LoginPage() {
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(false);
+  const [mode, setMode] = useState<'login' | 'logout'>('login');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('logout') === 'true') {
+      setMode('logout');
       setShowSplash(true);
+      window.history.replaceState({}, '', '/login');
     }
   }, []);
 
   if (showSplash) {
-    return <SplashScreen duration={2500} onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen duration={2500} mode={mode} onComplete={() => setShowSplash(false)} />;
   }
 
   const handleGoogleLogin = async () => {

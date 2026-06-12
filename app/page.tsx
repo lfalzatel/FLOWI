@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
+  const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
   const router = useRouter();
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
@@ -40,15 +41,16 @@ export default function DashboardPage() {
     
     if (params.get('login') === 'true' || params.get('newuser') === 'true') {
       setSplashDuration(2500);
+      setSplashMode('login');
       setShowSplash(true);
       if (params.get('newuser') === 'true') {
         setShowNewUserMsg(true);
-        window.history.replaceState({}, '', '/');
-      } else {
-        window.history.replaceState({}, '', '/');
       }
-    } else if (hasLoaded) {
-      setShowSplash(false);
+      window.history.replaceState({}, '', '/');
+    } else {
+      setSplashDuration(1000);
+      setSplashMode('reload');
+      setShowSplash(true);
     }
     
     sessionStorage.setItem('appHasLoaded', 'true');
@@ -56,13 +58,7 @@ export default function DashboardPage() {
  
   useEffect(() => {
     if (!authLoading && !user) {
-      const justLoggedOut = sessionStorage.getItem('justLoggedOut');
-      if (justLoggedOut === 'true') {
-        sessionStorage.removeItem('justLoggedOut');
-        router.push('/login?logout=true');
-      } else {
-        router.push('/login');
-      }
+      router.push('/login');
     }
   }, [user, authLoading, router]);
 
@@ -71,7 +67,7 @@ export default function DashboardPage() {
   }
 
   if (showSplash) {
-    return <SplashScreen duration={splashDuration} onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen duration={splashDuration} mode={splashMode} onComplete={() => setShowSplash(false)} />;
   }
 
   if (authLoading) {
