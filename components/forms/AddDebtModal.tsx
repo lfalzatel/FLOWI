@@ -95,7 +95,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-4">
       <div className="bg-[#0A0A0F] border border-white/10 p-6 rounded-t-3xl sm:rounded-3xl w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white">
           <X className="w-5 h-5" />

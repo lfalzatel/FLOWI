@@ -107,45 +107,60 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
   return (
     <div className="flex flex-col gap-3 mb-6 relative">
       {/* Pestañas superiores */}
-      <div className="flex items-center p-1 bg-[#FFD6EB]/10 rounded-full w-full max-w-sm mx-auto shadow-inner">
-        {(['all', 'month', 'week', 'day'] as FilterType[]).map((type) => (
-          <button
-            key={type}
-            onClick={() => {
-              if (type === 'day' && filterType === 'day') {
-                setShowCalendar(true); // Toggle on
-              } else {
-                handleTypeChange(type);
-              }
-            }}
-            className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all rounded-full ${
-              filterType === type 
-                ? 'bg-white text-[#D10074] shadow-md' 
-                : 'text-[#D10074]/70 hover:text-[#D10074]'
-            }`}
-          >
-            {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'DÍA'}
-          </button>
-        ))}
+      <div 
+        className="relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/50 rounded-[28px]"
+        style={{
+          background: 'rgba(18, 18, 40, 0.75)',
+          backdropFilter: 'blur(28px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(28px) saturate(200%)',
+          border: '1px solid rgba(255,255,255,0.12)',
+        }}
+      >
+        <div className="absolute inset-0 rounded-[28px] pointer-events-none overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        </div>
+
+        <div className="relative z-10 flex w-full gap-1">
+          {(['all', 'month', 'week', 'day'] as FilterType[]).map((type) => (
+            <button
+              key={type}
+              onClick={() => {
+                if (type === 'day' && filterType === 'day') {
+                  setShowCalendar(true); // Toggle on
+                } else {
+                  handleTypeChange(type);
+                }
+              }}
+              className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all rounded-[24px] ${
+                filterType === type 
+                  ? 'bg-white/20 text-white shadow-md' 
+                  : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'DÍA'}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Navegador inferior (oculto si es Todo) */}
       {filterType !== 'all' && (
-        <div className="flex items-center justify-between px-4 py-3 bg-white rounded-full w-full max-w-sm mx-auto shadow-sm border border-[#FFD6EB]">
+        <div className="flex items-center justify-between px-4 py-3 bg-[#0A0A0F] rounded-full w-full max-w-sm mx-auto border border-white/10 mt-2">
           <button 
             onClick={handlePrev}
-            className="p-1 rounded-full hover:bg-black/5 active:scale-95 transition-all text-black/60"
+            className="p-1 rounded-full hover:bg-white/5 active:scale-95 transition-all text-white/60"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           
-          <span className="font-semibold text-[13px] text-black">
+          <span className="font-semibold text-[13px] text-white">
             {formatFilterText(filterType, filterValue)}
           </span>
 
           <button 
             onClick={handleNext}
-            className="p-1 rounded-full hover:bg-black/5 active:scale-95 transition-all text-black/60"
+            className="p-1 rounded-full hover:bg-white/5 active:scale-95 transition-all text-white/60"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
