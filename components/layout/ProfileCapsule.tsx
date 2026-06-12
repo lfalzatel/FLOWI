@@ -32,6 +32,7 @@ export function ProfileCapsule() {
   const { user, profile } = useAuth();
   const { theme, setTheme, allowedThemes } = useTheme();
   const [open, setOpen]   = useState(false);
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const ref               = useRef<HTMLDivElement>(null);
@@ -160,7 +161,7 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-sm">{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
                   </button>
                 ) : item.label === 'Editar Categorías' ? (
                   <button
@@ -170,7 +171,7 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-sm">{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
                   </button>
                 ) : item.label === 'Mi Perfil' ? (
                   <button
@@ -180,7 +181,7 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-sm">{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
                   </button>
                 ) : item.soon ? (
                   <button
@@ -195,7 +196,7 @@ export function ProfileCapsule() {
                       <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                         <item.icon className="w-3.5 h-3.5" />
                       </div>
-                      <span className="text-sm opacity-70">{item.label}</span>
+                      <span className={`text-sm opacity-70 ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
                     </div>
                     <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider">Pronto</span>
                   </button>
@@ -208,7 +209,7 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-sm">{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
                   </Link>
                 )}
               </div>
