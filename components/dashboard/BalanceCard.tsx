@@ -80,7 +80,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Balance total</span>
           </div>
 
-          <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,48px)] text-text-primary tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,48px)] text-text-primary'}`}>
+          <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,48px)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,48px)]'} ${balance < 0 ? 'text-[var(--red)]' : balance > 0 ? 'text-accent' : 'text-text-primary'}`}>
             <AnimatedNumber value={balance} delay={0.05} />
           </p>
           <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Este mes</p>
