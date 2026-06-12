@@ -18,7 +18,7 @@ export function Header() {
         flex items-center justify-between
         transition-all duration-300 ease-out
         ${scrolled
-          ? 'bg-[#0A0A0F]/75 backdrop-blur-2xl border-b border-white/5 shadow-xl shadow-black/30'
+          ? 'bg-bg-deep/75 backdrop-blur-2xl border-b border-glass-border shadow-xl shadow-black/10'
           : 'bg-transparent'
         }
       `}
@@ -51,11 +51,11 @@ export function Header() {
           </svg>
 
           {/* Logo Container */}
-          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527]">
+          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-bg-card">
             <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
           </div>
         </div>
-        <span className="font-syne font-bold text-lg tracking-tight text-white hidden sm:block">
+        <span className="font-syne font-bold text-lg tracking-tight text-text-primary hidden sm:block">
           flowi
         </span>
       </div>
@@ -63,9 +63,9 @@ export function Header() {
       {/* Right */}
       <div className="flex items-center gap-3">
         {/* Notification bell */}
-        <button className="relative w-9 h-9 rounded-xl bg-white/5 border border-white/8
-                           flex items-center justify-center hover:bg-white/10 transition-colors">
-          <svg className="w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button className="relative w-9 h-9 rounded-xl bg-glass border border-glass-border
+                           flex items-center justify-center hover:bg-glass-hover transition-colors">
+          <svg className="w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>

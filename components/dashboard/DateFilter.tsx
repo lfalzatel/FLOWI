@@ -108,13 +108,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     <div className="flex flex-col gap-3 mb-6 relative">
       {/* Pestañas superiores */}
       <div 
-        className="relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/50 rounded-[28px]"
-        style={{
-          background: 'rgba(18, 18, 40, 0.75)',
-          backdropFilter: 'blur(28px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(28px) saturate(200%)',
-          border: '1px solid rgba(255,255,255,0.12)',
-        }}
+        className="relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/10 rounded-[28px] bg-glass backdrop-blur-3xl border border-glass-border"
       >
         <div className="absolute inset-0 rounded-[28px] pointer-events-none overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -134,8 +128,8 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
               }}
               className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all rounded-[24px] ${
                 filterType === type 
-                  ? 'bg-white/20 text-white shadow-md' 
-                  : 'text-white/50 hover:text-white/80'
+                  ? 'bg-glass-hover text-text-primary shadow-md' 
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'DÍA'}
@@ -146,21 +140,21 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Navegador inferior (oculto si es Todo) */}
       {filterType !== 'all' && (
-        <div className="flex items-center justify-between px-4 py-3 bg-[#0A0A0F] rounded-full w-full max-w-sm mx-auto border border-white/10 mt-2">
+        <div className="flex items-center justify-between px-4 py-3 bg-bg-card rounded-full w-full max-w-sm mx-auto border border-glass-border mt-2 shadow-sm">
           <button 
             onClick={handlePrev}
-            className="p-1 rounded-full hover:bg-white/5 active:scale-95 transition-all text-white/60"
+            className="p-1 rounded-full hover:bg-glass-hover active:scale-95 transition-all text-text-secondary"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           
-          <span className="font-semibold text-[13px] text-white">
+          <span className="font-semibold text-[13px] text-text-primary">
             {formatFilterText(filterType, filterValue)}
           </span>
 
           <button 
             onClick={handleNext}
-            className="p-1 rounded-full hover:bg-white/5 active:scale-95 transition-all text-white/60"
+            className="p-1 rounded-full hover:bg-glass-hover active:scale-95 transition-all text-text-secondary"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -169,19 +163,19 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Heatmap Calendar Modal */}
       {showCalendar && (
-        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 bg-white rounded-3xl p-5 shadow-2xl border border-[#FFD6EB] animate-fade-in-up">
+        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 bg-bg-card rounded-3xl p-5 shadow-2xl border border-glass-border animate-fade-in-up">
           <div className="flex items-center justify-between mb-4">
-            <button onClick={handleCalendarPrevMonth} className="p-2 rounded-full hover:bg-black/5 text-black">
+            <button onClick={handleCalendarPrevMonth} className="p-2 rounded-full hover:bg-glass-hover text-text-primary">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h4 className="font-bold text-sm text-black capitalize">
+            <h4 className="font-bold text-sm text-text-primary capitalize">
               {calendarMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
             </h4>
             <div className="flex items-center gap-1">
-              <button onClick={handleCalendarNextMonth} className="p-2 rounded-full hover:bg-black/5 text-black">
+              <button onClick={handleCalendarNextMonth} className="p-2 rounded-full hover:bg-glass-hover text-text-primary">
                 <ChevronRight className="w-5 h-5" />
               </button>
-              <button onClick={() => setShowCalendar(false)} className="p-2 rounded-full hover:bg-black/5 text-black/40">
+              <button onClick={() => setShowCalendar(false)} className="p-2 rounded-full hover:bg-glass-hover text-text-secondary">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -189,7 +183,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
           <div className="grid grid-cols-7 gap-1 text-center mb-2">
             {['L','M','X','J','V','S','D'].map(day => (
-              <div key={day} className="text-[10px] font-bold text-black/40">{day}</div>
+              <div key={day} className="text-[10px] font-bold text-text-secondary">{day}</div>
             ))}
           </div>
 
@@ -210,8 +204,8 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
                   onClick={() => handleDaySelect(new Date(currentYear, currentMonth, day))}
                   className="relative aspect-square rounded-xl flex items-center justify-center text-xs font-semibold hover:ring-2 hover:ring-[#D10074] transition-all"
                   style={{
-                    backgroundColor: activity ? `rgba(209, 0, 116, ${bgOpacity})` : '#F3F4F6',
-                    color: activity && bgOpacity > 0.5 ? 'white' : 'black'
+                    backgroundColor: activity ? `rgba(209, 0, 116, ${bgOpacity})` : 'var(--glass)',
+                    color: activity && bgOpacity > 0.5 ? '#fff' : 'var(--text-primary)'
                   }}
                 >
                   {day}
@@ -226,9 +220,9 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
             })}
           </div>
           
-          <div className="mt-4 flex items-center justify-center gap-4 text-[10px] font-medium text-black/40">
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#00E5A0]" /> Ingresos</div>
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-400" /> Gastos</div>
+          <div className="mt-4 flex items-center justify-center gap-4 text-[10px] font-medium text-text-secondary">
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-accent" /> Ingresos</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[var(--red)]" /> Gastos</div>
           </div>
         </div>
       )}

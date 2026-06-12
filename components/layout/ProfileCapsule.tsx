@@ -74,8 +74,8 @@ export function ProfileCapsule() {
       <button
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-2 px-2 py-1.5 rounded-full
-                   bg-white/5 border border-white/10
-                   hover:bg-white/10 hover:border-white/20
+                   bg-glass border border-glass-border
+                   hover:bg-glass-hover hover:border-glass-strong
                    active:scale-[0.97]
                    transition-all duration-200 group"
       >
@@ -101,31 +101,31 @@ export function ProfileCapsule() {
         </div>
 
         <ChevronDown
-          className={`w-3.5 h-3.5 text-white/40 transition-transform duration-200
-                      ${open ? 'rotate-180 text-white/70' : ''}`}
+          className={`w-3.5 h-3.5 text-text-secondary transition-transform duration-200
+                      ${open ? 'rotate-180 text-text-primary' : ''}`}
         />
       </button>
 
-      {/* ── Dropdown ── */}
+      {/* 🚀 Dropdown 🚀 */}
       {open && (
         <div className="absolute right-0 top-full mt-2.5 w-68
-                        bg-[#12122A]/95 backdrop-blur-2xl
-                        border border-white/10 rounded-2xl
-                        shadow-2xl shadow-black/60
+                        bg-bg-card/95 backdrop-blur-2xl
+                        border border-glass-border rounded-2xl
+                        shadow-2xl shadow-black/10
                         animate-slide-down origin-top-right
                         overflow-hidden z-50"
              style={{ width: '272px' }}>
 
           {/* Profile header */}
-          <div className="px-4 py-4 flex items-center gap-3 border-b border-white/5
+          <div className="px-4 py-4 flex items-center gap-3 border-b border-glass-border
                           bg-gradient-to-r from-accent/5 to-transparent">
             <div className="relative w-11 h-11 rounded-full overflow-hidden
                             ring-2 ring-accent/30 flex-shrink-0">
               <Image src={photoURL} alt={displayName} fill className="object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{displayName}</p>
-              <p className="text-xs text-white/40 truncate">{email}</p>
+              <p className="text-sm font-semibold text-text-primary truncate">{displayName}</p>
+              <p className="text-xs text-text-secondary truncate">{email}</p>
               <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full
                                bg-accent/15 text-accent font-semibold tracking-wide uppercase">
                 {role}

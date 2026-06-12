@@ -38,13 +38,8 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
         className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50
                    flex items-center gap-0.5 px-2.5 py-2
                    rounded-[28px]
-                   shadow-2xl shadow-black/50"
-        style={{
-          background: 'rgba(18, 18, 40, 0.75)',
-          backdropFilter: 'blur(28px) saturate(200%)',
-          WebkitBackdropFilter: 'blur(28px) saturate(200%)',
-          border: '1px solid rgba(255,255,255,0.12)',
-        }}
+                   shadow-2xl shadow-black/10
+                   bg-glass backdrop-blur-3xl border border-glass-border"
       >
         {/* Inner highlight */}
         <div className="absolute inset-0 rounded-[28px] pointer-events-none overflow-hidden">
