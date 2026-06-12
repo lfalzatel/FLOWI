@@ -10,8 +10,10 @@ export default function LoginPage() {
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(false);
   const [mode, setMode] = useState<'login' | 'logout'>('login');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const params = new URLSearchParams(window.location.search);
     if (params.get('logout') === 'true') {
       setMode('logout');
@@ -19,6 +21,10 @@ export default function LoginPage() {
       window.history.replaceState({}, '', '/login');
     }
   }, []);
+
+  if (!mounted) {
+    return <div className="min-h-screen bg-[#050B14]" />;
+  }
 
   if (showSplash) {
     return <SplashScreen duration={2500} mode={mode} onComplete={() => setShowSplash(false)} />;
