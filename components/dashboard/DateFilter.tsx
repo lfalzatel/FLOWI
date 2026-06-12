@@ -105,7 +105,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
   });
 
   return (
-    <div className="flex flex-col gap-3 mb-6 relative">
+    <div className="flex flex-col gap-3 mb-6 relative z-50">
       {/* Pestañas superiores */}
       <div 
         className="relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/10 rounded-[28px] bg-glass backdrop-blur-3xl border border-glass-border"
