@@ -146,11 +146,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Type Toggle */}
-          <div className={`flex p-1 ${isTechTheme ? 'bg-black/40 border border-accent/20 rounded-none' : 'bg-white/5 rounded-xl'}`}>
+          <div className={`flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-white/5 rounded-xl'}`}>
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('gasto'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-semibold transition-all ${isTechTheme ? 'rounded-none border border-transparent' : 'rounded-lg'} ${type === 'gasto' ? (isTechTheme ? 'bg-accent/20 text-accent border-accent/50' : 'bg-accent text-black') : (isTechTheme ? 'text-accent/40 hover:text-accent/60' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'gasto' ? `bg-accent text-black shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Gasto
@@ -158,7 +158,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('ingreso'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-semibold transition-all ${isTechTheme ? 'rounded-none border border-transparent' : 'rounded-lg'} ${type === 'ingreso' ? (isTechTheme ? 'bg-accent/20 text-accent border-accent/50' : 'bg-accent text-black') : (isTechTheme ? 'text-accent/40 hover:text-accent/60' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'ingreso' ? `bg-accent text-black shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Ingreso
