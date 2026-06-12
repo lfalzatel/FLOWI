@@ -150,7 +150,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('gasto'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'gasto' ? `bg-accent text-black shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'gasto' ? `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Gasto
@@ -158,7 +158,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('ingreso'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'ingreso' ? `bg-accent text-black shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'ingreso' ? `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Ingreso
@@ -278,7 +278,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="submit"
               disabled={loading || !amount || !category}
-              className={`w-full py-4 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : 'rounded-xl bg-accent text-black hover:bg-accent/90'}`}
+              className={`w-full py-4 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} hover:bg-accent/90`}`}
             >
               {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : 'Añadir Transacción'}
             </button>

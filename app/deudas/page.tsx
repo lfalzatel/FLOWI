@@ -50,7 +50,7 @@ export default function DeudasPage() {
           <button
             onClick={() => setShowAdd(true)}
             className={`flex items-center gap-2 px-4 py-2.5 transition-all
-                       ${isCyberpunk ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : 'rounded-2xl bg-gradient-to-r from-accent to-accent-dim text-black font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]'}`}
+                       ${isCyberpunk ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
           >
             <Plus className="w-4 h-4" />
             Nueva Deuda

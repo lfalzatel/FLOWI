@@ -21,6 +21,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [showAdd, setShowAdd] = useState(false);
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+  const isLight = theme === 'light';
 
   return (
     <>
@@ -51,7 +52,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
         </div>
 
         {navItems.slice(0, 2).map(item => (
-          <NavItem key={item.href} {...item} active={pathname === item.href} isTechTheme={isTechTheme} />
+          <NavItem key={item.href} {...item} active={pathname === item.href} isTechTheme={isTechTheme} isLight={isLight} />
         ))}
 
         {/* FAB */}
@@ -64,11 +65,11 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
                      active:scale-95 transition-transform duration-150
                      ${isTechTheme ? 'rounded-none border border-black' : 'rounded-full'}`}
         >
-          <Plus className="w-5 h-5 text-black stroke-[2.5]" />
+          <Plus className={`w-5 h-5 stroke-[2.5] ${isLight ? 'text-white' : 'text-black'}`} />
         </button>
 
         {navItems.slice(2).map(item => (
-          <NavItem key={item.href} {...item} active={pathname === item.href} isTechTheme={isTechTheme} />
+          <NavItem key={item.href} {...item} active={pathname === item.href} isTechTheme={isTechTheme} isLight={isLight} />
         ))}
       </nav>
 
@@ -77,14 +78,14 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   );
 }
 
-function NavItem({ icon: Icon, label, href, active, isTechTheme }: any) {
+function NavItem({ icon: Icon, label, href, active, isTechTheme, isLight }: any) {
   return (
     <Link href={href}
       className={`relative flex flex-col items-center gap-0.5 px-3.5 py-2
                   transition-all duration-200 ${isTechTheme ? 'rounded-none' : 'rounded-[20px]'}
                   ${active
-                    ? `bg-accent text-black shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards] ${isTechTheme ? 'border border-black' : ''}`
-                    : 'text-accent hover:opacity-80 active:text-black'
+                    ? `bg-accent ${isLight ? 'text-white' : 'text-black'} shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards] ${isTechTheme ? 'border border-black' : ''}`
+                    : `text-accent hover:opacity-80 ${isLight ? 'active:text-accent-dim' : 'active:text-black'}`
                   }`}
     >
       <Icon className={`w-[18px] h-[18px] relative z-10 ${active ? 'animate-[micro-bounce_0.4s_infinite_alternate] [animation-delay:0.45s]' : ''}`} />

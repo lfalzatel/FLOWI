@@ -131,7 +131,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
               }}
               className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all ${isTechTheme ? 'font-mono uppercase rounded-none tracking-widest' : 'rounded-[24px]'} ${
                 filterType === type 
-                  ? `bg-accent text-black shadow-md ${isTechTheme ? 'border border-accent' : ''}` 
+                  ? `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` 
                   : 'text-accent hover:opacity-80'
               }`}
             >
