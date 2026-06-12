@@ -69,7 +69,7 @@ export default function DeudasPage() {
               <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-orange-400/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Pendiente</span>
             </div>
 
-            <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-4xl text-orange-400 tracking-wider' : 'font-syne font-bold text-4xl text-orange-400'}`}>
+            <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-orange-400 tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-orange-400'}`}>
               {fmt(totalDeudas)}
             </p>
             <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>Suma de todas tus deudas activas</p>
