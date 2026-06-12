@@ -70,10 +70,9 @@ export default function GastosPage() {
           </div>
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl
-                       bg-gradient-to-r from-accent to-accent-dim text-black
-                       font-semibold text-sm shadow-lg shadow-accent/20
-                       hover:opacity-90 active:scale-[0.97] transition-all">
+            className={`flex items-center gap-2 px-4 py-2.5 transition-all
+                       ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : 'rounded-2xl bg-gradient-to-r from-accent to-accent-dim text-black font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]'}`}
+          >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Nueva transacción</span>
           </button>
