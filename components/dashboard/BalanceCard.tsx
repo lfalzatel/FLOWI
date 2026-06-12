@@ -96,7 +96,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--red)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Gastos</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-lg text-[var(--red)] tracking-wider' : 'font-syne font-bold text-lg text-[var(--red)]'}`}><AnimatedNumber value={totalGastos} delay={0.15} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)] tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)]'}`}><AnimatedNumber value={totalGastos} delay={0.15} /></p>
         </div>
         <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.25s' }}>
           <div className="flex items-center gap-2 mb-2">
@@ -105,7 +105,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Ingresos</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-lg text-accent tracking-wider' : 'font-syne font-bold text-lg text-accent'}`}><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-accent'}`}><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
         </div>
         
         {/* Tarjeta de Deudas a lo ancho */}
@@ -116,7 +116,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--yellow)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Deudas Pendientes</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-lg text-[var(--yellow)] tracking-wider' : 'font-syne font-bold text-lg text-[var(--yellow)]'}`}><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)] tracking-wider' : 'font-syne font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)]'}`}><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
         </div>
       </div>
     </div>
