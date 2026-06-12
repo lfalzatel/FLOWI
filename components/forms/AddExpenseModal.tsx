@@ -165,11 +165,15 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddEx
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-medium">$</span>
               <input
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                  if (val.split('.').length > 2) return; // evitar múltiples puntos
+                  setAmount(val);
+                }}
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-8 pr-4 text-white placeholder-white/20 focus:outline-none focus:border-accent"
                 required
               />

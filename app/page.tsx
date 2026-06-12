@@ -13,6 +13,7 @@ import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { SplashScreen } from '@/components/layout/SplashScreen';
+import { getISOWeekString } from '@/lib/dateUtils';
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -24,7 +25,7 @@ export default function DashboardPage() {
   const [showSplash, setShowSplash] = useState(true);
   const [splashDuration, setSplashDuration] = useState(1500);
   const router = useRouter();
-  const [filterType, setFilterType] = useState<'all' | 'month' | 'day'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
 
   useEffect(() => {
@@ -94,6 +95,8 @@ export default function DashboardPage() {
     const dateStr = d.toISOString().split('T')[0];
     if (filterType === 'month') {
       return dateStr.startsWith(filterValue);
+    } else if (filterType === 'week') {
+      return getISOWeekString(d) === filterValue;
     } else {
       return dateStr === filterValue;
     }
@@ -158,6 +161,17 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => {
+                setFilterType('week');
+                setFilterValue(getISOWeekString(new Date()));
+              }}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'week' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Semana
+            </button>
+            <button
+              onClick={() => {
                 setFilterType('day');
                 setFilterValue(new Date().toISOString().split('T')[0]);
               }}
@@ -172,7 +186,7 @@ export default function DashboardPage() {
           <div className="flex-1">
             {filterType !== 'all' && (
               <input
-                type={filterType === 'month' ? 'month' : 'date'}
+                type={filterType === 'month' ? 'month' : filterType === 'week' ? 'week' : 'date'}
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
                 className="w-full bg-transparent text-white text-sm focus:outline-none border-none text-right"
@@ -193,7 +207,7 @@ export default function DashboardPage() {
         )}
 
         {/* Chart */}
-        <ExpenseChart transactions={filteredTransactions} />
+        <ExpenseChart transactions={filteredTransactions} filterType={filterType} />
 
         {/* Recent transactions */}
         <div>

@@ -8,7 +8,8 @@ import { useExpenses } from '@/hooks/useExpenses';
 import { Transaction } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { TrendingDown } from 'lucide-react';
+import { TrendingDown, Plus } from 'lucide-react';
+import { getISOWeekString } from '@/lib/dateUtils';
 
 export default function GastosPage() {
   const { user, loading: authLoading } = useAuth();
@@ -16,7 +17,8 @@ export default function GastosPage() {
   const router = useRouter();
   
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [filterType, setFilterType] = useState<'all' | 'month' | 'day'>('all');
+  const [showAdd, setShowAdd] = useState(false);
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
 
   useEffect(() => {
@@ -45,6 +47,8 @@ export default function GastosPage() {
     const dateStr = d.toISOString().split('T')[0];
     if (filterType === 'month') {
       return dateStr.startsWith(filterValue);
+    } else if (filterType === 'week') {
+      return getISOWeekString(d) === filterValue;
     } else {
       return dateStr === filterValue;
     }
@@ -54,10 +58,21 @@ export default function GastosPage() {
     <div className="min-h-screen bg-[#0A0A0F] text-white flex flex-col">
       <Header />
       
-      <main className="flex-1 p-4 pb-24">
-        <div className="mb-6">
-          <h1 className="text-3xl font-syne font-bold text-white">Mis Gastos</h1>
-          <p className="text-white/40 text-sm mt-1">Historial completo de tus salidas</p>
+      <main className="flex-1 p-4 pb-24 max-w-2xl mx-auto w-full">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-syne font-bold text-white">Mis Gastos</h1>
+            <p className="text-white/40 text-sm mt-1">Historial completo de tus salidas</p>
+          </div>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl
+                       bg-gradient-to-r from-accent to-accent-dim text-black
+                       font-semibold text-sm shadow-lg shadow-accent/20
+                       hover:opacity-90 active:scale-[0.97] transition-all">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Nueva transacción</span>
+          </button>
         </div>
 
         {/* Filter */}
@@ -84,6 +99,17 @@ export default function GastosPage() {
             </button>
             <button
               onClick={() => {
+                setFilterType('week');
+                setFilterValue(getISOWeekString(new Date()));
+              }}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                filterType === 'week' ? 'bg-accent text-black font-semibold' : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Semana
+            </button>
+            <button
+              onClick={() => {
                 setFilterType('day');
                 setFilterValue(new Date().toISOString().split('T')[0]);
               }}
@@ -98,7 +124,7 @@ export default function GastosPage() {
           <div className="flex-1">
             {filterType !== 'all' && (
               <input
-                type={filterType === 'month' ? 'month' : 'date'}
+                type={filterType === 'month' ? 'month' : filterType === 'week' ? 'week' : 'date'}
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
                 className="w-full bg-transparent text-white text-sm focus:outline-none border-none text-right"
@@ -143,12 +169,15 @@ export default function GastosPage() {
 
       <BottomNav onSuccess={refresh} />
 
-      {/* Modal de Edición */}
-      {editingTransaction && (
+      {/* Modal de Edición o Adición */}
+      {(editingTransaction || showAdd) && (
         <AddExpenseModal
-          onClose={() => setEditingTransaction(null)}
+          onClose={() => {
+            setEditingTransaction(null);
+            setShowAdd(false);
+          }}
           onSuccess={refresh}
-          transactionToEdit={editingTransaction}
+          transactionToEdit={editingTransaction || undefined}
         />
       )}
     </div>

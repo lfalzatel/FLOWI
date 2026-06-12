@@ -123,10 +123,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           <div>
             <label className="text-white/40 text-xs font-medium mb-1.5 block">Monto Total</label>
             <input
-              type="number"
-              step="any"
+              type="text"
+              inputMode="decimal"
               value={totalAmount}
-              onChange={(e) => setTotalAmount(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                if (val.split('.').length > 2) return;
+                setTotalAmount(val);
+              }}
               className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent font-syne font-bold"
               placeholder="0.00"
               required
@@ -138,10 +142,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             <div>
               <label className="text-white/40 text-xs font-medium mb-1.5 block">Monto ya pagado (Opcional)</label>
               <input
-                type="number"
-                step="any"
+                type="text"
+                inputMode="decimal"
                 value={paidAmount}
-                onChange={(e) => setPaidAmount(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                  if (val.split('.').length > 2) return;
+                  setPaidAmount(val);
+                }}
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent font-syne"
                 placeholder="0.00"
               />
@@ -163,10 +171,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
               <div>
                 <label className="text-white/40 text-xs font-medium mb-1.5 block">Monto a Abonar</label>
                 <input
-                  type="number"
-                  step="any"
+                  type="text"
+                  inputMode="decimal"
                   value={abono}
-                  onChange={(e) => setAbono(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                    if (val.split('.').length > 2) return;
+                    setAbono(val);
+                  }}
                   className="w-full bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-white/20 focus:outline-none focus:border-accent font-syne font-bold"
                   placeholder="0.00"
                 />

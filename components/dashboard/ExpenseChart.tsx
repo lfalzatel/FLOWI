@@ -3,29 +3,49 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 
-interface Props { transactions: Transaction[]; }
+interface Props { 
+  transactions: Transaction[];
+  filterType?: 'all' | 'month' | 'week' | 'day';
+}
 
-function buildWeeklyData(transactions: Transaction[]) {
-  const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const now = new Date();
-  const result = days.map((day, i) => {
-    const date = new Date(now);
-    date.setDate(now.getDate() - (now.getDay() - i + 7) % 7);
-    const dayStr = date.toDateString();
-    const gastos = transactions
-      .filter(t => {
-        const d = t.date instanceof Timestamp ? t.date.toDate() : t.date as Date;
-        return d.toDateString() === dayStr && t.type === 'gasto';
-      })
-      .reduce((s, t) => s + t.amount, 0);
-    const ingresos = transactions
-      .filter(t => {
-        const d = t.date instanceof Timestamp ? t.date.toDate() : t.date as Date;
-        return d.toDateString() === dayStr && t.type === 'ingreso';
-      })
-      .reduce((s, t) => s + t.amount, 0);
-    return { day, gastos, ingresos };
+function buildChartData(transactions: Transaction[], filterType: string = 'all') {
+  if (transactions.length === 0) return [];
+
+  const sorted = [...transactions].sort((a, b) => {
+    const da = a.date instanceof Timestamp ? a.date.toDate().getTime() : new Date(a.date as any).getTime();
+    const db = b.date instanceof Timestamp ? b.date.toDate().getTime() : new Date(b.date as any).getTime();
+    return da - db;
   });
+
+  const grouped = new Map<string, { gastos: number, ingresos: number }>();
+
+  sorted.forEach(t => {
+    const d = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date as any);
+    let key = '';
+
+    if (filterType === 'all') {
+      key = d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+    } else if (filterType === 'month') {
+      key = d.getDate().toString() + ' ' + d.toLocaleDateString('es-ES', { month: 'short' });
+    } else if (filterType === 'week') {
+      key = d.toLocaleDateString('es-ES', { weekday: 'short' });
+    } else if (filterType === 'day') {
+      key = d.getHours().toString().padStart(2, '0') + ':00';
+    } else {
+      key = d.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+    }
+
+    const current = grouped.get(key) || { gastos: 0, ingresos: 0 };
+    if (t.type === 'gasto') current.gastos += t.amount;
+    if (t.type === 'ingreso') current.ingresos += t.amount;
+    grouped.set(key, current);
+  });
+
+  const result: any[] = [];
+  grouped.forEach((value, key) => {
+    result.push({ day: key, ...value });
+  });
+
   return result;
 }
 
@@ -43,13 +63,20 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function ExpenseChart({ transactions }: Props) {
-  const data = buildWeeklyData(transactions);
+export function ExpenseChart({ transactions, filterType = 'all' }: Props) {
+  const data = buildChartData(transactions, filterType);
+  
+  const titleMap = {
+    'all': 'Historial',
+    'month': 'Este mes',
+    'week': 'Esta semana',
+    'day': 'Hoy'
+  };
 
   return (
     <div className="glass-card p-5 rounded-2xl">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-syne font-bold text-sm text-white">Esta semana</h3>
+        <h3 className="font-syne font-bold text-sm text-white">{titleMap[filterType] || 'Resumen'}</h3>
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1 text-[10px] text-white/40">
             <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Gastos
