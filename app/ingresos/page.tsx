@@ -89,7 +89,7 @@ export default function IngresosPage() {
         />
 
         {/* Card de Total */}
-        <div className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-accent/20 shadow-sm">
+        <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-accent/20 shadow-sm animate-card-mix">
           {/* Decorative circles */}
           <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
                           bg-accent/5 blur-2xl pointer-events-none" />
