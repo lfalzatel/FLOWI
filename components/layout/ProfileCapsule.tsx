@@ -89,7 +89,7 @@ export function ProfileCapsule() {
       {/* ── Capsule button ── */}
       <button
         onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-[var(--accent-glow)] border border-accent hover:bg-accent hover:text-black' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
+        className={`flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-transparent border border-accent hover:bg-accent hover:text-black' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
       >
         {/* Avatar */}
         <div className={`relative w-7 h-7 overflow-hidden ring-1 ring-offset-1 ring-offset-transparent ${isTechTheme ? 'rounded-none ring-accent' : 'rounded-full ring-transparent group-hover:ring-[var(--accent-glow)]'}`}>
