@@ -79,12 +79,16 @@ export default function ConfigPage() {
               </div>
             </button>
 
-                        {/* Modo KiloCode */}
+            {/* Modo KiloCode */}
             <button 
               onClick={() => setTheme('kiloCode')}
-              className={lex items-center p-4 rounded-xl border text-left transition-all }
+              className={`flex items-center p-4 rounded-xl border text-left transition-all ${
+                theme === 'kiloCode' 
+                  ? 'border-accent bg-accent/10 shadow-[0_0_15px_rgba(250,204,21,0.15)]' 
+                  : 'border-glass-border bg-glass hover:bg-glass-hover'
+              }`}
             >
-              <div className={p-3 rounded-full mr-4 }>
+              <div className={`p-3 rounded-full mr-4 ${theme === 'kiloCode' ? 'bg-accent/20 text-accent' : 'bg-glass-strong text-text-secondary'}`}>
                 <Zap className="w-6 h-6" />
               </div>
               <div>
