@@ -25,6 +25,24 @@ export default function ConfigPage() {
           <h2 className="text-lg font-semibold mb-4 text-text-secondary">Apariencia (Modo)</h2>
           <div className="grid grid-cols-1 gap-4">
             
+            {/* Modo Oscuro (Original) */}
+            <button 
+              onClick={() => setTheme('dark')}
+              className={`flex items-center p-4 rounded-xl border text-left transition-all ${
+                theme === 'dark' 
+                  ? 'border-accent bg-accent/10 shadow-[0_0_15px_rgba(0,229,160,0.1)]' 
+                  : 'border-glass-border bg-glass hover:bg-glass-hover'
+              }`}
+            >
+              <div className={`p-3 rounded-full mr-4 ${theme === 'dark' ? 'bg-accent/20 text-accent' : 'bg-glass-strong text-text-secondary'}`}>
+                <Moon className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold font-syne text-lg">Modo Noche (Original)</h3>
+                <p className="text-sm text-text-secondary mt-1">El diseño oscuro original, plano y enfocado.</p>
+              </div>
+            </button>
+
             {/* Modo Día */}
             <button 
               onClick={() => setTheme('light')}
