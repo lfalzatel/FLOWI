@@ -17,15 +17,12 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { icon: User,     label: 'Mi Perfil',      href: '#',         divider: false, soon: true },
-  { icon: CreditCard, label: 'Presupuesto',  href: '/presupuesto',     divider: false, soon: false },
-  { icon: BarChart2,  label: 'Reportes',     href: '/reportes',        divider: false, soon: false },
-  { icon: List,       label: 'Editar Categorías', href: '#',           divider: true, soon: false },
-  { icon: Share2,     label: 'Compartir App',  href: '#',                divider: true, soon: false  },
-  { icon: Bell,       label: 'Notificaciones', href: '#',       divider: true, soon: true  },
-  { icon: Settings,   label: 'Configuración', href: '/configuracion',        divider: false, soon: false },
-  { icon: Shield,     label: 'Privacidad',   href: '#',         divider: false, soon: true },
-  { icon: HelpCircle, label: 'Ayuda y soporte', href: '#',     divider: false, soon: true },
+  { icon: User,       label: 'Mi perfil',         href: '#',              divider: false, soon: false },
+  { icon: BarChart2,  label: 'Reportes',          href: '/reportes',      divider: false, soon: false },
+  { icon: List,       label: 'Editar Categorías', href: '#',              divider: false, soon: false },
+  { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
+  { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: true  },
+  { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: true,  soon: false },
 ];
 
 export function ProfileCapsule() {
@@ -181,7 +178,7 @@ export function ProfileCapsule() {
             {menuItems.map((item, i) => (
               <div key={i}>
                 {item.divider && <div className="my-1 border-t border-glass-border" />}
-                {item.label === 'Compartir App' ? (
+                {item.label === 'Compartir app' ? (
                   <button
                     onClick={() => { handleShare(); setOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
@@ -201,7 +198,7 @@ export function ProfileCapsule() {
                     </div>
                     <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
                   </button>
-                ) : item.label === 'Mi Perfil' ? (
+                ) : item.label === 'Mi perfil' ? (
                   <button
                     onClick={() => { setIsProfileModalOpen(true); setOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
@@ -248,12 +245,14 @@ export function ProfileCapsule() {
           <div className="p-1.5 border-t border-glass-border">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/8 active:bg-red-500/15 transition-all duration-150 group/so"
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/8 active:bg-red-500/15 transition-all duration-150 group/so ${isTechTheme ? 'font-mono uppercase tracking-widest' : ''}`}
             >
               <div className="w-7 h-7 rounded-lg bg-red-500/8 flex items-center justify-center group-hover/so:bg-red-500/15 transition-colors">
                 <LogOut className="w-3.5 h-3.5" />
               </div>
-              <span className="text-sm">Cerrar sesión</span>
+              <span className={`text-sm ${isTechTheme ? 'font-mono font-bold tracking-widest uppercase' : ''}`}>
+                {isTechTheme ? '>_ CERRAR_SESION' : 'Cerrar sesión'}
+              </span>
             </button>
           </div>
         </div>
