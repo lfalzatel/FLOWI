@@ -128,8 +128,8 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
               }}
               className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all rounded-[24px] ${
                 filterType === type 
-                  ? 'bg-glass-hover text-text-primary shadow-md' 
-                  : 'text-text-secondary hover:text-text-primary'
+                  ? 'bg-accent text-black shadow-md' 
+                  : 'text-accent hover:opacity-80'
               }`}
             >
               {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'DÍA'}
@@ -148,7 +148,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
             <ChevronLeft className="w-5 h-5" />
           </button>
           
-          <span className="font-semibold text-[13px] text-text-primary">
+          <span className="font-semibold text-[13px] text-accent">
             {formatFilterText(filterType, filterValue)}
           </span>
 

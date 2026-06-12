@@ -79,8 +79,8 @@ function NavItem({ icon: Icon, label, href, active }: any) {
       className={`relative flex flex-col items-center gap-0.5 px-3.5 py-2
                   rounded-[20px] transition-all duration-200
                   ${active
-                    ? 'bg-accent text-white shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]'
-                    : 'text-accent/60 hover:text-accent active:text-white'
+                    ? 'bg-accent text-black shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]'
+                    : 'text-accent/80 hover:text-accent active:text-black'
                   }`}
     >
       <Icon className={`w-[18px] h-[18px] relative z-10 ${active ? 'animate-[micro-bounce_0.4s_infinite_alternate] [animation-delay:0.45s]' : ''}`} />

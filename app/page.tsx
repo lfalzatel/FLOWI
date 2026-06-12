@@ -122,7 +122,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-text-secondary">{greeting} 👋</p>
-            <h1 className="font-syne font-bold text-2xl text-text-primary">
+            <h1 className="font-syne font-bold text-2xl text-accent">
               {profile?.name?.split(' ')[0] || 'Usuario'}
             </h1>
           </div>
