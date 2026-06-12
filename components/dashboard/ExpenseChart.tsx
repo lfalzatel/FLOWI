@@ -2,24 +2,40 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
+import { getDateFromISOWeek } from '@/lib/dateUtils';
 
 interface Props { 
   transactions: Transaction[];
   filterType?: 'all' | 'month' | 'week' | 'day';
+  filterValue?: string;
 }
 
-function buildChartData(transactions: Transaction[], filterType: string = 'all') {
-  if (transactions.length === 0) return [];
-
-  const sorted = [...transactions].sort((a, b) => {
-    const da = a.date instanceof Timestamp ? a.date.toDate().getTime() : new Date(a.date as any).getTime();
-    const db = b.date instanceof Timestamp ? b.date.toDate().getTime() : new Date(b.date as any).getTime();
-    return da - db;
-  });
-
+function buildChartData(transactions: Transaction[], filterType: string = 'all', filterValue: string = '') {
   const grouped = new Map<string, { gastos: number, ingresos: number }>();
 
-  sorted.forEach(t => {
+  // Pre-seed based on filter
+  if (filterType === 'week' && filterValue) {
+    const startOfWeek = getDateFromISOWeek(filterValue);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(d.getDate() + i);
+      grouped.set(d.toLocaleDateString('es-ES', { weekday: 'short' }), { gastos: 0, ingresos: 0 });
+    }
+  } else if (filterType === 'month' && filterValue) {
+    const [y, m] = filterValue.split('-');
+    const daysInMonth = new Date(parseInt(y), parseInt(m), 0).getDate();
+    const d = new Date(parseInt(y), parseInt(m) - 1, 1);
+    for (let i = 1; i <= daysInMonth; i++) {
+      d.setDate(i);
+      grouped.set(`${i} ${d.toLocaleDateString('es-ES', { month: 'short' })}`, { gastos: 0, ingresos: 0 });
+    }
+  } else if (filterType === 'day' && filterValue) {
+    for (let i = 0; i < 24; i++) {
+      grouped.set(`${i.toString().padStart(2, '0')}:00`, { gastos: 0, ingresos: 0 });
+    }
+  }
+
+  transactions.forEach(t => {
     const d = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date as any);
     let key = '';
 
@@ -46,6 +62,13 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all')
     result.push({ day: key, ...value });
   });
 
+  if (filterType === 'all') {
+     // Para "all", si no preseedeamos, necesitamos ordenar por fecha. 
+     // Re-ordenamos si es 'all' (los demás ya están ordenados por pre-seed)
+     // Un truco simple para "all" es ordenar el array final aunque las keys son complejas.
+     // Es mejor pre-ordenar las transacciones y dejar que el Map mantenga el orden de inserción.
+  }
+
   return result;
 }
 
@@ -63,8 +86,17 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function ExpenseChart({ transactions, filterType = 'all' }: Props) {
-  const data = buildChartData(transactions, filterType);
+export function ExpenseChart({ transactions, filterType = 'all', filterValue = '' }: Props) {
+  // If filterType is 'all', sort transactions so the Map insertion order is correct
+  const sortedTransactions = filterType === 'all' 
+    ? [...transactions].sort((a, b) => {
+        const da = a.date instanceof Timestamp ? a.date.toDate().getTime() : new Date(a.date as any).getTime();
+        const db = b.date instanceof Timestamp ? b.date.toDate().getTime() : new Date(b.date as any).getTime();
+        return da - db;
+      })
+    : transactions;
+
+  const data = buildChartData(sortedTransactions, filterType, filterValue);
   
   const titleMap = {
     'all': 'Historial',

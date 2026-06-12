@@ -40,7 +40,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     <div className="flex flex-col gap-3 mb-6">
       {/* Pestañas superiores */}
       <div className="flex items-center p-1 bg-[#FFD6EB]/10 rounded-full w-full max-w-sm mx-auto shadow-inner">
-        {(['day', 'week', 'month', 'all'] as FilterType[]).map((type) => (
+        {(['all', 'month', 'week', 'day'] as FilterType[]).map((type) => (
           <button
             key={type}
             onClick={() => handleTypeChange(type)}
@@ -50,7 +50,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
                 : 'text-[#D10074]/70 hover:text-[#D10074]'
             }`}
           >
-            {type === 'day' ? 'HOY' : type === 'week' ? 'SEMANA' : type === 'month' ? 'MES' : 'TODO'}
+            {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'HOY'}
           </button>
         ))}
       </div>

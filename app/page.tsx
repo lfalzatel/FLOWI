@@ -158,7 +158,7 @@ export default function DashboardPage() {
         )}
 
         {/* Chart */}
-        <ExpenseChart transactions={filteredTransactions} filterType={filterType} />
+        <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} />
 
         {/* Recent transactions */}
         <div>
