@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -110,21 +111,23 @@ export function ProfileCapsule() {
       </button>
 
       {/* 🚀 Dropdown 🚀 */}
+      {open && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 bg-black/70 z-50 transition-opacity" 
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />,
+        document.body
+      )}
       {open && (
         <>
-          {/* Fondo oscuro overlay */}
-          <div 
-            className="fixed inset-0 bg-black/60 z-40" 
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
           <div className="absolute right-0 top-full mt-2.5 w-68
                           bg-deep
                           border border-glass-border rounded-2xl
                           shadow-2xl shadow-black/10
                           animate-slide-down origin-top-right
                           overflow-y-auto z-50
-                          max-h-[95vh] scrollbar-hide"
+                          max-h-[calc(100vh-120px)] scrollbar-hide"
                style={{ width: '272px' }}>
 
           {/* Profile header */}
