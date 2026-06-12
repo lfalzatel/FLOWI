@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
-import { CustomCategory, getCustomCategories, BASE_CATEGORIES } from '@/lib/firestore';
+import { CustomCategory, BASE_CATEGORIES } from '@/lib/firestore';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 export interface CategoryOption {
   label: string;
@@ -15,27 +17,31 @@ export function useCategories() {
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCategories = useCallback(async () => {
+  useEffect(() => {
     if (!user) {
       setCustomCategories([]);
       setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      const data = await getCustomCategories(user.uid);
-      setCustomCategories(data);
-    } catch (error) {
-      console.error('Error fetching custom categories:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+    setLoading(true);
+    const categoriesRef = collection(db, 'customCategories');
+    const q = query(categoriesRef, where('userId', '==', user.uid));
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const data = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      })) as CustomCategory[];
+      setCustomCategories(data);
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching custom categories in real-time:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   // Combine base categories with custom ones for dropdowns
   const allCategories: CategoryOption[] = [
@@ -53,6 +59,6 @@ export function useCategories() {
     customCategories,
     allCategories,
     loading,
-    refreshCategories: fetchCategories
+    refreshCategories: () => {} // Kept for backwards compatibility if any component calls it
   };
 }
