@@ -109,7 +109,7 @@ export function ProfileCapsule() {
       {/* 🚀 Dropdown 🚀 */}
       {open && (
         <div className="absolute right-0 top-full mt-2.5 w-68
-                        bg-bg-card backdrop-blur-3xl
+                        bg-card backdrop-blur-3xl
                         border border-glass-border rounded-2xl
                         shadow-2xl shadow-black/10
                         animate-slide-down origin-top-right

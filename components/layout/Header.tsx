@@ -14,11 +14,11 @@ export function Header() {
   return (
     <header
       className={`
-        sticky top-0 z-50 w-full px-4 py-3
+        sticky top-0 z-[60] w-full px-4 py-3
         flex items-center justify-between
         transition-all duration-300 ease-out
         ${scrolled
-          ? 'bg-bg-deep/75 backdrop-blur-2xl border-b border-glass-border shadow-xl shadow-black/10'
+          ? 'bg-deep/75 backdrop-blur-2xl border-b border-glass-border shadow-xl shadow-black/10'
           : 'bg-transparent'
         }
       `}
@@ -51,7 +51,7 @@ export function Header() {
           </svg>
 
           {/* Logo Container */}
-          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-bg-card">
+          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-card">
             <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
           </div>
         </div>

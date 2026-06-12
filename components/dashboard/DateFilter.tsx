@@ -140,7 +140,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Navegador inferior (oculto si es Todo) */}
       {filterType !== 'all' && (
-        <div className="flex items-center justify-between px-4 py-3 bg-bg-card rounded-full w-full max-w-sm mx-auto border border-glass-border mt-2 shadow-sm">
+        <div className="flex items-center justify-between px-4 py-3 bg-card rounded-full w-full max-w-sm mx-auto border border-glass-border mt-2 shadow-sm">
           <button 
             onClick={handlePrev}
             className="p-1 rounded-full hover:bg-glass-hover active:scale-95 transition-all text-text-secondary"
@@ -163,7 +163,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Heatmap Calendar Modal */}
       {showCalendar && (
-        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 bg-bg-card rounded-3xl p-5 shadow-2xl border border-glass-border animate-fade-in-up">
+        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 bg-card rounded-3xl p-5 shadow-2xl border border-glass-border animate-fade-in-up">
           <div className="flex items-center justify-between mb-4">
             <button onClick={handleCalendarPrevMonth} className="p-2 rounded-full hover:bg-glass-hover text-text-primary">
               <ChevronLeft className="w-5 h-5" />
