@@ -43,7 +43,7 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
         const cat = getCategoryIcon(t.category, t.type);
         const displayName = t.description || t.category;
         const displayLabel = isCyberpunk 
-          ? displayName.toUpperCase().replace(/\s+/g, '_') 
+          ? `>_ ${displayName.toUpperCase().replace(/\s+/g, '_')}` 
           : displayName;
 
         if (isCyberpunk) {
