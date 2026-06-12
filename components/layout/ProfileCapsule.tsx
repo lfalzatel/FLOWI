@@ -32,6 +32,7 @@ export function ProfileCapsule() {
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+  const [showInstallAlert, setShowInstallAlert] = useState(false);
   const ref               = useRef<HTMLDivElement>(null);
   const router            = useRouter();
 
@@ -244,8 +245,8 @@ export function ProfileCapsule() {
                             setDeferredPrompt(null);
                           }
                         } else {
-                          // Fallback
-                          alert('Para instalar la aplicación, abre el menú de opciones de tu navegador (los tres puntos o el botón de compartir) y selecciona "Agregar a la pantalla de inicio" o "Instalar aplicación".');
+                          // Fallback custom modal
+                          setShowInstallAlert(true);
                         }
                         setOpen(false);
                       }}
@@ -375,6 +376,27 @@ export function ProfileCapsule() {
       )}
       {isCategoriesModalOpen && (
         <ManageCategoriesModal onClose={() => setIsCategoriesModalOpen(false)} />
+      )}
+
+      {/* Console-style Install Alert Modal */}
+      {showInstallAlert && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+          <div className="bg-black border-2 border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.15)] p-8 max-w-sm w-full text-center animate-fade-in-up">
+            <h3 className="font-mono text-accent text-xl font-bold mb-4 tracking-widest uppercase">
+              {'>_ INSTRUCCION_MANUAL'}
+            </h3>
+            <p className="font-mono text-white/80 text-sm mb-6 leading-relaxed">
+              Para instalar la aplicación de forma nativa, abre el menú de opciones de tu navegador (generalmente los tres puntos arriba a la derecha o el botón de compartir abajo) y selecciona <strong className="text-accent">"Agregar a la pantalla de inicio"</strong> o <strong className="text-accent">"Instalar aplicación"</strong>.
+            </p>
+            <button
+              onClick={() => setShowInstallAlert(false)}
+              className="w-full bg-accent/10 border border-accent text-accent font-mono font-bold uppercase tracking-widest py-3 hover:bg-accent hover:text-black transition-colors"
+            >
+              {'>_ ENTENDIDO'}
+            </button>
+          </div>
+        </div>,
+        document.body
       )}
     </>
   );
