@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { X, LogOut, Shield, Mail, User as UserIcon, Phone, Camera, Trash2 } from 'lucide-react';
+import { X, LogOut, Shield, Mail, User as UserIcon, Phone, Camera, Trash2, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
@@ -84,6 +84,40 @@ export function ProfileModal({ onClose }: Props) {
   };
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [knownAccounts, setKnownAccounts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem('knownAccounts');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setKnownAccounts(parsed.filter((acc: any) => acc.uid !== user?.uid));
+        }
+      } catch (e) {}
+    }
+  }, [user]);
+
+  const handleAddAccount = async () => {
+    try {
+      const { signInWithGoogle } = await import('@/lib/auth');
+      const { isNewUser } = await signInWithGoogle(true);
+      window.location.href = isNewUser ? '/?newuser=true' : '/?login=true';
+    } catch (error) {
+      console.error('Error adding account:', error);
+    }
+  };
+
+  const handleSwitchAccount = async (email: string) => {
+    try {
+      const { signInWithGoogle } = await import('@/lib/auth');
+      const { isNewUser } = await signInWithGoogle(false, email);
+      window.location.href = isNewUser ? '/?newuser=true' : '/?login=true';
+    } catch (error) {
+      console.error('Error switching account:', error);
+    }
+  };
 
   const handleDeleteAccountClick = () => {
     setShowDeleteConfirm(true);
@@ -195,7 +229,43 @@ export function ProfileModal({ onClose }: Props) {
           </div>
         </div>
 
+        {/* Account Switcher */}
+        {knownAccounts.length > 0 && (
+          <div className="space-y-2 mb-4">
+            <p className={`text-xs uppercase tracking-widest font-bold ${isCyberpunk ? 'font-mono text-accent' : 'font-syne text-white/50'}`}>
+              {isCyberpunk ? '>_ CUENTAS_ALMACENADAS' : 'Cuentas almacenadas'}
+            </p>
+            {knownAccounts.map((acc, idx) => (
+              <div 
+                key={idx}
+                onClick={() => handleSwitchAccount(acc.email)}
+                className={`w-full flex items-center justify-between p-3 cursor-pointer transition-colors ${isCyberpunk ? 'bg-black border border-accent/30 hover:bg-accent/10 rounded-none' : 'bg-white/5 hover:bg-white/10 rounded-xl'}`}
+              >
+                <div className="flex items-center gap-3">
+                  {acc.photoURL ? (
+                    <img src={acc.photoURL} alt={acc.displayName} className={`w-8 h-8 ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`} />
+                  ) : (
+                    <div className={`w-8 h-8 ${isCyberpunk ? 'rounded-none border border-accent/30' : 'rounded-full bg-white/10'} flex items-center justify-center`}><UserIcon className="w-4 h-4 text-white/50" /></div>
+                  )}
+                  <div className="text-left">
+                    <p className={`text-sm font-bold ${isCyberpunk ? 'font-mono text-white tracking-wider' : 'text-white'}`}>{acc.displayName}</p>
+                    <p className={`text-xs ${isCyberpunk ? 'font-mono text-white/50 tracking-widest' : 'text-white/40'}`}>{acc.email}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="space-y-3">
+          <button
+            onClick={handleAddAccount}
+            className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-black border border-accent text-accent rounded-none uppercase font-mono tracking-widest hover:bg-accent hover:text-black' : 'bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 active:scale-[0.98]'}`}
+          >
+            <Plus className="w-4 h-4" />
+            {isCyberpunk ? '>_ ANADIR_CUENTA' : 'Añadir Cuenta'}
+          </button>
+
           <button
             onClick={handleSignOut}
             className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-transparent border border-white text-white rounded-none uppercase font-mono tracking-widest hover:bg-white hover:text-black' : 'bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 active:scale-[0.98]'}`}
