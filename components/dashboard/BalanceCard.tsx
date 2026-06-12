@@ -42,7 +42,7 @@ function AnimatedNumber({ value, delay = 0 }: { value: number, delay?: number })
 
 export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }: Props) {
   const { theme } = useTheme();
-  const isCyberpunk = theme === 'cyberpunk';
+  const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light';
 
   const cardGradient = isLight 
