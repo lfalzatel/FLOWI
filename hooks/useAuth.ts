@@ -9,6 +9,7 @@ export interface UserProfile {
   email: string;
   photoURL: string;
   role: string;
+  hiddenCategories?: string[];
 }
 
 export function useAuth() {

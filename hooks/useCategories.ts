@@ -13,7 +13,7 @@ export interface CategoryOption {
 }
 
 export function useCategories() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,8 +44,12 @@ export function useCategories() {
   }, [user]);
 
   // Combine base categories with custom ones for dropdowns
+  const visibleBaseCategories = BASE_CATEGORIES.filter(
+    cat => !profile?.hiddenCategories?.includes(cat.label)
+  );
+
   const allCategories: CategoryOption[] = [
-    ...BASE_CATEGORIES,
+    ...visibleBaseCategories,
     ...customCategories.map(cat => ({
       label: cat.label,
       icon: cat.icon,

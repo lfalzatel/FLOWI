@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc, arrayUnion } from 'firebase/firestore';
 
 export interface Transaction {
   id?: string;
@@ -148,6 +148,11 @@ export async function deleteDebt(id: string) {
 export async function updateUserProfile(userId: string, data: any) {
   const docRef = doc(db, 'users', userId);
   await setDoc(docRef, data, { merge: true });
+}
+
+export async function hideBaseCategory(userId: string, label: string) {
+  const docRef = doc(db, 'users', userId);
+  await setDoc(docRef, { hiddenCategories: arrayUnion(label) }, { merge: true });
 }
 export async function getCustomCategories(userId: string) {
   const categoriesRef = collection(db, 'customCategories');
