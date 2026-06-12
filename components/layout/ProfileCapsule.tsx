@@ -138,21 +138,44 @@ export function ProfileCapsule() {
                style={{ width: '272px' }}>
 
           {/* Profile header */}
-          <div className="px-4 py-4 flex items-center gap-3 border-b border-glass-border
-                          bg-gradient-to-r from-accent/5 to-transparent">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden
-                            ring-2 ring-accent/30 flex-shrink-0">
+          <div className="px-4 py-4 flex items-center gap-3 border-b border-glass-border bg-gradient-to-r from-accent/5 to-transparent">
+            <div className="relative w-11 h-11 rounded-full overflow-hidden ring-2 ring-accent/30 flex-shrink-0">
               <Image src={photoURL} alt={displayName} fill className="object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-text-primary truncate">{displayName}</p>
               <p className="text-xs text-text-secondary truncate">{email}</p>
-              <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full
-                               bg-accent/15 text-accent font-semibold tracking-wide uppercase">
+              <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-accent/15 text-accent font-semibold tracking-wide uppercase">
                 {role}
               </span>
             </div>
           </div>
+
+          {/* Theme Switcher */}
+          {allowedThemes && allowedThemes.length > 0 && (
+            <div className="p-1.5 border-b border-glass-border">
+              <div className="flex items-center justify-between gap-1 p-1 bg-glass border border-glass-border rounded-xl">
+                {allowedThemes.includes('light') && (
+                  <button onClick={() => setTheme('light')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'light' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                    <Sun className="w-4 h-4 mb-1" />
+                    <span className="text-[9px] font-semibold">Día</span>
+                  </button>
+                )}
+                {allowedThemes.includes('cyberpunk') && (
+                  <button onClick={() => setTheme('cyberpunk')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'cyberpunk' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                    <Monitor className="w-4 h-4 mb-1" />
+                    <span className="text-[9px] font-semibold">Cyber</span>
+                  </button>
+                )}
+                {allowedThemes.includes('kiloCode') && (
+                  <button onClick={() => setTheme('kiloCode')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'kiloCode' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                    <Terminal className="w-4 h-4 mb-1" />
+                    <span className="text-[9px] font-semibold">Kilo</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Menu items */}
           <div className="p-1.5">
@@ -222,43 +245,13 @@ export function ProfileCapsule() {
             ))}
           </div>
 
-          {/* Theme Switcher */}
-          {allowedThemes && allowedThemes.length > 0 && (
-            <div className="p-1.5 border-t border-white/5">
-              <div className="flex items-center justify-between gap-1 p-1 bg-glass border border-glass-border rounded-xl">
-                {allowedThemes.includes('light') && (
-                  <button onClick={() => setTheme('light')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'light' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
-                    <Sun className="w-4 h-4 mb-1" />
-                    <span className="text-[9px] font-semibold">Día</span>
-                  </button>
-                )}
-                {allowedThemes.includes('cyberpunk') && (
-                  <button onClick={() => setTheme('cyberpunk')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'cyberpunk' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
-                    <Monitor className="w-4 h-4 mb-1" />
-                    <span className="text-[9px] font-semibold">Cyber</span>
-                  </button>
-                )}
-                {allowedThemes.includes('kiloCode') && (
-                  <button onClick={() => setTheme('kiloCode')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'kiloCode' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
-                    <Terminal className="w-4 h-4 mb-1" />
-                    <span className="text-[9px] font-semibold">Kilo</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Sign out */}
-          <div className="p-1.5 border-t border-white/5">
+          <div className="p-1.5 border-t border-glass-border">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
-                         text-red-400/80 hover:text-red-400 hover:bg-red-500/8
-                         active:bg-red-500/15
-                         transition-all duration-150 group/so"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/8 active:bg-red-500/15 transition-all duration-150 group/so"
             >
-              <div className="w-7 h-7 rounded-lg bg-red-500/8 flex items-center justify-center
-                              group-hover/so:bg-red-500/15 transition-colors">
+              <div className="w-7 h-7 rounded-lg bg-red-500/8 flex items-center justify-center group-hover/so:bg-red-500/15 transition-colors">
                 <LogOut className="w-3.5 h-3.5" />
               </div>
               <span className="text-sm">Cerrar sesión</span>
