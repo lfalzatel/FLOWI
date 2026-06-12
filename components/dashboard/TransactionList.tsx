@@ -30,9 +30,9 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="glass-card p-8 rounded-2xl text-center">
+      <div className={`glass-card p-8 text-center ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
         <p className="text-3xl mb-2">💸</p>
-        <p className="text-text-muted text-sm">Sin transacciones aún</p>
+        <p className={`text-sm ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-widest' : 'text-text-muted'}`}>Sin transacciones aún</p>
       </div>
     );
   }
@@ -50,16 +50,16 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
           return (
             <div key={t.id || i}
                  onClick={() => onEdit && onEdit(t)}
-                 className={`glass-card flex items-center justify-between p-4 rounded-xl border-y border-r border-glass-border
+                 className={`glass-card flex items-center justify-between p-4 rounded-none border-y border-r border-glass-border
                             hover:bg-glass-hover transition-all duration-200
                             ${onEdit ? 'cursor-pointer' : ''}`}
                  style={{ borderLeft: `3px solid ${cat.color}` }}>
-              <p className="text-sm font-semibold text-text-primary font-mono truncate">
+              <p className="text-sm font-bold text-text-primary font-mono truncate uppercase tracking-widest">
                 {displayLabel}
               </p>
-              <p className={`text-sm font-bold flex-shrink-0 font-mono
+              <p className={`text-sm font-bold flex-shrink-0 font-mono tracking-widest
                              ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
-                {t.type === 'gasto' ? '-' : '+'}{t.amount}
+                {t.type === 'gasto' ? '-' : '+'}{fmt(t.amount)}
               </p>
             </div>
           );

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { TrendingUp, Plus } from 'lucide-react';
 import { getISOWeekString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function IngresosPage() {
   const { user, loading: authLoading } = useAuth();
@@ -21,6 +22,8 @@ export default function IngresosPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
+  const { theme } = useTheme();
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -62,8 +65,8 @@ export default function IngresosPage() {
       <main className="flex-1 p-4 pb-24 max-w-2xl mx-auto w-full">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-syne font-bold text-text-primary">Mis Ingresos</h1>
-            <p className="text-text-secondary text-sm mt-1">Historial completo de tus entradas</p>
+            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>Mis Ingresos</h1>
+            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>Historial completo de tus entradas</p>
           </div>
           <button
             onClick={() => setShowAdd(true)}
@@ -98,13 +101,13 @@ export default function IngresosPage() {
               <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
                 <TrendingUp className="w-3.5 h-3.5 text-accent" />
               </div>
-              <span className="text-xs font-medium text-text-secondary">Total Ingresado</span>
+              <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Ingresado</span>
             </div>
 
-            <p className="font-syne font-bold text-4xl text-text-primary mb-1 leading-none">
+            <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-4xl text-text-primary tracking-wider' : 'font-syne font-bold text-4xl text-text-primary'}`}>
               ${filteredTransactions.reduce((sum, e) => sum + e.amount, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-text-muted">{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
+            <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
           </div>
         </div>
 

@@ -15,6 +15,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { getISOWeekString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -28,6 +29,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
+  const { theme } = useTheme();
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
     setMounted(true);
@@ -121,8 +124,8 @@ export default function DashboardPage() {
         {/* Greeting */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-text-secondary">{greeting} 👋</p>
-            <h1 className="font-syne font-bold text-2xl text-accent">
+            <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/70 tracking-wider' : 'text-text-secondary'}`}>{greeting} 👋</p>
+            <h1 className={`${isTechTheme ? 'font-mono font-bold text-2xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-2xl text-accent'}`}>
               {profile?.name?.split(' ')[0] || 'Usuario'}
             </h1>
           </div>
@@ -164,10 +167,10 @@ export default function DashboardPage() {
         {/* Recent transactions */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-syne font-semibold text-base text-text-primary">
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-base text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-base text-text-primary'}`}>
               {filterType === 'all' ? 'Últimas transacciones' : 'Transacciones'}
             </h2>
-            <a href="/gastos" className="text-xs text-accent hover:underline">Ver todo</a>
+            <a href="/gastos" className={`text-xs ${isTechTheme ? 'font-mono text-accent uppercase hover:text-accent/80 transition-colors' : 'text-accent hover:underline'}`}>Ver todo</a>
           </div>
           {loading ? (
             <div className="space-y-2">

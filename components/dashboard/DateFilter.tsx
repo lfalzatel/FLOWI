@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getISOWeekString, formatFilterText, navigateFilter } from '@/lib/dateUtils';
 import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
+import { useTheme } from '@/components/ThemeProvider';
 
 type FilterType = 'all' | 'month' | 'week' | 'day';
 
@@ -18,6 +19,8 @@ interface Props {
 export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [] }: Props) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+  const { theme } = useTheme();
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   const handleTypeChange = (type: FilterType) => {
     onChangeType(type);
@@ -108,9 +111,9 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     <div className="flex flex-col gap-3 mb-6 relative z-40">
       {/* Pestañas superiores */}
       <div 
-        className="relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/10 rounded-[28px] bg-glass backdrop-blur-3xl border border-glass-border"
+        className={`relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/10 bg-glass backdrop-blur-3xl border border-glass-border ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-[28px]'}`}
       >
-        <div className="absolute inset-0 rounded-[28px] pointer-events-none overflow-hidden">
+        <div className={`absolute inset-0 pointer-events-none overflow-hidden ${isTechTheme ? 'rounded-none' : 'rounded-[28px]'}`}>
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
         </div>
@@ -126,9 +129,9 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
                   handleTypeChange(type);
                 }
               }}
-              className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all rounded-[24px] ${
+              className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all ${isTechTheme ? 'font-mono uppercase rounded-none tracking-widest' : 'rounded-[24px]'} ${
                 filterType === type 
-                  ? 'bg-accent text-black shadow-md' 
+                  ? `bg-accent text-black shadow-md ${isTechTheme ? 'border border-accent' : ''}` 
                   : 'text-accent hover:opacity-80'
               }`}
             >
@@ -140,15 +143,15 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Navegador inferior (oculto si es Todo) */}
       {filterType !== 'all' && (
-        <div className="flex items-center justify-between px-4 py-3 bg-card rounded-full w-full max-w-sm mx-auto border border-glass-border mt-2 shadow-sm">
+        <div className={`flex items-center justify-between px-4 py-3 bg-card w-full max-w-sm mx-auto border border-glass-border mt-2 shadow-sm ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-full'}`}>
           <button 
             onClick={handlePrev}
-            className="p-1 rounded-full hover:bg-glass-hover active:scale-95 transition-all text-text-secondary"
+            className={`p-1 hover:bg-glass-hover active:scale-95 transition-all text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           
-          <span className="font-semibold text-[13px] text-accent">
+          <span className={`font-semibold text-[13px] text-accent ${isTechTheme ? 'font-mono uppercase tracking-widest' : ''}`}>
             {formatFilterText(filterType, filterValue)}
           </span>
 

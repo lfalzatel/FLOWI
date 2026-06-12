@@ -44,8 +44,8 @@ export default function DeudasPage() {
         {/* Header section */}
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs font-medium text-text-muted uppercase tracking-wider">Mis Finanzas</span>
-            <h1 className="font-syne font-bold text-3xl text-text-primary">Deudas</h1>
+            <span className={`text-xs font-medium uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/70' : 'text-text-muted'}`}>Mis Finanzas</span>
+            <h1 className={`${isCyberpunk ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>Deudas</h1>
           </div>
           <button
             onClick={() => setShowAdd(true)}
@@ -68,19 +68,19 @@ export default function DeudasPage() {
               <div className="w-7 h-7 rounded-xl bg-orange-500/15 flex items-center justify-center">
                 <CreditCard className="w-3.5 h-3.5 text-orange-400" />
               </div>
-              <span className="text-xs font-medium text-text-secondary">Total Pendiente</span>
+              <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-orange-400/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Pendiente</span>
             </div>
 
-            <p className="font-syne font-bold text-4xl text-orange-400 mb-1 leading-none">
+            <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-4xl text-orange-400 tracking-wider' : 'font-syne font-bold text-4xl text-orange-400'}`}>
               {fmt(totalDeudas)}
             </p>
-            <p className="text-xs text-text-muted">Suma de todas tus deudas activas</p>
+            <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>Suma de todas tus deudas activas</p>
           </div>
         </div>
 
         {/* Debts List */}
         <div className="space-y-3">
-          <h2 className="font-syne font-semibold text-base text-text-primary">Todas las deudas</h2>
+          <h2 className={`${isCyberpunk ? 'font-mono font-bold text-base text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-base text-text-primary'}`}>Todas las deudas</h2>
           
           {debtsLoading ? (
             <div className="space-y-2">

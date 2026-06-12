@@ -77,13 +77,13 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
               <Wallet className="w-3.5 h-3.5 text-accent" />
             </div>
-            <span className="text-xs font-medium text-text-secondary">Balance total</span>
+            <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Balance total</span>
           </div>
 
-          <p className={`font-syne font-bold text-4xl md:text-5xl text-text-primary mb-1 leading-none ${isCyberpunk ? 'font-mono' : ''}`}>
+          <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-4xl md:text-5xl text-text-primary tracking-wider' : 'font-syne font-bold text-4xl md:text-5xl text-text-primary'}`}>
             <AnimatedNumber value={balance} delay={0.05} />
           </p>
-          <p className="text-xs text-text-muted">Este mes</p>
+          <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Este mes</p>
         </div>
       </div>
 
@@ -94,18 +94,18 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             <div className="w-6 h-6 rounded-lg bg-[var(--red)]/15 flex items-center justify-center">
               <TrendingDown className="w-3 h-3 text-[var(--red)]" />
             </div>
-            <span className="text-[11px] text-text-secondary font-medium">Gastos</span>
+            <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--red)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Gastos</span>
           </div>
-          <p className={`font-syne font-bold text-lg text-[var(--red)] ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={totalGastos} delay={0.15} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-lg text-[var(--red)] tracking-wider' : 'font-syne font-bold text-lg text-[var(--red)]'}`}><AnimatedNumber value={totalGastos} delay={0.15} /></p>
         </div>
         <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.25s' }}>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">
               <TrendingUp className="w-3 h-3 text-accent" />
             </div>
-            <span className="text-[11px] text-text-secondary font-medium">Ingresos</span>
+            <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Ingresos</span>
           </div>
-          <p className={`font-syne font-bold text-lg text-accent ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-lg text-accent tracking-wider' : 'font-syne font-bold text-lg text-accent'}`}><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
         </div>
         
         {/* Tarjeta de Deudas a lo ancho */}
@@ -114,9 +114,9 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             <div className="w-6 h-6 rounded-lg bg-[var(--yellow)]/15 flex items-center justify-center">
               <TrendingDown className="w-3 h-3 text-[var(--yellow)]" />
             </div>
-            <span className="text-[11px] text-text-secondary font-medium">Deudas Pendientes</span>
+            <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--yellow)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Deudas Pendientes</span>
           </div>
-          <p className={`font-syne font-bold text-lg text-[var(--yellow)] ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-lg text-[var(--yellow)] tracking-wider' : 'font-syne font-bold text-lg text-[var(--yellow)]'}`}><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
         </div>
       </div>
     </div>

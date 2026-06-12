@@ -7,6 +7,7 @@ import {
   PieChart, Plus, X, CreditCard,
 } from 'lucide-react';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
+import { useTheme } from '@/components/ThemeProvider';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Inicio',   href: '/' },
@@ -18,6 +19,8 @@ const navItems = [
 export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const pathname        = usePathname();
   const [showAdd, setShowAdd] = useState(false);
+  const { theme } = useTheme();
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   return (
     <>
@@ -35,36 +38,37 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       `}</style>
 
       <nav
-        className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50
+        className={`lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50
                    flex items-center gap-0.5 px-2.5 py-2
-                   rounded-[28px]
                    shadow-2xl shadow-black/10
-                   bg-glass backdrop-blur-3xl border border-glass-border"
+                   bg-glass backdrop-blur-3xl border border-glass-border
+                   ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-[28px]'}`}
       >
         {/* Inner highlight */}
-        <div className="absolute inset-0 rounded-[28px] pointer-events-none overflow-hidden">
+        <div className={`absolute inset-0 pointer-events-none overflow-hidden ${isTechTheme ? 'rounded-none' : 'rounded-[28px]'}`}>
           <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r
                           from-transparent via-white/20 to-transparent" />
         </div>
 
         {navItems.slice(0, 2).map(item => (
-          <NavItem key={item.href} {...item} active={pathname === item.href} />
+          <NavItem key={item.href} {...item} active={pathname === item.href} isTechTheme={isTechTheme} />
         ))}
 
         {/* FAB */}
         <button
           onClick={() => setShowAdd(true)}
-          className="relative mx-1.5 w-12 h-12 rounded-full flex-shrink-0
+          className={`relative mx-1.5 w-12 h-12 flex-shrink-0
                      flex items-center justify-center
                      bg-gradient-to-br from-accent to-accent-dim
                      shadow-lg shadow-accent/35
-                     active:scale-95 transition-transform duration-150"
+                     active:scale-95 transition-transform duration-150
+                     ${isTechTheme ? 'rounded-none border border-black' : 'rounded-full'}`}
         >
           <Plus className="w-5 h-5 text-black stroke-[2.5]" />
         </button>
 
         {navItems.slice(2).map(item => (
-          <NavItem key={item.href} {...item} active={pathname === item.href} />
+          <NavItem key={item.href} {...item} active={pathname === item.href} isTechTheme={isTechTheme} />
         ))}
       </nav>
 
@@ -73,18 +77,18 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   );
 }
 
-function NavItem({ icon: Icon, label, href, active }: any) {
+function NavItem({ icon: Icon, label, href, active, isTechTheme }: any) {
   return (
     <Link href={href}
       className={`relative flex flex-col items-center gap-0.5 px-3.5 py-2
-                  rounded-[20px] transition-all duration-200
+                  transition-all duration-200 ${isTechTheme ? 'rounded-none' : 'rounded-[20px]'}
                   ${active
-                    ? 'bg-accent text-black shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards]'
+                    ? `bg-accent text-black shadow-lg shadow-accent/35 animate-[push-and-settle_0.45s_cubic-bezier(0.175,0.885,0.32,1.275)_forwards] ${isTechTheme ? 'border border-black' : ''}`
                     : 'text-accent hover:opacity-80 active:text-black'
                   }`}
     >
       <Icon className={`w-[18px] h-[18px] relative z-10 ${active ? 'animate-[micro-bounce_0.4s_infinite_alternate] [animation-delay:0.45s]' : ''}`} />
-      <span className="text-[9px] font-medium relative z-10 leading-none">{label}</span>
+      <span className={`text-[9px] relative z-10 leading-none ${isTechTheme ? 'font-mono font-bold uppercase tracking-widest' : 'font-medium'}`}>{label}</span>
     </Link>
   );
 }
