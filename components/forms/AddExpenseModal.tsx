@@ -12,13 +12,14 @@ interface AddExpenseModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   transactionToEdit?: Transaction;
+  initialType?: 'gasto' | 'ingreso';
 }
 
-export function AddExpenseModal({ onClose, onSuccess, transactionToEdit }: AddExpenseModalProps) {
+export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initialType = 'gasto' }: AddExpenseModalProps) {
   const { user } = useAuth();
   const { allCategories } = useCategories();
   
-  const [type, setType] = useState<'gasto' | 'ingreso'>('gasto');
+  const [type, setType] = useState<'gasto' | 'ingreso'>(initialType);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');

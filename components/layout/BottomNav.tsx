@@ -68,7 +68,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
         ))}
       </nav>
 
-      {showAdd && <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={onSuccess} />}
+      {showAdd && <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={onSuccess} initialType={pathname === '/ingresos' ? 'ingreso' : 'gasto'} />}
     </>
   );
 }

@@ -120,6 +120,7 @@ export default function IngresosPage() {
       {/* Modal de Edición o Adición */}
       {(editingTransaction || showAdd) && (
         <AddExpenseModal
+          initialType="ingreso"
           onClose={() => {
             setEditingTransaction(null);
             setShowAdd(false);
@@ -130,6 +131,5 @@ export default function IngresosPage() {
       )}
     </div>
   );
-}
 
 

@@ -120,6 +120,7 @@ export default function GastosPage() {
       {/* Modal de Edición o Adición */}
       {(editingTransaction || showAdd) && (
         <AddExpenseModal
+          initialType="gasto"
           onClose={() => {
             setEditingTransaction(null);
             setShowAdd(false);
