@@ -36,20 +36,19 @@ export function ProfileCapsule() {
   const router            = useRouter();
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone) {
-      setIsInstallable(false);
+      setIsInstalled(true);
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setIsInstallable(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -235,15 +234,18 @@ export function ProfileCapsule() {
               <div key={i}>
                 {item.divider && <div className="my-1 border-t border-glass-border" />}
                 {item.label === 'Instalar app' ? (
-                  isInstallable && (
+                  !isInstalled && (
                     <button
                       onClick={async () => {
-                        if (!deferredPrompt) return;
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        if (outcome === 'accepted') {
-                          setIsInstallable(false);
-                          setDeferredPrompt(null);
+                        if (deferredPrompt) {
+                          deferredPrompt.prompt();
+                          const { outcome } = await deferredPrompt.userChoice;
+                          if (outcome === 'accepted') {
+                            setDeferredPrompt(null);
+                          }
+                        } else {
+                          // Fallback
+                          alert('Para instalar la aplicación, abre el menú de opciones de tu navegador (los tres puntos o el botón de compartir) y selecciona "Agregar a la pantalla de inicio" o "Instalar aplicación".');
                         }
                         setOpen(false);
                       }}
