@@ -115,8 +115,8 @@ export function ManageCategoriesModal({ onClose }: Props) {
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'}`}>
+    <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`} onClick={onClose}>
+      <div className={`w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'}`} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className={`absolute top-4 right-4 hover:text-white transition-colors ${isTechTheme ? 'text-accent' : 'text-white/50'}`}>
           <X className="w-5 h-5" />
         </button>
@@ -150,7 +150,7 @@ export function ManageCategoriesModal({ onClose }: Props) {
                         {cat.icon}
                       </div>
                       <div className="flex flex-col flex-1 min-w-0 justify-center">
-                        <span className={`font-medium break-words whitespace-normal leading-tight ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
+                        <span className={`font-medium truncate leading-tight ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
                         {!cat.isCustom && (
                           <span className={`w-max mt-1.5 text-[9px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/70 border border-accent/30' : 'bg-white/10 text-white/50 rounded'}`}>
                             Defecto
