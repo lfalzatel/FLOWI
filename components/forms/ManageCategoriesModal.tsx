@@ -134,14 +134,14 @@ export function ManageCategoriesModal({ onClose }: Props) {
               <div className="space-y-2 mt-4">
                 {allCategories.map((cat, i) => (
                   <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-3 border ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50' : 'rounded-xl bg-white/5 border-white/5'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
                         {cat.icon}
                       </div>
-                      <span className={`font-medium ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
-                      {!cat.isCustom && <span className={`text-[9px] px-1.5 py-0.5 ml-2 uppercase ${isTechTheme ? 'text-accent/70 border border-accent/30' : 'bg-white/10 text-white/50 rounded'}`}>Defecto</span>}
+                      <span className={`font-medium truncate ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
+                      {!cat.isCustom && <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/70 border border-accent/30' : 'bg-white/10 text-white/50 rounded'}`}>Defecto</span>}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 flex-shrink-0 ml-2">
                       <button onClick={() => handleEdit(cat)} className={`p-2 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
                         <Edit2 className="w-4 h-4" />
                       </button>
