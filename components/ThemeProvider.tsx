@@ -6,15 +6,20 @@ type Theme = 'light' | 'dark' | 'glassmorphism' | 'cyberpunk' | 'kiloCode';
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  allowedThemes: Theme[];
+  setAllowedThemes: (themes: Theme[]) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'glassmorphism',
   setTheme: () => null,
+  allowedThemes: ['light', 'cyberpunk', 'kiloCode'],
+  setAllowedThemes: () => null,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('glassmorphism');
+  const [allowedThemes, setAllowedThemesState] = useState<Theme[]>(['light', 'cyberpunk', 'kiloCode']);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('flowi-theme') as Theme;
@@ -24,6 +29,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.setAttribute('data-theme', 'glassmorphism');
     }
+
+    const savedAllowed = localStorage.getItem('flowi-allowed-themes');
+    if (savedAllowed) {
+      try {
+        const parsed = JSON.parse(savedAllowed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAllowedThemesState(parsed);
+        }
+      } catch(e) {}
+    }
   }, []);
 
   const setTheme = (newTheme: Theme) => {
@@ -32,8 +47,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
+  const setAllowedThemes = (themes: Theme[]) => {
+    setAllowedThemesState(themes);
+    localStorage.setItem('flowi-allowed-themes', JSON.stringify(themes));
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, allowedThemes, setAllowedThemes }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -7,10 +7,12 @@ import { ProfileModal } from '@/components/forms/ProfileModal';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
+import { useTheme } from '@/components/ThemeProvider';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
-  BarChart2, Shield, Share2, List
+  BarChart2, Shield, Share2, List,
+  Sun, Monitor, Terminal
 } from 'lucide-react';
 
 const menuItems = [
@@ -27,6 +29,7 @@ const menuItems = [
 
 export function ProfileCapsule() {
   const { user, profile } = useAuth();
+  const { theme, setTheme, allowedThemes } = useTheme();
   const [open, setOpen]   = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
@@ -109,7 +112,7 @@ export function ProfileCapsule() {
       {/* 🚀 Dropdown 🚀 */}
       {open && (
         <div className="absolute right-0 top-full mt-2.5 w-68
-                        bg-card backdrop-blur-3xl
+                        bg-deep
                         border border-glass-border rounded-2xl
                         shadow-2xl shadow-black/10
                         animate-slide-down origin-top-right
@@ -200,6 +203,32 @@ export function ProfileCapsule() {
               </div>
             ))}
           </div>
+
+          {/* Theme Switcher */}
+          {allowedThemes && allowedThemes.length > 0 && (
+            <div className="p-1.5 border-t border-white/5">
+              <div className="flex items-center justify-between gap-1 p-1 bg-glass border border-glass-border rounded-xl">
+                {allowedThemes.includes('light') && (
+                  <button onClick={() => setTheme('light')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'light' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                    <Sun className="w-4 h-4 mb-1" />
+                    <span className="text-[9px] font-semibold">Día</span>
+                  </button>
+                )}
+                {allowedThemes.includes('cyberpunk') && (
+                  <button onClick={() => setTheme('cyberpunk')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'cyberpunk' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                    <Monitor className="w-4 h-4 mb-1" />
+                    <span className="text-[9px] font-semibold">Cyber</span>
+                  </button>
+                )}
+                {allowedThemes.includes('kiloCode') && (
+                  <button onClick={() => setTheme('kiloCode')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'kiloCode' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                    <Terminal className="w-4 h-4 mb-1" />
+                    <span className="text-[9px] font-semibold">Kilo</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Sign out */}
           <div className="p-1.5 border-t border-white/5">

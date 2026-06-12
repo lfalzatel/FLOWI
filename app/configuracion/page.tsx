@@ -6,7 +6,18 @@ import { BottomNav } from '@/components/layout/BottomNav';
 
 export default function ConfigPage() {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, allowedThemes, setAllowedThemes } = useTheme();
+  
+  type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'cyberpunk' | 'kiloCode';
+
+  const toggleAllowedTheme = (t: ThemeType) => {
+    if (!allowedThemes || !setAllowedThemes) return;
+    if (allowedThemes.includes(t)) {
+      setAllowedThemes(allowedThemes.filter(th => th !== t));
+    } else {
+      setAllowedThemes([...allowedThemes, t]);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-deep text-text-primary p-6 pb-24 animate-fade-in">
@@ -115,6 +126,24 @@ export default function ConfigPage() {
               </div>
             </button>
 
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-lg font-semibold mb-4 text-text-secondary">Selector Rápido de Temas</h2>
+          <p className="text-sm text-text-muted mb-4">Elige qué temas quieres ver como acceso rápido en el menú desplegable de tu perfil.</p>
+          <div className="space-y-3">
+            {(['light', 'dark', 'glassmorphism', 'kiloCode', 'cyberpunk'] as ThemeType[]).map(t => (
+              <label key={t} className="flex items-center justify-between p-4 rounded-xl border border-glass-border bg-glass cursor-pointer hover:bg-glass-hover transition-all">
+                <span className="font-syne font-medium capitalize">{t === 'light' ? 'Día' : t === 'dark' ? 'Noche (Original)' : t}</span>
+                <input 
+                  type="checkbox" 
+                  className="w-5 h-5 rounded border-glass-strong text-accent focus:ring-accent focus:ring-offset-deep bg-deep"
+                  checked={allowedThemes?.includes(t) || false}
+                  onChange={() => toggleAllowedTheme(t)}
+                />
+              </label>
+            ))}
           </div>
         </section>
       </div>
