@@ -4,7 +4,7 @@ import { X, Plus, Trash2, Edit2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories, CategoryOption } from '@/hooks/useCategories';
 import { addCustomCategory, updateCustomCategory, deleteCustomCategory, CustomCategory, hideBaseCategory } from '@/lib/firestore';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from '@/components/ThemeProvider';
 
 const ICONS = ['📱', '🌐', '🍿', '💧', '💡', '🏢', '🔑', '⛽', '🔥', '🏦', '💳', '📦', '🍔', '🚌', '🎮', '🏠', '💰', '📈', '🎁', '🐶', '✈️', '👗', '💊', '🚗', '🎓', '🛒', '⚽'];
 const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899', '#E11D48', '#10B981', '#8B5CF6', '#F97316', '#EF4444', '#1D4ED8', '#FBBF24', '#D946EF', '#6B7280'];
