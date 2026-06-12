@@ -115,6 +115,7 @@ export default function GastosPage() {
         <TransactionList 
           transactions={filteredTransactions} 
           onEdit={(tx) => setEditingTransaction(tx)} 
+          animationKey={`${filterType}-${filterValue}`}
         />
       </main>
 

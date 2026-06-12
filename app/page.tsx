@@ -198,6 +198,7 @@ export default function DashboardPage() {
                 transactions={filteredTransactions} 
                 limit={filterType === 'all' ? 5 : undefined} 
                 onEdit={(tx) => setEditingTransaction(tx)} 
+                animationKey={`${filterType}-${filterValue}`}
              />
           )}
         </div>

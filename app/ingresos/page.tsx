@@ -115,6 +115,7 @@ export default function IngresosPage() {
         <TransactionList 
           transactions={filteredTransactions} 
           onEdit={(tx) => setEditingTransaction(tx)} 
+          animationKey={`${filterType}-${filterValue}`}
         />
       </main>
 

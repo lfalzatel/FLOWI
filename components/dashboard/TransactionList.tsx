@@ -8,6 +8,7 @@ interface Props {
   transactions: Transaction[]; 
   limit?: number; 
   onEdit?: (transaction: Transaction) => void;
+  animationKey?: string;
 }
 
 function fmt(n: number) {
@@ -24,14 +25,14 @@ function getCategoryIcon(category: string, type: string) {
   return cats.find(c => c.label === category) || { icon: '💡', color: '#6B7280' };
 }
 
-export function TransactionList({ transactions, limit, onEdit }: Props) {
+export function TransactionList({ transactions, limit, onEdit, animationKey }: Props) {
   const { theme } = useTheme();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const items = limit ? transactions.slice(0, limit) : transactions;
 
   if (items.length === 0) {
     return (
-      <div className={`glass-card p-8 text-center ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
+      <div key={animationKey} className={`glass-card p-8 text-center ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
         <p className="text-3xl mb-2">💸</p>
         <p className={`text-sm ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-widest' : 'text-text-muted'}`}>Sin transacciones aún</p>
       </div>
@@ -39,7 +40,7 @@ export function TransactionList({ transactions, limit, onEdit }: Props) {
   }
 
   return (
-    <div className="space-y-2">
+    <div key={animationKey} className="space-y-2">
       {items.map((t, i) => {
         const cat = getCategoryIcon(t.category, t.type);
         const displayName = t.description || t.category;
