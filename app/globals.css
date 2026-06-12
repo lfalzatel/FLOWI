@@ -163,7 +163,8 @@ body {
   z-index: 0;
 }
 
-[data-theme='cyberpunk'] body::before {
+[data-theme='cyberpunk'] body::before,
+[data-theme='kiloCode']::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
