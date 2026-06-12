@@ -78,6 +78,7 @@ export default function GastosPage() {
 
         {/* Filter */}
         <DateFilter 
+          transactions={transactions}
           filterType={filterType} 
           filterValue={filterValue} 
           onChangeType={setFilterType} 

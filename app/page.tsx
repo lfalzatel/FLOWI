@@ -140,6 +140,7 @@ export default function DashboardPage() {
 
         {/* Filter */}
         <DateFilter 
+          transactions={transactions}
           filterType={filterType} 
           filterValue={filterValue} 
           onChangeType={setFilterType} 

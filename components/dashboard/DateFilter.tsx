@@ -1,6 +1,9 @@
 'use client';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getISOWeekString, formatFilterText, navigateFilter } from '@/lib/dateUtils';
+import { Transaction } from '@/lib/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 type FilterType = 'all' | 'month' | 'week' | 'day';
 
@@ -9,12 +12,26 @@ interface Props {
   filterValue: string;
   onChangeType: (type: FilterType) => void;
   onChangeValue: (value: string) => void;
+  transactions?: Transaction[];
 }
 
-export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue }: Props) {
+export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [] }: Props) {
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+
   const handleTypeChange = (type: FilterType) => {
     onChangeType(type);
-    if (type === 'all') return;
+    if (type === 'all') {
+      setShowCalendar(false);
+      return;
+    }
+    
+    if (type === 'day') {
+      setShowCalendar(true);
+      setCalendarMonth(new Date()); // reset to current month
+    } else {
+      setShowCalendar(false);
+    }
     
     const now = new Date();
     if (type === 'month') {
@@ -36,21 +53,78 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     onChangeValue(navigateFilter(filterType, filterValue, 'next'));
   };
 
+  // --- CALENDAR LOGIC ---
+  const handleCalendarPrevMonth = () => {
+    setCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+  
+  const handleCalendarNextMonth = () => {
+    setCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleDaySelect = (d: Date) => {
+    // Para evitar desfases por zona horaria al hacer toISOString
+    const localStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+    onChangeType('day');
+    onChangeValue(localStr);
+    setShowCalendar(false);
+  };
+
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (year: number, month: number) => {
+    const day = new Date(year, month, 1).getDay();
+    return day === 0 ? 6 : day - 1; // 0 = Lunes, 6 = Domingo
+  };
+
+  const currentYear = calendarMonth.getFullYear();
+  const currentMonth = calendarMonth.getMonth();
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const blanksArray = Array.from({ length: firstDay }, (_, i) => i);
+
+  // Construir mapa de actividad para el heatmap
+  const activityMap = new Map<string, { gastos: number, ingresos: number, total: number }>();
+  let maxTotal = 1; // para evitar división por cero en el heatmap
+
+  transactions.forEach(t => {
+    const d = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date as any);
+    if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
+      const dateKey = d.getDate().toString();
+      const current = activityMap.get(dateKey) || { gastos: 0, ingresos: 0, total: 0 };
+      if (t.type === 'gasto') current.gastos += t.amount;
+      if (t.type === 'ingreso') current.ingresos += t.amount;
+      current.total += t.amount;
+      activityMap.set(dateKey, current);
+      if (current.total > maxTotal) maxTotal = current.total;
+    }
+  });
+
   return (
-    <div className="flex flex-col gap-3 mb-6">
+    <div className="flex flex-col gap-3 mb-6 relative">
       {/* Pestañas superiores */}
       <div className="flex items-center p-1 bg-[#FFD6EB]/10 rounded-full w-full max-w-sm mx-auto shadow-inner">
         {(['all', 'month', 'week', 'day'] as FilterType[]).map((type) => (
           <button
             key={type}
-            onClick={() => handleTypeChange(type)}
+            onClick={() => {
+              if (type === 'day' && filterType === 'day') {
+                setShowCalendar(true); // Toggle on
+              } else {
+                handleTypeChange(type);
+              }
+            }}
             className={`flex-1 py-2 text-[11px] font-bold tracking-wide transition-all rounded-full ${
               filterType === type 
                 ? 'bg-white text-[#D10074] shadow-md' 
                 : 'text-[#D10074]/70 hover:text-[#D10074]'
             }`}
           >
-            {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'HOY'}
+            {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'DÍA'}
           </button>
         ))}
       </div>
@@ -75,6 +149,72 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
           >
             <ChevronRight className="w-5 h-5" />
           </button>
+        </div>
+      )}
+
+      {/* Heatmap Calendar Modal */}
+      {showCalendar && (
+        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 bg-white rounded-3xl p-5 shadow-2xl border border-[#FFD6EB] animate-fade-in-up">
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={handleCalendarPrevMonth} className="p-2 rounded-full hover:bg-black/5 text-black">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <h4 className="font-bold text-sm text-black capitalize">
+              {calendarMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+            </h4>
+            <div className="flex items-center gap-1">
+              <button onClick={handleCalendarNextMonth} className="p-2 rounded-full hover:bg-black/5 text-black">
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <button onClick={() => setShowCalendar(false)} className="p-2 rounded-full hover:bg-black/5 text-black/40">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 text-center mb-2">
+            {['L','M','X','J','V','S','D'].map(day => (
+              <div key={day} className="text-[10px] font-bold text-black/40">{day}</div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1">
+            {blanksArray.map(b => <div key={`blank-${b}`} className="aspect-square"></div>)}
+            
+            {daysArray.map(day => {
+              const activity = activityMap.get(day.toString());
+              let bgOpacity = 0;
+              if (activity) {
+                // calculamos intensidad del 20% al 100% basada en el máximo del mes
+                bgOpacity = 0.2 + (0.8 * (activity.total / maxTotal));
+              }
+
+              return (
+                <button
+                  key={day}
+                  onClick={() => handleDaySelect(new Date(currentYear, currentMonth, day))}
+                  className="relative aspect-square rounded-xl flex items-center justify-center text-xs font-semibold hover:ring-2 hover:ring-[#D10074] transition-all"
+                  style={{
+                    backgroundColor: activity ? `rgba(209, 0, 116, ${bgOpacity})` : '#F3F4F6',
+                    color: activity && bgOpacity > 0.5 ? 'white' : 'black'
+                  }}
+                >
+                  {day}
+                  {activity && (
+                    <div className="absolute bottom-1 flex gap-0.5">
+                      {activity.ingresos > 0 && <div className="w-1 h-1 rounded-full bg-[#00E5A0]" />}
+                      {activity.gastos > 0 && <div className="w-1 h-1 rounded-full bg-red-400" />}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          
+          <div className="mt-4 flex items-center justify-center gap-4 text-[10px] font-medium text-black/40">
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#00E5A0]" /> Ingresos</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-400" /> Gastos</div>
+          </div>
         </div>
       )}
     </div>
