@@ -166,7 +166,11 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Heatmap Calendar Modal */}
       {showCalendar && (
-        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 bg-card rounded-3xl p-5 shadow-2xl border border-glass-border animate-fade-in-up">
+        <div className={`absolute top-[100%] left-0 right-0 z-50 mt-2 p-5 shadow-2xl border animate-fade-in-up ${
+          isTechTheme 
+            ? 'bg-deep rounded-none border-accent/40 shadow-[0_10px_50px_rgba(0,0,0,0.8)]' 
+            : 'bg-deep rounded-3xl border-glass-border shadow-black/20'
+        }`}>
           <div className="flex items-center justify-between mb-4">
             <button onClick={handleCalendarPrevMonth} className="p-2 rounded-full hover:bg-glass-hover text-text-primary">
               <ChevronLeft className="w-5 h-5" />
