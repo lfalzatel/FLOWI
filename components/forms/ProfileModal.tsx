@@ -83,9 +83,14 @@ export function ProfileModal({ onClose }: Props) {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDeleteAccountClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const executeDeleteAccount = async () => {
     if (!user) return;
-    if (!window.confirm('⚠️ AVISO DE SEGURIDAD ⚠️\n\nEsta acción es IRREVERSIBLE. Se borrarán todos tus datos y perderás el acceso. ¿Estás COMPLETAMENTE SEGURO de que quieres eliminar tu cuenta?')) return;
 
     try {
       await user.delete();
@@ -98,6 +103,8 @@ export function ProfileModal({ onClose }: Props) {
       } else {
         alert('Error al eliminar la cuenta. Por favor, intenta cerrar sesión e iniciar sesión de nuevo.');
       }
+    } finally {
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -198,7 +205,7 @@ export function ProfileModal({ onClose }: Props) {
           </button>
 
           <button
-            onClick={handleDeleteAccount}
+            onClick={handleDeleteAccountClick}
             className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-black border border-red-500/50 text-red-500 rounded-none uppercase font-mono tracking-widest hover:bg-red-500/10' : 'bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500/20 active:scale-[0.98]'}`}
           >
             <Trash2 className="w-4 h-4" />
@@ -206,6 +213,33 @@ export function ProfileModal({ onClose }: Props) {
           </button>
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+          <div className="bg-black border-2 border-red-500 rounded-none shadow-[0_0_50px_rgba(239,68,68,0.3)] p-8 max-w-sm w-full text-center animate-fade-in-up">
+            <h3 className="font-mono text-red-500 text-xl font-bold mb-4 tracking-widest uppercase">
+              {'>_ ADVERTENCIA_CRITICA'}
+            </h3>
+            <p className="font-mono text-white/80 text-sm mb-8 leading-relaxed">
+              ESTA ACCIÓN ES IRREVERSIBLE. SE BORRARÁN TODOS TUS DATOS DE MANERA PERMANENTE. ¿CONFIRMAR ELIMINACIÓN DE CUENTA?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={executeDeleteAccount}
+                className="w-full bg-red-500/10 border border-red-500 text-red-500 font-mono font-bold uppercase tracking-widest py-3 hover:bg-red-500 hover:text-black transition-colors"
+              >
+                {'>_ CONFIRMAR_PURGA'}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="w-full bg-transparent border border-white/30 text-white/70 font-mono font-bold uppercase tracking-widest py-3 hover:bg-white/10 transition-colors"
+              >
+                {'>_ ABORTAR'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
