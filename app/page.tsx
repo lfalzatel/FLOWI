@@ -24,7 +24,14 @@ export default function DashboardPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('login') === 'true' || params.get('newuser') === 'true') return true;
+      return !sessionStorage.getItem('appHasLoaded');
+    }
+    return true;
+  });
   const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
   const [splashDuration, setSplashDuration] = useState(1000);
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
