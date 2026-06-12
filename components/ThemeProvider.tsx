@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'glassmorphism' | 'cyberpunk';
+type Theme = 'light' | 'dark' | 'glassmorphism' | 'cyberpunk';
 
 interface ThemeContextType {
   theme: Theme;
@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('flowi-theme') as Theme;
-    if (savedTheme && ['light', 'glassmorphism', 'cyberpunk'].includes(savedTheme)) {
+    if (savedTheme && ['light', 'dark', 'glassmorphism', 'cyberpunk'].includes(savedTheme)) {
       setThemeState(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
     } else {
@@ -42,3 +42,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme() {
   return useContext(ThemeContext);
 }
+

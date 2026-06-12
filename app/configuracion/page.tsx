@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sun, Moon, Terminal } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Terminal, Layers } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { BottomNav } from '@/components/layout/BottomNav';
 
@@ -53,7 +53,7 @@ export default function ConfigPage() {
               }`}
             >
               <div className={`p-3 rounded-full mr-4 ${theme === 'glassmorphism' ? 'bg-accent/20 text-accent' : 'bg-glass-strong text-text-secondary'}`}>
-                <Moon className="w-6 h-6" />
+                <Layers className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-semibold font-syne text-lg">Glassmorphism</h3>
@@ -87,3 +87,4 @@ export default function ConfigPage() {
     </main>
   );
 }
+
