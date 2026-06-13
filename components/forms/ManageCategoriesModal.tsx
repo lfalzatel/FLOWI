@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCategories, CategoryOption } from '@/hooks/useCategories';
 import { addCustomCategory, updateCustomCategory, deleteCustomCategory, CustomCategory, hideBaseCategory } from '@/lib/firestore';
 import { useTheme } from '@/components/ThemeProvider';
+import { CategoryIcon } from '@/components/CategoryIcon';
 
 const ICONS = ['📱', '🌐', '🍿', '💧', '💡', '🏢', '🔑', '⛽', '🔥', '🏦', '💳', '📦', '🍔', '🚌', '🎮', '🏠', '💰', '📈', '🎁', '🐶', '✈️', '👗', '💊', '🚗', '🎓', '🛒', '⚽'];
 const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899', '#E11D48', '#10B981', '#8B5CF6', '#F97316', '#EF4444', '#1D4ED8', '#FBBF24', '#D946EF', '#6B7280'];
@@ -147,7 +148,7 @@ export function ManageCategoriesModal({ onClose }: Props) {
                   <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-3 border ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50' : 'rounded-xl bg-white/5 border-white/5'}`}>
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
-                        {cat.icon}
+                        <CategoryIcon icon={cat.icon} label={cat.label} className="w-5 h-5" />
                       </div>
                       <div className="flex flex-col flex-1 min-w-0 justify-center">
                         <span className={`font-medium truncate leading-tight ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
