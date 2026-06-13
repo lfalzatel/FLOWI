@@ -24,7 +24,7 @@ function fmtDate(date: Timestamp | Date) {
 
 function getCategoryIcon(category: string, type: string) {
   const cats = type === 'gasto' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
-  return cats.find(c => c.label === category) || { icon: '💡', color: '#6B7280' };
+  return cats.find(c => c.label === category) || { label: 'Otro', icon: '💡', color: '#6B7280' };
 }
 
 function RenderIcon({ icon, label, className }: { icon: string, label: string, className?: string }) {
