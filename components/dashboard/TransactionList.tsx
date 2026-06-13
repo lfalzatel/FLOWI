@@ -56,9 +56,12 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
                             hover:bg-glass-hover transition-all duration-200 animate-card-mix
                             ${onEdit ? 'cursor-pointer' : ''}`}
                  style={{ borderLeft: `3px solid ${cat.color}`, animationDelay: `${i * 0.1}s` }}>
-              <p className="text-sm font-bold text-text-primary font-mono truncate uppercase tracking-widest">
-                {displayLabel}
-              </p>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-lg opacity-80">{cat.icon}</span>
+                <p className="text-sm font-bold text-text-primary font-mono truncate uppercase tracking-widest">
+                  {displayLabel}
+                </p>
+              </div>
               <p className={`text-sm font-bold flex-shrink-0 font-mono tracking-widest
                              ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
                 <AnimatedNumber value={t.amount} prefix={t.type === 'gasto' ? '-' : '+'} delay={i * 0.1} />
