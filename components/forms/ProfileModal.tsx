@@ -19,6 +19,10 @@ export function ProfileModal({ onClose }: Props) {
   const { theme } = useTheme();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
 
+  const [userStats, setUserStats] = useState<{gastos: number, ingresos: number, deudas: number, loading: boolean}>({
+    gastos: 0, ingresos: 0, deudas: 0, loading: true
+  });
+
   useEffect(() => {
     if (profile && 'phone' in profile) {
       setPhone((profile as any).phone || '');
@@ -32,6 +36,31 @@ export function ProfileModal({ onClose }: Props) {
       document.body.style.overflow = 'auto';
     };
   }, []);
+
+  useEffect(() => {
+    if (user?.uid) {
+      loadUserStats(user.uid);
+    }
+  }, [user]);
+
+  const loadUserStats = async (userId: string) => {
+    try {
+      const { getUserTransactions, getUserDebts } = await import('@/lib/firestore');
+      const [gastosTx, ingresosTx, deudas] = await Promise.all([
+        getUserTransactions(userId, 'gasto'),
+        getUserTransactions(userId, 'ingreso'),
+        getUserDebts(userId)
+      ]);
+      const totalGastos = gastosTx.reduce((acc, t) => acc + t.amount, 0);
+      const totalIngresos = ingresosTx.reduce((acc, t) => acc + t.amount, 0);
+      const totalDeudas = deudas.reduce((acc, d) => acc + (d.totalAmount - d.paidAmount), 0);
+      
+      setUserStats({ gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      setUserStats(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -193,6 +222,34 @@ export function ProfileModal({ onClose }: Props) {
               </p>
             </div>
           </div>
+        </div>
+
+        <div className={`mb-6 p-4 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-white/5 rounded-2xl border border-white/10'}`}>
+          <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isCyberpunk ? 'font-mono text-accent' : 'text-white/70'}`}>Estadísticas Financieras</h4>
+          {userStats.loading ? (
+            <div className="flex justify-center py-4">
+              <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Ingresos</p>
+                <p className={`text-sm font-semibold text-green-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.ingresos.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Gastos</p>
+                <p className={`text-sm font-semibold text-red-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.gastos.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Deudas</p>
+                <p className={`text-sm font-semibold text-orange-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.deudas.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Balance</p>
+                <p className={`text-sm font-semibold text-accent ${isCyberpunk ? 'font-mono' : ''}`}>${(userStats.ingresos - userStats.gastos - userStats.deudas).toLocaleString()}</p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">
