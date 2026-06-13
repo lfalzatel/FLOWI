@@ -8,7 +8,7 @@ import { addCustomCategory, updateCustomCategory, deleteCustomCategory, CustomCa
 import { useTheme } from '@/components/ThemeProvider';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
-const ICONS = ['📱', '🌐', '🍿', '💧', '💡', '🏢', '🔑', '⛽', '🔥', '🏦', '💳', '📦', '🍔', '🚌', '🎮', '🏠', '💰', '📈', '🎁', '🐶', '✈️', '👗', '💊', '🚗', '🎓', '🛒', '⚽'];
+const ICONS = ['📱', '🌐', '🍿', '💧', '💡', '🏢', '🔑', '⛽', '🔥', '🏦', '💳', '📦', '🍔', '🚌', '🎮', '🏠', '💰', '📈', '🎁', '🐶', '✈️', '👗', '💊', '🚗', '🎓', '🛒', '⚽', 'netflix', 'google', 'youtube', 'yt music'];
 const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899', '#E11D48', '#10B981', '#8B5CF6', '#F97316', '#EF4444', '#1D4ED8', '#FBBF24', '#D946EF', '#6B7280'];
 
 interface Props {
@@ -227,7 +227,7 @@ export function ManageCategoriesModal({ onClose }: Props) {
                         : (isTechTheme ? 'bg-white/5 hover:bg-accent/10 hover:border hover:border-accent/50' : 'bg-white/5 hover:bg-white/10')
                     }`}
                   >
-                    {i}
+                    <CategoryIcon icon={i} label={i} className="w-6 h-6" />
                   </button>
                 ))}
               </div>
