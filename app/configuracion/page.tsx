@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/Header';
 import { ProfileModal } from '@/components/forms/ProfileModal';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { ManageThemesModal } from '@/components/forms/ManageThemesModal';
+import { ManageUsersModal } from '@/components/forms/ManageUsersModal';
 import { 
   ArrowLeft, Sun, Moon, Terminal, Layers, Zap, Palette,
   User, Wallet, Bell, Shield, 
