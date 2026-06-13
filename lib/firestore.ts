@@ -151,6 +151,7 @@ export interface UserProfile {
   email?: string;
   photoURL?: string;
   role?: string;
+  phone?: string;
   createdAt?: Timestamp | Date;
 }
 

@@ -167,6 +167,9 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                 </div>
                 <h3 className={`text-lg font-semibold ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{selectedUser.name || 'Sin nombre'}</h3>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{selectedUser.email}</p>
+                {selectedUser.phone && (
+                  <p className={`text-xs mt-1 font-medium ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{selectedUser.phone}</p>
+                )}
                 <p className={`text-[10px] mt-1 ${isTechTheme ? 'font-mono text-white/40' : 'text-white/40'}`}>Registrado: {selectedUser.createdAt ? (typeof (selectedUser.createdAt as any).toDate === 'function' ? (selectedUser.createdAt as any).toDate().toLocaleDateString() : (selectedUser.createdAt as Date).toLocaleDateString()) : 'N/A'}</p>
               </div>
 
