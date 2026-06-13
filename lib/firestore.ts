@@ -145,6 +145,25 @@ export async function deleteDebt(id: string) {
   await deleteDoc(docRef);
 }
 
+export interface UserProfile {
+  id?: string;
+  name?: string;
+  email?: string;
+  photoURL?: string;
+  role?: string;
+  createdAt?: Timestamp | Date;
+}
+
+export async function getAllUsers() {
+  const usersRef = collection(db, 'users');
+  const querySnapshot = await getDocs(usersRef);
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    createdAt: doc.data().createdAt instanceof Timestamp ? doc.data().createdAt.toDate() : new Date(),
+  })) as UserProfile[];
+}
+
 export async function updateUserProfile(userId: string, data: any) {
   const docRef = doc(db, 'users', userId);
   await setDoc(docRef, data, { merge: true });

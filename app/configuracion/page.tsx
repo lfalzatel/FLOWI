@@ -7,6 +7,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { Header } from '@/components/layout/Header';
 import { ProfileModal } from '@/components/forms/ProfileModal';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
+import { ManageUsersModal } from '@/components/forms/ManageUsersModal';
 import { 
   ArrowLeft, Sun, Moon, Terminal, Layers, Zap,
   User, Wallet, Bell, Shield, 
@@ -23,6 +24,7 @@ export default function ConfigPage() {
   
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+  const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
 
   type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'cyberpunk' | 'kiloCode';
 
@@ -96,6 +98,23 @@ export default function ConfigPage() {
               </div>
               <span className={`text-[10px] px-2 py-0.5 rounded-full ${isTechTheme ? 'font-mono bg-accent/10 text-accent border border-accent/20' : 'bg-glass-strong text-text-secondary'}`}>{profile?.role || 'Usuario'}</span>
             </div>
+
+            {/* Admin only: Manage Users */}
+            {profile?.role === 'admin' && (
+              <button onClick={() => setIsUsersModalOpen(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-t border-glass-border">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-red-500" />
+                  </div>
+                  <div className="text-left">
+                    <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Gestión de Usuarios</p>
+                    <p className="text-[10px] text-text-muted">Cambiar roles y administrar accesos</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-text-muted" />
+              </button>
+            )}
+
           </div>
         </section>
 
@@ -308,6 +327,9 @@ export default function ConfigPage() {
       )}
       {isCategoriesModalOpen && (
         <ManageCategoriesModal onClose={() => setIsCategoriesModalOpen(false)} />
+      )}
+      {isUsersModalOpen && (
+        <ManageUsersModal onClose={() => setIsUsersModalOpen(false)} currentUserEmail={user?.email || undefined} />
       )}
     </div>
   );

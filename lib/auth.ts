@@ -42,15 +42,22 @@ export async function signInWithGoogle(promptSelectAccount?: boolean, loginHint?
   const snap    = await getDoc(userRef);
 
   let isNewUser = false;
+  const isAdminEmail = user.email === 'lfalzatel@gmail.com';
+
   if (!snap.exists()) {
     isNewUser = true;
     await setDoc(userRef, {
       name:      user.displayName,
       email:     user.email,
       photoURL:  user.photoURL,
-      role:      'Personal',
+      role:      isAdminEmail ? 'admin' : 'Usuario',
       createdAt: serverTimestamp(),
     });
+  } else {
+    const data = snap.data();
+    if (isAdminEmail && data.role !== 'admin') {
+      await setDoc(userRef, { role: 'admin' }, { merge: true });
+    }
   }
 
   saveKnownAccount(user);
