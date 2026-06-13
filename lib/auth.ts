@@ -55,9 +55,15 @@ export async function signInWithGoogle(promptSelectAccount?: boolean, loginHint?
     });
   } else {
     const data = snap.data();
+    const updates: any = {
+      name: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+    };
     if (isAdminEmail && data.role !== 'admin') {
-      await setDoc(userRef, { role: 'admin' }, { merge: true });
+      updates.role = 'admin';
     }
+    await setDoc(userRef, updates, { merge: true });
   }
 
   saveKnownAccount(user);
