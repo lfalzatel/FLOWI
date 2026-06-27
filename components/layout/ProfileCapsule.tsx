@@ -378,26 +378,154 @@ export function ProfileCapsule() {
         <ManageCategoriesModal onClose={() => setIsCategoriesModalOpen(false)} />
       )}
 
-      {/* Console-style Install Alert Modal */}
+      {/* Detailed PWA Install Instructions Modal */}
       {showInstallAlert && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-4">
-          <div className="bg-black border-2 border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.15)] p-8 max-w-sm w-full text-center animate-fade-in-up">
-            <h3 className="font-mono text-accent text-xl font-bold mb-4 tracking-widest uppercase">
-              {'>_ INSTRUCCION_MANUAL'}
-            </h3>
-            <p className="font-mono text-white/80 text-sm mb-6 leading-relaxed">
-              Para instalar la aplicación de forma nativa, abre el menú de opciones de tu navegador (generalmente los tres puntos arriba a la derecha o el botón de compartir abajo) y selecciona <strong className="text-accent">"Agregar a la pantalla de inicio"</strong> o <strong className="text-accent">"Instalar aplicación"</strong>.
-            </p>
-            <button
-              onClick={() => setShowInstallAlert(false)}
-              className="w-full bg-accent/10 border border-accent text-accent font-mono font-bold uppercase tracking-widest py-3 hover:bg-accent hover:text-black transition-colors"
-            >
-              {'>_ ENTENDIDO'}
-            </button>
-          </div>
-        </div>,
+        <InstallInstructionsModal onClose={() => setShowInstallAlert(false)} isTechTheme={isTechTheme} />,
         document.body
       )}
     </>
+  );
+}
+
+// Sub-componente para las instrucciones de instalación con pestañas
+function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => void; isTechTheme: boolean }) {
+  const [activeTab, setActiveTab] = useState<'ios' | 'android' | 'desktop'>('ios');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      if (/iphone|ipad|ipod/.test(userAgent)) {
+        setActiveTab('ios');
+      } else if (/android/.test(userAgent)) {
+        setActiveTab('android');
+      } else {
+        setActiveTab('desktop');
+      }
+    }
+  }, []);
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+      <div className={`
+        w-full max-w-md overflow-hidden transition-all duration-300
+        ${isTechTheme 
+          ? 'bg-black border-2 border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.15)]' 
+          : 'glass-card rounded-3xl border border-glass-border bg-deep/95 shadow-2xl'
+        }
+      `}>
+        {/* Cabecera */}
+        <div className={`p-5 border-b border-glass-border ${isTechTheme ? 'bg-black' : 'bg-gradient-to-r from-[var(--accent-glow)] to-transparent'}`}>
+          <h3 className={`text-lg font-bold ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : 'text-text-primary font-syne'}`}>
+            {isTechTheme ? '>_ INSTALAR_FLOWI' : 'Instalar aplicación'}
+          </h3>
+          <p className={`text-xs mt-1 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-secondary'}`}>
+            Disfruta de la experiencia completa en pantalla de inicio.
+          </p>
+        </div>
+
+        {/* Pestañas de selección */}
+        <div className="flex border-b border-glass-border p-1.5 bg-glass gap-1">
+          {(['ios', 'android', 'desktop'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`
+                flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200
+                ${activeTab === tab 
+                  ? (isTechTheme ? 'bg-accent text-black font-mono uppercase' : 'bg-accent text-white shadow-sm') 
+                  : (isTechTheme ? 'font-mono text-accent/50 hover:text-accent' : 'text-text-secondary hover:text-text-primary hover:bg-glass')
+                }
+              `}
+            >
+              {tab === 'ios' && 'iPhone / iPad'}
+              {tab === 'android' && 'Android'}
+              {tab === 'desktop' && 'Computadora'}
+            </button>
+          ))}
+        </div>
+
+        {/* Contenido instructivo */}
+        <div className="p-6 space-y-4">
+          {activeTab === 'ios' && (
+            <div className="space-y-4 animate-fade-in-up">
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  Abre la aplicación en el navegador <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>Safari</strong> de tu dispositivo Apple.
+                </p>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  Toca el botón de <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>Compartir</strong> (el cuadro con una flecha hacia arriba) en la barra de opciones inferior.
+                </p>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  Busca la opción que dice <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Agregar a inicio"</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Add to Home Screen"</strong> y selecciónala.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'android' && (
+            <div className="space-y-4 animate-fade-in-up">
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  Toca el botón de opciones del navegador (los <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>tres puntos verticales</strong> arriba a la derecha).
+                </p>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  Busca y selecciona la opción <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Instalar aplicación"</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Agregar a la pantalla principal"</strong>.
+                </p>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  Confirma la instalación en el cuadro emergente y se creará un acceso directo en tu menú de aplicaciones.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'desktop' && (
+            <div className="space-y-4 animate-fade-in-up">
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  En la parte derecha de la barra de direcciones de tu navegador (Chrome, Edge, etc.), busca el icono de un <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>monitor con una flecha apuntando hacia abajo</strong> o una pequeña ventana de instalación.
+                </p>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
+                  Haz clic en él y confirma la instalación seleccionando <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Instalar"</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Botón de cierre */}
+        <div className="p-4 bg-glass border-t border-glass-border">
+          <button
+            onClick={onClose}
+            className={`
+              w-full py-3 text-center text-xs font-bold transition-all duration-200
+              ${isTechTheme 
+                ? 'bg-accent/10 border border-accent text-accent hover:bg-accent hover:text-black font-mono uppercase tracking-widest' 
+                : 'rounded-xl bg-gradient-to-r from-accent to-accent-dim text-white shadow-lg shadow-accent/20 hover:opacity-95 active:scale-[0.98]'
+              }
+            `}
+          >
+            {isTechTheme ? 'CERRAR_MENU.SYS' : '¡Entendido!'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
