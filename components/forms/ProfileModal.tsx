@@ -31,9 +31,19 @@ export function ProfileModal({ onClose }: Props) {
 
   // Bloquear scroll de fondo
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    const html = document.documentElement;
+    const body = document.body;
+    
+    html.style.overflow = 'hidden';
+    html.style.height = '100%';
+    body.style.overflow = 'hidden';
+    body.style.height = '100%';
+
     return () => {
-      document.body.style.overflow = 'auto';
+      html.style.overflow = '';
+      html.style.height = '';
+      body.style.overflow = '';
+      body.style.height = '';
     };
   }, []);
 
