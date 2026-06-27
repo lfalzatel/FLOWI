@@ -32,6 +32,7 @@ export const viewport: Viewport = {
 };
 
 import { DataProvider } from '@/components/DataProvider';
+import { WelcomeTour } from '@/components/layout/WelcomeTour';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <DataProvider>
             {children}
+            <WelcomeTour />
           </DataProvider>
         </ThemeProvider>
       </body>
