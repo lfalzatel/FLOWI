@@ -52,7 +52,7 @@ export const EXPENSE_CATEGORIES = BASE_CATEGORIES;
 export const INCOME_CATEGORIES = BASE_CATEGORIES;
 
 export async function getUserTransactions(userId: string, type?: 'gasto' | 'ingreso') {
-  const expensesRef = collection(db, 'expenses');
+  const expensesRef = collection(db, 'fl_expenses');
   let q = query(expensesRef, where('userId', '==', userId));
   
   if (type) {
@@ -78,7 +78,7 @@ export async function getUserTransactions(userId: string, type?: 'gasto' | 'ingr
 }
 
 export async function addExpense(expense: Omit<Transaction, 'id'> & { userId: string }) {
-  const expensesRef = collection(db, 'expenses');
+  const expensesRef = collection(db, 'fl_expenses');
   const docRef = await addDoc(expensesRef, {
     ...expense,
     date: expense.date || serverTimestamp(),
@@ -87,12 +87,12 @@ export async function addExpense(expense: Omit<Transaction, 'id'> & { userId: st
 }
 
 export async function updateExpense(id: string, expense: Partial<Transaction>) {
-  const docRef = doc(db, 'expenses', id);
+  const docRef = doc(db, 'fl_expenses', id);
   await updateDoc(docRef, expense);
 }
 
 export async function deleteExpense(id: string) {
-  const docRef = doc(db, 'expenses', id);
+  const docRef = doc(db, 'fl_expenses', id);
   await deleteDoc(docRef);
 }
 
@@ -109,7 +109,7 @@ export interface Debt {
 }
 
 export async function getUserDebts(userId: string) {
-  const debtsRef = collection(db, 'debts');
+  const debtsRef = collection(db, 'fl_debts');
   const q = query(debtsRef, where('userId', '==', userId));
   const querySnapshot = await getDocs(q);
   
@@ -131,7 +131,7 @@ export async function getUserDebts(userId: string) {
 }
 
 export async function addDebt(debt: Omit<Debt, 'id'>) {
-  const debtsRef = collection(db, 'debts');
+  const debtsRef = collection(db, 'fl_debts');
   const docRef = await addDoc(debtsRef, {
     ...debt,
     createdAt: serverTimestamp(),
@@ -140,12 +140,12 @@ export async function addDebt(debt: Omit<Debt, 'id'>) {
 }
 
 export async function updateDebt(id: string, debt: Partial<Debt>) {
-  const docRef = doc(db, 'debts', id);
+  const docRef = doc(db, 'fl_debts', id);
   await updateDoc(docRef, debt);
 }
 
 export async function deleteDebt(id: string) {
-  const docRef = doc(db, 'debts', id);
+  const docRef = doc(db, 'fl_debts', id);
   await deleteDoc(docRef);
 }
 
@@ -179,24 +179,24 @@ export async function hideBaseCategory(userId: string, label: string) {
   await setDoc(docRef, { hiddenCategories: arrayUnion(label) }, { merge: true });
 }
 export async function getCustomCategories(userId: string) {
-  const categoriesRef = collection(db, 'customCategories');
+  const categoriesRef = collection(db, 'fl_customCategories');
   const q = query(categoriesRef, where('userId', '==', userId));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as CustomCategory[];
 }
 
 export async function addCustomCategory(category: Omit<CustomCategory, 'id'>) {
-  const categoriesRef = collection(db, 'customCategories');
+  const categoriesRef = collection(db, 'fl_customCategories');
   const docRef = await addDoc(categoriesRef, category);
   return docRef.id;
 }
 
 export async function updateCustomCategory(id: string, category: Partial<CustomCategory>) {
-  const docRef = doc(db, 'customCategories', id);
+  const docRef = doc(db, 'fl_customCategories', id);
   await updateDoc(docRef, category);
 }
 
 export async function deleteCustomCategory(id: string) {
-  const docRef = doc(db, 'customCategories', id);
+  const docRef = doc(db, 'fl_customCategories', id);
   await deleteDoc(docRef);
 }
