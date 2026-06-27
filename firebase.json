@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "flowi",
     "public": "out",
     "ignore": [
       "firebase.json",

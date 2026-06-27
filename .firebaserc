@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "tienda-38d40"
-  }
+  },
+  "targets": {
+    "tienda-38d40": {
+      "hosting": {
+        "flowi": [
+          "flowi-gastos"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
