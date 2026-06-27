@@ -69,12 +69,12 @@ export default function DashboardPage() {
     if (!authLoading && !user) {
       if (sessionStorage.getItem('justLoggedOut') === 'true') {
         sessionStorage.removeItem('justLoggedOut');
-        router.push('/login?logout=true');
+        window.location.replace('/login?logout=true');
       } else {
-        router.push('/login');
+        window.location.replace('/login');
       }
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading]);
 
   if (!mounted) {
     return null;
