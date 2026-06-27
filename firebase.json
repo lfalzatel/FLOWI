@@ -2,6 +2,7 @@
   "hosting": {
     "target": "flowi",
     "public": "out",
+    "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "**/.*",
