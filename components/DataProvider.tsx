@@ -42,7 +42,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setLoadingDebts(true);
 
     // Listen to Expenses/Transactions
-    const expensesRef = collection(db, 'expenses');
+    const expensesRef = collection(db, 'fl_expenses');
     const expensesQuery = query(expensesRef, where('userId', '==', user.uid));
     
     const unsubscribeExpenses = onSnapshot(
@@ -74,7 +74,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     );
 
     // Listen to Debts
-    const debtsRef = collection(db, 'debts');
+    const debtsRef = collection(db, 'fl_debts');
     const debtsQuery = query(debtsRef, where('userId', '==', user.uid));
     
     const unsubscribeDebts = onSnapshot(
