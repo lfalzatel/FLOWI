@@ -1,15 +1,35 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ProfileCapsule } from './ProfileCapsule';
+import { X } from 'lucide-react';
+import { useTheme } from '@/components/ThemeProvider';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoModal, setShowLogoModal] = useState(false);
+  const { theme } = useTheme();
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (showLogoModal) {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    };
+  }, [showLogoModal]);
 
   return (
     <header
@@ -24,7 +44,10 @@ export function Header() {
       `}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2.5">
+      <div 
+        onClick={() => setShowLogoModal(true)}
+        className="flex items-center gap-2.5 cursor-pointer active:scale-95 transition-transform"
+      >
         <div className="relative w-9 h-9">
           {/* SVG Lines */}
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
@@ -75,6 +98,69 @@ export function Header() {
 
         <ProfileCapsule />
       </div>
+
+      {/* 🚀 Giant Centered Logo Modal 🚀 */}
+      {showLogoModal && typeof document !== 'undefined' && createPortal(
+        <div 
+          onClick={() => setShowLogoModal(false)}
+          className="fixed inset-0 bg-black/85 backdrop-blur-md z-[120] flex items-center justify-center p-4 animate-fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className={`
+              w-full max-w-xs p-8 text-center flex flex-col items-center justify-center relative
+              ${isTechTheme 
+                ? 'bg-black border border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.2)]' 
+                : 'glass-card rounded-3xl border border-glass-border bg-deep/90 shadow-2xl'
+              }
+            `}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setShowLogoModal(false)} 
+              className={`absolute top-4 right-4 ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-white/40 hover:text-white'}`}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Giant Logo */}
+            <div className="relative w-48 h-48 mb-6">
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                <circle
+                  cx="50" cy="50" r="46"
+                  fill="none"
+                  stroke="#10B981"
+                  strokeWidth="2.5"
+                  strokeDasharray="150 100"
+                  className="animate-[spin_6s_linear_infinite] origin-center"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="50" cy="50" r="41"
+                  fill="none"
+                  stroke="#3B82F6"
+                  strokeWidth="2.5"
+                  strokeDasharray="120 80"
+                  className="animate-[spin_9s_linear_infinite_reverse] origin-center"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className={`absolute inset-[15%] overflow-hidden border border-glass-border bg-card ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
+              </div>
+            </div>
+
+            {/* Brand Title */}
+            <h2 className={`text-2xl font-bold tracking-widest ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>
+              flowi
+            </h2>
+            <p className={`text-xs mt-1.5 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
+              Tu dinero, en flujo.
+            </p>
+          </div>
+        </div>,
+        document.body
+      )}
     </header>
   );
 }
