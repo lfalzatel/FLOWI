@@ -67,11 +67,14 @@ export default function DashboardPage() {
  
   useEffect(() => {
     if (!authLoading && !user) {
-      if (sessionStorage.getItem('justLoggedOut') === 'true') {
-        sessionStorage.removeItem('justLoggedOut');
-        window.location.replace('/login?logout=true');
-      } else {
-        window.location.replace('/login');
+      const isAlreadyAtLogin = window.location.pathname.startsWith('/login');
+      if (!isAlreadyAtLogin) {
+        if (sessionStorage.getItem('justLoggedOut') === 'true') {
+          sessionStorage.removeItem('justLoggedOut');
+          window.location.replace('/login?logout=true');
+        } else {
+          window.location.replace('/login');
+        }
       }
     }
   }, [user, authLoading]);
