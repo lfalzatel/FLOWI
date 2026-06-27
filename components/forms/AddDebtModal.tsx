@@ -17,6 +17,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   const [title, setTitle] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
+  const [description, setDescription] = useState('');
   const [abono, setAbono] = useState('');
   const [abonoDate, setAbonoDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       setTitle(debtToEdit.title);
       setTotalAmount(debtToEdit.totalAmount.toString());
       setPaidAmount(debtToEdit.paidAmount.toString());
+      setDescription(debtToEdit.description || '');
     }
   }, [debtToEdit]);
 
@@ -71,6 +73,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           totalAmount: total,
           paidAmount: paid,
           status,
+          description,
         });
       } else {
         await addDebt({
@@ -79,6 +82,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           totalAmount: total,
           paidAmount: paid,
           status,
+          description,
         });
       }
       onSuccess();
@@ -213,6 +217,17 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
               </div>
             </div>
           )}
+
+          {/* Description */}
+          <div>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none resize-none h-20 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+              placeholder="Ej. Dinero prestado para la compra de materiales..."
+            />
+          </div>
 
           {/* Action Buttons */}
           <div className="pt-2 space-y-2">

@@ -106,6 +106,7 @@ export interface Debt {
   paidAmount: number;
   status: 'pending' | 'paid';
   createdAt?: Timestamp | Date;
+  description?: string;
 }
 
 export async function getUserDebts(userId: string) {

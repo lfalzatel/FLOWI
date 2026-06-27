@@ -113,7 +113,12 @@ export default function DeudasPage() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className={`text-text-primary font-medium text-sm ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
+                        {debt.description && (
+                          <p className={`text-xs text-text-muted mt-0.5 max-w-[200px] sm:max-w-md line-clamp-1 italic ${isCyberpunk ? 'font-mono' : ''}`}>
+                            {debt.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-1.5 mt-1">
                           {debt.status === 'paid' ? (
                             <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium">
                               <Check className="w-3 h-3" /> Liquidada
