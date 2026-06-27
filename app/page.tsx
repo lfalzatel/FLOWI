@@ -24,7 +24,12 @@ export default function DashboardPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !sessionStorage.getItem('flowi_session_loaded');
+    }
+    return true;
+  });
   const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
   const [splashDuration, setSplashDuration] = useState(1000);
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
@@ -55,6 +60,9 @@ export default function DashboardPage() {
       setSplashDuration(1200);
       setSplashMode('reload');
     }
+    
+    // Guardar en sessionStorage que la sesión ya inició en esta pestaña
+    sessionStorage.setItem('flowi_session_loaded', 'true');
   }, []);
  
   useEffect(() => {

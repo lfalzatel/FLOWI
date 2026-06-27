@@ -103,58 +103,41 @@ export function Header() {
       {showLogoModal && typeof document !== 'undefined' && createPortal(
         <div 
           onClick={() => setShowLogoModal(false)}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md z-[120] flex items-center justify-center p-4 animate-fade-in"
+          className="fixed inset-0 bg-black/90 backdrop-blur-lg z-[120] flex flex-col items-center justify-center p-4 cursor-pointer animate-fade-in"
         >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className={`
-              w-full max-w-xs p-8 text-center flex flex-col items-center justify-center relative
-              ${isTechTheme 
-                ? 'bg-black border border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.2)]' 
-                : 'glass-card rounded-3xl border border-glass-border bg-deep/90 shadow-2xl'
-              }
-            `}
-          >
-            {/* Close Button */}
-            <button 
-              onClick={() => setShowLogoModal(false)} 
-              className={`absolute top-4 right-4 ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-white/40 hover:text-white'}`}
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Giant Logo */}
-            <div className="relative w-48 h-48 mb-6">
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                <circle
-                  cx="50" cy="50" r="46"
-                  fill="none"
-                  stroke="#10B981"
-                  strokeWidth="2.5"
-                  strokeDasharray="150 100"
-                  className="animate-[spin_6s_linear_infinite] origin-center"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="50" cy="50" r="41"
-                  fill="none"
-                  stroke="#3B82F6"
-                  strokeWidth="2.5"
-                  strokeDasharray="120 80"
-                  className="animate-[spin_9s_linear_infinite_reverse] origin-center"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className={`absolute inset-[15%] overflow-hidden border border-glass-border bg-card ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
-              </div>
+          {/* Giant Logo (Without card frame) */}
+          <div className="relative w-56 h-56 mb-8 select-none pointer-events-none">
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+              <circle
+                cx="50" cy="50" r="46"
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="2"
+                strokeDasharray="150 100"
+                className="animate-[spin_4s_linear_infinite] origin-center"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="50" cy="50" r="41"
+                fill="none"
+                stroke="#3B82F6"
+                strokeWidth="2"
+                strokeDasharray="120 80"
+                className="animate-[spin_6s_linear_infinite_reverse] origin-center"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-[16%] rounded-full overflow-hidden border border-white/10 bg-[#0A0A14]/90 shadow-2xl">
+              <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.12]" />
             </div>
+          </div>
 
-            {/* Brand Title */}
-            <h2 className={`text-2xl font-bold tracking-widest ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>
+          {/* Brand Text */}
+          <div className="text-center select-none pointer-events-none">
+            <h2 className={`text-3xl font-bold tracking-widest ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>
               flowi
             </h2>
-            <p className={`text-xs mt-1.5 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
+            <p className={`text-xs mt-2 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
               Tu dinero, en flujo.
             </p>
           </div>
