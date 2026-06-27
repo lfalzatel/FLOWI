@@ -45,17 +45,26 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
         )}
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2">
             <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
               <Wallet className="w-3.5 h-3.5 text-accent" />
             </div>
-            <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Balance total</span>
+            <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Dinero disponible</span>
           </div>
 
-          <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,48px)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,48px)]'} ${balance < 0 ? 'text-[var(--red)]' : balance > 0 ? 'text-accent' : 'text-text-primary'}`}>
+          <p className={`mb-3 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,44px)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,44px)]'} ${balance < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
             <AnimatedNumber value={balance} delay={0.05} />
           </p>
-          <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Este mes</p>
+
+          {/* Balance Neto con deudas incluidas */}
+          <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+            <span className={`text-[10px] ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-wider' : 'text-text-muted'}`}>
+              Balance Neto (Con Deudas)
+            </span>
+            <span className={`text-xs font-bold ${isCyberpunk ? 'font-mono' : 'font-syne'} ${(balance - totalDeudas) < 0 ? 'text-red-400' : 'text-accent/80'}`}>
+              ${(balance - totalDeudas).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
         </div>
       </div>
 

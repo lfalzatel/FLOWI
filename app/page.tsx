@@ -192,7 +192,7 @@ export default function DashboardPage() {
             <div className="h-3 bg-glass rounded w-1/4" />
           </div>
         ) : (
-          <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance - totalDeudas} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
+          <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
         )}
 
         {/* Chart */}
