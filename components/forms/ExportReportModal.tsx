@@ -267,7 +267,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             <div class="report-meta">
               <div class="report-title">Reporte de ${title}</div>
               <div><strong>Periodo:</strong> ${getPeriodString()}</div>
-              <div><strong>Generado:</strong> ${dateStr}</div>
+              <div><strong>Fecha y hora de consulta:</strong> ${dateStr}</div>
             </div>
           </div>
           
@@ -415,7 +415,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         doc.setTextColor(107, 114, 128);
         doc.setFont('helvetica', 'normal');
         doc.text(`Periodo: ${getPeriodString()}`, 130, 25);
-        doc.text(`Generado: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`, 130, 30);
+        doc.text(`Fecha y hora de consulta: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`, 130, 30);
         
         doc.line(14, 35, 196, 35);
 
