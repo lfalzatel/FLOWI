@@ -8,7 +8,14 @@ import { addCustomCategory, updateCustomCategory, deleteCustomCategory, CustomCa
 import { useTheme } from '@/components/ThemeProvider';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
-const ICONS = ['📱', '🌐', '🍿', '💧', '💡', '🏢', '🔑', '⛽', '🔥', '🏦', '💳', '📦', '🍔', '🚌', '🎮', '🏠', '💰', '📈', '🎁', '🐶', '✈️', '👗', '💊', '🚗', '🎓', '🛒', '⚽', 'netflix', 'google', 'youtube', 'yt music'];
+const ICONS = [
+  '🍔', '🍿', '🍺', '🚬', '🍷', '🍹', '☕', '🥖', // Comida, ocio, vicios
+  '📱', '🌐', '📡', '🔌', '💧', '💡', '📶', // Tecnología y servicios
+  '🏠', '🏢', '🏪', '🛒', '🛍️', '🔑', '📦', '🎁', // Hogar y comercio
+  '🚌', '🚗', '⛽', '✈️', '🎮', '⚽', '🐶', // Transporte y recreación
+  '💰', '📈', '🏦', '💳', '🔥', '💊', '🎓', '👗', // Finanzas, estudio y salud
+  'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos' // Marcas
+];
 const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899', '#E11D48', '#10B981', '#8B5CF6', '#F97316', '#EF4444', '#1D4ED8', '#FBBF24', '#D946EF', '#6B7280'];
 
 interface Props {

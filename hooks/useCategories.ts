@@ -99,7 +99,7 @@ export function useCategories() {
       isCustom: true,
       id: cat.id
     }))
-  ];
+  ].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
 
   return {
     customCategories,
