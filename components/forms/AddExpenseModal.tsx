@@ -64,11 +64,39 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     ]
   };
 
+  // Clasificación inteligente de pestañas por palabras clave en el nombre
+  const getTabByKeywords = (label: string): keyof typeof CATEGORIZED_ICONS | null => {
+    const text = label.toLowerCase();
+    if (/comida|restaurante|almuerzo|cena|desayuno|mercado|supermercado|cafe|café|panaderia|panadería|antojo|snack|licor|bar|cerveza|trago|bebida|cigarro|popsy|frisby|helado/.test(text)) {
+      return 'Comida y Ocio';
+    }
+    if (/banco|tarjeta|credito|crédito|ahorro|inversion|inversión|prestamo|préstamo|nequi|bancolombia|bbva|daviplata|davivienda|plata|efectivo|nomina|nómina|sueldo/.test(text)) {
+      return 'Bancos y Finanzas';
+    }
+    if (/claro|movistar|tigo|wom|epm|efigas|alcanos|agua|luz|energia|energía|gas|internet|television|televisión|telefono|teléfono|hogar|arriendo|alquiler|administracion|administración|apartamento|apto/.test(text)) {
+      return 'Hogar y Servicios';
+    }
+    if (/netflix|spotify|google|youtube|yt music|drive|gmail|photos|play store|playstore|app|susbcripcion|suscripción/.test(text)) {
+      return 'Marcas y Apps';
+    }
+    if (/deporte|gym|gimnasio|fitness|piscina|natacion|natación|futbol|fútbol|ciclo|ciclismo|bici|bicicleta|run|running|atletismo|nike|adidas|decathlon/.test(text)) {
+      return 'Deportes';
+    }
+    return null;
+  };
+
   // Helper para agrupar las categorías cargadas de Firestore en su respectiva pestaña
   const getCategoriesForTab = (tab: keyof typeof CATEGORIZED_ICONS) => {
     const iconsInTab = CATEGORIZED_ICONS[tab];
     return allCategories.filter(cat => {
+      // 1. Intentar clasificar por palabras clave en el nombre primero
+      const keywordTab = getTabByKeywords(cat.label);
+      if (keywordTab) return keywordTab === tab;
+
+      // 2. Si no hay palabras clave, clasificar por el icono asignado
       if (iconsInTab.includes(cat.icon)) return true;
+
+      // 3. Caer en 'Otros' si no pertenece a ninguna pestaña
       if (tab === 'Otros') {
         const isInAnyOtherTab = Object.entries(CATEGORIZED_ICONS).some(([t, icons]) => {
           return t !== 'Otros' && icons.includes(cat.icon);
@@ -79,9 +107,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     });
   };
 
-  const categoriesInActiveTab = getCategoriesForTab(activeDropdownTab).filter(cat => 
-    cat.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Si hay búsqueda escrita, buscar de manera global en todas las categorías sin importar la pestaña
+  const categoriesInActiveTab = searchQuery.trim() !== ''
+    ? allCategories.filter(cat => cat.label.toLowerCase().includes(searchQuery.toLowerCase()))
+    : getCategoriesForTab(activeDropdownTab);
 
   useEffect(() => {
     if (transactionToEdit) {
