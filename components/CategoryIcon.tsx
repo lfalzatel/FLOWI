@@ -46,11 +46,11 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
         {/* Elemento Geométrico Nequi */}
         <g opacity="0.95">
           {/* Rombo cian */}
-          <path d="M20 9L29 17L20 25L11 17L20 9Z" fill="#00FFD1" mixBlendMode="screen" opacity="0.8" />
+          <path d="M20 9L29 17L20 25L11 17L20 9Z" fill="#00FFD1" style={{ mixBlendMode: 'screen' }} opacity="0.8" />
           {/* Rombo magenta/fucsia */}
-          <path d="M16 13L25 21L16 29L7 21L16 13Z" fill="#FF007A" mixBlendMode="screen" opacity="0.8" />
+          <path d="M16 13L25 21L16 29L7 21L16 13Z" fill="#FF007A" style={{ mixBlendMode: 'screen' }} opacity="0.8" />
           {/* Rombo morado */}
-          <path d="M24 13L33 21L24 29L15 21L24 13Z" fill="#7000FF" mixBlendMode="screen" opacity="0.8" />
+          <path d="M24 13L33 21L24 29L15 21L24 13Z" fill="#7000FF" style={{ mixBlendMode: 'screen' }} opacity="0.8" />
         </g>
         <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="6.5" fontWeight="black" fontFamily="sans-serif" letterSpacing="0.5">NEQUI</text>
       </svg>
