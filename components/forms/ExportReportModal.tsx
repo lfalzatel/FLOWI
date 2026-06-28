@@ -61,6 +61,8 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     if (filterType === 'month') return `Mes: ${filterValue}`;
     if (filterType === 'week') return `Semana: ${filterValue}`;
     return `Día: ${filterValue}`;
+  };
+
   // Función para exportar a CSV/Excel (Estructura de Reporte Financiero Completo)
   const exportToCSV = () => {
     let csv = "\uFEFF"; // BOM para asegurar codificación UTF-8 correcta en Excel
