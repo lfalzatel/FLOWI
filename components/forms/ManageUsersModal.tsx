@@ -86,7 +86,16 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
       <div className={`${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'} p-6 w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto`}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
+        <button 
+          onClick={() => {
+            if (selectedUser) {
+              setSelectedUser(null);
+            } else {
+              onClose();
+            }
+          }} 
+          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+        >
           <X className="w-5 h-5" />
         </button>
 
