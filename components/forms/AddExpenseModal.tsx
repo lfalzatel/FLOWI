@@ -48,7 +48,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       '🍔', '🍿', '🍺', '🚬', '🍷', '🍹', '☕', '🥖', '🍕', '🍰', '🍉', '🍦', '🥩', '🍳', '🍽️'
     ],
     'Bancos y Finanzas': [
-      'bancolombia', 'bbva', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
+      'bancolombia', 'nequi', 'bbva', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
     ],
     'Hogar y Servicios': [
       'claro_hogar', 'claro_movil', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
@@ -236,9 +236,16 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 <div className="flex items-center gap-2">
                   {category ? (
                     <>
-                      <span className="text-xl">
-                        {allCategories.find(c => c.label === category)?.icon || '📝'}
-                      </span>
+                      {(() => {
+                        const matchingCat = allCategories.find(c => c.label === category);
+                        return (
+                          <CategoryIcon 
+                            icon={matchingCat?.icon || '📝'} 
+                            label={category} 
+                            className="w-5 h-5 text-xl flex items-center justify-center" 
+                          />
+                        );
+                      })()}
                       <span>{category}</span>
                     </>
                   ) : (
