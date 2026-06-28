@@ -297,7 +297,47 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     return csv;
   };
 
-  // Compartir reporte mediante Web Share API
+  // Exportar reporte como imagen PNG física
+  const exportToImage = async () => {
+    const previewElement = document.getElementById('report-preview-card');
+    if (!previewElement) return;
+
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      
+      // Crear clon para capturar la ficha completa extendida
+      const clone = previewElement.cloneNode(true) as HTMLElement;
+      clone.style.position = 'fixed';
+      clone.style.top = '-9999px';
+      clone.style.left = '-9999px';
+      clone.style.maxHeight = 'none';
+      clone.style.height = 'auto';
+      clone.style.width = '380px';
+      document.body.appendChild(clone);
+
+      const canvas = await html2canvas(clone, {
+        backgroundColor: '#0A0A0F',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+      
+      document.body.removeChild(clone);
+
+      // Descargar el PNG directamente
+      const url = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.png`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error al exportar imagen:', error);
+    }
+  };
+
+  // Compartir reporte mediante Web Share API (PDF, Excel o Imagen)
   const handleShare = async () => {
     if (!navigator.share) {
       alert('Tu navegador o dispositivo no soporta la función de compartir directamente.');
@@ -309,22 +349,121 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       const dateStr = new Date().toISOString().split('T')[0];
 
       if (format === 'excel') {
+        // 1. Compartir Excel (CSV)
         const csvText = getCSVString();
         const blob = new Blob(["\uFEFF" + csvText], { type: 'text/csv;charset=utf-8;' });
         fileToShare = new File([blob], `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${dateStr}.csv`, { type: 'text/csv' });
+      } else if (format === 'pdf') {
+        // 2. Compartir PDF Real (Usando jsPDF)
+        const { jsPDF } = await import('jspdf');
+        const doc = new jsPDF();
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(16, 185, 129); // Verde Flowi
+        doc.text("FLOWI", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(107, 114, 128);
+        doc.setFont('helvetica', 'normal');
+        doc.text("Tu dinero, en flujo.", 14, 25);
+
+        doc.setFontSize(14);
+        doc.setTextColor(17, 24, 39);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Reporte de ${title}`, 130, 20);
+        
+        doc.setFontSize(9);
+        doc.setTextColor(107, 114, 128);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Periodo: ${getPeriodString()}`, 130, 25);
+        doc.text(`Generado: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`, 130, 30);
+        
+        doc.line(14, 35, 196, 35);
+
+        // Resumen Ejecutivo en el PDF
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text("RESUMEN EJECUTIVO", 14, 45);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        if (debts.length > 0) {
+          const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
+          const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
+          const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
+          doc.text(`Total Deuda Original: $${total.toLocaleString()}`, 14, 52);
+          doc.text(`Total Abonado: $${paid.toLocaleString()}`, 14, 58);
+          doc.text(`Total Pendiente: $${pending.toLocaleString()}`, 14, 64);
+        } else {
+          const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
+          const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
+          const balanceReal = totalIngresos - totalGastos;
+          doc.text(`Total Ingresos: $${totalIngresos.toLocaleString()}`, 14, 52);
+          doc.text(`Total Gastos: $${totalGastos.toLocaleString()}`, 14, 58);
+          doc.text(`Dinero Disponible (Balance): $${balanceReal.toLocaleString()}`, 14, 64);
+        }
+
+        doc.line(14, 72, 196, 72);
+
+        // Detalle de transacciones
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text("DETALLE DEL REPORTE", 14, 80);
+
+        let y = 90;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        if (debts.length > 0) {
+          doc.text("Concepto", 14, y);
+          doc.text("Monto Total", 70, y);
+          doc.text("Abonado", 110, y);
+          doc.text("Pendiente", 150, y);
+          doc.text("Estado", 180, y);
+          y += 6;
+          doc.setFont('helvetica', 'normal');
+          debts.forEach(d => {
+            if (y > 280) { doc.addPage(); y = 20; }
+            doc.text(d.title, 14, y);
+            doc.text(`$${d.totalAmount.toLocaleString()}`, 70, y);
+            doc.text(`$${d.paidAmount.toLocaleString()}`, 110, y);
+            doc.text(`$${(d.totalAmount - d.paidAmount).toLocaleString()}`, 150, y);
+            doc.text(d.status === 'paid' ? 'Liquidada' : 'Pendiente', 180, y);
+            y += 6;
+          });
+        } else {
+          doc.text("Fecha y Hora", 14, y);
+          doc.text("Categoría", 60, y);
+          doc.text("Tipo", 105, y);
+          doc.text("Descripción", 130, y);
+          doc.text("Monto", 180, y);
+          y += 6;
+          doc.setFont('helvetica', 'normal');
+          transactions.forEach(t => {
+            if (y > 280) { doc.addPage(); y = 20; }
+            doc.text(formatTimestamp(t.date), 14, y);
+            doc.text(t.category, 60, y);
+            doc.text(t.type === 'gasto' ? 'Gasto' : 'Ingreso', 105, y);
+            doc.text(t.description || '-', 130, y);
+            doc.text(`$${t.amount.toLocaleString()}`, 180, y);
+            y += 6;
+          });
+        }
+
+        const pdfBlob = doc.output('blob');
+        fileToShare = new File([pdfBlob], `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${dateStr}.pdf`, { type: 'application/pdf' });
       } else {
+        // 3. Compartir Imagen (PNG)
         const previewElement = document.getElementById('report-preview-card');
         if (previewElement) {
           const html2canvas = (await import('html2canvas')).default;
-          
-          // Crear un clon fuera de pantalla para capturar todo el reporte sin scrollbar ni recortes
           const clone = previewElement.cloneNode(true) as HTMLElement;
           clone.style.position = 'fixed';
           clone.style.top = '-9999px';
           clone.style.left = '-9999px';
-          clone.style.maxHeight = 'none'; // Quitar límite de altura
+          clone.style.maxHeight = 'none';
           clone.style.height = 'auto';
-          clone.style.width = '380px';    // Ancho fijo óptimo de tarjeta
+          clone.style.width = '380px';
           document.body.appendChild(clone);
 
           const canvas = await html2canvas(clone, {
@@ -334,7 +473,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             useCORS: true
           });
           
-          document.body.removeChild(clone); // Limpiar el DOM
+          document.body.removeChild(clone);
 
           const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
           if (blob) {
@@ -530,7 +669,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                   <Share2 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={format === 'excel' ? exportToCSV : exportToPDF}
+                  onClick={format === 'excel' ? exportToCSV : format === 'pdf' ? exportToPDF : exportToImage}
                   className={`flex-[2] py-3 text-xs font-bold transition-all flex items-center justify-center gap-2 ${isTechTheme ? 'bg-accent/20 border border-accent text-accent hover:bg-accent hover:text-black rounded-none font-mono uppercase' : 'bg-gradient-to-r from-accent to-accent-dim text-black rounded-xl hover:opacity-90'}`}
                 >
                   <Download className="w-4 h-4" />
