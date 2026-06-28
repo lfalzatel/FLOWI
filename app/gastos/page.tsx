@@ -132,7 +132,7 @@ export default function GastosPage() {
 
         {/* Chart */}
         <div className="mb-6">
-          <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} />
+          <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} type="gasto" />
         </div>
 
         {/* Lista */}

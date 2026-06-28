@@ -8,6 +8,7 @@ interface Props {
   transactions: Transaction[];
   filterType?: 'all' | 'month' | 'week' | 'day';
   filterValue?: string;
+  type?: 'all' | 'gasto' | 'ingreso';
 }
 
 function buildChartData(transactions: Transaction[], filterType: string = 'all', filterValue: string = '') {
@@ -62,22 +63,25 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
     result.push({ day: key, ...value });
   });
 
-  if (filterType === 'all') {
-     // Para "all", si no preseedeamos, necesitamos ordenar por fecha. 
-     // Re-ordenamos si es 'all' (los demás ya están ordenados por pre-seed)
-     // Un truco simple para "all" es ordenar el array final aunque las keys son complejas.
-     // Es mejor pre-ordenar las transacciones y dejar que el Map mantenga el orden de inserción.
-  }
-
   return result;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, chartType = 'all' }: any) => {
   if (!active || !payload?.length) return null;
+  
+  // Filtrar payload según el tipo de gráfico
+  const filteredPayload = payload.filter((p: any) => {
+    if (chartType === 'gasto') return p.name === 'gastos';
+    if (chartType === 'ingreso') return p.name === 'ingresos';
+    return true;
+  });
+
+  if (filteredPayload.length === 0) return null;
+
   return (
     <div className="bg-card border border-glass-border rounded-xl px-3 py-2 shadow-xl">
       <p className="text-xs text-text-secondary mb-1">{label}</p>
-      {payload.map((p: any) => (
+      {filteredPayload.map((p: any) => (
         <p key={p.name} className="text-xs font-semibold" style={{ color: p.color }}>
           {p.name === 'gastos' ? 'Gastos' : 'Ingresos'}: ${p.value.toLocaleString('es-MX')}
         </p>
@@ -86,7 +90,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-export function ExpenseChart({ transactions, filterType = 'all', filterValue = '' }: Props) {
+export function ExpenseChart({ transactions, filterType = 'all', filterValue = '', type = 'all' }: Props) {
   // If filterType is 'all', sort transactions so the Map insertion order is correct
   const sortedTransactions = filterType === 'all' 
     ? [...transactions].sort((a, b) => {
@@ -105,17 +109,24 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
     'day': 'Hoy'
   };
 
+  const showGastos = type === 'all' || type === 'gasto';
+  const showIngresos = type === 'all' || type === 'ingreso';
+
   return (
     <div className="glass-card p-5 rounded-2xl">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-syne font-bold text-sm text-text-primary">{titleMap[filterType] || 'Resumen'}</h3>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 text-[10px] text-text-muted">
-            <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Gastos
-          </span>
-          <span className="flex items-center gap-1 text-[10px] text-text-muted">
-            <span className="w-2 h-2 rounded-full bg-accent inline-block" /> Ingresos
-          </span>
+          {showGastos && (
+            <span className="flex items-center gap-1 text-[10px] text-text-muted">
+              <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Gastos
+            </span>
+          )}
+          {showIngresos && (
+            <span className="flex items-center gap-1 text-[10px] text-text-muted">
+              <span className="w-2 h-2 rounded-full bg-accent inline-block" /> Ingresos
+            </span>
+          )}
         </div>
       </div>
       <ResponsiveContainer width="100%" height={160}>
@@ -134,11 +145,15 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
                  axisLine={false} tickLine={false} />
           <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
                  axisLine={false} tickLine={false} />
-          <Tooltip content={<CustomTooltip />} />
-          <Area type="monotone" dataKey="gastos"   stroke="#FF5B5B" strokeWidth={2}
-                fill="url(#gastos)"   dot={false} />
-          <Area type="monotone" dataKey="ingresos" stroke="#00E5A0" strokeWidth={2}
-                fill="url(#ingresos)" dot={false} />
+          <Tooltip content={<CustomTooltip chartType={type} />} />
+          {showGastos && (
+            <Area type="monotone" dataKey="gastos"   stroke="#FF5B5B" strokeWidth={2}
+                  fill="url(#gastos)"   dot={false} />
+          )}
+          {showIngresos && (
+            <Area type="monotone" dataKey="ingresos" stroke="#00E5A0" strokeWidth={2}
+                  fill="url(#ingresos)" dot={false} />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>
