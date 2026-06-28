@@ -31,7 +31,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [categoriesInitialView, setCategoriesInitialView] = useState<'list' | 'form'>('list');
 
-  const [activeDropdownTab, setActiveDropdownTab] = useState<'Comida y Ocio' | 'Bancos y Finanzas' | 'Hogar y Servicios' | 'Marcas y Apps' | 'Otros'>('Comida y Ocio');
+  const [activeDropdownTab, setActiveDropdownTab] = useState<'Comida y Ocio' | 'Bancos y Finanzas' | 'Hogar y Servicios' | 'Marcas y Apps' | 'Deportes' | 'Otros'>('Comida y Ocio');
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -56,8 +56,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     'Marcas y Apps': [
       'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos'
     ],
+    'Deportes': [
+      'deportes', '⚽', '🏋️‍♂️', '🚲', '🏃‍♂️'
+    ],
     'Otros': [
-      'parqueadero', 'cine', 'deportes', '🚗', '⛽', '🚌', '✈️', '🏍️', '🚲', '🎮', '⚽', '🐶', '🐱', '🏥', '💊', '🎓', '👗', '🎁', '💈', '🏋️‍♂️'
+      'parqueadero', 'cine', '🚗', '⛽', '🚌', '✈️', '🏍️', '🎮', '🐱', '🐶', '🏥', '💊', '🎓', '👗', '🎁', '💈'
     ]
   };
 
