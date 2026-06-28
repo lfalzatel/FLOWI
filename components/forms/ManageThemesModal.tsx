@@ -1,6 +1,6 @@
 'use client';
-import { useEffect } from 'react';
-import { X, Sun, Moon, Terminal, Layers, Zap, Palette } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 
 interface Props {
@@ -13,19 +13,61 @@ export function ManageThemesModal({ onClose }: Props) {
   const { theme, setTheme, allowedThemes, setAllowedThemes } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
+  // Usamos un estado local para no mutar el tema global hasta hacer clic en "Guardar"
+  const [localAllowed, setLocalAllowed] = useState<ThemeType[]>([]);
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
+    if (allowedThemes) {
+      setLocalAllowed([...allowedThemes] as ThemeType[]);
+    }
     return () => { document.body.style.overflow = 'auto'; };
-  }, []);
+  }, [allowedThemes]);
 
   const toggleAllowedTheme = (t: ThemeType) => {
-    if (!allowedThemes || !setAllowedThemes) return;
-    if (allowedThemes.includes(t)) {
-      setAllowedThemes(allowedThemes.filter(th => th !== t));
+    if (localAllowed.includes(t)) {
+      // Remover y reordenar
+      const filtered = localAllowed.filter(th => th !== t);
+      setLocalAllowed(filtered);
     } else {
-      setAllowedThemes([...allowedThemes, t]);
+      // Agregar al final si no excede el límite razonable para interacción (por ejemplo 3)
+      if (localAllowed.length >= 3) {
+        // Opcional: no permitir agregar más de 3
+        return;
+      }
+      setLocalAllowed([...localAllowed, t]);
     }
   };
+
+  const handleSave = () => {
+    if (localAllowed.length < 2 || localAllowed.length > 3) return;
+    if (setAllowedThemes) {
+      setAllowedThemes(localAllowed);
+    }
+    onClose();
+  };
+
+  const getThemeIcon = (t: ThemeType) => {
+    switch (t) {
+      case 'light': return <Sun className="w-4 h-4" />;
+      case 'dark': return <Moon className="w-4 h-4" />;
+      case 'glassmorphism': return <Layers className="w-4 h-4" />;
+      case 'cyberpunk': return <Terminal className="w-4 h-4" />;
+      case 'kiloCode': return <Zap className="w-4 h-4" />;
+    }
+  };
+
+  const getThemeLabel = (t: ThemeType) => {
+    switch (t) {
+      case 'light': return 'Día';
+      case 'dark': return 'Noche (Original)';
+      case 'glassmorphism': return 'Glassmorphism';
+      case 'cyberpunk': return 'Cyberpunk';
+      case 'kiloCode': return 'KiloCode';
+    }
+  };
+
+  const isValidCount = localAllowed.length >= 2 && localAllowed.length <= 3;
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
@@ -47,7 +89,7 @@ export function ManageThemesModal({ onClose }: Props) {
         </div>
 
         <div className="space-y-6">
-          {/* Temas Activo */}
+          {/* Tema Activo */}
           <div>
             <p className={`text-sm font-medium text-white mb-3 ${isTechTheme ? 'font-mono' : ''}`}>Tema Visual Activo</p>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -78,21 +120,74 @@ export function ManageThemesModal({ onClose }: Props) {
 
           {/* Selector rápido en menú */}
           <div>
-            <p className={`text-sm font-medium text-white mb-3 ${isTechTheme ? 'font-mono' : ''}`}>Modos en Menú Desplegable</p>
+            <div className="flex justify-between items-center mb-1">
+              <p className={`text-sm font-medium text-white ${isTechTheme ? 'font-mono' : ''}`}>Modos en Menú Desplegable</p>
+              <span className={`text-[10px] px-2 py-0.5 rounded ${isValidCount ? 'text-accent bg-accent/10' : 'text-red-400 bg-red-500/10'} ${isTechTheme ? 'font-mono' : ''}`}>
+                {localAllowed.length} seleccionados (Mín 2, Máx 3)
+              </span>
+            </div>
+            <p className="text-[11px] text-text-muted mb-3">Toca los temas en el orden que quieres que aparezcan en el menú rápido.</p>
+            
             <div className="space-y-2">
-              {(['light', 'dark', 'glassmorphism', 'kiloCode', 'cyberpunk'] as ThemeType[]).map(t => (
-                <label key={t} className="flex items-center justify-between p-3 rounded-xl border border-glass-border bg-glass cursor-pointer hover:bg-glass-hover transition-all">
-                  <span className={`text-sm font-medium capitalize text-white ${isTechTheme ? 'font-mono' : 'font-syne'}`}>{t === 'light' ? 'Día' : t === 'dark' ? 'Noche (Original)' : t}</span>
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 rounded border-glass-strong text-accent focus:ring-accent focus:ring-offset-deep bg-deep"
-                    checked={allowedThemes?.includes(t) || false}
-                    onChange={() => toggleAllowedTheme(t)}
-                  />
-                </label>
-              ))}
+              {(['light', 'dark', 'glassmorphism', 'cyberpunk', 'kiloCode'] as ThemeType[]).map(t => {
+                const selectedIndex = localAllowed.indexOf(t);
+                const isSelected = selectedIndex !== -1;
+                
+                return (
+                  <button 
+                    key={t} 
+                    onClick={() => toggleAllowedTheme(t)}
+                    className={`w-full flex items-center justify-between p-3.5 rounded-xl border transition-all ${
+                      isSelected 
+                        ? 'border-accent/40 bg-accent/5 text-white' 
+                        : 'border-glass-border bg-glass text-white/60 hover:bg-glass-hover'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSelected ? 'bg-accent/10 text-accent' : 'bg-white/5 text-white/40'}`}>
+                        {getThemeIcon(t)}
+                      </div>
+                      <span className={`text-sm font-semibold ${isTechTheme ? 'font-mono' : 'font-syne'}`}>
+                        {getThemeLabel(t)}
+                      </span>
+                    </div>
+
+                    {isSelected ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold bg-accent text-black w-5 h-5 rounded-full flex items-center justify-center">
+                          {selectedIndex + 1}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border border-white/20" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
+        </div>
+
+        {/* Botón de Guardar */}
+        <div className="mt-6 pt-4 border-t border-glass-border flex gap-3">
+          <button
+            onClick={onClose}
+            className={`flex-1 py-3 text-xs font-bold transition-all border ${isTechTheme ? 'border-accent/30 hover:border-accent text-accent rounded-none font-mono' : 'border-white/10 hover:bg-white/5 text-text-secondary rounded-xl'}`}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!isValidCount}
+            className={`flex-[2] py-3 text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed ${
+              isTechTheme 
+                ? 'bg-accent/20 border border-accent text-accent hover:bg-accent hover:text-black rounded-none font-mono uppercase' 
+                : 'bg-gradient-to-r from-accent to-accent-dim text-black rounded-xl hover:opacity-90'
+            }`}
+          >
+            <Check className="w-4 h-4" />
+            Guardar Cambios
+          </button>
         </div>
 
       </div>

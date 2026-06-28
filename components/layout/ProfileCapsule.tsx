@@ -13,7 +13,7 @@ import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
-  Sun, Monitor, Terminal
+  Sun, Monitor, Terminal, Moon, Layers
 } from 'lucide-react';
 
 const menuItems = [
@@ -207,24 +207,40 @@ export function ProfileCapsule() {
           {allowedThemes && allowedThemes.length > 0 && (
             <div className="p-1.5 border-b border-glass-border">
               <div className="flex items-center justify-between gap-1 p-1 bg-glass border border-glass-border rounded-xl">
-                {allowedThemes.includes('light') && (
-                  <button onClick={() => setTheme('light')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'light' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
-                    <Sun className="w-4 h-4 mb-1" />
-                    <span className="text-[9px] font-semibold">Día</span>
-                  </button>
-                )}
-                {allowedThemes.includes('cyberpunk') && (
-                  <button onClick={() => setTheme('cyberpunk')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'cyberpunk' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
-                    <Monitor className="w-4 h-4 mb-1" />
-                    <span className="text-[9px] font-semibold">Cyber</span>
-                  </button>
-                )}
-                {allowedThemes.includes('kiloCode') && (
-                  <button onClick={() => setTheme('kiloCode')} className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${theme === 'kiloCode' ? 'bg-accent text-black shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
-                    <Terminal className="w-4 h-4 mb-1" />
-                    <span className="text-[9px] font-semibold">Kilo</span>
-                  </button>
-                )}
+                {allowedThemes.map((t) => {
+                  const isActive = theme === t;
+                  let icon = <Monitor className="w-4 h-4 mb-1" />;
+                  let label = 'Cyber';
+                  
+                  if (t === 'light') {
+                    icon = <Sun className="w-4 h-4 mb-1" />;
+                    label = 'Día';
+                  } else if (t === 'dark') {
+                    icon = <Moon className="w-4 h-4 mb-1" />;
+                    label = 'Noche';
+                  } else if (t === 'glassmorphism') {
+                    icon = <Layers className="w-4 h-4 mb-1" />;
+                    label = 'Glass';
+                  } else if (t === 'kiloCode') {
+                    icon = <Terminal className="w-4 h-4 mb-1" />;
+                    label = 'Kilo';
+                  }
+
+                  return (
+                    <button 
+                      key={t}
+                      onClick={() => setTheme(t)} 
+                      className={`flex-1 flex flex-col items-center justify-center py-2 rounded-lg transition-all ${
+                        isActive 
+                          ? 'bg-accent text-black shadow-sm font-bold' 
+                          : 'text-text-secondary hover:text-text-primary hover:bg-glass'
+                      }`}
+                    >
+                      {icon}
+                      <span className="text-[9px] font-semibold">{label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
