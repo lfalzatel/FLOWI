@@ -40,72 +40,137 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     }, 1000);
   };
 
-  // Función para exportar a CSV/Excel
-  const exportToCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM para Excel UTF-8
+  // Formatear Timestamp de Firebase a fecha y hora local
+  const formatTimestamp = (dateValue: any) => {
+    let d: Date;
+    if (dateValue && typeof dateValue.toDate === 'function') {
+      d = dateValue.toDate();
+    } else if (dateValue instanceof Date) {
+      d = dateValue;
+    } else {
+      d = new Date(dateValue);
+    }
     
+    // Obtener fecha y hora en formato legible (ej. 27/06/2026 18:45)
+    return d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Obtener el periodo del reporte legible
+  const getPeriodString = () => {
+    if (filterType === 'all') return "Historial completo";
+    if (filterType === 'month') return `Mes: ${filterValue}`;
+    if (filterType === 'week') return `Semana: ${filterValue}`;
+    return `Día: ${filterValue}`;
+  };
+
+  // Función para exportar a CSV/Excel (Estructura de Reporte Financiero Completo)
+  const exportToCSV = () => {
+    let csv = "\uFEFF"; // BOM para asegurar codificación UTF-8 correcta en Excel
+    const dateStr = new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    
+    // Encabezado Corporativo
+    csv += "FLOWI — Tu dinero en flujo\n";
+    csv += `Reporte de:;${title}\n`;
+    csv += `Periodo del reporte:;${getPeriodString()}\n`;
+    csv += `Fecha y hora de consulta:;${dateStr}\n\n`;
+
+    // Resumen Ejecutivo
+    csv += "RESUMEN EJECUTIVO\n";
     if (debts.length > 0) {
-      csvContent += "Reporte de Deudas - FLOWI\n\n";
-      csvContent += "Título,Monto Total,Pagado,Pendiente,Estado\n";
+      const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
+      const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
+      const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
+      csv += `Total Deuda original:;${total}\n`;
+      csv += `Total Abonado:;${paid}\n`;
+      csv += `Total Pendiente de pago:;${pending}\n\n`;
+    } else {
+      const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
+      const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
+      const balanceReal = totalIngresos - totalGastos;
+      csv += `Total Ingresos:;${totalIngresos}\n`;
+      csv += `Total Gastos:;${totalGastos}\n`;
+      csv += `Dinero Disponible (Balance):;${balanceReal}\n\n`;
+    }
+
+    // Tabla de Datos
+    csv += "DETALLE DEL REPORTE\n";
+    if (debts.length > 0) {
+      csv += "Concepto;Monto Total;Abonado;Deuda Pendiente;Estado\n";
       debts.forEach(d => {
         const pending = d.totalAmount - d.paidAmount;
-        csvContent += `"${d.title}",${d.totalAmount},${d.paidAmount},${pending},"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
+        csv += `"${d.title}";${d.totalAmount};${d.paidAmount};${pending};"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
       });
     } else {
-      csvContent += `Reporte de Transacciones (${title}) - FLOWI\n\n`;
-      csvContent += "Fecha,Categoría,Tipo,Descripción,Monto\n";
+      csv += "Fecha y Hora;Categoría;Tipo;Descripción;Monto\n";
       transactions.forEach(t => {
-        const d = t.date instanceof Date ? t.date : new Date(t.date as any);
-        const formattedDate = d.toLocaleDateString('es-CO');
-        csvContent += `"${formattedDate}","${t.category}","${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}","${t.description || ''}",${t.amount}\n`;
+        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";${t.amount}\n`;
       });
     }
 
-    const encodedUri = encodeURI(csvContent);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Reporte_FLOWI_${new Date().toISOString().split('T')[0]}.csv`);
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Función para exportar a PDF (mediante impresión nativa estilizada)
+  // Función para exportar a PDF (Impresión Corporativa Novedosa)
   const exportToPDF = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const isGasto = title.toLowerCase().includes('gasto');
-    const isIngreso = title.toLowerCase().includes('ingreso');
-
+    const dateStr = new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
     let rowsHTML = '';
-    let total = 0;
+    let summaryHTML = '';
 
     if (debts.length > 0) {
+      const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
+      const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
+      const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
+      
+      summaryHTML = `
+        <div class="summary-card">
+          <div><strong>Total Deuda:</strong> $${total.toLocaleString()}</div>
+          <div><strong>Total Abonado:</strong> $${paid.toLocaleString()}</div>
+          <div style="color: #e28743;"><strong>Pendiente:</strong> $${pending.toLocaleString()}</div>
+        </div>
+      `;
+
       debts.forEach(d => {
         const pending = d.totalAmount - d.paidAmount;
-        total += pending;
         rowsHTML += `
           <tr>
-            <td>${d.title}</td>
+            <td><strong>${d.title}</strong></td>
             <td>$${d.totalAmount.toLocaleString()}</td>
             <td>$${d.paidAmount.toLocaleString()}</td>
             <td style="color: #e28743; font-weight: bold;">$${pending.toLocaleString()}</td>
-            <td>${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}</td>
+            <td><span class="badge ${d.status === 'paid' ? 'badge-paid' : 'badge-pending'}">${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}</span></td>
           </tr>
         `;
       });
     } else {
+      const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
+      const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
+      const balanceReal = totalIngresos - totalGastos;
+
+      summaryHTML = `
+        <div class="summary-card">
+          <div><strong>Ingresos:</strong> <span style="color: #00e5a0;">$${totalIngresos.toLocaleString()}</span></div>
+          <div><strong>Gastos:</strong> <span style="color: #ff5b5b;">$${totalGastos.toLocaleString()}</span></div>
+          <div><strong>Disponible:</strong> <span style="color: #00e5a0; font-weight: 800;">$${balanceReal.toLocaleString()}</span></div>
+        </div>
+      `;
+
       transactions.forEach(t => {
-        total += t.amount;
-        const d = t.date instanceof Date ? t.date : new Date(t.date as any);
         rowsHTML += `
           <tr>
-            <td>${d.toLocaleDateString('es-CO')}</td>
-            <td>${t.category}</td>
-            <td style="color: ${t.type === 'gasto' ? '#ff5b5b' : '#00e5a0'}">${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}</td>
-            <td>${t.description || '-'}</td>
-            <td style="font-weight: bold;">$${t.amount.toLocaleString()}</td>
+            <td style="color: #666; font-size: 11px;">${formatTimestamp(t.date)}</td>
+            <td><strong>${t.category}</strong></td>
+            <td><span class="badge ${t.type === 'gasto' ? 'badge-gasto' : 'badge-ingreso'}">${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}</span></td>
+            <td style="color: #555;">${t.description || '-'}</td>
+            <td style="font-weight: bold; text-align: right;">$${t.amount.toLocaleString()}</td>
           </tr>
         `;
       });
@@ -116,39 +181,53 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         <head>
           <title>Reporte FLOWI - ${title}</title>
           <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; padding: 40px; }
-            .header { display: flex; justify-between: space-between; align-items: center; border-bottom: 2px solid #eaeaea; padding-bottom: 20px; margin-bottom: 30px; }
-            .logo { font-size: 28px; font-weight: bold; color: #00e5a0; }
-            .title { font-size: 18px; color: #666; text-align: right; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eaeaea; }
-            th { background-color: #f9f9f9; color: #555; font-weight: bold; }
-            .total-box { margin-top: 30px; text-align: right; font-size: 20px; font-weight: bold; }
-            .footer { margin-top: 50px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eaeaea; padding-top: 20px; }
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; padding: 40px; line-height: 1.5; }
+            .header-container { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #10b981; padding-bottom: 20px; margin-bottom: 25px; }
+            .brand { font-size: 32px; font-weight: 800; color: #10b981; letter-spacing: -0.5px; }
+            .brand span { color: #3b82f6; }
+            .report-meta { text-align: right; font-size: 12px; color: #555; }
+            .report-title { font-size: 22px; font-weight: 700; margin: 0 0 5px 0; color: #111; }
+            .summary-card { display: flex; gap: 20px; background: #f4f6f8; padding: 15px 20px; border-radius: 12px; margin-bottom: 30px; justify-content: space-between; font-size: 14px; border: 1px solid #e5e7eb; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { padding: 12px 10px; text-align: left; background-color: #f9fafb; color: #374151; font-weight: 700; border-bottom: 2px solid #e5e7eb; font-size: 12px; text-transform: uppercase; }
+            td { padding: 12px 10px; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+            .badge { display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 700; border-radius: 6px; text-transform: uppercase; }
+            .badge-gasto { background: #fef2f2; color: #ef4444; }
+            .badge-ingreso { background: #ecfdf5; color: #10b981; }
+            .badge-paid { background: #ecfdf5; color: #10b981; }
+            .badge-pending { background: #fffbeb; color: #d97706; }
+            .footer { margin-top: 60px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; }
           </style>
         </head>
         <body>
-          <div class="header">
-            <div class="logo">flowi</div>
-            <div class="title">Reporte de ${title}<br><small>${new Date().toLocaleDateString('es-CO')}</small></div>
+          <div class="header-container">
+            <div>
+              <div class="brand">flowi<span>.</span></div>
+              <div style="font-size: 11px; color: #6B7280; font-weight: 500;">Tu dinero, en flujo.</div>
+            </div>
+            <div class="report-meta">
+              <div class="report-title">Reporte de ${title}</div>
+              <div><strong>Periodo:</strong> ${getPeriodString()}</div>
+              <div><strong>Generado:</strong> ${dateStr}</div>
+            </div>
           </div>
+          
+          ${summaryHTML}
+          
           <table>
             <thead>
               ${debts.length > 0 
-                ? '<tr><th>Concepto</th><th>Monto Total</th><th>Abonado</th><th>Pendiente</th><th>Estado</th></tr>'
-                : '<tr><th>Fecha</th><th>Categoría</th><th>Tipo</th><th>Descripción</th><th>Monto</th></tr>'
+                ? '<tr><th>Concepto</th><th>Monto Original</th><th>Abonado</th><th>Pendiente</th><th>Estado</th></tr>'
+                : '<tr><th>Fecha y Hora</th><th>Categoría</th><th>Tipo</th><th>Descripción</th><th style="text-align: right;">Monto</th></tr>'
               }
             </thead>
             <tbody>
               ${rowsHTML}
             </tbody>
           </table>
-          <div class="total-box">
-            ${debts.length > 0 ? 'Total Deuda Pendiente' : isGasto ? 'Total Gastado' : isIngreso ? 'Total Ingresado' : 'Total General'}: 
-            <span style="color: #00e5a0;">$${total.toLocaleString()}</span>
-          </div>
+          
           <div class="footer">
-            Reporte generado automáticamente por FLOWI — Tu dinero, en flujo.
+            Este reporte fue generado de manera segura desde tu aplicación de finanzas FLOWI.
           </div>
         </body>
       </html>
@@ -156,35 +235,54 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
 
     printWindow.document.close();
     printWindow.focus();
-    // Esperar un momento a que renderice y llamar a la impresión/descarga a PDF del navegador
     setTimeout(() => {
       printWindow.print();
     }, 500);
   };
 
-  // Obtener el contenido crudo del CSV
+  // Obtener el contenido del CSV para compartir como archivo real
   const getCSVString = () => {
     let csv = "";
+    const dateStr = new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    csv += "FLOWI — Tu dinero en flujo\n";
+    csv += `Reporte de:;${title}\n`;
+    csv += `Periodo del reporte:;${getPeriodString()}\n`;
+    csv += `Fecha y hora de consulta:;${dateStr}\n\n`;
+
+    csv += "RESUMEN EJECUTIVO\n";
     if (debts.length > 0) {
-      csv += "Reporte de Deudas - FLOWI\n\n";
-      csv += "Título,Monto Total,Pagado,Pendiente,Estado\n";
+      const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
+      const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
+      const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
+      csv += `Total Deuda original:;${total}\n`;
+      csv += `Total Abonado:;${paid}\n`;
+      csv += `Total Pendiente de pago:;${pending}\n\n`;
+    } else {
+      const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
+      const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
+      const balanceReal = totalIngresos - totalGastos;
+      csv += `Total Ingresos:;${totalIngresos}\n`;
+      csv += `Total Gastos:;${totalGastos}\n`;
+      csv += `Dinero Disponible (Balance):;${balanceReal}\n\n`;
+    }
+
+    csv += "DETALLE DEL REPORTE\n";
+    if (debts.length > 0) {
+      csv += "Concepto;Monto Total;Abonado;Deuda Pendiente;Estado\n";
       debts.forEach(d => {
         const pending = d.totalAmount - d.paidAmount;
-        csv += `"${d.title}",${d.totalAmount},${d.paidAmount},${pending},"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
+        csv += `"${d.title}";${d.totalAmount};${d.paidAmount};${pending};"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
       });
     } else {
-      csv += `Reporte de Transacciones (${title}) - FLOWI\n\n`;
-      csv += "Fecha,Categoría,Tipo,Descripción,Monto\n";
+      csv += "Fecha y Hora;Categoría;Tipo;Descripción;Monto\n";
       transactions.forEach(t => {
-        const d = t.date instanceof Date ? t.date : new Date(t.date as any);
-        const formattedDate = d.toLocaleDateString('es-CO');
-        csv += `"${formattedDate}","${t.category}","${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}","${t.description || ''}",${t.amount}\n`;
+        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";${t.amount}\n`;
       });
     }
     return csv;
   };
 
-  // Compartir reporte mediante Web Share API (enviando el archivo real)
+  // Compartir reporte mediante Web Share API
   const handleShare = async () => {
     if (!navigator.share) {
       alert('Tu navegador o dispositivo no soporta la función de compartir directamente.');
@@ -197,14 +295,11 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
 
       if (format === 'excel') {
         const csvText = getCSVString();
-        // Agregar BOM para UTF-8 correcto en Excel
         const blob = new Blob(["\uFEFF" + csvText], { type: 'text/csv;charset=utf-8;' });
-        fileToShare = new File([blob], `Reporte_FLOWI_${dateStr}.csv`, { type: 'text/csv' });
+        fileToShare = new File([blob], `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${dateStr}.csv`, { type: 'text/csv' });
       } else {
-        // Para PDF e Imagen en móviles, generamos una tarjeta de captura de la previsualización
         const previewElement = document.getElementById('report-preview-card');
         if (previewElement) {
-          // Utilizaremos un canvas simple o captura para compartir como imagen
           const html2canvas = (await import('html2canvas')).default;
           const canvas = await html2canvas(previewElement, {
             backgroundColor: '#0A0A0F',
@@ -214,7 +309,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           
           const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
           if (blob) {
-            fileToShare = new File([blob], `Reporte_FLOWI_${dateStr}.png`, { type: 'image/png' });
+            fileToShare = new File([blob], `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${dateStr}.png`, { type: 'image/png' });
           }
         }
       }
@@ -226,7 +321,6 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           text: `Te comparto mi reporte financiero de ${title} generado desde FLOWI.`
         });
       } else {
-        // Fallback si no se puede compartir el archivo directo
         await navigator.share({
           title: `Reporte de ${title} - FLOWI`,
           text: `Te comparto mi reporte financiero de ${title} generado desde FLOWI.`,
@@ -313,36 +407,79 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             // Pantalla 2: Previsualización del Reporte
             <div className="space-y-5 animate-fade-in-up">
               {/* Contenedor de Previsualización */}
-              <div id="report-preview-card" className={`p-4 border max-h-64 overflow-y-auto ${isTechTheme ? 'border-accent/30 bg-black' : 'border-white/5 bg-white/5 rounded-2xl'} scrollbar-hide`}>
-                <div className="space-y-4 text-xs font-mono text-white/70">
-                  <div className="flex justify-between border-b border-white/5 pb-2">
-                    <span className="text-accent font-bold">FLOWI REPORT</span>
-                    <span>{new Date().toLocaleDateString('es-CO')}</span>
-                  </div>
+              <div id="report-preview-card" className="p-5 bg-[#0A0A0F] border border-white/10 rounded-2xl max-h-[320px] overflow-y-auto scrollbar-hide text-white/90 space-y-5">
+                {/* Brand Header */}
+                <div className="flex justify-between items-start border-b border-white/10 pb-3">
                   <div>
-                    <p className="text-white font-bold text-sm">Reporte de: {title}</p>
-                    <p className="text-[10px] text-text-muted">Filtro: {filterType} ({filterValue})</p>
+                    <span className="text-sm font-bold text-accent tracking-wider font-mono">FLOWI</span>
+                    <p className="text-[9px] text-text-muted">Tu dinero, en flujo.</p>
                   </div>
-                  
-                  {/* Filas de ejemplo de la tabla */}
-                  <div className="space-y-2.5 pt-2">
+                  <div className="text-right">
+                    <span className="text-[10px] text-white font-bold">{title}</span>
+                    <p className="text-[8px] text-text-muted">{new Date().toLocaleDateString('es-CO')} {new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                </div>
+
+                {/* Resumen Ejecutivo */}
+                <div className="bg-white/5 p-3 rounded-xl border border-white/5 space-y-1">
+                  <span className="text-[9px] text-text-muted font-bold uppercase tracking-wider">Resumen Ejecutivo</span>
+                  {debts.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-2 text-[10px] text-center pt-1">
+                      <div>
+                        <div className="text-[8px] text-text-muted">Total</div>
+                        <div className="font-bold">${debts.reduce((sum, d) => sum + d.totalAmount, 0).toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] text-text-muted">Abonado</div>
+                        <div className="font-bold text-accent">${debts.reduce((sum, d) => sum + d.paidAmount, 0).toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] text-text-muted">Pendiente</div>
+                        <div className="font-bold text-orange-400">${debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0).toLocaleString()}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2 text-[10px] text-center pt-1">
+                      <div>
+                        <div className="text-[8px] text-text-muted">Ingresos</div>
+                        <div className="font-bold text-accent">${transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] text-text-muted">Gastos</div>
+                        <div className="font-bold text-red-400">${transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] text-text-muted">Disponible</div>
+                        <div className="font-bold text-accent">${(transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0) - transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0)).toLocaleString()}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Detalle */}
+                <div className="space-y-2">
+                  <span className="text-[9px] text-text-muted font-bold uppercase tracking-wider">Detalle del Reporte</span>
+                  <div className="space-y-2.5 divide-y divide-white/5 pt-1">
                     {debts.length > 0 ? (
-                      debts.slice(0, 3).map((d, index) => (
-                        <div key={index} className="flex justify-between text-[11px]">
-                          <span>• {d.title}</span>
-                          <span className="text-orange-400">${(d.totalAmount - d.paidAmount).toLocaleString()}</span>
+                      debts.map((d, index) => (
+                        <div key={index} className="flex justify-between items-center text-[10px] pt-2">
+                          <div>
+                            <span className="font-bold text-white block">{d.title}</span>
+                            <span className="text-[8px] text-text-muted">Monto: ${d.totalAmount.toLocaleString()}</span>
+                          </div>
+                          <span className="text-orange-400 font-bold">${(d.totalAmount - d.paidAmount).toLocaleString()}</span>
                         </div>
                       ))
                     ) : (
-                      transactions.slice(0, 3).map((t, index) => (
-                        <div key={index} className="flex justify-between text-[11px]">
-                          <span>• {t.category} ({t.description || 'Sin desc.'})</span>
-                          <span className={t.type === 'gasto' ? 'text-red-400' : 'text-accent'}>${t.amount.toLocaleString()}</span>
+                      transactions.map((t, index) => (
+                        <div key={index} className="flex justify-between items-center text-[10px] pt-2">
+                          <div>
+                            <span className="font-bold text-white block">{t.category}</span>
+                            <span className="text-[8px] text-text-muted">{formatTimestamp(t.date)}</span>
+                          </div>
+                          <span className={t.type === 'gasto' ? 'text-red-400 font-bold' : 'text-accent font-bold'}>${t.amount.toLocaleString()}</span>
                         </div>
                       ))
-                    )}
-                    {(transactions.length > 3 || debts.length > 3) && (
-                      <p className="text-center text-[10px] text-text-muted italic pt-1">... y {Math.max(transactions.length, debts.length) - 3} filas más ...</p>
                     )}
                   </div>
                 </div>
