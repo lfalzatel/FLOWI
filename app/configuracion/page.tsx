@@ -9,9 +9,11 @@ import { ProfileModal } from '@/components/forms/ProfileModal';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { ManageThemesModal } from '@/components/forms/ManageThemesModal';
 import { ManageUsersModal } from '@/components/forms/ManageUsersModal';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { 
   ArrowLeft, Sun, Moon, Terminal, Layers, Zap, Palette,
-  User, Wallet, Bell, Shield, 
+  User, Wallet, Bell, Shield, RefreshCw,
   ChevronRight, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
   FileText, Settings
@@ -27,6 +29,26 @@ export default function ConfigPage() {
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
   const [isThemesModalOpen, setIsThemesModalOpen] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  const handleRestoreBaseCategories = async () => {
+    if (!user) return;
+    if (!window.confirm('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?')) return;
+    
+    setRestoring(true);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        hiddenCategories: []
+      });
+      alert('Categorías base restauradas con éxito. Recarga la página si es necesario.');
+    } catch (e) {
+      console.error(e);
+      alert('Error al restaurar categorías.');
+    } finally {
+      setRestoring(false);
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/login');
@@ -111,18 +133,37 @@ export default function ConfigPage() {
             
             {/* Admin only: Manage Users */}
             {profile?.role === 'admin' && (
-              <button onClick={() => setIsUsersModalOpen(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-red-500" />
+              <>
+                <button onClick={() => setIsUsersModalOpen(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center">
+                      <Shield className="w-4 h-4 text-red-500" />
+                    </div>
+                    <div className="text-left">
+                      <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Gestionar Usuarios</p>
+                      <p className="text-[10px] text-text-muted">Cambiar roles y administrar accesos</p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Gestionar Usuarios</p>
-                    <p className="text-[10px] text-text-muted">Cambiar roles y administrar accesos</p>
+                  <ChevronRight className="w-4 h-4 text-text-muted" />
+                </button>
+
+                <button 
+                  onClick={handleRestoreBaseCategories} 
+                  disabled={restoring}
+                  className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border disabled:opacity-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                      <RefreshCw className={`w-4 h-4 text-cyan-400 ${restoring ? 'animate-spin' : ''}`} />
+                    </div>
+                    <div className="text-left">
+                      <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Restaurar Categorías Base</p>
+                      <p className="text-[10px] text-text-muted">Volver a ver las categorías por defecto ocultas</p>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-text-muted" />
-              </button>
+                  <ChevronRight className="w-4 h-4 text-text-muted" />
+                </button>
+              </>
             )}
           </div>
         </section>
