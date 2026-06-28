@@ -59,16 +59,17 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !amount || !category) return;
+    if (!user || !amount) return;
 
     setLoading(true);
     try {
+      const finalCategory = category.trim() || 'Otros';
       const data = {
         userId: user.uid,
         type,
         amount: parseFloat(amount),
         description,
-        category,
+        category: finalCategory,
         date: new Date(date + 'T12:00:00'), // Evitar problemas de zona horaria
       };
 
@@ -277,7 +278,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
           <div className="pt-2">
             <button
               type="submit"
-              disabled={loading || !amount || !category}
+              disabled={loading || !amount}
               className={`w-full py-4 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} hover:bg-accent/90`}`}
             >
               {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : 'Añadir Transacción'}
