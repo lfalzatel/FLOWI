@@ -86,9 +86,8 @@ export function useCategories() {
   }, [user]);
 
   // Combine base categories with custom ones for dropdowns
-  const isAdmin = profile?.role === 'admin';
   const visibleBaseCategories = BASE_CATEGORIES.filter(
-    cat => isAdmin || !profile?.hiddenCategories?.includes(cat.label)
+    cat => !profile?.hiddenCategories?.includes(cat.label)
   );
 
   const allCategories: CategoryOption[] = [
