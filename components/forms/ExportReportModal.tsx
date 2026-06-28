@@ -622,7 +622,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                   <div className="text-right">
                     <span className="text-[10px] text-slate-800 font-extrabold block">Reporte de {title}</span>
                     <p className="text-[7px] text-slate-400 font-semibold">Periodo: {getPeriodString()}</p>
-                    <p className="text-[7px] text-slate-400 font-medium">{new Date().toLocaleDateString('es-CO')} {new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-[7px] text-slate-400 font-medium">Fecha y hora de consulta: {new Date().toLocaleDateString('es-CO')} {new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>
 
