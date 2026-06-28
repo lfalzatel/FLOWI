@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useDebts } from '@/hooks/useDebts';
@@ -10,6 +10,7 @@ import { BalanceCard }     from '@/components/dashboard/BalanceCard';
 import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
 import { TransactionList } from '@/components/dashboard/TransactionList';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
+import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { SplashScreen } from '@/components/layout/SplashScreen';
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const { totalDeudas } = useDebts();
   const [showAdd, setShowAdd] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(() => {
@@ -164,15 +166,27 @@ export default function DashboardPage() {
               {profile?.name?.split(' ')[0] || 'Usuario'}
             </h1>
           </div>
-          {/* Desktop FAB */}
-          <button
-            onClick={() => setShowAdd(true)}
-            className={`hidden sm:flex items-center gap-2 px-4 py-2.5 transition-all
-                       ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
-          >
-            <Plus className="w-4 h-4" />
-            Nueva transacción
-          </button>
+          
+          <div className="flex items-center gap-2">
+            {/* Download Report Button */}
+            <button
+              onClick={() => setShowExport(true)}
+              className={`w-9 h-9 flex items-center justify-center border transition-all ${isTechTheme ? 'rounded-none border-accent/30 hover:border-accent text-accent' : 'rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary'}`}
+              title="Descargar Reporte"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+
+            {/* Desktop FAB */}
+            <button
+              onClick={() => setShowAdd(true)}
+              className={`hidden sm:flex items-center gap-2 px-4 py-2.5 transition-all
+                         ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
+            >
+              <Plus className="w-4 h-4" />
+              Nueva transacción
+            </button>
+          </div>
         </div>
 
         {/* Filter */}
@@ -227,6 +241,16 @@ export default function DashboardPage() {
 
       {showAdd && (
         <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={refresh} />
+      )}
+
+      {showExport && (
+        <ExportReportModal
+          onClose={() => setShowExport(false)}
+          title="General (Inicio)"
+          transactions={filteredTransactions}
+          filterType={filterType}
+          filterValue={filterValue}
+        />
       )}
 
       {editingTransaction && (

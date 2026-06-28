@@ -6,8 +6,9 @@ import { useDebts } from '@/hooks/useDebts';
 import { Debt } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { CreditCard, Plus, Check, Clock } from 'lucide-react';
+import { CreditCard, Plus, Check, Clock, Download } from 'lucide-react';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
+import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 
@@ -19,6 +20,7 @@ export default function DeudasPage() {
   const router = useRouter();
   
   const [showAdd, setShowAdd] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
 
   useEffect(() => {
@@ -53,14 +55,25 @@ export default function DeudasPage() {
             <span className={`text-xs font-medium uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/70' : 'text-text-muted'}`}>Mis Finanzas</span>
             <h1 className={`${isCyberpunk ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>Deudas</h1>
           </div>
-          <button
-            onClick={() => setShowAdd(true)}
-            className={`flex items-center gap-2 px-4 py-2.5 transition-all
-                       ${isCyberpunk ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
-          >
-            <Plus className="w-4 h-4" />
-            Nueva Deuda
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Download Report Button */}
+            <button
+              onClick={() => setShowExport(true)}
+              className={`w-9 h-9 flex items-center justify-center border transition-all ${isCyberpunk ? 'rounded-none border-accent/30 hover:border-accent text-accent' : 'rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary'}`}
+              title="Descargar Reporte"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => setShowAdd(true)}
+              className={`flex items-center gap-2 px-4 py-2.5 transition-all
+                         ${isCyberpunk ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
+            >
+              <Plus className="w-4 h-4" />
+              Nueva Deuda
+            </button>
+          </div>
         </div>
 
         {/* Premium Card for Total Debts */}
@@ -168,6 +181,16 @@ export default function DeudasPage() {
           onClose={() => setSelectedDebt(null)}
           onSuccess={refresh}
           debtToEdit={selectedDebt}
+        />
+      )}
+
+      {showExport && (
+        <ExportReportModal
+          onClose={() => setShowExport(false)}
+          title="Deudas"
+          debts={debts}
+          filterType="all"
+          filterValue="all"
         />
       )}
     </div>

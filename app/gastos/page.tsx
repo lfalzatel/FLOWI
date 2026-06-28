@@ -3,12 +3,14 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { TransactionList } from '@/components/dashboard/TransactionList';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
+import { ExportReportModal } from '@/components/forms/ExportReportModal';
+import { ExpenseChart } from '@/components/dashboard/ExpenseChart';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
 import { Transaction } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { TrendingDown, Plus } from 'lucide-react';
+import { TrendingDown, Plus, Download } from 'lucide-react';
 import { getISOWeekString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
@@ -21,6 +23,7 @@ export default function GastosPage() {
   
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
   const { theme } = useTheme();
@@ -74,14 +77,25 @@ export default function GastosPage() {
             <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>Mis Gastos</h1>
             <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>Historial completo de tus salidas</p>
           </div>
-          <button
-            onClick={() => setShowAdd(true)}
-            className={`flex items-center gap-2 px-4 py-2.5 transition-all
-                       ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nueva transacción</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Download Report Button */}
+            <button
+              onClick={() => setShowExport(true)}
+              className={`w-9 h-9 flex items-center justify-center border transition-all ${isTechTheme ? 'rounded-none border-accent/30 hover:border-accent text-accent' : 'rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary'}`}
+              title="Descargar Reporte"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => setShowAdd(true)}
+              className={`flex items-center gap-2 px-4 py-2.5 transition-all
+                         ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Nueva transacción</span>
+            </button>
+          </div>
         </div>
 
         {/* Filter */}
@@ -116,6 +130,11 @@ export default function GastosPage() {
           </div>
         </div>
 
+        {/* Chart */}
+        <div className="mb-6">
+          <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} />
+        </div>
+
         {/* Lista */}
         <TransactionList 
           transactions={filteredTransactions} 
@@ -136,6 +155,16 @@ export default function GastosPage() {
           }}
           onSuccess={refresh}
           transactionToEdit={editingTransaction || undefined}
+        />
+      )}
+
+      {showExport && (
+        <ExportReportModal
+          onClose={() => setShowExport(false)}
+          title="Gastos"
+          transactions={filteredTransactions}
+          filterType={filterType}
+          filterValue={filterValue}
         />
       )}
     </div>
