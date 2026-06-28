@@ -166,15 +166,20 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
 
   // --- NUEVOS LOGOS CC SAN NICOLÁS / GRANDES SUPERFICIES ---
 
-  if (check('play store') || check('playstore')) {
+  if (check('play store') || check('playstore') || check('play_store')) {
     return (
       <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="8" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
-        {/* Triángulo de Google Play */}
-        <path d="M10 8V32L26 20L10 8Z" fill="#00E5A0" />
-        <path d="M10 8V20L26 20L10 8Z" fill="#00C3FF" opacity="0.8" />
-        <path d="M10 32V20L26 20L10 32Z" fill="#FF3366" opacity="0.8" />
-        <path d="M26 20L19 15L10 20L19 25L26 20Z" fill="#FFBB00" opacity="0.9" />
+        <g transform="translate(4, 4) scale(0.8)">
+          {/* Azul (Izquierda) */}
+          <path d="M7.7 5.3C7.2 5.8 7 6.7 7 7.8V32.2C7 33.3 7.2 34.2 7.7 34.7L8 35L22.8 20.2V19.8L8 5L7.7 5.3Z" fill="#00C3FF" />
+          {/* Rojo (Derecha / Punta) */}
+          <path d="M27.7 25.1L22.8 20.2V19.8L27.7 14.9L28 15.1L33.8 18.4C35.4 19.3 35.4 20.7 33.8 21.6L28 24.9L27.7 25.1Z" fill="#FF3366" />
+          {/* Amarillo (Abajo) */}
+          <path d="M28 24.9L22.8 19.8L8 34.6C8.5 35.1 9.4 35.2 10.4 34.6L28 24.9Z" fill="#FFC700" />
+          {/* Verde (Arriba) */}
+          <path d="M28 15.1L10.4 5.4C9.4 4.8 8.5 4.9 8 5.4L22.8 20.2L28 15.1Z" fill="#00E5A0" />
+        </g>
       </svg>
     );
   }
