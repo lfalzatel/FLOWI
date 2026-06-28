@@ -110,36 +110,51 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
               </div>
             ) : (
               <div className="space-y-3">
-                {users.map(u => (
-                  <button 
-                    key={u.id} 
-                    onClick={() => handleSelectUser(u)}
-                    className={`w-full text-left ${isTechTheme ? 'bg-black border border-accent/20 rounded-none hover:bg-accent/10' : 'bg-glass rounded-xl border border-glass-border hover:bg-glass-hover'} p-3 flex items-center gap-3 transition-colors`}
-                  >
-                    <div className={`relative w-10 h-10 overflow-hidden flex-shrink-0 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                      {u.photoURL ? (
-                        <Image src={u.photoURL} alt={u.name || ''} fill className="object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-glass flex items-center justify-center"><UserIcon className="w-4 h-4 text-text-secondary" /></div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{u.name || 'Sin nombre'}</p>
-                      <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{u.email}</p>
-                    </div>
+                {users.map(u => {
+                  const displayName = u.name || u.email.split('@')[0];
+                  const initials = displayName
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase();
+                  
+                  // Generar un color de fondo consistente basado en el nombre
+                  const colors = ['bg-[#FF5B5B]/20 text-[#FF5B5B]', 'bg-[#F5A623]/20 text-[#F5A623]', 'bg-[#A855F7]/20 text-[#A855F7]', 'bg-[#00E5A0]/20 text-[#00E5A0]', 'bg-[#3B82F6]/20 text-[#3B82F6]', 'bg-[#EC4899]/20 text-[#EC4899]'];
+                  const colorIndex = displayName.length % colors.length;
+                  const avatarColorClass = colors[colorIndex];
 
-                    <div className="flex-shrink-0">
-                      {u.email === currentUserEmail ? (
-                        <span className={`text-[10px] px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú</span>
-                      ) : (
-                        <span className={`text-[10px] px-2 py-1 uppercase tracking-widest ${isTechTheme ? 'font-mono border border-accent/30 text-accent' : 'bg-glass border border-glass-border text-text-primary rounded-lg'}`}>
-                          {u.role || 'Usuario'}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                  return (
+                    <button 
+                      key={u.id} 
+                      onClick={() => handleSelectUser(u)}
+                      className={`w-full text-left ${isTechTheme ? 'bg-black border border-accent/20 rounded-none hover:bg-accent/10' : 'bg-glass rounded-xl border border-glass-border hover:bg-glass-hover'} p-3 flex items-center gap-3 transition-colors`}
+                    >
+                      <div className={`relative w-10 h-10 overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-sm ${isTechTheme ? 'rounded-none border border-accent/30' : 'rounded-full'} ${!u.photoURL ? avatarColorClass : ''}`}>
+                        {u.photoURL ? (
+                          <Image src={u.photoURL} alt={displayName} fill className="object-cover" />
+                        ) : (
+                          <span>{initials}</span>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</p>
+                        <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{u.email}</p>
+                      </div>
+
+                      <div className="flex-shrink-0">
+                        {u.email === currentUserEmail ? (
+                          <span className={`text-[10px] px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú</span>
+                        ) : (
+                          <span className={`text-[10px] px-2 py-1 uppercase tracking-widest ${isTechTheme ? 'font-mono border border-accent/30 text-accent' : 'bg-glass border border-glass-border text-text-primary rounded-lg'}`}>
+                            {u.role || 'Usuario'}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </>
