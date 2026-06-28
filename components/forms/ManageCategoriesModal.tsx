@@ -31,15 +31,16 @@ const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899'
 interface Props {
   onClose: () => void;
   onCreated?: (label: string) => void;
+  initialView?: 'list' | 'form';
 }
 
-export function ManageCategoriesModal({ onClose, onCreated }: Props) {
+export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list' }: Props) {
   const { user } = useAuth();
   const { allCategories, refreshCategories } = useCategories();
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   
-  const [view, setView] = useState<'list' | 'form'>('list');
+  const [view, setView] = useState<'list' | 'form'>(initialView);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [baseCategoryToHide, setBaseCategoryToHide] = useState<string | null>(null);
   
@@ -148,12 +149,42 @@ export function ManageCategoriesModal({ onClose, onCreated }: Props) {
     }
   };
 
+  // Helper para filtrar las categorías del listado general según la pestaña activa
+  const getFilteredCategoriesForTab = () => {
+    const iconsInTab = CATEGORIZED_ICONS[activeTab];
+    return allCategories.filter(cat => {
+      // Si el icono de la categoría está en la pestaña activa
+      if (iconsInTab.includes(cat.icon)) return true;
+      // Si es la pestaña 'Otros' y el icono no está en ninguna otra pestaña
+      if (activeTab === 'Otros') {
+        const isInAnyOtherTab = Object.entries(CATEGORIZED_ICONS).some(([tab, icons]) => {
+          return tab !== 'Otros' && icons.includes(cat.icon);
+        });
+        return !isInAnyOtherTab;
+      }
+      return false;
+    });
+  };
+
+  const filteredCategoriesForList = getFilteredCategoriesForTab();
+
   if (typeof document === 'undefined') return null;
 
   return createPortal(
     <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`} onClick={onClose}>
       <div className={`w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'}`} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className={`absolute top-4 right-4 hover:text-white transition-colors ${isTechTheme ? 'text-accent' : 'text-white/50'}`}>
+        <button 
+          onClick={() => {
+            if (view === 'form' && initialView === 'form') {
+              onClose();
+            } else if (view === 'form') {
+              setView('list');
+            } else {
+              onClose();
+            }
+          }} 
+          className={`absolute top-4 right-4 hover:text-white transition-colors ${isTechTheme ? 'text-accent' : 'text-white/50'}`}
+        >
           <X className="w-5 h-5" />
         </button>
 
@@ -175,11 +206,31 @@ export function ManageCategoriesModal({ onClose, onCreated }: Props) {
               Crear Categoría
             </button>
 
-            {allCategories.length === 0 ? (
-              <p className={`text-center text-sm py-8 ${isTechTheme ? 'text-accent/50' : 'text-white/40'}`}>Aún no hay categorías disponibles.</p>
+            {/* Selector de pestañas para la lista de categorías en gestión */}
+            <div className="flex border-b border-white/10 mb-2 overflow-x-auto gap-1 pb-1 scrollbar-none">
+              {Object.keys(CATEGORIZED_ICONS).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab as any)}
+                  className={`px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                    activeTab === tab
+                      ? 'text-accent border-b-2 border-accent'
+                      : (isTechTheme ? 'text-accent/50 hover:text-accent' : 'text-white/50 hover:text-white')
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {filteredCategoriesForList.length === 0 ? (
+              <p className={`text-center text-xs py-10 ${isTechTheme ? 'text-accent/50' : 'text-white/40'}`}>
+                No hay categorías en "{activeTab}".
+              </p>
             ) : (
-              <div className="space-y-2 mt-4">
-                {allCategories.map((cat, i) => (
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {filteredCategoriesForList.map((cat, i) => (
                   <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-3 border ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50' : 'rounded-xl bg-white/5 border-white/5'}`}>
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>

@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction } from '@/lib/firestore';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
+import { CategoryIcon } from '@/components/CategoryIcon';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -28,6 +29,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
+  const [categoriesInitialView, setCategoriesInitialView] = useState<'list' | 'form'>('list');
+
+  const [activeDropdownTab, setActiveDropdownTab] = useState<'Comida y Ocio' | 'Bancos y Finanzas' | 'Hogar y Servicios' | 'Marcas y Apps' | 'Otros'>('Comida y Ocio');
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -39,7 +43,40 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     };
   }, []);
 
-  const filteredCategories = allCategories.filter(cat => 
+  const CATEGORIZED_ICONS = {
+    'Comida y Ocio': [
+      '🍔', '🍿', '🍺', '🚬', '🍷', '🍹', '☕', '🥖', '🍕', '🍰', '🍉', '🍦', '🥩', '🍳', '🍽️'
+    ],
+    'Bancos y Finanzas': [
+      'bancolombia', 'bbva', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
+    ],
+    'Hogar y Servicios': [
+      'claro_hogar', 'claro_movil', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
+    ],
+    'Marcas y Apps': [
+      'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos'
+    ],
+    'Otros': [
+      '🚗', '⛽', '🚌', '✈️', '🏍️', '🚲', '🎮', '⚽', '🐶', '🐱', '🏥', '💊', '🎓', '👗', '🎁', '💈', '🏋️‍♂️'
+    ]
+  };
+
+  // Helper para agrupar las categorías cargadas de Firestore en su respectiva pestaña
+  const getCategoriesForTab = (tab: keyof typeof CATEGORIZED_ICONS) => {
+    const iconsInTab = CATEGORIZED_ICONS[tab];
+    return allCategories.filter(cat => {
+      if (iconsInTab.includes(cat.icon)) return true;
+      if (tab === 'Otros') {
+        const isInAnyOtherTab = Object.entries(CATEGORIZED_ICONS).some(([t, icons]) => {
+          return t !== 'Otros' && icons.includes(cat.icon);
+        });
+        return !isInAnyOtherTab;
+      }
+      return false;
+    });
+  };
+
+  const categoriesInActiveTab = getCategoriesForTab(activeDropdownTab).filter(cat => 
     cat.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -213,7 +250,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
               
               <button
                 type="button"
-                onClick={() => setIsManageCategoriesOpen(true)}
+                onClick={() => {
+                  setCategoriesInitialView('form');
+                  setIsManageCategoriesOpen(true);
+                }}
                 title="Nueva Categoría"
                 className={`px-3.5 flex items-center justify-center border transition-all active:scale-95 ${
                   isTechTheme 
@@ -226,41 +266,69 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             </div>
 
             {isDropdownOpen && (
-              <div className={`absolute z-20 top-full mt-2 w-full border shadow-2xl p-2 max-h-60 overflow-y-auto ${isTechTheme ? 'bg-deep border-accent/50 rounded-none' : 'bg-[#0A0A0F] border-white/10 rounded-xl'}`}>
+              <div className={`absolute z-20 top-full mt-2 w-full border shadow-2xl p-3 flex flex-col gap-2 ${isTechTheme ? 'bg-deep border-accent/50 rounded-none' : 'bg-[#0A0A0F] border-white/10 rounded-2xl'}`}>
                 <input
                   type="text"
                   placeholder="Buscar categoría..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none mb-2 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-lg focus:border-accent'}`}
+                  className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent'}`}
                 />
-                <div className="space-y-1">
-                  {filteredCategories.map((cat) => (
-                    <button
-                      key={cat.label}
-                      type="button"
-                      onClick={() => { setCategory(cat.label); setIsDropdownOpen(false); setSearchQuery(''); }}
-                      className={`w-full text-left py-2 px-3 hover:bg-white/5 text-sm flex items-center gap-2 ${isTechTheme ? 'rounded-none text-accent' : 'rounded-lg text-white'}`}
-                    >
-                      <span>{cat.icon}</span>
-                      <span className="flex-1 truncate">{cat.label}</span>
-                      {cat.isCustom && <span className={`text-[10px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/50 border border-accent/30' : 'text-accent/50 border border-accent/20 rounded'}`}>Pers.</span>}
-                    </button>
-                  ))}
-                  
-                  <button
-                    type="button"
-                    onClick={() => { 
-                      setIsDropdownOpen(false); 
-                      setSearchQuery('');
-                      setIsManageCategoriesOpen(true);
-                    }}
-                    className={`w-full text-left py-3 px-3 hover:bg-white/5 text-sm font-semibold flex items-center gap-2 mt-2 border-t ${isTechTheme ? 'rounded-none text-accent border-accent/20' : 'rounded-lg text-accent border-white/5'}`}
-                  >
-                    <span>+</span>
-                    <span>Nueva categoría...</span>
-                  </button>
+                
+                {/* Selector agrupado vertical (2 Columnas) */}
+                <div className="flex gap-2 h-40">
+                  {/* Columna Izquierda: Pestañas de grupos */}
+                  <div className="w-2/5 flex flex-col gap-1 overflow-y-auto pr-1 border-r border-white/10 select-none scrollbar-none">
+                    {Object.keys(CATEGORIZED_ICONS).map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setActiveDropdownTab(tab as any)}
+                        className={`px-2 py-2 text-left text-[9px] font-bold transition-all truncate ${
+                          activeDropdownTab === tab
+                            ? 'text-accent bg-accent/10 rounded-lg'
+                            : 'text-white/50 hover:text-white hover:bg-white/5 rounded-lg'
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Columna Derecha: Categorías del grupo seleccionado */}
+                  <div className="w-3/5 flex flex-col gap-1 overflow-y-auto pr-1">
+                    {categoriesInActiveTab.length === 0 ? (
+                      <p className="text-[10px] text-white/30 text-center py-8">Vacío</p>
+                    ) : (
+                      categoriesInActiveTab.map((cat) => (
+                        <button
+                          key={cat.label}
+                          type="button"
+                          onClick={() => { setCategory(cat.label); setIsDropdownOpen(false); setSearchQuery(''); }}
+                          className={`w-full text-left py-2 px-2 hover:bg-white/5 text-xs flex items-center gap-2 rounded-lg text-white`}
+                        >
+                          <CategoryIcon icon={cat.icon} label={cat.label} className="w-4 h-4" />
+                          <span className="flex-1 truncate">{cat.label}</span>
+                          {cat.isCustom && <span className="text-[8px] px-1 py-0.2 bg-accent/10 text-accent rounded uppercase font-semibold">P.</span>}
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => { 
+                    setIsDropdownOpen(false); 
+                    setSearchQuery('');
+                    setCategoriesInitialView('list');
+                    setIsManageCategoriesOpen(true);
+                  }}
+                  className={`w-full text-left py-2 px-3 hover:bg-white/5 text-xs font-semibold flex items-center gap-2 border-t border-white/5 text-accent`}
+                >
+                  <span>+</span>
+                  <span>Gestionar categorías...</span>
+                </button>
               </div>
             )}
           </div>
@@ -333,6 +401,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         <ManageCategoriesModal 
           onClose={() => setIsManageCategoriesOpen(false)} 
           onCreated={(newLabel) => setCategory(newLabel)}
+          initialView={categoriesInitialView}
         />
       )}
     </>
