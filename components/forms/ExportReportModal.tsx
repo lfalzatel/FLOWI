@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { X, Download, Share2, FileSpreadsheet, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Transaction, Debt } from '@/lib/firestore';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface Props {
   onClose: () => void;
@@ -342,8 +344,6 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     if (!previewElement) return;
 
     try {
-      const html2canvas = (await import('html2canvas')).default;
-      
       // Crear clon para capturar la ficha completa extendida
       const clone = previewElement.cloneNode(true) as HTMLElement;
       clone.style.position = 'fixed';
@@ -393,8 +393,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         const blob = new Blob(["\uFEFF" + csvText], { type: 'text/csv;charset=utf-8;' });
         fileToShare = new File([blob], `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${dateStr}.csv`, { type: 'text/csv' });
       } else if (format === 'pdf') {
-        // 2. Compartir PDF Real (Usando jsPDF)
-        const { jsPDF } = await import('jspdf');
+        // 2. Compartir PDF Real (Usando jsPDF estático)
         const doc = new jsPDF();
         
         doc.setFont('helvetica', 'bold');
@@ -495,7 +494,6 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         // 3. Compartir Imagen (PNG)
         const previewElement = document.getElementById('report-preview-card');
         if (previewElement) {
-          const html2canvas = (await import('html2canvas')).default;
           const clone = previewElement.cloneNode(true) as HTMLElement;
           clone.style.position = 'fixed';
           clone.style.top = '-9999px';
