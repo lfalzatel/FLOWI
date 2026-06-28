@@ -20,8 +20,11 @@ export interface CustomCategory {
 }
 
 export const BASE_CATEGORIES = [
-  // Originales
-  { label: 'Comida', icon: '🍔', color: '#FF5B5B' },
+  // Originales / Comida y Ocio expandidos
+  { label: 'Restaurantes', icon: '🍽️', color: '#FF5B5B' },
+  { label: 'Mercado', icon: '🛒', color: '#10B981' },
+  { label: 'Café y Antojos', icon: '☕', color: '#D1A153' },
+  { label: 'Licores y Bares', icon: '🍺', color: '#F5A623' },
   { label: 'Transporte', icon: '🚌', color: '#F5A623' },
   { label: 'Entretenimiento', icon: '🎮', color: '#A855F7' },
   { label: 'Hogar', icon: '🏠', color: '#00E5A0' },

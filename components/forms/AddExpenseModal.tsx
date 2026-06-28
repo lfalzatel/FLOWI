@@ -45,7 +45,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
   const CATEGORIZED_ICONS = {
     'Comida y Ocio': [
-      '🍔', '🍿', '🍺', '🚬', '🍷', '🍹', '☕', '🥖', '🍕', '🍰', '🍉', '🍦', '🥩', '🍳', '🍽️'
+      '🍽️', '🍔', '🛒', '☕', '🍺', '🍿', '🍕', 'cine', '🍷', '🍹', '🚬', '🥖', '🍰', '🍉', '🍦', '🥩', '🍳'
     ],
     'Bancos y Finanzas': [
       'bancolombia', 'nequi', 'bbva', 'daviplata', 'davivienda', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
@@ -60,7 +60,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       'deportes', 'decathlon', 'nike', 'adidas', '⚽', '🏋️‍♂️', '🚲', '🏃‍♂️'
     ],
     'Otros': [
-      'parqueadero', 'cine', '🚗', '⛽', '🚌', '✈️', '🏍️', '🎮', '🐱', '🐶', '🏥', '💊', '🎓', '👗', '🎁', '💈'
+      'parqueadero', '🚗', '⛽', '🚌', '✈️', '🏍️', '🎮', '🐱', '🐶', '🏥', '💊', '🎓', '👗', '🎁', '💈'
     ]
   };
 
