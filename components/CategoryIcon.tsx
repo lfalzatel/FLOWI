@@ -89,5 +89,80 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
     );
   }
 
+  // --- NUEVOS LOGOS DE EMPRESAS COLOMBIANAS E ICONOS PREMIUM ---
+
+  if (check('epm')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
+        {/* Logo EPM (Hojas verdes curvas estilizadas) */}
+        <path d="M14 26C14 20 18 16 23 14C21 17 21 21 23 24C20 23 17 24 14 26Z" fill="#78B833" />
+        <path d="M26 26C26 20 22 16 17 14C19 17 19 21 17 24C20 23 23 24 26 26Z" fill="#009639" />
+        <circle cx="20" cy="20" r="1.5" fill="#FDDA24" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#009639" fontSize="6" fontWeight="bold" fontFamily="sans-serif">epm</text>
+      </svg>
+    );
+  }
+
+  if (check('efigas')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#0A2240" />
+        {/* Llama de Efigas (Azul y Naranja) */}
+        <path d="M20 8C20 8 13 15 13 22C13 25.8 16.1 29 20 29C23.9 29 27 25.8 27 22C27 15 20 8 20 8Z" fill="#009EE0" />
+        <path d="M20 14C20 14 16 18 16 23C16 25.2 17.8 27 20 27C22.2 27 24 25.2 24 23C24 18 20 14 20 14Z" fill="#FF7A00" />
+        <text x="50%" y="85%" textAnchor="middle" fill="#FFFFFF" fontSize="5" fontWeight="bold" fontFamily="sans-serif" letterSpacing="0.2">EFIGAS</text>
+      </svg>
+    );
+  }
+
+  if (check('alcanos')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#0054A6" />
+        {/* Símbolo Alcanos (Llama y estructuras circulares) */}
+        <path d="M20 10C24.4 10 28 13.6 28 18C28 23 20 30 20 30C20 30 12 23 12 18C12 13.6 15.6 10 20 10Z" fill="#FFF100" />
+        <path d="M20 14C22.2 14 24 15.8 24 18C24 21 20 25 20 25C20 25 16 21 16 18C16 15.8 17.8 14 20 14Z" fill="#0054A6" />
+        <text x="50%" y="85%" textAnchor="middle" fill="#FFFFFF" fontSize="5" fontWeight="bold" fontFamily="sans-serif">ALCANOS</text>
+      </svg>
+    );
+  }
+
+  if (check('parqueadero') || check('parking')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#1E3A8A" />
+        {/* Letra P de Parking oficial */}
+        <rect x="11" y="10" width="18" height="20" rx="2" fill="none" stroke="#FFFFFF" strokeWidth="2" />
+        <path d="M16 26V14H21C22.7 14 24 15.3 24 17C24 18.7 22.7 20 21 20H16" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  if (check('cine') || check('cinema')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#7F1D1D" />
+        {/* Claqueta de cine */}
+        <path d="M10 16H30V28H10V16Z" fill="#FFFFFF" />
+        <path d="M10 12H30L28 16H8L10 12Z" fill="#000000" />
+        <path d="M13 12L15 16M19 12L21 16M25 12L27 16" stroke="#FFFFFF" strokeWidth="1.5" />
+        <circle cx="20" cy="22" r="2" fill="#7F1D1D" />
+      </svg>
+    );
+  }
+
+  if (check('deportes') || check('piscina') || check('sports')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#065F46" />
+        {/* Icono de Nadador / Piscina */}
+        <path d="M20 12C21.1 12 22 11.1 22 10C22 8.9 21.1 8 20 8C18.9 8 18 8.9 18 10C18 11.1 18.9 12 20 12Z" fill="#FFFFFF" />
+        <path d="M13 22C15.5 22 17 20.5 19 20.5C21 20.5 22.5 22 25 22M10 25C13.5 25 15.5 23 18 23C20.5 23 22.5 25 26 25" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" />
+        <path d="M15 18C17.5 16 19.5 16.5 21 15C22.5 13.5 24.5 14 26 15" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
   return <span className={className}>{icon}</span>;
 }
