@@ -148,7 +148,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                           <span className={`text-[10px] px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú</span>
                         ) : (
                           <span className={`text-[10px] px-2 py-1 uppercase tracking-widest ${isTechTheme ? 'font-mono border border-accent/30 text-accent' : 'bg-glass border border-glass-border text-text-primary rounded-lg'}`}>
-                            {u.role || 'Usuario'}
+                            {u.role === 'admin' ? 'ADMIN' : 'USUARIO'}
                           </span>
                         )}
                       </div>
@@ -173,14 +173,32 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
 
             <div className="space-y-6">
               <div className="flex flex-col items-center">
-                <div className={`relative w-20 h-20 overflow-hidden mb-3 ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-full'}`}>
-                  {selectedUser.photoURL ? (
-                    <Image src={selectedUser.photoURL} alt={selectedUser.name || ''} fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-glass flex items-center justify-center"><UserIcon className="w-8 h-8 text-text-secondary" /></div>
-                  )}
-                </div>
-                <h3 className={`text-lg font-semibold ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{selectedUser.name || 'Sin nombre'}</h3>
+                {(() => {
+                  const displayName = selectedUser.name || (selectedUser.email ? selectedUser.email.split('@')[0] : 'Usuario');
+                  const initials = displayName
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .substring(0, 2)
+                    .toUpperCase();
+                  
+                  const colors = ['bg-[#FF5B5B]/20 text-[#FF5B5B]', 'bg-[#F5A623]/20 text-[#F5A623]', 'bg-[#A855F7]/20 text-[#A855F7]', 'bg-[#00E5A0]/20 text-[#00E5A0]', 'bg-[#3B82F6]/20 text-[#3B82F6]', 'bg-[#EC4899]/20 text-[#EC4899]'];
+                  const colorIndex = displayName.length % colors.length;
+                  const avatarColorClass = colors[colorIndex];
+
+                  return (
+                    <>
+                      <div className={`relative w-20 h-20 overflow-hidden mb-3 flex items-center justify-center font-bold text-xl ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-full'} ${!selectedUser.photoURL ? avatarColorClass : ''}`}>
+                        {selectedUser.photoURL ? (
+                          <Image src={selectedUser.photoURL} alt={displayName} fill className="object-cover" />
+                        ) : (
+                          <span>{initials}</span>
+                        )}
+                      </div>
+                      <h3 className={`text-lg font-semibold ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</h3>
+                    </>
+                  );
+                })()}
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{selectedUser.email}</p>
                 {selectedUser.phone && (
                   <p className={`text-xs mt-1 font-medium ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{selectedUser.phone}</p>
@@ -196,7 +214,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                     <span className={`text-xs px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú (Administrador)</span>
                   ) : (
                     <select
-                      value={selectedUser.role || 'Usuario'}
+                      value={selectedUser.role === 'admin' ? 'admin' : 'Usuario'}
                       onChange={(e) => handleChangeRole(selectedUser.id!, e.target.value)}
                       disabled={savingId === selectedUser.id}
                       className={`text-sm focus:outline-none cursor-pointer appearance-none px-3 py-1.5 ${isTechTheme ? 'font-mono uppercase tracking-widest border border-accent/30 bg-black text-accent disabled:opacity-50' : 'bg-glass border border-glass-border text-text-primary rounded-xl disabled:opacity-50'}`}

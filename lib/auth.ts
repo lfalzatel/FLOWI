@@ -56,9 +56,9 @@ export async function signInWithGoogle(promptSelectAccount?: boolean, loginHint?
   } else {
     const data = snap.data();
     const updates: any = {
-      name: user.displayName,
+      name: user.displayName || data.name || '',
       email: user.email,
-      photoURL: user.photoURL,
+      photoURL: user.photoURL || data.photoURL || '',
     };
     if (isAdminEmail && data.role !== 'admin') {
       updates.role = 'admin';
