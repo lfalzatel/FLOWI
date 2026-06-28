@@ -30,9 +30,10 @@ const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899'
 
 interface Props {
   onClose: () => void;
+  onCreated?: (label: string) => void;
 }
 
-export function ManageCategoriesModal({ onClose }: Props) {
+export function ManageCategoriesModal({ onClose, onCreated }: Props) {
   const { user } = useAuth();
   const { allCategories, refreshCategories } = useCategories();
   const { theme } = useTheme();
@@ -134,7 +135,12 @@ export function ManageCategoriesModal({ onClose }: Props) {
       // Pequeña espera para asegurar que Firebase actualice el estado global
       setTimeout(() => {
         setLoading(false);
-        setView('list');
+        if (!editingId && onCreated) {
+          onCreated(label);
+          onClose();
+        } else {
+          setView('list');
+        }
       }, 500);
     } catch (e) {
       console.error(e);

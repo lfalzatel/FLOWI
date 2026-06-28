@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, FolderPlus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction } from '@/lib/firestore';
@@ -190,25 +190,40 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
           {/* Category */}
           <div className="relative">
             <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Categoría</label>
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`w-full bg-white/5 border py-3 px-4 focus:outline-none text-left flex justify-between items-center ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent text-accent' : 'border-white/10 rounded-xl focus:border-accent text-white'}`}
-            >
-              <div className="flex items-center gap-2">
-                {category ? (
-                  <>
-                    <span className="text-xl">
-                      {allCategories.find(c => c.label === category)?.icon || '📝'}
-                    </span>
-                    <span>{category}</span>
-                  </>
-                ) : (
-                  <span className={isTechTheme ? 'text-accent/50' : 'text-white/50'}>Selecciona una categoría</span>
-                )}
-              </div>
-              <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent/70' : 'text-white/40'}`} />
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className={`flex-1 bg-white/5 border py-3 px-4 focus:outline-none text-left flex justify-between items-center ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent text-accent' : 'border-white/10 rounded-xl focus:border-accent text-white'}`}
+              >
+                <div className="flex items-center gap-2">
+                  {category ? (
+                    <>
+                      <span className="text-xl">
+                        {allCategories.find(c => c.label === category)?.icon || '📝'}
+                      </span>
+                      <span>{category}</span>
+                    </>
+                  ) : (
+                    <span className={isTechTheme ? 'text-accent/50' : 'text-white/50'}>Selecciona una categoría</span>
+                  )}
+                </div>
+                <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent/70' : 'text-white/40'}`} />
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setIsManageCategoriesOpen(true)}
+                title="Nueva Categoría"
+                className={`px-3.5 flex items-center justify-center border transition-all active:scale-95 ${
+                  isTechTheme 
+                    ? 'border-accent/30 bg-accent/10 text-accent hover:bg-accent hover:text-black rounded-none' 
+                    : 'border-white/10 bg-white/5 text-[#D10074] hover:bg-[#FFD6EB]/10 rounded-xl'
+                }`}
+              >
+                <FolderPlus className="w-5 h-5" />
+              </button>
+            </div>
 
             {isDropdownOpen && (
               <div className={`absolute z-20 top-full mt-2 w-full border shadow-2xl p-2 max-h-60 overflow-y-auto ${isTechTheme ? 'bg-deep border-accent/50 rounded-none' : 'bg-[#0A0A0F] border-white/10 rounded-xl'}`}>
@@ -315,7 +330,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       )}
       
       {isManageCategoriesOpen && (
-        <ManageCategoriesModal onClose={() => setIsManageCategoriesOpen(false)} />
+        <ManageCategoriesModal 
+          onClose={() => setIsManageCategoriesOpen(false)} 
+          onCreated={(newLabel) => setCategory(newLabel)}
+        />
       )}
     </>
   );
