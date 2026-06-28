@@ -206,56 +206,60 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
               Crear Categoría
             </button>
 
-            {/* Selector de pestañas para la lista de categorías en gestión */}
-            <div className="flex border-b border-white/10 mb-2 overflow-x-auto gap-1 pb-1 scrollbar-none">
-              {Object.keys(CATEGORIZED_ICONS).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab as any)}
-                  className={`px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
-                    activeTab === tab
-                      ? 'text-accent border-b-2 border-accent'
-                      : (isTechTheme ? 'text-accent/50 hover:text-accent' : 'text-white/50 hover:text-white')
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            {filteredCategoriesForList.length === 0 ? (
-              <p className={`text-center text-xs py-10 ${isTechTheme ? 'text-accent/50' : 'text-white/40'}`}>
-                No hay categorías en "{activeTab}".
-              </p>
-            ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                {filteredCategoriesForList.map((cat, i) => (
-                  <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-3 border ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50' : 'rounded-xl bg-white/5 border-white/5'}`}>
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
-                        <CategoryIcon icon={cat.icon} label={cat.label} className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className={`font-semibold truncate text-sm ${isTechTheme ? 'text-accent' : 'text-white'}`}>{cat.label}</p>
-                        <span className={`text-[9px] px-1 py-0.2 font-mono ${isTechTheme ? 'text-accent/50 border border-accent/20' : 'text-white/30 border border-white/10 rounded'}`}>
-                          {cat.isCustom ? 'PERSONALIZADA' : 'DEFECTO'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => handleEdit(cat)} className={`p-2 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDelete(cat)} className="p-2 text-red-400/60 hover:text-red-400 transition" disabled={loading}>
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+            {/* Selector agrupado vertical (2 Columnas) */}
+            <div className="flex gap-3 h-64">
+              {/* Columna Izquierda: Pestañas de grupos */}
+              <div className="w-2/5 flex flex-col gap-1 overflow-y-auto pr-1 border-r border-white/10 select-none scrollbar-none">
+                {Object.keys(CATEGORIZED_ICONS).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab as any)}
+                    className={`px-2 py-2 text-left text-[10px] font-bold transition-all truncate ${
+                      activeTab === tab
+                        ? 'text-accent bg-accent/10 rounded-lg'
+                        : 'text-white/50 hover:text-white hover:bg-white/5 rounded-lg'
+                    }`}
+                  >
+                    {tab}
+                  </button>
                 ))}
               </div>
-            )}
+
+              {/* Columna Derecha: Categorías de la pestaña seleccionada */}
+              <div className="w-3/5 flex flex-col gap-2 overflow-y-auto pr-1">
+                {filteredCategoriesForList.length === 0 ? (
+                  <p className={`text-center text-xs py-10 ${isTechTheme ? 'text-accent/50' : 'text-white/40'}`}>
+                    Sin categorías.
+                  </p>
+                ) : (
+                  filteredCategoriesForList.map((cat, i) => (
+                    <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-2.5 border ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50' : 'rounded-xl bg-white/5 border-white/5'}`}>
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className={`w-8 h-8 flex-shrink-0 flex items-center justify-center text-lg ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
+                          <CategoryIcon icon={cat.icon} label={cat.label} className="w-4.5 h-4.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className={`font-semibold truncate text-xs ${isTechTheme ? 'text-accent' : 'text-white'}`}>{cat.label}</p>
+                          <span className={`text-[8px] px-1 py-0.1 font-mono ${isTechTheme ? 'text-accent/50 border border-accent/20' : 'text-white/30 border border-white/10 rounded'}`}>
+                            {cat.isCustom ? 'PERS.' : 'DEF.'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-0.5">
+                        <button onClick={() => handleEdit(cat)} className={`p-1.5 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => handleDelete(cat)} className="p-1.5 text-red-400/60 hover:text-red-400 transition" disabled={loading}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         )}
 
