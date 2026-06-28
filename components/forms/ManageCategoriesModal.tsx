@@ -22,7 +22,7 @@ const CATEGORIZED_ICONS = {
     'netflix', 'spotify', 'google', 'play_store', 'youtube', 'yt music', 'exito', 'd1', 'olimpica', 'jumbo', 'carulla', 'homecenter', 'ktronix', 'panamericana', 'frisby', 'popsy', 'drive', 'gmail', 'photos'
   ],
   'Deportes': [
-    'deportes', '⚽', '🏋️‍♂️', '🚲', '🏃‍♂️'
+    'deportes', 'decathlon', 'nike', 'adidas', '⚽', '🏋️‍♂️', '🚲', '🏃‍♂️'
   ],
   'Otros': [
     'parqueadero', 'cine', '🚗', '⛽', '🚌', '✈️', '🏍️', '🎮', '🐱', '🐶', '🏥', '💊', '🎓', '👗', '🎁', '💈'

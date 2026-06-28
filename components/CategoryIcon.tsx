@@ -303,5 +303,43 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
     );
   }
 
+  // --- NUEVAS MARCAS DEPORTIVAS ---
+
+  if (check('decathlon')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#0082C3" />
+        {/* Tipografía Decathlon simplificada con la unión clásica C-A */}
+        <text x="50%" y="54%" textAnchor="middle" fill="#FFFFFF" fontSize="6" fontWeight="900" fontFamily="sans-serif" letterSpacing="0.2">DECATHLON</text>
+        <path d="M13 22H27" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (check('nike')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#000000" />
+        {/* Nike Swoosh icónico */}
+        <path d="M10 18C15 19.5 22 19 31 11C25 19 16 25 12 25C10.5 25 9.5 24 10 18Z" fill="#FFFFFF" />
+      </svg>
+    );
+  }
+
+  if (check('adidas')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
+        {/* Las tres tiras icónicas de Adidas */}
+        <g fill="#000000">
+          <path d="M14 24L20 12H23L17 24H14Z" />
+          <path d="M19 24L25 12H28L22 24H19Z" />
+          <path d="M24 24L30 12H33L27 24H24Z" />
+        </g>
+        <text x="50%" y="86%" textAnchor="middle" fill="#000000" fontSize="5" fontWeight="bold" fontFamily="sans-serif">adidas</text>
+      </svg>
+    );
+  }
+
   return <span className={className}>{icon}</span>;
 }
