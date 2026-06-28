@@ -28,13 +28,13 @@ export const BASE_CATEGORIES = [
   { label: 'Sueldo', icon: '💰', color: '#00E5A0' },
   { label: 'Inversiones', icon: '📈', color: '#3B82F6' },
   { label: 'Regalos', icon: '🎁', color: '#EC4899' },
-  // Nuevas pedidas por el usuario
-  { label: 'Claro Hogar', icon: '🌐', color: '#E11D48' },
-  { label: 'Claro Móvil', icon: '📱', color: '#E11D48' },
-  { label: 'Netflix', icon: '🍿', color: '#E50914' },
-  { label: 'Google', icon: '🔍', color: '#4285F4' },
-  { label: 'YouTube', icon: '▶️', color: '#FF0000' },
-  { label: 'YT Music', icon: '🎵', color: '#FF0000' },
+  // Nuevas pedidas por el usuario (con iconos corporativos nativos)
+  { label: 'Claro Hogar', icon: 'claro_hogar', color: '#E11D48' },
+  { label: 'Claro Móvil', icon: 'claro_movil', color: '#E11D48' },
+  { label: 'Netflix', icon: 'netflix', color: '#E50914' },
+  { label: 'Google', icon: 'google', color: '#4285F4' },
+  { label: 'YouTube', icon: 'youtube', color: '#FF0000' },
+  { label: 'YT Music', icon: 'yt music', color: '#FF0000' },
   { label: 'Viajes', icon: '✈️', color: '#06B6D4' },
   { label: 'Agua', icon: '💧', color: '#3B82F6' },
   { label: 'Luz', icon: '💡', color: '#F5A623' },
@@ -42,9 +42,9 @@ export const BASE_CATEGORIES = [
   { label: 'Administración', icon: '🔑', color: '#8B5CF6' },
   { label: 'Alcanos', icon: '⛽', color: '#F97316' },
   { label: 'Gas natural', icon: '🔥', color: '#EF4444' },
-  { label: 'BBVA', icon: '🏦', color: '#1D4ED8' },
-  { label: 'Bancolombia', icon: '🏦', color: '#FBBF24' },
-  { label: 'Nequi', icon: '💳', color: '#D946EF' },
+  { label: 'BBVA', icon: 'bbva', color: '#1D4ED8' },
+  { label: 'Bancolombia', icon: 'bancolombia', color: '#FBBF24' },
+  { label: 'Nequi', icon: 'nequi', color: '#D946EF' },
   { label: 'Otros', icon: '📦', color: '#6B7280' },
 ];
 
