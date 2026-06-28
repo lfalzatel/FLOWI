@@ -254,7 +254,7 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
         <circle cx="20" cy="16" r="5" fill="#FDDA24" />
         <path d="M18 15C18 15 19 14 20 15M22 15C22 15 21 14 20 15" stroke="#000000" strokeWidth="0.8" />
         <path d="M19.5 17.5L20 18.5L20.5 17.5H19.5Z" fill="#FF7A00" />
-        <text x="50%" y="84%" textAnchor="middle" fill="#FDDA24" fontSize="6.5" fontWeight="black" fontFamily="sans-serif" italic="true">Frisby</text>
+        <text x="50%" y="84%" textAnchor="middle" fill="#FDDA24" fontSize="6.5" fontWeight="black" fontFamily="sans-serif" style={{ fontStyle: 'italic' }}>Frisby</text>
       </svg>
     );
   }
