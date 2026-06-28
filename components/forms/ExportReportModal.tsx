@@ -162,20 +162,79 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     }, 500);
   };
 
-  // Compartir reporte mediante Web Share API
+  // Obtener el contenido crudo del CSV
+  const getCSVString = () => {
+    let csv = "";
+    if (debts.length > 0) {
+      csv += "Reporte de Deudas - FLOWI\n\n";
+      csv += "Título,Monto Total,Pagado,Pendiente,Estado\n";
+      debts.forEach(d => {
+        const pending = d.totalAmount - d.paidAmount;
+        csv += `"${d.title}",${d.totalAmount},${d.paidAmount},${pending},"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
+      });
+    } else {
+      csv += `Reporte de Transacciones (${title}) - FLOWI\n\n`;
+      csv += "Fecha,Categoría,Tipo,Descripción,Monto\n";
+      transactions.forEach(t => {
+        const d = t.date instanceof Date ? t.date : new Date(t.date as any);
+        const formattedDate = d.toLocaleDateString('es-CO');
+        csv += `"${formattedDate}","${t.category}","${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}","${t.description || ''}",${t.amount}\n`;
+      });
+    }
+    return csv;
+  };
+
+  // Compartir reporte mediante Web Share API (enviando el archivo real)
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
+    if (!navigator.share) {
+      alert('Tu navegador o dispositivo no soporta la función de compartir directamente.');
+      return;
+    }
+
+    try {
+      let fileToShare: File | null = null;
+      const dateStr = new Date().toISOString().split('T')[0];
+
+      if (format === 'excel') {
+        const csvText = getCSVString();
+        // Agregar BOM para UTF-8 correcto en Excel
+        const blob = new Blob(["\uFEFF" + csvText], { type: 'text/csv;charset=utf-8;' });
+        fileToShare = new File([blob], `Reporte_FLOWI_${dateStr}.csv`, { type: 'text/csv' });
+      } else {
+        // Para PDF e Imagen en móviles, generamos una tarjeta de captura de la previsualización
+        const previewElement = document.getElementById('report-preview-card');
+        if (previewElement) {
+          // Utilizaremos un canvas simple o captura para compartir como imagen
+          const html2canvas = (await import('html2canvas')).default;
+          const canvas = await html2canvas(previewElement, {
+            backgroundColor: '#0A0A0F',
+            scale: 2,
+            logging: false
+          });
+          
+          const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+          if (blob) {
+            fileToShare = new File([blob], `Reporte_FLOWI_${dateStr}.png`, { type: 'image/png' });
+          }
+        }
+      }
+
+      if (fileToShare && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+        await navigator.share({
+          files: [fileToShare],
+          title: `Reporte de ${title} - FLOWI`,
+          text: `Te comparto mi reporte financiero de ${title} generado desde FLOWI.`
+        });
+      } else {
+        // Fallback si no se puede compartir el archivo directo
         await navigator.share({
           title: `Reporte de ${title} - FLOWI`,
           text: `Te comparto mi reporte financiero de ${title} generado desde FLOWI.`,
           url: window.location.origin
         });
-      } catch (err) {
-        console.error('Error al compartir:', err);
       }
-    } else {
-      alert('Tu navegador o dispositivo no soporta la función de compartir directamente.');
+    } catch (err) {
+      console.error('Error al compartir:', err);
     }
   };
 
@@ -254,7 +313,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             // Pantalla 2: Previsualización del Reporte
             <div className="space-y-5 animate-fade-in-up">
               {/* Contenedor de Previsualización */}
-              <div className={`p-4 border max-h-64 overflow-y-auto ${isTechTheme ? 'border-accent/30 bg-black' : 'border-white/5 bg-white/5 rounded-2xl'} scrollbar-hide`}>
+              <div id="report-preview-card" className={`p-4 border max-h-64 overflow-y-auto ${isTechTheme ? 'border-accent/30 bg-black' : 'border-white/5 bg-white/5 rounded-2xl'} scrollbar-hide`}>
                 <div className="space-y-4 text-xs font-mono text-white/70">
                   <div className="flex justify-between border-b border-white/5 pb-2">
                     <span className="text-accent font-bold">FLOWI REPORT</span>
