@@ -1,9 +1,10 @@
 'use client';
-import { Transaction, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/firestore';
+import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from './AnimatedNumber';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { useCategories } from '@/hooks/useCategories';
 
 interface Props { 
   transactions: Transaction[]; 
@@ -21,15 +22,16 @@ function fmtDate(date: Timestamp | Date) {
   return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
 }
 
-function getCategoryIcon(category: string, type: string) {
-  const cats = type === 'gasto' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
-  return cats.find(c => c.label === category) || { label: 'Otro', icon: '💡', color: '#6B7280' };
-}
-
 export function TransactionList({ transactions, limit, onEdit, animationKey }: Props) {
   const { theme } = useTheme();
+  const { allCategories } = useCategories();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const items = limit ? transactions.slice(0, limit) : transactions;
+
+  const getCategoryIcon = (category: string) => {
+    return allCategories.find(c => c.label.toLowerCase() === category.toLowerCase()) 
+      || { label: 'Otro', icon: '💡', color: '#6B7280' };
+  };
 
   if (items.length === 0) {
     return (
@@ -43,7 +45,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
   return (
     <div key={animationKey} className="space-y-2">
       {items.map((t, i) => {
-        const cat = getCategoryIcon(t.category, t.type);
+        const cat = getCategoryIcon(t.category);
         const displayName = t.description || t.category;
         const displayLabel = isCyberpunk 
           ? `>_ ${displayName.toUpperCase().replace(/\s+/g, '_')}` 
