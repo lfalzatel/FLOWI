@@ -164,5 +164,139 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
     );
   }
 
+  // --- NUEVOS LOGOS CC SAN NICOLÁS / GRANDES SUPERFICIES ---
+
+  if (check('play store') || check('playstore')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
+        {/* Triángulo de Google Play */}
+        <path d="M10 8V32L26 20L10 8Z" fill="#00E5A0" />
+        <path d="M10 8V20L26 20L10 8Z" fill="#00C3FF" opacity="0.8" />
+        <path d="M10 32V20L26 20L10 32Z" fill="#FF3366" opacity="0.8" />
+        <path d="M26 20L19 15L10 20L19 25L26 20Z" fill="#FFBB00" opacity="0.9" />
+      </svg>
+    );
+  }
+
+  if (check('olimpica')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#E30613" />
+        <circle cx="20" cy="18" r="8" stroke="#FFFFFF" strokeWidth="2.5" fill="none" />
+        <path d="M20 13V23" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">OLIMPICA</text>
+      </svg>
+    );
+  }
+
+  if (check('jumbo')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#00A859" />
+        {/* Elefante de Jumbo simplificado */}
+        <path d="M14 24C14 20 16 16 20 16C23 16 25 18 25 21C25 24 23 25 20 25C18 25 16 26 14 27" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx="23" cy="19" r="1" fill="#FFFFFF" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="6" fontWeight="bold" fontFamily="sans-serif">JUMBO</text>
+      </svg>
+    );
+  }
+
+  if (check('carulla')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#005A36" />
+        {/* Rombo elegante Carulla */}
+        <path d="M20 10L28 18L20 26L12 18L20 10Z" stroke="#FFFFFF" strokeWidth="1.8" fill="none" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="serif" italic="true">Carulla</text>
+      </svg>
+    );
+  }
+
+  if (check('homecenter')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#004B87" />
+        {/* Techo de Homecenter */}
+        <path d="M10 22V15L20 9L30 15V22H10Z" fill="#E30613" />
+        <path d="M13 22V17L20 12L27 17V22H13Z" fill="#FFFFFF" />
+        <rect x="17" y="18" width="6" height="4" fill="#004B87" />
+      </svg>
+    );
+  }
+
+  if (check('ktronix')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#002D72" />
+        <text x="50%" y="48%" textAnchor="middle" fill="#FF6A00" fontSize="9" fontWeight="black" fontFamily="sans-serif">K</text>
+        <text x="50%" y="80%" textAnchor="middle" fill="#FFFFFF" fontSize="5" fontWeight="bold" fontFamily="sans-serif" letterSpacing="0.5">KTRONIX</text>
+      </svg>
+    );
+  }
+
+  if (check('panamericana')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#0A2240" />
+        {/* P de Panamericana */}
+        <path d="M15 11H23C26 11 27.5 12.5 27.5 14.5C27.5 16.5 26 18 23 18H18V28H15V11ZM18 15.5H22.5C23.8 15.5 24.5 15.1 24.5 14.5C24.5 13.9 23.8 13.5 22.5 13.5H18V15.5Z" fill="#00A4E4" />
+        <text x="50%" y="85%" textAnchor="middle" fill="#FFFFFF" fontSize="4.5" fontWeight="bold" fontFamily="sans-serif">PANAMERICANA</text>
+      </svg>
+    );
+  }
+
+  if (check('frisby')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#E30613" />
+        {/* Pollito Frisby simplificado */}
+        <circle cx="20" cy="16" r="5" fill="#FDDA24" />
+        <path d="M18 15C18 15 19 14 20 15M22 15C22 15 21 14 20 15" stroke="#000000" strokeWidth="0.8" />
+        <path d="M19.5 17.5L20 18.5L20.5 17.5H19.5Z" fill="#FF7A00" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FDDA24" fontSize="6.5" fontWeight="black" fontFamily="sans-serif" italic="true">Frisby</text>
+      </svg>
+    );
+  }
+
+  if (check('popsy')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#E10074" />
+        {/* Helado de Popsy */}
+        <path d="M15 26L20 32L25 26H15Z" fill="#FBBF24" />
+        <circle cx="18" cy="22" r="3.5" fill="#FFFFFF" />
+        <circle cx="22" cy="22" r="3.5" fill="#FF7A00" />
+        <circle cx="20" cy="19" r="3" fill="#EC4899" />
+        <text x="50%" y="85%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">POPSY</text>
+      </svg>
+    );
+  }
+
+  if (check('daviplata')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#E30613" />
+        {/* Casita de Daviplata */}
+        <path d="M12 25V18L20 12L28 18V25H12Z" fill="#FFFFFF" />
+        <rect x="15" y="21" width="3" height="4" fill="#E30613" />
+        <path d="M22 17.5V23.5H25V17.5H22Z" fill="#FDDA24" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">daviplata</text>
+      </svg>
+    );
+  }
+
+  if (check('davivienda')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
+        {/* Casita roja de Davivienda */}
+        <path d="M12 25V17L20 11L28 17V25H12Z" fill="#E30613" />
+        <rect x="18" y="20" width="4" height="5" fill="#FFFFFF" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#E30613" fontSize="5" fontWeight="bold" fontFamily="sans-serif">DAVIVIENDA</text>
+      </svg>
+    );
+  }
+
   return <span className={className}>{icon}</span>;
 }

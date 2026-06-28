@@ -48,13 +48,13 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       '🍔', '🍿', '🍺', '🚬', '🍷', '🍹', '☕', '🥖', '🍕', '🍰', '🍉', '🍦', '🥩', '🍳', '🍽️'
     ],
     'Bancos y Finanzas': [
-      'bancolombia', 'nequi', 'bbva', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
+      'bancolombia', 'nequi', 'bbva', 'daviplata', 'davivienda', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
     ],
     'Hogar y Servicios': [
       'claro_hogar', 'claro_movil', 'epm', 'efigas', 'alcanos', '🏢', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
     ],
     'Marcas y Apps': [
-      'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos'
+      'netflix', 'spotify', 'google', 'play_store', 'youtube', 'yt music', 'exito', 'd1', 'olimpica', 'jumbo', 'carulla', 'homecenter', 'ktronix', 'panamericana', 'frisby', 'popsy', 'drive', 'gmail', 'photos'
     ],
     'Deportes': [
       'deportes', '⚽', '🏋️‍♂️', '🚲', '🏃‍♂️'
