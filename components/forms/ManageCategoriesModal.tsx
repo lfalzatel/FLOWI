@@ -147,6 +147,9 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
           setView('list');
         }
       }, 500);
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
     }
   };
 
