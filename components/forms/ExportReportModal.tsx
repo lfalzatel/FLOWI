@@ -61,8 +61,6 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     if (filterType === 'month') return `Mes: ${filterValue}`;
     if (filterType === 'week') return `Semana: ${filterValue}`;
     return `Día: ${filterValue}`;
-  };
-
   // Función para exportar a CSV/Excel (Estructura de Reporte Financiero Completo)
   const exportToCSV = () => {
     let csv = "\uFEFF"; // BOM para asegurar codificación UTF-8 correcta en Excel
@@ -80,16 +78,16 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
       const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
       const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
-      csv += `Total Deuda original:;${total}\n`;
-      csv += `Total Abonado:;${paid}\n`;
-      csv += `Total Pendiente de pago:;${pending}\n\n`;
+      csv += `Total Deuda original:;"${Math.round(total)}"\n`;
+      csv += `Total Abonado:;"${Math.round(paid)}"\n`;
+      csv += `Total Pendiente de pago:;"${Math.round(pending)}"\n\n`;
     } else {
       const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
       const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
       const balanceReal = totalIngresos - totalGastos;
-      csv += `Total Ingresos:;${totalIngresos}\n`;
-      csv += `Total Gastos:;${totalGastos}\n`;
-      csv += `Dinero Disponible (Balance):;${balanceReal}\n\n`;
+      csv += `Total Ingresos:;"${Math.round(totalIngresos)}"\n`;
+      csv += `Total Gastos:;"${Math.round(totalGastos)}"\n`;
+      csv += `Dinero Disponible (Balance):;"${Math.round(balanceReal)}"\n\n`;
     }
 
     // Tabla de Datos
@@ -98,12 +96,12 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       csv += "Concepto;Monto Total;Abonado;Deuda Pendiente;Estado\n";
       debts.forEach(d => {
         const pending = d.totalAmount - d.paidAmount;
-        csv += `"${d.title}";${d.totalAmount};${d.paidAmount};${pending};"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
+        csv += `"${d.title}";"${Math.round(d.totalAmount)}";"${Math.round(d.paidAmount)}";"${Math.round(pending)}";"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
       });
     } else {
       csv += "Fecha y Hora;Categoría;Tipo;Descripción;Monto\n";
       transactions.forEach(t => {
-        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";${t.amount}\n`;
+        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";"${Math.round(t.amount)}"\n`;
       });
     }
 
@@ -157,9 +155,9 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
 
       summaryHTML = `
         <div class="summary-card">
-          <div><strong>Ingresos:</strong> <span style="color: #00e5a0;">$${totalIngresos.toLocaleString()}</span></div>
-          <div><strong>Gastos:</strong> <span style="color: #ff5b5b;">$${totalGastos.toLocaleString()}</span></div>
-          <div><strong>Disponible:</strong> <span style="color: #00e5a0; font-weight: 800;">$${balanceReal.toLocaleString()}</span></div>
+          <div><strong>Ingresos:</strong> <span style="color: #10b981;">$${totalIngresos.toLocaleString()}</span></div>
+          <div><strong>Gastos:</strong> <span style="color: #ef4444;">$${totalGastos.toLocaleString()}</span></div>
+          <div><strong>Disponible:</strong> <span style="color: #10b981; font-weight: 800;">$${balanceReal.toLocaleString()}</span></div>
         </div>
       `;
 
@@ -181,7 +179,17 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         <head>
           <title>Reporte FLOWI - ${title}</title>
           <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; padding: 40px; line-height: 1.5; }
+            @media print {
+              .no-print { display: none !important; }
+              body { padding: 0 !important; }
+            }
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; padding: 40px 40px 100px 40px; line-height: 1.5; background: #fff; }
+            .action-bar { display: flex; gap: 12px; background: #0F172A; padding: 15px 25px; border-radius: 16px; margin-bottom: 30px; align-items: center; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+            .action-bar span { color: #fff; font-size: 13px; font-weight: 600; }
+            .btn { padding: 8px 16px; font-size: 12px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; text-transform: uppercase; }
+            .btn-primary { background: #10B981; color: #fff; }
+            .btn-secondary { background: #3B82F6; color: #fff; }
+            .btn:hover { opacity: 0.9; }
             .header-container { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #10b981; padding-bottom: 20px; margin-bottom: 25px; }
             .brand { font-size: 32px; font-weight: 800; color: #10b981; letter-spacing: -0.5px; }
             .brand span { color: #3b82f6; }
@@ -200,6 +208,14 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           </style>
         </head>
         <body>
+          <div class="action-bar no-print">
+            <span>¿Qué deseas hacer con tu reporte de ${title}?</span>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" onclick="window.print()">Guardar como PDF / Imprimir</button>
+              <button class="btn btn-primary" onclick="window.close()">Cerrar Pestaña</button>
+            </div>
+          </div>
+
           <div class="header-container">
             <div>
               <div class="brand">flowi<span>.</span></div>
@@ -235,9 +251,6 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
 
     printWindow.document.close();
     printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
   };
 
   // Obtener el contenido del CSV para compartir como archivo real
@@ -254,16 +267,16 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
       const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
       const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
-      csv += `Total Deuda original:;${total}\n`;
-      csv += `Total Abonado:;${paid}\n`;
-      csv += `Total Pendiente de pago:;${pending}\n\n`;
+      csv += `Total Deuda original:;"${Math.round(total)}"\n`;
+      csv += `Total Abonado:;"${Math.round(paid)}"\n`;
+      csv += `Total Pendiente de pago:;"${Math.round(pending)}"\n\n`;
     } else {
       const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
       const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
       const balanceReal = totalIngresos - totalGastos;
-      csv += `Total Ingresos:;${totalIngresos}\n`;
-      csv += `Total Gastos:;${totalGastos}\n`;
-      csv += `Dinero Disponible (Balance):;${balanceReal}\n\n`;
+      csv += `Total Ingresos:;"${Math.round(totalIngresos)}"\n`;
+      csv += `Total Gastos:;"${Math.round(totalGastos)}"\n`;
+      csv += `Dinero Disponible (Balance):;"${Math.round(balanceReal)}"\n\n`;
     }
 
     csv += "DETALLE DEL REPORTE\n";
@@ -271,12 +284,12 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       csv += "Concepto;Monto Total;Abonado;Deuda Pendiente;Estado\n";
       debts.forEach(d => {
         const pending = d.totalAmount - d.paidAmount;
-        csv += `"${d.title}";${d.totalAmount};${d.paidAmount};${pending};"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
+        csv += `"${d.title}";"${Math.round(d.totalAmount)}";"${Math.round(d.paidAmount)}";"${Math.round(pending)}";"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
       });
     } else {
       csv += "Fecha y Hora;Categoría;Tipo;Descripción;Monto\n";
       transactions.forEach(t => {
-        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";${t.amount}\n`;
+        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";"${Math.round(t.amount)}"\n`;
       });
     }
     return csv;
@@ -301,12 +314,26 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         const previewElement = document.getElementById('report-preview-card');
         if (previewElement) {
           const html2canvas = (await import('html2canvas')).default;
-          const canvas = await html2canvas(previewElement, {
+          
+          // Crear un clon fuera de pantalla para capturar todo el reporte sin scrollbar ni recortes
+          const clone = previewElement.cloneNode(true) as HTMLElement;
+          clone.style.position = 'fixed';
+          clone.style.top = '-9999px';
+          clone.style.left = '-9999px';
+          clone.style.maxHeight = 'none'; // Quitar límite de altura
+          clone.style.height = 'auto';
+          clone.style.width = '380px';    // Ancho fijo óptimo de tarjeta
+          document.body.appendChild(clone);
+
+          const canvas = await html2canvas(clone, {
             backgroundColor: '#0A0A0F',
             scale: 2,
-            logging: false
+            logging: false,
+            useCORS: true
           });
           
+          document.body.removeChild(clone); // Limpiar el DOM
+
           const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
           if (blob) {
             fileToShare = new File([blob], `Reporte_FLOWI_${title.replace(/\s+/g, '_')}_${dateStr}.png`, { type: 'image/png' });
