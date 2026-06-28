@@ -574,82 +574,102 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           ) : (
             // Pantalla 2: Previsualización del Reporte
             <div className="space-y-5 animate-fade-in-up">
-              {/* Contenedor de Previsualización */}
-              <div id="report-preview-card" className="p-5 bg-[#0A0A0F] border border-white/10 rounded-2xl max-h-[320px] overflow-y-auto scrollbar-hide text-white/90 space-y-5">
-                {/* Brand Header */}
-                <div className="flex justify-between items-start border-b border-white/10 pb-3">
+              {/* Contenedor de Previsualización (Estilo Plantilla Limpia PDF) */}
+              <div id="report-preview-card" className="p-5 bg-white text-slate-800 border border-slate-200 rounded-2xl max-h-[340px] overflow-y-auto scrollbar-hide space-y-4 shadow-inner">
+                {/* Cabecera Limpia (Estilo PDF) */}
+                <div className="flex justify-between items-start border-b-2 border-emerald-500 pb-2.5">
                   <div>
-                    <span className="text-sm font-bold text-accent tracking-wider font-mono">FLOWI</span>
-                    <p className="text-[9px] text-text-muted">Tu dinero, en flujo.</p>
+                    <span className="text-xl font-black text-emerald-500 tracking-tight font-sans">flowi<span className="text-blue-500">.</span></span>
+                    <p className="text-[8px] text-slate-400 font-medium -mt-1">Tu dinero, en flujo.</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-white font-bold">{title}</span>
-                    <p className="text-[8px] text-text-muted">{new Date().toLocaleDateString('es-CO')} {new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</p>
+                    <span className="text-[10px] text-slate-800 font-extrabold block">Reporte de {title}</span>
+                    <p className="text-[7px] text-slate-400 font-semibold">Periodo: {getPeriodString()}</p>
+                    <p className="text-[7px] text-slate-400 font-medium">{new Date().toLocaleDateString('es-CO')} {new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>
 
-                {/* Resumen Ejecutivo */}
-                <div className="bg-white/5 p-3 rounded-xl border border-white/5 space-y-1">
-                  <span className="text-[9px] text-text-muted font-bold uppercase tracking-wider">Resumen Ejecutivo</span>
+                {/* Resumen Ejecutivo (Estilo PDF) */}
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100 space-y-1">
+                  <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Resumen Ejecutivo</span>
                   {debts.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-2 text-[10px] text-center pt-1">
+                    <div className="grid grid-cols-3 gap-2 text-[9px] text-center pt-0.5">
                       <div>
-                        <div className="text-[8px] text-text-muted">Total</div>
-                        <div className="font-bold">${debts.reduce((sum, d) => sum + d.totalAmount, 0).toLocaleString()}</div>
+                        <div className="text-[7px] text-slate-400">Total Deuda</div>
+                        <div className="font-bold text-slate-700">${debts.reduce((sum, d) => sum + d.totalAmount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[8px] text-text-muted">Abonado</div>
-                        <div className="font-bold text-accent">${debts.reduce((sum, d) => sum + d.paidAmount, 0).toLocaleString()}</div>
+                        <div className="text-[7px] text-slate-400">Abonado</div>
+                        <div className="font-bold text-emerald-600">${debts.reduce((sum, d) => sum + d.paidAmount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[8px] text-text-muted">Pendiente</div>
-                        <div className="font-bold text-orange-400">${debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0).toLocaleString()}</div>
+                        <div className="text-[7px] text-slate-400">Pendiente</div>
+                        <div className="font-bold text-amber-600">${debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0).toLocaleString()}</div>
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-3 gap-2 text-[10px] text-center pt-1">
+                    <div className="grid grid-cols-3 gap-2 text-[9px] text-center pt-0.5">
                       <div>
-                        <div className="text-[8px] text-text-muted">Ingresos</div>
-                        <div className="font-bold text-accent">${transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
+                        <div className="text-[7px] text-slate-400">Ingresos</div>
+                        <div className="font-bold text-emerald-600">${transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[8px] text-text-muted">Gastos</div>
-                        <div className="font-bold text-red-400">${transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
+                        <div className="text-[7px] text-slate-400">Gastos</div>
+                        <div className="font-bold text-red-500">${transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[8px] text-text-muted">Disponible</div>
-                        <div className="font-bold text-accent">${(transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0) - transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0)).toLocaleString()}</div>
+                        <div className="text-[7px] text-slate-400">Disponible</div>
+                        <div className="font-bold text-emerald-600 font-extrabold">${(transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0) - transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0)).toLocaleString()}</div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Detalle */}
-                <div className="space-y-2">
-                  <span className="text-[9px] text-text-muted font-bold uppercase tracking-wider">Detalle del Reporte</span>
-                  <div className="space-y-2.5 divide-y divide-white/5 pt-1">
-                    {debts.length > 0 ? (
-                      debts.map((d, index) => (
-                        <div key={index} className="flex justify-between items-center text-[10px] pt-2">
-                          <div>
-                            <span className="font-bold text-white block">{d.title}</span>
-                            <span className="text-[8px] text-text-muted">Monto: ${d.totalAmount.toLocaleString()}</span>
-                          </div>
-                          <span className="text-orange-400 font-bold">${(d.totalAmount - d.paidAmount).toLocaleString()}</span>
-                        </div>
-                      ))
-                    ) : (
-                      transactions.map((t, index) => (
-                        <div key={index} className="flex justify-between items-center text-[10px] pt-2">
-                          <div>
-                            <span className="font-bold text-white block">{t.category}</span>
-                            <span className="text-[8px] text-text-muted">{formatTimestamp(t.date)}</span>
-                          </div>
-                          <span className={t.type === 'gasto' ? 'text-red-400 font-bold' : 'text-accent font-bold'}>${t.amount.toLocaleString()}</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                {/* Tabla de Detalle (Estilo PDF) */}
+                <div className="space-y-1.5">
+                  <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Detalle del Reporte</span>
+                  <table className="w-full text-left text-[8px] border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50/50 text-slate-500 font-bold">
+                        {debts.length > 0 ? (
+                          <>
+                            <th className="py-1">Concepto</th>
+                            <th className="py-1">Total</th>
+                            <th className="py-1">Abonado</th>
+                            <th className="py-1 text-right">Pendiente</th>
+                          </>
+                        ) : (
+                          <>
+                            <th className="py-1">Fecha/Hora</th>
+                            <th className="py-1">Categoría</th>
+                            <th className="py-1">Tipo</th>
+                            <th className="py-1 text-right">Monto</th>
+                          </>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {debts.length > 0 ? (
+                        debts.map((d, index) => (
+                          <tr key={index} className="text-slate-700">
+                            <td className="py-1 font-semibold">{d.title}</td>
+                            <td className="py-1">${d.totalAmount.toLocaleString()}</td>
+                            <td className="py-1 text-emerald-600">${d.paidAmount.toLocaleString()}</td>
+                            <td className="py-1 text-right text-amber-600 font-bold">${(d.totalAmount - d.paidAmount).toLocaleString()}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        transactions.map((t, index) => (
+                          <tr key={index} className="text-slate-700">
+                            <td className="py-1 text-slate-400">{formatTimestamp(t.date)}</td>
+                            <td className="py-1 font-semibold">{t.category}</td>
+                            <td className={`py-1 font-medium ${t.type === 'gasto' ? 'text-red-500' : 'text-emerald-600'}`}>{t.type === 'gasto' ? 'Gasto' : 'Ingreso'}</td>
+                            <td className={`py-1 text-right font-bold ${t.type === 'gasto' ? 'text-red-500' : 'text-emerald-600'}`}>${t.amount.toLocaleString()}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
