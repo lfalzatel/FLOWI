@@ -35,7 +35,7 @@ interface Props {
 }
 
 export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list' }: Props) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { allCategories, refreshCategories } = useCategories();
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -96,6 +96,10 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
   };
 
   const handleDelete = async (cat: CategoryOption) => {
+    // Si no es personalizado y no es admin, no permitir
+    const isSystemAdmin = profile?.role === 'admin';
+    if (!cat.isCustom && !isSystemAdmin) return;
+
     if (!window.confirm(`¿Eliminar la categoría "${cat.label}"? No borrará las transacciones antiguas.`)) return;
     setLoading(true);
     try {
@@ -171,6 +175,8 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
   };
 
   const filteredCategoriesForList = getFilteredCategoriesForTab();
+
+  const isSystemAdmin = profile?.role === 'admin';
 
   if (typeof document === 'undefined') return null;
 
@@ -252,12 +258,16 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                       </div>
                       
                       <div className="flex items-center gap-0.5">
-                        <button onClick={() => handleEdit(cat)} className={`p-1.5 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => handleDelete(cat)} className="p-1.5 text-red-400/60 hover:text-red-400 transition" disabled={loading}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        {(cat.isCustom || isSystemAdmin) && (
+                          <>
+                            <button onClick={() => handleEdit(cat)} className={`p-1.5 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDelete(cat)} className="p-1.5 text-red-400/60 hover:text-red-400 transition" disabled={loading}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))
