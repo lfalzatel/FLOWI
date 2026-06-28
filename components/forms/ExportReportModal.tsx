@@ -58,9 +58,48 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
   // Obtener el periodo del reporte legible
   const getPeriodString = () => {
     if (filterType === 'all') return "Historial completo";
-    if (filterType === 'month') return `Mes: ${filterValue}`;
-    if (filterType === 'week') return `Semana: ${filterValue}`;
-    return `Día: ${filterValue}`;
+    if (filterType === 'month') {
+      // Formato YYYY-MM -> Nombre de mes y año
+      const [year, month] = filterValue.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const monthName = date.toLocaleDateString('es-CO', { month: 'long' });
+      return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${year}`;
+    }
+    if (filterType === 'week') {
+      // Formato YYYY-Www -> del DD/MM/YYYY al DD/MM/YYYY
+      try {
+        const parts = filterValue.split('-W');
+        if (parts.length === 2) {
+          const year = parseInt(parts[0]);
+          const week = parseInt(parts[1]);
+          
+          // Calcular el primer día del año
+          const simple = new Date(year, 0, 1 + (week - 1) * 7);
+          const dow = simple.getDay();
+          const ISOweekStart = simple;
+          if (dow <= 4) {
+            ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+          } else {
+            ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+          }
+          
+          const ISOweekEnd = new Date(ISOweekStart);
+          ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
+          
+          return `Semana: del ${ISOweekStart.toLocaleDateString('es-CO')} al ${ISOweekEnd.toLocaleDateString('es-CO')}`;
+        }
+      } catch (e) {
+        console.error("Error al calcular fechas de la semana:", e);
+      }
+      return `Semana: ${filterValue}`;
+    }
+    // Formato YYYY-MM-DD -> DD/MM/YYYY
+    try {
+      const [year, month, day] = filterValue.split('-');
+      return `Día: ${day}/${month}/${year}`;
+    } catch (e) {
+      return `Día: ${filterValue}`;
+    }
   };
 
   // Función para exportar a CSV/Excel (Estructura de Reporte Financiero Completo)
