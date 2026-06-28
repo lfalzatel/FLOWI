@@ -51,7 +51,7 @@ export function useCategories() {
     // Si no hay una suscripción activa a Firestore, la creamos
     if (!unsubscribeShared) {
       setLoading(true);
-      const categoriesRef = collection(db, 'customCategories');
+      const categoriesRef = collection(db, 'fl_customCategories');
       const q = query(categoriesRef, where('userId', '==', user.uid));
 
       unsubscribeShared = onSnapshot(q, (querySnapshot) => {
