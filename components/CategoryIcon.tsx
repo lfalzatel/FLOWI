@@ -27,6 +27,42 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
       </div>
     );
   }
+  if (check('bancolombia')) {
+    return (
+      <div className={`${className || "w-5 h-5"} bg-black rounded flex flex-col items-center justify-center overflow-hidden`} style={{ border: '1px solid #333' }}>
+        {/* Franja de colores amarillo, azul y rojo de Bancolombia */}
+        <div className="w-full flex h-[3px]">
+          <div className="flex-1 bg-[#FDDA24]"></div>
+          <div className="flex-1 bg-[#002F6C]"></div>
+          <div className="flex-1 bg-[#E31B23]"></div>
+        </div>
+        <div className="text-[6.5px] font-sans font-black text-white tracking-tighter leading-none py-0.5">
+          co
+        </div>
+      </div>
+    );
+  }
+  if (check('bbva')) {
+    return (
+      <div className={`${className || "w-5 h-5"} bg-[#002F6C] text-white font-black flex items-center justify-center text-[8px] rounded font-sans italic tracking-tighter`} style={{ border: '1px solid #00448F' }}>
+        BBVA
+      </div>
+    );
+  }
+  if (check('claro_hogar') || check('claro hogar')) {
+    return (
+      <div className={`${className || "w-5 h-5"} bg-[#E30613] text-white rounded-full flex items-center justify-center relative`} style={{ border: '1px solid #FF4D4D' }}>
+        <span className="text-[9px] font-bold">🏠</span>
+      </div>
+    );
+  }
+  if (check('claro_movil') || check('claro móvil') || check('claro movil')) {
+    return (
+      <div className={`${className || "w-5 h-5"} bg-[#E30613] text-white rounded-full flex items-center justify-center relative`} style={{ border: '1px solid #FF4D4D' }}>
+        <span className="text-[9px] font-bold">📱</span>
+      </div>
+    );
+  }
 
   return <span className={className}>{icon}</span>;
 }

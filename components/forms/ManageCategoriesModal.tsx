@@ -8,14 +8,24 @@ import { addCustomCategory, updateCustomCategory, deleteCustomCategory, CustomCa
 import { useTheme } from '@/components/ThemeProvider';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
-const ICONS = [
-  '🍔', '🍿', '🍺', '🚬', '🍷', '🍹', '☕', '🥖', // Comida, ocio, vicios
-  '📱', '🌐', '📡', '🔌', '💧', '💡', '📶', // Tecnología y servicios
-  '🏠', '🏢', '🏪', '🛒', '🛍️', '🔑', '📦', '🎁', // Hogar y comercio
-  '🚌', '🚗', '⛽', '✈️', '🎮', '⚽', '🐶', // Transporte y recreación
-  '💰', '📈', '🏦', '💳', '🔥', '💊', '🎓', '👗', // Finanzas, estudio y salud
-  'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos' // Marcas
-];
+const CATEGORIZED_ICONS = {
+  'Comida y Ocio': [
+    '🍔', '🍿', '🍺', '🚬', '🍷', '🍹', '☕', '🥖', '🍕', '🍰', '🍉', '🍦', '🥩', '🍳', '🍽️'
+  ],
+  'Bancos y Finanzas': [
+    'bancolombia', 'bbva', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
+  ],
+  'Hogar y Servicios': [
+    'claro_hogar', 'claro_movil', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
+  ],
+  'Marcas y Apps': [
+    'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos'
+  ],
+  'Otros': [
+    '🚗', '⛽', '🚌', '✈️', '🏍️', '🚲', '🎮', '⚽', '🐶', '🐱', '🏥', '💊', '🎓', '👗', '🎁', '💈', '🏋️‍♂️'
+  ]
+};
+
 const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899', '#E11D48', '#10B981', '#8B5CF6', '#F97316', '#EF4444', '#1D4ED8', '#FBBF24', '#D946EF', '#6B7280'];
 
 interface Props {
@@ -36,6 +46,7 @@ export function ManageCategoriesModal({ onClose }: Props) {
   const [icon, setIcon] = useState('📦');
   const [color, setColor] = useState('#6B7280');
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<keyof typeof CATEGORIZED_ICONS>('Comida y Ocio');
 
   // Bloquear scroll del body mientras el modal esté abierto
   useEffect(() => {
@@ -51,6 +62,7 @@ export function ManageCategoriesModal({ onClose }: Props) {
     setColor('#6B7280');
     setEditingId(null);
     setBaseCategoryToHide(null);
+    setActiveTab('Comida y Ocio');
   };
 
   const handleCreateNew = () => {
@@ -68,6 +80,16 @@ export function ManageCategoriesModal({ onClose }: Props) {
     } else {
       setBaseCategoryToHide(null);
     }
+    
+    // Auto-detectar la pestaña correcta del icono actual
+    let foundTab: keyof typeof CATEGORIZED_ICONS = 'Comida y Ocio';
+    for (const [tab, icons] of Object.entries(CATEGORIZED_ICONS)) {
+      if (icons.includes(cat.icon)) {
+        foundTab = tab as keyof typeof CATEGORIZED_ICONS;
+        break;
+      }
+    }
+    setActiveTab(foundTab);
     setView('form');
   };
 
@@ -157,16 +179,15 @@ export function ManageCategoriesModal({ onClose }: Props) {
                       <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center text-xl ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
                         <CategoryIcon icon={cat.icon} label={cat.label} className="w-5 h-5" />
                       </div>
-                      <div className="flex flex-col flex-1 min-w-0 justify-center">
-                        <span className={`font-medium truncate leading-tight ${isTechTheme ? 'text-text-primary tracking-wide' : 'text-white'}`}>{cat.label}</span>
-                        {!cat.isCustom && (
-                          <span className={`w-max mt-1.5 text-[9px] px-1.5 py-0.5 uppercase ${isTechTheme ? 'text-accent/70 border border-accent/30' : 'bg-white/10 text-white/50 rounded'}`}>
-                            Defecto
-                          </span>
-                        )}
+                      <div className="min-w-0 flex-1">
+                        <p className={`font-semibold truncate text-sm ${isTechTheme ? 'text-accent' : 'text-white'}`}>{cat.label}</p>
+                        <span className={`text-[9px] px-1 py-0.2 font-mono ${isTechTheme ? 'text-accent/50 border border-accent/20' : 'text-white/30 border border-white/10 rounded'}`}>
+                          {cat.isCustom ? 'PERSONALIZADA' : 'DEFECTO'}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                    
+                    <div className="flex items-center gap-1">
                       <button onClick={() => handleEdit(cat)} className={`p-2 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -222,8 +243,26 @@ export function ManageCategoriesModal({ onClose }: Props) {
 
             <div>
               <label className={`block text-xs font-semibold mb-2 uppercase tracking-wider ${isTechTheme ? 'text-accent' : 'text-white/50'}`}>Icono</label>
-              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1">
-                {ICONS.map(i => (
+              
+              <div className="flex border-b border-white/10 mb-3 overflow-x-auto gap-1 pb-1 scrollbar-none">
+                {Object.keys(CATEGORIZED_ICONS).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab as any)}
+                    className={`px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                      activeTab === tab
+                        ? (isTechTheme ? 'text-accent border-b-2 border-accent' : 'text-accent border-b-2 border-accent')
+                        : (isTechTheme ? 'text-accent/50 hover:text-accent' : 'text-white/50 hover:text-white')
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-1 bg-black/20 border border-white/5 rounded-xl">
+                {CATEGORIZED_ICONS[activeTab].map(i => (
                   <button
                     key={i}
                     type="button"
