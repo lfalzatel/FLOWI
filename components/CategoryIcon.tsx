@@ -208,7 +208,7 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
         <rect width="40" height="40" rx="8" fill="#005A36" />
         {/* Rombo elegante Carulla */}
         <path d="M20 10L28 18L20 26L12 18L20 10Z" stroke="#FFFFFF" strokeWidth="1.8" fill="none" />
-        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="serif" italic="true">Carulla</text>
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="serif" style={{ fontStyle: 'italic' }}>Carulla</text>
       </svg>
     );
   }
