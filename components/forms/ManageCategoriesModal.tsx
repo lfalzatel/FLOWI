@@ -16,7 +16,7 @@ const CATEGORIZED_ICONS = {
     'bancolombia', 'nequi', 'bbva', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
   ],
   'Hogar y Servicios': [
-    'claro_hogar', 'claro_movil', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
+    'claro_hogar', 'claro_movil', '🏢', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
   ],
   'Marcas y Apps': [
     'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos'
@@ -128,7 +128,11 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
           icon,
           color
         });
-        if (baseCategoryToHide) {
+        // Si hay una categoría por defecto con el mismo nombre, la ocultamos incondicionalmente
+        const baseMatch = allCategories.find(c => !c.isCustom && c.label.toLowerCase() === label.trim().toLowerCase());
+        if (baseMatch) {
+          await hideBaseCategory(user.uid, baseMatch.label);
+        } else if (baseCategoryToHide) {
           await hideBaseCategory(user.uid, baseCategoryToHide);
         }
       }
@@ -138,6 +142,16 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
         setLoading(false);
         if (!editingId && onCreated) {
           onCreated(label);
+          onClose();
+        } else {
+          setView('list');
+        }
+      }, 500);
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
+  };      onCreated(label);
           onClose();
         } else {
           setView('list');

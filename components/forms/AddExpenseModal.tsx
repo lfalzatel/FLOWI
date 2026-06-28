@@ -51,7 +51,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       'bancolombia', 'nequi', 'bbva', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
     ],
     'Hogar y Servicios': [
-      'claro_hogar', 'claro_movil', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
+      'claro_hogar', 'claro_movil', '🏢', '🏠', '🔌', '💧', '💡', '📶', '📡', '🧼', '🔨', '🔑', '🚪', '🛋️', '🪴', '🧹'
     ],
     'Marcas y Apps': [
       'netflix', 'spotify', 'google', 'youtube', 'yt music', 'exito', 'd1', 'drive', 'gmail', 'photos'
