@@ -111,7 +111,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
             ) : (
               <div className="space-y-3">
                 {users.map(u => {
-                  const displayName = u.name || u.email.split('@')[0];
+                  const displayName = u.name || (u.email ? u.email.split('@')[0] : 'Usuario');
                   const initials = displayName
                     .split(' ')
                     .map(n => n[0])
