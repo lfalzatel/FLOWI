@@ -53,10 +53,11 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
       d = t.date;
     } else if (typeof t.date === 'string') {
       // Si viene como string YYYY-MM-DD...
-      if (t.date.includes('T')) {
-        d = new Date(t.date);
+      const dateStr = t.date as string;
+      if (dateStr.includes('T')) {
+        d = new Date(dateStr);
       } else {
-        const [year, month, day] = t.date.split('-').map(Number);
+        const [year, month, day] = dateStr.split('-').map(Number);
         d = new Date(year, month - 1, day, 12, 0, 0);
       }
     } else {
