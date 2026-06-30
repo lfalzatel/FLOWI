@@ -19,7 +19,9 @@ function fmt(n: number) {
 
 function fmtDate(date: Timestamp | Date) {
   const d = date instanceof Timestamp ? date.toDate() : date;
-  return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+  const dateStr = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+  const timeStr = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+  return `${dateStr} • ${timeStr}`;
 }
 
 export function TransactionList({ transactions, limit, onEdit, animationKey }: Props) {
@@ -59,15 +61,20 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
                             hover:bg-glass-hover transition-all duration-200 animate-card-mix
                             ${onEdit ? 'cursor-pointer' : ''}`}
                  style={{ borderLeft: `3px solid ${cat.color}`, animationDelay: `${i * 0.1}s` }}>
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="opacity-80 flex items-center justify-center">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <span className="opacity-80 flex items-center justify-center flex-shrink-0">
                   <CategoryIcon icon={cat.icon} label={cat.label || t.category} className="text-lg w-5 h-5" />
                 </span>
-                <p className="text-[13px] font-bold text-text-primary font-mono truncate uppercase tracking-widest">
-                  {displayLabel}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-bold text-text-primary font-mono truncate uppercase tracking-widest">
+                    {displayLabel}
+                  </p>
+                  <p className="text-[9px] text-accent/60 font-mono mt-0.5 uppercase tracking-wider truncate">
+                    {t.category.replace(/\s+/g, '_')} // {fmtDate(t.date as Timestamp)}
+                  </p>
+                </div>
               </div>
-              <p className={`text-[13px] font-bold flex-shrink-0 font-mono tracking-widest
+              <p className={`text-[13px] font-bold flex-shrink-0 font-mono tracking-widest ml-4
                              ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
                 <AnimatedNumber value={t.amount} prefix={t.type === 'gasto' ? '-' : '+'} delay={i * 0.1} />
               </p>

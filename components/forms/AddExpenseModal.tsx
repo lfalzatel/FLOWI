@@ -133,13 +133,28 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     setLoading(true);
     try {
       const finalCategory = category.trim() || 'Otros';
+      
+      // Obtener fecha y hora exacta
+      const todayStr = new Date().toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD
+      let finalDate: Date;
+      if (date === todayStr) {
+        // Si es hoy, adjuntar la hora real actual
+        const now = new Date();
+        const [year, month, day] = date.split('-').map(Number);
+        finalDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+      } else {
+        // Si es otro día, usar las 12:00:00 locales
+        const [year, month, day] = date.split('-').map(Number);
+        finalDate = new Date(year, month - 1, day, 12, 0, 0);
+      }
+
       const data = {
         userId: user.uid,
         type,
         amount: parseFloat(amount),
         description,
         category: finalCategory,
-        date: new Date(date + 'T12:00:00'), // Evitar problemas de zona horaria
+        date: finalDate,
       };
 
       if (transactionToEdit?.id) {
