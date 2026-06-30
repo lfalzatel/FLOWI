@@ -36,7 +36,7 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
     const d = new Date(parseInt(y), parseInt(m) - 1, 1);
     for (let i = 1; i <= daysInMonth; i++) {
       d.setDate(i);
-      grouped.set(`${i} ${d.toLocaleDateString('es-ES', { month: 'short' })}`, { gastos: 0, ingresos: 0 });
+      grouped.set(i.toString(), { gastos: 0, ingresos: 0 });
     }
   } else if (filterType === 'day' && filterValue) {
     for (let i = 0; i < 24; i++) {
@@ -69,7 +69,7 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
     if (filterType === 'all') {
       key = d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
     } else if (filterType === 'month') {
-      key = d.getDate().toString() + ' ' + d.toLocaleDateString('es-ES', { month: 'short' });
+      key = d.getDate().toString();
     } else if (filterType === 'week') {
       key = getWeekKey(d);
     } else if (filterType === 'day') {
@@ -146,6 +146,13 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
   const showGastos = type === 'all' || type === 'gasto';
   const showIngresos = type === 'all' || type === 'ingreso';
 
+  const xAxisConfig = {
+    'day': { angle: -90, height: 45, interval: 1 }, // Mostrar horas alternas verticales de forma limpia
+    'week': { angle: -25, height: 35, interval: 0 }, // Mostrar todos los días de la semana un poco inclinados
+    'month': { angle: -90, height: 40, interval: 1 }, // Mostrar días alternos verticales
+    'all': { angle: -25, height: 35, interval: 0 }
+  }[filterType as 'day' | 'week' | 'month' | 'all'] || { angle: -25, height: 35, interval: 0 };
+
   return (
     <div className="glass-card p-5 rounded-2xl">
       <div className="flex items-center justify-between mb-4">
@@ -176,7 +183,11 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
             </linearGradient>
           </defs>
           <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
-                 axisLine={false} tickLine={false} angle={-25} textAnchor="end" height={35} interval={0} />
+                 axisLine={false} tickLine={false} 
+                 angle={xAxisConfig.angle} 
+                 textAnchor="end" 
+                 height={xAxisConfig.height} 
+                 interval={xAxisConfig.interval} />
           <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
                  axisLine={false} tickLine={false} />
           <Tooltip content={<CustomTooltip chartType={type} />} />
