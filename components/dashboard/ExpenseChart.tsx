@@ -14,13 +14,21 @@ interface Props {
 function buildChartData(transactions: Transaction[], filterType: string = 'all', filterValue: string = '') {
   const grouped = new Map<string, { gastos: number, ingresos: number }>();
 
+  // Helper para generar una llave consistente de semana (ej: "lun 22")
+  const getWeekKey = (date: Date) => {
+    const weekday = date.toLocaleDateString('es-ES', { weekday: 'short' });
+    const dayNum = date.getDate();
+    return `${weekday} ${dayNum}`;
+  };
+
   // Pre-seed based on filter
   if (filterType === 'week' && filterValue) {
     const startOfWeek = getDateFromISOWeek(filterValue);
     for (let i = 0; i < 7; i++) {
       const d = new Date(startOfWeek);
       d.setDate(d.getDate() + i);
-      grouped.set(d.toLocaleDateString('es-ES', { weekday: 'short' }), { gastos: 0, ingresos: 0 });
+      const key = getWeekKey(d);
+      grouped.set(key, { gastos: 0, ingresos: 0 });
     }
   } else if (filterType === 'month' && filterValue) {
     const [y, m] = filterValue.split('-');
@@ -37,7 +45,11 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
   }
 
   transactions.forEach(t => {
-    const d = t.date instanceof Timestamp ? t.date.toDate() : new Date(t.date as any);
+    // Obtener la fecha en el huso horario local de manera robusta
+    const d = t.date instanceof Timestamp 
+      ? t.date.toDate() 
+      : (t.date instanceof Date ? t.date : new Date(t.date as any));
+      
     let key = '';
 
     if (filterType === 'all') {
@@ -45,17 +57,25 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
     } else if (filterType === 'month') {
       key = d.getDate().toString() + ' ' + d.toLocaleDateString('es-ES', { month: 'short' });
     } else if (filterType === 'week') {
-      key = d.toLocaleDateString('es-ES', { weekday: 'short' });
+      key = getWeekKey(d);
     } else if (filterType === 'day') {
       key = d.getHours().toString().padStart(2, '0') + ':00';
     } else {
       key = d.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
     }
 
-    const current = grouped.get(key) || { gastos: 0, ingresos: 0 };
-    if (t.type === 'gasto') current.gastos += t.amount;
-    if (t.type === 'ingreso') current.ingresos += t.amount;
-    grouped.set(key, current);
+    const current = grouped.get(key);
+    if (current) {
+      if (t.type === 'gasto') current.gastos += t.amount;
+      if (t.type === 'ingreso') current.ingresos += t.amount;
+      grouped.set(key, current);
+    } else if (filterType === 'all' || filterType === 'month') {
+      // Si no estaba pre-seed pero corresponde al filtro
+      const newValue = { gastos: 0, ingresos: 0 };
+      if (t.type === 'gasto') newValue.gastos += t.amount;
+      if (t.type === 'ingreso') newValue.ingresos += t.amount;
+      grouped.set(key, newValue);
+    }
   });
 
   const result: any[] = [];
