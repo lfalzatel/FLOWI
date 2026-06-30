@@ -45,10 +45,23 @@ function buildChartData(transactions: Transaction[], filterType: string = 'all',
   }
 
   transactions.forEach(t => {
-    // Obtener la fecha en el huso horario local de manera robusta
-    const d = t.date instanceof Timestamp 
-      ? t.date.toDate() 
-      : (t.date instanceof Date ? t.date : new Date(t.date as any));
+    // Obtener la fecha en el huso horario local de manera 100% robusta
+    let d: Date;
+    if (t.date instanceof Timestamp) {
+      d = t.date.toDate();
+    } else if (t.date instanceof Date) {
+      d = t.date;
+    } else if (typeof t.date === 'string') {
+      // Si viene como string YYYY-MM-DD...
+      if (t.date.includes('T')) {
+        d = new Date(t.date);
+      } else {
+        const [year, month, day] = t.date.split('-').map(Number);
+        d = new Date(year, month - 1, day, 12, 0, 0);
+      }
+    } else {
+      d = new Date(t.date as any);
+    }
       
     let key = '';
 
@@ -162,16 +175,16 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
             </linearGradient>
           </defs>
           <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
-                 axisLine={false} tickLine={false} angle={-25} textAnchor="end" height={35} />
+                 axisLine={false} tickLine={false} angle={-25} textAnchor="end" height={35} interval={0} />
           <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
                  axisLine={false} tickLine={false} />
           <Tooltip content={<CustomTooltip chartType={type} />} />
           {showGastos && (
-            <Area type="linear" dataKey="gastos"   stroke="#FF5B5B" strokeWidth={2}
+            <Area type="monotone" dataKey="gastos"   stroke="#FF5B5B" strokeWidth={2}
                   fill="url(#gastos)"   dot={false} />
           )}
           {showIngresos && (
-            <Area type="linear" dataKey="ingresos" stroke="#00E5A0" strokeWidth={2}
+            <Area type="monotone" dataKey="ingresos" stroke="#00E5A0" strokeWidth={2}
                   fill="url(#ingresos)" dot={false} />
           )}
         </AreaChart>
