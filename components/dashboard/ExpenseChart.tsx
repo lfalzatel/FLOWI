@@ -161,17 +161,17 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
               <stop offset="95%" stopColor="#00E5A0" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
-                 axisLine={false} tickLine={false} />
+          <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
+                 axisLine={false} tickLine={false} angle={-25} textAnchor="end" height={35} />
           <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 9 }}
                  axisLine={false} tickLine={false} />
           <Tooltip content={<CustomTooltip chartType={type} />} />
           {showGastos && (
-            <Area type="monotone" dataKey="gastos"   stroke="#FF5B5B" strokeWidth={2}
+            <Area type="linear" dataKey="gastos"   stroke="#FF5B5B" strokeWidth={2}
                   fill="url(#gastos)"   dot={false} />
           )}
           {showIngresos && (
-            <Area type="monotone" dataKey="ingresos" stroke="#00E5A0" strokeWidth={2}
+            <Area type="linear" dataKey="ingresos" stroke="#00E5A0" strokeWidth={2}
                   fill="url(#ingresos)" dot={false} />
           )}
         </AreaChart>
