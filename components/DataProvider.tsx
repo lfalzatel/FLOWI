@@ -82,9 +82,29 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       (snapshot) => {
         const debtsData = snapshot.docs.map((doc) => {
           const data = doc.data();
+          const rawPayments = data.payments || [];
+          
+          const payments = rawPayments.map((p: any) => {
+            let finalDate: Date;
+            if (p.date instanceof Timestamp) {
+              finalDate = p.date.toDate();
+            } else if (p.date && typeof p.date === 'object' && 'seconds' in p.date) {
+              finalDate = new Timestamp(p.date.seconds, p.date.nanoseconds).toDate();
+            } else if (p.date) {
+              finalDate = new Date(p.date);
+            } else {
+              finalDate = new Date();
+            }
+            return {
+              ...p,
+              date: finalDate,
+            };
+          });
+
           return {
             id: doc.id,
             ...data,
+            payments,
             createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(),
           };
         }) as Debt[];
