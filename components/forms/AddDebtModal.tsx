@@ -54,6 +54,18 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
         const abonoAmount = parseFloat(abono);
         paid += abonoAmount;
         
+        // Obtener fecha y hora exacta localmente para evitar desfases UTC
+        const todayStr = new Date().toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD
+        let finalDate: Date;
+        if (abonoDate === todayStr) {
+          const now = new Date();
+          const [year, month, day] = abonoDate.split('-').map(Number);
+          finalDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+        } else {
+          const [year, month, day] = abonoDate.split('-').map(Number);
+          finalDate = new Date(year, month - 1, day, 12, 0, 0);
+        }
+
         // Registrar el abono como un gasto
         await addExpense({
           userId: user.uid,
@@ -61,7 +73,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           category: 'Deudas',
           amount: abonoAmount,
           description: `Abono a: ${title}`,
-          date: new Date(abonoDate),
+          date: finalDate,
         });
       }
 
