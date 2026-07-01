@@ -26,6 +26,7 @@ export default function GastosPage() {
   const [showExport, setShowExport] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
   const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
+  const [searchQuery, setSearchQuery] = useState(''); // Estado del buscador universal
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
@@ -48,23 +49,37 @@ export default function GastosPage() {
     );
   }
 
+  // Filtrado compuesto: Fecha + Buscador universal
   const filteredTransactions = transactions.filter(t => {
-    if (filterType === 'all') {
-      return true;
+    // 1. Filtrado por fecha
+    let matchesDate = true;
+    if (filterType !== 'all') {
+      const d = t.date instanceof Date 
+        ? t.date 
+        : (t.date && typeof (t.date as any).toDate === 'function')
+          ? (t.date as any).toDate()
+          : new Date(t.date as any);
+      const dateStr = d.toISOString().split('T')[0];
+      
+      if (filterType === 'month') {
+        matchesDate = dateStr.startsWith(filterValue);
+      } else if (filterType === 'week') {
+        matchesDate = getISOWeekString(d) === filterValue;
+      } else {
+        matchesDate = dateStr === filterValue;
+      }
     }
-    const d = t.date instanceof Date 
-      ? t.date 
-      : (t.date && typeof (t.date as any).toDate === 'function')
-        ? (t.date as any).toDate()
-        : new Date(t.date as any);
-    const dateStr = d.toISOString().split('T')[0];
-    if (filterType === 'month') {
-      return dateStr.startsWith(filterValue);
-    } else if (filterType === 'week') {
-      return getISOWeekString(d) === filterValue;
-    } else {
-      return dateStr === filterValue;
-    }
+
+    if (!matchesDate) return false;
+
+    // 2. Filtrado por buscador universal (descripción, categoría, monto)
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase().trim();
+    const matchesCategory = t.category.toLowerCase().includes(query);
+    const matchesDesc = (t.description || '').toLowerCase().includes(query);
+    const matchesAmount = t.amount.toString().includes(query);
+
+    return matchesCategory || matchesDesc || matchesAmount;
   });
 
   return (
@@ -98,7 +113,6 @@ export default function GastosPage() {
           </div>
         </div>
 
-        {/* Filter */}
         <DateFilter 
           transactions={transactions}
           filterType={filterType} 
@@ -106,6 +120,38 @@ export default function GastosPage() {
           onChangeType={setFilterType} 
           onChangeValue={setFilterValue} 
         />
+
+        {/* Buscador Universal */}
+        <div className="mb-4 relative">
+          <input
+            type="text"
+            placeholder={isTechTheme ? "SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR..." : "Buscar por categoría, descripción o monto..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={`
+              w-full py-2.5 pl-10 pr-4 text-xs text-white placeholder-white/35 bg-white/5 border focus:outline-none transition-all
+              ${isTechTheme
+                ? 'border-accent/20 rounded-none focus:border-accent font-mono'
+                : 'border-white/5 rounded-2xl focus:border-accent/40 bg-white/5'
+              }
+            `}
+          />
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {/* Card de Total */}
         <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-[var(--red)]/20 shadow-sm animate-card-mix">

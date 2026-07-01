@@ -8,6 +8,8 @@ import { useCategories } from '@/hooks/useCategories';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction } from '@/lib/firestore';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -28,6 +30,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // ConfirmDialog states
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showConfirmConvert, setShowConfirmConvert] = useState(false);
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [categoriesInitialView, setCategoriesInitialView] = useState<'list' | 'form'>('list');
 
@@ -157,10 +163,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         date: finalDate,
       };
 
+      const numericAmount = parseFloat(amount);
+
       if (transactionToEdit?.id) {
         await updateExpense(transactionToEdit.id, data);
+        triggerPowerAnimation(numericAmount, 'edicion');
       } else {
         await addExpense(data);
+        triggerPowerAnimation(numericAmount, type);
       }
       
       onSuccess?.();
@@ -174,8 +184,6 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
   const handleDelete = async () => {
     if (!transactionToEdit?.id) return;
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta transacción?')) return;
-
     setLoading(true);
     try {
       await deleteExpense(transactionToEdit.id);
@@ -185,13 +193,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       console.error('Error deleting transaction:', error);
     } finally {
       setLoading(false);
+      setShowConfirmDelete(false);
     }
   };
 
   const handleConvertToDebt = async () => {
     if (!transactionToEdit?.id || !user) return;
-    if (!window.confirm('¿Estás seguro de que quieres convertir este gasto en una deuda?')) return;
-
     setLoading(true);
     try {
       await addDebt({
@@ -208,6 +215,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       console.error('Error converting to debt:', error);
     } finally {
       setLoading(false);
+      setShowConfirmConvert(false);
     }
   };
 
@@ -426,9 +434,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={handleDelete}
+                onClick={() => setShowConfirmDelete(true)}
                 disabled={loading}
-                className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}
+                className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs'}`}
               >
                 Eliminar
               </button>
@@ -436,9 +444,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
               {type === 'gasto' && (
                 <button
                   type="button"
-                  onClick={handleConvertToDebt}
+                  onClick={() => setShowConfirmConvert(true)}
                   disabled={loading}
-                  className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-blue-500/10 border border-blue-500/50 text-blue-400 hover:bg-blue-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'}`}
+                  className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-blue-500/10 border border-blue-500/50 text-blue-400 hover:bg-blue-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-xs'}`}
                 >
                   Pasar a Deuda
                 </button>
@@ -450,6 +458,25 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         </div>,
         document.body
       )}
+
+      {/* Dialogs de confirmación style consola */}
+      <ConfirmDialog
+        isOpen={showConfirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
+        onConfirm={handleDelete}
+        title="Eliminar Transacción"
+        message="¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer y afectará tu balance."
+        confirmText="Eliminar"
+      />
+
+      <ConfirmDialog
+        isOpen={showConfirmConvert}
+        onCancel={() => setShowConfirmConvert(false)}
+        onConfirm={handleConvertToDebt}
+        title="Pasar a Deuda"
+        message="¿Estás seguro de que quieres convertir este gasto en una deuda activa? Se creará una deuda pendiente y se eliminará este gasto."
+        confirmText="Convertir"
+      />
       
       {isManageCategoriesOpen && (
         <ManageCategoriesModal 

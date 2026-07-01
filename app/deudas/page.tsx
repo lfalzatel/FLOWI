@@ -32,6 +32,9 @@ export default function DeudasPage() {
       return sum + basePending + interestData.accumulatedInterest;
     }, 0);
 
+  const activeDebts = debts.filter(d => d.status !== 'paid');
+  const paidDebts = debts.filter(d => d.status === 'paid');
+
   useEffect(() => {
     if (!authLoading && !user) {
       if (sessionStorage.getItem('justLoggedOut') === 'true') {
@@ -118,118 +121,113 @@ export default function DeudasPage() {
             <div className="glass-card rounded-2xl p-6 text-center text-text-muted text-sm">
               No tienes deudas registradas. ¡Buen trabajo!
             </div>
-          ) : (() => {
-            const activeDebts = debts.filter(d => d.status !== 'paid');
-            const paidDebts = debts.filter(d => d.status === 'paid');
+          ) : (
+            <div className="space-y-6">
+              {/* Deudas Activas */}
+              {activeDebts.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>Activas ({activeDebts.length})</h3>
+                  {activeDebts.map((debt, i) => {
+                    const interestData = calculateDebtInterest(debt);
+                    const basePending = debt.totalAmount - debt.paidAmount;
+                    const pending = basePending + interestData.accumulatedInterest;
+                    const progress = (debt.paidAmount / debt.totalAmount) * 100;
+                    const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
 
-            return (
-              <div className="space-y-6">
-                {/* Deudas Activas */}
-                {activeDebts.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>Activas ({activeDebts.length})</h3>
-                    {activeDebts.map((debt, i) => {
-                      const interestData = calculateDebtInterest(debt);
-                      const basePending = debt.totalAmount - debt.paidAmount;
-                      const pending = basePending + interestData.accumulatedInterest;
-                      const progress = (debt.paidAmount / debt.totalAmount) * 100;
-                      const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
-
-                      return (
-                        <div
-                          key={debt.id}
-                          onClick={() => setSelectedDebt(debt)}
-                          className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer animate-card-mix"
-                          style={{ animationDelay: `${i * 0.1}s` }}
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <p className={`text-text-primary font-medium text-sm ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
-                              {debt.description && (
-                                <p className={`text-xs text-text-muted mt-0.5 max-w-[200px] sm:max-w-md line-clamp-1 italic ${isCyberpunk ? 'font-mono' : ''}`}>
-                                  {debt.description}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-medium">
-                                  <Clock className="w-3 h-3" /> Pendiente
-                                  {debt.interestRate ? (
-                                    <span className="ml-1.5 bg-red-500/10 text-red-400 border border-red-500/20 px-1 rounded text-[9px] uppercase tracking-wider">
-                                      {debt.interestRate}% EA
-                                    </span>
-                                  ) : null}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-text-primary font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
-                                <AnimatedNumber value={pending} prefix="$" delay={i * 0.1} />
+                    return (
+                      <div
+                        key={debt.id}
+                        onClick={() => setSelectedDebt(debt)}
+                        className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer animate-card-mix"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className={`text-text-primary font-medium text-sm ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
+                            {debt.description && (
+                              <p className={`text-xs text-text-muted mt-0.5 max-w-[200px] sm:max-w-md line-clamp-1 italic ${isCyberpunk ? 'font-mono' : ''}`}>
+                                {debt.description}
                               </p>
-                              {interestData.accumulatedInterest > 0 ? (
-                                <p className="text-[10px] text-red-400 font-mono font-medium">
-                                  +${interestData.accumulatedInterest.toLocaleString('es-MX', { maximumFractionDigits: 0 })} Int.
-                                </p>
-                              ) : (
-                                <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
-                              )}
+                            )}
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-medium">
+                                <Clock className="w-3 h-3" /> Pendiente
+                                {debt.interestRate ? (
+                                  <span className="ml-1.5 bg-red-500/10 text-red-400 border border-red-500/20 px-1 rounded text-[9px] uppercase tracking-wider">
+                                    {debt.interestRate}% EA
+                                  </span>
+                                ) : null}
+                              </span>
                             </div>
                           </div>
-                          
-                          {/* Progress Bar */}
-                          <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-orange-500"
-                              style={{ width: `${Math.min(progress, 100)}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-[9px] text-text-muted">Pagado: {fmt(debt.paidAmount)}</span>
-                            <span className="text-[9px] text-text-muted">{Math.round(progress)}%</span>
+                          <div className="text-right">
+                            <p className={`text-text-primary font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
+                              <AnimatedNumber value={pending} prefix="$" delay={i * 0.1} />
+                            </p>
+                            {interestData.accumulatedInterest > 0 ? (
+                              <p className="text-[10px] text-red-400 font-mono font-medium">
+                                +${interestData.accumulatedInterest.toLocaleString('es-MX', { maximumFractionDigits: 0 })} Int.
+                              </p>
+                            ) : (
+                              <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
+                            )}
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                        
+                        {/* Progress Bar */}
+                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-orange-500"
+                            style={{ width: `${Math.min(progress, 100)}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <span className="text-[9px] text-text-muted">Pagado: {fmt(debt.paidAmount)}</span>
+                          <span className="text-[9px] text-text-muted">{Math.round(progress)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
-                {/* Historial de Deudas Liquidadas */}
-                {paidDebts.length > 0 && (
-                  <div className="space-y-2 pt-2">
-                    <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas ({paidDebts.length})</h3>
-                    {paidDebts.map((debt, i) => {
-                      const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
+              {/* Historial de Deudas Liquidadas */}
+              {paidDebts.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas ({paidDebts.length})</h3>
+                  {paidDebts.map((debt, i) => {
+                    const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
 
-                      return (
-                        <div
-                          key={debt.id}
-                          onClick={() => setSelectedDebt(debt)}
-                          className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer opacity-60 hover:opacity-100 transition-opacity animate-card-mix"
-                          style={{ animationDelay: `${i * 0.1}s` }}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className={`text-text-primary font-medium text-sm line-through ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium">
-                                  <Check className="w-3 h-3" /> Liquidada
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-accent font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
-                                ${debt.totalAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                              </p>
-                              <p className="text-[10px] text-text-muted">Saldado completo</p>
+                    return (
+                      <div
+                        key={debt.id}
+                        onClick={() => setSelectedDebt(debt)}
+                        className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer opacity-60 hover:opacity-100 transition-opacity animate-card-mix"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className={`text-text-primary font-medium text-sm line-through ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium">
+                                <Check className="w-3 h-3" /> Liquidada
+                              </span>
                             </div>
                           </div>
+                          <div className="text-right">
+                            <p className={`text-accent font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
+                              ${debt.totalAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                            </p>
+                            <p className="text-[10px] text-text-muted">Saldado completo</p>
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })())}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 

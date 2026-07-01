@@ -5,6 +5,8 @@ import { useTheme } from '@/components/ThemeProvider';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { addDebt, updateDebt, deleteDebt, addExpense, calculateDebtInterest, Debt } from '@/lib/firestore';
+import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 interface Props {
   onClose: () => void;
@@ -22,6 +24,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   const [abono, setAbono] = useState('');
   const [abonoDate, setAbonoDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -91,6 +94,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           date: finalDate,
         });
 
+        // Guardar la deuda con el array de abonos actualizado
         const status = paid >= total ? 'paid' : 'pending';
         await updateDebt(debtToEdit.id!, {
           title,
@@ -101,6 +105,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           description,
           payments: [...(debtToEdit.payments || []), newPayment],
         });
+        triggerPowerAnimation(abonoAmount, 'abono');
       } else {
         const status = paid >= total ? 'paid' : 'pending';
         if (debtToEdit && debtToEdit.id) {
@@ -112,6 +117,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             interestRate: rate,
             description,
           });
+          triggerPowerAnimation(total, 'edicion');
         } else {
           await addDebt({
             userId: user.uid,
@@ -123,6 +129,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             description,
             payments: [],
           });
+          triggerPowerAnimation(total, 'edicion');
         }
       }
       onSuccess();
@@ -136,8 +143,6 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
 
   const handleDelete = async () => {
     if (!debtToEdit?.id) return;
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta deuda?')) return;
-
     setLoading(true);
     try {
       await deleteDebt(debtToEdit.id);
@@ -147,6 +152,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       console.error('Error deleting debt:', error);
     } finally {
       setLoading(false);
+      setShowConfirmDelete(false);
     }
   };
 
@@ -161,6 +167,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
 
   return createPortal(
     <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`} onClick={onClose}>
+      <ConfirmDialog
+        isOpen={showConfirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
+        onConfirm={handleDelete}
+        title="Eliminar deuda"
+        message="¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer."
+      />
       <div 
         className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-t-3xl sm:rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
@@ -358,7 +371,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             {debtToEdit && (
                <button
                  type="button"
-                 onClick={handleDelete}
+                 onClick={() => setShowConfirmDelete(true)}
                  disabled={loading}
                  className={`w-full font-bold py-3.5 transition-all active:scale-[0.98] disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 uppercase tracking-wider' : 'rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20'}`}
                >

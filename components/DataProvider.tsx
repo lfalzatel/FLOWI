@@ -5,6 +5,8 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { Transaction, Debt } from '@/lib/firestore';
 
+import { PowerAnimation } from '@/components/dashboard/PowerAnimation';
+
 interface DataContextType {
   transactions: Transaction[];
   debts: Debt[];
@@ -142,6 +144,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+      <PowerAnimation />
     </DataContext.Provider>
   );
 }
