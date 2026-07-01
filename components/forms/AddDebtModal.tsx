@@ -26,6 +26,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
+  const isReadOnly = debtToEdit?.status === 'paid';
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -45,6 +47,10 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isReadOnly) {
+      onClose();
+      return;
+    }
     if (!user) return;
 
     setLoading(true);
@@ -163,9 +169,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-white mb-6'}`}>
-          {debtToEdit ? 'Editar Deuda' : 'Nueva Deuda'}
+        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-white mb-4'}`}>
+          {isReadOnly ? 'Detalles de Deuda' : debtToEdit ? 'Editar Deuda' : 'Nueva Deuda'}
         </h2>
+
+        {isReadOnly && (
+          <div className="mb-4 bg-[#00E5A0]/10 border border-[#00E5A0]/20 text-[#00E5A0] text-xs font-semibold py-2 px-3 flex items-center gap-1.5 justify-center tracking-wider">
+            ✓ CRÉDITO TOTALMENTE LIQUIDADO (HISTORIAL)
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -173,66 +185,65 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             <input
               type="text"
               required
+              disabled={isReadOnly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
               placeholder="Ej. Préstamo de Juan..."
             />
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            {/* Total Amount */}
             <div className="col-span-1">
               <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`}>Monto Total</label>
               <input
                 type="text"
                 required
+                disabled={isReadOnly}
                 value={totalAmount}
                 onChange={(e) => {
                   const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                   if (val.split('.').length > 2) return;
                   setTotalAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
+                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
                 placeholder="0.00"
               />
             </div>
 
-            {/* Paid Amount */}
             <div className="col-span-1">
               <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`}>Monto Pagado</label>
               <input
                 type="text"
+                disabled={isReadOnly || !!debtToEdit}
                 value={paidAmount}
-                disabled={!!debtToEdit}
                 onChange={(e) => {
                   const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                   if (val.split('.').length > 2) return;
                   setPaidAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-50 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
+                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
                 placeholder="0.00"
               />
             </div>
 
-            {/* Interest Rate E.A. */}
             <div className="col-span-1">
               <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`} title="Tasa Efectiva Anual">Tasa E.A. (%)</label>
               <input
                 type="text"
+                disabled={isReadOnly}
                 value={interestRate}
                 onChange={(e) => {
                   const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                   if (val.split('.').length > 2) return;
                   setInterestRate(val);
                 }}
-                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
+                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
                 placeholder="Opcional %"
               />
             </div>
           </div>
 
-          {/* Resumen de Intereses Compuestos Acumulados (Si aplica) */}
           {debtToEdit && debtToEdit.interestRate && debtToEdit.interestRate > 0 && (() => {
             const interestData = calculateDebtInterest(debtToEdit);
             const pendingAmount = Math.max(0, debtToEdit.totalAmount - debtToEdit.paidAmount);
@@ -241,19 +252,23 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
               <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-white/5 border-white/5 rounded-2xl text-xs space-y-1 text-white/70'}`}>
                 <div className="flex justify-between items-center text-white/60 mb-2">
                   <span>RESUMEN FINANCIERO (E.A. {debtToEdit.interestRate}%)</span>
-                  <span className="text-[10px] text-accent font-bold uppercase tracking-wider animate-pulse">Capitalización Diaria</span>
+                  {debtToEdit.status !== 'paid' && (
+                    <span className="text-[10px] text-accent font-bold uppercase tracking-wider animate-pulse">Capitalización Diaria</span>
+                  )}
                 </div>
                 <div className="flex justify-between">
-                  <span>Saldo base pendiente:</span>
+                  <span>Saldo base {isReadOnly ? 'liquidado' : 'pendiente'}:</span>
                   <span className="text-white">${pendingAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-red-400 font-semibold">Interés acumulado a hoy:</span>
-                  <span className="text-red-400 font-bold font-mono">+${interestData.accumulatedInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
-                </div>
+                {interestData.accumulatedInterest > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-red-400 font-semibold">Interés acumulado final:</span>
+                    <span className="text-red-400 font-bold font-mono">+${interestData.accumulatedInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                )}
                 <hr className="border-white/5 my-1.5" />
                 <div className="flex justify-between text-sm font-bold">
-                  <span className={isTechTheme ? 'text-accent' : 'text-white font-syne'}>Total a pagar hoy:</span>
+                  <span className={isTechTheme ? 'text-accent' : 'text-white font-syne'}>{isReadOnly ? 'Total pagado:' : 'Total a pagar hoy:'}</span>
                   <span className={isTechTheme ? 'text-accent font-mono' : 'text-[#00E5A0] font-mono'}>
                     ${totalWithInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                   </span>
@@ -262,7 +277,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             );
           })()}
 
-          {debtToEdit && (
+          {debtToEdit && !isReadOnly && (
             <div className={`p-4 border grid grid-cols-1 sm:grid-cols-2 gap-3.5 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-white/5 border-white/5 rounded-2xl'}`}>
               <div>
                 <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Registrar Abono</label>
@@ -293,9 +308,10 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           <div>
             <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
             <textarea
+              disabled={isReadOnly}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none resize-none h-20 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none resize-none h-20 disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
               placeholder="Ej. Dinero prestado para la compra de materiales..."
             />
           </div>
@@ -321,13 +337,23 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           )}
 
           <div className="pt-2 space-y-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}
-            >
-              {loading ? 'Guardando...' : debtToEdit ? 'Guardar Cambios' : 'Crear Deuda'}
-            </button>
+            {isReadOnly ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}
+              >
+                Volver / Aceptar
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}
+              >
+                {loading ? 'Guardando...' : debtToEdit ? 'Guardar Cambios' : 'Crear Deuda'}
+              </button>
+            )}
 
             {debtToEdit && (
                <button
