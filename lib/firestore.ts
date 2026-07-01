@@ -152,10 +152,23 @@ export async function getUserDebts(userId: string) {
     const rawPayments = data.payments || [];
     
     // Mapear los pagos convirtiendo timestamps a Date locales
-    const payments = rawPayments.map((p: any) => ({
-      ...p,
-      date: p.date instanceof Timestamp ? p.date.toDate() : (p.date ? new Date(p.date) : new Date())
-    }));
+    const payments = rawPayments.map((p: any) => {
+      let finalDate: Date;
+      if (p.date instanceof Timestamp) {
+        finalDate = p.date.toDate();
+      } else if (p.date && typeof p.date === 'object' && 'seconds' in p.date) {
+        // Manejar Timestamps serializados como objetos planos en arreglos
+        finalDate = new Timestamp(p.date.seconds, p.date.nanoseconds).toDate();
+      } else if (p.date) {
+        finalDate = new Date(p.date);
+      } else {
+        finalDate = new Date();
+      }
+      return {
+        ...p,
+        date: finalDate,
+      };
+    });
 
     return {
       id: doc.id,
