@@ -134,6 +134,12 @@ export interface Debt {
   status: 'pending' | 'paid';
   createdAt?: Timestamp | Date;
   description?: string;
+  payments?: Array<{
+    id: string;
+    amount: number;
+    date: Timestamp | Date;
+    description?: string;
+  }>;
 }
 
 export async function getUserDebts(userId: string) {
@@ -143,9 +149,18 @@ export async function getUserDebts(userId: string) {
   
   const debts = querySnapshot.docs.map(doc => {
     const data = doc.data();
+    const rawPayments = data.payments || [];
+    
+    // Mapear los pagos convirtiendo timestamps a Date locales
+    const payments = rawPayments.map((p: any) => ({
+      ...p,
+      date: p.date instanceof Timestamp ? p.date.toDate() : (p.date ? new Date(p.date) : new Date())
+    }));
+
     return {
       id: doc.id,
       ...data,
+      payments,
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(),
     };
   }) as Debt[];

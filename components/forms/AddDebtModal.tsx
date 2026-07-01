@@ -66,7 +66,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           finalDate = new Date(year, month - 1, day, 12, 0, 0);
         }
 
-        // Registrar el abono como un gasto
+        const newPayment = {
+          id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+          amount: abonoAmount,
+          date: finalDate,
+          description: `Abono a: ${title}`,
+        };
+
         await addExpense({
           userId: user.uid,
           type: 'gasto',
@@ -75,27 +81,37 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           description: `Abono a: ${title}`,
           date: finalDate,
         });
-      }
 
-      const status = paid >= total ? 'paid' : 'pending';
-
-      if (debtToEdit && debtToEdit.id) {
-        await updateDebt(debtToEdit.id, {
+        const status = paid >= total ? 'paid' : 'pending';
+        await updateDebt(debtToEdit.id!, {
           title,
           totalAmount: total,
           paidAmount: paid,
           status,
           description,
+          payments: [...(debtToEdit.payments || []), newPayment],
         });
       } else {
-        await addDebt({
-          userId: user.uid,
-          title,
-          totalAmount: total,
-          paidAmount: paid,
-          status,
-          description,
-        });
+        const status = paid >= total ? 'paid' : 'pending';
+        if (debtToEdit && debtToEdit.id) {
+          await updateDebt(debtToEdit.id, {
+            title,
+            totalAmount: total,
+            paidAmount: paid,
+            status,
+            description,
+          });
+        } else {
+          await addDebt({
+            userId: user.uid,
+            title,
+            totalAmount: total,
+            paidAmount: paid,
+            status,
+            description,
+            payments: [],
+          });
+        }
       }
       onSuccess();
       onClose();
@@ -122,6 +138,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
     }
   };
 
+  const formatPaymentDate = (date: any) => {
+    const d = date instanceof Date ? date : new Date(date);
+    const dateStr = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+    const timeStr = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return `${dateStr} • ${timeStr}`;
+  };
+
   if (typeof document === 'undefined') return null;
 
   return createPortal(
@@ -139,98 +162,80 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
           <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Nombre de la Deuda</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Título de la Deuda</label>
             <input
               type="text"
+              required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full bg-white/5 border py-3 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent' : 'border-white/10 rounded-xl focus:border-accent'}`}
-              placeholder="Ej. Préstamo de Nico"
-              required
+              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+              placeholder="Ej. Préstamo de Juan..."
             />
           </div>
 
-          {/* Total Amount */}
-          <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto Total</label>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={totalAmount}
-              onChange={(e) => {
-                const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
-                if (val.split('.').length > 2) return;
-                setTotalAmount(val);
-              }}
-              className={`w-full bg-white/5 border py-3 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent font-syne font-bold'}`}
-              placeholder="0.00"
-              required
-            />
-          </div>
-
-          {/* Paid Amount (only on creation or view) */}
-          {!debtToEdit && (
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto ya pagado (Opcional)</label>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto Total</label>
               <input
                 type="text"
-                inputMode="decimal"
+                required
+                value={totalAmount}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                  if (val.split('.').length > 2) return;
+                  setTotalAmount(val);
+                }}
+                className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto Pagado</label>
+              <input
+                type="text"
                 value={paidAmount}
+                disabled={!!debtToEdit}
                 onChange={(e) => {
                   const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                   if (val.split('.').length > 2) return;
                   setPaidAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-3 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent font-syne'}`}
+                className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none disabled:opacity-50 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
                 placeholder="0.00"
               />
             </div>
-          )}
+          </div>
 
-          {/* Abono (only on edit) */}
           {debtToEdit && (
-            <div className={`p-4 space-y-3 ${isTechTheme ? 'bg-black/40 border border-accent/20 rounded-none' : 'bg-white/5 rounded-xl'}`}>
-              <div className="flex justify-between text-xs">
-                <span className={`${isTechTheme ? 'text-accent/50' : 'text-white/40'}`}>Ya pagado:</span>
-                <span className={`font-medium ${isTechTheme ? 'text-text-primary' : 'text-white'}`}>${parseFloat(paidAmount || '0').toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className={`${isTechTheme ? 'text-accent/50' : 'text-white/40'}`}>Pendiente:</span>
-                <span className="text-orange-400 font-medium">${(parseFloat(totalAmount || '0') - parseFloat(paidAmount || '0')).toFixed(2)}</span>
-              </div>
-              
+            <div className={`p-4 border grid grid-cols-1 sm:grid-cols-2 gap-3.5 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-white/5 border-white/5 rounded-2xl'}`}>
               <div>
-                <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto a Abonar</label>
+                <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Registrar Abono</label>
                 <input
                   type="text"
-                  inputMode="decimal"
                   value={abono}
                   onChange={(e) => {
                     const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                     if (val.split('.').length > 2) return;
                     setAbono(val);
                   }}
-                  className={`w-full bg-white/10 border py-3 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent font-syne font-bold'}`}
+                  className={`w-full bg-white/10 border py-2 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
                   placeholder="0.00"
                 />
               </div>
-
               <div>
-                <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Fecha del Abono</label>
+                <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Fecha</label>
                 <input
                   type="date"
                   value={abonoDate}
                   onChange={(e) => setAbonoDate(e.target.value)}
-                  className={`w-full bg-white/10 border py-3 px-4 text-white focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-white/10 rounded-xl focus:border-accent'}`}
-                  required
+                  className={`w-full bg-white/10 border py-2 px-4 text-white focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
                 />
               </div>
             </div>
           )}
 
-          {/* Description */}
           <div>
             <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
             <textarea
@@ -241,7 +246,26 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             />
           </div>
 
-          {/* Action Buttons */}
+          {debtToEdit && debtToEdit.payments && debtToEdit.payments.length > 0 && (
+            <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-white/[0.02] border-white/5 rounded-2xl'}`}>
+              <h4 className={`text-xs font-semibold mb-2.5 tracking-wider ${isTechTheme ? 'text-accent' : 'text-white/60 font-syne'}`}>
+                Historial de Abonos ({debtToEdit.payments.length})
+              </h4>
+              <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                {debtToEdit.payments.map((p, idx) => (
+                  <div key={p.id || idx} className="flex justify-between items-center text-xs py-1.5 border-b border-white/5 last:border-0">
+                    <span className={`${isTechTheme ? 'text-white/80' : 'text-white/70'}`}>
+                      {formatPaymentDate(p.date)}
+                    </span>
+                    <span className={`font-mono font-bold ${isTechTheme ? 'text-accent' : 'text-[#00E5A0]'}`}>
+                      +${p.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="pt-2 space-y-2">
             <button
               type="submit"
