@@ -3,7 +3,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebts } from '@/hooks/useDebts';
-import { Debt } from '@/lib/firestore';
+import { Debt, calculateDebtInterest } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CreditCard, Plus, Check, Clock, Download } from 'lucide-react';
@@ -16,12 +16,21 @@ export default function DeudasPage() {
   const { theme } = useTheme();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const { user, loading: authLoading } = useAuth();
-  const { debts, loading: debtsLoading, refresh, totalDeudas } = useDebts();
+  const { debts, loading: debtsLoading, refresh } = useDebts();
   const router = useRouter();
   
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
+
+  // Calcular el total de deudas acumulando dinámicamente los intereses generados
+  const totalDeudasConInteres = debts
+    .filter(d => d.status !== 'paid')
+    .reduce((sum, d) => {
+      const basePending = d.totalAmount - d.paidAmount;
+      const interestData = calculateDebtInterest(d);
+      return sum + basePending + interestData.accumulatedInterest;
+    }, 0);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -89,7 +98,7 @@ export default function DeudasPage() {
             </div>
 
             <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-orange-400 tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-orange-400'}`}>
-              <AnimatedNumber value={totalDeudas} prefix="$" />
+              <AnimatedNumber value={totalDeudasConInteres} prefix="$" />
             </p>
             <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>Suma de todas tus deudas activas</p>
           </div>
@@ -112,7 +121,11 @@ export default function DeudasPage() {
           ) : (
             <div className="space-y-2">
               {debts.map((debt, i) => {
-                const pending = debt.totalAmount - debt.paidAmount;
+                const interestData = calculateDebtInterest(debt);
+                const basePending = debt.totalAmount - debt.paidAmount;
+                const pending = basePending + interestData.accumulatedInterest;
+                
+                // El progreso se calcula en base al monto total inicial
                 const progress = (debt.paidAmount / debt.totalAmount) * 100;
                 const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
                 
@@ -139,6 +152,11 @@ export default function DeudasPage() {
                           ) : (
                             <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-medium">
                               <Clock className="w-3 h-3" /> Pendiente
+                              {debt.interestRate ? (
+                                <span className="ml-1.5 bg-red-500/10 text-red-400 border border-red-500/20 px-1 rounded text-[9px] uppercase tracking-wider">
+                                  {debt.interestRate}% EA
+                                </span>
+                              ) : null}
                             </span>
                           )}
                         </div>
@@ -147,7 +165,13 @@ export default function DeudasPage() {
                         <p className={`text-text-primary font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
                           <AnimatedNumber value={pending} prefix="$" delay={i * 0.1} />
                         </p>
-                        <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
+                        {interestData.accumulatedInterest > 0 ? (
+                          <p className="text-[10px] text-red-400 font-mono font-medium">
+                            +${interestData.accumulatedInterest.toLocaleString('es-MX', { maximumFractionDigits: 0 })} Int.
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
+                        )}
                       </div>
                     </div>
                     

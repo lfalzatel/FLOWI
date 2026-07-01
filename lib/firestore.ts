@@ -134,6 +134,7 @@ export interface Debt {
   status: 'pending' | 'paid';
   createdAt?: Timestamp | Date;
   description?: string;
+  interestRate?: number; // Tasa efectiva anual (E.A. %) opcional
   payments?: Array<{
     id: string;
     amount: number;
@@ -203,6 +204,79 @@ export async function updateDebt(id: string, debt: Partial<Debt>) {
 export async function deleteDebt(id: string) {
   const docRef = doc(db, 'fl_debts', id);
   await deleteDoc(docRef);
+}
+
+// Función financiera para calcular intereses acumulados día a día (Capitalización Diaria de la E.A.)
+export function calculateDebtInterest(debt: Debt): { accumulatedInterest: number, currentTotal: number } {
+  const defaultResult = { accumulatedInterest: 0, currentTotal: debt.totalAmount };
+  
+  if (!debt.interestRate || debt.interestRate <= 0) {
+    return defaultResult;
+  }
+
+  const createdDate = debt.createdAt instanceof Date 
+    ? debt.createdAt 
+    : (debt.createdAt && 'toDate' in (debt.createdAt as any) 
+        ? (debt.createdAt as any).toDate() 
+        : new Date());
+
+  const today = new Date();
+  
+  // Si por algún motivo la fecha de creación es futura, retornar valores por defecto
+  if (createdDate.getTime() >= today.getTime()) {
+    return defaultResult;
+  }
+
+  // Convertir Tasa Efectiva Anual (E.A.) a Tasa Diaria
+  const dailyRate = Math.pow(1 + debt.interestRate / 100, 1 / 365) - 1;
+
+  // Ordenar el historial de abonos cronológicamente
+  const paymentsSorted = debt.payments 
+    ? [...debt.payments].sort((a, b) => {
+        const da = a.date instanceof Date ? a.date : new Date(a.date as any);
+        const db = b.date instanceof Date ? b.date : new Date(b.date as any);
+        return da.getTime() - db.getTime();
+      })
+    : [];
+
+  let currentBalance = debt.totalAmount;
+  let currentDate = new Date(createdDate.getTime());
+  
+  // Normalizar currentDate a las 00:00:00 del día de creación
+  currentDate.setHours(0, 0, 0, 0);
+  const targetDate = new Date(today.getTime());
+  targetDate.setHours(0, 0, 0, 0);
+
+  // Simulación día a día para acumular interés compuesto y aplicar abonos a tiempo
+  while (currentDate.getTime() < targetDate.getTime()) {
+    // 1. Aplicar interés diario al saldo pendiente antes de los abonos del día
+    currentBalance = currentBalance * (1 + dailyRate);
+
+    // 2. Avanzar un día
+    currentDate.setDate(currentDate.getDate() + 1);
+
+    // 3. Aplicar los abonos correspondientes a este día específico
+    const dateStr = currentDate.toLocaleDateString('sv-SE');
+    const dayPayments = paymentsSorted.filter(p => {
+      const pd = p.date instanceof Date ? p.date : new Date(p.date as any);
+      return pd.toLocaleDateString('sv-SE') === dateStr;
+    });
+
+    for (const pay of dayPayments) {
+      currentBalance = Math.max(0, currentBalance - pay.amount);
+    }
+  }
+
+  // El saldo pendiente base sin intereses sería:
+  const basePending = Math.max(0, debt.totalAmount - debt.paidAmount);
+  
+  // Los intereses acumulados netos son la diferencia entre el saldo real actual y el saldo base pendiente
+  const accumulatedInterest = Math.max(0, currentBalance - basePending);
+
+  return {
+    accumulatedInterest,
+    currentTotal: debt.totalAmount + accumulatedInterest,
+  };
 }
 
 export interface UserProfile {

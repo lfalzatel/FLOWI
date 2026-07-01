@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { addDebt, updateDebt, deleteDebt, addExpense, Debt } from '@/lib/firestore';
+import { addDebt, updateDebt, deleteDebt, addExpense, calculateDebtInterest, Debt } from '@/lib/firestore';
 
 interface Props {
   onClose: () => void;
@@ -17,6 +17,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   const [title, setTitle] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
+  const [interestRate, setInterestRate] = useState('');
   const [description, setDescription] = useState('');
   const [abono, setAbono] = useState('');
   const [abonoDate, setAbonoDate] = useState(new Date().toISOString().split('T')[0]);
@@ -37,6 +38,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       setTitle(debtToEdit.title);
       setTotalAmount(debtToEdit.totalAmount.toString());
       setPaidAmount(debtToEdit.paidAmount.toString());
+      setInterestRate(debtToEdit.interestRate ? debtToEdit.interestRate.toString() : '');
       setDescription(debtToEdit.description || '');
     }
   }, [debtToEdit]);
@@ -49,6 +51,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
     try {
       const total = parseFloat(totalAmount);
       let paid = parseFloat(paidAmount) || 0;
+      const rate = interestRate ? parseFloat(interestRate) : 0;
 
       if (debtToEdit && abono) {
         const abonoAmount = parseFloat(abono);
@@ -88,6 +91,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           totalAmount: total,
           paidAmount: paid,
           status,
+          interestRate: rate,
           description,
           payments: [...(debtToEdit.payments || []), newPayment],
         });
@@ -99,6 +103,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             totalAmount: total,
             paidAmount: paid,
             status,
+            interestRate: rate,
             description,
           });
         } else {
@@ -108,6 +113,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             totalAmount: total,
             paidAmount: paid,
             status,
+            interestRate: rate,
             description,
             payments: [],
           });
@@ -174,9 +180,10 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto Total</label>
+          <div className="grid grid-cols-3 gap-2">
+            {/* Total Amount */}
+            <div className="col-span-1">
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`}>Monto Total</label>
               <input
                 type="text"
                 required
@@ -186,13 +193,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                   if (val.split('.').length > 2) return;
                   setTotalAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
                 placeholder="0.00"
               />
             </div>
 
-            <div>
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto Pagado</label>
+            {/* Paid Amount */}
+            <div className="col-span-1">
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`}>Monto Pagado</label>
               <input
                 type="text"
                 value={paidAmount}
@@ -202,11 +210,57 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                   if (val.split('.').length > 2) return;
                   setPaidAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none disabled:opacity-50 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-50 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
                 placeholder="0.00"
               />
             </div>
+
+            {/* Interest Rate E.A. */}
+            <div className="col-span-1">
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`} title="Tasa Efectiva Anual">Tasa E.A. (%)</label>
+              <input
+                type="text"
+                value={interestRate}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                  if (val.split('.').length > 2) return;
+                  setInterestRate(val);
+                }}
+                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
+                placeholder="Opcional %"
+              />
+            </div>
           </div>
+
+          {/* Resumen de Intereses Compuestos Acumulados (Si aplica) */}
+          {debtToEdit && debtToEdit.interestRate && debtToEdit.interestRate > 0 && (() => {
+            const interestData = calculateDebtInterest(debtToEdit);
+            const pendingAmount = Math.max(0, debtToEdit.totalAmount - debtToEdit.paidAmount);
+            const totalWithInterest = pendingAmount + interestData.accumulatedInterest;
+            return (
+              <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-white/5 border-white/5 rounded-2xl text-xs space-y-1 text-white/70'}`}>
+                <div className="flex justify-between items-center text-white/60 mb-2">
+                  <span>RESUMEN FINANCIERO (E.A. {debtToEdit.interestRate}%)</span>
+                  <span className="text-[10px] text-accent font-bold uppercase tracking-wider animate-pulse">Capitalización Diaria</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Saldo base pendiente:</span>
+                  <span className="text-white">${pendingAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-red-400 font-semibold">Interés acumulado a hoy:</span>
+                  <span className="text-red-400 font-bold font-mono">+${interestData.accumulatedInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <hr className="border-white/5 my-1.5" />
+                <div className="flex justify-between text-sm font-bold">
+                  <span className={isTechTheme ? 'text-accent' : 'text-white font-syne'}>Total a pagar hoy:</span>
+                  <span className={isTechTheme ? 'text-accent font-mono' : 'text-[#00E5A0] font-mono'}>
+                    ${totalWithInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
 
           {debtToEdit && (
             <div className={`p-4 border grid grid-cols-1 sm:grid-cols-2 gap-3.5 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-white/5 border-white/5 rounded-2xl'}`}>
