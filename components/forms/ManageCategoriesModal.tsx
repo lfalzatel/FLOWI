@@ -256,11 +256,15 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                     onClick={() => setActiveTab(tab as any)}
                     className={`px-2 py-2 text-left text-[10px] font-bold transition-all truncate ${
                       activeTab === tab
-                        ? 'text-accent bg-accent/10 rounded-lg'
-                        : 'text-white/50 hover:text-white hover:bg-white/5 rounded-lg'
+                        ? isTechTheme
+                          ? 'text-accent bg-accent/10 border-l-2 border-accent rounded-none'
+                          : 'text-accent bg-accent/10 rounded-lg'
+                        : isTechTheme
+                          ? 'text-accent/50 hover:text-white hover:bg-white/5 rounded-none font-mono uppercase'
+                          : 'text-white/50 hover:text-white hover:bg-white/5 rounded-lg'
                     }`}
                   >
-                    {tab}
+                    {isTechTheme ? tab.toUpperCase().replace(' Y ', '_Y_') : tab}
                   </button>
                 ))}
               </div>
@@ -268,19 +272,19 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
               {/* Columna Derecha: Categorías de la pestaña seleccionada */}
               <div className="w-3/5 flex flex-col gap-2 overflow-y-auto pr-1">
                 {filteredCategoriesForList.length === 0 ? (
-                  <p className={`text-center text-xs py-10 ${isTechTheme ? 'text-accent/50' : 'text-white/40'}`}>
-                    Sin categorías.
+                  <p className={`text-center text-xs py-10 ${isTechTheme ? 'font-mono text-accent/50 uppercase' : 'text-white/40'}`}>
+                    {isTechTheme ? 'SIN_CATEGORIAS' : 'Sin categorías.'}
                   </p>
                 ) : (
                   filteredCategoriesForList.map((cat, i) => (
-                    <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-2.5 border ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50' : 'rounded-xl bg-white/5 border-white/5'}`}>
+                    <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-2.5 border transition-all ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50 rounded-none' : 'rounded-xl bg-white/5 border-white/5'}`}>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <div className={`w-8 h-8 flex-shrink-0 flex items-center justify-center text-lg ${!isTechTheme && 'rounded-full'}`} style={{ backgroundColor: `${cat.color}20`, color: cat.color }}>
+                        <div className={`w-8 h-8 flex-shrink-0 flex items-center justify-center text-lg ${isTechTheme ? 'border border-accent/20 bg-accent/5 rounded-none' : 'rounded-full'}`} style={{ backgroundColor: !isTechTheme ? `${cat.color}20` : undefined, color: cat.color, borderColor: isTechTheme ? `${cat.color}40` : undefined }}>
                           <CategoryIcon icon={cat.icon} label={cat.label} className="w-4.5 h-4.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className={`font-semibold truncate text-xs ${isTechTheme ? 'text-accent' : 'text-white'}`}>{cat.label}</p>
-                          <span className={`text-[8px] px-1 py-0.1 font-mono ${isTechTheme ? 'text-accent/50 border border-accent/20' : 'text-white/30 border border-white/10 rounded'}`}>
+                          <p className={`font-semibold truncate text-xs ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : 'text-white'}`}>{cat.label}</p>
+                          <span className={`text-[8px] px-1 py-0.1 font-mono ${isTechTheme ? 'text-accent/50 border border-accent/20 rounded-none' : 'text-white/30 border border-white/10 rounded'}`}>
                             {cat.isCustom ? 'PERS.' : 'DEF.'}
                           </span>
                         </div>
