@@ -129,14 +129,16 @@ export default function GastosPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`
-              w-full py-2.5 pl-10 pr-4 text-xs text-white placeholder-white/35 bg-white/5 border focus:outline-none transition-all
+              w-full py-2.5 pl-10 pr-4 text-xs focus:outline-none transition-all
               ${isTechTheme
-                ? 'border-accent/20 rounded-none focus:border-accent font-mono'
-                : 'border-white/5 rounded-2xl focus:border-accent/40 bg-white/5'
+                ? 'bg-white/5 text-white placeholder-white/35 border-accent/20 rounded-none focus:border-accent font-mono'
+                : theme === 'light'
+                  ? 'bg-black/[0.04] text-black placeholder-black/40 border-black/10 rounded-2xl focus:border-accent focus:bg-white'
+                  : 'bg-white/5 text-white placeholder-white/35 border-white/5 rounded-2xl focus:border-accent/40 focus:bg-white/10'
               }
             `}
           />
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
+          <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'light' ? 'text-black/40' : 'text-white/40'}`}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -144,7 +146,7 @@ export default function GastosPage() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${theme === 'light' ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
