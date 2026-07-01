@@ -4,8 +4,11 @@ import { createPortal } from 'react-dom';
 import { ProfileCapsule } from './ProfileCapsule';
 import { X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Header() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [showLogoModal, setShowLogoModal] = useState(false);
   const { theme } = useTheme();
@@ -82,6 +85,39 @@ export function Header() {
           flowi
         </span>
       </div>
+
+      {/* Navigation Menu for Desktop */}
+      <nav className="hidden md:flex items-center gap-1.5 p-1 bg-glass border border-glass-border rounded-2xl">
+        {[
+          { path: '/', label: 'Inicio', techLabel: '[ 01_INICIO ]' },
+          { path: '/gastos', label: 'Gastos', techLabel: '[ 02_GASTOS ]' },
+          { path: '/ingresos', label: 'Ingresos', techLabel: '[ 03_INGRESOS ]' },
+          { path: '/deudas', label: 'Deudas', techLabel: '[ 04_DEUDAS ]' },
+          { path: '/configuracion', label: 'Configuración', techLabel: '[ 05_CONFIG ]' },
+        ].map((item) => {
+          const isActive = pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={`
+                px-4 py-2 text-xs font-semibold tracking-wide transition-all duration-200
+                ${isActive
+                  ? isTechTheme
+                    ? 'bg-accent/25 border border-accent text-accent rounded-none'
+                    : 'bg-accent text-black rounded-xl shadow-lg shadow-accent/15'
+                  : isTechTheme
+                    ? 'text-accent/60 hover:text-accent border border-transparent rounded-none'
+                    : 'text-text-secondary hover:text-text-primary rounded-xl'
+                }
+                ${isTechTheme ? 'font-mono uppercase text-[11px]' : 'font-syne'}
+              `}
+            >
+              {isTechTheme ? item.techLabel : item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* Right */}
       <div className="flex items-center gap-3">
