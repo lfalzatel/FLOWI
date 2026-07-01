@@ -81,8 +81,14 @@ export function Header() {
             <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
           </div>
         </div>
-        <span className="font-syne font-bold text-lg tracking-tight text-text-primary hidden sm:block">
-          flowi
+        <span className={`
+          hidden sm:block text-lg tracking-wider transition-all
+          ${isTechTheme
+            ? 'font-mono font-bold text-accent uppercase tracking-widest text-md'
+            : 'font-syne font-bold text-text-primary'
+          }
+        `}>
+          {isTechTheme ? '>_FLOWI' : 'flowi'}
         </span>
       </div>
 
