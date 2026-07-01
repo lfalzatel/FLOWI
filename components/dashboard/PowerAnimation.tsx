@@ -5,7 +5,7 @@ import { useTheme } from '@/components/ThemeProvider';
 
 interface PowerAnimationEvent {
   amount: number;
-  type: 'gasto' | 'ingreso' | 'abono' | 'edicion';
+  type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion';
 }
 
 export function PowerAnimation() {
@@ -57,6 +57,11 @@ export function PowerAnimation() {
     colorClass = 'from-blue-400 via-indigo-400 to-purple-400';
     shadowColor = 'rgba(59,130,246,0.5)';
     actionText = 'TRANSACCIÓN ACTUALIZADA';
+  } else if (data.type === 'eliminacion') {
+    labelPrefix = '✕';
+    colorClass = 'from-red-500 via-rose-500 to-orange-500';
+    shadowColor = 'rgba(239,68,68,0.5)';
+    actionText = 'REGISTRO ELIMINADO';
   } else {
     // gasto
     labelPrefix = '-';
@@ -187,7 +192,7 @@ export function PowerAnimation() {
 }
 
 // Función helper para disparar la animación desde cualquier sitio
-export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' | 'abono' | 'edicion') {
+export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion') {
   if (typeof window !== 'undefined') {
     const event = new CustomEvent('show-power-animation', {
       detail: { amount, type }

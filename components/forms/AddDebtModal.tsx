@@ -145,7 +145,9 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
     if (!debtToEdit?.id) return;
     setLoading(true);
     try {
+      const deletedAmount = parseFloat(totalAmount) || 0;
       await deleteDebt(debtToEdit.id);
+      triggerPowerAnimation(deletedAmount, 'eliminacion');
       onSuccess();
       onClose();
     } catch (error) {

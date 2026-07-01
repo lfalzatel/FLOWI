@@ -186,7 +186,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     if (!transactionToEdit?.id) return;
     setLoading(true);
     try {
+      const deletedAmount = parseFloat(amount) || 0;
       await deleteExpense(transactionToEdit.id);
+      triggerPowerAnimation(deletedAmount, 'eliminacion');
       onSuccess?.();
       onClose();
     } catch (error) {
