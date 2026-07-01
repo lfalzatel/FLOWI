@@ -74,42 +74,42 @@ export default function ConfigPage() {
         {/* 1. Cuenta y Perfil */}
         <section className="space-y-3">
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Cuenta y Perfil</h2>
-          <div className="glass-card rounded-2xl overflow-hidden">
-            <button onClick={() => setIsProfileModalOpen(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border">
+          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+            <button onClick={() => setIsProfileModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <User className="w-4 h-4 text-accent" />
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/30 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
+                  <User className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-accent'}`} />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Mi perfil</p>
-                  <p className="text-[10px] text-text-muted">Editar nombre, foto y teléfono</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'MI_PERFIL' : 'Mi perfil'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'EDITAR_NOMBRE_FOTO_Y_TELEFONO' : 'Editar nombre, foto y teléfono'}</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-text-muted" />
+              <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
-            <div className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border opacity-50 cursor-not-allowed">
+            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
                   <Key className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Cambiar contraseña</p>
-                  <p className="text-[10px] text-text-muted">Enviar email de recuperación</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'CAMBIAR_CONTRASENA' : 'Cambiar contraseña'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'ENVIAR_EMAIL_DE_RECUPERACION' : 'Enviar email de recuperación'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
             <div className="w-full flex items-center justify-between p-4 bg-white/[0.01]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-purple-500/20 rounded-none bg-purple-500/5' : 'rounded-xl bg-purple-500/10'}`}>
                   <Shield className="w-4 h-4 text-purple-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Rol de la cuenta</p>
-                  <p className="text-[10px] text-text-muted">Nivel de acceso actual</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-purple-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ROL_DE_LA_CUENTA' : 'Rol de la cuenta'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-purple-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'NIVEL_DE_ACCESO_ACTUAL' : 'Nivel de acceso actual'}</p>
                 </div>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${isTechTheme ? 'font-mono bg-accent/10 text-accent border border-accent/20' : 'bg-glass-strong text-text-secondary'}`}>{profile?.role || 'Usuario'}</span>
+              <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono bg-accent/10 text-accent border border-accent/20 rounded-none' : 'bg-glass-strong text-text-secondary rounded-full'}`}>{profile?.role || 'Usuario'}</span>
             </div>
           </div>
         </section>
@@ -117,51 +117,51 @@ export default function ConfigPage() {
         {/* 2. Gestión */}
         <section className="space-y-3">
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Gestión</h2>
-          <div className="glass-card rounded-2xl overflow-hidden">
-            <button onClick={() => setIsCategoriesModalOpen(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border">
+          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+            <button onClick={() => setIsCategoriesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[var(--yellow)]/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
                   <PieChart className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Gestionar Categorías</p>
-                  <p className="text-[10px] text-text-muted">Colores e iconos de gastos</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'GESTIONAR_CATEGORIAS' : 'Gestionar Categorías'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'COLORES_E_ICONOS_DE_GASTOS' : 'Colores e iconos de gastos'}</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-text-muted" />
+              <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
             
             {/* Admin only: Manage Users */}
             {profile?.role === 'admin' && (
               <>
-                <button onClick={() => setIsUsersModalOpen(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border">
+                <button onClick={() => setIsUsersModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-red-500/30 rounded-none bg-red-500/5' : 'rounded-xl bg-red-500/10'}`}>
                       <Shield className="w-4 h-4 text-red-500" />
                     </div>
                     <div className="text-left">
-                      <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Gestionar Usuarios</p>
-                      <p className="text-[10px] text-text-muted">Cambiar roles y administrar accesos</p>
+                      <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-red-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'GESTIONAR_USUARIOS' : 'Gestionar Usuarios'}</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-red-400/60' : 'text-text-muted'}`}>{isTechTheme ? 'CAMBIAR_ROLES_Y_ADMINISTRAR_ACCESOS' : 'Cambiar roles y administrar accesos'}</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-text-muted" />
+                  <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
                 </button>
 
                 <button 
                   onClick={handleRestoreBaseCategories} 
                   disabled={restoring}
-                  className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border disabled:opacity-50"
+                  className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b disabled:opacity-50 ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                    <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-cyan-500/30 rounded-none bg-cyan-500/5' : 'rounded-xl bg-cyan-500/10'}`}>
                       <RefreshCw className={`w-4 h-4 text-cyan-400 ${restoring ? 'animate-spin' : ''}`} />
                     </div>
                     <div className="text-left">
-                      <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Restaurar Categorías Base</p>
-                      <p className="text-[10px] text-text-muted">Volver a ver las categorías por defecto ocultas</p>
+                      <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-cyan-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'RESTAURAR_CATEGORIAS_BASE' : 'Restaurar Categorías Base'}</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-cyan-400/60' : 'text-text-muted'}`}>{isTechTheme ? 'VOLVER_A_VER_LAS_CATEGORIAS_POR_DEFECTO_OCULTAS' : 'Volver a ver las categorías por defecto ocultas'}</p>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-text-muted" />
+                  <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
                 </button>
               </>
             )}
@@ -171,48 +171,48 @@ export default function ConfigPage() {
         {/* 3. Apariencia */}
         <section className="space-y-3">
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Apariencia</h2>
-          <div className="glass-card rounded-2xl overflow-hidden">
+          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
             
             {/* Botón de Temas */}
-            <button onClick={() => setIsThemesModalOpen(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border">
+            <button onClick={() => setIsThemesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-pink-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-pink-500/30 rounded-none bg-pink-500/5' : 'rounded-xl bg-pink-500/10'}`}>
                   <Palette className="w-4 h-4 text-pink-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Temas</p>
-                  <p className="text-[10px] text-text-muted">Tema activo y menú desplegable</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TEMAS' : 'Temas'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'TEMA_ACTIVO_Y_MENU_DESPLEGABLE' : 'Tema activo y menú desplegable'}</p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-text-muted" />
+              <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
 
             {/* Idioma y Moneda */}
-            <div className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b border-glass-border opacity-50 cursor-not-allowed">
+            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-green-500/20 rounded-none bg-green-500/5' : 'rounded-xl bg-green-500/10'}`}>
                   <Globe className="w-4 h-4 text-green-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Idioma y Moneda</p>
-                  <p className="text-[10px] text-text-muted">Actualmente: es-MX / MXN</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-green-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'IDIOMA_Y_MONEDA' : 'Idioma y Moneda'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-green-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'ACTUALMENTE_ES_MX_/_MXN' : 'Actualmente: es-MX / MXN'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-green-500/30 text-green-400 bg-green-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
 
             {/* Tamaño de texto */}
-            <div className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors opacity-50 cursor-not-allowed">
+            <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-orange-500/20 rounded-none bg-orange-500/5' : 'rounded-xl bg-orange-500/10'}`}>
                   <Type className="w-4 h-4 text-orange-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Tamaño de texto</p>
-                  <p className="text-[10px] text-text-muted">Compacto / Normal / Grande</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-orange-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TAMANO_DE_TEXTO' : 'Tamaño de texto'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'COMPACTO_/_NORMAL_/_GRANDE' : 'Tamaño: Compacto / Normal / Grande'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
           </div>
         </section>
@@ -220,42 +220,42 @@ export default function ConfigPage() {
         {/* 4. Finanzas */}
         <section className="space-y-3">
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Finanzas</h2>
-          <div className="glass-card rounded-2xl overflow-hidden">
-            <div className="w-full flex items-center justify-between p-4 border-b border-glass-border opacity-50 cursor-not-allowed">
+          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-accent/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/20 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
                   <Wallet className="w-4 h-4 text-accent" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Presupuesto mensual</p>
-                  <p className="text-[10px] text-text-muted">Define un límite de gastos</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'PRESUPUESTO_MENSUAL' : 'Presupuesto mensual'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{isTechTheme ? 'DEFINE_UN_LIMITE_DE_GASTOS' : 'Define un límite de gastos'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-accent/30 text-accent bg-accent/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
-            <div className="w-full flex items-center justify-between p-4 border-b border-glass-border opacity-50 cursor-not-allowed">
+            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
                   <Calendar className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Día de inicio de mes</p>
-                  <p className="text-[10px] text-text-muted">Ej: Día 15 o Día 30</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'DIA_DE_INICIO_DE_MES' : 'Día de inicio de mes'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'EJ_DIA_15_O_DIA_30' : 'Ej: Día 15 o Día 30'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
             <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[var(--red)]/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--red)]/20 rounded-none bg-[var(--red)]/5' : 'rounded-xl bg-[var(--red)]/10'}`}>
                   <FileText className="w-4 h-4 text-[var(--red)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Gastos recurrentes</p>
-                  <p className="text-[10px] text-text-muted">Netflix, Internet, etc.</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-[var(--red)]/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'GASTOS_RECURRENTES' : 'Gastos recurrentes'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-[var(--red)]/50' : 'text-text-muted'}`}>{isTechTheme ? 'NETFLIX_INTERNET_ETC' : 'Netflix, Internet, etc.'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-[var(--red)]/30 text-[var(--red)] bg-[var(--red)]/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
           </div>
         </section>
@@ -263,59 +263,59 @@ export default function ConfigPage() {
         {/* 5. Notificaciones */}
         <section className="space-y-3">
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Notificaciones</h2>
-          <div className="glass-card rounded-2xl overflow-hidden p-4 opacity-50 cursor-not-allowed flex items-center justify-between">
+          <div className={`p-4 opacity-50 cursor-not-allowed flex items-center justify-between ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center">
+              <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-orange-500/20 rounded-none bg-orange-500/5' : 'rounded-xl bg-orange-500/10'}`}>
                 <Bell className="w-4 h-4 text-orange-400" />
               </div>
               <div className="text-left">
-                <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Alertas y Recordatorios</p>
-                <p className="text-[10px] text-text-muted">Gasto excesivo y recordatorio diario</p>
+                <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-orange-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ALERTAS_Y_RECORDATORIOS' : 'Alertas y Recordatorios'}</p>
+                <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'GASTO_EXCESIVO_Y_RECORDATORIO_DIARIO' : 'Gasto excesivo y recordatorio diario'}</p>
               </div>
             </div>
-            <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
           </div>
         </section>
 
         {/* 6. Datos y Privacidad */}
         <section className="space-y-3">
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-red-400 uppercase tracking-wide border-b border-red-500/20 pb-1' : 'font-syne font-semibold text-sm text-red-400 ml-2'}`}>Datos y Privacidad</h2>
-          <div className="glass-card border-red-500/20 rounded-2xl overflow-hidden">
-            <div className="w-full flex items-center justify-between p-4 border-b border-glass-border opacity-50 cursor-not-allowed">
+          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-red-500/20 rounded-none bg-deep' : 'glass-card border-red-500/20 rounded-2xl'}`}>
+            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
                   <Download className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Exportar mis datos</p>
-                  <p className="text-[10px] text-text-muted">Descargar CSV o JSON</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'EXPORTAR_MIS_DATOS' : 'Exportar mis datos'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'DESCARGAR_CSV_O_JSON' : 'Descargar CSV o JSON'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
-            <div className="w-full flex items-center justify-between p-4 border-b border-glass-border opacity-50 cursor-not-allowed">
+            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-orange-500/20 rounded-none bg-orange-500/5' : 'rounded-xl bg-orange-500/10'}`}>
                   <Trash2 className="w-4 h-4 text-orange-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>Eliminar todos los datos</p>
-                  <p className="text-[10px] text-text-muted">Borrar transacciones pero mantener cuenta</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-orange-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ELIMINAR_TODOS_LOS_DATOS' : 'Eliminar todos los datos'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'BORRAR_TRANSACCIONES_PERO_MANTENER_CUENTA' : 'Borrar transacciones pero mantener cuenta'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider text-text-muted">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
             <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-red-500/30 rounded-none bg-red-500/5' : 'rounded-xl bg-red-500/10'}`}>
                   <Lock className="w-4 h-4 text-red-500" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium text-red-400 ${isTechTheme ? 'font-mono' : ''}`}>Eliminar cuenta</p>
-                  <p className="text-[10px] text-red-400/70">Acción irreversible</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-red-400 uppercase tracking-wider' : 'text-red-400'}`}>{isTechTheme ? 'ELIMINAR_CUENTA' : 'Eliminar cuenta'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-red-400/60' : 'text-red-400/70'}`}>{isTechTheme ? 'ACCION_IRREVERSIBLE' : 'Acción irreversible'}</p>
                 </div>
               </div>
-              <span className="text-[9px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded uppercase tracking-wider">Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-red-500/30 text-red-400 bg-red-500/5' : 'bg-red-500/20 text-red-400'}`}>Pronto</span>
             </div>
           </div>
         </section>
