@@ -206,28 +206,28 @@ export function Header() {
 
           {/* Dropdown Notificaciones */}
           {showDropdown && (
-            <div id="notif-dropdown" className={`absolute right-0 top-12 w-80 max-h-[400px] overflow-y-auto glass-card shadow-2xl p-2 z-[100] animate-fade-in-up border ${isTechTheme ? 'rounded-none border-glass-border' : 'rounded-2xl border-glass-border/50'}`}>
+            <div id="notif-dropdown" className={`fixed sm:absolute right-4 left-4 sm:left-auto sm:right-0 top-20 sm:top-12 w-auto sm:w-80 max-h-[400px] overflow-y-auto glass-card shadow-2xl p-2 z-[100] animate-fade-in-up border ${isTechTheme ? 'rounded-none border-accent/50' : 'rounded-2xl border-glass-border/50'}`}>
               <div className="p-2 pb-3 mb-2 border-b border-glass-border/50 flex justify-between items-center">
                 <span className={`font-semibold text-text-primary ${isTechTheme ? 'font-mono text-sm' : ''}`}>Notificaciones</span>
-                <Link href="/recordatorios" onClick={() => setShowDropdown(false)} className="text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold">Ver ajustes</Link>
+                <Link href="/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>Ver ajustes</Link>
               </div>
 
               {notifications.length === 0 && upcomingReminders.length === 0 ? (
                 <div className="py-6 text-center">
                   <Bell className="w-8 h-8 text-text-muted/30 mx-auto mb-2" />
-                  <p className="text-text-secondary text-sm">Al día. Nada por aquí.</p>
+                  <p className={`text-text-secondary text-sm ${isTechTheme ? 'font-mono' : ''}`}>Al día. Nada por aquí.</p>
                 </div>
               ) : (
                 <div className="space-y-1">
                   {/* Alertas inmediatas (InApp) */}
                   {notifications.map(n => (
-                    <div key={n.id} className="p-3 bg-accent/10 rounded-xl mb-2 flex gap-3 items-start border border-accent/20">
+                    <div key={n.id} className={`p-3 bg-accent/10 mb-2 flex gap-3 items-start border border-accent/20 ${isTechTheme ? 'rounded-none border-l-4 border-l-accent' : 'rounded-xl'}`}>
                       <div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Bell className="w-3.5 h-3.5 text-accent" />
                       </div>
                       <div>
-                        <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{n.title}</p>
-                        {n.body && <p className="text-xs text-text-secondary mt-0.5 leading-snug">{n.body}</p>}
+                        <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? `>_ ${n.title}` : n.title}</p>
+                        {n.body && <p className={`text-xs text-text-secondary mt-0.5 leading-snug ${isTechTheme ? 'font-mono' : ''}`}>{n.body}</p>}
                       </div>
                     </div>
                   ))}
@@ -235,18 +235,18 @@ export function Header() {
                   {/* Próximos eventos (Próximos 7 días) */}
                   {upcomingReminders.length > 0 && (
                     <>
-                      <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold px-2 pt-2 pb-1">
+                      <p className={`text-[10px] text-text-muted uppercase tracking-wider font-semibold px-2 pt-2 pb-1 ${isTechTheme ? 'font-mono' : ''}`}>
                         Próximos 7 días
                       </p>
                       {upcomingReminders.map(({ reminder, daysLeft }, i) => (
-                        <div key={reminder.id || i} className={`p-2.5 hover:bg-white/5 transition-colors flex gap-3 items-center ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                        <div key={reminder.id || i} className={`p-2.5 hover:bg-white/5 transition-colors flex gap-3 items-center ${isTechTheme ? 'rounded-none border-l-2 border-transparent hover:border-accent' : 'rounded-xl'}`}>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                                          ${daysLeft === 0 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-glass border border-glass-border text-text-secondary'}`}>
+                                          ${daysLeft === 0 ? 'bg-accent/20 text-accent' : 'bg-glass border border-glass-border text-text-secondary'}`}>
                             <Clock className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-text-primary truncate">{reminder.title}</p>
-                            <p className="text-xs text-text-muted mt-0.5 truncate">
+                             <p className={`text-sm font-medium text-text-primary truncate ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? `>_ ${reminder.title}` : reminder.title}</p>
+                            <p className={`text-xs text-text-muted mt-0.5 truncate ${isTechTheme ? 'font-mono' : ''}`}>
                               {daysLeft === 0 ? '¡Vence hoy!' : daysLeft === 1 ? 'Mañana' : `Faltan ${daysLeft} días`}
                             </p>
                           </div>
