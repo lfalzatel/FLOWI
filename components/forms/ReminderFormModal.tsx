@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCategories } from '@/hooks/useCategories';
 import { addReminder, updateReminder, Reminder } from '@/lib/firestore';
 
 interface Props {
@@ -12,17 +13,17 @@ interface Props {
   reminder?: Reminder | null;
 }
 
-function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+function ToggleSwitch({ checked, onChange, label, theme }: { checked: boolean; onChange: (v: boolean) => void; label: string, theme: string }) {
   return (
     <label className="flex items-center justify-between cursor-pointer py-1 select-none">
       <span className="text-sm text-text-secondary">{label}</span>
       <div
         onClick={() => onChange(!checked)}
-        className={`w-11 h-6 rounded-full transition-colors relative
-                    ${checked ? 'bg-accent' : 'bg-white/10'}`}
+        className={`w-11 h-6 rounded-full transition-colors relative border
+                    ${checked ? 'bg-accent border-accent' : (theme === 'light' ? 'bg-gray-200 border-gray-300' : 'bg-white/10 border-transparent')}`}
       >
-        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform
-                         ${checked ? 'translate-x-5.5' : 'translate-x-0.5'}`} />
+        <div className={`absolute top-[1px] w-5 h-5 rounded-full bg-white transition-transform shadow-sm
+                         ${checked ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
       </div>
     </label>
   );
@@ -36,7 +37,11 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
   const [time, setTime] = useState('08:00');
   const [dayOfWeek, setDayOfWeek] = useState(1); // 1 = Lunes
   const [dayOfMonth, setDayOfMonth] = useState(1);
+  const [date, setDate] = useState('');
+  const [category, setCategory] = useState('');
   const [budgetPercent, setBudgetPercent] = useState(80);
+
+  const { allCategories } = useCategories();
   const [sound, setSound] = useState(true);
   const [pushEnabled, setPushEnabled] = useState(true);
   const [inAppEnabled, setInAppEnabled] = useState(true);
@@ -61,6 +66,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
       setTime(reminder.time);
       if (reminder.dayOfWeek !== undefined) setDayOfWeek(reminder.dayOfWeek);
       if (reminder.dayOfMonth !== undefined) setDayOfMonth(reminder.dayOfMonth);
+      if (reminder.date !== undefined) setDate(reminder.date);
+      if (reminder.category !== undefined) setCategory(reminder.category);
       if (reminder.budgetPercent !== undefined) setBudgetPercent(reminder.budgetPercent);
       setSound(reminder.sound);
       setPushEnabled(reminder.pushEnabled);
@@ -87,6 +94,9 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
         active,
       };
 
+      if (category.trim()) data.category = category.trim();
+
+      if (type === 'once' && date.trim()) data.date = date;
       if (type === 'weekly') data.dayOfWeek = dayOfWeek;
       if (type === 'monthly') data.dayOfMonth = dayOfMonth;
       if (type === 'budget_alert') data.budgetPercent = budgetPercent;
@@ -137,7 +147,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={`
-                w-full px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all bg-white/5 border border-glass-border text-text-primary
+                w-full px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all bg-glass border border-glass-border text-text-primary
                 ${isTechTheme ? 'rounded-none font-mono text-accent placeholder-accent/40' : 'rounded-2xl'}
               `}
             />
@@ -152,10 +162,28 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               className={`
-                w-full px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all bg-white/5 border border-glass-border text-text-primary resize-none
+                w-full px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all bg-glass border border-glass-border text-text-primary resize-none
                 ${isTechTheme ? 'rounded-none font-mono text-accent placeholder-accent/40' : 'rounded-2xl'}
               `}
             />
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Categoría (Opcional)</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className={`
+                w-full px-3 py-2.5 text-sm focus:outline-none bg-deep border border-glass-border text-text-primary
+                ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
+              `}
+            >
+              <option value="">Sin categoría</option>
+              {allCategories.map(cat => (
+                <option key={cat.label} value={cat.label}>{cat.icon} {cat.label}</option>
+              ))}
+            </select>
           </div>
 
           {/* Tipo / Frecuencia */}
@@ -179,18 +207,35 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
           {/* Campos condicionales */}
           {type !== 'budget_alert' && (
-            <div>
-              <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Hora de notificación</label>
-              <input
-                type="time"
-                required
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className={`
-                  w-full px-3 py-2.5 text-sm focus:outline-none bg-white/5 border border-glass-border text-text-primary
-                  ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
-                `}
-              />
+            <div className="flex gap-4">
+              {type === 'once' && (
+                <div className="flex-1">
+                  <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Fecha</label>
+                  <input
+                    type="date"
+                    required
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className={`
+                      w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'}
+                      ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
+                    `}
+                  />
+                </div>
+              )}
+              <div className="flex-1">
+                <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Hora de notificación</label>
+                <input
+                  type="time"
+                  required
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className={`
+                    w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'}
+                    ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
+                  `}
+                />
+              </div>
             </div>
           )}
 
@@ -227,7 +272,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
                 value={dayOfMonth}
                 onChange={(e) => setDayOfMonth(Math.max(1, Math.min(31, Number(e.target.value))))}
                 className={`
-                  w-full px-3 py-2.5 text-sm focus:outline-none bg-white/5 border border-glass-border text-text-primary
+                  w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary
                   ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
                 `}
               />
@@ -250,27 +295,30 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
             </div>
           )}
 
-          {/* Toggles */}
           <div className="border-t border-glass-border/40 pt-3 space-y-2">
             <ToggleSwitch
               label="Notificación Push (Segundo plano)"
               checked={pushEnabled}
               onChange={setPushEnabled}
+              theme={theme}
             />
             <ToggleSwitch
               label="Notificación In-App (Toast)"
               checked={inAppEnabled}
               onChange={setInAppEnabled}
+              theme={theme}
             />
             <ToggleSwitch
               label="Efecto de Sonido"
               checked={sound}
               onChange={setSound}
+              theme={theme}
             />
             <ToggleSwitch
               label="Recordatorio Activo"
               checked={active}
               onChange={setActive}
+              theme={theme}
             />
           </div>
 

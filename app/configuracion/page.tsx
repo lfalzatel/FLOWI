@@ -16,7 +16,7 @@ import {
   User, Wallet, Bell, Shield, RefreshCw,
   ChevronRight, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
-  FileText, Settings
+  FileText, Settings, Volume2
 } from 'lucide-react';
 
 export default function ConfigPage() {
@@ -28,10 +28,57 @@ export default function ConfigPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
+  const [isClearDataConfirmOpen, setIsClearDataConfirmOpen] = useState(false);
+  const [isRegeneratingThemes, setIsRegeneratingThemes] = useState(false);
   const [isThemesModalOpen, setIsThemesModalOpen] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
   const handleRestoreBaseCategories = async () => {
+    if (!user) return;
+    if (!window.confirm('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?')) return;
+    
+    setRestoring(true);
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        hiddenCategories: []
+      });
+      alert('Categorías base restauradas con éxito. Recarga la página si es necesario.');
+    } catch (e) {
+      console.error(e);
+      alert('Error al restaurar categorías.');
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notificationSound, setNotificationSound] = useState('notification.mp3');
+
+  // Load from local storage
+  useEffect(() => {
+    setNotificationsEnabled(localStorage.getItem('notifications_enabled') !== 'false');
+    setNotificationSound(localStorage.getItem('notification_sound') || 'notification.mp3');
+  }, []);
+
+  const toggleNotifications = () => {
+    const newState = !notificationsEnabled;
+    setNotificationsEnabled(newState);
+    localStorage.setItem('notifications_enabled', String(newState));
+  };
+
+  const changeSound = (sound: string) => {
+    setNotificationSound(sound);
+    localStorage.setItem('notification_sound', sound);
+    
+    // Play a preview of the sound
+    if (notificationsEnabled) {
+      const audio = new Audio(`/assets/sounds/${sound}`);
+      audio.play().catch(e => console.error('Failed to play preview:', e));
+    }
+  };
+
+  const handleClearData = async () => {
     if (!user) return;
     if (!window.confirm('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?')) return;
     
@@ -110,6 +157,51 @@ export default function ConfigPage() {
                 </div>
               </div>
               <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono bg-accent/10 text-accent border border-accent/20 rounded-none' : 'bg-glass-strong text-text-secondary rounded-full'}`}>{profile?.role || 'Usuario'}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* 1.5 Notificaciones */}
+        <section className="space-y-3">
+          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Notificaciones</h2>
+          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
+                  <Bell className="w-4 h-4 text-[var(--yellow)]" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ACTIVAR_NOTIFICACIONES' : 'Activar Notificaciones'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'PERMITIR_ALERTAS_LOCALES' : 'Permitir alertas locales'}</p>
+                </div>
+              </div>
+              <button 
+                onClick={toggleNotifications}
+                className={`w-12 h-6 rounded-full transition-colors relative ${notificationsEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+              >
+                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
+              </button>
+            </div>
+            
+            <div className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
+                  <Volume2 className="w-4 h-4 text-[var(--yellow)]" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'SONIDO_DE_ALERTA' : 'Sonido de Alerta'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'ELIGE_TU_TONO_PREFERIDO' : 'Elige tu tono preferido'}</p>
+                </div>
+              </div>
+              <select
+                value={notificationSound}
+                onChange={(e) => changeSound(e.target.value)}
+                disabled={!notificationsEnabled}
+                className={`px-3 py-1.5 text-xs focus:outline-none transition-all ${isTechTheme ? 'bg-black/40 border border-accent/40 text-accent font-mono rounded-none uppercase' : 'bg-white/5 border border-white/10 text-text-primary rounded-xl'}`}
+              >
+                <option value="notification.mp3">Suave (Burbuja)</option>
+                <option value="notification-sound.mp3">Clásico (Campana)</option>
+              </select>
             </div>
           </div>
         </section>

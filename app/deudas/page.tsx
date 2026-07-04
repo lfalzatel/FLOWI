@@ -83,10 +83,9 @@ export default function DeudasPage() {
                           ${theme === 'light' ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
                           hover:opacity-90 active:scale-[0.97]
-                          ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}
+                          ${isCyberpunk ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}
             >
-              <Plus className="w-4 h-4" />
-              Nueva Deuda
+              + Nueva
             </button>
           </div>
         </div>

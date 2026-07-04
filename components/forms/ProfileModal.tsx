@@ -176,7 +176,7 @@ export function ProfileModal({ onClose }: Props) {
               </div>
             )}
             <div className={`absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isCyberpunk ? 'bg-accent/20' : ''}`}>
-              <Camera className={`w-8 h-8 ${isCyberpunk ? 'text-accent' : 'text-white'}`} />
+              <Camera className={`w-8 h-8 ${isCyberpunk ? 'text-accent' : 'text-text-primary'}`} />
             </div>
             {uploadingPhoto && (
               <div className={`absolute inset-0 bg-black/80 flex items-center justify-center ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}>
@@ -189,28 +189,28 @@ export function ProfileModal({ onClose }: Props) {
           </div>
           <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
 
-          <h3 className={`${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'font-syne text-white'} font-bold text-lg mt-2`}>{user?.displayName || 'Usuario'}</h3>
-          <p className={`${isCyberpunk ? 'font-mono text-accent/50 text-xs' : 'text-white/40 text-sm'}`}>{user?.email}</p>
+          <h3 className={`${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'font-syne text-text-primary'} font-bold text-lg mt-2`}>{user?.displayName || 'Usuario'}</h3>
+          <p className={`${isCyberpunk ? 'font-mono text-accent/50 text-xs' : 'text-text-secondary text-sm'}`}>{user?.email}</p>
         </div>
 
         <div className="space-y-4 mb-6">
-          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-white/5 rounded-xl'} p-4 flex items-center gap-3`}>
+          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} p-4 flex items-center gap-3`}>
             <Mail className="w-5 h-5 text-accent" />
             <div className="flex-1">
-              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-white/40'}`}>Correo Electrónico</p>
-              <p className={`text-sm font-medium truncate ${isCyberpunk ? 'font-mono text-white' : 'text-white'}`}>{user?.email || 'No disponible'}</p>
+              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Correo Electrónico</p>
+              <p className={`text-sm font-medium truncate ${isCyberpunk ? 'font-mono text-white' : 'text-text-primary'}`}>{user?.email || 'No disponible'}</p>
             </div>
           </div>
 
-          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-white/5 rounded-xl'} p-4 flex items-center gap-3`}>
+          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} p-4 flex items-center gap-3`}>
             <Phone className="w-5 h-5 text-accent" />
             <div className="flex-1">
-              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-white/40'}`}>Teléfono</p>
+              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Teléfono</p>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className={`bg-transparent text-sm font-medium focus:outline-none w-full ${isCyberpunk ? 'font-mono text-accent placeholder:text-accent/30' : 'text-white'}`}
+                className={`bg-transparent text-sm font-medium focus:outline-none w-full ${isCyberpunk ? 'font-mono text-accent placeholder:text-accent/30' : 'text-text-primary'}`}
                 placeholder="Ingresa tu teléfono"
               />
             </div>
@@ -223,19 +223,19 @@ export function ProfileModal({ onClose }: Props) {
             </button>
           </div>
 
-          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-white/5 rounded-xl'} p-4 flex items-center gap-3`}>
+          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} p-4 flex items-center gap-3`}>
             <Shield className="w-5 h-5 text-accent" />
             <div>
-              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-white/40'}`}>Rol de Cuenta</p>
-              <p className={`text-sm font-medium ${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'text-white'}`}>
+              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Rol de Cuenta</p>
+              <p className={`text-sm font-medium ${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'text-text-primary'}`}>
                 {profile?.role === 'admin' ? 'Propietario (Acceso Total)' : 'Usuario Estándar'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className={`mb-6 p-4 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-white/5 rounded-2xl border border-white/10'}`}>
-          <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isCyberpunk ? 'font-mono text-accent' : 'text-white/70'}`}>Estadísticas Financieras</h4>
+        <div className={`mb-6 p-4 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
+          <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isCyberpunk ? 'font-mono text-accent' : 'text-text-secondary'}`}>Estadísticas Financieras</h4>
           {userStats.loading ? (
             <div className="flex justify-center py-4">
               <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -243,19 +243,19 @@ export function ProfileModal({ onClose }: Props) {
           ) : (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Ingresos</p>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Ingresos</p>
                 <p className={`text-sm font-semibold text-green-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.ingresos.toLocaleString()}</p>
               </div>
               <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Gastos</p>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Gastos</p>
                 <p className={`text-sm font-semibold text-red-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.gastos.toLocaleString()}</p>
               </div>
               <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Deudas</p>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Deudas</p>
                 <p className={`text-sm font-semibold text-orange-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.deudas.toLocaleString()}</p>
               </div>
               <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-white/40'}`}>Balance</p>
+                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Balance</p>
                 <p className={`text-sm font-semibold text-accent ${isCyberpunk ? 'font-mono' : ''}`}>${(userStats.ingresos - userStats.gastos - userStats.deudas).toLocaleString()}</p>
               </div>
             </div>
@@ -265,7 +265,7 @@ export function ProfileModal({ onClose }: Props) {
         <div className="space-y-3">
           <button
             onClick={handleSignOut}
-            className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-transparent border border-white text-white rounded-none uppercase font-mono tracking-widest hover:bg-white hover:text-black' : 'bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 active:scale-[0.98]'}`}
+            className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-transparent border border-white text-white rounded-none uppercase font-mono tracking-widest hover:bg-white hover:text-black' : 'bg-glass border border-glass-border text-text-primary rounded-xl hover:bg-glass-hover active:scale-[0.98]'}`}
           >
             <LogOut className="w-4 h-4" />
             {isCyberpunk ? '>_ CERRAR_SESION' : 'Cerrar Sesión'}
@@ -283,25 +283,25 @@ export function ProfileModal({ onClose }: Props) {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-4">
-          <div className="bg-black border-2 border-red-500 rounded-none shadow-[0_0_50px_rgba(239,68,68,0.3)] p-8 max-w-sm w-full text-center animate-fade-in-up">
-            <h3 className="font-mono text-red-500 text-xl font-bold mb-4 tracking-widest uppercase">
-              {'>_ ADVERTENCIA_CRITICA'}
+          <div className={`${isCyberpunk ? 'bg-black border-2 rounded-none shadow-[0_0_50px_rgba(239,68,68,0.3)]' : 'bg-card border-2 rounded-3xl'} border-red-500 p-8 max-w-sm w-full text-center animate-fade-in-up`}>
+            <h3 className={`text-red-500 text-xl font-bold mb-4 uppercase ${isCyberpunk ? 'font-mono tracking-widest' : 'font-syne'}`}>
+              {isCyberpunk ? '>_ ADVERTENCIA_CRITICA' : 'Advertencia Crítica'}
             </h3>
-            <p className="font-mono text-white/80 text-sm mb-8 leading-relaxed">
+            <p className={`text-sm mb-8 leading-relaxed ${isCyberpunk ? 'font-mono text-white/80' : 'text-text-secondary'}`}>
               ESTA ACCIÓN ES IRREVERSIBLE. SE BORRARÁN TODOS TUS DATOS DE MANERA PERMANENTE. ¿CONFIRMAR ELIMINACIÓN DE CUENTA?
             </p>
             <div className="flex flex-col gap-3">
               <button
                 onClick={executeDeleteAccount}
-                className="w-full bg-red-500/10 border border-red-500 text-red-500 font-mono font-bold uppercase tracking-widest py-3 hover:bg-red-500 hover:text-black transition-colors"
+                className={`w-full bg-red-500/10 border border-red-500 text-red-500 font-bold uppercase py-3 transition-colors ${isCyberpunk ? 'font-mono tracking-widest hover:bg-red-500 hover:text-black' : 'rounded-xl hover:bg-red-500/20'}`}
               >
-                {'>_ CONFIRMAR_PURGA'}
+                {isCyberpunk ? '>_ CONFIRMAR_PURGA' : 'Confirmar Eliminación'}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="w-full bg-transparent border border-white/30 text-white/70 font-mono font-bold uppercase tracking-widest py-3 hover:bg-white/10 transition-colors"
+                className={`w-full bg-transparent border font-bold uppercase py-3 transition-colors ${isCyberpunk ? 'border-white/30 text-white/70 font-mono tracking-widest hover:bg-white/10' : 'border-glass-border text-text-secondary rounded-xl hover:bg-glass-hover'}`}
               >
-                {'>_ ABORTAR'}
+                {isCyberpunk ? '>_ ABORTAR' : 'Cancelar'}
               </button>
             </div>
           </div>

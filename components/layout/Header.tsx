@@ -7,6 +7,9 @@ import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
+import { useReminders } from '@/hooks/useReminders';
+import { Reminder } from '@/lib/firestore';
+import { Bell, Clock, Info } from 'lucide-react';
 
 export function Header() {
   const pathname = usePathname();
@@ -36,7 +39,59 @@ export function Header() {
   }, [showLogoModal]);
 
   const { notifications } = useInAppNotifications();
-  const unread = notifications.length;
+  const { reminders } = useReminders();
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    if (!showDropdown) return;
+    const clickOut = (e: MouseEvent) => {
+      if (!(e.target as Element).closest('#notif-dropdown') && !(e.target as Element).closest('#notif-bell')) {
+        setShowDropdown(false);
+      }
+    };
+    window.addEventListener('click', clickOut);
+    return () => window.removeEventListener('click', clickOut);
+  }, [showDropdown]);
+
+  const getUpcomingReminders = () => {
+    const upcoming: { reminder: Reminder, daysLeft: number }[] = [];
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normalize to start of day
+    
+    for (const r of reminders) {
+      if (!r.active) continue;
+      
+      let days = -1;
+      if (r.type === 'monthly' && r.dayOfMonth !== undefined) {
+        let currentDayOfMonth = now.getDate();
+        days = r.dayOfMonth - currentDayOfMonth;
+        if (days < 0) {
+          const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+          days = daysInMonth - currentDayOfMonth + r.dayOfMonth;
+        }
+      } else if (r.type === 'weekly' && r.dayOfWeek !== undefined) {
+        let currentDayOfWeek = now.getDay();
+        days = r.dayOfWeek - currentDayOfWeek;
+        if (days < 0) days += 7;
+      } else if (r.type === 'once' && r.date) {
+        const targetParts = r.date.split('-');
+        if (targetParts.length === 3) {
+           const targetDate = new Date(Number(targetParts[0]), Number(targetParts[1]) - 1, Number(targetParts[2]));
+           const diff = targetDate.getTime() - now.getTime();
+           days = Math.ceil(diff / (1000 * 3600 * 24));
+        }
+      }
+
+      if (days >= 0 && days <= 7) {
+        upcoming.push({ reminder: r, daysLeft: days });
+      }
+    }
+    return upcoming.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 5); // top 5
+  };
+
+  const upcomingReminders = getUpcomingReminders();
+  const unread = notifications.length + upcomingReminders.length;
 
   return (
     <header
@@ -132,23 +187,78 @@ export function Header() {
       {/* Right */}
       <div className="flex items-center gap-3">
         {/* Notification bell */}
-        <Link 
-          href="/recordatorios"
-          className="relative w-9 h-9 rounded-xl bg-glass border border-glass-border
-                     flex items-center justify-center hover:bg-glass-hover transition-colors"
-        >
-          <svg className="w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          {unread > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full
-                             bg-accent text-black text-[9px] font-bold
-                             flex items-center justify-center animate-pulse">
-              {unread > 9 ? '9+' : unread}
-            </span>
+        <div className="relative">
+          <button 
+            id="notif-bell"
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="relative w-9 h-9 rounded-xl bg-glass border border-glass-border
+                       flex items-center justify-center hover:bg-glass-hover transition-colors"
+          >
+            <Bell className="w-4 h-4 text-text-secondary" />
+            {unread > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full
+                               bg-accent text-black text-[9px] font-bold
+                               flex items-center justify-center animate-pulse">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
+          </button>
+
+          {/* Dropdown Notificaciones */}
+          {showDropdown && (
+            <div id="notif-dropdown" className={`absolute right-0 top-12 w-80 max-h-[400px] overflow-y-auto glass-card shadow-2xl p-2 z-[100] animate-fade-in-up border ${isTechTheme ? 'rounded-none border-glass-border' : 'rounded-2xl border-glass-border/50'}`}>
+              <div className="p-2 pb-3 mb-2 border-b border-glass-border/50 flex justify-between items-center">
+                <span className={`font-semibold text-text-primary ${isTechTheme ? 'font-mono text-sm' : ''}`}>Notificaciones</span>
+                <Link href="/recordatorios" onClick={() => setShowDropdown(false)} className="text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold">Ver ajustes</Link>
+              </div>
+
+              {notifications.length === 0 && upcomingReminders.length === 0 ? (
+                <div className="py-6 text-center">
+                  <Bell className="w-8 h-8 text-text-muted/30 mx-auto mb-2" />
+                  <p className="text-text-secondary text-sm">Al día. Nada por aquí.</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {/* Alertas inmediatas (InApp) */}
+                  {notifications.map(n => (
+                    <div key={n.id} className="p-3 bg-accent/10 rounded-xl mb-2 flex gap-3 items-start border border-accent/20">
+                      <div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Bell className="w-3.5 h-3.5 text-accent" />
+                      </div>
+                      <div>
+                        <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{n.title}</p>
+                        {n.body && <p className="text-xs text-text-secondary mt-0.5 leading-snug">{n.body}</p>}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Próximos eventos (Próximos 7 días) */}
+                  {upcomingReminders.length > 0 && (
+                    <>
+                      <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold px-2 pt-2 pb-1">
+                        Próximos 7 días
+                      </p>
+                      {upcomingReminders.map(({ reminder, daysLeft }, i) => (
+                        <div key={reminder.id || i} className={`p-2.5 hover:bg-white/5 transition-colors flex gap-3 items-center ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                                          ${daysLeft === 0 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-glass border border-glass-border text-text-secondary'}`}>
+                            <Clock className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-text-primary truncate">{reminder.title}</p>
+                            <p className="text-xs text-text-muted mt-0.5 truncate">
+                              {daysLeft === 0 ? '¡Vence hoy!' : daysLeft === 1 ? 'Mañana' : `Faltan ${daysLeft} días`}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           )}
-        </Link>
+        </div>
 
         <ProfileCapsule />
       </div>

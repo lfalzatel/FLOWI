@@ -109,7 +109,7 @@ export default function GastosPage() {
                           ${theme === 'light' ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
                           hover:opacity-90 active:scale-[0.97]
-                          ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}
+                          ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Nueva transacción</span>

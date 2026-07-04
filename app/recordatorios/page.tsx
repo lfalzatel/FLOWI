@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Clock, Edit2, Trash2, Pause, Check, Plus } from 'lucide-react';
+import { Bell, Clock, Edit2, Trash2, Pause, Check, Plus, Beaker } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useTheme } from '@/components/ThemeProvider';
 import { useReminders } from '@/hooks/useReminders';
 import { useReminderScheduler } from '@/hooks/useReminderScheduler';
@@ -11,7 +12,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { deleteReminder, updateReminder, Reminder } from '@/lib/firestore';
-import { registerReminderSW, requestNotificationPermission } from '@/lib/notifications';
+import { registerReminderSW, requestNotificationPermission, scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
 
 export default function RecordatoriosPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -19,6 +20,7 @@ export default function RecordatoriosPage() {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const router = useRouter();
+  const { push: pushInApp } = useInAppNotifications();
 
   // Estados locales
   const [showForm, setShowForm] = useState(false);
@@ -50,6 +52,19 @@ export default function RecordatoriosPage() {
   const handleRequestPermission = async () => {
     const granted = await requestNotificationPermission();
     setPermissionGranted(granted);
+  };
+
+  const handleTestNotification = () => {
+    scheduleNotificationViaSW({
+      title: '¡Prueba de Notificación!',
+      body: 'Si ves esto, las notificaciones push locales están funcionando bien.',
+      tag: 'test',
+    });
+    pushInApp({
+      title: 'Prueba in-app',
+      body: 'Notificación en la campanita'
+    });
+    playNotificationSound();
   };
 
   const handleToggle = async (r: Reminder) => {
@@ -87,24 +102,37 @@ export default function RecordatoriosPage() {
         {/* Header de página */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={`font-syne font-bold text-3xl text-text-primary ${isTechTheme ? 'font-mono text-xl sm:text-2xl text-accent uppercase tracking-wider' : ''}`}>
+            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>
               Recordatorios
             </h1>
             <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>
               Control y alertas de tus pagos recurrentes
             </p>
           </div>
-          <button
-            onClick={() => { setEditingReminder(null); setShowForm(true); }}
-            className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-accent to-accent-dim
-                        ${theme === 'light' ? 'text-white' : 'text-black'}
-                        font-semibold text-sm shadow-lg shadow-accent/20
-                        hover:opacity-90 active:scale-[0.97] transition-all
-                        ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo
-          </button>
+          <div className="flex gap-2">
+            {profile?.role === 'admin' && (
+              <button
+                onClick={handleTestNotification}
+                className={`flex items-center justify-center p-2.5 bg-glass border border-glass-border
+                            text-text-secondary hover:text-accent hover:bg-glass-hover active:scale-[0.97] transition-all
+                            ${isTechTheme ? 'rounded-none font-mono' : 'rounded-2xl'}`}
+                title="Probar Notificaciones"
+              >
+                <Beaker className="w-5 h-5" />
+              </button>
+            )}
+            <button
+              onClick={() => { setEditingReminder(null); setShowForm(true); }}
+              className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-accent to-accent-dim
+                          ${theme === 'light' ? 'text-white' : 'text-black'}
+                          font-semibold text-sm shadow-lg shadow-accent/20
+                          hover:opacity-90 active:scale-[0.97] transition-all
+                          ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}
+            >
+              <Plus className="w-4 h-4" />
+              Nuevo
+            </button>
+          </div>
         </div>
 
         {/* Banner de permiso si no está concedido */}

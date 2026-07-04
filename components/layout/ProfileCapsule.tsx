@@ -9,6 +9,7 @@ import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal'
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useTheme } from '@/components/ThemeProvider';
+import { requestNotificationPermission, registerReminderSW } from '@/lib/notifications';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
@@ -21,7 +22,7 @@ const menuItems = [
   { icon: BarChart2,  label: 'Reportes',          href: '/reportes',      divider: false, soon: false },
   { icon: Download,   label: 'Instalar app',      href: '#',              divider: false, soon: false },
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
-  { icon: Bell,       label: 'Recordatorios',     href: '/recordatorios', divider: false, soon: false },
+  { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: false, isNotificationToggle: true },
   { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: true,  soon: false },
 ];
 
@@ -33,6 +34,34 @@ export function ProfileCapsule() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [showInstallAlert, setShowInstallAlert] = useState(false);
+  const [notificationsActive, setNotificationsActive] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const allowed = Notification.permission === 'granted';
+      const pref = localStorage.getItem('notifications_enabled') !== 'false';
+      setNotificationsActive(allowed && pref);
+    }
+  }, []);
+
+  const handleToggleNotifications = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof window === 'undefined') return;
+
+    if (!notificationsActive) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        localStorage.setItem('notifications_enabled', 'true');
+        await registerReminderSW();
+        setNotificationsActive(true);
+      } else {
+        alert('Por favor, activa los permisos de notificación en la configuración de tu navegador.');
+      }
+    } else {
+      localStorage.setItem('notifications_enabled', 'false');
+      setNotificationsActive(false);
+    }
+  };
   const ref               = useRef<HTMLDivElement>(null);
   const router            = useRouter();
 
@@ -122,10 +151,10 @@ export function ProfileCapsule() {
       navigator.share({
         title: 'FLOWI',
         text: '¡Gestiona tus gastos e ingresos con FLOWI!',
-        url: 'https://flowi-woad.vercel.app/',
+        url: 'https://flowi-gastos.web.app/',
       });
     } else if (typeof navigator !== 'undefined') {
-      navigator.clipboard.writeText('https://flowi-woad.vercel.app/');
+      navigator.clipboard.writeText('https://flowi-gastos.web.app/');
       alert('¡Enlace copiado al portapapeles!');
     }
   };
@@ -311,6 +340,21 @@ export function ProfileCapsule() {
                     </div>
                     <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider">Pronto</span>
                   </button>
+                ) : item.isNotificationToggle ? (
+                  <div
+                    onClick={handleToggleNotifications}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${notificationsActive ? 'bg-accent/25 text-accent' : 'bg-glass-strong'}`}>
+                        <item.icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                    </div>
+                    <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${notificationsActive ? 'bg-accent' : 'bg-glass-strong border border-glass-border'}`}>
+                      <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transform duration-200 ${notificationsActive ? 'translate-x-3.5' : 'translate-x-0'}`} />
+                    </div>
+                  </div>
                 ) : (
                   <Link
                     href={item.href}

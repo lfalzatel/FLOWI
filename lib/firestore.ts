@@ -361,6 +361,7 @@ export interface Reminder {
   active: boolean;
   createdAt?: Timestamp | Date;
   lastTriggered?: Timestamp | Date | null;
+  date?: string; // Formato YYYY-MM-DD para recordatorios 'once'
 }
 
 export async function getUserReminders(userId: string): Promise<Reminder[]> {

@@ -265,8 +265,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             const pendingAmount = Math.max(0, debtToEdit.totalAmount - debtToEdit.paidAmount);
             const totalWithInterest = pendingAmount + interestData.accumulatedInterest;
             return (
-              <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-white/5 border-white/5 rounded-2xl text-xs space-y-1 text-white/70'}`}>
-                <div className="flex justify-between items-center text-white/60 mb-2">
+              <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-glass border-glass-border rounded-2xl text-xs space-y-1 text-text-secondary'}`}>
+                <div className="flex justify-between items-center text-text-muted mb-2">
                   <span>RESUMEN FINANCIERO (E.A. {debtToEdit.interestRate}%)</span>
                   {debtToEdit.status !== 'paid' && (
                     <span className="text-[10px] text-accent font-bold uppercase tracking-wider animate-pulse">Capitalización Diaria</span>
@@ -274,7 +274,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                 </div>
                 <div className="flex justify-between">
                   <span>Saldo base {isReadOnly ? 'liquidado' : 'pendiente'}:</span>
-                  <span className="text-white">${pendingAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-text-primary">${pendingAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                 </div>
                 {interestData.accumulatedInterest > 0 && (
                   <div className="flex justify-between">
@@ -282,9 +282,9 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                     <span className="text-red-400 font-bold font-mono">+${interestData.accumulatedInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                   </div>
                 )}
-                <hr className="border-white/5 my-1.5" />
+                <hr className="border-glass-border my-1.5" />
                 <div className="flex justify-between text-sm font-bold">
-                  <span className={isTechTheme ? 'text-accent' : 'text-white font-syne'}>{isReadOnly ? 'Total pagado:' : 'Total a pagar hoy:'}</span>
+                  <span className={isTechTheme ? 'text-accent' : 'text-text-primary font-syne'}>{isReadOnly ? 'Total pagado:' : 'Total a pagar hoy:'}</span>
                   <span className={isTechTheme ? 'text-accent font-mono' : 'text-[#00E5A0] font-mono'}>
                     ${totalWithInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                   </span>
@@ -315,7 +315,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                   type="date"
                   value={abonoDate}
                   onChange={(e) => setAbonoDate(e.target.value)}
-                  className={`w-full bg-glass border py-2 px-4 text-text-primary focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
+                  className={`w-full bg-glass border py-2 px-4 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
                 />
               </div>
             </div>
@@ -333,14 +333,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           </div>
 
           {debtToEdit && debtToEdit.payments && debtToEdit.payments.length > 0 && (
-            <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-white/[0.02] border-white/5 rounded-2xl'}`}>
-              <h4 className={`text-xs font-semibold mb-2.5 tracking-wider ${isTechTheme ? 'text-accent' : 'text-white/60 font-syne'}`}>
+            <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
+              <h4 className={`text-xs font-semibold mb-2.5 tracking-wider ${isTechTheme ? 'text-accent' : 'text-text-secondary font-syne'}`}>
                 Historial de Abonos ({debtToEdit.payments.length})
               </h4>
               <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                 {debtToEdit.payments.map((p, idx) => (
-                  <div key={p.id || idx} className="flex justify-between items-center text-xs py-1.5 border-b border-white/5 last:border-0">
-                    <span className={`${isTechTheme ? 'text-white/80' : 'text-white/70'}`}>
+                  <div key={p.id || idx} className="flex justify-between items-center text-xs py-1.5 border-b border-glass-border last:border-0">
+                    <span className={`${isTechTheme ? 'text-white/80' : 'text-text-secondary'}`}>
                       {formatPaymentDate(p.date)}
                     </span>
                     <span className={`font-mono font-bold ${isTechTheme ? 'text-accent' : 'text-[#00E5A0]'}`}>

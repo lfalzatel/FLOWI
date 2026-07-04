@@ -242,11 +242,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Type Toggle */}
-          <div className={`flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-white/5 rounded-xl'}`}>
+          <div className={`flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-glass border border-glass-border rounded-xl'}`}>
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('gasto'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'gasto' ? `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'gasto' ? `bg-accent text-white shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Gasto
@@ -254,7 +254,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('ingreso'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'ingreso' ? `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-white/60')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'ingreso' ? `bg-accent text-white shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Ingreso
@@ -363,14 +363,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                   {/* Columna Derecha: Categorías del grupo seleccionado */}
                   <div className="w-3/5 flex flex-col gap-1 overflow-y-auto pr-1">
                     {categoriesInActiveTab.length === 0 ? (
-                      <p className="text-[10px] text-white/30 text-center py-8">Vacío</p>
+                      <p className="text-[10px] text-text-muted text-center py-8">Vacío</p>
                     ) : (
                       categoriesInActiveTab.map((cat) => (
                         <button
                           key={cat.label}
                           type="button"
                           onClick={() => { setCategory(cat.label); setIsDropdownOpen(false); setSearchQuery(''); }}
-                          className={`w-full text-left py-2 px-2 hover:bg-white/5 text-xs flex items-center gap-2 rounded-lg text-white`}
+                          className={`w-full text-left py-2 px-2 hover:bg-glass text-xs flex items-center gap-2 rounded-lg text-text-primary`}
                         >
                           <CategoryIcon icon={cat.icon} label={cat.label} className="w-4 h-4" />
                           <span className="flex-1 truncate">{cat.label}</span>
@@ -389,7 +389,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                     setCategoriesInitialView('list');
                     setIsManageCategoriesOpen(true);
                   }}
-                  className={`w-full text-left py-2 px-3 hover:bg-white/5 text-xs font-semibold flex items-center gap-2 border-t border-white/5 text-accent`}
+                  className={`w-full text-left py-2 px-3 hover:bg-glass text-xs font-semibold flex items-center gap-2 border-t border-glass-border text-accent`}
                 >
                   <span>+</span>
                   <span>Gestionar categorías...</span>
@@ -405,7 +405,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className={`w-full bg-glass border py-3 px-4 text-text-primary focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`}
+              className={`w-full bg-glass border py-3 px-4 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`}
               required
             />
           </div>
@@ -427,7 +427,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="submit"
               disabled={loading || !amount}
-              className={`w-full py-4 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} hover:bg-accent/90`}`}
+              className={`w-full py-4 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent text-white hover:bg-accent/90`}`}
             >
               {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : 'Añadir Transacción'}
             </button>

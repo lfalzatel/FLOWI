@@ -89,7 +89,7 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
 
         // 3. Tocar sonido
         if (r.sound) {
-          playNotificationSound(r.type === 'budget_alert' ? 'alert' : 'soft');
+          playNotificationSound();
         }
       }
     }

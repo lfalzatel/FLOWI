@@ -43,20 +43,17 @@ export async function scheduleNotificationViaSW(payload: {
 }
 
 // ── 4. Reproducir sonido in-app ────────────────────────────────────
-export function playNotificationSound(type: 'soft' | 'alert' = 'soft') {
+export function playNotificationSound() {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = type === 'alert' ? 880 : 660;
-    osc.type = 'sine';
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.6);
+    if (typeof window === 'undefined') return;
+    
+    // Check if notifications are disabled globally
+    if (localStorage.getItem('notifications_enabled') === 'false') return;
+
+    const soundFile = localStorage.getItem('notification_sound') || 'notification.mp3';
+    const audio = new Audio(`/assets/sounds/${soundFile}`);
+    audio.play().catch(e => console.error('Failed to play sound:', e));
   } catch (e) {
-    // Sin soporte de AudioContext — silencio, no romper la app
+    // Ignore errors
   }
 }
