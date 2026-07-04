@@ -4,6 +4,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .h-screen {
+    height: 100vh;
+    height: 100dvh;
+  }
+}
+
 /* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root, [data-theme='glassmorphism'] {
   --accent:        #00E5A0;
