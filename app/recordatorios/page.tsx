@@ -87,7 +87,7 @@ export default function RecordatoriosPage() {
         {/* Header de página */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={`font-syne font-bold text-3xl text-text-primary ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : ''}`}>
+            <h1 className={`font-syne font-bold text-3xl text-text-primary ${isTechTheme ? 'font-mono text-xl sm:text-2xl text-accent uppercase tracking-wider' : ''}`}>
               Recordatorios
             </h1>
             <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>
