@@ -109,7 +109,7 @@ export default function RecordatoriosPage() {
               Control y alertas de tus pagos recurrentes
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-end sm:self-auto">
             {profile?.role === 'admin' && (
               <button
                 onClick={handleTestNotification}
@@ -227,10 +227,14 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
     return '';
   };
 
+  const displayLabel = isTechTheme 
+    ? `>_ ${reminder.title.toUpperCase().replace(/\s+/g, '_')}`
+    : reminder.title;
+
   return (
     <div
       className={`glass-card p-4 cursor-pointer animate-card-mix hover:bg-white/[0.04] transition-colors
-                 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}
+                 ${isTechTheme ? 'rounded-none border-y border-r border-glass-border border-l-4 border-l-accent' : 'rounded-2xl'}`}
       style={{ animationDelay: `${delay}s` }}
     >
       <div className="flex items-start gap-3">
@@ -239,8 +243,8 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className={`font-semibold text-sm text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>
-              {reminder.title}
+            <p className={`font-semibold text-sm text-text-primary ${isTechTheme ? 'font-mono tracking-wide' : ''}`}>
+              {displayLabel}
             </p>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent font-medium">
               {typeLabel}
