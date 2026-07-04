@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 
 export function Header() {
   const pathname = usePathname();
@@ -33,6 +34,9 @@ export function Header() {
       document.body.style.overflow = '';
     };
   }, [showLogoModal]);
+
+  const { notifications } = useInAppNotifications();
+  const unread = notifications.length;
 
   return (
     <header
@@ -128,15 +132,23 @@ export function Header() {
       {/* Right */}
       <div className="flex items-center gap-3">
         {/* Notification bell */}
-        <button className="relative w-9 h-9 rounded-xl bg-glass border border-glass-border
-                           flex items-center justify-center hover:bg-glass-hover transition-colors">
+        <Link 
+          href="/recordatorios"
+          className="relative w-9 h-9 rounded-xl bg-glass border border-glass-border
+                     flex items-center justify-center hover:bg-glass-hover transition-colors"
+        >
           <svg className="w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
-          {/* Notification dot */}
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full" />
-        </button>
+          {unread > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full
+                             bg-accent text-black text-[9px] font-bold
+                             flex items-center justify-center animate-pulse">
+              {unread > 9 ? '9+' : unread}
+            </span>
+          )}
+        </Link>
 
         <ProfileCapsule />
       </div>

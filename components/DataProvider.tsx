@@ -133,6 +133,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user]);
 
+  useEffect(() => {
+    import('@/lib/notifications').then((m) => {
+      m.registerReminderSW();
+    });
+  }, []);
+
   return (
     <DataContext.Provider
       value={{

@@ -10,6 +10,7 @@ export interface UserProfile {
   photoURL: string;
   role: string;
   hiddenCategories?: string[];
+  budget?: number;
 }
 
 export function useAuth() {

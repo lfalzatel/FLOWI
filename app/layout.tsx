@@ -33,6 +33,8 @@ export const viewport: Viewport = {
 
 import { DataProvider } from '@/components/DataProvider';
 import { WelcomeTour } from '@/components/layout/WelcomeTour';
+import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
+import { InAppToastStack } from '@/components/layout/InAppToastStack';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -45,12 +47,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-deep text-text-primary antialiased">
-        <ThemeProvider>
-          <DataProvider>
-            {children}
-            <WelcomeTour />
-          </DataProvider>
-        </ThemeProvider>
+        <InAppNotificationProvider>
+          <ThemeProvider>
+            <DataProvider>
+              {children}
+              <WelcomeTour />
+              <InAppToastStack />
+            </DataProvider>
+          </ThemeProvider>
+        </InAppNotificationProvider>
       </body>
     </html>
   );

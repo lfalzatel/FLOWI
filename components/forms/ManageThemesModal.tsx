@@ -71,8 +71,8 @@ export function ManageThemesModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className={`${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'} p-6 w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto`}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
+      <div className={`${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' : 'bg-card border border-glass-border rounded-3xl'} p-6 w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto`}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors">
           <X className="w-5 h-5" />
         </button>
 
@@ -81,7 +81,7 @@ export function ManageThemesModal({ onClose }: Props) {
             <Palette className="w-5 h-5 text-accent" />
           </div>
           <div>
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-accent uppercase tracking-widest text-lg' : 'font-syne font-bold text-white text-xl'}`}>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-accent uppercase tracking-widest text-lg' : 'font-syne font-bold text-text-primary text-xl'}`}>
               {isTechTheme ? '>_ GESTION_TEMAS' : 'Gestión de Temas'}
             </h2>
             <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
@@ -93,7 +93,7 @@ export function ManageThemesModal({ onClose }: Props) {
         <div className="space-y-6">
           {/* Tema Activo */}
           <div>
-            <p className={`text-sm font-medium text-white mb-3 ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
+            <p className={`text-sm font-medium text-text-primary mb-3 ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
               {isTechTheme ? 'TEMA_VISUAL_ACTIVO' : 'Tema Visual Activo'}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -125,7 +125,7 @@ export function ManageThemesModal({ onClose }: Props) {
           {/* Selector rápido en menú */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className={`text-sm font-medium text-white ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
+              <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
                 {isTechTheme ? 'MODOS_EN_MENU' : 'Modos en Menú Desplegable'}
               </p>
               <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono border border-accent/20 rounded-none' : 'rounded'} ${isValidCount ? 'text-accent bg-accent/10' : 'text-red-400 bg-red-500/10'}`}>
@@ -148,11 +148,11 @@ export function ManageThemesModal({ onClose }: Props) {
                     className={`w-full flex items-center justify-between p-3.5 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${
                       isSelected 
                         ? isTechTheme 
-                          ? 'border-accent bg-accent/5 text-white'
-                          : 'border-accent/40 bg-accent/5 text-white'
+                          ? 'border-accent bg-accent/5 text-text-primary'
+                          : 'border-accent/40 bg-accent/5 text-text-primary'
                         : isTechTheme
                           ? 'border-accent/20 bg-black text-accent/60 hover:border-accent/45'
-                          : 'border-glass-border bg-glass text-white/60 hover:bg-glass-hover'
+                          : 'border-glass-border bg-glass text-text-secondary hover:bg-glass-hover'
                     }`}
                   >
                     <div className="flex items-center gap-3">

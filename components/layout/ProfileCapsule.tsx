@@ -190,7 +190,7 @@ export function ProfileCapsule() {
                           max-h-[calc(100vh-120px)] scrollbar-hide"
                style={{ width: '272px' }}>
 
-          <div className={`px-4 py-4 flex items-center gap-3 border-b border-glass-border ${isTechTheme ? 'bg-black' : 'bg-gradient-to-r from-[var(--accent-glow)] to-transparent'}`}>
+          <div className={`px-4 py-4 flex items-center gap-3 border-b border-glass-border ${isTechTheme ? 'bg-deep' : 'bg-gradient-to-r from-[var(--accent-glow)] to-transparent'}`}>
             <div className={`relative w-11 h-11 overflow-hidden ring-2 ring-accent flex-shrink-0 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
               <Image src={photoURL} alt={displayName} fill className="object-cover" />
             </div>
@@ -426,7 +426,7 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
         w-full max-w-md overflow-hidden transition-all duration-300
         ${isTechTheme 
           ? 'bg-black border-2 border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.15)]' 
-          : 'glass-card rounded-3xl border border-glass-border bg-deep/95 shadow-2xl'
+          : 'bg-card border border-glass-border rounded-3xl shadow-2xl'
         }
       `}>
         {/* Cabecera */}

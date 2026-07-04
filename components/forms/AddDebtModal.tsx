@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { addDebt, updateDebt, deleteDebt, addExpense, calculateDebtInterest, Debt } from '@/lib/firestore';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { getLocalDateString } from '@/lib/dateUtils';
 
 interface Props {
   onClose: () => void;
@@ -22,7 +23,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   const [interestRate, setInterestRate] = useState('');
   const [description, setDescription] = useState('');
   const [abono, setAbono] = useState('');
-  const [abonoDate, setAbonoDate] = useState(new Date().toISOString().split('T')[0]);
+  const [abonoDate, setAbonoDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
@@ -177,14 +178,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
         message="¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer."
       />
       <div 
-        className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-t-3xl sm:rounded-3xl'}`}
+        className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-card border border-glass-border rounded-t-3xl sm:rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-white/50 hover:text-white'}`}>
+        <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-white mb-4'}`}>
+        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-text-primary mb-4'}`}>
           {isReadOnly ? 'Detalles de Deuda' : debtToEdit ? 'Editar Deuda' : 'Nueva Deuda'}
         </h2>
 
@@ -196,21 +197,21 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Título de la Deuda</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Título de la Deuda</label>
             <input
               type="text"
               required
               disabled={isReadOnly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+              className={`w-full bg-glass border py-2.5 px-4 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
               placeholder="Ej. Préstamo de Juan..."
             />
           </div>
 
           <div className="grid grid-cols-3 gap-2">
             <div className="col-span-1">
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`}>Monto Total</label>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`}>Monto Total</label>
               <input
                 type="text"
                 required
@@ -221,13 +222,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                   if (val.split('.').length > 2) return;
                   setTotalAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
+                className={`w-full bg-glass border py-2 px-3 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-glass-border rounded-xl focus:border-accent text-xs'}`}
                 placeholder="0.00"
               />
             </div>
 
             <div className="col-span-1">
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`}>Monto Pagado</label>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`}>Monto Pagado</label>
               <input
                 type="text"
                 disabled={isReadOnly || !!debtToEdit}
@@ -237,13 +238,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                   if (val.split('.').length > 2) return;
                   setPaidAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
+                className={`w-full bg-glass border py-2 px-3 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-glass-border rounded-xl focus:border-accent text-xs'}`}
                 placeholder="0.00"
               />
             </div>
 
             <div className="col-span-1">
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-[10px] font-medium mb-1 block truncate`} title="Tasa Efectiva Anual">Tasa E.A. (%)</label>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`} title="Tasa Efectiva Anual">Tasa E.A. (%)</label>
               <input
                 type="text"
                 disabled={isReadOnly}
@@ -253,7 +254,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                   if (val.split('.').length > 2) return;
                   setInterestRate(val);
                 }}
-                className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-xs'}`}
+                className={`w-full bg-glass border py-2 px-3 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-glass-border rounded-xl focus:border-accent text-xs'}`}
                 placeholder="Opcional %"
               />
             </div>
@@ -293,9 +294,9 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           })()}
 
           {debtToEdit && !isReadOnly && (
-            <div className={`p-4 border grid grid-cols-1 sm:grid-cols-2 gap-3.5 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-white/5 border-white/5 rounded-2xl'}`}>
+            <div className={`p-4 border grid grid-cols-1 sm:grid-cols-2 gap-3.5 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
               <div>
-                <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Registrar Abono</label>
+                <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Registrar Abono</label>
                 <input
                   type="text"
                   value={abono}
@@ -304,29 +305,29 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
                     if (val.split('.').length > 2) return;
                     setAbono(val);
                   }}
-                  className={`w-full bg-white/10 border py-2 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+                  className={`w-full bg-glass border py-2 px-4 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
                   placeholder="0.00"
                 />
               </div>
               <div>
-                <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Fecha</label>
+                <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Fecha</label>
                 <input
                   type="date"
                   value={abonoDate}
                   onChange={(e) => setAbonoDate(e.target.value)}
-                  className={`w-full bg-white/10 border py-2 px-4 text-white focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+                  className={`w-full bg-glass border py-2 px-4 text-text-primary focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
             <textarea
               disabled={isReadOnly}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`w-full bg-white/5 border py-2.5 px-4 text-white placeholder-white/20 focus:outline-none resize-none h-20 disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-white/10 rounded-xl focus:border-accent text-sm'}`}
+              className={`w-full bg-glass border py-2.5 px-4 text-text-primary placeholder-text-muted focus:outline-none resize-none h-20 disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
               placeholder="Ej. Dinero prestado para la compra de materiales..."
             />
           </div>

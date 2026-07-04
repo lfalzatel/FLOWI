@@ -5,6 +5,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { X, ChevronDown, FolderPlus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
+import { getLocalDateString } from '@/lib/dateUtils';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction } from '@/lib/firestore';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { CategoryIcon } from '@/components/CategoryIcon';
@@ -26,7 +27,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,7 +128,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       
       if (transactionToEdit.date) {
         const d = transactionToEdit.date instanceof Date ? transactionToEdit.date : new Date();
-        setDate(d.toISOString().split('T')[0]);
+        setDate(getLocalDateString(d));
       }
     }
   }, [transactionToEdit]);
@@ -141,7 +142,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       const finalCategory = category.trim() || 'Otros';
       
       // Obtener fecha y hora exacta
-      const todayStr = new Date().toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD
+      const todayStr = getLocalDateString(); // Formato YYYY-MM-DD
       let finalDate: Date;
       if (date === todayStr) {
         // Si es hoy, adjuntar la hora real actual
@@ -228,14 +229,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       {createPortal(
         <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`} onClick={onClose}>
           <div 
-            className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-t-3xl sm:rounded-3xl'}`}
+            className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-card border border-glass-border rounded-t-3xl sm:rounded-3xl'}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-white/50 hover:text-white'}`}>
+            <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
               <X className="w-5 h-5" />
             </button>
         
-        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-white mb-6'}`}>
+        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-text-primary mb-6'}`}>
           {transactionToEdit ? 'Editar Transacción' : 'Nueva Transacción'}
         </h2>
         
@@ -262,9 +263,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
           {/* Amount */}
           <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Monto</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Monto</label>
             <div className="relative">
-              <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-medium ${isTechTheme ? 'text-accent/70' : 'text-white/40'}`}>$</span>
+              <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-medium ${isTechTheme ? 'text-accent/70' : 'text-text-secondary'}`}>$</span>
               <input
                 type="text"
                 inputMode="decimal"
@@ -275,7 +276,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                   if (val.split('.').length > 2) return;
                   setAmount(val);
                 }}
-                className={`w-full bg-white/5 border py-3 pl-8 pr-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent'}`}
+                className={`w-full bg-glass border py-3 pl-8 pr-4 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
                 required
               />
             </div>
@@ -283,12 +284,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
           {/* Category */}
           <div className="relative">
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Categoría</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Categoría</label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`flex-1 bg-white/5 border py-3 px-4 focus:outline-none text-left flex justify-between items-center ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent text-accent' : 'border-white/10 rounded-xl focus:border-accent text-white'}`}
+                className={`flex-1 bg-glass border py-3 px-4 focus:outline-none text-left flex justify-between items-center ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent text-accent' : 'border-glass-border rounded-xl focus:border-accent text-text-primary'}`}
               >
                 <div className="flex items-center gap-2">
                   {category ? (
@@ -306,10 +307,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                       <span>{category}</span>
                     </>
                   ) : (
-                    <span className={isTechTheme ? 'text-accent/50' : 'text-white/50'}>Selecciona una categoría</span>
+                    <span className={isTechTheme ? 'text-accent/50' : 'text-text-muted'}>Selecciona una categoría</span>
                   )}
                 </div>
-                <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent/70' : 'text-white/40'}`} />
+                <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`} />
               </button>
               
               <button
@@ -322,7 +323,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 className={`px-3.5 flex items-center justify-center border transition-all active:scale-95 ${
                   isTechTheme 
                     ? 'border-accent/30 bg-accent/10 text-accent hover:bg-accent hover:text-black rounded-none' 
-                    : 'border-white/10 bg-white/5 text-[#D10074] hover:bg-[#FFD6EB]/10 rounded-xl'
+                    : 'border-glass-border bg-glass text-[#D10074] hover:bg-[#FFD6EB]/10 rounded-xl'
                 }`}
               >
                 <FolderPlus className="w-5 h-5" />
@@ -330,19 +331,19 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             </div>
 
             {isDropdownOpen && (
-              <div className={`absolute z-20 top-full mt-2 w-full border shadow-2xl p-3 flex flex-col gap-2 ${isTechTheme ? 'bg-deep border-accent/50 rounded-none' : 'bg-[#0A0A0F] border-white/10 rounded-2xl'}`}>
+              <div className={`absolute z-20 top-full mt-2 w-full border shadow-2xl p-3 flex flex-col gap-2 ${isTechTheme ? 'bg-deep border-accent/50 rounded-none' : 'bg-card border-glass-border rounded-2xl'}`}>
                 <input
                   type="text"
                   placeholder="Buscar categoría..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full bg-white/5 border py-2 px-3 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent'}`}
+                  className={`w-full bg-glass border py-2 px-3 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
                 />
                 
                 {/* Selector agrupado vertical (2 Columnas) */}
                 <div className="flex gap-2 h-40">
                   {/* Columna Izquierda: Pestañas de grupos */}
-                  <div className="w-2/5 flex flex-col gap-1 overflow-y-auto pr-1 border-r border-white/10 select-none scrollbar-none">
+                  <div className="w-2/5 flex flex-col gap-1 overflow-y-auto pr-1 border-r border-glass-border select-none scrollbar-none">
                     {Object.keys(CATEGORIZED_ICONS).map((tab) => (
                       <button
                         key={tab}
@@ -351,7 +352,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                         className={`px-2 py-2 text-left text-[9px] font-bold transition-all truncate ${
                           activeDropdownTab === tab
                             ? 'text-accent bg-accent/10 rounded-lg'
-                            : 'text-white/50 hover:text-white hover:bg-white/5 rounded-lg'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-glass rounded-lg'
                         }`}
                       >
                         {tab}
@@ -399,25 +400,25 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
           {/* Date */}
           <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Fecha</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Fecha</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className={`w-full bg-white/5 border py-3 px-4 text-white focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-white/10 rounded-xl focus:border-accent'}`}
+              className={`w-full bg-glass border py-3 px-4 text-text-primary focus:outline-none [color-scheme:dark] ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`}
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-white/40'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
+            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
             <input
               type="text"
               placeholder="Ej. Cena con amigos"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`w-full bg-white/5 border py-3 px-4 text-white placeholder-white/20 focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-white/10 rounded-xl focus:border-accent'}`}
+              className={`w-full bg-glass border py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
             />
           </div>
 

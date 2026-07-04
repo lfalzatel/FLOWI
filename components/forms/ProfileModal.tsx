@@ -149,12 +149,12 @@ export function ProfileModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className={`${isCyberpunk ? 'bg-black border border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'} p-6 w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto`}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
+      <div className={`${isCyberpunk ? 'bg-black border border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' : 'bg-card border border-glass-border rounded-3xl'} p-6 w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto`}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors">
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className={`${isCyberpunk ? 'font-mono font-bold text-accent uppercase tracking-widest' : 'font-syne font-bold text-white'} text-xl mb-6`}>
+        <h2 className={`${isCyberpunk ? 'font-mono font-bold text-accent uppercase tracking-widest' : 'font-syne font-bold text-text-primary'} text-xl mb-6`}>
           {isCyberpunk ? '>_ MI_PERFIL' : 'Mi Perfil'}
         </h2>
 
@@ -171,8 +171,8 @@ export function ProfileModal({ onClose }: Props) {
                 className={`${isCyberpunk ? 'rounded-none border-2 border-accent' : 'rounded-full border-2 border-accent'} object-cover group-hover:opacity-75 transition-opacity`}
               />
             ) : (
-              <div className={`w-24 h-24 ${isCyberpunk ? 'rounded-none border border-accent/30 bg-accent/5' : 'rounded-full border-2 border-white/10 bg-white/5'} flex items-center justify-center group-hover:bg-white/10 transition-colors`}>
-                <UserIcon className={`w-12 h-12 ${isCyberpunk ? 'text-accent/50' : 'text-white/20'}`} />
+              <div className={`w-24 h-24 ${isCyberpunk ? 'rounded-none border border-accent/30 bg-accent/5' : 'rounded-full border-2 border-glass-border bg-glass'} flex items-center justify-center group-hover:bg-white/10 transition-colors`}>
+                <UserIcon className={`w-12 h-12 ${isCyberpunk ? 'text-accent/50' : 'text-text-muted'}`} />
               </div>
             )}
             <div className={`absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isCyberpunk ? 'bg-accent/20' : ''}`}>

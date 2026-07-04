@@ -275,4 +275,8 @@ body {
 .stagger > *:nth-child(4) { animation-delay: 0.20s; }
 .stagger > *:nth-child(5) { animation-delay: 0.25s; }
 
+@media (max-width: 360px) {
+  .nav-label { display: none; }
+}
+
 

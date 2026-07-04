@@ -85,7 +85,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className={`${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'} p-6 w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto`}>
+      <div className={`${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' : 'bg-card border border-glass-border rounded-3xl'} p-6 w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto`}>
         <button 
           onClick={() => {
             if (selectedUser) {
@@ -94,7 +94,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
               onClose();
             }
           }} 
-          className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -106,7 +106,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                 <Shield className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <h2 className={`${isTechTheme ? 'font-mono font-bold text-accent uppercase tracking-widest text-lg' : 'font-syne font-bold text-white text-xl'}`}>
+                <h2 className={`${isTechTheme ? 'font-mono font-bold text-accent uppercase tracking-widest text-lg' : 'font-syne font-bold text-text-primary text-xl'}`}>
                   {isTechTheme ? '>_ GESTION_USUARIOS' : 'Gestión de Usuarios'}
                 </h2>
                 <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Administra el acceso y roles</p>

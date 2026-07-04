@@ -10,7 +10,7 @@ import { CategoryIcon } from '@/components/CategoryIcon';
 
 const CATEGORIZED_ICONS = {
   'Comida y Ocio': [
-    '🍽️', '🍔', '🛒', '☕', '🍺', '🍿', '🍕', 'cine', '🍷', '🍹', '🚬', '🥖', '🍰', '🍉', '🍦', '🥩', '🍳'
+    '🍽️', '🍔', '🛒', '☕', '🍺', '🍿', '🍕', 'cine', '🍷', '🍹', '🚬', '🥖', '🍰', '🍉', '🍦', '🥩', '🍳', '🥦', '🥐'
   ],
   'Bancos y Finanzas': [
     'bancolombia', 'nequi', 'bbva', 'daviplata', 'davivienda', '💰', '💵', '💳', '📈', '🏦', '🪙', '💎', '💼', '🐖', '🧾'
@@ -25,7 +25,7 @@ const CATEGORIZED_ICONS = {
     'deportes', 'decathlon', 'nike', 'adidas', '⚽', '🏋️‍♂️', '🚲', '🏃‍♂️'
   ],
   'Otros': [
-    'parqueadero', '🚗', '⛽', '🚌', '✈️', '🏍️', '🎮', '🐱', '🐶', '🏥', '💊', '🎓', '👗', '🎁', '💈'
+    'parqueadero', '🚗', '⛽', '🚌', '✈️', '🏍️', '🎮', '🐱', '🐶', '🏥', '💊', '🎓', '👗', '🎁', '💈', '🐾', '📚', 'snicker', '👟'
   ]
 };
 
@@ -163,13 +163,13 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
   // Clasificación inteligente de pestañas por palabras clave en el nombre
   const getTabByKeywords = (label: string): keyof typeof CATEGORIZED_ICONS | null => {
     const text = label.toLowerCase();
-    if (/comida|restaurante|almuerzo|cena|desayuno|mercado|supermercado|cafe|café|panaderia|panadería|antojo|snack|licor|bar|cerveza|trago|bebida|cigarro|popsy|frisby|helado/.test(text)) {
+    if (/comida|restaurante|almuerzo|cena|desayuno|mercado|supermercado|cafe|café|panaderia|panadería|antojo|snack|licor|bar|cerveza|trago|bebida|cigarro|popsy|frisby|helado|verdura|fruta|vegetal|carne|carniceria|carnicería|pan/.test(text)) {
       return 'Comida y Ocio';
     }
     if (/banco|tarjeta|credito|crédito|ahorro|inversion|inversión|prestamo|préstamo|nequi|bancolombia|bbva|daviplata|davivienda|plata|efectivo|nomina|nómina|sueldo/.test(text)) {
       return 'Bancos y Finanzas';
     }
-    if (/claro|movistar|tigo|wom|epm|efigas|alcanos|agua|luz|energia|energía|gas|internet|television|televisión|telefono|teléfono|hogar|arriendo|alquiler|administracion|administración|apartamento|apto/.test(text)) {
+    if (/claro|movistar|tigo|wom|epm|efigas|alcanos|agua|luz|energia|energía|gas|internet|television|televisión|telefono|teléfono|hogar|arriendo|alquiler|administracion|administración|apartamento|apto|aseo|limpieza/.test(text)) {
       return 'Hogar y Servicios';
     }
     if (/netflix|spotify|google|youtube|yt music|drive|gmail|photos|play store|playstore|app|susbcripcion|suscripción/.test(text)) {
@@ -177,6 +177,9 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
     }
     if (/deporte|gym|gimnasio|fitness|piscina|natacion|natación|futbol|fútbol|ciclo|ciclismo|bici|bicicleta|run|running|atletismo|nike|adidas|decathlon/.test(text)) {
       return 'Deportes';
+    }
+    if (/mascota|mascotas|perro|gato|medico|médico|salud|droga|farmacia|drogueria|droguería|doctor|educacion|educación|estudio|colegio|universidad|libro|libros|ropa|calzado|zapatos|vestir/.test(text)) {
+      return 'Otros';
     }
     return null;
   };
@@ -211,7 +214,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
 
   return createPortal(
     <div className={`fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`} onClick={onClose}>
-      <div className={`w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'}`} onClick={(e) => e.stopPropagation()}>
+      <div className={`w-full max-w-md relative animate-fade-in-up max-h-[90vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-card border border-glass-border rounded-3xl'}`} onClick={(e) => e.stopPropagation()}>
         <button 
           onClick={() => {
             if (view === 'form' && initialView === 'form') {
@@ -222,12 +225,12 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
               onClose();
             }
           }} 
-          className={`absolute top-4 right-4 hover:text-white transition-colors ${isTechTheme ? 'text-accent' : 'text-white/50'}`}
+          className={`absolute top-4 right-4 hover:text-text-primary transition-colors ${isTechTheme ? 'text-accent' : 'text-text-secondary'}`}
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className={`font-bold text-xl mb-6 ${isTechTheme ? 'text-accent uppercase tracking-widest' : 'font-syne text-white'}`}>
+        <h2 className={`font-bold text-xl mb-6 ${isTechTheme ? 'text-accent uppercase tracking-widest' : 'font-syne text-text-primary'}`}>
           {view === 'list' ? 'Mis Categorías' : (editingId ? 'Editar Categoría' : 'Nueva Categoría')}
         </h2>
 
@@ -261,7 +264,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                           : 'text-accent bg-accent/10 rounded-lg'
                         : isTechTheme
                           ? 'text-accent/50 hover:text-white hover:bg-white/5 rounded-none font-mono uppercase'
-                          : 'text-white/50 hover:text-white hover:bg-white/5 rounded-lg'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-glass rounded-lg'
                     }`}
                   >
                     {isTechTheme ? tab.toUpperCase().replace(' Y ', '_Y_') : tab}
@@ -272,19 +275,19 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
               {/* Columna Derecha: Categorías de la pestaña seleccionada */}
               <div className="w-3/5 flex flex-col gap-2 overflow-y-auto pr-1">
                 {filteredCategoriesForList.length === 0 ? (
-                  <p className={`text-center text-xs py-10 ${isTechTheme ? 'font-mono text-accent/50 uppercase' : 'text-white/40'}`}>
+                  <p className={`text-center text-xs py-10 ${isTechTheme ? 'font-mono text-accent/50 uppercase' : 'text-text-muted'}`}>
                     {isTechTheme ? 'SIN_CATEGORIAS' : 'Sin categorías.'}
                   </p>
                 ) : (
                   filteredCategoriesForList.map((cat, i) => (
-                    <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-2.5 border transition-all ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50 rounded-none' : 'rounded-xl bg-white/5 border-white/5'}`}>
+                    <div key={cat.id || `base-${i}`} className={`flex items-center justify-between p-2.5 border transition-all ${isTechTheme ? 'bg-black/40 border-accent/20 hover:border-accent/50 rounded-none' : 'rounded-xl bg-glass border-glass-border'}`}>
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className={`w-8 h-8 flex-shrink-0 flex items-center justify-center text-lg ${isTechTheme ? 'border border-accent/20 bg-accent/5 rounded-none' : 'rounded-full'}`} style={{ backgroundColor: !isTechTheme ? `${cat.color}20` : undefined, color: cat.color, borderColor: isTechTheme ? `${cat.color}40` : undefined }}>
                           <CategoryIcon icon={cat.icon} label={cat.label} className="w-4.5 h-4.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className={`font-semibold truncate text-xs ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : 'text-white'}`}>{cat.label}</p>
-                          <span className={`text-[8px] px-1 py-0.1 font-mono ${isTechTheme ? 'text-accent/50 border border-accent/20 rounded-none' : 'text-white/30 border border-white/10 rounded'}`}>
+                          <p className={`font-semibold truncate text-xs ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : 'text-text-primary'}`}>{cat.label}</p>
+                          <span className={`text-[8px] px-1 py-0.1 font-mono ${isTechTheme ? 'text-accent/50 border border-accent/20 rounded-none' : 'text-text-muted border border-glass-border rounded'}`}>
                             {cat.isCustom ? 'PERS.' : 'DEF.'}
                           </span>
                         </div>
@@ -293,7 +296,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                       <div className="flex items-center gap-0.5">
                         {(cat.isCustom || isSystemAdmin) && (
                           <>
-                            <button onClick={() => handleEdit(cat)} className={`p-1.5 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-white/50 hover:text-white'}`}>
+                            <button onClick={() => handleEdit(cat)} className={`p-1.5 transition ${isTechTheme ? 'text-accent/60 hover:text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button onClick={() => handleDelete(cat)} className="p-1.5 text-red-400/60 hover:text-red-400 transition" disabled={loading}>

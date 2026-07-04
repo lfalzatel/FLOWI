@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { getISOWeekString, formatFilterText, navigateFilter } from '@/lib/dateUtils';
+import { getISOWeekString, formatFilterText, navigateFilter, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { useTheme } from '@/components/ThemeProvider';
@@ -38,11 +38,11 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     
     const now = new Date();
     if (type === 'month') {
-      onChangeValue(now.toISOString().split('T')[0].substring(0, 7));
+      onChangeValue(getLocalMonthString(now));
     } else if (type === 'week') {
       onChangeValue(getISOWeekString(now));
     } else if (type === 'day') {
-      onChangeValue(now.toISOString().split('T')[0]);
+      onChangeValue(getLocalDateString(now));
     }
   };
 

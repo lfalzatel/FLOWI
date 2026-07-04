@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc, arrayUnion } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc, arrayUnion, orderBy } from 'firebase/firestore';
 
 export interface Transaction {
   id?: string;
@@ -28,6 +28,7 @@ export const BASE_CATEGORIES = [
   { label: 'Transporte', icon: '🚌', color: '#F5A623' },
   { label: 'Entretenimiento', icon: '🎮', color: '#A855F7' },
   { label: 'Hogar', icon: '🏠', color: '#00E5A0' },
+  { label: 'Arriendo', icon: '🏢', color: '#F59E0B' },
   { label: 'Sueldo', icon: '💰', color: '#00E5A0' },
   { label: 'Inversiones', icon: '📈', color: '#3B82F6' },
   { label: 'Regalos', icon: '🎁', color: '#EC4899' },
@@ -72,6 +73,17 @@ export const BASE_CATEGORIES = [
   { label: 'Nequi', icon: 'nequi', color: '#D946EF' },
   { label: 'Daviplata', icon: 'daviplata', color: '#E30613' },
   { label: 'Davivienda', icon: 'davivienda', color: '#E30613' },
+  // Compras y mercado (las más solicitadas)
+  { label: 'Tienda / Minimercado', icon: '🏪', color: '#10B981' },
+  { label: 'Verduras y Frutas',    icon: '🥦', color: '#22C55E' },
+  { label: 'Carnicería',           icon: '🥩', color: '#EF4444' },
+  { label: 'Panadería',            icon: '🥐', color: '#D97706' },
+  { label: 'Aseo del hogar',       icon: '🧹', color: '#6366F1' },
+  { label: 'Mascotas',             icon: '🐾', color: '#F59E0B' },
+  { label: 'Médico / Salud',       icon: '🏥', color: '#3B82F6' },
+  { label: 'Farmacia',             icon: '💊', color: '#14B8A6' },
+  { label: 'Educación',            icon: '📚', color: '#8B5CF6' },
+  { label: 'Ropa y Calzado',       icon: '👟', color: '#EC4899' },
   { label: 'Otros', icon: '📦', color: '#6B7280' },
 ];
 
@@ -328,5 +340,61 @@ export async function updateCustomCategory(id: string, category: Partial<CustomC
 
 export async function deleteCustomCategory(id: string) {
   const docRef = doc(db, 'fl_customCategories', id);
+  await deleteDoc(docRef);
+}
+
+// ─── REMINDERS (RECORDATORIOS) ──────────────────────────────────────────────
+export interface Reminder {
+  id?: string;
+  userId: string;
+  title: string;               // "Pagar arriendo"
+  description?: string;        // nota opcional
+  category?: string;           // mismo tipo que Transaction.category
+  type: 'once' | 'daily' | 'weekly' | 'monthly' | 'budget_alert';
+  time: string;                // "08:30" en formato HH:mm
+  dayOfWeek?: number;          // 0-6 para weekly (0=Domingo, 1=Lunes...)
+  dayOfMonth?: number;         // 1-31 para monthly
+  budgetPercent?: number;      // solo si type === 'budget_alert' — ej: 80
+  sound: boolean;
+  pushEnabled: boolean;
+  inAppEnabled: boolean;
+  active: boolean;
+  createdAt?: Timestamp | Date;
+  lastTriggered?: Timestamp | Date | null;
+}
+
+export async function getUserReminders(userId: string): Promise<Reminder[]> {
+  const ref = collection(db, 'fl_reminders');
+  const q = query(ref, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => {
+    const data = d.data();
+    return {
+      id: d.id,
+      ...data,
+      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+      lastTriggered: data.lastTriggered instanceof Timestamp ? data.lastTriggered.toDate() : data.lastTriggered,
+    };
+  }) as Reminder[];
+}
+
+export async function addReminder(reminder: Omit<Reminder, 'id'>): Promise<string> {
+  const ref = collection(db, 'fl_reminders');
+  const docRef = await addDoc(ref, { 
+    ...reminder, 
+    createdAt: serverTimestamp(),
+    lastTriggered: null 
+  });
+  return docRef.id;
+}
+
+export async function updateReminder(id: string, data: Partial<Reminder>) {
+  const docRef = doc(db, 'fl_reminders', id);
+  // Si mandamos un Date para lastTriggered, se guarda como Timestamp de Firebase
+  await updateDoc(docRef, data);
+}
+
+export async function deleteReminder(id: string) {
+  const docRef = doc(db, 'fl_reminders', id);
   await deleteDoc(docRef);
 }

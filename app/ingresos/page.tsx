@@ -11,7 +11,7 @@ import { Transaction } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { TrendingUp, Plus, Download } from 'lucide-react';
-import { getISOWeekString } from '@/lib/dateUtils';
+import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
@@ -25,7 +25,7 @@ export default function IngresosPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
-  const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
+  const [filterValue, setFilterValue] = useState(getLocalMonthString());
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
@@ -57,7 +57,7 @@ export default function IngresosPage() {
       : (t.date && typeof (t.date as any).toDate === 'function')
         ? (t.date as any).toDate()
         : new Date(t.date as any);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = getLocalDateString(d);
     if (filterType === 'month') {
       return dateStr.startsWith(filterValue);
     } else if (filterType === 'week') {
@@ -90,7 +90,11 @@ export default function IngresosPage() {
             <button
               onClick={() => setShowAdd(true)}
               className={`flex items-center gap-2 px-4 py-2.5 transition-all
-                         ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
+                          bg-gradient-to-br from-accent to-accent-dim
+                          ${theme === 'light' ? 'text-white' : 'text-black'}
+                          font-semibold text-sm shadow-lg shadow-accent/20
+                          hover:opacity-90 active:scale-[0.97]
+                          ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Nueva transacción</span>

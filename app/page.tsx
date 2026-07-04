@@ -14,7 +14,7 @@ import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { SplashScreen } from '@/components/layout/SplashScreen';
-import { getISOWeekString } from '@/lib/dateUtils';
+import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
 
@@ -37,7 +37,7 @@ export default function DashboardPage() {
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
   const router = useRouter();
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
-  const [filterValue, setFilterValue] = useState(new Date().toISOString().split('T')[0].substring(0, 7));
+  const [filterValue, setFilterValue] = useState(getLocalMonthString());
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
@@ -118,7 +118,7 @@ export default function DashboardPage() {
       : (t.date && typeof (t.date as any).toDate === 'function')
         ? (t.date as any).toDate()
         : new Date(t.date as any);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = getLocalDateString(d);
     if (filterType === 'month') {
       return dateStr.startsWith(filterValue);
     } else if (filterType === 'week') {

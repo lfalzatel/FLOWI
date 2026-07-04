@@ -540,7 +540,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
   return createPortal(
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className={`w-full max-w-md relative animate-fade-in-up overflow-hidden ${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.15)]' : 'bg-[#0A0A0F] border border-white/10 rounded-3xl'}`}
+        className={`w-full max-w-md relative animate-fade-in-up overflow-hidden ${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.15)]' : 'bg-card border border-glass-border rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera */}
@@ -553,7 +553,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
               {format ? 'Revisa la estructura antes de exportar' : 'Elige el formato de tu preferencia'}
             </p>
           </div>
-          <button onClick={onClose} className={`transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-white/50 hover:text-white'}`}>
+          <button onClick={onClose} className={`transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -565,39 +565,39 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             <div className="grid grid-cols-1 gap-3">
               <button 
                 onClick={() => handleSelectFormat('pdf')}
-                className={`flex items-center gap-4 p-4 text-left border transition-all ${isTechTheme ? 'border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-none' : 'border-white/5 bg-white/5 hover:bg-white/10 rounded-2xl'}`}
+                className={`flex items-center gap-4 p-4 text-left border transition-all ${isTechTheme ? 'border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-none' : 'border-glass-border bg-glass hover:bg-glass-hover rounded-2xl'}`}
               >
                 <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
                   <FileText className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-white'}`}>Documento PDF (.pdf)</h4>
+                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>Documento PDF (.pdf)</h4>
                   <p className="text-xs text-text-muted mt-0.5">Reporte formal limpio con tablas ordenadas listo para imprimir.</p>
                 </div>
               </button>
 
               <button 
                 onClick={() => handleSelectFormat('excel')}
-                className={`flex items-center gap-4 p-4 text-left border transition-all ${isTechTheme ? 'border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-none' : 'border-white/5 bg-white/5 hover:bg-white/10 rounded-2xl'}`}
+                className={`flex items-center gap-4 p-4 text-left border transition-all ${isTechTheme ? 'border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-none' : 'border-glass-border bg-glass hover:bg-glass-hover rounded-2xl'}`}
               >
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
                   <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-white'}`}>Hoja de Cálculo (.csv)</h4>
+                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>Hoja de Cálculo (.csv)</h4>
                   <p className="text-xs text-text-muted mt-0.5">Ideal para importar y analizar en Excel o Google Sheets.</p>
                 </div>
               </button>
 
               <button 
                 onClick={() => handleSelectFormat('image')}
-                className={`flex items-center gap-4 p-4 text-left border transition-all ${isTechTheme ? 'border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-none' : 'border-white/5 bg-white/5 hover:bg-white/10 rounded-2xl'}`}
+                className={`flex items-center gap-4 p-4 text-left border transition-all ${isTechTheme ? 'border-accent/20 bg-accent/5 hover:bg-accent/10 rounded-none' : 'border-glass-border bg-glass hover:bg-glass-hover rounded-2xl'}`}
               >
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
                   <ImageIcon className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-white'}`}>Captura de Imagen (.png)</h4>
+                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>Captura de Imagen (.png)</h4>
                   <p className="text-xs text-text-muted mt-0.5">Ficha ejecutiva visual ideal para compartir por redes sociales.</p>
                 </div>
               </button>
