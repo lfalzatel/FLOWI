@@ -212,11 +212,23 @@ body {
 }
 
 .glass-dropdown {
-  background: var(--glass);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border: 1px solid var(--glass-border);
   transition: background 0.2s, border-color 0.2s;
+}
+
+[data-theme='light'] .glass-dropdown {
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme='dark'] .glass-dropdown {
+  background: rgba(26, 26, 46, 0.6) !important;
+}
+
+[data-theme='cyberpunk'] .glass-dropdown {
+  background: rgba(10, 10, 20, 0.6) !important;
 }
 
 [data-theme='light'] .glass-card {
