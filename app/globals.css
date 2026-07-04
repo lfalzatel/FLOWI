@@ -211,6 +211,14 @@ body {
   border-color: var(--glass-strong);
 }
 
+.glass-dropdown {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid var(--glass-border);
+  transition: background 0.2s, border-color 0.2s;
+}
+
 [data-theme='light'] .glass-card {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
