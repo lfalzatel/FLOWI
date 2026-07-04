@@ -210,13 +210,14 @@ export function ProfileCapsule() {
       )}
       {open && (
         <>
-          <div className="absolute right-0 top-full mt-2.5 w-68
-                          bg-deep
-                          border border-glass-border rounded-2xl
+          <div className={`absolute right-0 top-full mt-2.5 
                           shadow-2xl shadow-black/10
                           animate-slide-down origin-top-right
                           overflow-y-auto z-50
-                          max-h-[calc(100vh-120px)] scrollbar-hide"
+                          max-h-[calc(100vh-120px)] scrollbar-hide
+                          ${isTechTheme 
+                            ? 'rounded-none border border-accent/50 bg-deep' 
+                            : 'bg-deep border border-glass-border rounded-2xl'}`}
                style={{ width: '272px' }}>
 
           <div className={`px-4 py-4 flex items-center gap-3 border-b border-glass-border ${isTechTheme ? 'bg-deep' : 'bg-gradient-to-r from-[var(--accent-glow)] to-transparent'}`}>
