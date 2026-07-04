@@ -123,14 +123,13 @@ export default function RecordatoriosPage() {
             )}
             <button
               onClick={() => { setEditingReminder(null); setShowForm(true); }}
-              className={`flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-accent to-accent-dim
+              className={`flex items-center justify-center w-10 h-10 bg-gradient-to-br from-accent to-accent-dim
                           ${theme === 'light' ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
                           hover:opacity-90 active:scale-[0.97] transition-all
-                          ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}
+                          ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}
             >
-              <Plus className="w-4 h-4" />
-              Nuevo
+              <Plus className="w-5 h-5" />
             </button>
           </div>
         </div>
