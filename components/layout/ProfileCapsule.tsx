@@ -21,7 +21,7 @@ const menuItems = [
   { icon: BarChart2,  label: 'Reportes',          href: '/reportes',      divider: false, soon: false },
   { icon: Download,   label: 'Instalar app',      href: '#',              divider: false, soon: false },
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
-  { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: true  },
+  { icon: Bell,       label: 'Recordatorios',     href: '/recordatorios', divider: false, soon: false },
   { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: true,  soon: false },
 ];
 

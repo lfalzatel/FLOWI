@@ -64,8 +64,8 @@ export default function DeudasPage() {
         {/* Header section */}
         <div className="flex items-center justify-between">
           <div>
-            <span className={`text-xs font-medium uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/70' : 'text-text-muted'}`}>Mis Finanzas</span>
             <h1 className={`${isCyberpunk ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>Deudas</h1>
+            <p className={`mt-1 ${isCyberpunk ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>Historial y control de préstamos</p>
           </div>
           <div className="flex items-center gap-2">
             {/* Download Report Button */}

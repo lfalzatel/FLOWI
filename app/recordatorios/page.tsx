@@ -87,10 +87,12 @@ export default function RecordatoriosPage() {
         {/* Header de página */}
         <div className="flex items-center justify-between">
           <div>
-            <span className={`text-xs uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>Finanzas</span>
             <h1 className={`font-syne font-bold text-3xl text-text-primary ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : ''}`}>
               Recordatorios
             </h1>
+            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>
+              Control y alertas de tus pagos recurrentes
+            </p>
           </div>
           <button
             onClick={() => { setEditingReminder(null); setShowForm(true); }}
