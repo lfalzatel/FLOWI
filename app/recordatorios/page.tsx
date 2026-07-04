@@ -100,12 +100,12 @@ export default function RecordatoriosPage() {
       
       <main className="flex-1 max-w-2xl mx-auto w-full p-4 pb-24 space-y-6 animate-fade-in-up">
         {/* Header de página */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-2">
           <div>
-            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>
+            <h1 className={`${isTechTheme ? 'font-mono font-bold text-2xl sm:text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-2xl sm:text-3xl text-text-primary'}`}>
               Recordatorios
             </h1>
-            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>
+            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>
               Control y alertas de tus pagos recurrentes
             </p>
           </div>
