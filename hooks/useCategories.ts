@@ -90,16 +90,24 @@ export function useCategories() {
     cat => !profile?.hiddenCategories?.includes(cat.label)
   );
 
-  const allCategories: CategoryOption[] = [
-    ...visibleBaseCategories,
-    ...customCategories.map(cat => ({
+  const allCategoriesMap = new Map<string, CategoryOption>();
+
+  visibleBaseCategories.forEach(cat => {
+    allCategoriesMap.set(cat.label, { ...cat });
+  });
+
+  customCategories.forEach(cat => {
+    allCategoriesMap.set(cat.label, {
       label: cat.label,
       icon: cat.icon,
       color: cat.color,
       isCustom: true,
       id: cat.id
-    }))
-  ].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+    });
+  });
+
+  const allCategories: CategoryOption[] = Array.from(allCategoriesMap.values())
+    .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
 
   return {
     customCategories,

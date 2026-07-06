@@ -344,6 +344,12 @@ export async function deleteCustomCategory(id: string) {
 }
 
 // ─── REMINDERS (RECORDATORIOS) ──────────────────────────────────────────────
+export interface ReminderAlert {
+  id: string;
+  value: number;
+  unit: 'minutes' | 'hours' | 'days';
+}
+
 export interface Reminder {
   id?: string;
   userId: string;
@@ -362,6 +368,7 @@ export interface Reminder {
   createdAt?: Timestamp | Date;
   lastTriggered?: Timestamp | Date | null;
   date?: string; // Formato YYYY-MM-DD para recordatorios 'once'
+  alerts?: ReminderAlert[]; // Alertas múltiples relativas al tiempo principal
 }
 
 export async function getUserReminders(userId: string): Promise<Reminder[]> {

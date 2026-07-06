@@ -1,11 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
-import { addReminder, updateReminder, Reminder } from '@/lib/firestore';
+import { addReminder, updateReminder, Reminder, ReminderAlert } from '@/lib/firestore';
+import { CategoryIcon } from '@/components/CategoryIcon';
 
 interface Props {
   onClose: () => void;
@@ -40,6 +41,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
   const [date, setDate] = useState('');
   const [category, setCategory] = useState('');
   const [budgetPercent, setBudgetPercent] = useState(80);
+  const [alerts, setAlerts] = useState<ReminderAlert[]>([]);
 
   const { allCategories } = useCategories();
   const [sound, setSound] = useState(true);
@@ -47,9 +49,16 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
   const [inAppEnabled, setInAppEnabled] = useState(true);
   const [active, setActive] = useState(true);
   const [loading, setLoading] = useState(false);
+  
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+  const neonClass = theme === 'cyberpunk' 
+    ? 'border-[#00FF41] shadow-[0_0_15px_rgba(0,255,65,0.5)]' 
+    : theme === 'kiloCode' 
+      ? 'border-[#F0DB4F] shadow-[0_0_15px_rgba(240,219,79,0.5)]' 
+      : isTechTheme ? 'border-accent/30' : '';
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -69,6 +78,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
       if (reminder.date !== undefined) setDate(reminder.date);
       if (reminder.category !== undefined) setCategory(reminder.category);
       if (reminder.budgetPercent !== undefined) setBudgetPercent(reminder.budgetPercent);
+      if (reminder.alerts) setAlerts(reminder.alerts);
       setSound(reminder.sound);
       setPushEnabled(reminder.pushEnabled);
       setInAppEnabled(reminder.inAppEnabled);
@@ -92,6 +102,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
         pushEnabled,
         inAppEnabled,
         active,
+        alerts,
       };
 
       if (category.trim()) data.category = category.trim();
@@ -115,6 +126,20 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
     }
   };
 
+  const addAlert = () => {
+    setAlerts([...alerts, { id: Math.random().toString(36).substring(7), value: 10, unit: 'minutes' }]);
+  };
+
+  const removeAlert = (id: string) => {
+    setAlerts(alerts.filter(a => a.id !== id));
+  };
+
+  const updateAlert = (id: string, field: keyof ReminderAlert, value: any) => {
+    setAlerts(alerts.map(a => a.id === id ? { ...a, [field]: value } : a));
+  };
+
+  const selectedCategoryData = allCategories.find(c => c.label === category);
+
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Overlay */}
@@ -123,8 +148,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
       {/* Card container */}
       <div className={`
         relative w-full max-w-md max-h-[90vh] overflow-y-auto z-10 p-6
-        glass-card-strong border border-glass-border shadow-2xl animate-slide-down
-        ${isTechTheme ? 'rounded-none border-accent/30 font-mono text-accent' : 'rounded-3xl'}
+        glass-card-strong border shadow-2xl animate-slide-down
+        ${isTechTheme ? `rounded-none font-mono text-accent ${neonClass}` : 'rounded-3xl border-glass-border'}
       `}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -168,22 +193,46 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
             />
           </div>
 
-          {/* Categoría */}
-          <div>
+          {/* Categoría Personalizada */}
+          <div className="relative">
             <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Categoría (Opcional)</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+            <div 
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
               className={`
-                w-full px-3 py-2.5 text-sm focus:outline-none bg-deep border border-glass-border text-text-primary
+                w-full px-3 py-2.5 text-sm flex items-center justify-between cursor-pointer bg-deep border border-glass-border text-text-primary
                 ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
               `}
             >
-              <option value="">Sin categoría</option>
-              {allCategories.map(cat => (
-                <option key={cat.label} value={cat.label}>{cat.icon} {cat.label}</option>
-              ))}
-            </select>
+              {category && selectedCategoryData ? (
+                <div className="flex items-center gap-2">
+                  <CategoryIcon icon={selectedCategoryData.icon} label={selectedCategoryData.label} className="w-4 h-4" />
+                  <span>{selectedCategoryData.label}</span>
+                </div>
+              ) : (
+                <span className="text-text-muted">Sin categoría</span>
+              )}
+            </div>
+            
+            {isCategoryOpen && (
+              <div className={`absolute z-20 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-deep border border-glass-border shadow-lg ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                <div 
+                  className="px-3 py-2 hover:bg-white/10 cursor-pointer text-sm text-text-primary border-b border-glass-border/30"
+                  onClick={() => { setCategory(''); setIsCategoryOpen(false); }}
+                >
+                  Sin categoría
+                </div>
+                {allCategories.map(cat => (
+                  <div 
+                    key={cat.label}
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 cursor-pointer text-sm text-text-primary"
+                    onClick={() => { setCategory(cat.label); setIsCategoryOpen(false); }}
+                  >
+                    <CategoryIcon icon={cat.icon} label={cat.label} className="w-4 h-4" />
+                    <span>{cat.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Tipo / Frecuencia */}
@@ -224,7 +273,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
                 </div>
               )}
               <div className="flex-1">
-                <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Hora de notificación</label>
+                <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Hora {type === 'once' ? 'del evento' : 'base'}</label>
                 <input
                   type="time"
                   required
@@ -292,6 +341,52 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
                 onChange={(e) => setBudgetPercent(Number(e.target.value))}
                 className="w-full accent-accent bg-white/10 h-1.5 rounded-lg appearance-none cursor-pointer"
               />
+            </div>
+          )}
+          
+          {/* Múltiples Alertas (Solo si no es budget_alert) */}
+          {type !== 'budget_alert' && (
+            <div className="pt-2 border-t border-glass-border/40">
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs text-text-muted uppercase tracking-wider">Alertas previas (Opcional)</label>
+                <button
+                  type="button"
+                  onClick={addAlert}
+                  className="flex items-center gap-1 text-xs text-accent hover:underline"
+                >
+                  <Plus className="w-3 h-3" /> Agregar alerta
+                </button>
+              </div>
+              
+              <div className="space-y-2">
+                {alerts.map(alert => (
+                  <div key={alert.id} className="flex gap-2 items-center">
+                    <input
+                      type="number"
+                      min={1}
+                      value={alert.value}
+                      onChange={e => updateAlert(alert.id, 'value', Number(e.target.value))}
+                      className={`w-16 px-2 py-1.5 text-sm bg-glass border border-glass-border text-text-primary text-center ${isTechTheme ? 'rounded-none font-mono' : 'rounded-lg'}`}
+                    />
+                    <select
+                      value={alert.unit}
+                      onChange={e => updateAlert(alert.id, 'unit', e.target.value)}
+                      className={`flex-1 px-2 py-1.5 text-sm bg-deep border border-glass-border text-text-primary ${isTechTheme ? 'rounded-none font-mono' : 'rounded-lg'}`}
+                    >
+                      <option value="minutes">Minutos antes</option>
+                      <option value="hours">Horas antes</option>
+                      <option value="days">Días antes</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => removeAlert(alert.id)}
+                      className="p-1.5 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
