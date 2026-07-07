@@ -148,8 +148,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
       {/* Card container */}
       <div className={`
         relative w-full max-w-md max-h-[90vh] overflow-y-auto z-10 p-6
-        glass-card-strong border shadow-2xl animate-slide-down
-        ${isTechTheme ? `rounded-none font-mono text-accent ${neonClass}` : 'rounded-3xl border-glass-border'}
+        ${isTechTheme ? `glass-card-strong border shadow-2xl animate-slide-down rounded-none font-mono text-accent ${neonClass}` : 'glass-dropdown rounded-3xl animate-slide-down'}
       `}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
