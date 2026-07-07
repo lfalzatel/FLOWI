@@ -56,23 +56,23 @@ export default function LoginPage() {
           <div className="relative w-40 h-40 mx-auto animate-float">
             {/* SVG Lines */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-              {/* Circle 1 (Outer, Green, Clockwise) */}
+              {/* Circle 1 (Outer, Green, Clockwise, 3 parts) */}
               <circle
                 cx="50" cy="50" r="46"
                 fill="none"
                 stroke="#10B981"
                 strokeWidth="2"
-                strokeDasharray="150 100"
+                strokeDasharray="70 26.3"
                 className="animate-[spin_4s_linear_infinite] origin-center"
                 strokeLinecap="round"
               />
-              {/* Circle 2 (Inner, Cyan, Counter-clockwise) */}
+              {/* Circle 2 (Inner, Cyan, Counter-clockwise, 3 parts) */}
               <circle
                 cx="50" cy="50" r="41"
                 fill="none"
                 stroke="#00C4CC"
                 strokeWidth="2"
-                strokeDasharray="120 80"
+                strokeDasharray="60 25.8"
                 className="animate-[spin_6s_linear_infinite_reverse] origin-center"
                 strokeLinecap="round"
               />
