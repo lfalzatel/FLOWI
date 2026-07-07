@@ -230,7 +230,7 @@ body {
 }
 
 [data-theme='cyberpunk'] .glass-dropdown {
-  background: rgba(10, 10, 20, 0.6) !important;
+  background: rgba(10, 10, 20, 0.1) !important;
 }
 
 [data-theme='light'] .glass-card {
