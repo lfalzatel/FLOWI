@@ -329,24 +329,33 @@ export function Header() {
               <circle
                 cx="50" cy="50" r="46"
                 fill="none"
-                stroke="#10B981"
+                stroke={logoInnerColor}
                 strokeWidth="2"
-                strokeDasharray="150 100"
-                className="animate-[spin_4s_linear_infinite] origin-center"
+                strokeDasharray="70 26.3"
+                className="animate-[spin_4s_linear_infinite] origin-center transition-colors duration-500"
                 strokeLinecap="round"
               />
               <circle
                 cx="50" cy="50" r="41"
                 fill="none"
-                stroke="#3B82F6"
+                stroke={logoOuterColor}
                 strokeWidth="2"
-                strokeDasharray="120 80"
-                className="animate-[spin_6s_linear_infinite_reverse] origin-center"
+                strokeDasharray="60 25.8"
+                className="animate-[spin_6s_linear_infinite_reverse] origin-center transition-colors duration-500"
                 strokeLinecap="round"
               />
             </svg>
-            <div className="absolute inset-[16%] rounded-full overflow-hidden border border-white/10 bg-[#0A0A14]/90 shadow-2xl">
-              <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.12]" />
+            <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center shadow-2xl">
+              <svg className="w-full h-full drop-shadow-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                {/* Vertical stem */}
+                <line x1="33" y1="25" x2="33" y2="75" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+                {/* Top bar */}
+                <line x1="33" y1="25" x2="58" y2="25" stroke={logoInnerColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+                {/* Middle bar */}
+                <line x1="33" y1="50" x2="48" y2="50" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+                {/* Dot */}
+                <circle cx="68" cy="50" r="6" fill={logoDotColor} className="transition-colors duration-500" />
+              </svg>
             </div>
           </div>
 
