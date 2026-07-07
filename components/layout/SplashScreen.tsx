@@ -53,20 +53,26 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
   // Dynamic colors for the logo based on theme
   let logoOuterColor = '#10B981'; // Default / Dark theme
   let logoInnerColor = '#3B82F6';
-  let fColorClass = 'text-white';
+  let logoDotColor = '#3B82F6';
   
   if (theme === 'cyberpunk') {
     logoOuterColor = '#00FF41'; // Neon Green
     logoInnerColor = '#0FF0FC'; // Cyan
-    fColorClass = 'text-[#00FF41] drop-shadow-[0_0_12px_rgba(0,255,65,0.8)]';
+    logoDotColor = '#0FF0FC';
   } else if (theme === 'kiloCode') {
     logoOuterColor = '#F0DB4F'; // JS Yellow
     logoInnerColor = '#F97316'; // Orange
-    fColorClass = 'text-[#F0DB4F] drop-shadow-[0_0_12px_rgba(240,219,79,0.8)]';
+    logoDotColor = '#F97316';
   } else if (theme === 'light') {
-    logoOuterColor = '#059669'; // Darker green
-    logoInnerColor = '#2563EB'; // Darker blue
-    fColorClass = 'text-[#059669]';
+    // Colores originales del diseño en modo día
+    logoOuterColor = '#00C4CC'; // Cyan (trazos F)
+    logoInnerColor = '#10B981'; // Green (barra superior y anillo)
+    logoDotColor = '#F97316';   // Orange (punto)
+  } else {
+    // Default / Dark
+    logoDotColor = '#F97316';   // Naranja por defecto para que resalte
+    logoOuterColor = '#00C4CC'; // Cyan
+    logoInnerColor = '#10B981'; // Green
   }
 
   return (
@@ -81,7 +87,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
           <circle
             cx="50" cy="50" r="46"
             fill="none"
-            stroke={logoOuterColor}
+            stroke={logoInnerColor}
             strokeWidth="2"
             strokeDasharray="70 26.3"
             className="animate-[spin_4s_linear_infinite] origin-center transition-colors duration-500"
@@ -90,7 +96,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
           <circle
             cx="50" cy="50" r="41"
             fill="none"
-            stroke={logoInnerColor}
+            stroke={logoOuterColor}
             strokeWidth="2"
             strokeDasharray="60 25.8"
             className="animate-[spin_6s_linear_infinite_reverse] origin-center transition-colors duration-500"
@@ -108,7 +114,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
             {/* Middle bar */}
             <line x1="33" y1="50" x2="48" y2="50" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
             {/* Dot */}
-            <circle cx="68" cy="50" r="6" fill={logoInnerColor} className="transition-colors duration-500" />
+            <circle cx="68" cy="50" r="6" fill={logoDotColor} className="transition-colors duration-500" />
           </svg>
         </div>
       </div>
