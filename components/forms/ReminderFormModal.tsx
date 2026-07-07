@@ -143,7 +143,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Overlay */}
-      <div onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div onClick={onClose} className="absolute inset-0 bg-black/40" />
 
       {/* Card container */}
       <div className={`
