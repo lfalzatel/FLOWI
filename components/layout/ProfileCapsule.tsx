@@ -202,7 +202,7 @@ export function ProfileCapsule() {
       {/* 🚀 Dropdown 🚀 */}
       {open && typeof document !== 'undefined' && createPortal(
         <div 
-          className="fixed inset-0 bg-black/70 z-50 transition-opacity" 
+          className="fixed inset-0 z-50 transition-opacity" 
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />,
