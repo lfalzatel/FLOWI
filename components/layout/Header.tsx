@@ -255,7 +255,7 @@ export function Header() {
           {/* Dropdown Notificaciones */}
           {showDropdown && typeof document !== 'undefined' && createPortal(
             <div 
-              className="fixed inset-0 bg-black/70 z-50 transition-opacity sm:bg-transparent" 
+              className="fixed inset-0 z-50 transition-opacity" 
               onClick={() => setShowDropdown(false)}
               aria-hidden="true"
             />,
