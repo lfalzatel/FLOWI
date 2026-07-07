@@ -119,7 +119,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
             <circle cx="72" cy="50" r="7" fill={logoDotColor} className="transition-colors duration-500" />
           </svg>
           {/* Scanlines Overlay */}
-          <div className="absolute inset-0 z-10 pointer-events-none bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)] opacity-50" />
+          <div className="absolute inset-0 z-10 pointer-events-none bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.15)_2px,rgba(0,0,0,0.15)_3px)]" />
         </div>
       </div>
       
