@@ -247,7 +247,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('gasto'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'gasto' ? `bg-accent text-white shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'gasto' ? `bg-accent ${isTechTheme ? 'text-deep' : 'text-white'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Gasto
@@ -255,7 +255,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             <button
               type="button"
               onClick={() => { if (!transactionToEdit) { setType('ingreso'); setCategory(''); } }}
-              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'ingreso' ? `bg-accent text-white shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === 'ingreso' ? `bg-accent ${isTechTheme ? 'text-deep' : 'text-white'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!!transactionToEdit}
             >
               Ingreso

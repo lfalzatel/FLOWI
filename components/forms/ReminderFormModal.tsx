@@ -150,20 +150,17 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
         relative w-full max-w-md max-h-[90vh] overflow-y-auto z-10 p-6 glass-dropdown animate-slide-down
         ${isTechTheme ? 'border border-accent/50 rounded-none font-mono text-accent' : 'rounded-3xl'}
       `}>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className={`text-xl font-bold text-text-primary ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne'}`}>
-            {reminder ? 'Editar Recordatorio' : 'Nuevo Recordatorio'}
-          </h2>
-          <button onClick={onClose} className="p-1 rounded-lg text-text-muted hover:text-text-primary transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
+          <X className="w-5 h-5" />
+        </button>
+        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2 uppercase font-mono' : 'font-syne font-bold text-xl text-text-primary mb-6'}`}>
+          {reminder ? 'Editar Recordatorio' : 'Nuevo Recordatorio'}
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Título */}
           <div>
-            <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Título del recordatorio</label>
+            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Título del recordatorio</label>
             <input
               type="text"
               required
@@ -179,7 +176,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
           {/* Descripción */}
           <div>
-            <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Nota o Descripción (Opcional)</label>
+            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Nota o Descripción (Opcional)</label>
             <textarea
               placeholder="Ej: Banco de Bogotá, cuenta corriente"
               value={description}
@@ -194,7 +191,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
           {/* Categoría Personalizada */}
           <div className="relative">
-            <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Categoría (Opcional)</label>
+            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Categoría (Opcional)</label>
             <div 
               onClick={() => setIsCategoryOpen(!isCategoryOpen)}
               className={`
@@ -236,7 +233,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
           {/* Tipo / Frecuencia */}
           <div>
-            <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Frecuencia / Tipo</label>
+            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Frecuencia / Tipo</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as Reminder['type'])}
@@ -258,7 +255,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
             <div className="flex gap-4">
               {type === 'once' && (
                 <div className="flex-1">
-                  <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Fecha</label>
+                  <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Fecha</label>
                   <input
                     type="date"
                     required
@@ -272,7 +269,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
                 </div>
               )}
               <div className="flex-1">
-                <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Hora {type === 'once' ? 'del evento' : 'base'}</label>
+                <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Hora {type === 'once' ? 'del evento' : 'base'}</label>
                 <input
                   type="time"
                   required
@@ -289,7 +286,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
           {type === 'weekly' && (
             <div>
-              <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Día de la semana</label>
+              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Día de la semana</label>
               <select
                 value={dayOfWeek}
                 onChange={(e) => setDayOfWeek(Number(e.target.value))}
@@ -311,7 +308,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
           {type === 'monthly' && (
             <div>
-              <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">Día del mes (1 - 31)</label>
+              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Día del mes (1 - 31)</label>
               <input
                 type="number"
                 min={1}
@@ -339,7 +336,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
           {type === 'budget_alert' && (
             <div>
-              <label className="block text-xs text-text-muted uppercase tracking-wider mb-1.5">
+              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
                 % del presupuesto mensual: {budgetPercent}%
               </label>
               <input
