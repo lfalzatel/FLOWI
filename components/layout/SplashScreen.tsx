@@ -99,8 +99,8 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
         </svg>
 
         {/* Logo Container */}
-        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center">
-          <span className={`font-syne font-bold text-6xl mt-2 ${fColorClass} transition-colors duration-500`}>f</span>
+        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527]">
+          <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
         </div>
       </div>
       

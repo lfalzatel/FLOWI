@@ -167,8 +167,8 @@ export function Header() {
           </svg>
 
           {/* Logo Container */}
-          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-card flex items-center justify-center">
-            <span className={`font-syne font-bold text-xl mt-0.5 ${fColorClass} transition-colors duration-500`}>f</span>
+          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-card">
+            <img src="/icons/icon-192.png" alt="Logo" className={`w-full h-full object-cover scale-[1.15]`} />
           </div>
         </div>
         <span className={`
