@@ -178,7 +178,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
         message="¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer."
       />
       <div 
-        className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-card border border-glass-border rounded-t-3xl sm:rounded-3xl'}`}
+        className={`w-full max-w-md relative animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 ${isTechTheme ? 'bg-deep border border-accent/30 rounded-none' : 'bg-card border border-glass-border rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
