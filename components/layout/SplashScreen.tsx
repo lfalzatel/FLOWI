@@ -55,6 +55,8 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
   let logoInnerColor = '#3B82F6';
   let logoDotColor = '#3B82F6';
   
+  const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+  
   if (theme === 'cyberpunk') {
     logoOuterColor = '#00FF41'; // Neon Green
     logoInnerColor = '#0FF0FC'; // Cyan
@@ -105,8 +107,8 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
         </svg>
 
         {/* Logo Container */}
-        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)] flex items-center justify-center">
-          <svg className="w-full h-full drop-shadow-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center">
+          <svg className="w-full h-full drop-shadow-lg relative z-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             {/* Vertical stem */}
             <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
             {/* Top bar */}
@@ -116,6 +118,8 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
             {/* Dot */}
             <circle cx="72" cy="50" r="7" fill={logoDotColor} className="transition-colors duration-500" />
           </svg>
+          {/* Scanlines Overlay */}
+          <div className="absolute inset-0 z-10 pointer-events-none bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)] opacity-50" />
         </div>
       </div>
       
