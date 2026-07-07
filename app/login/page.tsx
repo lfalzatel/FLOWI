@@ -53,7 +53,7 @@ export default function LoginPage() {
         <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-violet-500/10 blur-3xl rounded-full" />
 
         <div className="relative z-10 text-center space-y-4">
-          <div className="relative w-40 h-40 mx-auto">
+          <div className="relative w-40 h-40 mx-auto animate-float">
             {/* SVG Lines */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
               {/* Circle 1 (Outer, Green, Clockwise) */}
@@ -66,11 +66,11 @@ export default function LoginPage() {
                 className="animate-[spin_4s_linear_infinite] origin-center"
                 strokeLinecap="round"
               />
-              {/* Circle 2 (Inner, Blue, Counter-clockwise) */}
+              {/* Circle 2 (Inner, Cyan, Counter-clockwise) */}
               <circle
                 cx="50" cy="50" r="41"
                 fill="none"
-                stroke="#3B82F6"
+                stroke="#00C4CC"
                 strokeWidth="2"
                 strokeDasharray="120 80"
                 className="animate-[spin_6s_linear_infinite_reverse] origin-center"
@@ -79,8 +79,19 @@ export default function LoginPage() {
             </svg>
 
             {/* Logo Container */}
-            <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527]">
-              <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
+            <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center shadow-2xl">
+              <svg className="w-full h-full drop-shadow-lg relative z-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                {/* Vertical stem */}
+                <line x1="28" y1="25" x2="28" y2="75" stroke="#00C4CC" strokeWidth="14" strokeLinecap="round" />
+                {/* Top bar */}
+                <line x1="28" y1="25" x2="60" y2="25" stroke="#10B981" strokeWidth="14" strokeLinecap="round" />
+                {/* Middle bar */}
+                <line x1="28" y1="50" x2="48" y2="50" stroke="#00C4CC" strokeWidth="14" strokeLinecap="round" />
+                {/* Dot */}
+                <circle cx="72" cy="50" r="7" fill="#F97316" />
+              </svg>
+              {/* Scanlines Overlay */}
+              <div className="absolute inset-0 z-10 pointer-events-none bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.15)_2px,rgba(0,0,0,0.15)_3px)]" />
             </div>
           </div>
           

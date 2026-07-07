@@ -29,6 +29,7 @@ module.exports = {
         'fade-in-up': 'fadeInUp 0.4s ease-out forwards',
         'slide-down': 'slideDown 0.2s ease-out forwards',
         'loading-bar': 'loadingBar 1.5s infinite linear',
+        'float': 'float 4s ease-in-out infinite',
       },
       keyframes: {
         fadeInUp: {
@@ -42,6 +43,10 @@ module.exports = {
         loadingBar: {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(100%)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
       },
     },
