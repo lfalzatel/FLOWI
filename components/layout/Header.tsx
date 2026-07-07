@@ -108,16 +108,20 @@ export function Header() {
   // Dynamic colors for the logo based on theme
   let logoOuterColor = '#10B981'; // Default / Dark theme
   let logoInnerColor = '#3B82F6';
+  let fColorClass = 'text-white';
   
   if (theme === 'cyberpunk') {
     logoOuterColor = '#00FF41'; // Neon Green
     logoInnerColor = '#0FF0FC'; // Cyan
+    fColorClass = 'text-[#00FF41] drop-shadow-[0_0_8px_rgba(0,255,65,0.8)]';
   } else if (theme === 'kiloCode') {
     logoOuterColor = '#F0DB4F'; // JS Yellow
     logoInnerColor = '#F97316'; // Orange
+    fColorClass = 'text-[#F0DB4F] drop-shadow-[0_0_8px_rgba(240,219,79,0.8)]';
   } else if (theme === 'light') {
     logoOuterColor = '#059669'; // Darker green
     logoInnerColor = '#2563EB'; // Darker blue
+    fColorClass = 'text-[#059669]';
   }
 
   return (
@@ -163,8 +167,8 @@ export function Header() {
           </svg>
 
           {/* Logo Container */}
-          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-card">
-            <img src="/icons/icon-192.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
+          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-card flex items-center justify-center">
+            <span className={`font-syne font-bold text-xl mt-0.5 ${fColorClass} transition-colors duration-500`}>f</span>
           </div>
         </div>
         <span className={`

@@ -11,9 +11,12 @@ const LOGIN_MESSAGES = ["Conectando al servidor...", "Verificando credenciales..
 const RELOAD_MESSAGES = ["Restaurando sesión...", "Cargando datos...", "Listo"];
 const LOGOUT_MESSAGES = ["Borrando caché...", "Cerrando conexión...", "Desconectando perfil...", "Apagando..."];
 
+import { useTheme } from '@/components/ThemeProvider';
+
 export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: SplashScreenProps) {
   const [progress, setProgress] = useState(mode === 'logout' ? 100 : 0);
   const [messageIndex, setMessageIndex] = useState(0);
+  const { theme } = useTheme();
 
   useEffect(() => {
     let start: number | null = null;
@@ -47,6 +50,25 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
   const messages = mode === 'login' ? LOGIN_MESSAGES : mode === 'reload' ? RELOAD_MESSAGES : LOGOUT_MESSAGES;
   const currentMessage = messages[messageIndex];
 
+  // Dynamic colors for the logo based on theme
+  let logoOuterColor = '#10B981'; // Default / Dark theme
+  let logoInnerColor = '#3B82F6';
+  let fColorClass = 'text-white';
+  
+  if (theme === 'cyberpunk') {
+    logoOuterColor = '#00FF41'; // Neon Green
+    logoInnerColor = '#0FF0FC'; // Cyan
+    fColorClass = 'text-[#00FF41] drop-shadow-[0_0_12px_rgba(0,255,65,0.8)]';
+  } else if (theme === 'kiloCode') {
+    logoOuterColor = '#F0DB4F'; // JS Yellow
+    logoInnerColor = '#F97316'; // Orange
+    fColorClass = 'text-[#F0DB4F] drop-shadow-[0_0_12px_rgba(240,219,79,0.8)]';
+  } else if (theme === 'light') {
+    logoOuterColor = '#059669'; // Darker green
+    logoInnerColor = '#2563EB'; // Darker blue
+    fColorClass = 'text-[#059669]';
+  }
+
   return (
     <div className="fixed inset-0 bg-[#0A0A0F] z-[9999] flex flex-col items-center justify-center">
       {/* Glow effects */}
@@ -59,26 +81,26 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
           <circle
             cx="50" cy="50" r="46"
             fill="none"
-            stroke="#10B981"
+            stroke={logoOuterColor}
             strokeWidth="2"
-            strokeDasharray="150 100"
-            className="animate-[spin_4s_linear_infinite] origin-center"
+            strokeDasharray="70 26.3"
+            className="animate-[spin_4s_linear_infinite] origin-center transition-colors duration-500"
             strokeLinecap="round"
           />
           <circle
             cx="50" cy="50" r="41"
             fill="none"
-            stroke="#3B82F6"
+            stroke={logoInnerColor}
             strokeWidth="2"
-            strokeDasharray="120 80"
-            className="animate-[spin_6s_linear_infinite_reverse] origin-center"
+            strokeDasharray="60 25.8"
+            className="animate-[spin_6s_linear_infinite_reverse] origin-center transition-colors duration-500"
             strokeLinecap="round"
           />
         </svg>
 
         {/* Logo Container */}
-        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527]">
-          <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
+        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center">
+          <span className={`font-syne font-bold text-6xl mt-2 ${fColorClass} transition-colors duration-500`}>f</span>
         </div>
       </div>
       
