@@ -202,7 +202,7 @@ export default function ConfigPage() {
               </div>
               <button 
                 onClick={toggleNotifications}
-                className={`w-12 h-6 rounded-full transition-colors relative ${notificationsEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${notificationsEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
               >
                 <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
               </button>
@@ -222,7 +222,7 @@ export default function ConfigPage() {
               <button 
                 onClick={togglePush}
                 disabled={!notificationsEnabled}
-                className={`w-12 h-6 rounded-full transition-colors relative ${pushEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${pushEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
               >
                 <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${pushEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
               </button>
@@ -242,7 +242,7 @@ export default function ConfigPage() {
               <button 
                 onClick={toggleInApp}
                 disabled={!notificationsEnabled}
-                className={`w-12 h-6 rounded-full transition-colors relative ${inAppEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${inAppEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
               >
                 <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${inAppEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
               </button>
@@ -262,7 +262,7 @@ export default function ConfigPage() {
               <button 
                 onClick={toggleSound}
                 disabled={!notificationsEnabled}
-                className={`w-12 h-6 rounded-full transition-colors relative ${soundEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${soundEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
               >
                 <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${soundEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
               </button>
