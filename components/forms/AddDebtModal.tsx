@@ -170,7 +170,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <ConfirmDialog
         isOpen={showConfirmDelete}
         onCancel={() => setShowConfirmDelete(false)}
