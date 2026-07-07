@@ -135,13 +135,16 @@ export function Header() {
       className={`
         sticky top-0 z-[60] w-full px-4 py-3
         flex items-center justify-between
-        transition-all duration-300 ease-out
-        ${scrolled
-          ? 'bg-deep/75 backdrop-blur-2xl border-b border-glass-border shadow-xl shadow-black/10'
-          : 'bg-transparent'
-        }
+        transition-all duration-300 ease-out bg-transparent
       `}
     >
+      {/* Background that appears on scroll */}
+      <div 
+        className={`absolute inset-0 transition-opacity duration-300 -z-10 pointer-events-none ${
+          scrolled ? 'opacity-100 bg-deep/75 backdrop-blur-2xl border-b border-glass-border shadow-xl shadow-black/10' : 'opacity-0'
+        }`}
+      />
+      
       {/* Logo */}
       <div 
         onClick={() => setShowLogoModal(true)}
