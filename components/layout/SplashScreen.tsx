@@ -105,7 +105,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
         </svg>
 
         {/* Logo Container */}
-        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center">
+        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)] flex items-center justify-center">
           <svg className="w-full h-full drop-shadow-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             {/* Vertical stem */}
             <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
@@ -120,8 +120,11 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
       </div>
       
       {/* Text */}
-      <h1 className="mt-6 font-syne font-bold text-4xl text-white tracking-tight relative z-10">
-        flowi
+      <h1 
+        className={`mt-6 font-bold text-4xl tracking-widest relative z-10 ${isTechTheme ? 'font-mono uppercase' : 'font-syne uppercase'}`}
+        style={{ color: logoOuterColor, textShadow: `0 0 12px ${logoOuterColor}80` }}
+      >
+        {isTechTheme ? '>_FLOWI' : 'FLOWI'}
       </h1>
       
       {/* Dynamic Subtitle / Message */}

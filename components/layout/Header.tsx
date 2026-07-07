@@ -173,7 +173,7 @@ export function Header() {
           </svg>
 
           {/* Logo Container */}
-          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-[#0D1527] flex items-center justify-center">
+          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-[#0D1527] bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)] flex items-center justify-center">
             <svg className="w-full h-full drop-shadow-md" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               {/* Vertical stem */}
               <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
@@ -345,7 +345,7 @@ export function Header() {
                 strokeLinecap="round"
               />
             </svg>
-            <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center shadow-2xl">
+            <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_2px,rgba(0,0,0,0.5)_4px)] flex items-center justify-center shadow-2xl">
               <svg className="w-full h-full drop-shadow-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 {/* Vertical stem */}
                 <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
@@ -361,10 +361,16 @@ export function Header() {
 
           {/* Brand Text */}
           <div className="text-center select-none pointer-events-none">
-            <h2 className={`text-3xl font-bold tracking-widest ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>
-              flowi
+            <h2 
+              className={`text-3xl font-bold tracking-widest ${isTechTheme ? 'font-mono uppercase' : 'font-syne uppercase'}`}
+              style={{ color: logoOuterColor, textShadow: `0 0 12px ${logoOuterColor}80` }}
+            >
+              {isTechTheme ? '>_FLOWI' : 'FLOWI'}
             </h2>
-            <p className={`text-xs mt-2 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
+            <p 
+              className={`text-xs mt-2 tracking-widest ${isTechTheme ? 'font-mono' : ''}`}
+              style={{ color: '#A1A1AA' }}
+            >
               Tu dinero, en flujo.
             </p>
           </div>
