@@ -176,13 +176,13 @@ export function Header() {
           <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-[#0D1527] flex items-center justify-center">
             <svg className="w-full h-full drop-shadow-md" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               {/* Vertical stem */}
-              <line x1="33" y1="25" x2="33" y2="75" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+              <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
               {/* Top bar */}
-              <line x1="33" y1="25" x2="58" y2="25" stroke={logoInnerColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+              <line x1="28" y1="25" x2="60" y2="25" stroke={logoInnerColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
               {/* Middle bar */}
-              <line x1="33" y1="50" x2="48" y2="50" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+              <line x1="28" y1="50" x2="48" y2="50" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
               {/* Dot */}
-              <circle cx="68" cy="50" r="6" fill={logoDotColor} className="transition-colors duration-500" />
+              <circle cx="72" cy="50" r="7" fill={logoDotColor} className="transition-colors duration-500" />
             </svg>
           </div>
         </div>
@@ -348,13 +348,13 @@ export function Header() {
             <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center shadow-2xl">
               <svg className="w-full h-full drop-shadow-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 {/* Vertical stem */}
-                <line x1="33" y1="25" x2="33" y2="75" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+                <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
                 {/* Top bar */}
-                <line x1="33" y1="25" x2="58" y2="25" stroke={logoInnerColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+                <line x1="28" y1="25" x2="60" y2="25" stroke={logoInnerColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
                 {/* Middle bar */}
-                <line x1="33" y1="50" x2="48" y2="50" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+                <line x1="28" y1="50" x2="48" y2="50" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
                 {/* Dot */}
-                <circle cx="68" cy="50" r="6" fill={logoDotColor} className="transition-colors duration-500" />
+                <circle cx="72" cy="50" r="7" fill={logoDotColor} className="transition-colors duration-500" />
               </svg>
             </div>
           </div>
