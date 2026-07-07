@@ -105,6 +105,21 @@ export function Header() {
   const upcomingReminders = getUpcomingReminders();
   const unread = notifications.length + upcomingReminders.length;
 
+  // Dynamic colors for the logo based on theme
+  let logoOuterColor = '#10B981'; // Default / Dark theme
+  let logoInnerColor = '#3B82F6';
+  
+  if (theme === 'cyberpunk') {
+    logoOuterColor = '#00FF41'; // Neon Green
+    logoInnerColor = '#0FF0FC'; // Cyan
+  } else if (theme === 'kiloCode') {
+    logoOuterColor = '#F0DB4F'; // JS Yellow
+    logoInnerColor = '#F97316'; // Orange
+  } else if (theme === 'light') {
+    logoOuterColor = '#059669'; // Darker green
+    logoInnerColor = '#2563EB'; // Darker blue
+  }
+
   return (
     <header
       className={`
@@ -125,24 +140,24 @@ export function Header() {
         <div className="relative w-9 h-9">
           {/* SVG Lines */}
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-            {/* Circle 1 (Outer, Green, Clockwise) */}
+            {/* Circle 1 (Outer, 3 parts, Clockwise) 2*PI*46 ≈ 289 -> 289/3 = 96.3 -> 70 26.3 */}
             <circle
               cx="50" cy="50" r="46"
               fill="none"
-              stroke="#10B981"
+              stroke={logoOuterColor}
               strokeWidth="3"
-              strokeDasharray="150 100"
-              className="animate-[spin_4s_linear_infinite] origin-center"
+              strokeDasharray="70 26.3"
+              className="animate-[spin_4s_linear_infinite] origin-center transition-colors duration-500"
               strokeLinecap="round"
             />
-            {/* Circle 2 (Inner, Blue, Counter-clockwise) */}
+            {/* Circle 2 (Inner, 3 parts, Counter-clockwise) 2*PI*41 ≈ 257.6 -> 257.6/3 = 85.8 -> 60 25.8 */}
             <circle
               cx="50" cy="50" r="41"
               fill="none"
-              stroke="#3B82F6"
+              stroke={logoInnerColor}
               strokeWidth="3"
-              strokeDasharray="120 80"
-              className="animate-[spin_6s_linear_infinite_reverse] origin-center"
+              strokeDasharray="60 25.8"
+              className="animate-[spin_6s_linear_infinite_reverse] origin-center transition-colors duration-500"
               strokeLinecap="round"
             />
           </svg>
