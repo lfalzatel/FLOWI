@@ -16,7 +16,7 @@ import {
   User, Wallet, Bell, Shield, RefreshCw,
   ChevronRight, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
-  FileText, Settings, Volume2
+  FileText, Settings, Volume2, Smartphone, MessageSquare, Music
 } from 'lucide-react';
 
 export default function ConfigPage() {
@@ -53,11 +53,17 @@ export default function ConfigPage() {
   };
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [pushEnabled, setPushEnabled] = useState(true);
+  const [inAppEnabled, setInAppEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [notificationSound, setNotificationSound] = useState('notification.mp3');
 
   // Load from local storage
   useEffect(() => {
     setNotificationsEnabled(localStorage.getItem('notifications_enabled') !== 'false');
+    setPushEnabled(localStorage.getItem('push_enabled') !== 'false');
+    setInAppEnabled(localStorage.getItem('in_app_enabled') !== 'false');
+    setSoundEnabled(localStorage.getItem('sound_enabled') !== 'false');
     setNotificationSound(localStorage.getItem('notification_sound') || 'notification.mp3');
   }, []);
 
@@ -65,6 +71,24 @@ export default function ConfigPage() {
     const newState = !notificationsEnabled;
     setNotificationsEnabled(newState);
     localStorage.setItem('notifications_enabled', String(newState));
+  };
+
+  const togglePush = () => {
+    const newState = !pushEnabled;
+    setPushEnabled(newState);
+    localStorage.setItem('push_enabled', String(newState));
+  };
+
+  const toggleInApp = () => {
+    const newState = !inAppEnabled;
+    setInAppEnabled(newState);
+    localStorage.setItem('in_app_enabled', String(newState));
+  };
+
+  const toggleSound = () => {
+    const newState = !soundEnabled;
+    setSoundEnabled(newState);
+    localStorage.setItem('sound_enabled', String(newState));
   };
 
   const changeSound = (sound: string) => {
@@ -165,6 +189,7 @@ export default function ConfigPage() {
         <section className="space-y-3">
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Notificaciones</h2>
           <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+            {/* Activar Notificaciones (Master) */}
             <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
@@ -182,21 +207,82 @@ export default function ConfigPage() {
                 <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${notificationsEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
               </button>
             </div>
-            
-            <div className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+
+            {/* Notificación Push */}
+            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
+                  <Smartphone className="w-4 h-4 text-[var(--yellow)]" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'NOTIFICACION_PUSH' : 'Notificación Push'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'SEGUNDO_PLANO' : 'Segundo plano'}</p>
+                </div>
+              </div>
+              <button 
+                onClick={togglePush}
+                disabled={!notificationsEnabled}
+                className={`w-12 h-6 rounded-full transition-colors relative ${pushEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+              >
+                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${pushEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
+              </button>
+            </div>
+
+            {/* Notificación In-App */}
+            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
+                  <MessageSquare className="w-4 h-4 text-[var(--yellow)]" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'NOTIFICACION_IN_APP' : 'Notificación In-App'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'MENSAJES_TOAST' : 'Mensajes toast'}</p>
+                </div>
+              </div>
+              <button 
+                onClick={toggleInApp}
+                disabled={!notificationsEnabled}
+                className={`w-12 h-6 rounded-full transition-colors relative ${inAppEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+              >
+                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${inAppEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
+              </button>
+            </div>
+
+            {/* Efecto de Sonido (Toggle) */}
+            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
                   <Volume2 className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'SONIDO_DE_ALERTA' : 'Sonido de Alerta'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'EFECTO_DE_SONIDO' : 'Efecto de Sonido'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'REPRODUCIR_TONOS' : 'Reproducir tonos'}</p>
+                </div>
+              </div>
+              <button 
+                onClick={toggleSound}
+                disabled={!notificationsEnabled}
+                className={`w-12 h-6 rounded-full transition-colors relative ${soundEnabled ? (isTechTheme ? 'bg-accent/40 border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
+              >
+                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${soundEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
+              </button>
+            </div>
+            
+            {/* Tono de Alerta (Dropdown) */}
+            <div className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 ${!notificationsEnabled || !soundEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
+                  <Music className="w-4 h-4 text-[var(--yellow)]" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TONO_DE_ALERTA' : 'Tono de Alerta'}</p>
                   <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'ELIGE_TU_TONO_PREFERIDO' : 'Elige tu tono preferido'}</p>
                 </div>
               </div>
               <select
                 value={notificationSound}
                 onChange={(e) => changeSound(e.target.value)}
-                disabled={!notificationsEnabled}
+                disabled={!notificationsEnabled || !soundEnabled}
                 className={`px-3 py-1.5 text-xs focus:outline-none transition-all ${isTechTheme ? 'bg-black/40 border border-accent/40 text-accent font-mono rounded-none uppercase' : 'bg-white/5 border border-white/10 text-text-primary rounded-xl'}`}
               >
                 <option value="notification.mp3">Suave (Burbuja)</option>
