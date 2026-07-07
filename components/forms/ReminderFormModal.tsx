@@ -37,7 +37,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
   const [type, setType] = useState<Reminder['type']>('once');
   const [time, setTime] = useState('08:00');
   const [dayOfWeek, setDayOfWeek] = useState(1); // 1 = Lunes
-  const [dayOfMonth, setDayOfMonth] = useState(1);
+  const [dayOfMonth, setDayOfMonth] = useState<number | ''>(1);
   const [date, setDate] = useState('');
   const [category, setCategory] = useState('');
   const [budgetPercent, setBudgetPercent] = useState(80);
@@ -109,7 +109,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
       if (type === 'once' && date.trim()) data.date = date;
       if (type === 'weekly') data.dayOfWeek = dayOfWeek;
-      if (type === 'monthly') data.dayOfMonth = dayOfMonth;
+      if (type === 'monthly') data.dayOfMonth = dayOfMonth === '' ? 1 : dayOfMonth;
       if (type === 'budget_alert') data.budgetPercent = budgetPercent;
 
       if (reminder?.id) {
@@ -318,7 +318,17 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
                 max={31}
                 required
                 value={dayOfMonth}
-                onChange={(e) => setDayOfMonth(Math.max(1, Math.min(31, Number(e.target.value))))}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '') {
+                    setDayOfMonth('');
+                  } else {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      setDayOfMonth(Math.max(1, Math.min(31, num)));
+                    }
+                  }
+                }}
                 className={`
                   w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary
                   ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
