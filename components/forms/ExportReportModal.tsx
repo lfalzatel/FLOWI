@@ -538,9 +538,10 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4" onClick={onClose}>
+    <div className={`fixed inset-0 z-[110] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
       <div 
-        className={`w-full max-w-md relative animate-fade-in-up overflow-hidden ${isTechTheme ? 'bg-black border border-accent rounded-none shadow-[0_0_50px_rgba(0,229,160,0.15)]' : 'bg-card border border-glass-border rounded-3xl'}`}
+        className={`w-full max-w-md relative z-10 animate-fade-in-up overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera */}
