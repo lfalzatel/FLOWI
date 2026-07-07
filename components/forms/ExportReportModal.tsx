@@ -728,7 +728,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                 </button>
                 <button
                   onClick={format === 'excel' ? exportToCSV : format === 'pdf' ? exportToPDF : exportToImage}
-                  className={`flex-[2] py-3 text-xs font-bold transition-all flex items-center justify-center gap-2 ${isTechTheme ? 'bg-accent/20 border border-accent text-accent hover:bg-accent hover:text-black rounded-none font-mono uppercase' : 'bg-gradient-to-r from-accent to-accent-dim text-black rounded-xl hover:opacity-90'}`}
+                  className={`flex-[2] py-3 text-xs font-bold transition-all flex items-center justify-center gap-2 ${isTechTheme ? 'bg-accent/20 border border-accent text-accent hover:bg-accent hover:text-black rounded-none font-mono uppercase' : 'bg-gradient-to-r from-accent to-accent-dim text-white rounded-xl hover:opacity-90'}`}
                 >
                   <Download className="w-4 h-4" />
                   Descargar
