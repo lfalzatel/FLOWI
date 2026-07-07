@@ -14,7 +14,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { 
   ArrowLeft, Sun, Moon, Terminal, Layers, Zap, Palette,
   User, Wallet, Bell, Shield, RefreshCw,
-  ChevronRight, Lock, Key, Globe, Type, 
+  ChevronRight, ChevronDown, ChevronUp, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
   FileText, Settings, Volume2, Smartphone, MessageSquare, Music
 } from 'lucide-react';
@@ -32,6 +32,19 @@ export default function ConfigPage() {
   const [isRegeneratingThemes, setIsRegeneratingThemes] = useState(false);
   const [isThemesModalOpen, setIsThemesModalOpen] = useState(false);
   const [restoring, setRestoring] = useState(false);
+
+  const [openSections, setOpenSections] = useState({
+    cuenta: false,
+    notificaciones: false,
+    gestion: false,
+    apariencia: false,
+    finanzas: false,
+    privacidad: false
+  });
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   const handleRestoreBaseCategories = async () => {
     if (!user) return;
@@ -144,8 +157,16 @@ export default function ConfigPage() {
 
         {/* 1. Cuenta y Perfil */}
         <section className="space-y-3">
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Cuenta y Perfil</h2>
-          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+          <button 
+            onClick={() => toggleSection('cuenta')}
+            className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
+          >
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Cuenta y Perfil</h2>
+            {openSections.cuenta ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+          </button>
+          
+          {openSections.cuenta && (
+            <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
             <button onClick={() => setIsProfileModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/30 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
@@ -183,12 +204,21 @@ export default function ConfigPage() {
               <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono bg-accent/10 text-accent border border-accent/20 rounded-none' : 'bg-glass-strong text-text-secondary rounded-full'}`}>{profile?.role || 'Usuario'}</span>
             </div>
           </div>
+          )}
         </section>
 
         {/* 1.5 Notificaciones */}
         <section className="space-y-3">
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Notificaciones</h2>
-          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+          <button 
+            onClick={() => toggleSection('notificaciones')}
+            className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
+          >
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Notificaciones</h2>
+            {openSections.notificaciones ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+          </button>
+
+          {openSections.notificaciones && (
+            <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
             {/* Activar Notificaciones (Master) */}
             <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
@@ -289,13 +319,22 @@ export default function ConfigPage() {
                 <option value="notification-sound.mp3">Clásico (Campana)</option>
               </select>
             </div>
-          </div>
+            </div>
+          )}
         </section>
 
         {/* 2. Gestión */}
         <section className="space-y-3">
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Gestión</h2>
-          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+          <button 
+            onClick={() => toggleSection('gestion')}
+            className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
+          >
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Gestión</h2>
+            {openSections.gestion ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+          </button>
+
+          {openSections.gestion && (
+            <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
             <button onClick={() => setIsCategoriesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
@@ -344,12 +383,21 @@ export default function ConfigPage() {
               </>
             )}
           </div>
+          )}
         </section>
 
         {/* 3. Apariencia */}
         <section className="space-y-3">
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Apariencia</h2>
-          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+          <button 
+            onClick={() => toggleSection('apariencia')}
+            className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
+          >
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Apariencia</h2>
+            {openSections.apariencia ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+          </button>
+
+          {openSections.apariencia && (
+            <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
             
             {/* Botón de Temas */}
             <button onClick={() => setIsThemesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
@@ -393,12 +441,21 @@ export default function ConfigPage() {
               <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
           </div>
+          )}
         </section>
 
         {/* 4. Finanzas */}
         <section className="space-y-3">
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Finanzas</h2>
-          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+          <button 
+            onClick={() => toggleSection('finanzas')}
+            className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
+          >
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Finanzas</h2>
+            {openSections.finanzas ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+          </button>
+
+          {openSections.finanzas && (
+            <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
             <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/20 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
@@ -436,29 +493,21 @@ export default function ConfigPage() {
               <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-[var(--red)]/30 text-[var(--red)] bg-[var(--red)]/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
             </div>
           </div>
-        </section>
-
-        {/* 5. Notificaciones */}
-        <section className="space-y-3">
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>Notificaciones</h2>
-          <div className={`p-4 opacity-50 cursor-not-allowed flex items-center justify-between ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-orange-500/20 rounded-none bg-orange-500/5' : 'rounded-xl bg-orange-500/10'}`}>
-                <Bell className="w-4 h-4 text-orange-400" />
-              </div>
-              <div className="text-left">
-                <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-orange-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ALERTAS_Y_RECORDATORIOS' : 'Alertas y Recordatorios'}</p>
-                <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'GASTO_EXCESIVO_Y_RECORDATORIO_DIARIO' : 'Gasto excesivo y recordatorio diario'}</p>
-              </div>
-            </div>
-            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
-          </div>
+          )}
         </section>
 
         {/* 6. Datos y Privacidad */}
         <section className="space-y-3">
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-red-400 uppercase tracking-wide border-b border-red-500/20 pb-1' : 'font-syne font-semibold text-sm text-red-400 ml-2'}`}>Datos y Privacidad</h2>
-          <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-red-500/20 rounded-none bg-deep' : 'glass-card border-red-500/20 rounded-2xl'}`}>
+          <button 
+            onClick={() => toggleSection('privacidad')}
+            className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-red-500/20 pb-1' : 'ml-2 pr-2'}`}
+          >
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-red-400 uppercase tracking-wide' : 'font-syne font-semibold text-sm text-red-400'}`}>Datos y Privacidad</h2>
+            {openSections.privacidad ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-red-400' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-red-400' : 'text-text-muted'}`} />}
+          </button>
+
+          {openSections.privacidad && (
+            <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-red-500/20 rounded-none bg-deep animate-fade-in' : 'glass-card border-red-500/20 rounded-2xl animate-fade-in'}`}>
             <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
@@ -495,7 +544,8 @@ export default function ConfigPage() {
               </div>
               <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-red-500/30 text-red-400 bg-red-500/5' : 'bg-red-500/20 text-red-400'}`}>Pronto</span>
             </div>
-          </div>
+            </div>
+          )}
         </section>
 
       </main>
