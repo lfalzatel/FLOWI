@@ -99,8 +99,17 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
         </svg>
 
         {/* Logo Container */}
-        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527]">
-          <img src="/icons/icon-512.png" alt="Logo" className="w-full h-full object-cover scale-[1.15]" />
+        <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center">
+          <svg className="w-full h-full drop-shadow-lg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            {/* Vertical stem */}
+            <line x1="33" y1="25" x2="33" y2="75" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+            {/* Top bar */}
+            <line x1="33" y1="25" x2="58" y2="25" stroke={logoInnerColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+            {/* Middle bar */}
+            <line x1="33" y1="50" x2="48" y2="50" stroke={logoOuterColor} strokeWidth="12" strokeLinecap="round" className="transition-colors duration-500" />
+            {/* Dot */}
+            <circle cx="68" cy="50" r="6" fill={logoInnerColor} className="transition-colors duration-500" />
+          </svg>
         </div>
       </div>
       
