@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, TrendingDown, TrendingUp,
-  Plus, Bell, CreditCard
+  Plus, Bell, CreditCard, Grid
 } from 'lucide-react';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
@@ -16,7 +16,7 @@ const navItems = [
   { icon: TrendingDown,    label: 'Gastos',        href: '/gastos' },
   { icon: TrendingUp,      label: 'Ingresos',      href: '/ingresos' },
   { icon: CreditCard,      label: 'Deudas',        href: '/deudas' },
-  { icon: Bell,            label: 'Recordatorios', href: '/recordatorios' },
+  { icon: Grid,            label: 'Servicios',     href: '/servicios' },
 ];
 
 export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
@@ -93,7 +93,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       {showAdd && (
         pathname === '/deudas' ? (
           <AddDebtModal onClose={() => setShowAdd(false)} onSuccess={onSuccess || (() => {})} />
-        ) : pathname === '/recordatorios' ? (
+        ) : pathname.startsWith('/servicios') ? (
           <ReminderFormModal onClose={() => setShowAdd(false)} onSuccess={onSuccess || (() => {})} />
         ) : (
           <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={onSuccess} initialType={pathname === '/ingresos' ? 'ingreso' : 'gasto'} />

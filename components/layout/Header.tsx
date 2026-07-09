@@ -268,7 +268,7 @@ export function Header() {
             <div id="notif-dropdown" className={`fixed sm:absolute right-4 left-4 sm:left-auto sm:right-0 top-20 sm:top-12 w-auto sm:w-80 max-h-[400px] overflow-y-auto glass-dropdown shadow-2xl p-2 z-[100] animate-fade-in-up ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-2xl border border-glass-border/50'}`}>
               <div className="p-2 pb-3 mb-2 border-b border-glass-border/50 flex justify-between items-center">
                 <span className={`font-semibold text-text-primary ${isTechTheme ? 'font-mono text-sm' : ''}`}>Notificaciones</span>
-                <Link href="/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>Ver ajustes</Link>
+                <Link href="/servicios/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>Ver ajustes</Link>
               </div>
 
               {notifications.length === 0 && upcomingReminders.length === 0 ? (
