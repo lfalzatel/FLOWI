@@ -3,7 +3,8 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebts } from '@/hooks/useDebts';
-import { Debt, calculateDebtInterest } from '@/lib/firestore';
+import { calculateDebtInterest, deleteDebt, updateDebt, type Debt } from '@/lib/firestore';
+import { formatCurrency } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CreditCard, Plus, Check, Clock, Download } from 'lucide-react';
@@ -54,7 +55,7 @@ export default function DeudasPage() {
     );
   }
 
-  const fmt = (n: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+  const fmt = (n: number) => formatCurrency(n, profile?.currency);
 
   return (
     <div className="min-h-screen flex flex-col bg-deep">

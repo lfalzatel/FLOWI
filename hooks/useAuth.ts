@@ -11,6 +11,7 @@ export interface UserProfile {
   role: string;
   hiddenCategories?: string[];
   budget?: number;
+  currency?: string;
 }
 
 export function useAuth() {

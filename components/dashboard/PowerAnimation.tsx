@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
+import { useAuth } from '@/hooks/useAuth';
+import { formatCurrency } from '@/lib/format';
 
 interface PowerAnimationEvent {
   amount: number;
@@ -12,6 +14,7 @@ export function PowerAnimation() {
   const [active, setActive] = useState(false);
   const [data, setData] = useState<PowerAnimationEvent | null>(null);
   const { theme } = useTheme();
+  const { profile } = useAuth();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
@@ -70,7 +73,7 @@ export function PowerAnimation() {
     actionText = 'GASTO REGISTRADO';
   }
 
-  const fmt = (n: number) => new Intl.NumberFormat('es-MX', { minimumFractionDigits: 0 }).format(n);
+  const fmt = (n: number) => formatCurrency(n, profile?.currency).replace(/\.00$/, '');
 
   return createPortal(
     <div className="fixed inset-0 pointer-events-none z-[200] flex flex-col items-center justify-center overflow-hidden">

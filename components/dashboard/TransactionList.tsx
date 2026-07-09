@@ -13,9 +13,7 @@ interface Props {
   animationKey?: string;
 }
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
-}
+
 
 function fmtDate(date: Timestamp | Date) {
   const d = date instanceof Timestamp ? date.toDate() : date;

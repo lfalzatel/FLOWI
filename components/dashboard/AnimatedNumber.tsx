@@ -1,12 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
-
-function fmt(n: number) {
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
-}
+import { useAuth } from '@/hooks/useAuth';
+import { formatCurrency } from '@/lib/format';
 
 export function AnimatedNumber({ value, delay = 0, prefix = '' }: { value: number, delay?: number, prefix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
+  const { profile } = useAuth();
+  
+  const fmt = (n: number) => formatCurrency(n, profile?.currency);
 
   useEffect(() => {
     let startTimestamp: number | null = null;

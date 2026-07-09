@@ -334,6 +334,7 @@ export interface UserProfile {
   photoURL?: string;
   role?: string;
   phone?: string;
+  currency?: string;
   createdAt?: Timestamp | Date;
 }
 
