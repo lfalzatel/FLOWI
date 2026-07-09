@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User } from 'lucide-react';
+import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -24,6 +24,15 @@ const SERVICES = [
     href: '/servicios/notas',
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
+    isNew: true
+  },
+  {
+    id: 'estadisticas',
+    title: 'Estadísticas',
+    icon: BarChart2,
+    href: '/servicios/estadisticas',
+    color: 'text-cyan-500',
+    bgColor: 'bg-cyan-500/10',
     isNew: true
   },
   {

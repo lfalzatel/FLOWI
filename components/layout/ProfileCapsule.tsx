@@ -19,7 +19,7 @@ import {
 
 const menuItems = [
   { icon: User,       label: 'Mi perfil',         href: '#',              divider: false, soon: false },
-  { icon: BarChart2,  label: 'Reportes',          href: '/reportes',      divider: false, soon: false },
+
   { icon: Download,   label: 'Instalar app',      href: '#',              divider: false, soon: false },
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
   { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: false, isNotificationToggle: true },

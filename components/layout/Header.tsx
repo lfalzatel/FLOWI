@@ -209,7 +209,8 @@ export function Header() {
           { path: '/gastos', label: 'Gastos', techLabel: '[ 02_GASTOS ]' },
           { path: '/ingresos', label: 'Ingresos', techLabel: '[ 03_INGRESOS ]' },
           { path: '/deudas', label: 'Deudas', techLabel: '[ 04_DEUDAS ]' },
-          { path: '/configuracion', label: 'Configuración', techLabel: '[ 05_CONFIG ]' },
+          { path: '/servicios', label: 'Servicios', techLabel: '[ 05_SERVICIOS ]' },
+          { path: '/configuracion', label: 'Configuración', techLabel: '[ 06_CONFIG ]' },
         ].map((item) => {
           const isActive = pathname === item.path;
           return (
