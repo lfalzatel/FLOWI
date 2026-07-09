@@ -51,6 +51,7 @@ export async function signInWithGoogle(promptSelectAccount?: boolean, loginHint?
       email:     user.email,
       photoURL:  user.photoURL,
       role:      isAdminEmail ? 'admin' : 'Usuario',
+      currency:  'COP',
       createdAt: serverTimestamp(),
     });
   } else {

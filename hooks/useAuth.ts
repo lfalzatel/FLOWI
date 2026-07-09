@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 export interface UserProfile {
@@ -20,21 +20,34 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubscribeProfile: () => void;
+    
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      try {
-        if (firebaseUser) {
-          const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (snap.exists()) setProfile(snap.data() as UserProfile);
-        } else {
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error('Error al obtener el perfil de usuario:', error);
-      } finally {
+      
+      if (firebaseUser) {
+        unsubscribeProfile = onSnapshot(doc(db, 'users', firebaseUser.uid), (snap) => {
+          if (snap.exists()) {
+            setProfile(snap.data() as UserProfile);
+          } else {
+            setProfile(null);
+          }
+          setLoading(false);
+        }, (error) => {
+          console.error('Error al obtener el perfil de usuario:', error);
+          setLoading(false);
+        });
+      } else {
+        setProfile(null);
         setLoading(false);
+        if (unsubscribeProfile) unsubscribeProfile();
       }
     });
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeProfile) unsubscribeProfile();
+    };
   }, []);
 
   return { user, profile, loading };
