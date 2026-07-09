@@ -416,32 +416,6 @@ export default function ConfigPage() {
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
 
-            {/* Idioma y Moneda */}
-            <div className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
-              <div className="flex items-center gap-3 mb-2 sm:mb-0">
-                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-green-500/20 rounded-none bg-green-500/5' : 'rounded-xl bg-green-500/10'}`}>
-                  <Globe className="w-4 h-4 text-green-400" />
-                </div>
-                <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-green-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'MONEDA_GLOBAL' : 'Moneda Global'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-green-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'SELECCIONA_EL_FORMATO' : 'Selecciona el formato'}</p>
-                </div>
-              </div>
-              <select
-                value={profile?.currency || 'COP'}
-                onChange={async (e) => {
-                  if (user) {
-                    await updateDoc(doc(db, 'users', user.uid), { currency: e.target.value });
-                  }
-                }}
-                className={`px-3 py-1.5 text-xs focus:outline-none transition-all ${isTechTheme ? 'bg-black/40 border border-accent/40 text-accent font-mono rounded-none uppercase' : 'bg-white/5 border border-white/10 text-text-primary rounded-xl'}`}
-              >
-                {CURRENCIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.code} - {c.name}</option>
-                ))}
-              </select>
-            </div>
-
             {/* Tamaño de texto */}
             <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">
               <div className="flex items-center gap-3">
@@ -483,6 +457,33 @@ export default function ConfigPage() {
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
+            
+            {/* Moneda Global */}
+            <div className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+              <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-green-500/20 rounded-none bg-green-500/5' : 'rounded-xl bg-green-500/10'}`}>
+                  <Globe className="w-4 h-4 text-green-400" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-green-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'MONEDA_GLOBAL' : 'Moneda Global'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-green-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'SELECCIONA_EL_FORMATO' : 'Selecciona el formato'}</p>
+                </div>
+              </div>
+              <select
+                value={profile?.currency || 'COP'}
+                onChange={async (e) => {
+                  if (user) {
+                    await updateDoc(doc(db, 'users', user.uid), { currency: e.target.value });
+                  }
+                }}
+                className={`px-3 py-1.5 text-xs focus:outline-none transition-all ${isTechTheme ? 'bg-black/40 border border-accent/40 text-accent font-mono rounded-none uppercase' : 'bg-white/5 border border-white/10 text-text-primary rounded-xl'}`}
+              >
+                {CURRENCIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.code} - {c.name}</option>
+                ))}
+              </select>
+            </div>
+
             <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
