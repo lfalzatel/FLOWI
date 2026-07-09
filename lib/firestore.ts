@@ -203,9 +203,9 @@ export async function addDebt(debt: Omit<Debt, 'id'>) {
   const debtsRef = collection(db, 'fl_debts');
   const docRef = await addDoc(debtsRef, {
     ...debt,
-    createdAt: serverTimestamp(),
+    createdAt: debt.createdAt || serverTimestamp(),
   });
-  return { id: docRef.id, ...debt, createdAt: new Date() };
+  return { id: docRef.id, ...debt, createdAt: debt.createdAt || new Date() };
 }
 
 export async function updateDebt(id: string, debt: Partial<Debt>) {

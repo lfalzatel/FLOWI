@@ -24,6 +24,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
   const [description, setDescription] = useState('');
   const [abono, setAbono] = useState('');
   const [abonoDate, setAbonoDate] = useState(getLocalDateString());
+  const [debtDate, setDebtDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
@@ -46,6 +47,10 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       setPaidAmount(debtToEdit.paidAmount.toString());
       setInterestRate(debtToEdit.interestRate ? debtToEdit.interestRate.toString() : '');
       setDescription(debtToEdit.description || '');
+      if (debtToEdit.createdAt) {
+        const d = debtToEdit.createdAt instanceof Date ? debtToEdit.createdAt : new Date();
+        setDebtDate(getLocalDateString(d));
+      }
     }
   }, [debtToEdit]);
 
@@ -62,6 +67,17 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       const total = parseFloat(totalAmount);
       let paid = parseFloat(paidAmount) || 0;
       const rate = interestRate ? parseFloat(interestRate) : 0;
+
+      let finalDebtDate: Date;
+      const todayStr = new Date().toLocaleDateString('sv-SE');
+      if (debtDate === todayStr) {
+        const now = new Date();
+        const [year, month, day] = debtDate.split('-').map(Number);
+        finalDebtDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+      } else {
+        const [year, month, day] = debtDate.split('-').map(Number);
+        finalDebtDate = new Date(year, month - 1, day, 12, 0, 0);
+      }
 
       if (debtToEdit && abono) {
         const abonoAmount = parseFloat(abono);
@@ -104,6 +120,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           status,
           interestRate: rate,
           description,
+          createdAt: finalDebtDate,
           payments: [...(debtToEdit.payments || []), newPayment],
         });
         triggerPowerAnimation(abonoAmount, 'abono');
@@ -117,6 +134,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             status,
             interestRate: rate,
             description,
+            createdAt: finalDebtDate,
           });
           triggerPowerAnimation(total, 'edicion');
         } else {
@@ -128,6 +146,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             status,
             interestRate: rate,
             description,
+            createdAt: finalDebtDate,
             payments: [],
           });
           triggerPowerAnimation(total, 'edicion');
@@ -197,17 +216,30 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Título de la Deuda</label>
-            <input
-              type="text"
-              required
-              disabled={isReadOnly}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={`w-full bg-glass border py-2.5 px-4 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
-              placeholder="Ej. Préstamo de Juan..."
-            />
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2">
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Título de la Deuda</label>
+              <input
+                type="text"
+                required
+                disabled={isReadOnly}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className={`w-full bg-glass border py-2.5 px-4 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
+                placeholder="Ej. Préstamo de Juan..."
+              />
+            </div>
+            <div className="col-span-1">
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Fecha</label>
+              <input
+                type="date"
+                required
+                disabled={isReadOnly}
+                value={debtDate}
+                onChange={(e) => setDebtDate(e.target.value)}
+                className={`w-full bg-glass border py-2.5 px-3 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs [color-scheme:dark]' : `border-glass-border rounded-xl focus:border-accent text-xs ${theme === 'light' ? '[color-scheme:light]' : '[color-scheme:dark]'}`}`}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
