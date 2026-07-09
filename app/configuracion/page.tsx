@@ -46,7 +46,20 @@ export default function ConfigPage() {
   });
 
   const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setOpenSections(prev => {
+      // If the section is already open, close it
+      if (prev[section]) {
+        return { ...prev, [section]: false };
+      }
+      
+      // Otherwise, open it and close all others
+      const closed = Object.keys(prev).reduce((acc, key) => {
+        acc[key as keyof typeof openSections] = false;
+        return acc;
+      }, {} as typeof openSections);
+      
+      return { ...closed, [section]: true };
+    });
   };
 
   const handleRestoreBaseCategories = async () => {

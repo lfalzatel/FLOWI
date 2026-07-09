@@ -32,13 +32,16 @@ export function BudgetProjection({ filterType, filterValue, gastos }: Props) {
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     
     // Si estamos a día 1 y no hay gastos, la proyección es 0
-    projection = (gastos / daysPassed) * daysInMonth;
+    const averageDaily = gastos / daysPassed;
+    projection = averageDaily * daysInMonth;
+    
+    const baseText = `Con un promedio de ${formatCurrency(averageDaily, profile.currency)} diarios, a este ritmo cerrarás el mes en ${formatCurrency(projection, profile.currency)}.`;
     
     if (projection > profile.budget) {
       isWarning = true;
-      text = `A este ritmo, cerrarás el mes en ${formatCurrency(projection, profile.currency)}. ¡Superarás tu presupuesto de ${formatCurrency(profile.budget, profile.currency)}!`;
+      text = `${baseText} ¡Superarás tu presupuesto de ${formatCurrency(profile.budget, profile.currency)}!`;
     } else {
-      text = `A este ritmo, cerrarás el mes en ${formatCurrency(projection, profile.currency)}. Bien dentro de tu presupuesto de ${formatCurrency(profile.budget, profile.currency)}.`;
+      text = `${baseText} Bien dentro de tu presupuesto de ${formatCurrency(profile.budget, profile.currency)}.`;
     }
   } else {
     // Mes pasado
