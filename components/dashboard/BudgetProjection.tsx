@@ -4,14 +4,15 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { FIXED_CATEGORIES, Transaction } from '@/lib/firestore';
 
 interface Props {
   filterType: string;
   filterValue: string;
-  gastos: number;
+  transactions: Transaction[];
 }
 
-export function BudgetProjection({ filterType, filterValue, gastos }: Props) {
+export function BudgetProjection({ filterType, filterValue, transactions }: Props) {
   const { theme } = useTheme();
   const { profile } = useAuth();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -23,19 +24,24 @@ export function BudgetProjection({ filterType, filterValue, gastos }: Props) {
   const currentMonthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const isCurrentMonth = filterValue === currentMonthValue;
 
-  let projection = gastos;
+  const totalGastos = transactions.reduce((sum, t) => sum + t.amount, 0);
+  let projection = totalGastos;
   let text = '';
   let isWarning = false;
 
   if (isCurrentMonth) {
+    const fixedGastos = transactions.filter(t => FIXED_CATEGORIES.includes(t.category)).reduce((sum, t) => sum + t.amount, 0);
+    const variableGastos = totalGastos - fixedGastos;
+
     const daysPassed = Math.max(1, now.getDate());
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     
-    // Si estamos a día 1 y no hay gastos, la proyección es 0
-    const averageDaily = gastos / daysPassed;
-    projection = averageDaily * daysInMonth;
+    // Solo proyectamos los gastos variables diarios
+    const averageDailyVariable = variableGastos / daysPassed;
+    const projectedVariable = averageDailyVariable * daysInMonth;
+    projection = projectedVariable + fixedGastos;
     
-    const baseText = `Con un promedio de ${formatCurrency(averageDaily, profile.currency)} diarios, a este ritmo cerrarás el mes en ${formatCurrency(projection, profile.currency)}.`;
+    const baseText = `Tu promedio diario variable es de ${formatCurrency(averageDailyVariable, profile.currency)}. A este ritmo, cerrarás el mes en ${formatCurrency(projection, profile.currency)}.`;
     
     if (projection > profile.budget) {
       isWarning = true;
@@ -45,7 +51,7 @@ export function BudgetProjection({ filterType, filterValue, gastos }: Props) {
     }
   } else {
     // Mes pasado
-    if (gastos > profile.budget) {
+    if (totalGastos > profile.budget) {
       isWarning = true;
       text = `Superaste tu presupuesto de ${formatCurrency(profile.budget, profile.currency)}.`;
     } else {

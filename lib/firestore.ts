@@ -51,7 +51,6 @@ export const BASE_CATEGORIES = [
   { label: 'Gas natural', icon: '🔥', color: '#EF4444' },
   { label: 'Parqueadero', icon: 'parqueadero', color: '#1E3A8A' },
   { label: 'Cine', icon: 'cine', color: '#7F1D1D' },
-  { label: 'Deportes', icon: 'deportes', color: '#065F46' },
   { label: 'Fútbol', icon: '⚽', color: '#0F766E' },
   { label: 'Gimnasio', icon: '🏋️‍♂️', color: '#1E293B' },
   { label: 'Ciclismo', icon: '🚲', color: '#0369A1' },
@@ -84,7 +83,6 @@ export const BASE_CATEGORIES = [
   { label: 'Farmacia',             icon: '💊', color: '#14B8A6' },
   { label: 'Educación',            icon: '📚', color: '#8B5CF6' },
   { label: 'Ropa y Calzado',       icon: '👟', color: '#EC4899' },
-  { label: 'Otros', icon: '📦', color: '#6B7280' },
   // Nuevas agregadas
   { label: 'Sura', icon: 'sura', color: '#0033A0' },
   { label: 'Colsanitas', icon: 'colsanitas', color: '#00467F' },
@@ -114,6 +112,7 @@ export const BASE_CATEGORIES = [
   { label: 'Rappi', icon: 'rappi', color: '#FF441F' },
   { label: 'Uber', icon: 'uber', color: '#000000' },
   { label: 'SOAT', icon: '🚗', color: '#10B981' },
+  { label: 'Tecnomecánica', icon: '🔧', color: '#64748B' },
   { label: 'Peajes', icon: '🛣️', color: '#6B7280' },
   { label: 'Multas', icon: '🛑', color: '#EF4444' },
   { label: 'Rumba', icon: '🪩', color: '#D946EF' },
@@ -137,6 +136,12 @@ export const BASE_CATEGORIES = [
   { label: 'Arriendo recibido', icon: '🏘️', color: '#10B981' },
   { label: 'Transferencia', icon: '📲', color: '#06B6D4' },
   { label: 'Venta', icon: '🏷️', color: '#10B981' },
+];
+
+export const FIXED_CATEGORIES = [
+  'Arriendo', 'Administración', 'Agua', 'Luz', 'EPM', 'Gas natural', 'Efigas', 'Alcanos',
+  'Claro Hogar', 'Claro Móvil', 'Netflix', 'Spotify', 'YouTube', 'YT Music', 'Google', 'Play Store',
+  'Cuota de crédito', 'Gimnasio', 'Empleada', 'Pensión', 'Matrícula', 'SOAT', 'Tecnomecánica'
 ];
 
 export const EXPENSE_CATEGORIES = BASE_CATEGORIES;

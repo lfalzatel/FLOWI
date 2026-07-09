@@ -209,7 +209,7 @@ export default function DashboardPage() {
         ) : (
           <>
             <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
-            <BudgetProjection filterType={filterType} filterValue={filterValue} gastos={filteredGastos} />
+            <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions.filter(t => t.type === 'gasto')} />
           </>
         )}
 
