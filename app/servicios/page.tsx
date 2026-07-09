@@ -3,6 +3,8 @@ import { useTheme } from '@/components/ThemeProvider';
 import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { Header } from '@/components/layout/Header';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 const SERVICES = [
   {
@@ -75,10 +77,12 @@ export default function ServiciosPage() {
   );
 
   return (
-    <div className={`min-h-screen pb-32 p-4 pt-6 max-w-lg mx-auto ${isTechTheme ? 'font-mono' : ''}`}>
-      <h1 className={`text-2xl font-bold mb-6 ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
-        Servicios
-      </h1>
+    <div className="min-h-screen flex flex-col bg-deep">
+      <Header />
+      <main className={`flex-1 pb-32 p-4 pt-6 max-w-lg mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
+        <h1 className={`text-2xl font-bold mb-6 ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
+          Servicios
+        </h1>
 
       {/* Buscador */}
       <div className="relative mb-6">
@@ -137,6 +141,8 @@ export default function ServiciosPage() {
           </Link>
         ))}
       </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

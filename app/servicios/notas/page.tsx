@@ -2,14 +2,18 @@
 import { useTheme } from '@/components/ThemeProvider';
 import { StickyNote, Plus, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { Header } from '@/components/layout/Header';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 export default function NotasPage() {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   return (
-    <div className={`min-h-screen pb-32 p-4 pt-6 max-w-lg mx-auto ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className="flex items-center gap-3 mb-6">
+    <div className="min-h-screen flex flex-col bg-deep">
+      <Header />
+      <main className={`flex-1 pb-32 p-4 pt-6 max-w-lg mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
+        <div className="flex items-center gap-3 mb-6">
         <Link href="/servicios" className={`p-2 -ml-2 bg-glass border hover:bg-white/[0.05] transition-colors ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
           <ChevronLeft className="w-5 h-5" />
         </Link>
@@ -35,6 +39,8 @@ export default function NotasPage() {
           <span>Crear mi primera nota</span>
         </button>
       </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }
