@@ -12,6 +12,122 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
   if (check('gmail')) return <SiGmail color="#EA4335" className={className || "w-5 h-5"} />;
   if (check('photos')) return <SiGooglephotos color="#4285F4" className={className || "w-5 h-5"} />;
   
+  if (check('sura')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#0033A0" />
+        <path d="M14 26L20 12L26 26H14Z" fill="#00A4E4" />
+        <text x="50%" y="82%" textAnchor="middle" fill="#FFFFFF" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">SURA</text>
+      </svg>
+    );
+  }
+  if (check('colsanitas')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#00467F" />
+        <circle cx="20" cy="18" r="7" fill="#00A9E0" />
+        <text x="50%" y="82%" textAnchor="middle" fill="#FFFFFF" fontSize="6" fontWeight="bold" fontFamily="sans-serif">COLSANITAS</text>
+      </svg>
+    );
+  }
+  if (check('compensar')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#00873A" />
+        <path d="M12 24C12 24 16 12 20 12C24 12 28 24 28 24" stroke="#F18700" strokeWidth="3" strokeLinecap="round" />
+        <text x="50%" y="82%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">COMPENSAR</text>
+      </svg>
+    );
+  }
+  if (check('nueva eps')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#005A9C" />
+        <path d="M20 10V26" stroke="#8DC63F" strokeWidth="4" strokeLinecap="round" />
+        <path d="M12 18H28" stroke="#8DC63F" strokeWidth="4" strokeLinecap="round" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">NUEVA EPS</text>
+      </svg>
+    );
+  }
+  if (check('fna')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#003DA5" />
+        <rect x="14" y="14" width="12" height="12" fill="#FDB913" />
+        <text x="50%" y="82%" textAnchor="middle" fill="#FFFFFF" fontSize="7" fontWeight="bold" fontFamily="sans-serif">FNA</text>
+      </svg>
+    );
+  }
+  if (check('comfama')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#FF6A00" />
+        <path d="M12 20C12 15.5817 15.5817 12 20 12C24.4183 12 28 15.5817 28 20" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
+        <text x="50%" y="82%" textAnchor="middle" fill="#FFFFFF" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">COMFAMA</text>
+      </svg>
+    );
+  }
+  if (check('colsubsidio')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#E30613" />
+        <circle cx="20" cy="18" r="6" stroke="#FFFFFF" strokeWidth="3" />
+        <text x="50%" y="82%" textAnchor="middle" fill="#FFFFFF" fontSize="5" fontWeight="bold" fontFamily="sans-serif">COLSUBSIDIO</text>
+      </svg>
+    );
+  }
+  if (check('zara')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#000000" />
+        <text x="50%" y="60%" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold" fontFamily="serif" letterSpacing="-1">ZARA</text>
+      </svg>
+    );
+  }
+  if (check('h&m')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#CD102D" />
+        <text x="50%" y="60%" textAnchor="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold" fontFamily="sans-serif" letterSpacing="-0.5">H&amp;M</text>
+      </svg>
+    );
+  }
+  if (check('udemy')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#1C1D1F" />
+        <path d="M16 14V22C16 24 17 26 20 26C23 26 24 24 24 22V14" stroke="#A435F0" strokeWidth="3" fill="none" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">Udemy</text>
+      </svg>
+    );
+  }
+  if (check('coursera')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#0056D2" />
+        <path d="M26 18C26 18 24 14 20 14C16 14 14 17 14 20C14 23 16 26 20 26C24 26 26 22 26 22" stroke="#FFFFFF" strokeWidth="3" fill="none" />
+        <text x="50%" y="84%" textAnchor="middle" fill="#FFFFFF" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">coursera</text>
+      </svg>
+    );
+  }
+  if (check('rappi')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#FF441F" />
+        <text x="50%" y="60%" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontWeight="bold" fontFamily="sans-serif" letterSpacing="-0.5" style={{fontStyle: 'italic'}}>Rappi</text>
+      </svg>
+    );
+  }
+  if (check('uber')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#000000" />
+        <circle cx="20" cy="20" r="8" fill="#FFFFFF" />
+        <rect x="20" y="18" width="10" height="4" fill="#000000" />
+      </svg>
+    );
+  }
+  
   // Logos estilizados personalizados para marcas locales
   if (check('exito')) {
     return (
