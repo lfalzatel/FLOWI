@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Clock, Edit2, Trash2, Pause, Check, Plus, Beaker } from 'lucide-react';
+import Link from 'next/link';
+import { Bell, Clock, Edit2, Trash2, Pause, Check, Plus, Beaker, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useTheme } from '@/components/ThemeProvider';
@@ -101,13 +102,18 @@ export default function RecordatoriosPage() {
       <main className="flex-1 max-w-2xl mx-auto w-full p-4 pb-24 space-y-6 animate-fade-in-up">
         {/* Header de página */}
         <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0">
-            <h1 className={`${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-xl sm:text-2xl lg:text-3xl text-text-primary'} truncate`}>
-              Recordatorios
-            </h1>
-            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>
-              Control y alertas de tus pagos recurrentes
-            </p>
+          <div className="min-w-0 flex items-center gap-3">
+            <Link href="/servicios" className={`p-2 -ml-2 shrink-0 bg-glass border hover:bg-white/[0.05] transition-colors ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+              <ChevronLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className={`${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-xl sm:text-2xl lg:text-3xl text-text-primary'} truncate`}>
+                Recordatorios
+              </h1>
+              <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>
+                Control y alertas de tus pagos recurrentes
+              </p>
+            </div>
           </div>
           <div className="flex gap-2 shrink-0">
             {profile?.role === 'admin' && (

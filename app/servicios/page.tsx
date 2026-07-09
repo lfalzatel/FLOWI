@@ -1,10 +1,11 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight } from 'lucide-react';
+import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { ProfileModal } from '@/components/forms/ProfileModal';
 
 const SERVICES = [
   {
@@ -64,6 +65,24 @@ const SERVICES = [
     bgColor: 'bg-rose-500/10',
     isNew: false,
     soon: true
+  },
+  {
+    id: 'configuracion',
+    title: 'Configuración',
+    icon: Settings,
+    href: '/configuracion',
+    color: 'text-gray-500',
+    bgColor: 'bg-gray-500/10',
+    isNew: false
+  },
+  {
+    id: 'perfil',
+    title: 'Mi Perfil',
+    icon: User,
+    href: '#',
+    color: 'text-gray-500',
+    bgColor: 'bg-gray-500/10',
+    isNew: false
   }
 ];
 
@@ -71,6 +90,7 @@ export default function ServiciosPage() {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [searchTerm, setSearchTerm] = useState('');
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const filteredServices = SERVICES.filter(s => 
     s.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -116,33 +136,46 @@ export default function ServiciosPage() {
 
       {/* Grid de Servicios */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        {filteredServices.map((service) => (
-          <Link 
-            href={service.soon ? '#' : service.href} 
-            key={service.id}
-            className={`relative flex flex-col justify-center p-4 bg-glass border transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'border-glass-border rounded-2xl hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`}
-          >
-            {service.isNew && (
-              <span className={`absolute -top-2 -right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                Nuevo
+        {filteredServices.map((service) => {
+          const content = (
+            <>
+              {service.isNew && (
+                <span className={`absolute -top-2 -right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                  Nuevo
+                </span>
+              )}
+              {service.soon && (
+                <span className={`absolute top-2 right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-text-muted/20 text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                  Pronto
+                </span>
+              )}
+              <div className={`w-10 h-10 flex items-center justify-center mb-3 ${isTechTheme ? 'bg-transparent border border-accent/40' : service.bgColor + ' rounded-xl'}`}>
+                <service.icon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : service.color}`} />
+              </div>
+              <span className={`text-sm font-medium ${isTechTheme ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>
+                {service.title}
               </span>
-            )}
-            {service.soon && (
-              <span className={`absolute top-2 right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-text-muted/20 text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                Pronto
-              </span>
-            )}
-            <div className={`w-10 h-10 flex items-center justify-center mb-3 ${isTechTheme ? 'bg-transparent border border-accent/40' : service.bgColor + ' rounded-xl'}`}>
-              <service.icon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : service.color}`} />
-            </div>
-            <span className={`text-sm font-medium ${isTechTheme ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>
-              {service.title}
-            </span>
-          </Link>
-        ))}
+            </>
+          );
+          const classNameStr = `relative flex flex-col justify-center p-4 bg-glass border transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'border-glass-border rounded-2xl hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
+
+          if (service.id === 'perfil') {
+            return (
+              <button key={service.id} onClick={() => setShowProfileModal(true)} className={classNameStr + ' text-left'}>
+                {content}
+              </button>
+            );
+          }
+          return (
+            <Link href={service.soon ? '#' : service.href} key={service.id} className={classNameStr}>
+              {content}
+            </Link>
+          );
+        })}
       </div>
       </main>
       <BottomNav />
+      {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
     </div>
   );
 }
