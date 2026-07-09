@@ -9,6 +9,7 @@ import { ProfileModal } from '@/components/forms/ProfileModal';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { ManageThemesModal } from '@/components/forms/ManageThemesModal';
 import { ManageUsersModal } from '@/components/forms/ManageUsersModal';
+import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { CURRENCIES } from '@/lib/format';
@@ -32,6 +33,7 @@ export default function ConfigPage() {
   const [isClearDataConfirmOpen, setIsClearDataConfirmOpen] = useState(false);
   const [isRegeneratingThemes, setIsRegeneratingThemes] = useState(false);
   const [isThemesModalOpen, setIsThemesModalOpen] = useState(false);
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
   const [openSections, setOpenSections] = useState({
@@ -469,7 +471,7 @@ export default function ConfigPage() {
 
           {openSections.finanzas && (
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
-            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <button onClick={() => setIsBudgetModalOpen(true)} className={`w-full flex items-center justify-between p-4 border-b hover:bg-white/[0.02] transition-colors ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/20 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
                   <Wallet className="w-4 h-4 text-accent" />
@@ -479,8 +481,8 @@ export default function ConfigPage() {
                   <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{isTechTheme ? 'DEFINE_UN_LIMITE_DE_GASTOS' : 'Define un límite de gastos'}</p>
                 </div>
               </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-accent/30 text-accent bg-accent/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
-            </div>
+              <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
+            </button>
             <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
@@ -576,6 +578,9 @@ export default function ConfigPage() {
       )}
       {isThemesModalOpen && (
         <ManageThemesModal onClose={() => setIsThemesModalOpen(false)} />
+      )}
+      {isBudgetModalOpen && (
+        <ManageBudgetModal onClose={() => setIsBudgetModalOpen(false)} />
       )}
     </div>
   );

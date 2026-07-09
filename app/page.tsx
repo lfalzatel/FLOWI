@@ -9,6 +9,7 @@ import { Transaction } from '@/lib/firestore';
 import { BalanceCard }     from '@/components/dashboard/BalanceCard';
 import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
 import { TransactionList } from '@/components/dashboard/TransactionList';
+import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
@@ -206,7 +207,10 @@ export default function DashboardPage() {
             <div className="h-3 bg-glass rounded w-1/4" />
           </div>
         ) : (
-          <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
+          <>
+            <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
+            <BudgetProjection filterType={filterType} filterValue={filterValue} gastos={filteredGastos} />
+          </>
         )}
 
         {/* Chart */}
