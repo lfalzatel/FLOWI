@@ -36,9 +36,9 @@ export default function LoginPage() {
       const { isNewUser } = await signInWithGoogle(true);
       
       if (isNewUser) {
-        router.push('/?newuser=true');
+        window.location.assign('/?newuser=true');
       } else {
-        router.push('/?login=true');
+        window.location.assign('/?login=true');
       }
     } catch (error) {
       console.error('Error logging in:', error);
