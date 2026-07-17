@@ -22,11 +22,10 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
     let start: number | null = null;
     let animationFrame: number;
 
-    const messages = mode === 'login' ? LOGIN_MESSAGES : mode === 'reload' ? RELOAD_MESSAGES : LOGOUT_MESSAGES;
-
+    let audio: HTMLAudioElement | null = null;
     if (mode === 'login' || mode === 'reload') {
       try {
-        const audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
+        audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
         audio.volume = 0.5;
         // The browser might block this if the user hasn't interacted yet
         audio.play().catch((err) => {
@@ -57,7 +56,13 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
 
     animationFrame = requestAnimationFrame(step);
 
-    return () => cancelAnimationFrame(animationFrame);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    };
   }, [duration, mode, onComplete]);
 
   const messages = mode === 'login' ? LOGIN_MESSAGES : mode === 'reload' ? RELOAD_MESSAGES : LOGOUT_MESSAGES;

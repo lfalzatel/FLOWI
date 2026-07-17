@@ -33,7 +33,7 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       const { signInWithGoogle } = await import('@/lib/auth');
-      const { isNewUser } = await signInWithGoogle();
+      const { isNewUser } = await signInWithGoogle(true);
       
       if (isNewUser) {
         router.push('/?newuser=true');
