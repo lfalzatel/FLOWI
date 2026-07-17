@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [showSplash, setShowSplash] = useState(false);
   const [mode, setMode] = useState<'login' | 'logout'>('login');
   const [mounted, setMounted] = useState(false);
+  const [isSplashDone, setIsSplashDone] = useState(false);
+  const [authDoneUrl, setAuthDoneUrl] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -23,25 +25,45 @@ export default function LoginPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (mode === 'login' && isSplashDone && authDoneUrl) {
+      sessionStorage.setItem('login_splash_done', 'true');
+      router.push(authDoneUrl);
+    }
+  }, [mode, isSplashDone, authDoneUrl, router]);
+
   if (!mounted) {
     return <div className="min-h-screen bg-[#050B14]" />;
   }
 
   if (showSplash) {
-    return <SplashScreen duration={2500} mode={mode} onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen duration={2500} mode={mode} onComplete={() => {
+      if (mode === 'login') {
+        setIsSplashDone(true);
+      } else {
+        setShowSplash(false);
+      }
+    }} />;
   }
 
   const handleGoogleLogin = async () => {
     try {
-      const { signInWithGoogle } = await import('@/lib/auth');
-      const { isNewUser } = await signInWithGoogle(true);
+      const { signInWithPopup } = await import('firebase/auth');
+      const { auth, googleProvider } = await import('@/lib/firebase');
+      googleProvider.setCustomParameters({ prompt: 'select_account' });
+      const result = await signInWithPopup(auth, googleProvider);
+
+      setMode('login');
+      setIsSplashDone(false);
+      setAuthDoneUrl(null);
+      setShowSplash(true);
+
+      const { processGoogleUser } = await import('@/lib/auth');
+      const { isNewUser } = await processGoogleUser(result.user);
       
-      if (isNewUser) {
-        window.location.assign('/?newuser=true');
-      } else {
-        window.location.assign('/?login=true');
-      }
+      setAuthDoneUrl(isNewUser ? '/?newuser=true' : '/?login=true');
     } catch (error) {
+      setShowSplash(false);
       console.error('Error logging in:', error);
     }
   };

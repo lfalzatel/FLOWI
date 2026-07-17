@@ -37,7 +37,10 @@ export async function signInWithGoogle(promptSelectAccount?: boolean, loginHint?
   googleProvider.setCustomParameters(customParams);
 
   const result  = await signInWithPopup(auth, googleProvider);
-  const user    = result.user;
+  return processGoogleUser(result.user);
+}
+
+export async function processGoogleUser(user: any) {
   const userRef = doc(db, 'users', user.uid);
   const snap    = await getDoc(userRef);
 

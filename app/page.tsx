@@ -53,11 +53,16 @@ export default function DashboardPage() {
 
     if (isLogin) {
       processedUrl.current = true;
-      setSplashDuration(2500);
-      setSplashMode('login');
-      setShowSplash(true);
       if (params.get('newuser') === 'true') {
         setShowNewUserMsg(true);
+      }
+      if (sessionStorage.getItem('login_splash_done') === 'true') {
+        setShowSplash(false);
+        sessionStorage.removeItem('login_splash_done');
+      } else {
+        setSplashDuration(2500);
+        setSplashMode('login');
+        setShowSplash(true);
       }
       window.history.replaceState({}, '', '/');
     } else {
