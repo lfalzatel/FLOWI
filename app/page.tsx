@@ -19,6 +19,8 @@ import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
 
+let hasShownSplashInThisJSContext = false;
+
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
@@ -27,7 +29,7 @@ export default function DashboardPage() {
   const [showExport, setShowExport] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => !hasShownSplashInThisJSContext);
   const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
   const [splashDuration, setSplashDuration] = useState(1000);
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
@@ -41,6 +43,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
+    hasShownSplashInThisJSContext = true;
     if (processedUrl.current) return;
 
     const params = new URLSearchParams(window.location.search);
