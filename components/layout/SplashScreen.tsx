@@ -167,7 +167,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
       {/* Loading bar */}
       <div className="mt-8 w-64 h-1 bg-white/10 rounded-full overflow-hidden relative z-10">
         <div 
-          className="h-full bg-accent rounded-full transition-all duration-75"
+          className="h-full bg-accent rounded-full"
           style={{ width: `${progress}%` }}
         />
       </div>
