@@ -162,7 +162,7 @@ export function ProfileCapsule() {
   async function handleSignOut() {
     setOpen(false);
     sessionStorage.setItem('justLoggedOut', 'true');
-    await signOut();
+    router.push('/login?logout=true');
   }
 
   return (

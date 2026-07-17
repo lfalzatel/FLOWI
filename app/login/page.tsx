@@ -19,6 +19,7 @@ export default function LoginPage() {
       setMode('logout');
       setShowSplash(true);
       window.history.replaceState({}, '', '/login');
+      import('@/lib/auth').then(({ signOut }) => signOut().catch(console.error));
     }
   }, []);
 
