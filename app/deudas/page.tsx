@@ -7,7 +7,7 @@ import { calculateDebtInterest, deleteDebt, updateDebt, type Debt } from '@/lib/
 import { formatCurrency } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { CreditCard, Plus, Check, Clock, Download } from 'lucide-react';
+import { CreditCard, Plus, Check, Clock, Download, Calendar } from 'lucide-react';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { useTheme } from '@/components/ThemeProvider';
@@ -136,6 +136,12 @@ export default function DeudasPage() {
                     const pending = basePending + interestData.accumulatedInterest;
                     const progress = (debt.paidAmount / debt.totalAmount) * 100;
                     const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
+                    const createdDate = debt.createdAt instanceof Date 
+                      ? debt.createdAt 
+                      : (debt.createdAt && 'toDate' in (debt.createdAt as any) 
+                          ? (debt.createdAt as any).toDate() 
+                          : new Date());
+                    const dateStr = createdDate.toLocaleDateString('es-CO', { month: 'short', day: 'numeric', year: 'numeric' });
 
                     return (
                       <div
@@ -152,15 +158,18 @@ export default function DeudasPage() {
                                 {debt.description}
                               </p>
                             )}
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-medium">
-                                <Clock className="w-3 h-3" /> Pendiente
-                                {debt.interestRate ? (
-                                  <span className="ml-1.5 bg-red-500/10 text-red-400 border border-red-500/20 px-1 rounded text-[9px] uppercase tracking-wider">
-                                    {debt.interestRate}% EA
-                                  </span>
-                                ) : null}
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              <span className="flex items-center gap-0.5 text-[10px] text-text-secondary font-medium bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                                <Calendar className="w-3 h-3" /> {dateStr}
                               </span>
+                              <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-medium bg-orange-400/10 px-1.5 py-0.5 rounded">
+                                <Clock className="w-3 h-3" /> Pendiente
+                              </span>
+                              {debt.interestRate ? (
+                                <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-1 rounded text-[9px] uppercase tracking-wider">
+                                  {debt.interestRate}% EA
+                                </span>
+                              ) : null}
                             </div>
                           </div>
                           <div className="text-right">
@@ -200,6 +209,12 @@ export default function DeudasPage() {
                   <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas ({paidDebts.length})</h3>
                   {paidDebts.map((debt, i) => {
                     const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
+                    const createdDate = debt.createdAt instanceof Date 
+                      ? debt.createdAt 
+                      : (debt.createdAt && 'toDate' in (debt.createdAt as any) 
+                          ? (debt.createdAt as any).toDate() 
+                          : new Date());
+                    const dateStr = createdDate.toLocaleDateString('es-CO', { month: 'short', day: 'numeric', year: 'numeric' });
 
                     return (
                       <div
@@ -211,8 +226,11 @@ export default function DeudasPage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <p className={`text-text-primary font-medium text-sm line-through ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium">
+                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                              <span className="flex items-center gap-0.5 text-[10px] text-text-secondary font-medium bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                                <Calendar className="w-3 h-3" /> {dateStr}
+                              </span>
+                              <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium bg-accent/10 px-1.5 py-0.5 rounded">
                                 <Check className="w-3 h-3" /> Liquidada
                               </span>
                             </div>

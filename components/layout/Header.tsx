@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useReminders } from '@/hooks/useReminders';
 import { Reminder } from '@/lib/firestore';
-import { Bell, Clock, Info } from 'lucide-react';
+import { Bell, Clock, Info, MessageCircle } from 'lucide-react';
 
 export function Header() {
   const pathname = usePathname();
@@ -237,7 +237,19 @@ export function Header() {
       </nav>
 
       {/* Right */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* WhatsApp Support Button */}
+        <a
+          href="https://wa.me/573104604592"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative w-9 h-9 rounded-xl bg-glass border border-glass-border
+                     flex items-center justify-center hover:bg-[#25D366]/20 hover:border-[#25D366]/50 transition-colors group"
+          title="Soporte y Sugerencias"
+        >
+          <MessageCircle className="w-4 h-4 text-text-secondary group-hover:text-[#25D366] transition-colors" />
+        </a>
+
         {/* Notification bell */}
         <div className="relative">
           <button 
