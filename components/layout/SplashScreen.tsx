@@ -23,17 +23,21 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
     let animationFrame: number;
 
     let audio: HTMLAudioElement | null = null;
-    if (mode === 'login' || mode === 'reload') {
-      try {
+    try {
+      if (mode === 'login' || mode === 'reload') {
         audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
         audio.volume = 0.5;
-        // The browser might block this if the user hasn't interacted yet
+      } else if (mode === 'logout') {
+        audio = new Audio('/assets/sounds/73577__cyberpunk64bit__boomstick.mp3');
+        audio.volume = 0.5;
+      }
+      if (audio) {
         audio.play().catch((err) => {
           console.warn("Autoplay blocked for splash sound:", err);
         });
-      } catch (e) {
-        // ignore
       }
+    } catch (e) {
+      // ignore
     }
 
     const step = (timestamp: number) => {
