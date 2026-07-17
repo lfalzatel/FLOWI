@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface SplashScreenProps {
   duration?: number;
@@ -17,6 +17,11 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
   const [progress, setProgress] = useState(mode === 'logout' ? 100 : 0);
   const [messageIndex, setMessageIndex] = useState(0);
   const { theme } = useTheme();
+
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     let start: number | null = null;
@@ -54,7 +59,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
       if (t < 1) {
         animationFrame = requestAnimationFrame(step);
       } else {
-        if (onComplete) onComplete();
+        if (onCompleteRef.current) onCompleteRef.current();
       }
     };
 
@@ -67,7 +72,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
         audio.currentTime = 0;
       }
     };
-  }, [duration, mode, onComplete]);
+  }, [duration, mode]);
 
   const messages = mode === 'login' ? LOGIN_MESSAGES : mode === 'reload' ? RELOAD_MESSAGES : LOGOUT_MESSAGES;
   const currentMessage = messages[messageIndex];
