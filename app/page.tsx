@@ -55,6 +55,7 @@ export default function DashboardPage() {
       processedUrl.current = true;
       setSplashDuration(2500);
       setSplashMode('login');
+      setShowSplash(true);
       if (params.get('newuser') === 'true') {
         setShowNewUserMsg(true);
       }

@@ -24,6 +24,19 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
 
     const messages = mode === 'login' ? LOGIN_MESSAGES : mode === 'reload' ? RELOAD_MESSAGES : LOGOUT_MESSAGES;
 
+    if (mode === 'login' || mode === 'reload') {
+      try {
+        const audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
+        audio.volume = 0.5;
+        // The browser might block this if the user hasn't interacted yet
+        audio.play().catch((err) => {
+          console.warn("Autoplay blocked for splash sound:", err);
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+
     const step = (timestamp: number) => {
       if (!start) start = timestamp;
       const elapsed = timestamp - start;
