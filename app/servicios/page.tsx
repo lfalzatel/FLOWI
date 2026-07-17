@@ -128,7 +128,7 @@ export default function ServiciosPage() {
       </div>
 
       {/* Acceso Rápido / Favoritos (Opcional, estilo Nequi) */}
-      <div className={`mb-8 flex items-center justify-between p-4 bg-glass border cursor-pointer hover:bg-white/[0.02] transition-colors ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-2xl'}`}>
+      <div className={`mb-8 flex items-center justify-between p-4 glass-card cursor-pointer transition-colors ${isTechTheme ? 'border-accent/30 rounded-none' : ''}`}>
         <div className="flex items-center gap-3">
           <Receipt className={`w-6 h-6 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`} />
           <span className={`font-semibold ${isTechTheme ? 'text-accent text-sm' : 'text-text-primary'}`}>Mis pagos inscritos</span>
@@ -149,7 +149,7 @@ export default function ServiciosPage() {
           const content = (
             <>
               {service.isNew && (
-                <span className={`absolute -top-2 -right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                <span className={`absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
                   Nuevo
                 </span>
               )}
@@ -166,7 +166,7 @@ export default function ServiciosPage() {
               </span>
             </>
           );
-          const classNameStr = `relative flex flex-col justify-center p-4 bg-glass border transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'border-glass-border rounded-2xl hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
+          const classNameStr = `relative flex flex-col justify-center p-4 glass-card transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
 
           if (service.id === 'perfil') {
             return (

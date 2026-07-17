@@ -296,8 +296,12 @@ export function calculateDebtInterest(debt: Debt): { accumulatedInterest: number
     return defaultResult;
   }
 
-  // Convertir Tasa Efectiva Anual (E.A.) a Tasa Diaria
-  const dailyRate = Math.pow(1 + debt.interestRate / 100, 1 / 365) - 1;
+  // Convertir Tasa Efectiva Anual (E.A.) a Tasa Nominal Mensual y luego a Nominal Anual (N.A.M.V)
+  const nominalMensual = Math.pow(1 + debt.interestRate / 100, 1 / 12) - 1;
+  const nominalAnual = nominalMensual * 12;
+  
+  // Dividir la tasa Nominal Anual por 360 días para obtener la tasa diaria comercial
+  const dailyRate = nominalAnual / 360;
 
   // Ordenar el historial de abonos cronológicamente
   const paymentsSorted = debt.payments 
@@ -309,6 +313,7 @@ export function calculateDebtInterest(debt: Debt): { accumulatedInterest: number
     : [];
 
   let currentBalance = debt.totalAmount;
+  let accumulatedInterest = 0;
   let currentDate = new Date(createdDate.getTime());
   
   // Normalizar currentDate a las 00:00:00 del día de creación
@@ -316,10 +321,11 @@ export function calculateDebtInterest(debt: Debt): { accumulatedInterest: number
   const targetDate = new Date(today.getTime());
   targetDate.setHours(0, 0, 0, 0);
 
-  // Simulación día a día para acumular interés compuesto y aplicar abonos a tiempo
+  // Simulación día a día para acumular interés y aplicar abonos a tiempo
   while (currentDate.getTime() < targetDate.getTime()) {
-    // 1. Aplicar interés diario al saldo pendiente antes de los abonos del día
-    currentBalance = currentBalance * (1 + dailyRate);
+    // 1. Calcular el interés diario sobre el saldo actual (interés simple diario)
+    const dailyInterest = currentBalance * dailyRate;
+    accumulatedInterest += dailyInterest;
 
     // 2. Avanzar un día
     currentDate.setDate(currentDate.getDate() + 1);
@@ -336,15 +342,12 @@ export function calculateDebtInterest(debt: Debt): { accumulatedInterest: number
     }
   }
 
-  // El saldo pendiente base sin intereses sería:
-  const basePending = Math.max(0, debt.totalAmount - debt.paidAmount);
-  
-  // Los intereses acumulados netos son la diferencia entre el saldo real actual y el saldo base pendiente
-  const accumulatedInterest = Math.max(0, currentBalance - basePending);
+  // Redondear el interés acumulado al entero más cercano (comportamiento bancario estándar en COP)
+  accumulatedInterest = Math.round(accumulatedInterest);
 
   return {
     accumulatedInterest,
-    currentTotal: debt.totalAmount + accumulatedInterest,
+    currentTotal: currentBalance + accumulatedInterest,
   };
 }
 
@@ -464,3 +467,54 @@ export async function deleteReminder(id: string) {
   const docRef = doc(db, 'fl_reminders', id);
   await deleteDoc(docRef);
 }
+
+// ─── NOTAS (NOTES) ─────────────────────────────────────────────────────────
+
+export interface Note {
+  id?: string;
+  userId: string;
+  title: string;
+  content: string;
+  color: string; // Hex color or predefined color name for Google Keep style
+  createdAt?: Timestamp | Date;
+  updatedAt?: Timestamp | Date;
+}
+
+export async function getUserNotes(userId: string): Promise<Note[]> {
+  const ref = collection(db, 'fl_notes');
+  const q = query(ref, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => {
+    const data = d.data();
+    return {
+      id: d.id,
+      ...data,
+      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+      updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
+    };
+  }) as Note[];
+}
+
+export async function addNote(note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  const ref = collection(db, 'fl_notes');
+  const docRef = await addDoc(ref, { 
+    ...note, 
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+  return docRef.id;
+}
+
+export async function updateNote(id: string, data: Partial<Note>) {
+  const docRef = doc(db, 'fl_notes', id);
+  await updateDoc(docRef, {
+    ...data,
+    updatedAt: serverTimestamp()
+  });
+}
+
+export async function deleteNote(id: string) {
+  const docRef = doc(db, 'fl_notes', id);
+  await deleteDoc(docRef);
+}
+

@@ -11,8 +11,8 @@ module.exports = {
         dm:   ['DM Sans', 'sans-serif'],
       },
       colors: {
-        accent: 'var(--accent)',
-        'accent-dim': 'var(--accent-dim)',
+        accent: 'rgb(var(--accent) / <alpha-value>)',
+        'accent-dim': 'rgb(var(--accent-dim) / <alpha-value>)',
         deep: 'var(--bg-deep)',
         card: 'var(--bg-card)',
         glass: 'var(--glass)',
