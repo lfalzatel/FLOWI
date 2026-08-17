@@ -13,6 +13,8 @@ interface PowerAnimationEvent {
 
 // Global AudioContext singleton para sintaxis fluida y cero latencia
 let globalAudioCtx: AudioContext | null = null;
+let activeAudioFile: HTMLAudioElement | null = null;
+let activeTimers: ReturnType<typeof setTimeout>[] = [];
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -33,9 +35,33 @@ function getAudioContext(): AudioContext | null {
   return null;
 }
 
+// Detiene de forma inmediata cualquier audio o tono sintetizado anterior
+export function stopCurrentSound() {
+  if (activeAudioFile) {
+    try {
+      activeAudioFile.pause();
+      activeAudioFile.currentTime = 0;
+    } catch (e) {}
+    activeAudioFile = null;
+  }
+
+  activeTimers.forEach(clearTimeout);
+  activeTimers = [];
+
+  if (globalAudioCtx && globalAudioCtx.state !== 'closed') {
+    try {
+      globalAudioCtx.close();
+    } catch (e) {}
+    globalAudioCtx = null;
+  }
+}
+
 // Sintetizador autónomo Web Audio API & reproductor de tonos según configuración
 export function playSynthesizedSound(type: PowerAnimationEvent['type'], overrideSetting?: string) {
   if (typeof window === 'undefined') return;
+
+  // 1. Detener de inmediato cualquier sonido anterior en reproducción (Previsualización Limpia)
+  stopCurrentSound();
 
   // Verificar si los sonidos globales están desactivados
   if (localStorage.getItem('sound_enabled') === 'false') return;
@@ -56,39 +82,44 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
 
   if (soundSetting === 'silent') return;
 
-  // Reproducción de archivo si fue seleccionado un tono alternativo
+  // Reproducción de archivo si fue seleccionado un tono de audio alternativo
   if (soundSetting === 'bass') {
     const audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
     audio.volume = 0.6;
+    activeAudioFile = audio;
     audio.play().catch(() => {});
     return;
   }
   if (soundSetting === 'rover') {
     const audio = new Audio('/assets/sounds/565373__the_runner_01__rover-landing.wav');
     audio.volume = 0.6;
+    activeAudioFile = audio;
     audio.play().catch(() => {});
     return;
   }
   if (soundSetting === 'boomstick') {
     const audio = new Audio('/assets/sounds/73577__cyberpunk64bit__boomstick.mp3');
     audio.volume = 0.6;
+    activeAudioFile = audio;
     audio.play().catch(() => {});
     return;
   }
   if (soundSetting === 'bell') {
     const audio = new Audio('/assets/sounds/notification-sound.mp3');
     audio.volume = 0.6;
+    activeAudioFile = audio;
     audio.play().catch(() => {});
     return;
   }
   if (soundSetting === 'soft') {
     const audio = new Audio('/assets/sounds/notification.mp3');
     audio.volume = 0.6;
+    activeAudioFile = audio;
     audio.play().catch(() => {});
     return;
   }
 
-  // Si es 'synth' (Síntesis Web Audio API)
+  // Síntesis con Web Audio API
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -101,7 +132,7 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
     delayMs: number = 0,
     gainLevel: number = 0.18
   ) => {
-    setTimeout(() => {
+    const t = setTimeout(() => {
       try {
         if (!ctx || ctx.state === 'closed') return;
         const osc = ctx.createOscillator();
@@ -124,34 +155,36 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
         // Ignorar excepciones de audio diferido
       }
     }, delayMs);
+    activeTimers.push(t);
   };
 
-  if (type === 'ingreso' || type === 'abono') {
-    // 🌟 1. Arpegio Celestial Ascendente + Campanada Cristalina (Do5-Mi5-Sol5-Si5-Do6-Mi6)
-    const arpeggio = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51, 1567.98];
-    arpeggio.forEach((freq, idx) => {
-      playTone(freq, 'sine', 350, idx * 80, 0.16);
-    });
+  if (type === 'eliminacion' && soundSetting === 'synth_laser') {
+    // 💥 1. Láser Ciberpunk Descendente (Eliminación Synth 2)
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-    // Campanada armónica resonante
-    playTone(1567.98, 'sine', 800, 600, 0.20);
-    playTone(2093.00, 'triangle', 600, 750, 0.12);
-  } else if (type === 'gasto') {
-    // 💥 2. Acorde Sintetizado Resonante (Gasto)
-    const notes = [659.25, 523.25, 440.00, 349.23];
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880.00, now);
+      osc.frequency.exponentialRampToValueAtTime(65.00, now + 0.35);
+
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.35);
+    } catch (e) {}
+  } else if (type === 'eliminacion' && soundSetting === 'synth_dissolve') {
+    // 🌌 2. Disolución Armónica Retro (Eliminación Synth 3)
+    const notes = [587.33, 493.88, 392.00, 293.66];
     notes.forEach((freq, idx) => {
-      playTone(freq, 'triangle', 320, idx * 75, 0.18);
+      playTone(freq, 'sine', 450, idx * 90, 0.16);
     });
-    playTone(261.63, 'sine', 500, 300, 0.15);
-  } else if (type === 'edicion') {
-    // 🔮 3. Doble Repique Cristalino Moderno (Edición)
-    const notes = [659.25, 880.00, 1046.50, 1318.51];
-    notes.forEach((freq, idx) => {
-      playTone(freq, 'sine', 300, idx * 90, 0.15);
-    });
-    playTone(1760.00, 'sine', 600, 450, 0.16);
   } else if (type === 'eliminacion') {
-    // ⚡ 4. Barrido Sintetizado Descendente Estilo De-rez (Eliminación)
+    // ⚡ 3. Barrido Descendente De-Rez (Eliminación Synth Default)
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -169,6 +202,29 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
       osc.start(now);
       osc.stop(now + 0.45);
     } catch (e) {}
+  } else if (type === 'ingreso' || type === 'abono') {
+    // 🌟 Arpegio Celestial Ascendente + Campanada Cristalina
+    const arpeggio = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51, 1567.98];
+    arpeggio.forEach((freq, idx) => {
+      playTone(freq, 'sine', 350, idx * 80, 0.16);
+    });
+
+    playTone(1567.98, 'sine', 800, 600, 0.20);
+    playTone(2093.00, 'triangle', 600, 750, 0.12);
+  } else if (type === 'gasto') {
+    // 💥 Acorde Sintetizado Resonante
+    const notes = [659.25, 523.25, 440.00, 349.23];
+    notes.forEach((freq, idx) => {
+      playTone(freq, 'triangle', 320, idx * 75, 0.18);
+    });
+    playTone(261.63, 'sine', 500, 300, 0.15);
+  } else if (type === 'edicion') {
+    // 🔮 Doble Repique Cristalino Moderno
+    const notes = [659.25, 880.00, 1046.50, 1318.51];
+    notes.forEach((freq, idx) => {
+      playTone(freq, 'sine', 300, idx * 90, 0.15);
+    });
+    playTone(1760.00, 'sine', 600, 450, 0.16);
   }
 }
 
@@ -195,7 +251,7 @@ export function PowerAnimation() {
     if (active) {
       const timer = setTimeout(() => {
         setActive(false);
-      }, 3200); // 3.2 segundos para apreciar animación y síntesis completa
+      }, 3200);
       return () => clearTimeout(timer);
     }
   }, [active]);
@@ -303,7 +359,7 @@ export function PowerAnimation() {
         }
       `}</style>
 
-      {/* 1. Telón oscuro con blur de alto contraste para MODO DÍA y MODO NOCHE */}
+      {/* 1. Telón oscuro con blur de alto contraste */}
       <div className="absolute inset-0 bg-[#050B14]/75 backdrop-blur-md animate-backdrop-flowi pointer-events-none" />
 
       {/* 2. Rayos Solares Giratorios (Sunburst GPU estilo Temu) */}
@@ -346,7 +402,7 @@ export function PowerAnimation() {
         );
       })}
 
-      {/* 5. Tarjeta Temu-Pop Elástica (100% Nítida en Modo Día / Noche, SIN doble $$) */}
+      {/* 5. Tarjeta Temu-Pop Elástica */}
       <div className="relative z-10 animate-temu-card flex flex-col items-center justify-center text-center p-6 sm:p-8 rounded-3xl bg-[#0B132B]/95 border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9)] max-w-sm mx-4">
         <div 
           className="absolute inset-0 rounded-3xl opacity-35 blur-xl pointer-events-none"
@@ -378,13 +434,11 @@ export function PowerAnimation() {
   );
 }
 
-// Función helper síncrona: dispara el audio sintetizado al instante de hacer clic y activa el portal
+// Función helper síncrona: dispara el audio sintetizado al instante de hacer clic
 export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion') {
   if (typeof window !== 'undefined') {
-    // 1. Ejecución síncrona del sintetizador Web Audio API en el callback de evento del usuario
     playSynthesizedSound(type);
 
-    // 2. Disparo de evento React
     const event = new CustomEvent('show-power-animation', {
       detail: { amount, type }
     });

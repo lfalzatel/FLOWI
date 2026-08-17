@@ -434,7 +434,7 @@ export default function ConfigPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
                 <div className="text-left">
                   <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-red-400 uppercase' : 'text-red-500'}`}>Eliminaciones</p>
-                  <p className="text-[10px] text-text-muted">Barrido Descendente De-Rez (523Hz-110Hz)</p>
+                  <p className="text-[10px] text-text-muted">Barridos, Láseres y Disolución Synth</p>
                 </div>
                 <select
                   value={soundEliminacion}
@@ -442,6 +442,8 @@ export default function ConfigPage() {
                   className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-red-500/40 text-red-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
                 >
                   <option value="synth">⚡ Barrido Descendente De-Rez (Web Audio)</option>
+                  <option value="synth_laser">💥 Láser Ciberpunk Descendente (Web Audio)</option>
+                  <option value="synth_dissolve">🌌 Disolución Armónica Retro (Web Audio)</option>
                   <option value="boomstick">💣 Boomstick Ciberpunk (MP3)</option>
                   <option value="silent">🔇 Silencioso</option>
                 </select>
