@@ -166,16 +166,17 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
       const numericAmount = parseFloat(amount);
 
+      // ⚡ Respuesta optimista inmediata a 0ms
+      triggerPowerAnimation(numericAmount, transactionToEdit?.id ? 'edicion' : type);
+      onClose();
+
       if (transactionToEdit?.id) {
         await updateExpense(transactionToEdit.id, data);
-        triggerPowerAnimation(numericAmount, 'edicion');
       } else {
         await addExpense(data);
-        triggerPowerAnimation(numericAmount, type);
       }
       
       onSuccess?.();
-      onClose();
     } catch (error) {
       console.error('Error saving transaction:', error);
     } finally {
@@ -188,10 +189,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     setLoading(true);
     try {
       const deletedAmount = parseFloat(amount) || 0;
-      await deleteExpense(transactionToEdit.id);
+      
+      // ⚡ Respuesta optimista inmediata a 0ms para eliminación
       triggerPowerAnimation(deletedAmount, 'eliminacion');
-      onSuccess?.();
+      setShowConfirmDelete(false);
       onClose();
+
+      await deleteExpense(transactionToEdit.id);
+      onSuccess?.();
     } catch (error) {
       console.error('Error deleting transaction:', error);
     } finally {

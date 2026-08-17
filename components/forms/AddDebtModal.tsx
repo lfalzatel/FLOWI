@@ -111,7 +111,6 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           date: finalDate,
         });
 
-        // Guardar la deuda con el array de abonos actualizado
         const status = paid >= total ? 'paid' : 'pending';
         await updateDebt(debtToEdit.id!, {
           title,
@@ -123,9 +122,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           createdAt: finalDebtDate,
           payments: [...(debtToEdit.payments || []), newPayment],
         });
-        triggerPowerAnimation(abonoAmount, 'abono');
       } else {
         const status = paid >= total ? 'paid' : 'pending';
+        
+        // ⚡ Respuesta optimista inmediata a 0ms
+        triggerPowerAnimation(total, debtToEdit?.id ? 'edicion' : 'edicion');
+        onClose();
+
         if (debtToEdit && debtToEdit.id) {
           await updateDebt(debtToEdit.id, {
             title,
@@ -136,7 +139,6 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             description,
             createdAt: finalDebtDate,
           });
-          triggerPowerAnimation(total, 'edicion');
         } else {
           await addDebt({
             userId: user.uid,
@@ -149,11 +151,9 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             createdAt: finalDebtDate,
             payments: [],
           });
-          triggerPowerAnimation(total, 'edicion');
         }
       }
       onSuccess();
-      onClose();
     } catch (error) {
       console.error('Error saving debt:', error);
     } finally {
@@ -166,10 +166,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
     setLoading(true);
     try {
       const deletedAmount = parseFloat(totalAmount) || 0;
-      await deleteDebt(debtToEdit.id);
+
+      // ⚡ Respuesta optimista inmediata a 0ms
       triggerPowerAnimation(deletedAmount, 'eliminacion');
-      onSuccess();
+      setShowConfirmDelete(false);
       onClose();
+
+      await deleteDebt(debtToEdit.id);
+      onSuccess();
     } catch (error) {
       console.error('Error deleting debt:', error);
     } finally {
