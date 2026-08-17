@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 export interface PointsBurstAnimationProps {
   amount: number;
   type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion';
-  targetSelector?: string;  // Selector CSS del elemento destino (ej: '[data-points-capsule]')
+  targetSelector?: string;  // Selector CSS del elemento destino
   originSelector?: string; // Selector CSS del elemento origen (opcional)
   onComplete: () => void;  // Callback al finalizar la animación
 }
@@ -31,12 +31,12 @@ export default function PointsBurstAnimation({
     if (ranRef.current) return;
     ranRef.current = true;
 
-    // Configuración según el tipo de acción (Colores, Textos, Signos)
+    // Configuración de Colores y Textos adaptados a FLOWI
     let primaryColor = '#00E5A0';   // Emerald / Mint
     let secondaryColor = '#00E5FF'; // Cyan
     let shadowRgba = 'rgba(0, 229, 160, 0.9)';
     let actionTitle = 'INGRESO REGISTRADO';
-    let actionSubtitle = '¡Excelente Gestión!';
+    let actionSubtitle = '¡Saldo actualizado!';
     let signPrefix = '+';
     let isPositive = true;
 
@@ -111,7 +111,7 @@ export default function PointsBurstAnimation({
     const nodes: HTMLElement[] = [];
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    // Sintetizador Web Audio API autónomo con desbloqueo síncrono
+    // Sintetizador Web Audio API autónomo
     let audioCtx: AudioContext | null = null;
     const unlockAudio = () => {
       try {
@@ -163,18 +163,15 @@ export default function PointsBurstAnimation({
       }, delayMs));
     };
 
-    // 1. Audio Sintetizado por Fases (Web Audio API)
-    // Fase A: Arpegio inicial
+    // 1. Audio Sintetizado Web Audio API
     const baseFreqs = isPositive ? [523.25, 659.25, 783.99, 987.77, 1046.50] : [783.99, 659.25, 523.25, 440.00, 392.00];
     baseFreqs.forEach((freq, idx) => {
       playTone(freq, 'sine', 320, 100 + idx * 100, 0.14);
     });
 
-    // Fase B: Campanada central armónica
     playTone(isPositive ? 1318.51 : 880.00, 'sine', 700, 700, 0.18);
     playTone(isPositive ? 1567.98 : 1046.50, 'sine', 800, 750, 0.15);
 
-    // Fase C: Fanfarria de clímax (4.2s extensión)
     const fireworksNotes = isPositive 
       ? [1567.98, 1760.00, 1975.53, 2093.00, 2637.02]
       : [1046.50, 987.77, 880.00, 783.99, 659.25];
@@ -184,7 +181,7 @@ export default function PointsBurstAnimation({
       playTone(freq * 1.5, 'sine', 400, 2840 + idx * 70, 0.10);
     });
 
-    // 2. Inyección de Keyframes CSS para rotación GPU
+    // 2. Keyframes CSS para animación GPU
     const styleId = 'burst-sunburst-keyframes-flowi';
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
@@ -198,7 +195,24 @@ export default function PointsBurstAnimation({
       document.head.appendChild(style);
     }
 
-    // 3. Flash de pantalla suave
+    // 3. TELÓN OSCURO DE ALTO CONTRASTE (Garantiza legibilidad perfecta en Modo Día / Light Mode)
+    const backdrop = document.createElement('div');
+    Object.assign(backdrop.style, {
+      position: 'fixed', inset: '0',
+      background: 'rgba(5, 11, 20, 0.72)',
+      backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+      opacity: '0', zIndex: '9995', pointerEvents: 'none',
+      transition: 'opacity 300ms ease-out', willChange: 'opacity',
+    });
+    document.body.appendChild(backdrop);
+    nodes.push(backdrop);
+    requestAnimationFrame(() => { backdrop.style.opacity = '1'; });
+    timers.push(setTimeout(() => {
+      backdrop.style.transition = 'opacity 600ms ease-in';
+      backdrop.style.opacity = '0';
+    }, 3600));
+
+    // 4. Flash suave en color primario
     const flash = document.createElement('div');
     Object.assign(flash.style, {
       position: 'fixed', inset: '0', background: primaryColor, opacity: '0',
@@ -207,17 +221,17 @@ export default function PointsBurstAnimation({
     });
     document.body.appendChild(flash);
     nodes.push(flash);
-    requestAnimationFrame(() => { flash.style.opacity = '0.25'; });
+    requestAnimationFrame(() => { flash.style.opacity = '0.2'; });
     timers.push(setTimeout(() => {
-      flash.style.transition = 'opacity 600ms ease-in';
+      flash.style.transition = 'opacity 500ms ease-in';
       flash.style.opacity = '0';
     }, 200));
 
-    // 4. Rayos Solares Giratorios (Sunburst GPU) con colores de FLOWI
+    // 5. Rayos Solares Giratorios (Sunburst GPU estilo Temu)
     const sunburst = document.createElement('div');
     Object.assign(sunburst.style, {
       position: 'fixed', left: '50%', top: '42%',
-      width: '420px', height: '420px',
+      width: '450px', height: '450px',
       zIndex: '9997', pointerEvents: 'none',
       transform: 'translate3d(-50%, -50%, 0) scale(0.2)', opacity: '0',
       borderRadius: '50%',
@@ -232,16 +246,16 @@ export default function PointsBurstAnimation({
     nodes.push(sunburst);
 
     requestAnimationFrame(() => {
-      sunburst.style.opacity = '0.85';
-      sunburst.style.animation = 'flowiSunburstSpin 14s linear infinite';
+      sunburst.style.opacity = '0.9';
+      sunburst.style.animation = 'flowiSunburstSpin 12s linear infinite';
     });
 
-    // 5. Doble onda expansiva en el origen
+    // 6. Doble onda expansiva en el origen
     [0, 1].forEach((r) => {
       const ring = document.createElement('div');
       Object.assign(ring.style, {
         position: 'fixed', left: '0px', top: '0px',
-        width: '16px', height: '16px', borderRadius: '50%',
+        width: '18px', height: '18px', borderRadius: '50%',
         border: `3px solid ${r === 0 ? primaryColor : secondaryColor}`,
         zIndex: '9998',
         transform: `translate3d(${originX}px, ${originY}px, 0) translate(-50%, -50%) scale(1)`,
@@ -257,19 +271,19 @@ export default function PointsBurstAnimation({
       timers.push(setTimeout(() => ring.remove(), 1000 + r * 120));
     });
 
-    // 6. Lanzamiento de Estrellas/Partículas en abanico (100% GPU translate3d)
+    // 7. Lanzamiento de Estrellas/Partículas en abanico (100% GPU translate3d)
     const starsN = 10;
     for (let i = 0; i < starsN; i++) {
       const angle = (Math.PI / (starsN + 1)) * (i + 1) + Math.PI;
-      const spreadX = originX + Math.cos(angle) * 100;
-      const spreadY = originY + Math.sin(angle) * 65;
+      const spreadX = originX + Math.cos(angle) * 110;
+      const spreadY = originY + Math.sin(angle) * 70;
 
       const star = document.createElement('div');
       star.innerHTML = isPositive ? '★' : '◆';
       Object.assign(star.style, {
         position: 'fixed', left: '0px', top: '0px',
-        zIndex: '9999', color: i % 2 === 0 ? primaryColor : secondaryColor, fontSize: '32px', lineHeight: '1',
-        textShadow: `0 0 14px ${shadowRgba}, 0 0 28px ${secondaryColor}`,
+        zIndex: '9999', color: i % 2 === 0 ? primaryColor : secondaryColor, fontSize: '34px', lineHeight: '1',
+        textShadow: `0 0 16px ${shadowRgba}, 0 0 32px ${secondaryColor}`,
         transform: `translate3d(${originX}px, ${originY}px, 0) translate(-50%, -50%) scale(0.2) rotate(0deg)`,
         opacity: '0', willChange: 'transform, opacity',
         WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden',
@@ -279,7 +293,7 @@ export default function PointsBurstAnimation({
       nodes.push(star);
 
       requestAnimationFrame(() => {
-        star.style.transform = `translate3d(${spreadX}px, ${spreadY}px, 0) translate(-50%, -50%) scale(2.2) rotate(45deg)`;
+        star.style.transform = `translate3d(${spreadX}px, ${spreadY}px, 0) translate(-50%, -50%) scale(2.4) rotate(45deg)`;
         star.style.opacity = '1';
       });
 
@@ -291,9 +305,9 @@ export default function PointsBurstAnimation({
           const dy = spreadY + (Math.random() - 0.5) * 70 - 10;
           Object.assign(dot.style, {
             position: 'fixed', left: '0px', top: '0px',
-            width: '7px', height: '7px', borderRadius: '50%',
+            width: '8px', height: '8px', borderRadius: '50%',
             background: s % 2 === 0 ? primaryColor : secondaryColor,
-            zIndex: '9998', opacity: '1', boxShadow: `0 0 10px ${shadowRgba}`,
+            zIndex: '9998', opacity: '1', boxShadow: `0 0 12px ${shadowRgba}`,
             transform: `translate3d(${spreadX}px, ${spreadY}px, 0) translate(-50%, -50%) scale(1)`,
             willChange: 'transform, opacity',
             transition: 'transform 800ms ease-out, opacity 800ms ease-out',
@@ -320,38 +334,37 @@ export default function PointsBurstAnimation({
       timers.push(setTimeout(() => star.remove(), 2300 + i * 120));
     }
 
-    // 7. Gran Estrella / Badge Central Blur "+$ MONTO"
+    // 8. Gran Tarjeta / Badge Central tipo Temu "+$ MONTO" (100% NÍTIDO Y LEGIBLE EN MODO DÍA)
     const starContainer = document.createElement('div');
     Object.assign(starContainer.style, {
       position: 'fixed', left: '50%', top: '42%',
-      width: '260px', height: '260px',
+      width: '280px', height: '240px',
       zIndex: '100000', transform: 'translate3d(-50%,-50%,0) scale(0.2)', opacity: '0',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       pointerEvents: 'none', willChange: 'transform, opacity',
       WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden',
-      transition: 'transform 800ms cubic-bezier(.22,1.6,.4,1), opacity 600ms ease',
+      transition: 'transform 850ms cubic-bezier(.22,1.6,.4,1), opacity 600ms ease',
     });
 
     const starBg = document.createElement('div');
     Object.assign(starBg.style, {
       position: 'absolute', inset: '0',
       clipPath: 'polygon(50% 0%, 63% 33%, 98% 35%, 70% 58%, 81% 92%, 50% 72%, 19% 92%, 30% 58%, 2% 35%, 37% 33%)',
-      background: `radial-gradient(circle, ${shadowRgba} 0%, rgba(13, 21, 39, 0.95) 100%)`,
-      backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+      background: `radial-gradient(circle, ${shadowRgba} 0%, rgba(10, 17, 30, 0.98) 100%)`,
       border: `2px solid ${primaryColor}`,
-      boxShadow: `0 0 35px ${shadowRgba}, inset 0 0 20px rgba(255,255,255,0.4)`,
+      boxShadow: `0 0 45px ${shadowRgba}, inset 0 0 25px rgba(255,255,255,0.4)`,
       willChange: 'transform, opacity',
-      transition: 'transform 700ms cubic-bezier(.22,1.6,.4,1), opacity 600ms ease',
+      transition: 'transform 750ms cubic-bezier(.22,1.6,.4,1), opacity 600ms ease',
     });
     starContainer.appendChild(starBg);
 
     const labelText = document.createElement('div');
     labelText.innerHTML = `
-      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
-         <span style="font-size: 24px; font-weight: 900; color: #ffffff; text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 14px ${primaryColor}; font-family: monospace, system-ui; letter-spacing: 0.5px;">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px;">
+         <span style="font-size: 28px; font-weight: 900; color: #FFFFFF; text-shadow: 0 2px 14px rgba(0,0,0,1), 0 0 16px ${primaryColor}; font-family: monospace, system-ui; letter-spacing: 0.5px;">
            ${displayText}
          </span>
-         <span style="font-size: 11px; font-weight: 800; color: #ffffff; background: rgba(0,0,0,0.45); padding: 3px 12px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; border: 1px solid ${secondaryColor}55;">
+         <span style="font-size: 11px; font-weight: 900; color: #FFFFFF; background: rgba(0,0,0,0.65); padding: 4px 14px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1.2px; border: 1px solid ${secondaryColor}; box-shadow: 0 0 10px ${shadowRgba};">
            ${actionTitle}
          </span>
       </div>
@@ -366,7 +379,7 @@ export default function PointsBurstAnimation({
     nodes.push(starContainer);
 
     requestAnimationFrame(() => {
-      starContainer.style.transform = 'translate3d(-50%,-50%,0) scale(1.25)';
+      starContainer.style.transform = 'translate3d(-50%,-50%,0) scale(1.35)';
       starContainer.style.opacity = '1';
     });
 
@@ -374,7 +387,7 @@ export default function PointsBurstAnimation({
       starContainer.style.transform = 'translate3d(-50%,-50%,0) scale(1)';
     }, 700));
 
-    // 8. Desprendimiento de 5 puntas al segundo 2.8s (duración extendida a 4.2s)
+    // 9. Desprendimiento de 5 puntas estelares al segundo 2.8s
     timers.push(setTimeout(() => {
       starBg.style.transition = 'transform 700ms ease-in, opacity 700ms ease-in';
       starBg.style.transform = 'scale(0) rotate(240deg)';
@@ -395,7 +408,7 @@ export default function PointsBurstAnimation({
         tip.innerHTML = isPositive ? '★' : '◆';
         Object.assign(tip.style, {
           position: 'fixed', left: `${startX}px`, top: `${startY}px`,
-          zIndex: '100001', color: primaryColor, fontSize: '42px', lineHeight: '1',
+          zIndex: '100001', color: primaryColor, fontSize: '44px', lineHeight: '1',
           textShadow: `0 0 20px ${primaryColor}, 0 0 35px ${secondaryColor}`,
           transform: 'translate3d(-50%,-50%,0) scale(1.4) rotate(0deg)', opacity: '1',
           willChange: 'transform, opacity',
@@ -404,8 +417,8 @@ export default function PointsBurstAnimation({
         document.body.appendChild(tip);
         nodes.push(tip);
 
-        const destX = Math.cos(tipAngle) * 170;
-        const destY = Math.sin(tipAngle) * 170;
+        const destX = Math.cos(tipAngle) * 180;
+        const destY = Math.sin(tipAngle) * 180;
 
         requestAnimationFrame(() => {
           tip.style.transform = `translate3d(calc(-50% + ${destX}px), calc(-50% + ${destY}px), 0) scale(0.1) rotate(${360 + p * 72}deg)`;
@@ -443,7 +456,7 @@ export default function PointsBurstAnimation({
 
     timers.push(setTimeout(() => starContainer.remove(), 3600));
 
-    // 9. Pulso progresivo de la Cápsula Destino (BalanceCard)
+    // 10. Pulso progresivo de la Cápsula Destino (BalanceCard)
     if (targetEl) {
       const computedRadius = window.getComputedStyle(targetEl).borderRadius || '9999px';
 
@@ -471,7 +484,6 @@ export default function PointsBurstAnimation({
       }, 3800));
     }
 
-    // Duración total ampliada a ~4.2 segundos para mejor apreciación visual y sonora
     const doneTimer = setTimeout(() => {
       if (onCompleteRef.current) onCompleteRef.current();
     }, 4200);
