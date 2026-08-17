@@ -284,14 +284,19 @@ export function ProfileCapsule() {
                   !isInstalled && (
                     <button
                       onClick={async () => {
-                        if (deferredPrompt) {
-                          deferredPrompt.prompt();
-                          const { outcome } = await deferredPrompt.userChoice;
-                          if (outcome === 'accepted') {
-                            setDeferredPrompt(null);
+                        const promptEvent = deferredPrompt || (typeof window !== 'undefined' && (window as any).deferredPWAInstallPrompt);
+                        if (promptEvent) {
+                          try {
+                            promptEvent.prompt();
+                            const choice = await promptEvent.userChoice;
+                            if (choice && choice.outcome === 'accepted') {
+                              setDeferredPrompt(null);
+                              if (typeof window !== 'undefined') (window as any).deferredPWAInstallPrompt = null;
+                            }
+                          } catch (err) {
+                            setShowInstallAlert(true);
                           }
                         } else {
-                          // Fallback custom modal
                           setShowInstallAlert(true);
                         }
                         setOpen(false);
