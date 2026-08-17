@@ -381,13 +381,15 @@ export default function ConfigPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
                 <div className="text-left">
                   <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-500'}`}>Ingresos y Abonos</p>
-                  <p className="text-[10px] text-text-muted">Arpegio Celestial (523Hz-1567Hz)</p>
+                  <p className="text-[10px] text-text-muted">Vida Extra Mario, Monedas o Arpegios</p>
                 </div>
                 <select
                   value={soundIngreso}
                   onChange={(e) => handleActionSoundChange('ingreso', e.target.value)}
                   className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-emerald-500/40 text-emerald-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
                 >
+                  <option value="mario_1up">🍄 Mario Bros 1-UP (Vida Extra 8-Bit)</option>
+                  <option value="mario_coin">🪙 Mario Bros Coin (Moneda 8-Bit)</option>
                   <option value="synth">🎵 Arpegio Celestial (Web Audio)</option>
                   <option value="bass">🔊 Bajo Ciberpunk (WAV)</option>
                   <option value="bell">🔔 Campanada Clásica (MP3)</option>
@@ -399,13 +401,14 @@ export default function ConfigPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
                 <div className="text-left">
                   <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-rose-400 uppercase' : 'text-rose-500'}`}>Gastos</p>
-                  <p className="text-[10px] text-text-muted">Acorde Sintetizado Resonante (Re5-Fa4)</p>
+                  <p className="text-[10px] text-text-muted">Moneda Mario, Acordes Resonantes o Rover</p>
                 </div>
                 <select
                   value={soundGasto}
                   onChange={(e) => handleActionSoundChange('gasto', e.target.value)}
                   className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-rose-500/40 text-rose-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
                 >
+                  <option value="mario_coin">🪙 Mario Bros Coin (Moneda 8-Bit)</option>
                   <option value="synth">💥 Acorde Resonante (Web Audio)</option>
                   <option value="rover">🚀 Rover Landing (WAV)</option>
                   <option value="soft">🔔 Campanada Suave (MP3)</option>
@@ -417,13 +420,14 @@ export default function ConfigPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
                 <div className="text-left">
                   <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-500'}`}>Ediciones</p>
-                  <p className="text-[10px] text-text-muted">Doble Repique Cristalino (Mi5-Mi6)</p>
+                  <p className="text-[10px] text-text-muted">Salto Mario o Doble Repique Cristalino</p>
                 </div>
                 <select
                   value={soundEdicion}
                   onChange={(e) => handleActionSoundChange('edicion', e.target.value)}
                   className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-purple-500/40 text-purple-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
                 >
+                  <option value="mario_jump">🍄 Mario Bros Jump (Salto 8-Bit)</option>
                   <option value="synth">🔮 Doble Repique Cristalino (Web Audio)</option>
                   <option value="bell">🔔 Campanada Clásica (MP3)</option>
                   <option value="silent">🔇 Silencioso</option>
@@ -434,13 +438,14 @@ export default function ConfigPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
                 <div className="text-left">
                   <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-red-400 uppercase' : 'text-red-500'}`}>Eliminaciones</p>
-                  <p className="text-[10px] text-text-muted">Barridos, Láseres y Disolución Synth</p>
+                  <p className="text-[10px] text-text-muted">Tubo Mario, De-Rez, Láseres y Disolución</p>
                 </div>
                 <select
                   value={soundEliminacion}
                   onChange={(e) => handleActionSoundChange('eliminacion', e.target.value)}
                   className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-red-500/40 text-red-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
                 >
+                  <option value="mario_pipe">🍄 Mario Bros Pipe (Tubo 8-Bit)</option>
                   <option value="synth">⚡ Barrido Descendente De-Rez (Web Audio)</option>
                   <option value="synth_laser">💥 Láser Ciberpunk Descendente (Web Audio)</option>
                   <option value="synth_dissolve">🌌 Disolución Armónica Retro (Web Audio)</option>

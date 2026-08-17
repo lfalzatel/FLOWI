@@ -82,7 +82,7 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
 
   if (soundSetting === 'silent') return;
 
-  // Reproducción de archivo si fue seleccionado un tono de audio alternativo
+  // Reproducción de archivos de audio
   if (soundSetting === 'bass') {
     const audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
     audio.volume = 0.6;
@@ -119,7 +119,7 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
     return;
   }
 
-  // Síntesis con Web Audio API
+  // Síntesis Web Audio API
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -141,9 +141,8 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
         osc.type = waveType;
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-        // Envolvente de volumen (Attack, Sustain, Decay)
         gain.gain.setValueAtTime(0.001, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(gainLevel, ctx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(gainLevel, ctx.currentTime + 0.015);
         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durationMs / 1000);
 
         osc.connect(gain);
@@ -151,15 +150,62 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
 
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + durationMs / 1000);
-      } catch (err) {
-        // Ignorar excepciones de audio diferido
-      }
+      } catch (err) {}
     }, delayMs);
     activeTimers.push(t);
   };
 
+  // 🍄 SÍNTESIS DE SONIDOS TIPO MARIO BROS (8-BIT NES)
+  if (soundSetting === 'mario_1up') {
+    // 🍄 Mario 1-UP (Vida Extra 8-Bit NES): E5 (659Hz), C6 (1046Hz), E6 (1318Hz), G6 (1568Hz), C7 (2093Hz), G7 (3136Hz)
+    const notes = [659.25, 1046.50, 1318.51, 1567.98, 2093.00, 3135.96];
+    notes.forEach((freq, idx) => {
+      const duration = idx === notes.length - 1 ? 360 : 70;
+      playTone(freq, 'square', duration, idx * 70, 0.15);
+    });
+    return;
+  }
+
+  if (soundSetting === 'mario_coin') {
+    // 🪙 Mario Coin (Moneda 8-Bit NES): B5 (988Hz) ➔ E6 (1319Hz)
+    playTone(987.77, 'square', 80, 0, 0.15);
+    playTone(1318.51, 'square', 340, 80, 0.18);
+    return;
+  }
+
+  if (soundSetting === 'mario_jump') {
+    // 🍄 Mario Jump (Salto 8-Bit NES): Pitch sweep 160Hz ➔ 620Hz
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.exponentialRampToValueAtTime(620, now + 0.14);
+
+      gain.gain.setValueAtTime(0.16, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.14);
+    } catch (e) {}
+    return;
+  }
+
+  if (soundSetting === 'mario_pipe') {
+    // 🍄 Mario Pipe / Fall (Tubo 8-Bit NES): C4 ➔ G3 ➔ E3 ➔ C3
+    const notes = [261.63, 207.65, 174.61, 130.81];
+    notes.forEach((freq, idx) => {
+      playTone(freq, 'square', 110, idx * 95, 0.16);
+    });
+    return;
+  }
+
+  // OTROS SONIDOS SINTETIZADOS
   if (type === 'eliminacion' && soundSetting === 'synth_laser') {
-    // 💥 1. Láser Ciberpunk Descendente (Eliminación Synth 2)
+    // 💥 Láser Ciberpunk Descendente
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -178,13 +224,13 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
       osc.stop(now + 0.35);
     } catch (e) {}
   } else if (type === 'eliminacion' && soundSetting === 'synth_dissolve') {
-    // 🌌 2. Disolución Armónica Retro (Eliminación Synth 3)
+    // 🌌 Disolución Armónica Retro
     const notes = [587.33, 493.88, 392.00, 293.66];
     notes.forEach((freq, idx) => {
       playTone(freq, 'sine', 450, idx * 90, 0.16);
     });
   } else if (type === 'eliminacion') {
-    // ⚡ 3. Barrido Descendente De-Rez (Eliminación Synth Default)
+    // ⚡ Barrido Descendente De-Rez
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -203,7 +249,7 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
       osc.stop(now + 0.45);
     } catch (e) {}
   } else if (type === 'ingreso' || type === 'abono') {
-    // 🌟 Arpegio Celestial Ascendente + Campanada Cristalina
+    // 🌟 Arpegio Celestial Ascendente
     const arpeggio = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51, 1567.98];
     arpeggio.forEach((freq, idx) => {
       playTone(freq, 'sine', 350, idx * 80, 0.16);
@@ -219,7 +265,7 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
     });
     playTone(261.63, 'sine', 500, 300, 0.15);
   } else if (type === 'edicion') {
-    // 🔮 Doble Repique Cristalino Moderno
+    // 🔮 Doble Repique Cristalino
     const notes = [659.25, 880.00, 1046.50, 1318.51];
     notes.forEach((freq, idx) => {
       playTone(freq, 'sine', 300, idx * 90, 0.15);
