@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ProfileModal } from '@/components/forms/ProfileModal';
+import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { Sparkles, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 
 const SERVICES = [
   {
@@ -127,13 +129,54 @@ export default function ServiciosPage() {
         />
       </div>
 
-      {/* Acceso Rápido / Favoritos (Opcional, estilo Nequi) */}
-      <div className={`mb-8 flex items-center justify-between p-4 glass-card cursor-pointer transition-colors ${isTechTheme ? 'border-accent/30 rounded-none' : ''}`}>
-        <div className="flex items-center gap-3">
-          <Receipt className={`w-6 h-6 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`} />
-          <span className={`font-semibold ${isTechTheme ? 'text-accent text-sm' : 'text-text-primary'}`}>Mis pagos inscritos</span>
+      {/* 3 Botones de prueba para ver las animaciones */}
+      <div className="mb-8 space-y-2">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-emerald-500'}`} />
+          <span className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>
+            Probar Animaciones & Sonidos Web Audio
+          </span>
         </div>
-        <ChevronRight className="w-5 h-5 text-text-muted" />
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => triggerPowerAnimation(50000, 'ingreso')}
+            className={`flex flex-col items-center justify-center p-3 text-center transition-all active:scale-95 ${
+              isTechTheme
+                ? 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 rounded-2xl hover:bg-emerald-500/20'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4 mb-1" />
+            <span className="text-[10px] font-extrabold uppercase">Ingreso</span>
+            <span className="text-[9px] opacity-80">$50k</span>
+          </button>
+
+          <button
+            onClick={() => triggerPowerAnimation(25000, 'gasto')}
+            className={`flex flex-col items-center justify-center p-3 text-center transition-all active:scale-95 ${
+              isTechTheme
+                ? 'border border-rose-500/40 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
+                : 'bg-rose-500/10 border border-rose-500/30 text-rose-600 rounded-2xl hover:bg-rose-500/20'
+            }`}
+          >
+            <TrendingDown className="w-4 h-4 mb-1" />
+            <span className="text-[10px] font-extrabold uppercase">Gasto</span>
+            <span className="text-[9px] opacity-80">$25k</span>
+          </button>
+
+          <button
+            onClick={() => triggerPowerAnimation(100000, 'abono')}
+            className={`flex flex-col items-center justify-center p-3 text-center transition-all active:scale-95 ${
+              isTechTheme
+                ? 'border border-cyan-500/40 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20'
+                : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 rounded-2xl hover:bg-cyan-500/20'
+            }`}
+          >
+            <RefreshCw className="w-4 h-4 mb-1" />
+            <span className="text-[10px] font-extrabold uppercase">Abono</span>
+            <span className="text-[9px] opacity-80">$100k</span>
+          </button>
+        </div>
       </div>
 
       <div className="mb-4 flex items-center gap-2">
