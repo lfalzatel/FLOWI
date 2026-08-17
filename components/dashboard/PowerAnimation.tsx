@@ -11,6 +11,113 @@ interface PowerAnimationEvent {
   type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion';
 }
 
+// Global AudioContext singleton para sintaxis fluida y cero latencia
+let globalAudioCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioCtxClass) {
+      if (!globalAudioCtx || globalAudioCtx.state === 'closed') {
+        globalAudioCtx = new AudioCtxClass();
+      }
+      if (globalAudioCtx.state === 'suspended') {
+        globalAudioCtx.resume();
+      }
+      return globalAudioCtx;
+    }
+  } catch (e) {
+    console.warn('Web Audio API not supported:', e);
+  }
+  return null;
+}
+
+// Sintetizador autónomo Web Audio API según la guía del usuario
+export function playSynthesizedSound(type: PowerAnimationEvent['type']) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+
+  const playTone = (
+    freq: number,
+    waveType: OscillatorType,
+    durationMs: number,
+    delayMs: number = 0,
+    gainLevel: number = 0.18
+  ) => {
+    setTimeout(() => {
+      try {
+        if (!ctx || ctx.state === 'closed') return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = waveType;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        // Envolvente de volumen (Attack, Sustain, Decay)
+        gain.gain.setValueAtTime(0.001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(gainLevel, ctx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durationMs / 1000);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + durationMs / 1000);
+      } catch (err) {
+        // Ignorar excepciones de audio diferido
+      }
+    }, delayMs);
+  };
+
+  if (type === 'ingreso' || type === 'abono') {
+    // 🌟 1. Arpegio Celestial Ascendente + Campanada Cristalina (Do5-Mi5-Sol5-Si5-Do6-Mi6)
+    const arpeggio = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51, 1567.98];
+    arpeggio.forEach((freq, idx) => {
+      playTone(freq, 'sine', 350, idx * 80, 0.16);
+    });
+
+    // Campanada armónica resonante
+    playTone(1567.98, 'sine', 800, 600, 0.20);
+    playTone(2093.00, 'triangle', 600, 750, 0.12);
+  } else if (type === 'gasto') {
+    // 💥 2. Acorde Sintetizado Resonante (Gasto)
+    const notes = [659.25, 523.25, 440.00, 349.23];
+    notes.forEach((freq, idx) => {
+      playTone(freq, 'triangle', 320, idx * 75, 0.18);
+    });
+    playTone(261.63, 'sine', 500, 300, 0.15);
+  } else if (type === 'edicion') {
+    // 🔮 3. Doble Repique Cristalino Moderno (Edición)
+    const notes = [659.25, 880.00, 1046.50, 1318.51];
+    notes.forEach((freq, idx) => {
+      playTone(freq, 'sine', 300, idx * 90, 0.15);
+    });
+    playTone(1760.00, 'sine', 600, 450, 0.16);
+  } else if (type === 'eliminacion') {
+    // ⚡ 4. Barrido Sintetizado Descendente Estilo De-rez (Eliminación)
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.exponentialRampToValueAtTime(110.00, now + 0.45);
+
+      gain.gain.setValueAtTime(0.20, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.45);
+    } catch (e) {}
+  }
+}
+
 export function PowerAnimation() {
   const [active, setActive] = useState(false);
   const [data, setData] = useState<PowerAnimationEvent | null>(null);
@@ -24,22 +131,6 @@ export function PowerAnimation() {
       const eventData = customEvent.detail;
       setData(eventData);
       setActive(true);
-
-      // Reproducción del sonido correspondiente a la acción
-      try {
-        let soundFile = '550332__wax_vibe__cyberpunk-bass.wav'; // Default para ingresos/abonos
-        if (eventData.type === 'gasto' || eventData.type === 'edicion') {
-          soundFile = '565373__the_runner_01__rover-landing.wav';
-        } else if (eventData.type === 'eliminacion') {
-          soundFile = '73577__cyberpunk64bit__boomstick.mp3';
-        }
-
-        const audio = new Audio(`/assets/sounds/${soundFile}`);
-        audio.volume = 0.6;
-        audio.play().catch((err) => console.warn('Audio play prevented:', err));
-      } catch (err) {
-        console.warn('Audio error:', err);
-      }
     };
 
     window.addEventListener('show-power-animation', handleTrigger);
@@ -50,19 +141,19 @@ export function PowerAnimation() {
     if (active) {
       const timer = setTimeout(() => {
         setActive(false);
-      }, 2800); // 2.8 segundos para apreciar animación y audio perfectamente
+      }, 3200); // 3.2 segundos para apreciar animación y síntesis completa
       return () => clearTimeout(timer);
     }
   }, [active]);
 
   if (!active || !data || typeof document === 'undefined') return null;
 
-  // Personalización según el tipo de acción
+  // Personalización del tema y colores según la acción
   let labelPrefix = '';
   let colorGradient = 'from-emerald-400 via-teal-300 to-cyan-400';
   let primaryColor = '#00E5A0';
   let secondaryColor = '#00E5FF';
-  let shadowRgba = 'rgba(0, 229, 160, 0.6)';
+  let shadowRgba = 'rgba(0, 229, 160, 0.7)';
   let actionText = 'INGRESO REGISTRADO';
   let actionSubtitle = '¡Saldo actualizado con éxito!';
 
@@ -123,7 +214,7 @@ export function PowerAnimation() {
         }
         @keyframes temu-pop {
           0% { transform: scale(0.2) translateY(40px); opacity: 0; }
-          20% { transform: scale(1.2) translateY(-10px); opacity: 1; }
+          20% { transform: scale(1.25) translateY(-10px); opacity: 1; }
           30% { transform: scale(1) translateY(0); opacity: 1; }
           80% { transform: scale(1) translateY(-10px); opacity: 1; }
           100% { transform: scale(0.7) translateY(-60px); opacity: 0; }
@@ -142,10 +233,10 @@ export function PowerAnimation() {
           100% { transform: translateY(-140px) scale(1.4) rotate(45deg); opacity: 0; }
         }
         .animate-backdrop-flowi {
-          animation: backdrop-fade 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+          animation: backdrop-fade 3.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
         .animate-temu-card {
-          animation: temu-pop 2.8s cubic-bezier(0.22, 1.6, 0.4, 1) forwards;
+          animation: temu-pop 3.2s cubic-bezier(0.22, 1.6, 0.4, 1) forwards;
         }
         .animate-sunburst-flowi {
           animation: sunburst-spin 12s linear infinite;
@@ -158,12 +249,12 @@ export function PowerAnimation() {
         }
       `}</style>
 
-      {/* 1. Telón oscuro de alto contraste con blur para garantizar 100% legibilidad en MODO DÍA */}
+      {/* 1. Telón oscuro con blur de alto contraste para MODO DÍA y MODO NOCHE */}
       <div className="absolute inset-0 bg-[#050B14]/75 backdrop-blur-md animate-backdrop-flowi pointer-events-none" />
 
       {/* 2. Rayos Solares Giratorios (Sunburst GPU estilo Temu) */}
       <div 
-        className="absolute top-1/2 left-1/2 w-[420px] h-[420px] rounded-full pointer-events-none animate-sunburst-flowi opacity-40"
+        className="absolute top-1/2 left-1/2 w-[450px] h-[450px] rounded-full pointer-events-none animate-sunburst-flowi opacity-45"
         style={{
           background: `conic-gradient(from 0deg, ${shadowRgba} 0deg 15deg, transparent 15deg 30deg, ${shadowRgba} 30deg 45deg, transparent 45deg 60deg, ${shadowRgba} 60deg 75deg, transparent 75deg 90deg, ${shadowRgba} 90deg 105deg, transparent 105deg 120deg, ${shadowRgba} 120deg 135deg, transparent 135deg 150deg, ${shadowRgba} 150deg 165deg, transparent 165deg 180deg, ${shadowRgba} 180deg 195deg, transparent 195deg 210deg, ${shadowRgba} 210deg 225deg, transparent 225deg 240deg, ${shadowRgba} 240deg 255deg, transparent 255deg 270deg, ${shadowRgba} 270deg 285deg, transparent 285deg 300deg, ${shadowRgba} 300deg 315deg, transparent 315deg 330deg, ${shadowRgba} 330deg 345deg, transparent 345deg 360deg)`,
           maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 75%)',
@@ -171,7 +262,7 @@ export function PowerAnimation() {
         }}
       />
 
-      {/* 3. Anillos expansivos en el origen */}
+      {/* 3. Anillos expansivos neón */}
       <div 
         className="absolute w-48 h-48 rounded-full border animate-ring-flowi pointer-events-none"
         style={{ borderColor: primaryColor, boxShadow: `0 0 35px ${primaryColor}` }}
@@ -181,7 +272,7 @@ export function PowerAnimation() {
         style={{ borderColor: secondaryColor, boxShadow: `0 0 25px ${secondaryColor}`, animationDelay: '0.15s' }}
       />
 
-      {/* 4. Partículas flotantes neón */}
+      {/* 4. Partículas neón flotantes */}
       {[...Array(14)].map((_, i) => {
         const leftOffset = (Math.random() - 0.5) * 200;
         const scale = 0.6 + Math.random() * 0.9;
@@ -201,11 +292,10 @@ export function PowerAnimation() {
         );
       })}
 
-      {/* 5. Tarjeta Principal tipo Temu con Scale Pop elástico y alto contraste */}
+      {/* 5. Tarjeta Temu-Pop Elástica (100% Nítida en Modo Día / Noche, SIN doble $$) */}
       <div className="relative z-10 animate-temu-card flex flex-col items-center justify-center text-center p-6 sm:p-8 rounded-3xl bg-[#0B132B]/95 border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9)] max-w-sm mx-4">
-        {/* Glow de fondo interior */}
         <div 
-          className="absolute inset-0 rounded-3xl opacity-30 blur-xl pointer-events-none"
+          className="absolute inset-0 rounded-3xl opacity-35 blur-xl pointer-events-none"
           style={{ background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)` }}
         />
 
@@ -216,7 +306,6 @@ export function PowerAnimation() {
           {actionText}
         </span>
 
-        {/* Monto de dinero 100% Nitido y Legible (SIN doble $$) */}
         <div 
           className={`relative z-10 text-4xl sm:text-5xl font-black ${isTechTheme ? 'font-mono' : 'font-syne'} tracking-tight bg-gradient-to-r ${colorGradient} bg-clip-text text-transparent filter drop-shadow-[0_4px_12px_rgba(0,0,0,1)] my-1`}
           style={{
@@ -235,9 +324,13 @@ export function PowerAnimation() {
   );
 }
 
-// Función helper para disparar la animación y el sonido desde cualquier lugar
+// Función helper síncrona: dispara el audio sintetizado al instante de hacer clic y activa el portal
 export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion') {
   if (typeof window !== 'undefined') {
+    // 1. Ejecución síncrona del sintetizador Web Audio API en el callback de evento del usuario
+    playSynthesizedSound(type);
+
+    // 2. Disparo de evento React
     const event = new CustomEvent('show-power-animation', {
       detail: { amount, type }
     });
