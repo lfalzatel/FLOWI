@@ -33,8 +33,62 @@ function getAudioContext(): AudioContext | null {
   return null;
 }
 
-// Sintetizador autónomo Web Audio API según la guía del usuario
-export function playSynthesizedSound(type: PowerAnimationEvent['type']) {
+// Sintetizador autónomo Web Audio API & reproductor de tonos según configuración
+export function playSynthesizedSound(type: PowerAnimationEvent['type'], overrideSetting?: string) {
+  if (typeof window === 'undefined') return;
+
+  // Verificar si los sonidos globales están desactivados
+  if (localStorage.getItem('sound_enabled') === 'false') return;
+
+  // Obtener configuración para esta acción
+  let soundSetting = overrideSetting;
+  if (!soundSetting) {
+    if (type === 'ingreso' || type === 'abono') {
+      soundSetting = localStorage.getItem('sound_ingreso') || 'synth';
+    } else if (type === 'gasto') {
+      soundSetting = localStorage.getItem('sound_gasto') || 'synth';
+    } else if (type === 'edicion') {
+      soundSetting = localStorage.getItem('sound_edicion') || 'synth';
+    } else if (type === 'eliminacion') {
+      soundSetting = localStorage.getItem('sound_eliminacion') || 'synth';
+    }
+  }
+
+  if (soundSetting === 'silent') return;
+
+  // Reproducción de archivo si fue seleccionado un tono alternativo
+  if (soundSetting === 'bass') {
+    const audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+    return;
+  }
+  if (soundSetting === 'rover') {
+    const audio = new Audio('/assets/sounds/565373__the_runner_01__rover-landing.wav');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+    return;
+  }
+  if (soundSetting === 'boomstick') {
+    const audio = new Audio('/assets/sounds/73577__cyberpunk64bit__boomstick.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+    return;
+  }
+  if (soundSetting === 'bell') {
+    const audio = new Audio('/assets/sounds/notification-sound.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+    return;
+  }
+  if (soundSetting === 'soft') {
+    const audio = new Audio('/assets/sounds/notification.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+    return;
+  }
+
+  // Si es 'synth' (Síntesis Web Audio API)
   const ctx = getAudioContext();
   if (!ctx) return;
 

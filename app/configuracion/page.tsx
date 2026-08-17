@@ -87,6 +87,12 @@ export default function ConfigPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [notificationSound, setNotificationSound] = useState('notification.mp3');
 
+  // Sonidos por acción
+  const [soundIngreso, setSoundIngreso] = useState('synth');
+  const [soundGasto, setSoundGasto] = useState('synth');
+  const [soundEdicion, setSoundEdicion] = useState('synth');
+  const [soundEliminacion, setSoundEliminacion] = useState('synth');
+
   // Load from local storage
   useEffect(() => {
     setNotificationsEnabled(localStorage.getItem('notifications_enabled') !== 'false');
@@ -94,6 +100,11 @@ export default function ConfigPage() {
     setInAppEnabled(localStorage.getItem('in_app_enabled') !== 'false');
     setSoundEnabled(localStorage.getItem('sound_enabled') !== 'false');
     setNotificationSound(localStorage.getItem('notification_sound') || 'notification.mp3');
+
+    setSoundIngreso(localStorage.getItem('sound_ingreso') || 'synth');
+    setSoundGasto(localStorage.getItem('sound_gasto') || 'synth');
+    setSoundEdicion(localStorage.getItem('sound_edicion') || 'synth');
+    setSoundEliminacion(localStorage.getItem('sound_eliminacion') || 'synth');
   }, []);
 
   const toggleNotifications = () => {
@@ -129,6 +140,27 @@ export default function ConfigPage() {
       const audio = new Audio(`/assets/sounds/${sound}`);
       audio.play().catch(e => console.error('Failed to play preview:', e));
     }
+  };
+
+  const handleActionSoundChange = (actionType: 'ingreso' | 'gasto' | 'edicion' | 'eliminacion', value: string) => {
+    if (actionType === 'ingreso') {
+      setSoundIngreso(value);
+      localStorage.setItem('sound_ingreso', value);
+    } else if (actionType === 'gasto') {
+      setSoundGasto(value);
+      localStorage.setItem('sound_gasto', value);
+    } else if (actionType === 'edicion') {
+      setSoundEdicion(value);
+      localStorage.setItem('sound_edicion', value);
+    } else if (actionType === 'eliminacion') {
+      setSoundEliminacion(value);
+      localStorage.setItem('sound_eliminacion', value);
+    }
+
+    // Disparar prueba de sonido inmediata
+    import('@/components/dashboard/PowerAnimation').then(({ playSynthesizedSound }) => {
+      playSynthesizedSound(actionType, value);
+    });
   };
 
   const handleClearData = async () => {
@@ -334,6 +366,86 @@ export default function ConfigPage() {
                 <option value="notification.mp3">Suave (Burbuja)</option>
                 <option value="notification-sound.mp3">Clásico (Campana)</option>
               </select>
+            </div>
+
+            {/* Configuración de Sonidos por Acción (Web Audio API & Archivos) */}
+            <div className={`p-4 border-t space-y-4 ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!soundEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <Music className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-emerald-500'}`} />
+                <span className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>
+                  {isTechTheme ? 'MAPA_DE_SONIDOS_POR_ACCION' : 'Mapa de Sonidos Sintetizados & Efectos'}
+                </span>
+              </div>
+
+              {/* 1. Ingresos y Abonos */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <div className="text-left">
+                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-500'}`}>Ingresos y Abonos</p>
+                  <p className="text-[10px] text-text-muted">Arpegio Celestial (523Hz-1567Hz)</p>
+                </div>
+                <select
+                  value={soundIngreso}
+                  onChange={(e) => handleActionSoundChange('ingreso', e.target.value)}
+                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-emerald-500/40 text-emerald-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
+                >
+                  <option value="synth">🎵 Arpegio Celestial (Web Audio)</option>
+                  <option value="bass">🔊 Bajo Ciberpunk (WAV)</option>
+                  <option value="bell">🔔 Campanada Clásica (MP3)</option>
+                  <option value="silent">🔇 Silencioso</option>
+                </select>
+              </div>
+
+              {/* 2. Gastos */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <div className="text-left">
+                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-rose-400 uppercase' : 'text-rose-500'}`}>Gastos</p>
+                  <p className="text-[10px] text-text-muted">Acorde Sintetizado Resonante (Re5-Fa4)</p>
+                </div>
+                <select
+                  value={soundGasto}
+                  onChange={(e) => handleActionSoundChange('gasto', e.target.value)}
+                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-rose-500/40 text-rose-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
+                >
+                  <option value="synth">💥 Acorde Resonante (Web Audio)</option>
+                  <option value="rover">🚀 Rover Landing (WAV)</option>
+                  <option value="soft">🔔 Campanada Suave (MP3)</option>
+                  <option value="silent">🔇 Silencioso</option>
+                </select>
+              </div>
+
+              {/* 3. Ediciones */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <div className="text-left">
+                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-500'}`}>Ediciones</p>
+                  <p className="text-[10px] text-text-muted">Doble Repique Cristalino (Mi5-Mi6)</p>
+                </div>
+                <select
+                  value={soundEdicion}
+                  onChange={(e) => handleActionSoundChange('edicion', e.target.value)}
+                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-purple-500/40 text-purple-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
+                >
+                  <option value="synth">🔮 Doble Repique Cristalino (Web Audio)</option>
+                  <option value="bell">🔔 Campanada Clásica (MP3)</option>
+                  <option value="silent">🔇 Silencioso</option>
+                </select>
+              </div>
+
+              {/* 4. Eliminaciones */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <div className="text-left">
+                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-red-400 uppercase' : 'text-red-500'}`}>Eliminaciones</p>
+                  <p className="text-[10px] text-text-muted">Barrido Descendente De-Rez (523Hz-110Hz)</p>
+                </div>
+                <select
+                  value={soundEliminacion}
+                  onChange={(e) => handleActionSoundChange('eliminacion', e.target.value)}
+                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-red-500/40 text-red-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
+                >
+                  <option value="synth">⚡ Barrido Descendente De-Rez (Web Audio)</option>
+                  <option value="boomstick">💣 Boomstick Ciberpunk (MP3)</option>
+                  <option value="silent">🔇 Silencioso</option>
+                </select>
+              </div>
             </div>
             </div>
           )}
