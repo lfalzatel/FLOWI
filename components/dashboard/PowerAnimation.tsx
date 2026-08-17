@@ -369,7 +369,13 @@ export function PowerAnimation() {
   const formattedText = `${labelPrefix}${fmt(data.amount)}`;
 
   return createPortal(
-    <div className="fixed inset-0 pointer-events-none z-[9999] flex items-center justify-center overflow-hidden">
+    <div 
+      className="fixed inset-0 pointer-events-auto z-[9999] flex items-center justify-center overflow-hidden touch-none select-none"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+    >
       <style>{`
         @keyframes backdrop-fade {
           0% { opacity: 0; }
@@ -428,8 +434,8 @@ export function PowerAnimation() {
         }
       `}</style>
 
-      {/* 1. Telón oscuro multicapa con blur pro */}
-      <div className="absolute inset-0 bg-[#030712]/80 backdrop-blur-lg animate-backdrop-flowi pointer-events-none" />
+      {/* 1. Telón oscuro multicapa con blur pro (bloqueador de eventos) */}
+      <div className="absolute inset-0 bg-[#030712]/80 backdrop-blur-lg animate-backdrop-flowi pointer-events-auto" />
 
       {/* 2. Doble Sunburst Concéntrico Neón (Estilo Mario Wonder / Temu Reward) */}
       <div 

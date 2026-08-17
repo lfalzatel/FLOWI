@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ProfileModal } from '@/components/forms/ProfileModal';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
-import { Sparkles, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2 } from 'lucide-react';
 
 const SERVICES = [
   {
@@ -165,16 +165,16 @@ export default function ServiciosPage() {
           </button>
 
           <button
-            onClick={() => triggerPowerAnimation(100000, 'abono')}
+            onClick={() => triggerPowerAnimation(15000, 'eliminacion')}
             className={`flex flex-col items-center justify-center p-3 text-center transition-all active:scale-95 ${
               isTechTheme
-                ? 'border border-cyan-500/40 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20'
-                : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 rounded-2xl hover:bg-cyan-500/20'
+                ? 'border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                : 'bg-red-500/10 border border-red-500/30 text-red-600 rounded-2xl hover:bg-red-500/20'
             }`}
           >
-            <RefreshCw className="w-4 h-4 mb-1" />
-            <span className="text-[10px] font-extrabold uppercase">Abono</span>
-            <span className="text-[9px] opacity-80">$100k</span>
+            <Trash2 className="w-4 h-4 mb-1" />
+            <span className="text-[10px] font-extrabold uppercase">Eliminación</span>
+            <span className="text-[9px] opacity-80">$15k</span>
           </button>
         </div>
       </div>
