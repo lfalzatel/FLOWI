@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
+import PointsBurstAnimation from '@/components/ui/PointsBurstAnimation';
 
 interface PowerAnimationEvent {
   amount: number;
@@ -32,7 +33,7 @@ export function PowerAnimation() {
     if (active) {
       const timer = setTimeout(() => {
         setActive(false);
-      }, 1300); // Duración de la animación
+      }, 4200); // Duración ampliada a 4.2s para apreciar la animación y audio
       return () => clearTimeout(timer);
     }
   }, [active]);
@@ -186,9 +187,15 @@ export function PowerAnimation() {
             filter: `drop-shadow(0 0 10px ${shadowColor})`
           }}
         >
-          {labelPrefix}${fmt(data.amount)}
+          {labelPrefix}{fmt(data.amount)}
         </div>
       </div>
+      <PointsBurstAnimation
+        amount={data.amount}
+        type={data.type}
+        targetSelector="[data-points-capsule]"
+        onComplete={() => setActive(false)}
+      />
     </div>,
     document.body
   );

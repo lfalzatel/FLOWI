@@ -26,7 +26,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
   return (
     <div className="space-y-4">
       {/* Main balance */}
-      <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix shadow-sm"
+      <div data-points-capsule="true" className="relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix shadow-sm"
            style={{
              background: cardGradient,
              border: '1px solid var(--glass-border)',
