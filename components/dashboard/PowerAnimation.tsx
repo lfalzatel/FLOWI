@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
+import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, CheckCircle2, Trophy } from 'lucide-react';
 
 interface PowerAnimationEvent {
   amount: number;
@@ -157,7 +158,6 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
 
   // 🍄 SÍNTESIS DE SONIDOS TIPO MARIO BROS (8-BIT NES)
   if (soundSetting === 'mario_1up') {
-    // 🍄 Mario 1-UP (Vida Extra 8-Bit NES): E5 (659Hz), C6 (1046Hz), E6 (1318Hz), G6 (1568Hz), C7 (2093Hz), G7 (3136Hz)
     const notes = [659.25, 1046.50, 1318.51, 1567.98, 2093.00, 3135.96];
     notes.forEach((freq, idx) => {
       const duration = idx === notes.length - 1 ? 360 : 70;
@@ -167,14 +167,12 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
   }
 
   if (soundSetting === 'mario_coin') {
-    // 🪙 Mario Coin (Moneda 8-Bit NES): B5 (988Hz) ➔ E6 (1319Hz)
     playTone(987.77, 'square', 80, 0, 0.15);
     playTone(1318.51, 'square', 340, 80, 0.18);
     return;
   }
 
   if (soundSetting === 'mario_jump') {
-    // 🍄 Mario Jump (Salto 8-Bit NES): Pitch sweep 160Hz ➔ 620Hz
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -195,7 +193,6 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
   }
 
   if (soundSetting === 'mario_pipe') {
-    // 🍄 Mario Pipe / Fall (Tubo 8-Bit NES): C4 ➔ G3 ➔ E3 ➔ C3
     const notes = [261.63, 207.65, 174.61, 130.81];
     notes.forEach((freq, idx) => {
       playTone(freq, 'square', 110, idx * 95, 0.16);
@@ -205,7 +202,6 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
 
   // OTROS SONIDOS SINTETIZADOS
   if (type === 'eliminacion' && soundSetting === 'synth_laser') {
-    // 💥 Láser Ciberpunk Descendente
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -224,13 +220,11 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
       osc.stop(now + 0.35);
     } catch (e) {}
   } else if (type === 'eliminacion' && soundSetting === 'synth_dissolve') {
-    // 🌌 Disolución Armónica Retro
     const notes = [587.33, 493.88, 392.00, 293.66];
     notes.forEach((freq, idx) => {
       playTone(freq, 'sine', 450, idx * 90, 0.16);
     });
   } else if (type === 'eliminacion') {
-    // ⚡ Barrido Descendente De-Rez
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -249,7 +243,6 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
       osc.stop(now + 0.45);
     } catch (e) {}
   } else if (type === 'ingreso' || type === 'abono') {
-    // 🌟 Arpegio Celestial Ascendente
     const arpeggio = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51, 1567.98];
     arpeggio.forEach((freq, idx) => {
       playTone(freq, 'sine', 350, idx * 80, 0.16);
@@ -258,14 +251,12 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
     playTone(1567.98, 'sine', 800, 600, 0.20);
     playTone(2093.00, 'triangle', 600, 750, 0.12);
   } else if (type === 'gasto') {
-    // 💥 Acorde Sintetizado Resonante
     const notes = [659.25, 523.25, 440.00, 349.23];
     notes.forEach((freq, idx) => {
       playTone(freq, 'triangle', 320, idx * 75, 0.18);
     });
     playTone(261.63, 'sine', 500, 300, 0.15);
   } else if (type === 'edicion') {
-    // 🔮 Doble Repique Cristalino
     const notes = [659.25, 880.00, 1046.50, 1318.51];
     notes.forEach((freq, idx) => {
       playTone(freq, 'sine', 300, idx * 90, 0.15);
@@ -297,63 +288,81 @@ export function PowerAnimation() {
     if (active) {
       const timer = setTimeout(() => {
         setActive(false);
-      }, 3200);
+      }, 3400);
       return () => clearTimeout(timer);
     }
   }, [active]);
 
   if (!active || !data || typeof document === 'undefined') return null;
 
-  // Personalización del tema y colores según la acción
+  // Personalización del tema, colores e insignias flotantes 3D
   let labelPrefix = '';
-  let colorGradient = 'from-emerald-400 via-teal-300 to-cyan-400';
+  let colorGradient = 'from-emerald-300 via-emerald-400 to-teal-300';
+  let borderGradient = 'from-emerald-400 via-teal-300 to-cyan-400';
   let primaryColor = '#00E5A0';
   let secondaryColor = '#00E5FF';
-  let shadowRgba = 'rgba(0, 229, 160, 0.7)';
+  let shadowRgba = 'rgba(0, 229, 160, 0.75)';
   let actionText = 'INGRESO REGISTRADO';
-  let actionSubtitle = '¡Saldo actualizado con éxito!';
+  let actionSubtitle = '¡Tu saldo ha aumentado!';
+  let IconComponent = TrendingUp;
+  let badgeEmoji = '⭐';
 
   if (data.type === 'ingreso') {
     labelPrefix = '+';
-    colorGradient = 'from-emerald-400 via-teal-300 to-cyan-400';
+    colorGradient = 'from-emerald-300 via-teal-300 to-cyan-300';
+    borderGradient = 'from-emerald-400 via-teal-400 to-cyan-400';
     primaryColor = '#00E5A0';
     secondaryColor = '#00E5FF';
-    shadowRgba = 'rgba(0, 229, 160, 0.7)';
+    shadowRgba = 'rgba(0, 229, 160, 0.75)';
     actionText = 'INGRESO REGISTRADO';
-    actionSubtitle = '¡Tu saldo ha aumentado!';
+    actionSubtitle = '¡Saldo actualizado con éxito!';
+    IconComponent = TrendingUp;
+    badgeEmoji = '✨';
   } else if (data.type === 'abono') {
     labelPrefix = '+';
-    colorGradient = 'from-cyan-400 via-blue-400 to-indigo-400';
+    colorGradient = 'from-cyan-300 via-blue-400 to-indigo-300';
+    borderGradient = 'from-cyan-400 via-blue-400 to-indigo-400';
     primaryColor = '#00E5FF';
     secondaryColor = '#3B82F6';
-    shadowRgba = 'rgba(0, 229, 255, 0.7)';
-    actionText = 'ABONO COMPLETO';
+    shadowRgba = 'rgba(0, 229, 255, 0.75)';
+    actionText = 'ABONO REGISTRADO';
     actionSubtitle = '¡Deuda reducida con éxito!';
+    IconComponent = RefreshCw;
+    badgeEmoji = '💎';
   } else if (data.type === 'edicion') {
     labelPrefix = '✓ ';
-    colorGradient = 'from-purple-400 via-indigo-400 to-blue-400';
+    colorGradient = 'from-purple-300 via-indigo-300 to-blue-300';
+    borderGradient = 'from-purple-400 via-indigo-400 to-blue-400';
     primaryColor = '#8B5CF6';
     secondaryColor = '#3B82F6';
-    shadowRgba = 'rgba(139, 92, 246, 0.7)';
-    actionText = 'TRANSACCIÓN ACTUALIZADA';
-    actionSubtitle = '¡Cambios guardados!';
+    shadowRgba = 'rgba(139, 92, 246, 0.75)';
+    actionText = 'TRANSACCIÓN EDITA';
+    actionSubtitle = '¡Cambios guardados con éxito!';
+    IconComponent = CheckCircle2;
+    badgeEmoji = '🔮';
   } else if (data.type === 'eliminacion') {
     labelPrefix = '✕ ';
-    colorGradient = 'from-red-500 via-rose-500 to-orange-500';
+    colorGradient = 'from-red-400 via-rose-400 to-orange-400';
+    borderGradient = 'from-red-500 via-rose-500 to-orange-500';
     primaryColor = '#EF4444';
     secondaryColor = '#F97316';
-    shadowRgba = 'rgba(239, 68, 68, 0.7)';
+    shadowRgba = 'rgba(239, 68, 68, 0.75)';
     actionText = 'REGISTRO ELIMINADO';
     actionSubtitle = '¡Registro removido!';
+    IconComponent = Trash2;
+    badgeEmoji = '⚡';
   } else {
     // gasto
     labelPrefix = '-';
-    colorGradient = 'from-rose-500 via-red-500 to-pink-500';
+    colorGradient = 'from-rose-300 via-red-400 to-pink-300';
+    borderGradient = 'from-rose-500 via-red-500 to-pink-500';
     primaryColor = '#FF2E63';
     secondaryColor = '#EF4444';
-    shadowRgba = 'rgba(255, 46, 99, 0.7)';
+    shadowRgba = 'rgba(255, 46, 99, 0.75)';
     actionText = 'GASTO REGISTRADO';
     actionSubtitle = '¡Balance actualizado!';
+    IconComponent = TrendingDown;
+    badgeEmoji = '💸';
   }
 
   const fmt = (n: number) => formatCurrency(n, profile?.currency).replace(/\.00$/, '');
@@ -368,110 +377,157 @@ export function PowerAnimation() {
           85% { opacity: 1; }
           100% { opacity: 0; }
         }
-        @keyframes temu-pop {
-          0% { transform: scale(0.2) translateY(40px); opacity: 0; }
-          20% { transform: scale(1.25) translateY(-10px); opacity: 1; }
-          30% { transform: scale(1) translateY(0); opacity: 1; }
-          80% { transform: scale(1) translateY(-10px); opacity: 1; }
-          100% { transform: scale(0.7) translateY(-60px); opacity: 0; }
+        @keyframes mario-temu-pop {
+          0% { transform: scale(0.15) translateY(60px) rotateX(25deg); opacity: 0; }
+          22% { transform: scale(1.18) translateY(-12px) rotateX(-5deg); opacity: 1; }
+          32% { transform: scale(1) translateY(0) rotateX(0deg); opacity: 1; }
+          80% { transform: scale(1) translateY(-6px); opacity: 1; }
+          100% { transform: scale(0.65) translateY(-80px) rotateX(-20deg); opacity: 0; }
         }
-        @keyframes sunburst-spin {
+        @keyframes sunburst-cw {
           from { transform: translate(-50%, -50%) rotate(0deg); }
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
-        @keyframes ring-expand {
-          0% { transform: scale(0.3); opacity: 0.9; border-width: 6px; }
-          100% { transform: scale(2.2); opacity: 0; border-width: 1px; }
+        @keyframes sunburst-ccw {
+          from { transform: translate(-50%, -50%) rotate(360deg); }
+          to { transform: translate(-50%, -50%) rotate(0deg); }
         }
-        @keyframes particle-fly {
-          0% { transform: translateY(20px) scale(0); opacity: 0; }
-          40% { opacity: 1; }
-          100% { transform: translateY(-140px) scale(1.4) rotate(45deg); opacity: 0; }
+        @keyframes badge-bounce {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-8px) scale(1.1); }
+        }
+        @keyframes shimmer-sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+        @keyframes star-burst-up {
+          0% { transform: translateY(10px) scale(0) rotate(0deg); opacity: 0; }
+          30% { opacity: 1; }
+          100% { transform: translateY(-160px) scale(1.5) rotate(360deg); opacity: 0; }
         }
         .animate-backdrop-flowi {
-          animation: backdrop-fade 3.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+          animation: backdrop-fade 3.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-        .animate-temu-card {
-          animation: temu-pop 3.2s cubic-bezier(0.22, 1.6, 0.4, 1) forwards;
+        .animate-mario-temu-card {
+          animation: mario-temu-pop 3.4s cubic-bezier(0.18, 1.4, 0.35, 1) forwards;
         }
-        .animate-sunburst-flowi {
-          animation: sunburst-spin 12s linear infinite;
+        .animate-sunburst-cw {
+          animation: sunburst-cw 12s linear infinite;
         }
-        .animate-ring-flowi {
-          animation: ring-expand 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        .animate-sunburst-ccw {
+          animation: sunburst-ccw 8s linear infinite;
         }
-        .animate-particle-flowi {
-          animation: particle-fly 1.4s cubic-bezier(0.1, 0.6, 0.2, 1) forwards;
+        .animate-badge-bounce {
+          animation: badge-bounce 2s ease-in-out infinite;
+        }
+        .animate-shimmer-sweep {
+          animation: shimmer-sweep 2.2s ease-in-out infinite;
+        }
+        .animate-star-burst {
+          animation: star-burst-up 1.6s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
         }
       `}</style>
 
-      {/* 1. Telón oscuro con blur de alto contraste */}
-      <div className="absolute inset-0 bg-[#050B14]/75 backdrop-blur-md animate-backdrop-flowi pointer-events-none" />
+      {/* 1. Telón oscuro multicapa con blur pro */}
+      <div className="absolute inset-0 bg-[#030712]/80 backdrop-blur-lg animate-backdrop-flowi pointer-events-none" />
 
-      {/* 2. Rayos Solares Giratorios (Sunburst GPU estilo Temu) */}
+      {/* 2. Doble Sunburst Concéntrico Neón (Estilo Mario Wonder / Temu Reward) */}
       <div 
-        className="absolute top-1/2 left-1/2 w-[450px] h-[450px] rounded-full pointer-events-none animate-sunburst-flowi opacity-45"
+        className="absolute top-1/2 left-1/2 w-[520px] h-[520px] rounded-full pointer-events-none animate-sunburst-cw opacity-40"
         style={{
           background: `conic-gradient(from 0deg, ${shadowRgba} 0deg 15deg, transparent 15deg 30deg, ${shadowRgba} 30deg 45deg, transparent 45deg 60deg, ${shadowRgba} 60deg 75deg, transparent 75deg 90deg, ${shadowRgba} 90deg 105deg, transparent 105deg 120deg, ${shadowRgba} 120deg 135deg, transparent 135deg 150deg, ${shadowRgba} 150deg 165deg, transparent 165deg 180deg, ${shadowRgba} 180deg 195deg, transparent 195deg 210deg, ${shadowRgba} 210deg 225deg, transparent 225deg 240deg, ${shadowRgba} 240deg 255deg, transparent 255deg 270deg, ${shadowRgba} 270deg 285deg, transparent 285deg 300deg, ${shadowRgba} 300deg 315deg, transparent 315deg 330deg, ${shadowRgba} 330deg 345deg, transparent 345deg 360deg)`,
-          maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 75%)',
-          WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 75%)',
+          maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 70%)',
+          WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 70%)',
+        }}
+      />
+      <div 
+        className="absolute top-1/2 left-1/2 w-[380px] h-[380px] rounded-full pointer-events-none animate-sunburst-ccw opacity-30"
+        style={{
+          background: `conic-gradient(from 0deg, rgba(255,255,255,0.4) 0deg 10deg, transparent 10deg 25deg, rgba(255,255,255,0.4) 25deg 35deg, transparent 35deg 50deg, rgba(255,255,255,0.4) 50deg 60deg, transparent 60deg 75deg, rgba(255,255,255,0.4) 75deg 85deg, transparent 85deg 100deg)`,
+          maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%)',
+          WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%)',
         }}
       />
 
-      {/* 3. Anillos expansivos neón */}
-      <div 
-        className="absolute w-48 h-48 rounded-full border animate-ring-flowi pointer-events-none"
-        style={{ borderColor: primaryColor, boxShadow: `0 0 35px ${primaryColor}` }}
-      />
-      <div 
-        className="absolute w-64 h-64 rounded-full border animate-ring-flowi pointer-events-none"
-        style={{ borderColor: secondaryColor, boxShadow: `0 0 25px ${secondaryColor}`, animationDelay: '0.15s' }}
-      />
-
-      {/* 4. Partículas neón flotantes */}
-      {[...Array(14)].map((_, i) => {
-        const leftOffset = (Math.random() - 0.5) * 200;
-        const scale = 0.6 + Math.random() * 0.9;
-        const delay = Math.random() * 0.4;
+      {/* 3. Estrellas y Monedas Flotantes (Particle Physics Burst) */}
+      {[...Array(10)].map((_, i) => {
+        const leftPos = 50 + (i % 2 === 0 ? 1 : -1) * (15 + i * 14);
+        const delay = 0.1 + i * 0.08;
+        const particleIcons = ['⭐', '🪙', '✨', '💎', '🌟'];
+        const pIcon = particleIcons[i % particleIcons.length];
         return (
           <div
             key={i}
-            className="absolute animate-particle-flowi w-2 h-2 rounded-full pointer-events-none"
+            className="absolute animate-star-burst text-lg sm:text-2xl pointer-events-none select-none"
             style={{
-              left: `calc(50% + ${leftOffset}px)`,
-              backgroundColor: i % 2 === 0 ? primaryColor : secondaryColor,
-              boxShadow: `0 0 12px ${shadowRgba}`,
+              left: `${leftPos}%`,
+              top: '55%',
               animationDelay: `${delay}s`,
-              transform: `scale(${scale})`,
+              filter: `drop-shadow(0 0 10px ${primaryColor})`,
             }}
-          />
+          >
+            {pIcon}
+          </div>
         );
       })}
 
-      {/* 5. Tarjeta Temu-Pop Elástica */}
-      <div className="relative z-10 animate-temu-card flex flex-col items-center justify-center text-center p-6 sm:p-8 rounded-3xl bg-[#0B132B]/95 border-2 border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.9)] max-w-sm mx-4">
+      {/* 4. Tarjeta 3D Holográfica de Alto Impacto (Super Mario Item Collect & Temu Chest Style) */}
+      <div className="relative z-10 animate-mario-temu-card flex flex-col items-center justify-center text-center p-7 sm:p-9 rounded-[2.2rem] max-w-sm mx-4 bg-[#091124]/95 border border-white/20 shadow-[0_0_60px_rgba(0,0,0,0.95)] overflow-visible">
+        
+        {/* Borde metálico con Shimmer Light Sweep */}
         <div 
-          className="absolute inset-0 rounded-3xl opacity-35 blur-xl pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)` }}
+          className="absolute -inset-[2px] rounded-[2.3rem] p-[2px] pointer-events-none"
+          style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor}, rgba(255,255,255,0.3))` }}
+        >
+          <div className="w-full h-full rounded-[2.2rem] bg-[#091124] overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-sweep pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Resplandor radial interno de profundidad 3D */}
+        <div 
+          className="absolute inset-0 rounded-[2.2rem] opacity-35 pointer-events-none"
+          style={{ background: `radial-gradient(circle at 50% 30%, ${primaryColor} 0%, transparent 75%)` }}
         />
 
-        <span 
-          className="relative z-10 text-[10px] sm:text-xs font-black tracking-[0.25em] uppercase mb-2 px-3 py-1 rounded-full bg-black/60 border border-white/20 text-white shadow-md"
+        {/* 🌟 EMBLEMA FLOTANTE 3D CON INSIGNIA Y HALO SUPERIOR (Sobresale de la tarjeta) */}
+        <div className="absolute -top-7 z-20 flex items-center justify-center animate-badge-bounce">
+          <div 
+            className="w-14 h-14 rounded-full flex items-center justify-center border-2 border-white shadow-[0_0_25px_rgba(0,0,0,0.8)] relative"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+              boxShadow: `0 0 30px ${shadowRgba}, 0 4px 15px rgba(0,0,0,0.6)`
+            }}
+          >
+            <IconComponent className="w-7 h-7 text-black stroke-[2.5]" />
+            <span className="absolute -bottom-1 -right-1 text-xs select-none filter drop-shadow">{badgeEmoji}</span>
+          </div>
+        </div>
+
+        {/* Espaciador para la insignia flotante */}
+        <div className="h-4" />
+
+        {/* Cinta / Banner Titular */}
+        <div 
+          className="relative z-10 text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase px-4 py-1 rounded-full bg-black/70 border border-white/20 text-white shadow-lg mb-2"
           style={{ textShadow: `0 0 10px ${primaryColor}` }}
         >
           {actionText}
-        </span>
+        </div>
 
+        {/* Número 3D Neón Gigante */}
         <div 
-          className={`relative z-10 text-4xl sm:text-5xl font-black ${isTechTheme ? 'font-mono' : 'font-syne'} tracking-tight bg-gradient-to-r ${colorGradient} bg-clip-text text-transparent filter drop-shadow-[0_4px_12px_rgba(0,0,0,1)] my-1`}
+          className={`relative z-10 text-4xl sm:text-5xl font-black ${isTechTheme ? 'font-mono' : 'font-syne'} tracking-tight bg-gradient-to-r ${colorGradient} bg-clip-text text-transparent filter drop-shadow-[0_4px_16px_rgba(0,0,0,1)] my-2`}
           style={{
-            textShadow: `0 0 25px ${shadowRgba}`,
+            textShadow: `0 0 30px ${shadowRgba}`,
           }}
         >
           {formattedText}
         </div>
 
-        <span className="relative z-10 text-[11px] font-bold text-gray-300 mt-1">
+        {/* Subtítulo elegante */}
+        <span className="relative z-10 text-xs font-bold text-gray-200 mt-1 flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+          <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
           {actionSubtitle}
         </span>
       </div>
