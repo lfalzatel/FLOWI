@@ -485,6 +485,7 @@ export default function ConfigPage() {
                 </select>
               </div>
             </div>
+            </div>
           )}
         </section>
 
