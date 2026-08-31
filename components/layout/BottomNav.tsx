@@ -10,6 +10,7 @@ import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { useTheme } from '@/components/ThemeProvider';
+import { playUISound } from '@/components/dashboard/PowerAnimation';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Inicio',        href: '/' },
@@ -75,7 +76,10 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
         {/* Floating FAB on the right */}
         <button
-          onClick={() => setShowAdd(true)}
+          onClick={() => {
+            playUISound();
+            setShowAdd(true);
+          }}
           aria-label="Nueva transacción"
           className={`pointer-events-auto flex-shrink-0 flex items-center justify-center
                       w-14 h-14
@@ -107,7 +111,9 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
 function NavItem({ icon: Icon, label, href, active, isTechTheme, isLight }: any) {
   return (
-    <Link href={href}
+    <Link 
+      href={href}
+      onClick={() => playUISound()}
       className={`relative flex flex-col items-center justify-center flex-1 gap-0.5 py-1.5
                   transition-all duration-200 ${isTechTheme ? 'rounded-none' : 'rounded-[20px]'}
                   ${active

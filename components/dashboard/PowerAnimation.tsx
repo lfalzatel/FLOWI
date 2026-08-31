@@ -265,6 +265,103 @@ export function playSynthesizedSound(type: PowerAnimationEvent['type'], override
   }
 }
 
+// 🍿 Sintetizador de efectos de interfaz PAE (Navegación / Menú Inferior / Botones)
+export function playUISound(overrideType?: string) {
+  if (typeof window === 'undefined') return;
+
+  if (localStorage.getItem('sound_enabled') === 'false') return;
+
+  const soundType = overrideType || localStorage.getItem('sound_ui_nav') || 'pop';
+  if (soundType === 'silent') return;
+
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+
+  if (soundType === 'pop') {
+    // 🍿 1. Pop / Burbuja (Sine 440Hz -> 880Hz, 80ms)
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } catch (e) {}
+  } else if (soundType === 'click') {
+    // ⚡ 2. Click Digital (Triangle 1200Hz, 30ms)
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1200, now);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.03);
+    } catch (e) {}
+  } else if (soundType === 'chime') {
+    // 🎵 3. Campana Armónica (Dual Sine C5 523Hz + E5 659Hz, 120ms)
+    try {
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(523.25, now);
+      osc2.frequency.setValueAtTime(659.25, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.12);
+      osc2.stop(now + 0.12);
+    } catch (e) {}
+  } else if (soundType === 'haptic') {
+    // 📳 4. Toque Háptico (Sine 160Hz -> 50Hz, 40ms)
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.exponentialRampToValueAtTime(50, now + 0.04);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch (e) {}
+  } else if (soundType === 'arcade') {
+    // ✨ 5. Chime Brillos (Sine 600Hz -> 1200Hz -> 1800Hz, 120ms)
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.06);
+      osc.frequency.exponentialRampToValueAtTime(1800, now + 0.12);
+      gain.gain.setValueAtTime(0.10, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } catch (e) {}
+  }
+}
+
 export function PowerAnimation() {
   const [active, setActive] = useState(false);
   const [data, setData] = useState<PowerAnimationEvent | null>(null);

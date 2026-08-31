@@ -92,6 +92,7 @@ export default function ConfigPage() {
   const [soundGasto, setSoundGasto] = useState('synth');
   const [soundEdicion, setSoundEdicion] = useState('synth');
   const [soundEliminacion, setSoundEliminacion] = useState('synth');
+  const [soundUINav, setSoundUINav] = useState('pop');
 
   // Load from local storage
   useEffect(() => {
@@ -105,6 +106,7 @@ export default function ConfigPage() {
     setSoundGasto(localStorage.getItem('sound_gasto') || 'synth');
     setSoundEdicion(localStorage.getItem('sound_edicion') || 'synth');
     setSoundEliminacion(localStorage.getItem('sound_eliminacion') || 'synth');
+    setSoundUINav(localStorage.getItem('sound_ui_nav') || 'pop');
   }, []);
 
   const toggleNotifications = () => {
@@ -160,6 +162,15 @@ export default function ConfigPage() {
     // Disparar prueba de sonido inmediata
     import('@/components/dashboard/PowerAnimation').then(({ playSynthesizedSound }) => {
       playSynthesizedSound(actionType, value);
+    });
+  };
+
+  const handleUINavSoundChange = (value: string) => {
+    setSoundUINav(value);
+    localStorage.setItem('sound_ui_nav', value);
+
+    import('@/components/dashboard/PowerAnimation').then(({ playUISound }) => {
+      playUISound(value);
     });
   };
 
@@ -453,7 +464,26 @@ export default function ConfigPage() {
                   <option value="silent">🔇 Silencioso</option>
                 </select>
               </div>
-            </div>
+
+              {/* 5. Menú Inferior & Navegación (Sintetizador PAE) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <div className="text-left">
+                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>Menú Inferior & Navegación (PAE)</p>
+                  <p className="text-[10px] text-text-muted">Micro-feedback al tocar pestañas y botones</p>
+                </div>
+                <select
+                  value={soundUINav}
+                  onChange={(e) => handleUINavSoundChange(e.target.value)}
+                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-cyan-500/40 text-cyan-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
+                >
+                  <option value="pop">🍿 Pop / Burbuja (Estilo iOS)</option>
+                  <option value="click">⚡ Click Digital (Mecánico)</option>
+                  <option value="chime">🎵 Campana Armónica (Micro-acorde)</option>
+                  <option value="haptic">📳 Toque Háptico (Grave)</option>
+                  <option value="arcade">✨ Chime Brillos (Ascendente)</option>
+                  <option value="silent">🔇 Silencioso</option>
+                </select>
+              </div>
             </div>
           )}
         </section>
