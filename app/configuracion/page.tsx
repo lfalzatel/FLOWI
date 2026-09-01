@@ -93,6 +93,7 @@ export default function ConfigPage() {
   const [soundEdicion, setSoundEdicion] = useState('synth');
   const [soundEliminacion, setSoundEliminacion] = useState('synth');
   const [soundUINav, setSoundUINav] = useState('pop');
+  const [soundParticles, setSoundParticles] = useState('crystal');
 
   // Load from local storage
   useEffect(() => {
@@ -107,6 +108,7 @@ export default function ConfigPage() {
     setSoundEdicion(localStorage.getItem('sound_edicion') || 'synth');
     setSoundEliminacion(localStorage.getItem('sound_eliminacion') || 'synth');
     setSoundUINav(localStorage.getItem('sound_ui_nav') || 'pop');
+    setSoundParticles(localStorage.getItem('sound_particles') || 'crystal');
   }, []);
 
   const toggleNotifications = () => {
@@ -172,6 +174,17 @@ export default function ConfigPage() {
     import('@/components/dashboard/PowerAnimation').then(({ playUISound }) => {
       playUISound(value);
     });
+  };
+
+  const handleParticlesSoundChange = (value: string) => {
+    setSoundParticles(value);
+    localStorage.setItem('sound_particles', value);
+
+    if (soundEnabled && value !== 'silent') {
+      import('@/components/dashboard/DualTrajectoryBurst').then(({ triggerDualBurst }) => {
+        triggerDualBurst({ type: 'ingreso' });
+      });
+    }
   };
 
   const handleClearData = async () => {
@@ -482,6 +495,25 @@ export default function ConfigPage() {
                   <option value="haptic">📳 Toque Háptico (Grave)</option>
                   <option value="arcade">✨ Chime Brillos (Ascendente)</option>
                   <option value="silent">🔇 Silencioso</option>
+                </select>
+              </div>
+
+              {/* 6. Partículas Voladoras (Trayectoria Dual) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                <div className="text-left">
+                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Partículas Voladoras (Trayectoria Dual)</p>
+                  <p className="text-[10px] text-text-muted">Cascada de micro-tonos (Despegue + Absorción)</p>
+                </div>
+                <select
+                  value={soundParticles}
+                  onChange={(e) => handleParticlesSoundChange(e.target.value)}
+                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-purple-500/40 text-purple-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
+                >
+                  <option value="crystal">🔮 Cristalino Pentatónico (Armónico)</option>
+                  <option value="arcade">✨ Arcade 8-Bit (NES Retro)</option>
+                  <option value="marimba">🪵 Marimba Acústica (Madera)</option>
+                  <option value="synth_laser">⚡ Neón Ciberpunk (Sintetizador)</option>
+                  <option value="silent">🔇 Silenciar solo partículas</option>
                 </select>
               </div>
             </div>

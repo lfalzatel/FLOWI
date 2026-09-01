@@ -78,6 +78,9 @@ function playToneForPhase(
   if (typeof window === 'undefined') return;
   if (localStorage.getItem('sound_enabled') === 'false') return;
 
+  const particleStyle = localStorage.getItem('sound_particles') || 'crystal';
+  if (particleStyle === 'silent') return;
+
   const timer = setTimeout(() => {
     try {
       const ctx = getCrystalAudioContext();
@@ -86,7 +89,7 @@ function playToneForPhase(
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
-      // Configuración de escalas y frecuencias por tipo de animación
+      // Configuración de escalas y frecuencias por tipo de animación (Ingreso, Abono, Logro, Gasto)
       let baseFreq = 1046.50; // Do6 (Ingresos)
       let stepFreq = 45;
       let waveType: OscillatorType = 'sine';
@@ -96,25 +99,37 @@ function playToneForPhase(
       if (type === 'abono') {
         baseFreq = 880.00; // La5 (Abono / Deudas - Resonancia Cristalina)
         stepFreq = 55;
-        waveType = 'sine';
         volume = 0.09;
       } else if (type === 'logro') {
         baseFreq = 1318.51; // Mi6 (Logro / Fanfarria Triunfal)
         stepFreq = 65;
-        waveType = 'triangle';
         volume = 0.11;
       } else if (type === 'gasto') {
         baseFreq = 783.99; // Sol5 (Gastos - Pop Háptico)
         stepFreq = 35;
-        waveType = 'sine';
         volume = 0.08;
+      }
+
+      // Estilo de Instrumento elegido por el usuario en Configuración
+      if (particleStyle === 'arcade') {
+        waveType = 'square';
+        volume *= 0.8;
+        duration = 0.09;
+      } else if (particleStyle === 'marimba') {
+        waveType = 'triangle';
+        volume *= 1.1;
+        duration = 0.14;
+      } else if (particleStyle === 'synth_laser') {
+        waveType = 'sawtooth';
+        volume *= 0.7;
+        duration = 0.08;
       }
 
       // En la fase de Impacto/Absorción, la frecuencia sube a la siguiente octava (sonido de llegada al destino)
       if (phase === 'impact') {
         baseFreq = baseFreq * 1.5; // Salto armónico a quinta/octava alta
-        duration = 0.09;
-        volume = 0.07;
+        duration *= 0.85;
+        volume *= 0.75;
       }
 
       const freq = baseFreq + (particleIndex % 12) * stepFreq;
