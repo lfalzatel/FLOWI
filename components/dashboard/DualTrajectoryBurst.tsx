@@ -10,6 +10,7 @@ export interface DualTrajectoryBurstProps {
   startPosition?: { x: number; y: number };
   targetAId?: string;
   targetBId?: string;
+  targetCId?: string;
   type?: 'ingreso' | 'gasto' | 'abono' | 'logro';
   enableSound?: boolean;
 }
@@ -17,7 +18,7 @@ export interface DualTrajectoryBurstProps {
 interface Particle {
   id: number;
   icon: string;
-  target: 'targetA' | 'targetB';
+  target: 'targetA' | 'targetB' | 'targetC';
   targetX: number;
   targetY: number;
   startX: number;
@@ -29,6 +30,7 @@ interface TriggerEventDetail {
   type?: 'ingreso' | 'gasto' | 'abono' | 'logro';
   targetAId?: string;
   targetBId?: string;
+  targetCId?: string;
   startPosition?: { x: number; y: number };
 }
 
@@ -66,7 +68,7 @@ function stopCrystalAudio() {
 }
 
 /**
- * 🎵 Sintetizador de 2 Fases (Despegue y Absorción/Impacto)
+ * 🎵 Sintetizador Armónico de Cascada Única
  * Cada tipo ('ingreso', 'abono', 'logro', 'gasto') tiene una escala y timbre musical único.
  */
 function playToneForPhase(
@@ -125,13 +127,6 @@ function playToneForPhase(
         duration = 0.08;
       }
 
-      // En la fase de Impacto/Absorción, la frecuencia sube a la siguiente octava (sonido de llegada al destino)
-      if (phase === 'impact') {
-        baseFreq = baseFreq * 1.5; // Salto armónico a quinta/octava alta
-        duration *= 0.85;
-        volume *= 0.75;
-      }
-
       const freq = baseFreq + (particleIndex % 12) * stepFreq;
 
       osc.type = waveType;
@@ -160,6 +155,7 @@ export function DualTrajectoryBurst({
   startPosition,
   targetAId = 'balance-card',
   targetBId = 'header-profile',
+  targetCId = 'total-ingresos-card',
   type = 'ingreso',
   enableSound = true
 }: DualTrajectoryBurstProps) {
@@ -178,9 +174,11 @@ export function DualTrajectoryBurst({
 
     const elA = document.getElementById(targetAId);
     const elB = document.getElementById(targetBId);
+    const elC = targetCId ? document.getElementById(targetCId) : null;
 
     const rectA = elA ? elA.getBoundingClientRect() : { left: window.innerWidth - 60, top: 20, width: 40, height: 40 };
     const rectB = elB ? elB.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight - 50, width: 40, height: 40 };
+    const rectC = elC ? elC.getBoundingClientRect() : (elA ? elA.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 40, height: 40 });
 
     const startX = startPosition?.x ?? window.innerWidth / 2;
     const startY = startPosition?.y ?? window.innerHeight / 2;
@@ -189,37 +187,58 @@ export function DualTrajectoryBurst({
     const targetAY = rectA.top + rectA.height / 2;
     const targetBX = rectB.left + rectB.width / 2;
     const targetBY = rectB.top + rectB.height / 2;
+    const targetCX = rectC.left + rectC.width / 2;
+    const targetCY = rectC.top + rectC.height / 2;
 
     const icons = ICON_SETS[type] || ICON_SETS.ingreso;
     const generated: Particle[] = [];
 
-    // 🚀 Generar 24 partículas (12 hacia Destino A y 12 hacia Destino B)
-    const flightDurationMs = 1500; // Duración de vuelo de cada partícula en ms
-
+    // 🚀 Generar 24 partículas divididas en 3 Destinos (8 para Target A, 8 para Target B, 8 para Target C)
     for (let i = 0; i < 24; i++) {
-      const isTargetA = i % 2 === 0;
-      const delaySec = i * 0.05; // 50ms entre cada despegue (total despegues: 0 a 1150ms)
+      let particleTarget: 'targetA' | 'targetB' | 'targetC' = 'targetA';
+      let destX = targetAX;
+      let destY = targetAY;
+
+      if (i % 3 === 1) {
+        particleTarget = 'targetB';
+        destX = targetBX;
+        destY = targetBY;
+      } else if (i % 3 === 2) {
+        particleTarget = 'targetC';
+        destX = targetCX;
+        destY = targetCY;
+      }
+
+      const delaySec = i * 0.05;
 
       generated.push({
         id: Date.now() + i,
         icon: icons[i % icons.length],
-        target: isTargetA ? 'targetA' : 'targetB',
+        target: particleTarget,
         startX,
         startY,
-        targetX: isTargetA ? targetAX : targetBX,
-        targetY: isTargetA ? targetAY : targetBY,
+        targetX: destX,
+        targetY: destY,
         delay: delaySec,
       });
 
       if (enableSound) {
-        // 🎵 Una sola cascada musical fluida (1 nota por partícula repartida a lo largo de todo el vuelo, 0ms a 2100ms)
+        // 🎵 Una sola cascada musical fluida (0ms a 2100ms)
         playToneForPhase(i, type, 'launch', i * 90);
       }
     }
 
     setParticles(generated);
 
-    // Finalizar animación exacto al aterrizar y ser absorbida la última partícula (~2.7s)
+    // Disparar evento de absorción para que la tarjeta de total crezca y pulse al ser impactada
+    if (targetCId && typeof window !== 'undefined') {
+      const absorbTimer = setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('absorb-total-impact', { detail: { targetCId } }));
+      }, 500);
+      activeParticleTimers.push(absorbTimer);
+    }
+
+    // Finalizar animación exacto al aterrizar la última partícula
     const totalDurationMs = 2700;
     const timer = setTimeout(() => {
       setParticles([]);
@@ -251,12 +270,12 @@ export function DualTrajectoryBurst({
             animate={{
               x: [
                 p.startX,
-                p.startX + (p.target === 'targetA' ? 70 : -70),
+                p.startX + (p.target === 'targetA' ? 70 : p.target === 'targetB' ? -70 : (p.id % 2 === 0 ? 40 : -40)),
                 p.targetX
               ],
               y: [
                 p.startY,
-                p.startY - (p.target === 'targetA' ? 100 : 50),
+                p.startY - (p.target === 'targetA' ? 100 : p.target === 'targetB' ? 50 : 80),
                 p.targetY
               ],
               scale: [0.3, 1.4, 1.4, 1.1, 0.15],
@@ -302,13 +321,14 @@ export function DualTrajectoryBurstGlobal() {
       type={options.type || 'ingreso'}
       targetAId={options.targetAId || 'balance-card'}
       targetBId={options.targetBId || 'header-profile'}
+      targetCId={options.targetCId || 'total-ingresos-card'}
       startPosition={options.startPosition}
       onComplete={() => setActive(false)}
     />
   );
 }
 
-// Helper para disparar la animación global de 24 partículas de doble trayectoria
+// Helper para disparar la animación global de 24 partículas con 3 destinos (A, B y C)
 export function triggerDualBurst(options?: TriggerEventDetail) {
   if (typeof window !== 'undefined') {
     const event = new CustomEvent('show-dual-burst', {

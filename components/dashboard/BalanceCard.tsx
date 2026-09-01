@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { AnimatedNumber } from './AnimatedNumber';
 
 interface Props {
   balance:       number;
@@ -10,12 +11,26 @@ interface Props {
   totalDeudas:   number;
 }
 
-import { AnimatedNumber } from './AnimatedNumber';
-
 export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }: Props) {
   const { theme } = useTheme();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light';
+
+  const [absorbingId, setAbsorbingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleAbsorb = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.targetCId) {
+        setAbsorbingId(detail.targetCId);
+        const timer = setTimeout(() => setAbsorbingId(null), 1600);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    window.addEventListener('absorb-total-impact', handleAbsorb);
+    return () => window.removeEventListener('absorb-total-impact', handleAbsorb);
+  }, []);
 
   const cardGradient = isLight 
     ? 'linear-gradient(135deg, var(--bg-card) 0%, #F9FAFB 100%)' 
@@ -26,14 +41,20 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
   return (
     <div className="space-y-4">
       {/* Main balance */}
-      <div id="balance-card" data-points-capsule="true" className="relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix shadow-sm"
-           style={{
-             background: cardGradient,
-             border: '1px solid var(--glass-border)',
-             animationDelay: '0.05s',
-             borderRadius: isCyberpunk ? '0' : '1.5rem',
-             clipPath: isCyberpunk ? 'polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)' : 'none'
-           }}>
+      <div 
+        id="balance-card" 
+        data-points-capsule="true" 
+        className={`relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix shadow-sm transition-all duration-300 ${
+          absorbingId === 'balance-card' ? 'scale-[1.03] ring-2 ring-accent shadow-[0_0_40px_rgba(0,229,160,0.6)]' : ''
+        }`}
+        style={{
+          background: cardGradient,
+          border: '1px solid var(--glass-border)',
+          animationDelay: '0.05s',
+          borderRadius: isCyberpunk ? '0' : '1.5rem',
+          clipPath: isCyberpunk ? 'polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)' : 'none'
+        }}
+      >
         {/* Decorative circles */}
         {!isLight && !isCyberpunk && (
           <>
@@ -70,34 +91,61 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
 
       {/* Gastos + Ingresos row + Deudas */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.15s' }}>
+        {/* Tarjeta Total Gastos */}
+        <div 
+          id="total-gastos-card" 
+          className={`glass-card p-4 rounded-2xl animate-card-mix transition-all duration-300 ${
+            absorbingId === 'total-gastos-card' ? 'scale-110 border-red-500/80 shadow-[0_0_35px_rgba(239,68,68,0.7)]' : ''
+          }`} 
+          style={{ animationDelay: '0.15s' }}
+        >
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-[var(--red)]/15 flex items-center justify-center">
               <TrendingDown className="w-3 h-3 text-[var(--red)]" />
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--red)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Gastos</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)] tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)]'}`}><AnimatedNumber value={totalGastos} delay={0.15} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)] tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)]'} ${absorbingId === 'total-gastos-card' ? 'drop-shadow-[0_0_12px_rgba(239,68,68,0.9)]' : ''}`}>
+            <AnimatedNumber value={totalGastos} delay={0.15} />
+          </p>
         </div>
-        <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.25s' }}>
+
+        {/* Tarjeta Total Ingresos */}
+        <div 
+          id="total-ingresos-card" 
+          className={`glass-card p-4 rounded-2xl animate-card-mix transition-all duration-300 ${
+            absorbingId === 'total-ingresos-card' ? 'scale-110 border-accent/80 shadow-[0_0_35px_rgba(0,229,160,0.7)]' : ''
+          }`} 
+          style={{ animationDelay: '0.25s' }}
+        >
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">
               <TrendingUp className="w-3 h-3 text-accent" />
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Ingresos</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-accent'}`}><AnimatedNumber value={totalIngresos} delay={0.25} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-accent'} ${absorbingId === 'total-ingresos-card' ? 'drop-shadow-[0_0_12px_rgba(0,229,160,0.9)]' : ''}`}>
+            <AnimatedNumber value={totalIngresos} delay={0.25} />
+          </p>
         </div>
         
         {/* Tarjeta de Deudas a lo ancho */}
-        <div className="glass-card p-4 rounded-2xl col-span-2 animate-card-mix" style={{ animationDelay: '0.35s' }}>
+        <div 
+          id="total-deudas-card" 
+          className={`glass-card p-4 rounded-2xl col-span-2 animate-card-mix transition-all duration-300 ${
+            absorbingId === 'total-deudas-card' ? 'scale-105 border-yellow-500/80 shadow-[0_0_35px_rgba(245,158,11,0.7)]' : ''
+          }`} 
+          style={{ animationDelay: '0.35s' }}
+        >
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 rounded-lg bg-[var(--yellow)]/15 flex items-center justify-center">
               <TrendingDown className="w-3 h-3 text-[var(--yellow)]" />
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--yellow)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Deudas Pendientes</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)] tracking-wider' : 'font-syne font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)]'}`}><AnimatedNumber value={totalDeudas} delay={0.35} /></p>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)] tracking-wider' : 'font-syne font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)]'} ${absorbingId === 'total-deudas-card' ? 'drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]' : ''}`}>
+            <AnimatedNumber value={totalDeudas} delay={0.35} />
+          </p>
         </div>
       </div>
     </div>

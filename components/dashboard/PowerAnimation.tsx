@@ -659,23 +659,28 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
       let burstType: 'ingreso' | 'gasto' | 'abono' | 'logro' = 'ingreso';
       let targetAId = 'balance-card';
       let targetBId = 'header-profile';
+      let targetCId = 'total-ingresos-card';
 
       if (type === 'ingreso') {
         burstType = 'ingreso';
         targetAId = 'balance-card';
         targetBId = 'nav-ingresos';
+        targetCId = 'total-ingresos-card';
       } else if (type === 'abono') {
         burstType = 'abono';
         targetAId = 'nav-deudas';
         targetBId = 'header-profile';
+        targetCId = 'total-deudas-card';
       } else if (type === 'gasto') {
         burstType = 'gasto';
         targetAId = 'balance-card';
         targetBId = 'nav-gastos';
+        targetCId = 'total-gastos-card';
       } else {
         burstType = 'logro';
         targetAId = 'balance-card';
         targetBId = 'header-profile';
+        targetCId = 'total-ingresos-card';
       }
 
       // Si la tarjeta está activa, la explosión desfasa 1.5s. Si está desactivada, dispara de inmediato!
@@ -685,7 +690,8 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
         triggerDualBurst({
           type: burstType,
           targetAId,
-          targetBId
+          targetBId,
+          targetCId
         });
       }, delayMs);
     }
