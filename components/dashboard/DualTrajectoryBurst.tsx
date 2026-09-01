@@ -149,6 +149,31 @@ function playToneForPhase(
   activeParticleTimers.push(timer);
 }
 
+// 🛡️ Helper para asegurar que las coordenadas apunten SIEMPRE a un área visible dentro del viewport
+function getVisibleTargetCoordinates(
+  el: HTMLElement | null, 
+  defaultFallback: { x: number; y: number }
+) {
+  if (!el) return defaultFallback;
+  const rect = el.getBoundingClientRect();
+  
+  let x = rect.left + rect.width / 2;
+  let y = rect.top + rect.height / 2;
+
+  // Si el usuario hizo scroll y el elemento quedó fuera de la pantalla por ARRIBA
+  if (rect.bottom < 60) {
+    y = 60; // Apuntar a la barra superior sticky (Header)
+    x = Math.max(40, Math.min(window.innerWidth - 40, x));
+  } 
+  // Si el elemento quedó fuera de la pantalla por ABAJO
+  else if (rect.top > window.innerHeight - 60) {
+    y = window.innerHeight - 50; // Apuntar a la barra de navegación inferior
+    x = Math.max(40, Math.min(window.innerWidth - 40, x));
+  }
+
+  return { x, y };
+}
+
 export function DualTrajectoryBurst({
   trigger = false,
   onComplete,
@@ -176,37 +201,35 @@ export function DualTrajectoryBurst({
     const elB = document.getElementById(targetBId);
     const elC = targetCId ? document.getElementById(targetCId) : null;
 
-    const rectA = elA ? elA.getBoundingClientRect() : { left: window.innerWidth - 60, top: 20, width: 40, height: 40 };
-    const rectB = elB ? elB.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight - 50, width: 40, height: 40 };
-    const rectC = elC ? elC.getBoundingClientRect() : (elA ? elA.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 40, height: 40 });
+    const fallbackA = { x: window.innerWidth - 60, y: 20 };
+    const fallbackB = { x: window.innerWidth / 2, y: window.innerHeight - 50 };
+    const fallbackC = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+    // Calcular coordenadas garantizadas dentro del área visible de la pantalla (Scroll-Safe)
+    const targetA = getVisibleTargetCoordinates(elA, fallbackA);
+    const targetB = getVisibleTargetCoordinates(elB, fallbackB);
+    const targetC = getVisibleTargetCoordinates(elC, fallbackC);
 
     const startX = startPosition?.x ?? window.innerWidth / 2;
     const startY = startPosition?.y ?? window.innerHeight / 2;
 
-    const targetAX = rectA.left + rectA.width / 2;
-    const targetAY = rectA.top + rectA.height / 2;
-    const targetBX = rectB.left + rectB.width / 2;
-    const targetBY = rectB.top + rectB.height / 2;
-    const targetCX = rectC.left + rectC.width / 2;
-    const targetCY = rectC.top + rectC.height / 2;
-
     const icons = ICON_SETS[type] || ICON_SETS.ingreso;
     const generated: Particle[] = [];
 
-    // 🚀 Generar 24 partículas divididas en 3 Destinos (8 para Target A, 8 para Target B, 8 para Target C)
+    // 🚀 Generar 24 partículas divididas en 3 Destinos (8 para A, 8 para B, 8 para C)
     for (let i = 0; i < 24; i++) {
       let particleTarget: 'targetA' | 'targetB' | 'targetC' = 'targetA';
-      let destX = targetAX;
-      let destY = targetAY;
+      let destX = targetA.x;
+      let destY = targetA.y;
 
       if (i % 3 === 1) {
         particleTarget = 'targetB';
-        destX = targetBX;
-        destY = targetBY;
+        destX = targetB.x;
+        destY = targetB.y;
       } else if (i % 3 === 2) {
         particleTarget = 'targetC';
-        destX = targetCX;
-        destY = targetCY;
+        destX = targetC.x;
+        destY = targetC.y;
       }
 
       const delaySec = i * 0.05;
@@ -230,7 +253,7 @@ export function DualTrajectoryBurst({
 
     setParticles(generated);
 
-    // Disparar evento de absorción para que la tarjeta de total crezca y pulse al ser impactada
+    // Disparar evento de absorción si la tarjeta destino C es visible
     if (targetCId && typeof window !== 'undefined') {
       const absorbTimer = setTimeout(() => {
         window.dispatchEvent(new CustomEvent('absorb-total-impact', { detail: { targetCId } }));
