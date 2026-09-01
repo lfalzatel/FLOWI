@@ -24,7 +24,7 @@ export default function GastosPage() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('month');
   const [filterValue, setFilterValue] = useState(getLocalMonthString());
   const [searchQuery, setSearchQuery] = useState(''); // Estado del buscador universal
   const { theme } = useTheme();

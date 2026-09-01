@@ -34,7 +34,7 @@ export default function DashboardPage() {
   const [splashDuration, setSplashDuration] = useState(1000);
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
   const router = useRouter();
-  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('month');
   const [filterValue, setFilterValue] = useState(getLocalMonthString());
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';

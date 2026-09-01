@@ -25,7 +25,7 @@ export default function EstadisticasPage() {
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
 
   // Filtros
-  const [periodFilter, setPeriodFilter] = useState<'this_month' | 'last_month' | 'last_3m' | 'last_6m' | 'this_year' | 'all'>('last_6m');
+  const [periodFilter, setPeriodFilter] = useState<'this_month' | 'last_month' | 'last_3m' | 'last_6m' | 'this_year' | 'all'>('this_month');
   const [showExport, setShowExport] = useState(false);
   const [weeksAgo, setWeeksAgo] = useState(0);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
