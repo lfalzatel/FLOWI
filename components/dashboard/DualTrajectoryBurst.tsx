@@ -199,8 +199,6 @@ export function DualTrajectoryBurst({
     for (let i = 0; i < 24; i++) {
       const isTargetA = i % 2 === 0;
       const delaySec = i * 0.05; // 50ms entre cada despegue (total despegues: 0 a 1150ms)
-      const launchDelayMs = i * 50;
-      const impactDelayMs = launchDelayMs + flightDurationMs; // Momento exacto de llegada al objetivo (1500ms a 2650ms)
 
       generated.push({
         id: Date.now() + i,
@@ -214,11 +212,8 @@ export function DualTrajectoryBurst({
       });
 
       if (enableSound) {
-        // Fase 1: Sonido de Despegue al salir de la tarjeta central
-        playToneForPhase(i, type, 'launch', launchDelayMs);
-
-        // Fase 2: Sonido de Absorción/Llegada cuando la partícula toca el botón destino
-        playToneForPhase(i, type, 'impact', impactDelayMs);
+        // 🎵 Una sola cascada musical fluida (1 nota por partícula repartida a lo largo de todo el vuelo, 0ms a 2100ms)
+        playToneForPhase(i, type, 'launch', i * 90);
       }
     }
 
