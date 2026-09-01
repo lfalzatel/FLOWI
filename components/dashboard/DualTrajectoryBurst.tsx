@@ -65,8 +65,16 @@ function stopCrystalAudio() {
   activeParticleTimers = [];
 }
 
-// 🎵 Reproduce las 24 notas cristalinas en sincronía exacta con el viaje de cada partícula
-function playCrystalTone(particleIndex: number, type: string, delayMs: number = 0) {
+/**
+ * 🎵 Sintetizador de 2 Fases (Despegue y Absorción/Impacto)
+ * Cada tipo ('ingreso', 'abono', 'logro', 'gasto') tiene una escala y timbre musical único.
+ */
+function playToneForPhase(
+  particleIndex: number, 
+  type: string, 
+  phase: 'launch' | 'impact', 
+  delayMs: number
+) {
   if (typeof window === 'undefined') return;
   if (localStorage.getItem('sound_enabled') === 'false') return;
 
@@ -78,34 +86,51 @@ function playCrystalTone(particleIndex: number, type: string, delayMs: number = 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
+      // Configuración de escalas y frecuencias por tipo de animación
       let baseFreq = 1046.50; // Do6 (Ingresos)
-      let stepFreq = 50;
+      let stepFreq = 45;
+      let waveType: OscillatorType = 'sine';
+      let duration = 0.12;
+      let volume = 0.10;
 
       if (type === 'abono') {
-        baseFreq = 880.00; // La5 (Abono / Deudas)
-        stepFreq = 60;
+        baseFreq = 880.00; // La5 (Abono / Deudas - Resonancia Cristalina)
+        stepFreq = 55;
+        waveType = 'sine';
+        volume = 0.09;
       } else if (type === 'logro') {
-        baseFreq = 1318.51; // Mi6 (Logro / Fanfarria)
-        stepFreq = 70;
+        baseFreq = 1318.51; // Mi6 (Logro / Fanfarria Triunfal)
+        stepFreq = 65;
+        waveType = 'triangle';
+        volume = 0.11;
       } else if (type === 'gasto') {
-        baseFreq = 783.99; // Sol5 (Gastos)
-        stepFreq = 40;
+        baseFreq = 783.99; // Sol5 (Gastos - Pop Háptico)
+        stepFreq = 35;
+        waveType = 'sine';
+        volume = 0.08;
+      }
+
+      // En la fase de Impacto/Absorción, la frecuencia sube a la siguiente octava (sonido de llegada al destino)
+      if (phase === 'impact') {
+        baseFreq = baseFreq * 1.5; // Salto armónico a quinta/octava alta
+        duration = 0.09;
+        volume = 0.07;
       }
 
       const freq = baseFreq + (particleIndex % 12) * stepFreq;
 
-      osc.type = 'sine';
+      osc.type = waveType;
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
       gain.gain.setValueAtTime(0.001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.10, ctx.currentTime + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.14);
+      gain.gain.exponentialRampToValueAtTime(volume, ctx.currentTime + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.14);
+      osc.stop(ctx.currentTime + duration);
     } catch (e) {
       // Ignorar si el navegador bloquea audio
     }
@@ -133,7 +158,7 @@ export function DualTrajectoryBurst({
   useEffect(() => {
     if (!trigger) return;
 
-    // Limpiar sonidos anteriores de partículas para evitar duplicación
+    // Limpiar cualquier sonido anterior
     stopCrystalAudio();
 
     const elA = document.getElementById(targetAId);
@@ -154,9 +179,13 @@ export function DualTrajectoryBurst({
     const generated: Particle[] = [];
 
     // 🚀 Generar 24 partículas (12 hacia Destino A y 12 hacia Destino B)
+    const flightDurationMs = 1500; // Duración de vuelo de cada partícula en ms
+
     for (let i = 0; i < 24; i++) {
       const isTargetA = i % 2 === 0;
-      const delaySec = i * 0.05; // 50ms entre cada partícula
+      const delaySec = i * 0.05; // 50ms entre cada despegue (total despegues: 0 a 1150ms)
+      const launchDelayMs = i * 50;
+      const impactDelayMs = launchDelayMs + flightDurationMs; // Momento exacto de llegada al objetivo (1500ms a 2650ms)
 
       generated.push({
         id: Date.now() + i,
@@ -169,20 +198,24 @@ export function DualTrajectoryBurst({
         delay: delaySec,
       });
 
-      // El sonido empieza al volar cada partícula y finaliza con el último ícono
       if (enableSound) {
-        playCrystalTone(i, type, i * 50);
+        // Fase 1: Sonido de Despegue al salir de la tarjeta central
+        playToneForPhase(i, type, 'launch', launchDelayMs);
+
+        // Fase 2: Sonido de Absorción/Llegada cuando la partícula toca el botón destino
+        playToneForPhase(i, type, 'impact', impactDelayMs);
       }
     }
 
     setParticles(generated);
 
-    // Finalizar animación exacto al aterrizar la última partícula
+    // Finalizar animación exacto al aterrizar y ser absorbida la última partícula (~2.7s)
+    const totalDurationMs = 2700;
     const timer = setTimeout(() => {
       setParticles([]);
       stopCrystalAudio();
       onComplete?.();
-    }, 2500);
+    }, totalDurationMs);
 
     return () => {
       clearTimeout(timer);
