@@ -643,15 +643,19 @@ export function PowerAnimation() {
 // Función helper síncrona: dispara el audio sintetizado al instante de hacer clic
 export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion') {
   if (typeof window !== 'undefined') {
-    playSynthesizedSound(type);
+    const isCardEnabled = localStorage.getItem('anim_card_enabled') !== 'false';
+    const isBurstEnabled = localStorage.getItem('anim_burst_enabled') !== 'false';
 
-    const event = new CustomEvent('show-power-animation', {
-      detail: { amount, type }
-    });
-    window.dispatchEvent(event);
+    if (isCardEnabled) {
+      playSynthesizedSound(type);
 
-    // 🚀 Super Combo Secuencial: La tarjeta 3D abre primero (t=0s) y a los 1.5s las 24 partículas explotan hacia los extremos
-    setTimeout(() => {
+      const event = new CustomEvent('show-power-animation', {
+        detail: { amount, type }
+      });
+      window.dispatchEvent(event);
+    }
+
+    if (isBurstEnabled) {
       let burstType: 'ingreso' | 'gasto' | 'abono' | 'logro' = 'ingreso';
       let targetAId = 'balance-card';
       let targetBId = 'header-profile';
@@ -674,11 +678,16 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
         targetBId = 'header-profile';
       }
 
-      triggerDualBurst({
-        type: burstType,
-        targetAId,
-        targetBId
-      });
-    }, 1500);
+      // Si la tarjeta está activa, la explosión desfasa 1.5s. Si está desactivada, dispara de inmediato!
+      const delayMs = isCardEnabled ? 1500 : 0;
+
+      setTimeout(() => {
+        triggerDualBurst({
+          type: burstType,
+          targetAId,
+          targetBId
+        });
+      }, delayMs);
+    }
   }
 }

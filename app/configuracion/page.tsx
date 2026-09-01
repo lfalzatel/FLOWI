@@ -94,6 +94,8 @@ export default function ConfigPage() {
   const [soundEliminacion, setSoundEliminacion] = useState('synth');
   const [soundUINav, setSoundUINav] = useState('pop');
   const [soundParticles, setSoundParticles] = useState('crystal');
+  const [animCardEnabled, setAnimCardEnabled] = useState(true);
+  const [animBurstEnabled, setAnimBurstEnabled] = useState(true);
 
   // Load from local storage
   useEffect(() => {
@@ -109,6 +111,8 @@ export default function ConfigPage() {
     setSoundEliminacion(localStorage.getItem('sound_eliminacion') || 'synth');
     setSoundUINav(localStorage.getItem('sound_ui_nav') || 'pop');
     setSoundParticles(localStorage.getItem('sound_particles') || 'crystal');
+    setAnimCardEnabled(localStorage.getItem('anim_card_enabled') !== 'false');
+    setAnimBurstEnabled(localStorage.getItem('anim_burst_enabled') !== 'false');
   }, []);
 
   const toggleNotifications = () => {
@@ -185,6 +189,18 @@ export default function ConfigPage() {
         triggerDualBurst({ type: 'ingreso' });
       });
     }
+  };
+
+  const toggleAnimCard = () => {
+    const newState = !animCardEnabled;
+    setAnimCardEnabled(newState);
+    localStorage.setItem('anim_card_enabled', String(newState));
+  };
+
+  const toggleAnimBurst = () => {
+    const newState = !animBurstEnabled;
+    setAnimBurstEnabled(newState);
+    localStorage.setItem('anim_burst_enabled', String(newState));
   };
 
   const handleClearData = async () => {
@@ -515,6 +531,41 @@ export default function ConfigPage() {
                   <option value="synth_laser">⚡ Neón Ciberpunk (Sintetizador)</option>
                   <option value="silent">🔇 Silenciar solo partículas</option>
                 </select>
+              </div>
+
+              {/* 7. Controles de Activación de Animación Visual */}
+              <div className="pt-3 border-t border-white/10 space-y-3">
+                <p className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>
+                  {isTechTheme ? 'ACTIVACION_DE_ANIMACIONES' : 'Interruptores de Animación Visual'}
+                </p>
+
+                {/* Toggle Tarjeta 3D Central */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-left">
+                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'text-text-primary'}`}>Tarjeta 3D Central (Power Card)</p>
+                    <p className="text-[10px] text-text-muted">Tarjeta holográfica central con el monto</p>
+                  </div>
+                  <button 
+                    onClick={toggleAnimCard}
+                    className={`w-11 h-6 rounded-full transition-colors relative ${animCardEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-accent') : 'bg-gray-600'}`}
+                  >
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animCardEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                  </button>
+                </div>
+
+                {/* Toggle Partículas Voladoras */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-left">
+                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Explosión de Partículas Voladoras</p>
+                    <p className="text-[10px] text-text-muted">Partículas volando en arco hacia el saldo y menú</p>
+                  </div>
+                  <button 
+                    onClick={toggleAnimBurst}
+                    className={`w-11 h-6 rounded-full transition-colors relative ${animBurstEnabled ? (isTechTheme ? 'bg-purple-400 border border-purple-400' : 'bg-purple-500') : 'bg-gray-600'}`}
+                  >
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animBurstEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                  </button>
+                </div>
               </div>
             </div>
             </div>
