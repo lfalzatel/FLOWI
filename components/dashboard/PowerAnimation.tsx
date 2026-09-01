@@ -6,6 +6,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
 import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, CheckCircle2, Trophy } from 'lucide-react';
+import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
 
 interface PowerAnimationEvent {
   amount: number;
@@ -648,5 +649,34 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
       detail: { amount, type }
     });
     window.dispatchEvent(event);
+
+    // 🚀 Super Combo: Disparar la explosión de 24 partículas hacia destinos DOM estratégicos
+    let burstType: 'ingreso' | 'gasto' | 'abono' | 'logro' = 'ingreso';
+    let targetAId = 'balance-card';
+    let targetBId = 'header-profile';
+
+    if (type === 'ingreso') {
+      burstType = 'ingreso';
+      targetAId = 'balance-card';
+      targetBId = 'nav-ingresos';
+    } else if (type === 'abono') {
+      burstType = 'abono';
+      targetAId = 'nav-deudas';
+      targetBId = 'header-profile';
+    } else if (type === 'gasto') {
+      burstType = 'gasto';
+      targetAId = 'balance-card';
+      targetBId = 'nav-gastos';
+    } else {
+      burstType = 'logro';
+      targetAId = 'balance-card';
+      targetBId = 'header-profile';
+    }
+
+    triggerDualBurst({
+      type: burstType,
+      targetAId,
+      targetBId
+    });
   }
 }

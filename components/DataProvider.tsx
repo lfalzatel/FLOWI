@@ -6,6 +6,7 @@ import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firest
 import { Transaction, Debt } from '@/lib/firestore';
 
 import { PowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { DualTrajectoryBurstGlobal } from '@/components/dashboard/DualTrajectoryBurst';
 
 interface DataContextType {
   transactions: Transaction[];
@@ -164,6 +165,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
       <PowerAnimation />
+      <DualTrajectoryBurstGlobal />
     </DataContext.Provider>
   );
 }

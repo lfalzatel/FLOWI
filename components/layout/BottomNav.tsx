@@ -13,11 +13,11 @@ import { useTheme } from '@/components/ThemeProvider';
 import { playUISound } from '@/components/dashboard/PowerAnimation';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Inicio',        href: '/' },
-  { icon: TrendingDown,    label: 'Gastos',        href: '/gastos' },
-  { icon: TrendingUp,      label: 'Ingresos',      href: '/ingresos' },
-  { icon: CreditCard,      label: 'Deudas',        href: '/deudas' },
-  { icon: Grid,            label: 'Servicios',     href: '/servicios' },
+  { icon: LayoutDashboard, label: 'Inicio',        href: '/',          id: 'nav-inicio' },
+  { icon: TrendingDown,    label: 'Gastos',        href: '/gastos',    id: 'nav-gastos' },
+  { icon: TrendingUp,      label: 'Ingresos',      href: '/ingresos',  id: 'nav-ingresos' },
+  { icon: CreditCard,      label: 'Deudas',        href: '/deudas',    id: 'nav-deudas' },
+  { icon: Grid,            label: 'Servicios',     href: '/servicios', id: 'nav-servicios' },
 ];
 
 export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
@@ -109,9 +109,10 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   );
 }
 
-function NavItem({ icon: Icon, label, href, active, isTechTheme, isLight }: any) {
+function NavItem({ icon: Icon, label, href, id, active, isTechTheme, isLight }: any) {
   return (
     <Link 
+      id={id}
       href={href}
       onClick={() => playUISound()}
       className={`relative flex flex-col items-center justify-center flex-1 gap-0.5 py-1.5

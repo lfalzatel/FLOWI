@@ -339,7 +339,9 @@ export function Header() {
           )}
         </div>
 
-        <ProfileCapsule />
+        <div id="header-profile">
+          <ProfileCapsule />
+        </div>
       </div>
 
       {/* 🚀 Giant Centered Logo Modal 🚀 */}
