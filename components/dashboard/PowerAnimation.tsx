@@ -650,33 +650,35 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
     });
     window.dispatchEvent(event);
 
-    // 🚀 Super Combo: Disparar la explosión de 24 partículas hacia destinos DOM estratégicos
-    let burstType: 'ingreso' | 'gasto' | 'abono' | 'logro' = 'ingreso';
-    let targetAId = 'balance-card';
-    let targetBId = 'header-profile';
+    // 🚀 Super Combo Secuencial: La tarjeta 3D abre primero (t=0s) y a los 1.5s las 24 partículas explotan hacia los extremos
+    setTimeout(() => {
+      let burstType: 'ingreso' | 'gasto' | 'abono' | 'logro' = 'ingreso';
+      let targetAId = 'balance-card';
+      let targetBId = 'header-profile';
 
-    if (type === 'ingreso') {
-      burstType = 'ingreso';
-      targetAId = 'balance-card';
-      targetBId = 'nav-ingresos';
-    } else if (type === 'abono') {
-      burstType = 'abono';
-      targetAId = 'nav-deudas';
-      targetBId = 'header-profile';
-    } else if (type === 'gasto') {
-      burstType = 'gasto';
-      targetAId = 'balance-card';
-      targetBId = 'nav-gastos';
-    } else {
-      burstType = 'logro';
-      targetAId = 'balance-card';
-      targetBId = 'header-profile';
-    }
+      if (type === 'ingreso') {
+        burstType = 'ingreso';
+        targetAId = 'balance-card';
+        targetBId = 'nav-ingresos';
+      } else if (type === 'abono') {
+        burstType = 'abono';
+        targetAId = 'nav-deudas';
+        targetBId = 'header-profile';
+      } else if (type === 'gasto') {
+        burstType = 'gasto';
+        targetAId = 'balance-card';
+        targetBId = 'nav-gastos';
+      } else {
+        burstType = 'logro';
+        targetAId = 'balance-card';
+        targetBId = 'header-profile';
+      }
 
-    triggerDualBurst({
-      type: burstType,
-      targetAId,
-      targetBId
-    });
+      triggerDualBurst({
+        type: burstType,
+        targetAId,
+        targetBId
+      });
+    }, 1500);
   }
 }

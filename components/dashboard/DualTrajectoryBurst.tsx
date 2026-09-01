@@ -39,17 +39,41 @@ const ICON_SETS = {
   gasto:   ['💸', '🧾', '🛍️', '✨', '🏷️', '💳', '📉', '🛒', '⚡', '🔴', '📦', '💨'],
 };
 
-// 🎵 Sintetizador Web Audio API puro para los tonos cristalinos de las 24 partículas
+// 🎵 AudioContext Singleton para cero redundancia y cero repetición de sonido
+let crystalAudioCtx: AudioContext | null = null;
+let activeParticleTimers: ReturnType<typeof setTimeout>[] = [];
+
+function getCrystalAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioCtxClass) {
+      if (!crystalAudioCtx || crystalAudioCtx.state === 'closed') {
+        crystalAudioCtx = new AudioCtxClass();
+      }
+      if (crystalAudioCtx.state === 'suspended') {
+        crystalAudioCtx.resume();
+      }
+      return crystalAudioCtx;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function stopCrystalAudio() {
+  activeParticleTimers.forEach(clearTimeout);
+  activeParticleTimers = [];
+}
+
+// 🎵 Reproduce las 24 notas cristalinas en sincronía exacta con el viaje de cada partícula
 function playCrystalTone(particleIndex: number, type: string, delayMs: number = 0) {
   if (typeof window === 'undefined') return;
   if (localStorage.getItem('sound_enabled') === 'false') return;
 
-  setTimeout(() => {
+  const timer = setTimeout(() => {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      if (ctx.state === 'suspended') ctx.resume();
+      const ctx = getCrystalAudioContext();
+      if (!ctx || ctx.state === 'closed') return;
 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -74,18 +98,20 @@ function playCrystalTone(particleIndex: number, type: string, delayMs: number = 
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
       gain.gain.setValueAtTime(0.001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.10, ctx.currentTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.14);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.15);
+      osc.stop(ctx.currentTime + 0.14);
     } catch (e) {
-      // Ignorar si el navegador bloquea audio sin interacción previa
+      // Ignorar si el navegador bloquea audio
     }
   }, delayMs);
+
+  activeParticleTimers.push(timer);
 }
 
 export function DualTrajectoryBurst({
@@ -107,6 +133,9 @@ export function DualTrajectoryBurst({
   useEffect(() => {
     if (!trigger) return;
 
+    // Limpiar sonidos anteriores de partículas para evitar duplicación
+    stopCrystalAudio();
+
     const elA = document.getElementById(targetAId);
     const elB = document.getElementById(targetBId);
 
@@ -127,6 +156,8 @@ export function DualTrajectoryBurst({
     // 🚀 Generar 24 partículas (12 hacia Destino A y 12 hacia Destino B)
     for (let i = 0; i < 24; i++) {
       const isTargetA = i % 2 === 0;
+      const delaySec = i * 0.05; // 50ms entre cada partícula
+
       generated.push({
         id: Date.now() + i,
         icon: icons[i % icons.length],
@@ -135,22 +166,28 @@ export function DualTrajectoryBurst({
         startY,
         targetX: isTargetA ? targetAX : targetBX,
         targetY: isTargetA ? targetAY : targetBY,
-        delay: i * 0.05, // Cascada fluida
+        delay: delaySec,
       });
 
+      // El sonido empieza al volar cada partícula y finaliza con el último ícono
       if (enableSound) {
-        playCrystalTone(i, type, 350 + i * 65);
+        playCrystalTone(i, type, i * 50);
       }
     }
 
     setParticles(generated);
 
+    // Finalizar animación exacto al aterrizar la última partícula
     const timer = setTimeout(() => {
       setParticles([]);
+      stopCrystalAudio();
       onComplete?.();
-    }, 2600);
+    }, 2500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      stopCrystalAudio();
+    };
   }, [trigger]);
 
   if (!mounted || !trigger || particles.length === 0 || typeof document === 'undefined') return null;
@@ -184,7 +221,7 @@ export function DualTrajectoryBurst({
               rotate: [0, 180, 540],
             }}
             transition={{
-              duration: 1.7,
+              duration: 1.5,
               delay: p.delay,
               times: [0, 0.12, 0.78, 0.92, 1],
               ease: [0.22, 1, 0.36, 1],
