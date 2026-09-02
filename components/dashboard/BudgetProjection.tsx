@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
-import { AlertCircle, CheckCircle2, Calculator, Calendar, X, TrendingDown, TrendingUp, Wallet, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Calculator, Calendar, X, Wallet, Info } from 'lucide-react';
 import { Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
@@ -24,7 +25,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   const [activeModal, setActiveModal] = useState<'fijos' | 'disponible' | 'diario' | null>(null);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
 
-  // Lock scroll when modal is open
+  // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
     if (activeModal) {
       document.body.style.overflow = 'hidden';
@@ -252,8 +253,8 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
         </div>
       </div>
 
-      {/* Modal Interactivo de Detalle */}
-      {activeModal && (
+      {/* Modal Interactivo de Detalle RENDERIZADO VÍA PORTAL DIRECTO EN DOCUMENT.BODY */}
+      {activeModal && typeof document !== 'undefined' && createPortal(
         <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono text-sm' : ''}`}>
           {/* Backdrop */}
           <div 
@@ -261,9 +262,12 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             onClick={() => setActiveModal(null)} 
           />
 
-          <div className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[90vh] overflow-y-auto p-5 sm:p-6 glass-dropdown flex flex-col ${
-            isTechTheme ? 'rounded-none border border-accent/50 bg-deep uppercase' : 'rounded-3xl'
-          }`}>
+          <div 
+            className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[90vh] overflow-y-auto p-5 sm:p-6 glass-dropdown flex flex-col ${
+              isTechTheme ? 'rounded-none border border-accent/50 bg-deep uppercase' : 'rounded-3xl'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Cabecera del Modal */}
             <div className="flex items-center justify-between pb-4 border-b border-glass-border mb-4">
               <div className="flex items-center gap-3">
@@ -480,7 +484,8 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal para editar transacción desde el detalle */}
