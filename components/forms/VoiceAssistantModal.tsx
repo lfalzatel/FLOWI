@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
-import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Edit2, Compass, StickyNote, Bell, ArrowRight } from 'lucide-react';
+import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Edit2, Compass, StickyNote, Bell, ArrowRight, Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
@@ -37,6 +37,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [savingBulk, setSavingBulk] = useState(false);
   const [showSuccessAnim, setShowSuccessAnim] = useState(false);
+  const [showCategoryPickerIdx, setShowCategoryPickerIdx] = useState<number | null>(null);
+  const [categorySearch, setCategorySearch] = useState('');
 
   const recognitionRef = useRef<any>(null);
 
@@ -432,7 +434,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     {!isCommand && (
                       <button
                         type="button"
-                        onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
+                        onClick={() => {
+                          stopListening();
+                          setEditingIdx(editingIdx === idx ? null : idx);
+                        }}
                         title="Editar detalles"
                         className="p-1 text-accent/70 hover:text-accent transition-colors"
                       >
@@ -508,23 +513,73 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                               <input 
                                 type="number"
                                 value={res.amount || ''}
+                                onFocus={() => stopListening()}
                                 onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
                                 className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs font-bold text-accent"
                               />
                             </div>
-                            <div>
+                            <div className="relative">
                               <label className="text-[10px] text-text-muted block mb-0.5">Categoría</label>
-                              <select
-                                value={res.category}
-                                onChange={(e) => handleUpdateItem(idx, 'category', e.target.value)}
-                                className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  stopListening();
+                                  setShowCategoryPickerIdx(showCategoryPickerIdx === idx ? null : idx);
+                                }}
+                                className={`w-full flex items-center justify-between p-1.5 rounded text-xs border truncate ${
+                                  isTechTheme ? 'bg-black/60 border-accent/40 text-accent font-mono' : 'bg-black/40 border-white/20 text-text-primary'
+                                }`}
                               >
-                                {allCategories.map((cat) => (
-                                  <option key={cat.label} value={cat.label} className="bg-gray-900 text-white">
-                                    {cat.label}
-                                  </option>
-                                ))}
-                              </select>
+                                <span className="flex items-center gap-1.5 truncate">
+                                  <CategoryIcon icon={res.category} label={res.category} className="w-3.5 h-3.5 text-accent shrink-0" />
+                                  <span className="truncate">{res.category || 'Seleccionar'}</span>
+                                </span>
+                                <ChevronDown className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                              </button>
+
+                              {showCategoryPickerIdx === idx && (
+                                <div className={`absolute top-full right-0 left-[-80%] sm:left-0 z-50 mt-1 p-2.5 shadow-2xl border backdrop-blur-xl rounded-2xl animate-fade-in-up w-[220px] ${
+                                  isTechTheme ? 'bg-black border-accent font-mono' : 'bg-gray-900/95 border-white/25 text-white'
+                                }`}>
+                                  {/* Buscador de Categorías */}
+                                  <div className="relative mb-2">
+                                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-text-muted" />
+                                    <input
+                                      type="text"
+                                      placeholder="Buscar categoría..."
+                                      value={categorySearch}
+                                      onChange={(e) => setCategorySearch(e.target.value)}
+                                      onFocus={() => stopListening()}
+                                      className="w-full pl-8 pr-2 py-1 text-[11px] rounded-lg bg-white/10 border border-white/15 text-white focus:outline-none focus:border-accent"
+                                    />
+                                  </div>
+
+                                  {/* Grid de 2 Columnas con Íconos */}
+                                  <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto scrollbar-hide">
+                                    {allCategories
+                                      .filter(c => c.label.toLowerCase().includes(categorySearch.toLowerCase()))
+                                      .map((cat) => (
+                                        <button
+                                          key={cat.label}
+                                          type="button"
+                                          onClick={() => {
+                                            handleUpdateItem(idx, 'category', cat.label);
+                                            setShowCategoryPickerIdx(null);
+                                            setCategorySearch('');
+                                          }}
+                                          className={`flex items-center gap-1.5 p-1.5 rounded-lg text-left text-[10px] transition-all truncate ${
+                                            res.category === cat.label
+                                              ? 'bg-accent/25 border border-accent text-accent font-bold'
+                                              : 'bg-white/5 hover:bg-white/15 text-text-primary'
+                                          }`}
+                                        >
+                                          <CategoryIcon icon={cat.icon || cat.label} label={cat.label} className="w-3.5 h-3.5 text-accent shrink-0" />
+                                          <span className="truncate">{cat.label}</span>
+                                        </button>
+                                      ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div>
@@ -532,6 +587,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             <input 
                               type="text"
                               value={res.description}
+                              onFocus={() => stopListening()}
                               onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
                               className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
                             />
