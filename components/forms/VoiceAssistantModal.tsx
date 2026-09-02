@@ -332,14 +332,30 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                 {editingIdx === idx ? (
                   /* Modo Edición Rápida Inline */
                   <div className="space-y-2 mt-2 pt-2 border-t border-white/10">
-                    <div>
-                      <label className="text-[10px] text-text-muted block mb-0.5">Monto</label>
-                      <input 
-                        type="number"
-                        value={res.amount || ''}
-                        onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
-                        className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs font-bold text-accent"
-                      />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] text-text-muted block mb-0.5">Monto</label>
+                        <input 
+                          type="number"
+                          value={res.amount || ''}
+                          onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
+                          className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs font-bold text-accent"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-text-muted block mb-0.5">Categoría</label>
+                        <select
+                          value={res.category}
+                          onChange={(e) => handleUpdateItem(idx, 'category', e.target.value)}
+                          className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
+                        >
+                          {allCategories.map((cat) => (
+                            <option key={cat.label} value={cat.label} className="bg-gray-900 text-white">
+                              {cat.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                     <div>
                       <label className="text-[10px] text-text-muted block mb-0.5">Descripción</label>
