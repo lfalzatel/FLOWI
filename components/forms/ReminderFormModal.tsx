@@ -9,7 +9,7 @@ import { addReminder, updateReminder, deleteReminder, Reminder, ReminderAlert } 
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { speakText } from '@/lib/voiceParser';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
-import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 
 interface Props {
   onClose: () => void;
@@ -121,6 +121,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
         speakText('Recordatorio actualizado con éxito', 'es-CO');
       } else {
         await addReminder(data);
+        triggerPowerAnimation(0, 'edicion', 'RECORDATORIO AGENDADO', '¡AGENDADO!');
+        triggerConfettiWithSynth(3.0);
         speakText('Recordatorio agendado con éxito', 'es-CO');
       }
       onSuccess();

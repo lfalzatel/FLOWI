@@ -6,7 +6,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { addNote, updateNote, deleteNote, Note } from '@/lib/firestore';
 import { speakText } from '@/lib/voiceParser';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
-import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 
 interface Props {
   note: Note | null; // null if creating a new note
@@ -78,6 +78,8 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
           content,
           color,
         });
+        triggerPowerAnimation(0, 'edicion', 'NOTA GUARDADA', '¡GUARDADA!');
+        triggerConfettiWithSynth(3.0);
         speakText('Nota guardada con éxito', 'es-CO');
       }
       onSuccess();
