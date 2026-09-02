@@ -595,7 +595,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   ) : res ? (
                     /* Renderizado de Transacciones Estándar */
                     <div>
-                      <div className="flex flex-col items-start gap-1 mb-1 pr-14">
+                      <div className="flex flex-col items-start gap-1 mb-2 pr-8">
                         <span className="text-[9px] text-amber-300 font-medium leading-tight">
                           💡 Toca para convertir a {res.type === 'gasto' ? 'Ingreso 🟢' : 'Gasto 🔴'}
                         </span>
@@ -626,122 +626,60 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                         </div>
                       </div>
 
-                      {editingIdx === idx ? (
-                        /* Modo Edición Rápida Inline */
-                        <div className="space-y-2 mt-2 pt-2 border-t border-white/10">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label className="text-[10px] text-text-muted block mb-0.5">Monto</label>
+                      {/* Campos directamente editables en la tarjeta */}
+                      <div className="space-y-2 pt-1 border-t border-white/10">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Monto</label>
+                            <div className="relative flex items-center">
+                              <span className="absolute left-2 text-xs font-bold text-accent">$</span>
                               <input 
                                 type="number"
                                 value={res.amount || ''}
                                 onFocus={() => stopListening()}
                                 onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
-                                className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs font-bold text-accent"
+                                className={`w-full pl-6 pr-2 py-1.5 rounded-xl text-xs font-extrabold focus:outline-none focus:border-accent ${
+                                  isTechTheme ? 'bg-black/60 border border-accent/40 text-accent font-mono' : 'bg-black/40 border border-white/20 text-accent'
+                                }`}
                               />
                             </div>
-                            <div className="relative">
-                              <label className="text-[10px] text-text-muted block mb-0.5">Categoría</label>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  stopListening();
-                                  setShowCategoryPickerIdx(showCategoryPickerIdx === idx ? null : idx);
-                                }}
-                                className={`w-full flex items-center justify-between p-1.5 rounded text-xs border truncate ${
-                                  isTechTheme ? 'bg-black/60 border-accent/40 text-accent font-mono' : 'bg-black/40 border-white/20 text-text-primary'
-                                }`}
-                              >
-                                <span className="flex items-center gap-1.5 truncate">
-                                  <CategoryIcon icon={res.category} label={res.category} className="w-3.5 h-3.5 text-accent shrink-0" />
-                                  <span className="truncate">{res.category || 'Seleccionar'}</span>
-                                </span>
-                                <ChevronDown className="w-3.5 h-3.5 opacity-60 shrink-0" />
-                              </button>
-
-                              {showCategoryPickerIdx === idx && (
-                                <div className={`absolute top-full right-0 left-[-80%] sm:left-0 z-50 mt-1 p-2.5 shadow-2xl border backdrop-blur-xl rounded-2xl animate-fade-in-up w-[220px] ${
-                                  isTechTheme ? 'bg-black border-accent font-mono' : 'bg-gray-900/95 border-white/25 text-white'
-                                }`}>
-                                  {/* Buscador de Categorías */}
-                                  <div className="relative mb-2">
-                                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-text-muted" />
-                                    <input
-                                      type="text"
-                                      placeholder="Buscar categoría..."
-                                      value={categorySearch}
-                                      onChange={(e) => setCategorySearch(e.target.value)}
-                                      onFocus={() => stopListening()}
-                                      className="w-full pl-8 pr-2 py-1 text-[11px] rounded-lg bg-white/10 border border-white/15 text-white focus:outline-none focus:border-accent"
-                                    />
-                                  </div>
-
-                                  {/* Grid de 2 Columnas con Íconos */}
-                                  <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto scrollbar-hide">
-                                    {allCategories
-                                      .filter(c => c.label.toLowerCase().includes(categorySearch.toLowerCase()))
-                                      .map((cat) => (
-                                        <button
-                                          key={cat.label}
-                                          type="button"
-                                          onClick={() => {
-                                            handleUpdateItem(idx, 'category', cat.label);
-                                            setShowCategoryPickerIdx(null);
-                                            setCategorySearch('');
-                                          }}
-                                          className={`flex items-center gap-1.5 p-1.5 rounded-lg text-left text-[10px] transition-all truncate ${
-                                            res.category === cat.label
-                                              ? 'bg-accent/25 border border-accent text-accent font-bold'
-                                              : 'bg-white/5 hover:bg-white/15 text-text-primary'
-                                          }`}
-                                        >
-                                          <CategoryIcon icon={cat.icon || cat.label} label={cat.label} className="w-3.5 h-3.5 text-accent shrink-0" />
-                                          <span className="truncate">{cat.label}</span>
-                                        </button>
-                                      ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
                           </div>
+
                           <div>
-                            <label className="text-[10px] text-text-muted block mb-0.5">Descripción</label>
-                            <input 
-                              type="text"
-                              value={res.description}
-                              onFocus={() => stopListening()}
-                              onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
-                              className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
-                            />
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Categoría</label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                stopListening();
+                                setShowCategoryPickerIdx(idx);
+                              }}
+                              className={`w-full flex items-center justify-between p-1.5 rounded-xl text-xs border truncate active:scale-95 transition-all ${
+                                isTechTheme ? 'bg-black/60 border-accent/40 text-accent font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
+                              }`}
+                            >
+                              <span className="flex items-center gap-1.5 truncate">
+                                <CategoryIcon icon={res.category} label={res.category} className="w-3.5 h-3.5 text-accent shrink-0" />
+                                <span className="truncate font-semibold">{res.category || 'Seleccionar'}</span>
+                              </span>
+                              <ChevronDown className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setEditingIdx(null)}
-                            className="w-full py-1 text-[11px] font-bold bg-accent/20 border border-accent text-accent rounded flex items-center justify-center gap-1"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Listo</span>
-                          </button>
                         </div>
-                      ) : (
-                        /* Modo Visualización Estándar */
-                        <div className="flex items-center gap-2.5">
-                          <CategoryIcon icon={res.category} label={res.category} className="w-7 h-7 text-lg flex items-center justify-center flex-shrink-0" />
-                          <div className="flex-1 truncate">
-                            <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                              {res.category}
-                            </p>
-                            <p className={`text-[11px] truncate ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-                              {res.description}
-                            </p>
-                          </div>
-                          <p className={`text-sm font-bold ${
-                            res.type === 'ingreso' ? 'text-emerald-400' : res.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
-                          }`}>
-                            {res.amount ? formatCurrency(res.amount, profile?.currency) : 'Sin $'}
-                          </p>
+
+                        <div>
+                          <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Descripción / Concepto</label>
+                          <input 
+                            type="text"
+                            value={res.description}
+                            onFocus={() => stopListening()}
+                            onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
+                            placeholder="Escribe la descripción..."
+                            className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none focus:border-accent ${
+                              isTechTheme ? 'bg-black/60 border border-accent/40 text-accent font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
+                            }`}
+                          />
                         </div>
-                      )}
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -791,6 +729,82 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         </div>
       </div>
     </div>
+
+    {/* Modal Selector de Categorías (90% de pantalla) */}
+    {showCategoryPickerIdx !== null && (
+      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+        <div 
+          className={`w-full max-w-md h-[85vh] max-h-[90vh] rounded-t-3xl sm:rounded-3xl p-5 flex flex-col shadow-2xl border ${
+            isTechTheme ? 'bg-slate-950 border-accent font-mono text-accent' : 'bg-gray-900 border-white/20 text-white'
+          }`}
+        >
+          {/* Header Modal */}
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <Layers className="w-5 h-5 text-accent" />
+              <h3 className="text-sm font-bold uppercase tracking-wider">Seleccionar Categoría</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowCategoryPickerIdx(null);
+                setCategorySearch('');
+              }}
+              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-text-muted hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Buscador de Categorías */}
+          <div className="relative mb-4">
+            <Search className="w-4 h-4 absolute left-3 top-3 text-text-muted" />
+            <input
+              type="text"
+              placeholder="Buscar categoría..."
+              value={categorySearch}
+              onChange={(e) => setCategorySearch(e.target.value)}
+              onFocus={() => stopListening()}
+              className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-white/10 border border-white/15 text-white focus:outline-none focus:border-accent"
+            />
+          </div>
+
+          {/* Grid de 2 Columnas de Categorías */}
+          <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-2.5 pr-1 scrollbar-hide">
+            {allCategories
+              .filter(c => c.label.toLowerCase().includes(categorySearch.toLowerCase()))
+              .map((cat) => {
+                const currentCategory = parsedResults[showCategoryPickerIdx] && !('kind' in parsedResults[showCategoryPickerIdx]) 
+                  ? (parsedResults[showCategoryPickerIdx] as ParsedVoiceResult).category 
+                  : '';
+                const isSelected = currentCategory === cat.label;
+
+                return (
+                  <button
+                    key={cat.label}
+                    type="button"
+                    onClick={() => {
+                      handleUpdateItem(showCategoryPickerIdx, 'category', cat.label);
+                      setShowCategoryPickerIdx(null);
+                      setCategorySearch('');
+                    }}
+                    className={`flex items-center gap-2.5 p-3 rounded-xl text-left text-xs transition-all ${
+                      isSelected
+                        ? 'bg-accent/25 border-2 border-accent text-accent font-bold shadow-lg'
+                        : 'bg-white/5 border border-white/10 hover:bg-white/15 text-text-primary'
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
+                      <CategoryIcon icon={cat.icon || cat.label} label={cat.label} className="w-4 h-4 text-accent" />
+                    </div>
+                    <span className="truncate font-semibold">{cat.label}</span>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      </div>
+    )}
   </div>,
     document.body
   );
