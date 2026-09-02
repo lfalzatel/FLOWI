@@ -300,7 +300,25 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
           {/* Category */}
           <div className="relative">
-            <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Categoría</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium block`}>Categoría</label>
+
+              {type === 'gasto' && (
+                <button
+                  type="button"
+                  onClick={() => setIsFixed(!isFixed)}
+                  className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-all active:scale-95 cursor-pointer ${
+                    isFixed 
+                      ? (isTechTheme ? 'bg-accent/20 border border-accent text-accent font-mono' : 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400')
+                      : (isTechTheme ? 'bg-white/5 border border-white/10 text-accent/50 font-mono' : 'bg-white/5 border border-white/10 text-text-muted')
+                  }`}
+                  title="Cambiar entre Gasto Fijo o Variable"
+                >
+                  <span>📌 Gasto Fijo:</span>
+                  <span className={isFixed ? 'font-black underline' : ''}>{isFixed ? 'Sí' : 'No'}</span>
+                </button>
+              )}
+            </div>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -421,36 +439,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             )}
           </div>
 
-          {/* Toggle Gasto Fijo */}
-          {type === 'gasto' && (
-            <div className={`p-3.5 border flex items-center justify-between transition-all ${isTechTheme ? 'bg-accent/5 border-accent/30 rounded-none font-mono' : 'bg-glass border-glass-border rounded-xl'}`}>
-              <div className="flex flex-col pr-2">
-                <span className={`text-xs font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
-                  Gasto Fijo / Recurrente del mes
-                </span>
-                <span className={`text-[11px] mt-0.5 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                  {isFixed ? 'Se descontará directamente de tus ingresos del mes' : 'Se tomará como gasto variable diario'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsFixed(!isFixed)}
-                className={`relative w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out flex-shrink-0 focus:outline-none ${
-                  isFixed 
-                    ? (isTechTheme ? 'bg-accent' : 'bg-emerald-500') 
-                    : (isTechTheme ? 'bg-accent/20' : 'bg-white/10')
-                }`}
-              >
-                <div
-                  className={`w-4.5 h-4.5 rounded-full transition-transform duration-200 ease-in-out ${
-                    isFixed 
-                      ? 'translate-x-5.5 bg-black shadow' 
-                      : 'translate-x-0 ' + (isTechTheme ? 'bg-accent' : 'bg-text-secondary')
-                  }`}
-                />
-              </button>
-            </div>
-          )}
+
 
           {/* Date */}
           <div>
