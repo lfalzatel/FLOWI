@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, ArrowRight, Wallet, AlertCircle } from 'lucide-react';
+import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
@@ -27,32 +27,41 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
   const [transcript, setTranscript] = useState('');
   const [parsedResult, setParsedResult] = useState<ParsedVoiceResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isSupported, setIsSupported] = useState(true);
 
   const recognitionRef = useRef<any>(null);
 
-  // Configuración de idioma e inicio de micrófono
-  useEffect(() => {
+  // Iniciar reconocimiento de voz de forma dinámica
+  const startListening = () => {
+    setTranscript('');
+    setParsedResult(null);
+    setErrorMsg(null);
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setIsSupported(false);
       setErrorMsg('El micrófono nativo no está disponible en este navegador. Puedes usar el modo teclado.');
       return;
     }
 
-    const locale = detectUserLocaleAndCurrency(profile?.currency);
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = locale.language || 'es-CO';
+    // Cancelar cualquier instancia previa
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {}
+    }
 
-    recognition.onstart = () => {
+    const locale = detectUserLocaleAndCurrency(profile?.currency);
+    const rec = new SpeechRecognition();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = locale.language || 'es-CO';
+
+    rec.onstart = () => {
       setIsListening(true);
       setErrorMsg(null);
     };
 
-    recognition.onresult = (event: any) => {
+    rec.onresult = (event: any) => {
       let currentTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         currentTranscript += event.results[i][0].transcript;
@@ -60,56 +69,29 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
       setTranscript(currentTranscript);
     };
 
-    recognition.onerror = (event: any) => {
-      console.warn('Error en reconocimiento de voz:', event.error);
+    rec.onerror = (event: any) => {
+      console.warn('Error en voz:', event.error);
       setIsListening(false);
       if (event.error === 'no-speech') {
-        setErrorMsg('No escuchamos ningún audio. Intenta hablar nuevamente cerca al micrófono.');
+        setErrorMsg('No se escuchó nada. Toca el micrófono y vuelve a hablar.');
       } else if (event.error === 'not-allowed') {
-        setErrorMsg('Permiso de micrófono denegado en tu navegador.');
-      } else {
-        setErrorMsg('No pudimos procesar el audio. Puedes dictar de nuevo o ingresar por teclado.');
+        setErrorMsg('Permiso de micrófono denegado en tu dispositivo.');
+      } else if (event.error !== 'aborted') {
+        setErrorMsg('Toca el botón de micrófono para comenzar a dictar.');
       }
     };
 
-    recognition.onend = () => {
+    rec.onend = () => {
       setIsListening(false);
     };
 
-    recognitionRef.current = recognition;
-    startListening();
+    recognitionRef.current = rec;
 
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch (e) {}
-      }
-    };
-  }, [profile?.currency]);
-
-  // Al finalizar la transcripción, procesar con el parser inteligente
-  useEffect(() => {
-    if (transcript.trim() && !isListening) {
-      const parsed = parseVoiceTransaction(transcript, allCategories);
-      setParsedResult(parsed);
-    }
-  }, [isListening, transcript, allCategories]);
-
-  const startListening = () => {
-    setTranscript('');
-    setParsedResult(null);
-    setErrorMsg(null);
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.start();
-      } catch (e) {
-        // En caso de que ya estuviera activo
-        try {
-          recognitionRef.current.stop();
-          recognitionRef.current.start();
-        } catch (err) {}
-      }
+    try {
+      rec.start();
+    } catch (err) {
+      console.error('Error al iniciar micrófono:', err);
+      setErrorMsg('Toca el micrófono para iniciar el dictado.');
     }
   };
 
@@ -121,6 +103,25 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
     }
     setIsListening(false);
   };
+
+  useEffect(() => {
+    startListening();
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
+    };
+  }, []);
+
+  // Al finalizar la transcripción de un dictado, parsear automáticamente
+  useEffect(() => {
+    if (transcript.trim() && !isListening) {
+      const parsed = parseVoiceTransaction(transcript, allCategories);
+      setParsedResult(parsed);
+    }
+  }, [isListening, transcript, allCategories]);
 
   const handleConfirm = () => {
     if (parsedResult) {
@@ -148,6 +149,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
       >
         {/* Botón cerrar */}
         <button 
+          type="button"
           onClick={onClose} 
           className={`absolute top-4 right-4 p-2 rounded-xl transition-colors ${
             isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-muted hover:text-text-primary hover:bg-white/10'
@@ -180,14 +182,14 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
           <button
             type="button"
             onClick={isListening ? stopListening : startListening}
-            className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
+            className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl cursor-pointer ${
               isListening 
                 ? (isTechTheme ? 'bg-accent text-black scale-110 shadow-[0_0_40px_rgba(0,229,160,0.8)]' : 'bg-red-500 text-white scale-110 shadow-[0_0_35px_rgba(239,68,68,0.7)]')
                 : (isTechTheme ? 'bg-accent/20 border-2 border-accent text-accent hover:bg-accent/30' : 'bg-gradient-to-tr from-accent to-accent-dim text-black hover:scale-105 shadow-accent/40')
             }`}
           >
             {isListening ? (
-              <Mic className="w-10 h-10 animate-bounce" />
+              <Mic className="w-10 h-10 animate-bounce text-black" />
             ) : (
               <MicOff className="w-9 h-9" />
             )}
@@ -198,20 +200,20 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
         <div className="my-3 min-h-[3rem] flex flex-col items-center justify-center">
           {isListening ? (
             <span className={`text-xs font-bold animate-pulse ${isTechTheme ? 'text-accent' : 'text-accent'}`}>
-              🎙️ Escuchando... Di ej. "Gasté 45 mil en Frisby"
+              🎙️ Escuchando... Di ej. "Gasté 9000 en cerveza"
             </span>
           ) : transcript ? (
             <span className={`text-xs font-medium italic max-w-xs ${isTechTheme ? 'text-accent/90' : 'text-text-primary'}`}>
               "{transcript}"
             </span>
           ) : (
-            <span className={`text-xs ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-              Toca el micrófono para comenzar a dictar
+            <span className={`text-xs font-semibold ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
+              Toca el botón de micrófono amarillo para hablar
             </span>
           )}
         </div>
 
-        {/* Mensaje de Error / No soportado */}
+        {/* Mensaje de Error / Estado */}
         {errorMsg && (
           <div className="my-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -275,15 +277,14 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
             <button
               type="button"
               onClick={startListening}
-              disabled={isListening}
-              className={`w-full py-3 px-4 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 ${
+              className={`w-full py-3 px-4 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
                 isTechTheme 
                   ? 'bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 font-mono' 
                   : 'bg-white/10 text-text-primary hover:bg-white/20 rounded-xl'
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${isListening ? 'animate-spin' : ''}`} />
-              <span>{isListening ? 'Escuchando...' : 'Volver a Dictar'}</span>
+              <span>{isListening ? 'Escuchando...' : 'Volver a Dictar / Hablar'}</span>
             </button>
           )}
 
