@@ -249,12 +249,31 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
   const noteMatch = clean.match(/\b(?:nota|anotar|escribir nota|nueva nota)\s+(.+)/i);
   if (noteMatch) {
     const noteText = noteMatch[1].trim();
+    let title = '';
+    let content = noteText;
+    const titleMatch = noteText.match(/\b(?:t[íi]tulo|asunto)\s*[:\-]?\s*(.+?)(?:\s+(?:contenido|nota|texto|cuerpo)\s*[:\-]?\s*(.+)|$)/i);
+    if (titleMatch) {
+      title = titleMatch[1].trim();
+      if (titleMatch[2]) content = titleMatch[2].trim();
+    } else {
+      const parts = noteText.split(/[:\-–—]/);
+      if (parts.length > 1 && parts[0].trim().length < 30) {
+        title = parts[0].trim();
+        content = parts.slice(1).join('-').trim();
+      } else {
+        const words = noteText.split(/\s+/);
+        title = words.length <= 4 ? noteText : words.slice(0, 3).join(' ');
+      }
+    }
+    title = title.charAt(0).toUpperCase() + title.slice(1);
+    content = content.charAt(0).toUpperCase() + content.slice(1);
+
     return {
       kind: 'command',
       action: 'create_note',
       targetUrl: '/servicios/notas',
-      title: 'Nueva Nota 📝',
-      content: noteText.charAt(0).toUpperCase() + noteText.slice(1),
+      title,
+      content,
       label: 'Guardar Nota',
       rawText: text
     };
@@ -334,7 +353,7 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
       kind: 'command',
       action: 'ask_followup',
       title: '📝 Nueva Nota Importante',
-      prompt: '¿Qué deseas anotar en tu nota?',
+      prompt: '¿Cuál es el título y contenido de tu nota?',
       label: 'Responder',
       rawText: text
     };

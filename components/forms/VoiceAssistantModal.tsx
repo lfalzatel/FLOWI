@@ -248,12 +248,33 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
 
         if (pendingAction === 'create_note') {
+          let title = '';
+          let content = text;
+
+          const titleMatch = text.match(/\b(?:t[íi]tulo|asunto)\s*[:\-]?\s*(.+?)(?:\s+(?:contenido|nota|texto|cuerpo)\s*[:\-]?\s*(.+)|$)/i);
+          if (titleMatch) {
+            title = titleMatch[1].trim();
+            if (titleMatch[2]) content = titleMatch[2].trim();
+          } else {
+            const parts = text.split(/[:\-–—]/);
+            if (parts.length > 1 && parts[0].trim().length < 30) {
+              title = parts[0].trim();
+              content = parts.slice(1).join('-').trim();
+            } else {
+              const words = text.split(/\s+/);
+              title = words.length <= 4 ? text : words.slice(0, 3).join(' ');
+            }
+          }
+
+          title = title.charAt(0).toUpperCase() + title.slice(1);
+          content = content.charAt(0).toUpperCase() + content.slice(1);
+
           const noteCmd: ParsedVoiceCommand = {
             kind: 'command',
             action: 'create_note',
             targetUrl: '/servicios/notas',
-            title: 'Nueva Nota 📝',
-            content: text.charAt(0).toUpperCase() + text.slice(1),
+            title,
+            content,
             label: 'Guardar Nota',
             rawText: text
           };
@@ -659,20 +680,56 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             />
                           </div>
                         </div>
+                      ) : cmd.action === 'create_note' ? (
+                        <div className="space-y-2.5 mt-1">
+                          <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-purple-400">
+                            <StickyNote className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+                            <span>NOTA IMPORTANTE DETECTADA</span>
+                          </div>
+
+                          {/* Título de la Nota */}
+                          <div>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Título de la Nota</label>
+                            <input
+                              type="text"
+                              value={cmd.title || ''}
+                              onFocus={() => stopListening()}
+                              onChange={(e) => handleUpdateItem(idx, 'title', e.target.value)}
+                              placeholder="Ej: Citas médicas, Lista de compras..."
+                              className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:border-purple-400 ${
+                                isTechTheme ? 'bg-black/60 border border-purple-500/40 text-purple-300 font-mono' : 'bg-black/40 border border-white/20 text-white'
+                              }`}
+                            />
+                          </div>
+
+                          {/* Contenido / Nota */}
+                          <div>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Contenido / Nota</label>
+                            <textarea
+                              rows={3}
+                              value={cmd.content || ''}
+                              onFocus={() => stopListening()}
+                              onChange={(e) => handleUpdateItem(idx, 'content', e.target.value)}
+                              placeholder="Escribe o corrige el contenido..."
+                              className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-400 leading-relaxed resize-none ${
+                                isTechTheme ? 'bg-black/60 border border-purple-500/40 text-white font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
+                              }`}
+                            />
+                          </div>
+                        </div>
                       ) : (
                         <div>
                           <div className="flex items-center gap-1.5 mb-1 text-[9px] font-bold uppercase tracking-wider text-amber-400">
-                            {cmd.action === 'navigate' ? <Compass className="w-3 h-3 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-3 h-3 text-purple-400 animate-pulse" /> : <Bell className="w-3 h-3 text-amber-400 animate-pulse" />}
+                            {cmd.action === 'navigate' ? <Compass className="w-3 h-3 text-blue-400" /> : <Bell className="w-3 h-3 text-amber-400 animate-pulse" />}
                             <span>
                               {cmd.action === 'ask_followup' 
                                 ? (cmd.prompt?.includes('anotar') ? '📝 NUEVA NOTA (ESCUCHANDO DETALLES)' : '🔔 NUEVO RECORDATORIO (ESCUCHANDO DETALLES)')
-                                : cmd.action === 'create_note' ? '📝 NOTA IMPORTANTE DETECTADA'
                                 : 'COMANDO DE VOZ IA'}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                              {cmd.action === 'navigate' ? <Compass className="w-5 h-5 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-5 h-5 text-purple-400" /> : <Bell className="w-5 h-5 text-amber-400" />}
+                              {cmd.action === 'navigate' ? <Compass className="w-5 h-5 text-blue-400" /> : <Bell className="w-5 h-5 text-amber-400" />}
                             </div>
                             <div className="flex-1 truncate">
                               <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
