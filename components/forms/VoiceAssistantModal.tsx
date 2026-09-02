@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
-import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Edit2, Compass, StickyNote, Bell, ArrowRight, Search, ChevronDown } from 'lucide-react';
+import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Compass, StickyNote, Bell, ArrowRight, Search, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
@@ -540,21 +540,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     isTechTheme ? 'bg-accent/10 border border-accent/40 font-mono' : 'bg-white/5 border border-white/10 rounded-2xl'
                   }`}
                 >
-                  {/* Botones editar / eliminar en la esquina */}
+                  {/* Botón eliminar en la esquina */}
                   <div className="absolute top-2 right-2 flex items-center gap-1">
-                    {!isCommand && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          stopListening();
-                          setEditingIdx(editingIdx === idx ? null : idx);
-                        }}
-                        title="Editar detalles"
-                        className="p-1 text-accent/70 hover:text-accent transition-colors"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
                     <button
                       type="button"
                       onClick={() => handleRemoveResult(idx)}
