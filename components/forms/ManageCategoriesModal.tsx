@@ -304,43 +304,59 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
         {/* VISTA DE LISTA CON BUSCADOR Y GRIDS RESPONSIVOS */}
         {view === 'list' && (
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Barra de Control Superior (Buscador 35% + Acciones) */}
-            <div className={`p-4 sm:px-6 py-3 border-b flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between ${
+            {/* Barra de Control Superior organizada en 2 Líneas claras */}
+            <div className={`p-4 sm:px-6 py-3 border-b flex flex-col gap-3 ${
               isTechTheme ? 'border-accent/20 bg-black/40' : 'border-white/5 bg-white/[0.02]'
             }`}>
-              {/* Buscador (35% de la línea en escritorio) */}
-              <div className="w-full md:w-[35%] relative flex items-center">
-                <Search className={`w-4 h-4 absolute left-3.5 pointer-events-none ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar subcategoría..."
-                  className={`w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm font-medium transition-colors focus:outline-none ${
+              {/* LÍNEA 1: Buscador (35% en desktop) + Botón Crear Categoría (Misma Línea) */}
+              <div className="flex items-center justify-between gap-3 w-full">
+                {/* Buscador */}
+                <div className="w-[55%] sm:w-[40%] md:w-[35%] relative flex items-center shrink-0">
+                  <Search className={`w-4 h-4 absolute left-3 pointer-events-none ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar..."
+                    className={`w-full pl-9 pr-8 py-2 text-xs sm:text-sm font-medium transition-colors focus:outline-none ${
+                      isTechTheme 
+                        ? 'bg-black border border-accent/40 text-accent placeholder:text-accent/40 focus:border-accent' 
+                        : 'bg-white/5 border border-white/10 rounded-xl text-text-primary placeholder:text-text-muted focus:border-accent'
+                    }`}
+                  />
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 p-1 hover:opacity-80 text-text-muted hover:text-white transition"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Botón Crear Categoría en el lado derecho de la misma línea */}
+                <button 
+                  onClick={handleCreateNew}
+                  className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold transition shadow-lg shrink-0 ${
                     isTechTheme 
-                      ? 'bg-black border border-accent/40 text-accent placeholder:text-accent/40 focus:border-accent' 
-                      : 'bg-white/5 border border-white/10 rounded-xl text-text-primary placeholder:text-text-muted focus:border-accent'
+                      ? 'bg-accent text-black hover:bg-accent/80 border border-accent uppercase tracking-wider' 
+                      : 'bg-[#D10074] text-white rounded-xl hover:bg-[#D10074]/90 shadow-[#D10074]/20'
                   }`}
-                />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 p-1 hover:opacity-80 text-text-muted hover:text-white transition"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Crear Categoría</span>
+                </button>
               </div>
 
-              {/* Acciones y Filtros */}
-              <div className="flex items-center gap-2.5 flex-wrap md:flex-nowrap justify-between md:justify-end flex-1">
+              {/* LÍNEA 2: Filtros (Todas / PERS. / DEF.) + Expandir / Colapsar Todo en la misma línea */}
+              <div className="flex items-center justify-between gap-2 w-full pt-1">
                 {/* Filtros por Origen */}
-                <div className={`flex p-1 rounded-xl border ${isTechTheme ? 'border-accent/30 bg-black' : 'border-white/10 bg-white/5'}`}>
+                <div className={`flex p-0.5 rounded-xl border ${isTechTheme ? 'border-accent/30 bg-black' : 'border-white/10 bg-white/5'}`}>
                   {(['all', 'custom', 'default'] as const).map((type) => (
                     <button
                       key={type}
                       onClick={() => setFilterType(type)}
-                      className={`px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                      className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold transition-all ${
                         filterType === type
                           ? isTechTheme
                             ? 'bg-accent text-black font-mono'
@@ -354,34 +370,21 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                 </div>
 
                 {/* Alternar Expandir/Colapsar Todo */}
-                <div className="flex items-center gap-1 text-[11px] font-medium">
+                <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium shrink-0">
                   <button 
                     onClick={() => toggleExpandAll(true)}
-                    className={`px-2.5 py-1.5 transition ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}
+                    className={`px-2 py-1 transition ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}
                   >
                     Expandir todo
                   </button>
                   <span className="text-white/20">|</span>
                   <button 
                     onClick={() => toggleExpandAll(false)}
-                    className={`px-2.5 py-1.5 transition ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}
+                    className={`px-2 py-1 transition ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}
                   >
                     Colapsar todo
                   </button>
                 </div>
-
-                {/* Botón Crear Categoría */}
-                <button 
-                  onClick={handleCreateNew}
-                  className={`flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold transition shadow-lg shrink-0 ${
-                    isTechTheme 
-                      ? 'bg-accent text-black hover:bg-accent/80 border border-accent uppercase tracking-wider' 
-                      : 'bg-[#D10074] text-white rounded-xl hover:bg-[#D10074]/90 shadow-[#D10074]/20'
-                  }`}
-                >
-                  <Plus className="w-4 h-4" />
-                  Crear Categoría
-                </button>
               </div>
             </div>
 
