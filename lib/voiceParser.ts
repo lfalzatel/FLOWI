@@ -1,4 +1,4 @@
-import { BASE_CATEGORIES, CustomCategory, isFixedExpenseCategory } from './firestore';
+import { BASE_CATEGORIES, isFixedExpenseCategory } from './firestore';
 
 export interface ParsedVoiceResult {
   type: 'gasto' | 'ingreso' | 'deuda';
@@ -20,6 +20,64 @@ const NUMBER_WORDS: Record<string, number> = {
   'seiscientos': 600, 'setecientos': 700, 'ochocientos': 800, 'novecientos': 900,
 };
 
+const CATEGORY_KEYWORDS: { category: string; regex: RegExp }[] = [
+  // Licores y Bares (Prioridad alta antes que comida)
+  {
+    category: 'Licores y Bares',
+    regex: /\b(?:cerveza|cervezas|pola|polas|licor|licores|trago|tragos|ron|aguardiente|whisky|whiskey|tequila|vodka|vino|vinos|coctel|cóctel|cocteles|cócteles|bar|bares|pub|discoteca|antro|estanco)\b/i
+  },
+  // Restaurantes y Comida
+  {
+    category: 'Restaurantes',
+    regex: /\b(?:almuerzo|cena|desayuno|restaurante|restaurantes|comida|hamburguesa|pizza|frisby|perro caliente|asado|corrientazo|sushi|tacos|mcdonalds|kfc|subway|dominos)\b/i
+  },
+  // Café y Antojos
+  {
+    category: 'Café y Antojos',
+    regex: /\b(?:café|cafe|capuchino|tinto|panadería|panaderia|antojo|postre|helado|popsy|donas|dunkin|starbucks)\b/i
+  },
+  // Mercado y Compras
+  {
+    category: 'Mercado',
+    regex: /\b(?:mercado|supermercado|d1|olimpica|jumbo|carulla|exito|éxito|verdura|fruta|carniceria|tienda|minimercado|groceries)\b/i
+  },
+  // Transporte y Vehículos
+  {
+    category: 'Transporte',
+    regex: /\b(?:gasolina|combustible|uber|didi|cabify|indriver|taxi|bus|transporte|peaje|parqueadero|parking|pasaje|metro)\b/i
+  },
+  // Arriendo
+  {
+    category: 'Arriendo',
+    regex: /\b(?:arriendo|alquiler|apto|apartamento|renta)\b/i
+  },
+  // Servicios Domésticos / Conectividad
+  {
+    category: 'Claro Hogar',
+    regex: /\b(?:claro|internet|wifi|epm|luz|agua|gas|efigas|alcanos|telefonía|telefonia)\b/i
+  },
+  // Suscripciones
+  {
+    category: 'Netflix',
+    regex: /\b(?:netflix|spotify|google|youtube|yt music|suscripcion|suscripción|play store)\b/i
+  },
+  // Salud y Farmacia
+  {
+    category: 'Farmacia',
+    regex: /\b(?:medicina|farmacia|drogueria|droguería|salud|doctor|medico|médico|pastillas|remedio)\b/i
+  },
+  // Gimnasio y Deportes
+  {
+    category: 'Gimnasio',
+    regex: /\b(?:gym|gimnasio|deporte|nike|adidas|decathlon|piscina|natacion|natación|futbol|fútbol)\b/i
+  },
+  // Sueldo e Ingresos
+  {
+    category: 'Sueldo',
+    regex: /\b(?:sueldo|nómina|nomina|salario|pago|honorarios|freelance)\b/i
+  }
+];
+
 export function parseVoiceTransaction(text: string, customCategories: { label: string }[] = []): ParsedVoiceResult {
   const clean = text.toLowerCase().trim();
 
@@ -31,26 +89,27 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
     type = 'deuda';
   }
 
-  // 2. Extracción de Monto Numérico
+  // 2. Extracción de Monto Numérico Preciso
   let amount: number | null = null;
 
-  // Caso: "medio millón" / "medio millon"
+  // Caso especial: "medio millón" / "medio millon"
   if (/medio mill[oó]n/.test(clean)) {
     amount = 500000;
   }
 
   if (amount === null) {
-    // Buscar patrones con cifras numéricas (ej. "45 mil", "45.000", "1.5 millones", "1 millón 200 mil")
-    const millionMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:millón|millon|millones)/);
-    const thousandMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:mil|k)/);
-    const directDigitMatch = clean.match(/(?:(?:[$€£])\s*)?(\d{1,3}(?:[.,]\d{3})*|\d+)(?:[.,]\d{1,2})?/);
+    // Buscar patrones tipo: "1.5 millones", "45 mil", "$ 9000", "$9.000", "9000"
+    const millionMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:millón|millon|millones)/i);
+    const thousandMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:mil|k)\b/i);
+    
+    // Regex refinada para cifras directas sin confundir miles sin punto (ej. $9000 o 9000)
+    const directDigitMatch = clean.match(/(?:[$€£]\s*)?(\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,](\d{1,2}))?/);
 
     if (millionMatch) {
       const numPart = parseFloat(millionMatch[1].replace(',', '.'));
       amount = Math.round(numPart * 1000000);
 
-      // Ver si incluye miles adicionales después de millones (ej. "1 millón 200 mil")
-      const subThousand = clean.match(/mill[oó]n(?:es)?\s+(\d+)\s*mil?/);
+      const subThousand = clean.match(/mill[oó]n(?:es)?\s+(\d+)\s*mil?/i);
       if (subThousand) {
         const extraThousand = parseInt(subThousand[1], 10);
         amount += (extraThousand < 1000 ? extraThousand * 1000 : extraThousand);
@@ -59,15 +118,26 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
       const numPart = parseFloat(thousandMatch[1].replace(',', '.'));
       amount = Math.round(numPart * 1000);
     } else if (directDigitMatch) {
-      const rawNum = directDigitMatch[1].replace(/\./g, '').replace(',', '.');
-      const parsed = parseFloat(rawNum);
-      if (!isNaN(parsed) && parsed > 0) {
-        amount = parsed;
+      let rawStr = directDigitMatch[1];
+      const decimalStr = directDigitMatch[2];
+
+      // Si tiene puntos de miles (ej. 9.000 o 1.500.000), quitamos los puntos
+      if (rawStr.includes('.') || rawStr.includes(',')) {
+        rawStr = rawStr.replace(/[.,]/g, '');
+      }
+
+      let parsedNum = parseInt(rawStr, 10);
+      if (decimalStr) {
+        parsedNum = parseFloat(`${rawStr}.${decimalStr}`);
+      }
+
+      if (!isNaN(parsedNum) && parsedNum > 0) {
+        amount = parsedNum;
       }
     }
   }
 
-  // Si aún no se encontró número por dígitos, probar por palabras escritas en español
+  // Fallback por palabras escritas en español (ej. "cincuenta mil", "doscientos mil")
   if (amount === null) {
     let wordSum = 0;
     const words = clean.split(/\s+/);
@@ -93,11 +163,11 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
     }
   }
 
-  // 3. Detección de Categoría
+  // 3. Detección de Categoría Inteligente
   const allAvailableCategories = [...customCategories, ...BASE_CATEGORIES];
   let category = '';
 
-  // Probar coincidencia exacta o por palabras clave con las categorías disponibles
+  // A. Coincidencia directa por nombre de categoría del usuario
   for (const cat of allAvailableCategories) {
     const labelLower = cat.label.toLowerCase();
     if (clean.includes(labelLower)) {
@@ -106,29 +176,19 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
     }
   }
 
-  // Si no coincide directo por etiqueta de categoría, inferir por palabras de contexto comunes
+  // B. Coincidencia por palabras clave avanzadas (Licores, Restaurantes, Mercado, etc.)
   if (!category) {
-    if (/almuerzo|cena|desayuno|restaurante|comida|antojo|cafe|café|popsy|frisby|hamburguesa|pizza|cerveza|bar/.test(clean)) {
-      category = 'Restaurantes';
-    } else if (/mercado|supermercado|d1|olimpica|jumbo|carulla|exito|éxito|verdura|fruta|carniceria/.test(clean)) {
-      category = 'Mercado';
-    } else if (/gasolina|uber|taxi|bus|transporte|peaje|parqueadero|parking|pasaje/.test(clean)) {
-      category = 'Transporte';
-    } else if (/arriendo|alquiler|apto|apartamento/.test(clean)) {
-      category = 'Arriendo';
-    } else if (/claro|internet|wifi|epm|luz|agua|gas|efigas|alcanos/.test(clean)) {
-      category = 'Claro Hogar';
-    } else if (/netflix|spotify|google|youtube|yt music|suscripcion/.test(clean)) {
-      category = 'Netflix';
-    } else if (/sueldo|nómina|nomina|salario|pago/.test(clean)) {
-      category = 'Sueldo';
-    } else if (/gym|gimnasio|deporte|nike|adidas|decathlon/.test(clean)) {
-      category = 'Gimnasio';
-    } else if (/medicina|farmacia|drogueria|droguería|salud|doctor|medico|médico/.test(clean)) {
-      category = 'Farmacia';
-    } else {
-      category = type === 'ingreso' ? 'Sueldo' : 'Otros';
+    for (const kw of CATEGORY_KEYWORDS) {
+      if (kw.regex.test(clean)) {
+        category = kw.category;
+        break;
+      }
     }
+  }
+
+  // C. Fallback por defecto
+  if (!category) {
+    category = type === 'ingreso' ? 'Sueldo' : 'Otros';
   }
 
   // 4. Extracción de Descripción & Detalle de Persona en Deuda
@@ -144,11 +204,11 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
       description = 'Deuda por voz';
     }
   } else {
-    // Intentar extraer el nombre del lugar o detalle de la frase
+    // Extraer el comercio/producto mencionado (ej. "cerveza", "frisby", "gasolina Terpel")
     const afterEnMatch = clean.match(/(?:en|de|por)\s+([a-záéíóúñ0-9\s]+)/i);
     if (afterEnMatch) {
       const detail = afterEnMatch[1].replace(/para|por|de|un|una|el|la|los|las|\d+/g, '').trim();
-      if (detail.length > 2) {
+      if (detail.length > 1) {
         description = detail.charAt(0).toUpperCase() + detail.slice(1);
       }
     }
