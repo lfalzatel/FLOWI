@@ -400,7 +400,7 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
   // 1. Determinar el Tipo (Gasto, Ingreso, Deuda)
   let type: 'gasto' | 'ingreso' | 'deuda' = 'gasto';
 
-  if (/\b(?:ingreso|ingresos|ingresó|ingresaron|ingresé|ingrese|ingresar|me pagaron|me ingresaron|me entraron|me consignaron|consignaron|consignación|consignacion|me depositaron|depósito|deposito|sueldo|nómina|nomina|salario|gané|gane|me gané|me gane|ganancia|ganancias|recibí|recibi|recibo|recibió|recibio|me dieron|abono|abonos|premio|premios|cobré|cobre|cobro|venta|ventas|vendí|vendi|vendió|vendio|reembolso|devolución|devolucion)\b/i.test(clean)) {
+  if (/\b(?:ingreso|ingresos|ingresó|ingresaron|ingresé|ingrese|ingresar|me pagaron|me ingresaron|me entraron|me consignaron|consignaron|consignación|consignacion|me depositaron|depósito|deposito|sueldo|nómina|nomina|salario|gané|gane|me gané|me gane|ganancia|ganancias|recibí|recibi|recibo|recibió|recibio|me dieron|abono|abonos|premio|premios|cobré|cobre|cobro|venta|ventas|vendí|vendi|vendió|vendio|reembolso|devolución|devolucion|arriendo recibido|arrendamiento recibido|alquiler recibido|cobro arriendo)\b/i.test(clean)) {
     type = 'ingreso';
   } else if (/\b(?:deuda|deudas|debo|presté|preste|me prestaron|le debo|deber)\b/i.test(clean)) {
     type = 'deuda';

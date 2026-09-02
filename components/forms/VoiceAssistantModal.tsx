@@ -474,11 +474,24 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     /* Renderizado de Transacciones Estándar */
                     <div>
                       <div className="flex justify-between items-start mb-1 pr-14">
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                          res.type === 'ingreso' ? 'text-emerald-400' : res.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
-                        }`}>
-                          {res.type.toUpperCase()} DETECTADO
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextType = res.type === 'gasto' ? 'ingreso' : res.type === 'ingreso' ? 'deuda' : 'gasto';
+                            handleUpdateItem(idx, 'type', nextType);
+                          }}
+                          title="Toca para cambiar entre Gasto, Ingreso o Deuda"
+                          className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
+                            res.type === 'ingreso' 
+                              ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/25' 
+                              : res.type === 'deuda' 
+                              ? 'text-yellow-400 bg-yellow-500/15 border-yellow-500/40 hover:bg-yellow-500/25' 
+                              : 'text-red-400 bg-red-500/15 border-red-500/40 hover:bg-red-500/25'
+                          }`}
+                        >
+                          <span>{res.type.toUpperCase()} DETECTADO</span>
+                          <RefreshCw className="w-2.5 h-2.5 opacity-70" />
+                        </button>
                         {res.isFixed && (
                           <span className="text-[8px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold uppercase">
                             Gasto Fijo
