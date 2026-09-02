@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
 import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, CheckCircle2, Trophy } from 'lucide-react';
 import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
+import { speakText } from '@/lib/voiceParser';
 
 interface PowerAnimationEvent {
   amount: number;
@@ -645,6 +646,18 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
   if (typeof window !== 'undefined') {
     const isCardEnabled = localStorage.getItem('anim_card_enabled') !== 'false';
     const isBurstEnabled = localStorage.getItem('anim_burst_enabled') !== 'false';
+
+    // Síntesis de voz hablada automática en registros manuales y por voz
+    let spokenText = '';
+    if (type === 'ingreso') spokenText = 'Ingreso registrado con éxito';
+    else if (type === 'gasto') spokenText = 'Gasto registrado con éxito';
+    else if (type === 'abono') spokenText = 'Abono registrado con éxito';
+    else if (type === 'edicion') spokenText = 'Transacción actualizada con éxito';
+    else if (type === 'eliminacion') spokenText = 'Transacción eliminada con éxito';
+
+    if (spokenText) {
+      speakText(spokenText, 'es-CO');
+    }
 
     if (isCardEnabled) {
       playSynthesizedSound(type);

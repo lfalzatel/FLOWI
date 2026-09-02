@@ -4,6 +4,7 @@ import { X, Check, Palette, Trash2, Copy } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { addNote, updateNote, deleteNote, Note } from '@/lib/firestore';
+import { speakText } from '@/lib/voiceParser';
 
 interface Props {
   note: Note | null; // null if creating a new note
@@ -58,6 +59,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
     try {
       if (note?.id) {
         await updateNote(note.id, { title, content, color });
+        speakText('Nota actualizada con éxito', 'es-CO');
       } else {
         await addNote({
           userId: user.uid,
@@ -65,6 +67,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
           content,
           color,
         });
+        speakText('Nota guardada con éxito', 'es-CO');
       }
       onSuccess();
     } catch (err) {
@@ -82,6 +85,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
     setLoading(true);
     try {
       await deleteNote(note.id);
+      speakText('Nota eliminada con éxito', 'es-CO');
       onSuccess();
     } catch (err) {
       console.error(err);

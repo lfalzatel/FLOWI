@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { addReminder, updateReminder, Reminder, ReminderAlert } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { speakText } from '@/lib/voiceParser';
 
 interface Props {
   onClose: () => void;
@@ -114,8 +115,10 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
       if (reminder?.id) {
         await updateReminder(reminder.id, data);
+        speakText('Recordatorio actualizado con éxito', 'es-CO');
       } else {
         await addReminder(data);
+        speakText('Recordatorio agendado con éxito', 'es-CO');
       }
       onSuccess();
       onClose();
