@@ -40,7 +40,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [showCategoryPickerIdx, setShowCategoryPickerIdx] = useState<number | null>(null);
   const [categorySearch, setCategorySearch] = useState('');
 
-  const [pendingAction, setPendingAction] = useState<'create_reminder' | 'create_note' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'create_reminder' | 'create_note' | 'create_income' | 'create_expense' | null>(null);
 
   const recognitionRef = useRef<any>(null);
 
@@ -67,6 +67,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
     if (recognitionRef.current) {
       try {
+        recognitionRef.current.onstart = null;
+        recognitionRef.current.onresult = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onend = null;
         recognitionRef.current.abort();
       } catch (e) {}
     }
@@ -154,8 +158,40 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     if (transcript.trim() && !isListening) {
       const text = transcript.trim();
 
-      // Si había un estado conversacional pendiente (creación de recordatorio o nota):
+      // Si había un estado conversacional pendiente (creación de recordatorio, nota, ingreso o gasto):
       if (pendingAction) {
+        if (pendingAction === 'create_income') {
+          const results = parseMultiVoiceTransaction(text, allCategories);
+          results.forEach(r => {
+            if (!('kind' in r) || r.kind === 'transaction') {
+              const tx = r as ParsedVoiceResult;
+              tx.type = 'ingreso';
+              tx.isFixed = false;
+              if (tx.category === 'Arriendo') {
+                tx.category = 'Arriendo recibido';
+              }
+            }
+          });
+          setParsedResults(results);
+          setPendingAction(null);
+          setTranscript('');
+          return;
+        }
+
+        if (pendingAction === 'create_expense') {
+          const results = parseMultiVoiceTransaction(text, allCategories);
+          results.forEach(r => {
+            if (!('kind' in r) || r.kind === 'transaction') {
+              const tx = r as ParsedVoiceResult;
+              tx.type = 'gasto';
+            }
+          });
+          setParsedResults(results);
+          setPendingAction(null);
+          setTranscript('');
+          return;
+        }
+
         if (pendingAction === 'create_reminder') {
           let dueDate = '';
           if (/\bmañana\b/i.test(text)) {
@@ -210,10 +246,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           stopListening();
           setTranscript(''); // Limpiar la palabra clave para que no persista
 
-          const isReminder = cmd.prompt.toLowerCase().includes('recordar');
-          const isNote = cmd.prompt.toLowerCase().includes('anotar');
-          if (isReminder) setPendingAction('create_reminder');
-          else if (isNote) setPendingAction('create_note');
+          const promptLower = cmd.prompt.toLowerCase();
+          if (promptLower.includes('recordar')) setPendingAction('create_reminder');
+          else if (promptLower.includes('anotar')) setPendingAction('create_note');
+          else if (promptLower.includes('ingreso')) setPendingAction('create_income');
+          else if (promptLower.includes('gasto')) setPendingAction('create_expense');
 
           const locale = detectUserLocaleAndCurrency(profile?.currency);
           speakText(cmd.prompt, locale.language, () => {
@@ -232,7 +269,15 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const handleUpdateItem = (index: number, key: string, val: any) => {
     setParsedResults(prev => {
       const copy = [...prev];
-      copy[index] = { ...copy[index], [key]: val } as ParsedVoiceItem;
+      const item = { ...copy[index] } as any;
+      item[key] = val;
+      if (key === 'type' && val === 'ingreso') {
+        item.isFixed = false;
+        if (item.category === 'Arriendo') {
+          item.category = 'Arriendo recibido';
+        }
+      }
+      copy[index] = item as ParsedVoiceItem;
       return copy;
     });
   };
@@ -550,30 +595,35 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   ) : res ? (
                     /* Renderizado de Transacciones Estándar */
                     <div>
-                      <div className="flex justify-between items-start mb-1 pr-14">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextType = res.type === 'gasto' ? 'ingreso' : res.type === 'ingreso' ? 'deuda' : 'gasto';
-                            handleUpdateItem(idx, 'type', nextType);
-                          }}
-                          title="Toca para cambiar entre Gasto, Ingreso o Deuda"
-                          className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
-                            res.type === 'ingreso' 
-                              ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/25' 
-                              : res.type === 'deuda' 
-                              ? 'text-yellow-400 bg-yellow-500/15 border-yellow-500/40 hover:bg-yellow-500/25' 
-                              : 'text-red-400 bg-red-500/15 border-red-500/40 hover:bg-red-500/25'
-                          }`}
-                        >
-                          <span>{res.type.toUpperCase()} DETECTADO</span>
-                          <RefreshCw className="w-2.5 h-2.5 opacity-70" />
-                        </button>
-                        {res.isFixed && (
-                          <span className="text-[8px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold uppercase">
-                            Gasto Fijo
-                          </span>
-                        )}
+                      <div className="flex flex-col items-start gap-1 mb-1 pr-14">
+                        <span className="text-[8px] text-amber-300 font-medium">
+                          💡 Toca la etiqueta para convertir a {res.type === 'gasto' ? 'Ingreso 🟢' : 'Gasto 🔴'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextType = res.type === 'gasto' ? 'ingreso' : res.type === 'ingreso' ? 'deuda' : 'gasto';
+                              handleUpdateItem(idx, 'type', nextType);
+                            }}
+                            title="Toca para cambiar entre Gasto, Ingreso o Deuda"
+                            className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
+                              res.type === 'ingreso' 
+                                ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/25' 
+                                : res.type === 'deuda' 
+                                ? 'text-yellow-400 bg-yellow-500/15 border-yellow-500/40 hover:bg-yellow-500/25' 
+                                : 'text-red-400 bg-red-500/15 border-red-500/40 hover:bg-red-500/25'
+                            }`}
+                          >
+                            <span>{res.type.toUpperCase()} DETECTADO</span>
+                            <RefreshCw className="w-2.5 h-2.5 opacity-70" />
+                          </button>
+                          {res.isFixed && res.type === 'gasto' && (
+                            <span className="text-[8px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold uppercase">
+                              Gasto Fijo
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {editingIdx === idx ? (
