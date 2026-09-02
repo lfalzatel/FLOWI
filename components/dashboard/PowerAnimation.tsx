@@ -676,7 +676,7 @@ export function triggerPowerAnimation(
       window.dispatchEvent(event);
     }
 
-    if (isBurstEnabled) {
+    if (isBurstEnabled && amount > 0) {
       let burstType: 'ingreso' | 'gasto' | 'abono' | 'logro' = 'ingreso';
       let targetAId = 'balance-card';
       let targetBId = 'header-profile';
@@ -796,6 +796,7 @@ export function triggerConfettiWithSynth(durationSeconds = 3) {
         spread: 60,
         origin: { x: 0, y: 0.6 },
         colors,
+        zIndex: 100000,
       });
       confetti({
         particleCount: 10,
@@ -803,6 +804,7 @@ export function triggerConfettiWithSynth(durationSeconds = 3) {
         spread: 60,
         origin: { x: 1, y: 0.6 },
         colors,
+        zIndex: 100000,
       });
 
       if (Date.now() < end) {
