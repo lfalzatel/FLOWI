@@ -107,6 +107,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       {showVoice && (
         <VoiceAssistantModal
           onClose={() => setShowVoice(false)}
+          onSuccessBulk={onSuccess}
           onSelectParsed={(result) => {
             setShowVoice(false);
             setParsedVoiceData(result);

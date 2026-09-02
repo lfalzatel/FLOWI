@@ -242,3 +242,42 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
     debtPerson,
   };
 }
+
+/**
+ * Parser de frases compuestas largas con múltiples transacciones (Gastos + Ingresos + Deudas)
+ */
+export function parseMultiVoiceTransaction(text: string, customCategories: { label: string }[] = []): ParsedVoiceResult[] {
+  const clean = text.trim();
+  if (!clean) return [];
+
+  // Dividir por conectores de lenguaje natural o puntuación
+  const rawSegments = clean.split(/(?:;|\.|\bpero\b|\badem[áa]s\b|\bluego\b|\bdespu[ée]s\b|\by me\b|\by gast[ée]\b|\by pagu[ée]\b|\by debo\b|\by tambi[ée]n\b)/gi);
+
+  const results: ParsedVoiceResult[] = [];
+  let lastType: 'gasto' | 'ingreso' | 'deuda' = 'gasto';
+
+  for (const seg of rawSegments) {
+    const trimmed = seg.trim();
+    if (trimmed.length < 3) continue;
+
+    // Verificar si el segmento contiene alguna cifra o palabra clave de categoría
+    const parsed = parseVoiceTransaction(trimmed, customCategories);
+
+    if (parsed.amount !== null || parsed.category !== 'Otros') {
+      // Si el segmento no especificaba tipo nuevo, hereda el tipo anterior si corresponde
+      if (!/ingreso|ingresó|me pagaron|sueldo|nómina|gané|deuda|debo|presté/.test(trimmed.toLowerCase())) {
+        parsed.type = lastType;
+      } else {
+        lastType = parsed.type;
+      }
+      results.push(parsed);
+    }
+  }
+
+  // Si no se pudo segmentar en múltiples, retornar el parseo único estándar
+  if (results.length === 0) {
+    results.push(parseVoiceTransaction(clean, customCategories));
+  }
+
+  return results;
+}

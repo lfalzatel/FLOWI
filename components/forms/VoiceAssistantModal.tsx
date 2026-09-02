@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle } from 'lucide-react';
+import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
-import { parseVoiceTransaction, ParsedVoiceResult } from '@/lib/voiceParser';
+import { parseMultiVoiceTransaction, ParsedVoiceResult } from '@/lib/voiceParser';
+import { addExpense, addDebt } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
@@ -15,25 +16,27 @@ interface VoiceAssistantModalProps {
   onClose: () => void;
   onSelectParsed: (result: ParsedVoiceResult) => void;
   onOpenManual: () => void;
+  onSuccessBulk?: () => void;
 }
 
-export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: VoiceAssistantModalProps) {
+export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk }: VoiceAssistantModalProps) {
   const { theme } = useTheme();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const { allCategories } = useCategories();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [parsedResult, setParsedResult] = useState<ParsedVoiceResult | null>(null);
+  const [parsedResults, setParsedResults] = useState<ParsedVoiceResult[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [savingBulk, setSavingBulk] = useState(false);
 
   const recognitionRef = useRef<any>(null);
 
   // Iniciar reconocimiento de voz de forma dinámica
   const startListening = () => {
     setTranscript('');
-    setParsedResult(null);
+    setParsedResults([]);
     setErrorMsg(null);
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -118,16 +121,57 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
   // Al finalizar la transcripción de un dictado, parsear automáticamente
   useEffect(() => {
     if (transcript.trim() && !isListening) {
-      const parsed = parseVoiceTransaction(transcript, allCategories);
-      setParsedResult(parsed);
+      const results = parseMultiVoiceTransaction(transcript, allCategories);
+      setParsedResults(results);
     }
   }, [isListening, transcript, allCategories]);
 
-  const handleConfirm = () => {
-    if (parsedResult) {
-      onSelectParsed(parsedResult);
+  const handleRemoveResult = (index: number) => {
+    setParsedResults(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleConfirmSingle = () => {
+    if (parsedResults.length === 1) {
+      onSelectParsed(parsedResults[0]);
     } else {
       onOpenManual();
+    }
+  };
+
+  const handleSaveAllBulk = async () => {
+    if (!user || parsedResults.length === 0) return;
+    setSavingBulk(true);
+    try {
+      for (const res of parsedResults) {
+        if (!res.amount || res.amount <= 0) continue;
+
+        if (res.type === 'deuda') {
+          await addDebt({
+            userId: user.uid,
+            title: res.description || `Deuda con ${res.debtPerson || 'persona'}`,
+            totalAmount: res.amount,
+            paidAmount: 0,
+            status: 'pending',
+          });
+        } else {
+          await addExpense({
+            userId: user.uid,
+            amount: res.amount,
+            type: res.type,
+            category: res.category,
+            description: res.description,
+            date: new Date(),
+            isFixed: res.isFixed,
+          });
+        }
+      }
+      if (onSuccessBulk) onSuccessBulk();
+      onClose();
+    } catch (err) {
+      console.error('Error al guardar masivo por voz:', err);
+      setErrorMsg('Ocurrió un error guardando las transacciones.');
+    } finally {
+      setSavingBulk(false);
     }
   };
 
@@ -142,7 +186,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
       />
 
       <div 
-        className={`w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center ${
+        className={`w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center max-h-[90vh] overflow-y-auto ${
           isTechTheme ? 'rounded-none border border-accent bg-deep uppercase' : 'rounded-3xl shadow-2xl'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -165,42 +209,41 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
             Asistente de Voz IA
           </h2>
         </div>
-        <p className={`text-xs mb-6 max-w-xs ${isTechTheme ? 'text-accent/70 font-mono' : 'text-text-secondary'}`}>
-          Dicta tu gasto, ingreso o deuda de forma natural.
+        <p className={`text-xs mb-4 max-w-xs ${isTechTheme ? 'text-accent/70 font-mono' : 'text-text-secondary'}`}>
+          Dicta uno o múltiples gastos, ingresos y deudas de forma natural.
         </p>
 
         {/* Círculo Principal de Micrófono & Ondas */}
-        <div className="relative my-4 flex items-center justify-center">
-          {/* Anillos de pulso cuando está escuchando */}
+        <div className="relative my-2 flex items-center justify-center">
           {isListening && (
             <>
-              <div className="absolute w-36 h-36 rounded-full bg-accent/20 animate-ping opacity-75" />
-              <div className="absolute w-28 h-28 rounded-full bg-accent/30 animate-pulse" />
+              <div className="absolute w-32 h-32 rounded-full bg-accent/20 animate-ping opacity-75" />
+              <div className="absolute w-24 h-24 rounded-full bg-accent/30 animate-pulse" />
             </>
           )}
 
           <button
             type="button"
             onClick={isListening ? stopListening : startListening}
-            className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl cursor-pointer ${
+            className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl cursor-pointer ${
               isListening 
                 ? (isTechTheme ? 'bg-accent text-black scale-110 shadow-[0_0_40px_rgba(0,229,160,0.8)]' : 'bg-red-500 text-white scale-110 shadow-[0_0_35px_rgba(239,68,68,0.7)]')
                 : (isTechTheme ? 'bg-accent/20 border-2 border-accent text-accent hover:bg-accent/30' : 'bg-gradient-to-tr from-accent to-accent-dim text-black hover:scale-105 shadow-accent/40')
             }`}
           >
             {isListening ? (
-              <Mic className="w-10 h-10 animate-bounce text-black" />
+              <Mic className="w-9 h-9 animate-bounce text-black" />
             ) : (
-              <MicOff className="w-9 h-9" />
+              <MicOff className="w-8 h-8" />
             )}
           </button>
         </div>
 
         {/* Estado en Texto */}
-        <div className="my-3 min-h-[3rem] flex flex-col items-center justify-center">
+        <div className="my-2 min-h-[2.5rem] flex flex-col items-center justify-center">
           {isListening ? (
             <span className={`text-xs font-bold animate-pulse ${isTechTheme ? 'text-accent' : 'text-accent'}`}>
-              🎙️ Escuchando... Di ej. "Gasté 9000 en cerveza"
+              🎙️ Escuchando... Di ej. "Recibí 1.5M pero gasté 45 mil en mercado"
             </span>
           ) : transcript ? (
             <span className={`text-xs font-medium italic max-w-xs ${isTechTheme ? 'text-accent/90' : 'text-text-primary'}`}>
@@ -215,55 +258,97 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
 
         {/* Mensaje de Error / Estado */}
         {errorMsg && (
-          <div className="my-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+          <div className="my-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2 w-full">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        {/* Vista previa de los Datos Parseados por la IA */}
-        {parsedResult && (
-          <div className={`w-full my-4 p-4 text-left transition-all animate-fade-in-up ${
-            isTechTheme ? 'bg-accent/10 border border-accent/40 font-mono' : 'bg-white/5 border border-white/10 rounded-2xl'
-          }`}>
-            <div className="flex justify-between items-start mb-2">
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                parsedResult.type === 'ingreso' ? 'text-emerald-400' : parsedResult.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
-              }`}>
-                {parsedResult.type.toUpperCase()} DETECTADO
-              </span>
-              {parsedResult.isFixed && (
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-bold uppercase">
-                  Gasto Fijo
+        {/* Vista previa de los Datos Parseados (Individual o Múltiple) */}
+        {parsedResults.length > 0 && (
+          <div className="w-full my-3 space-y-2">
+            {parsedResults.length > 1 && (
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-bold text-accent flex items-center gap-1.5">
+                  <Layers className="w-4 h-4" />
+                  <span>{parsedResults.length} Transacciones Detectadas</span>
                 </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <CategoryIcon icon={parsedResult.category} label={parsedResult.category} className="w-8 h-8 text-xl flex items-center justify-center flex-shrink-0" />
-              <div className="flex-1 truncate">
-                <p className={`text-sm font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                  {parsedResult.category}
-                </p>
-                <p className={`text-xs truncate ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-                  {parsedResult.description}
-                </p>
+                <span className="text-[10px] text-text-muted">Desglose IA</span>
               </div>
-              <p className={`text-base font-bold ${
-                parsedResult.type === 'ingreso' ? 'text-emerald-400' : 'text-accent'
-              }`}>
-                {parsedResult.amount ? formatCurrency(parsedResult.amount, profile?.currency) : 'Monto no detectado'}
-              </p>
-            </div>
+            )}
+
+            {parsedResults.map((res, idx) => (
+              <div 
+                key={idx} 
+                className={`w-full p-3 text-left transition-all relative group ${
+                  isTechTheme ? 'bg-accent/10 border border-accent/40 font-mono' : 'bg-white/5 border border-white/10 rounded-2xl'
+                }`}
+              >
+                {parsedResults.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveResult(idx)}
+                    title="Eliminar esta transacción"
+                    className="absolute top-2 right-2 p-1 text-red-400/60 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+
+                <div className="flex justify-between items-start mb-1 pr-6">
+                  <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                    res.type === 'ingreso' ? 'text-emerald-400' : res.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
+                  }`}>
+                    {res.type.toUpperCase()} DETECTADO
+                  </span>
+                  {res.isFixed && (
+                    <span className="text-[8px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold uppercase">
+                      Gasto Fijo
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <CategoryIcon icon={res.category} label={res.category} className="w-7 h-7 text-lg flex items-center justify-center flex-shrink-0" />
+                  <div className="flex-1 truncate">
+                    <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
+                      {res.category}
+                    </p>
+                    <p className={`text-[11px] truncate ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
+                      {res.description}
+                    </p>
+                  </div>
+                  <p className={`text-sm font-bold ${
+                    res.type === 'ingreso' ? 'text-emerald-400' : 'text-accent'
+                  }`}>
+                    {res.amount ? formatCurrency(res.amount, profile?.currency) : 'Monto no detectado'}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
         {/* Botones de Acción */}
-        <div className="w-full space-y-2 mt-4">
-          {parsedResult ? (
+        <div className="w-full space-y-2 mt-2">
+          {parsedResults.length > 1 ? (
             <button
               type="button"
-              onClick={handleConfirm}
+              onClick={handleSaveAllBulk}
+              disabled={savingBulk}
+              className={`w-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+                isTechTheme 
+                  ? 'bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-wider' 
+                  : 'bg-gradient-to-r from-accent to-accent-dim text-black rounded-xl shadow-lg shadow-accent/25 hover:opacity-90 font-syne'
+              }`}
+            >
+              <Check className="w-5 h-5" />
+              <span>{savingBulk ? 'Guardando masivo...' : `Guardar Todas (${parsedResults.length})`}</span>
+            </button>
+          ) : parsedResults.length === 1 ? (
+            <button
+              type="button"
+              onClick={handleConfirmSingle}
               className={`w-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
                 isTechTheme 
                   ? 'bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-wider' 
@@ -292,7 +377,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual }: V
           <button
             type="button"
             onClick={onOpenManual}
-            className={`w-full py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+            className={`w-full py-2 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
               isTechTheme ? 'text-accent/60 hover:text-accent font-mono' : 'text-text-muted hover:text-text-primary'
             }`}
           >
