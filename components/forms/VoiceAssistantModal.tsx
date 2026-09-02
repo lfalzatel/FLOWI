@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers } from 'lucide-react';
+import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Edit2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
@@ -28,6 +28,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [parsedResults, setParsedResults] = useState<ParsedVoiceResult[]>([]);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [savingBulk, setSavingBulk] = useState(false);
 
@@ -37,6 +38,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const startListening = () => {
     setTranscript('');
     setParsedResults([]);
+    setEditingIdx(null);
     setErrorMsg(null);
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -46,7 +48,6 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       return;
     }
 
-    // Cancelar cualquier instancia previa
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -128,6 +129,15 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
   const handleRemoveResult = (index: number) => {
     setParsedResults(prev => prev.filter((_, i) => i !== index));
+    if (editingIdx === index) setEditingIdx(null);
+  };
+
+  const handleUpdateItem = (index: number, key: keyof ParsedVoiceResult, val: any) => {
+    setParsedResults(prev => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [key]: val };
+      return copy;
+    });
   };
 
   const handleConfirmSingle = () => {
@@ -210,7 +220,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           </h2>
         </div>
         <p className={`text-xs mb-4 max-w-xs ${isTechTheme ? 'text-accent/70 font-mono' : 'text-text-secondary'}`}>
-          Dicta uno o múltiples gastos, ingresos y deudas de forma natural.
+          Dicta tu gasto, ingreso o deuda de forma natural.
         </p>
 
         {/* Círculo Principal de Micrófono & Ondas */}
@@ -243,7 +253,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         <div className="my-2 min-h-[2.5rem] flex flex-col items-center justify-center">
           {isListening ? (
             <span className={`text-xs font-bold animate-pulse ${isTechTheme ? 'text-accent' : 'text-accent'}`}>
-              🎙️ Escuchando... Di ej. "Recibí 1.5M pero gasté 45 mil en mercado"
+              🎙️ Escuchando... Di ej. "Gasté 9000 en cerveza"
             </span>
           ) : transcript ? (
             <span className={`text-xs font-medium italic max-w-xs ${isTechTheme ? 'text-accent/90' : 'text-text-primary'}`}>
@@ -264,7 +274,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           </div>
         )}
 
-        {/* Vista previa de los Datos Parseados (Individual o Múltiple) */}
+        {/* Vista previa de los Datos Parseados */}
         {parsedResults.length > 0 && (
           <div className="w-full my-3 space-y-2">
             {parsedResults.length > 1 && (
@@ -273,29 +283,40 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   <Layers className="w-4 h-4" />
                   <span>{parsedResults.length} Transacciones Detectadas</span>
                 </span>
-                <span className="text-[10px] text-text-muted">Desglose IA</span>
+                <span className="text-[10px] text-text-muted">Toca ✏️ para editar</span>
               </div>
             )}
 
             {parsedResults.map((res, idx) => (
               <div 
                 key={idx} 
-                className={`w-full p-3 text-left transition-all relative group ${
+                className={`w-full p-3 text-left transition-all relative ${
                   isTechTheme ? 'bg-accent/10 border border-accent/40 font-mono' : 'bg-white/5 border border-white/10 rounded-2xl'
                 }`}
               >
-                {parsedResults.length > 1 && (
+                {/* Botones editar / eliminar en la esquina */}
+                <div className="absolute top-2 right-2 flex items-center gap-1">
                   <button
                     type="button"
-                    onClick={() => handleRemoveResult(idx)}
-                    title="Eliminar esta transacción"
-                    className="absolute top-2 right-2 p-1 text-red-400/60 hover:text-red-400 transition-colors"
+                    onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
+                    title="Editar detalles"
+                    className="p-1 text-accent/70 hover:text-accent transition-colors"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                )}
+                  {parsedResults.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveResult(idx)}
+                      title="Eliminar esta transacción"
+                      className="p-1 text-red-400/60 hover:text-red-400 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
 
-                <div className="flex justify-between items-start mb-1 pr-6">
+                <div className="flex justify-between items-start mb-1 pr-14">
                   <span className={`text-[9px] font-bold uppercase tracking-wider ${
                     res.type === 'ingreso' ? 'text-emerald-400' : res.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
                   }`}>
@@ -308,22 +329,55 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   )}
                 </div>
 
-                <div className="flex items-center gap-2.5">
-                  <CategoryIcon icon={res.category} label={res.category} className="w-7 h-7 text-lg flex items-center justify-center flex-shrink-0" />
-                  <div className="flex-1 truncate">
-                    <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                      {res.category}
-                    </p>
-                    <p className={`text-[11px] truncate ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-                      {res.description}
+                {editingIdx === idx ? (
+                  /* Modo Edición Rápida Inline */
+                  <div className="space-y-2 mt-2 pt-2 border-t border-white/10">
+                    <div>
+                      <label className="text-[10px] text-text-muted block mb-0.5">Monto</label>
+                      <input 
+                        type="number"
+                        value={res.amount || ''}
+                        onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
+                        className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs font-bold text-accent"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-text-muted block mb-0.5">Descripción</label>
+                      <input 
+                        type="text"
+                        value={res.description}
+                        onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
+                        className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingIdx(null)}
+                      className="w-full py-1 text-[11px] font-bold bg-accent/20 border border-accent text-accent rounded flex items-center justify-center gap-1"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Listo</span>
+                    </button>
+                  </div>
+                ) : (
+                  /* Modo Visualización Estándar */
+                  <div className="flex items-center gap-2.5">
+                    <CategoryIcon icon={res.category} label={res.category} className="w-7 h-7 text-lg flex items-center justify-center flex-shrink-0" />
+                    <div className="flex-1 truncate">
+                      <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
+                        {res.category}
+                      </p>
+                      <p className={`text-[11px] truncate ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
+                        {res.description}
+                      </p>
+                    </div>
+                    <p className={`text-sm font-bold ${
+                      res.type === 'ingreso' ? 'text-emerald-400' : 'text-accent'
+                    }`}>
+                      {res.amount ? formatCurrency(res.amount, profile?.currency) : 'Monto no detectado'}
                     </p>
                   </div>
-                  <p className={`text-sm font-bold ${
-                    res.type === 'ingreso' ? 'text-emerald-400' : 'text-accent'
-                  }`}>
-                    {res.amount ? formatCurrency(res.amount, profile?.currency) : 'Monto no detectado'}
-                  </p>
-                </div>
+                )}
               </div>
             ))}
           </div>
@@ -356,7 +410,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               }`}
             >
               <Check className="w-5 h-5" />
-              <span>Confirmar y Guardar</span>
+              <span>Confirmar y Abrir Formulario</span>
             </button>
           ) : (
             <button
