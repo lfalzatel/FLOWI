@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
-import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Edit2 } from 'lucide-react';
+import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Edit2, Compass, StickyNote, Bell, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
-import { parseMultiVoiceTransaction, ParsedVoiceResult } from '@/lib/voiceParser';
-import { addExpense, addDebt } from '@/lib/firestore';
+import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand } from '@/lib/voiceParser';
+import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 
@@ -20,6 +21,7 @@ interface VoiceAssistantModalProps {
 }
 
 export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk }: VoiceAssistantModalProps) {
+  const router = useRouter();
   const { theme } = useTheme();
   const { user, profile } = useAuth();
   const { allCategories } = useCategories();
@@ -27,7 +29,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [parsedResults, setParsedResults] = useState<ParsedVoiceResult[]>([]);
+  const [parsedResults, setParsedResults] = useState<ParsedVoiceItem[]>([]);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [savingBulk, setSavingBulk] = useState(false);
@@ -132,17 +134,17 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     if (editingIdx === index) setEditingIdx(null);
   };
 
-  const handleUpdateItem = (index: number, key: keyof ParsedVoiceResult, val: any) => {
+  const handleUpdateItem = (index: number, key: string, val: any) => {
     setParsedResults(prev => {
       const copy = [...prev];
-      copy[index] = { ...copy[index], [key]: val };
+      copy[index] = { ...copy[index], [key]: val } as ParsedVoiceItem;
       return copy;
     });
   };
 
   const handleConfirmSingle = () => {
-    if (parsedResults.length === 1) {
-      onSelectParsed(parsedResults[0]);
+    if (parsedResults.length === 1 && (!('kind' in parsedResults[0]) || parsedResults[0].kind === 'transaction')) {
+      onSelectParsed(parsedResults[0] as ParsedVoiceResult);
     } else {
       onOpenManual();
     }
@@ -153,33 +155,65 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     setSavingBulk(true);
     try {
       for (const res of parsedResults) {
-        if (!res.amount || res.amount <= 0) continue;
+        // Manejo de Comandos por Voz (Navegación / Notas / Recordatorios)
+        if ('kind' in res && res.kind === 'command') {
+          const cmd = res as ParsedVoiceCommand;
+          if (cmd.action === 'navigate' && cmd.targetUrl) {
+            router.push(cmd.targetUrl);
+          } else if (cmd.action === 'create_note') {
+            await addNote({
+              userId: user.uid,
+              title: cmd.title || 'Nota por voz',
+              content: cmd.content || cmd.rawText,
+              color: '#3B82F6',
+            });
+            if (cmd.targetUrl) router.push(cmd.targetUrl);
+          } else if (cmd.action === 'create_reminder') {
+            await addReminder({
+              userId: user.uid,
+              title: cmd.title || 'Recordatorio por voz',
+              description: cmd.content || cmd.rawText,
+              type: 'once',
+              time: '20:00',
+              sound: true,
+              pushEnabled: true,
+              inAppEnabled: true,
+              active: true,
+            });
+            if (cmd.targetUrl) router.push(cmd.targetUrl);
+          }
+          continue;
+        }
 
-        if (res.type === 'deuda') {
+        // Manejo de Transacciones Estándar (Gastos / Ingresos / Deudas)
+        const tx = res as ParsedVoiceResult;
+        if (!tx.amount || tx.amount <= 0) continue;
+
+        if (tx.type === 'deuda') {
           await addDebt({
             userId: user.uid,
-            title: res.description || `Deuda con ${res.debtPerson || 'persona'}`,
-            totalAmount: res.amount,
+            title: tx.description || `Deuda con ${tx.debtPerson || 'persona'}`,
+            totalAmount: tx.amount,
             paidAmount: 0,
             status: 'pending',
           });
         } else {
           await addExpense({
             userId: user.uid,
-            amount: res.amount,
-            type: res.type,
-            category: res.category,
-            description: res.description,
+            amount: tx.amount,
+            type: tx.type,
+            category: tx.category,
+            description: tx.description,
             date: new Date(),
-            isFixed: res.isFixed,
+            isFixed: tx.isFixed,
           });
         }
       }
       if (onSuccessBulk) onSuccessBulk();
       onClose();
     } catch (err) {
-      console.error('Error al guardar masivo por voz:', err);
-      setErrorMsg('Ocurrió un error guardando las transacciones.');
+      console.error('Error guardando por voz:', err);
+      setErrorMsg('Error al guardar. Intenta nuevamente.');
     } finally {
       setSavingBulk(false);
     }
@@ -191,12 +225,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono text-sm' : ''}`}>
       {/* Backdrop */}
       <div 
-        className={`absolute inset-0 ${theme === 'light' ? 'bg-black/30 backdrop-blur-xs' : 'bg-black/70 backdrop-blur-md'}`} 
+        className={`absolute inset-0 ${theme === 'light' ? 'bg-black/40 backdrop-blur-xs' : 'bg-black/75 backdrop-blur-md'}`} 
         onClick={onClose} 
       />
 
       <div 
-        className={`w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center max-h-[90vh] overflow-y-auto ${
+        className={`w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center overflow-hidden ${
           isTechTheme ? 'rounded-none border border-accent bg-deep uppercase' : 'rounded-3xl shadow-2xl'
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -212,39 +246,39 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           <X className="w-5 h-5" />
         </button>
 
-        {/* Título */}
+        {/* Header */}
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-          <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent tracking-wider font-mono' : 'text-text-primary font-syne'}`}>
+          <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent font-mono' : 'text-text-primary font-syne'}`}>
             Asistente de Voz IA
           </h2>
         </div>
-        <p className={`text-xs mb-4 max-w-xs ${isTechTheme ? 'text-accent/70 font-mono' : 'text-text-secondary'}`}>
-          Dicta tu gasto, ingreso o deuda de forma natural.
+
+        <p className={`text-xs max-w-xs mb-4 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
+          Dicta transacciones, comandos como "abrir estadísticas" o crea notas y recordatorios.
         </p>
 
-        {/* Círculo Principal de Micrófono & Ondas */}
-        <div className="relative my-2 flex items-center justify-center">
+        {/* Animación del Micrófono */}
+        <div className="relative my-4 flex items-center justify-center">
           {isListening && (
             <>
-              <div className="absolute w-32 h-32 rounded-full bg-accent/20 animate-ping opacity-75" />
-              <div className="absolute w-24 h-24 rounded-full bg-accent/30 animate-pulse" />
+              <div className="absolute w-24 h-24 rounded-full bg-accent/20 animate-ping" />
+              <div className="absolute w-20 h-20 rounded-full bg-accent/40 animate-pulse" />
             </>
           )}
-
           <button
             type="button"
             onClick={isListening ? stopListening : startListening}
-            className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl cursor-pointer ${
-              isListening 
-                ? (isTechTheme ? 'bg-accent text-black scale-110 shadow-[0_0_40px_rgba(0,229,160,0.8)]' : 'bg-red-500 text-white scale-110 shadow-[0_0_35px_rgba(239,68,68,0.7)]')
-                : (isTechTheme ? 'bg-accent/20 border-2 border-accent text-accent hover:bg-accent/30' : 'bg-gradient-to-tr from-accent to-accent-dim text-black hover:scale-105 shadow-accent/40')
+            className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
+              isListening
+                ? 'bg-red-500 text-white scale-110 shadow-red-500/30'
+                : 'bg-gradient-to-tr from-accent to-accent-dim text-black hover:scale-105 shadow-accent/30'
             }`}
           >
             {isListening ? (
-              <Mic className="w-9 h-9 animate-bounce text-black" />
+              <MicOff className="w-9 h-9 animate-pulse" />
             ) : (
-              <MicOff className="w-8 h-8" />
+              <Mic className="w-9 h-9" />
             )}
           </button>
         </div>
@@ -253,7 +287,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         <div className="my-2 min-h-[2.5rem] flex flex-col items-center justify-center">
           {isListening ? (
             <span className={`text-xs font-bold animate-pulse ${isTechTheme ? 'text-accent' : 'text-accent'}`}>
-              🎙️ Escuchando... Di ej. "Gasté 9000 en cerveza"
+              🎙️ Escuchando... Di "Estadísticas" o "Gasté 9000 en cerveza"
             </span>
           ) : transcript ? (
             <span className={`text-xs font-medium italic max-w-xs ${isTechTheme ? 'text-accent/90' : 'text-text-primary'}`}>
@@ -266,7 +300,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           )}
         </div>
 
-        {/* Mensaje de Error / Estado */}
+        {/* Mensaje de Error */}
         {errorMsg && (
           <div className="my-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2 w-full">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -276,183 +310,211 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
         {/* Vista previa de los Datos Parseados */}
         {parsedResults.length > 0 && (
-          <div className="w-full my-3 space-y-2">
+          <div className="w-full my-3 space-y-2 max-h-56 overflow-y-auto scrollbar-hide pr-1">
             {parsedResults.length > 1 && (
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold text-accent flex items-center gap-1.5">
                   <Layers className="w-4 h-4" />
-                  <span>{parsedResults.length} Transacciones Detectadas</span>
+                  <span>{parsedResults.length} Elementos Detectados</span>
                 </span>
                 <span className="text-[10px] text-text-muted">Toca ✏️ para editar</span>
               </div>
             )}
 
-            {parsedResults.map((res, idx) => (
-              <div 
-                key={idx} 
-                className={`w-full p-3 text-left transition-all relative ${
-                  isTechTheme ? 'bg-accent/10 border border-accent/40 font-mono' : 'bg-white/5 border border-white/10 rounded-2xl'
-                }`}
-              >
-                {/* Botones editar / eliminar en la esquina */}
-                <div className="absolute top-2 right-2 flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
-                    title="Editar detalles"
-                    className="p-1 text-accent/70 hover:text-accent transition-colors"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  {parsedResults.length > 1 && (
+            {parsedResults.map((item, idx) => {
+              const isCommand = 'kind' in item && item.kind === 'command';
+              const cmd = isCommand ? (item as ParsedVoiceCommand) : null;
+              const res = isCommand ? null : (item as ParsedVoiceResult);
+
+              return (
+                <div 
+                  key={idx} 
+                  className={`w-full p-3 text-left transition-all relative ${
+                    isTechTheme ? 'bg-accent/10 border border-accent/40 font-mono' : 'bg-white/5 border border-white/10 rounded-2xl'
+                  }`}
+                >
+                  {/* Botones editar / eliminar en la esquina */}
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    {!isCommand && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingIdx(editingIdx === idx ? null : idx)}
+                        title="Editar detalles"
+                        className="p-1 text-accent/70 hover:text-accent transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleRemoveResult(idx)}
-                      title="Eliminar esta transacción"
+                      title="Eliminar este elemento"
                       className="p-1 text-red-400/60 hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                  )}
-                </div>
+                  </div>
 
-                <div className="flex justify-between items-start mb-1 pr-14">
-                  <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                    res.type === 'ingreso' ? 'text-emerald-400' : res.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
-                  }`}>
-                    {res.type.toUpperCase()} DETECTADO
-                  </span>
-                  {res.isFixed && (
-                    <span className="text-[8px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold uppercase">
-                      Gasto Fijo
-                    </span>
-                  )}
-                </div>
-
-                {editingIdx === idx ? (
-                  /* Modo Edición Rápida Inline */
-                  <div className="space-y-2 mt-2 pt-2 border-t border-white/10">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[10px] text-text-muted block mb-0.5">Monto</label>
-                        <input 
-                          type="number"
-                          value={res.amount || ''}
-                          onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs font-bold text-accent"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-text-muted block mb-0.5">Categoría</label>
-                        <select
-                          value={res.category}
-                          onChange={(e) => handleUpdateItem(idx, 'category', e.target.value)}
-                          className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
-                        >
-                          {allCategories.map((cat) => (
-                            <option key={cat.label} value={cat.label} className="bg-gray-900 text-white">
-                              {cat.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+                  {/* Renderizado de Comandos por Voz (Navegación / Nota / Recordatorio) */}
+                  {isCommand && cmd ? (
                     <div>
-                      <label className="text-[10px] text-text-muted block mb-0.5">Descripción</label>
-                      <input 
-                        type="text"
-                        value={res.description}
-                        onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
-                        className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
-                      />
+                      <div className="flex items-center gap-1.5 mb-1 text-[9px] font-bold text-blue-400 uppercase tracking-wider">
+                        <Compass className="w-3 h-3" />
+                        <span>COMANDO DE VOZ IA</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+                          {cmd.action === 'navigate' ? <Compass className="w-4 h-4" /> : cmd.action === 'create_note' ? <StickyNote className="w-4 h-4 text-purple-400" /> : <Bell className="w-4 h-4 text-amber-400" />}
+                        </div>
+                        <div className="flex-1 truncate">
+                          <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
+                            {cmd.title}
+                          </p>
+                          <p className="text-[11px] text-text-muted truncate">
+                            {cmd.content || cmd.rawText}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setEditingIdx(null)}
-                      className="w-full py-1 text-[11px] font-bold bg-accent/20 border border-accent text-accent rounded flex items-center justify-center gap-1"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Listo</span>
-                    </button>
-                  </div>
-                ) : (
-                  /* Modo Visualización Estándar */
-                  <div className="flex items-center gap-2.5">
-                    <CategoryIcon icon={res.category} label={res.category} className="w-7 h-7 text-lg flex items-center justify-center flex-shrink-0" />
-                    <div className="flex-1 truncate">
-                      <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                        {res.category}
-                      </p>
-                      <p className={`text-[11px] truncate ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-                        {res.description}
-                      </p>
+                  ) : res ? (
+                    /* Renderizado de Transacciones Estándar */
+                    <div>
+                      <div className="flex justify-between items-start mb-1 pr-14">
+                        <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                          res.type === 'ingreso' ? 'text-emerald-400' : res.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {res.type.toUpperCase()} DETECTADO
+                        </span>
+                        {res.isFixed && (
+                          <span className="text-[8px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold uppercase">
+                            Gasto Fijo
+                          </span>
+                        )}
+                      </div>
+
+                      {editingIdx === idx ? (
+                        /* Modo Edición Rápida Inline */
+                        <div className="space-y-2 mt-2 pt-2 border-t border-white/10">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[10px] text-text-muted block mb-0.5">Monto</label>
+                              <input 
+                                type="number"
+                                value={res.amount || ''}
+                                onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
+                                className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs font-bold text-accent"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-text-muted block mb-0.5">Categoría</label>
+                              <select
+                                value={res.category}
+                                onChange={(e) => handleUpdateItem(idx, 'category', e.target.value)}
+                                className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
+                              >
+                                {allCategories.map((cat) => (
+                                  <option key={cat.label} value={cat.label} className="bg-gray-900 text-white">
+                                    {cat.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-text-muted block mb-0.5">Descripción</label>
+                            <input 
+                              type="text"
+                              value={res.description}
+                              onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
+                              className="w-full bg-black/40 border border-white/20 p-1.5 rounded text-xs text-text-primary"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setEditingIdx(null)}
+                            className="w-full py-1 text-[11px] font-bold bg-accent/20 border border-accent text-accent rounded flex items-center justify-center gap-1"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Listo</span>
+                          </button>
+                        </div>
+                      ) : (
+                        /* Modo Visualización Estándar */
+                        <div className="flex items-center gap-2.5">
+                          <CategoryIcon icon={res.category} label={res.category} className="w-7 h-7 text-lg flex items-center justify-center flex-shrink-0" />
+                          <div className="flex-1 truncate">
+                            <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
+                              {res.category}
+                            </p>
+                            <p className={`text-[11px] truncate ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
+                              {res.description}
+                            </p>
+                          </div>
+                          <p className={`text-sm font-bold ${
+                            res.type === 'ingreso' ? 'text-emerald-400' : res.type === 'deuda' ? 'text-yellow-400' : 'text-red-400'
+                          }`}>
+                            {res.amount ? formatCurrency(res.amount, profile?.currency) : 'Sin $'}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <p className={`text-sm font-bold ${
-                      res.type === 'ingreso' ? 'text-emerald-400' : 'text-accent'
-                    }`}>
-                      {res.amount ? formatCurrency(res.amount, profile?.currency) : 'Monto no detectado'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* Botones de Acción */}
-        <div className="w-full space-y-2 mt-2">
-          {parsedResults.length > 1 ? (
+        {/* Acciones principales */}
+        <div className="w-full space-y-2.5 mt-2">
+          {parsedResults.length > 0 ? (
             <button
               type="button"
               onClick={handleSaveAllBulk}
               disabled={savingBulk}
               className={`w-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
-                isTechTheme 
-                  ? 'bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-wider' 
+                isTechTheme
+                  ? 'bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-wider'
                   : 'bg-gradient-to-r from-accent to-accent-dim text-black rounded-xl shadow-lg shadow-accent/25 hover:opacity-90 font-syne'
               }`}
             >
-              <Check className="w-5 h-5" />
-              <span>{savingBulk ? 'Guardando masivo...' : `Guardar Todas (${parsedResults.length})`}</span>
-            </button>
-          ) : parsedResults.length === 1 ? (
-            <button
-              type="button"
-              onClick={handleConfirmSingle}
-              className={`w-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
-                isTechTheme 
-                  ? 'bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-wider' 
-                  : 'bg-gradient-to-r from-accent to-accent-dim text-black rounded-xl shadow-lg shadow-accent/25 hover:opacity-90 font-syne'
-              }`}
-            >
-              <Check className="w-5 h-5" />
-              <span>Confirmar y Abrir Formulario</span>
+              {savingBulk ? (
+                <RefreshCw className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  <span>
+                    {parsedResults.some(r => 'kind' in r && r.kind === 'command')
+                      ? 'Ejecutar Comando'
+                      : `Guardar ${parsedResults.length === 1 ? 'Transacción' : `Todas (${parsedResults.length})`}`}
+                  </span>
+                </>
+              )}
             </button>
           ) : (
             <button
               type="button"
-              onClick={startListening}
-              className={`w-full py-3 px-4 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
-                isTechTheme 
-                  ? 'bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 font-mono' 
-                  : 'bg-white/10 text-text-primary hover:bg-white/20 rounded-xl'
+              onClick={isListening ? stopListening : startListening}
+              className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                isTechTheme
+                  ? 'border border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase'
+                  : 'bg-white/10 text-text-primary hover:bg-white/20 font-syne'
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${isListening ? 'animate-spin' : ''}`} />
-              <span>{isListening ? 'Escuchando...' : 'Volver a Dictar / Hablar'}</span>
+              <span>{isListening ? 'Detener Micrófono' : 'Dictar por Voz'}</span>
             </button>
           )}
 
-          {/* Opción alternar a Teclado Manual */}
           <button
             type="button"
             onClick={onOpenManual}
-            className={`w-full py-2 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+            className={`w-full py-2.5 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 ${
               isTechTheme ? 'text-accent/60 hover:text-accent font-mono' : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            <Keyboard className="w-3.5 h-3.5" />
-            <span>Ingresar manualmente por teclado (+)</span>
+            <Keyboard className="w-4 h-4" />
+            <span>Cambiar a entrada manual con teclado</span>
           </button>
         </div>
       </div>
