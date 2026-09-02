@@ -137,11 +137,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       const results = parseMultiVoiceTransaction(transcript, allCategories);
       setParsedResults(results);
 
-      // Si es una pregunta de seguimiento (ask_followup), APAGAR micrófono primero, FLOWI habla y reactiva al terminar
+      // Si es una pregunta de seguimiento (ask_followup), APAGAR micrófono y LIMPIAR transcript para romper bucles
       if (results.length === 1 && 'kind' in results[0] && results[0].kind === 'command') {
         const cmd = results[0] as ParsedVoiceCommand;
         if (cmd.action === 'ask_followup' && cmd.prompt) {
           stopListening();
+          setTranscript(''); // Limpiar la palabra clave para que no persista
           const locale = detectUserLocaleAndCurrency(profile?.currency);
           speakText(cmd.prompt, locale.language, () => {
             startListening();
