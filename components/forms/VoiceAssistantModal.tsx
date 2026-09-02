@@ -243,24 +243,38 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
       }
 
-      // Lluvia de confeti y animación visual de éxito 🎉
-      try {
-        confetti({
-          particleCount: 90,
-          spread: 80,
-          origin: { y: 0.5 },
-          colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
-        });
-      } catch (e) {}
+      // Determinar si aplica disparo de confeti (múltiples transacciones, notas o recordatorios)
+      const isConfettiEnabled = typeof window !== 'undefined' ? localStorage.getItem('anim_burst_enabled') !== 'false' : true;
+      const isMultipleTx = parsedResults.length > 1;
+      const isReminder = parsedResults.some(r => 'kind' in r && r.kind === 'command' && r.action === 'create_reminder');
+      const isNote = parsedResults.some(r => 'kind' in r && r.kind === 'command' && r.action === 'create_note');
+      const shouldFireConfetti = isConfettiEnabled && (isMultipleTx || isReminder || isNote);
+
+      if (shouldFireConfetti) {
+        try {
+          confetti({
+            particleCount: 90,
+            spread: 80,
+            origin: { y: 0.5 },
+            colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
+          });
+        } catch (e) {}
+        setShowSuccessAnim(true);
+      }
+
+      let spokenMsg = 'Transacciones guardadas con éxito';
+      if (isReminder) spokenMsg = 'Recordatorio agendado con éxito';
+      else if (isNote) spokenMsg = 'Nota guardada con éxito';
 
       const locale = detectUserLocaleAndCurrency(profile?.currency);
-      speakText('Transacciones guardadas con éxito', locale.language);
-      setShowSuccessAnim(true);
-
-      setTimeout(() => {
-        if (onSuccessBulk) onSuccessBulk();
-        onClose();
-      }, 1400);
+      
+      // Cerrar y refrescar SOLAMENTE al terminar la voz hablada (cero interrupciones)
+      speakText(spokenMsg, locale.language, () => {
+        setTimeout(() => {
+          if (onSuccessBulk) onSuccessBulk();
+          onClose();
+        }, 400);
+      });
     } catch (err) {
       console.error('Error guardando por voz:', err);
       setErrorMsg('Error al guardar. Intenta nuevamente.');

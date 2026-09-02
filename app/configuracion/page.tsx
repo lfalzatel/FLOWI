@@ -568,11 +568,11 @@ export default function ConfigPage() {
                   </button>
                 </div>
 
-                {/* Toggle Partículas Voladoras */}
+                {/* Toggle Celebración y Confeti 🎉 */}
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
                   <div className="text-left">
-                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Explosión de Partículas Voladoras</p>
-                    <p className="text-[10px] text-text-muted">Partículas volando en arco hacia el saldo y menú</p>
+                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Animaciones de Celebración y Confeti 🎉</p>
+                    <p className="text-[10px] text-text-muted">Lluvia de confeti al guardar recordatorios, notas o múltiples transacciones por voz</p>
                   </div>
                   <button 
                     onClick={toggleAnimBurst}
