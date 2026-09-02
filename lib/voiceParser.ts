@@ -276,8 +276,19 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
     return {
       kind: 'command',
       action: 'ask_followup',
-      title: 'Asistente de Voz 🎙️',
+      title: '🔔 Nuevo Recordatorio',
       prompt: '¿Qué deseas recordar y en qué fecha?',
+      label: 'Responder',
+      rawText: text
+    };
+  }
+
+  if (/^(?:nota|una nota|nueva nota|nota importante|anotar)$/i.test(lower)) {
+    return {
+      kind: 'command',
+      action: 'ask_followup',
+      title: '📝 Nueva Nota Importante',
+      prompt: '¿Qué deseas anotar en tu nota?',
       label: 'Responder',
       rawText: text
     };

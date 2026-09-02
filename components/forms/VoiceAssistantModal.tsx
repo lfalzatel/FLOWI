@@ -40,12 +40,21 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [showCategoryPickerIdx, setShowCategoryPickerIdx] = useState<number | null>(null);
   const [categorySearch, setCategorySearch] = useState('');
 
+  const [pendingAction, setPendingAction] = useState<'create_reminder' | 'create_note' | null>(null);
+
   const recognitionRef = useRef<any>(null);
 
   // Iniciar reconocimiento de voz de forma dinámica
   const startListening = () => {
+    // Interrupción INMEDIATA de cualquier voz parlante de FLOWI al encender el micrófono
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+
     setTranscript('');
-    setParsedResults([]);
+    if (!pendingAction) {
+      setParsedResults([]);
+    }
     setEditingIdx(null);
     setErrorMsg(null);
 
@@ -108,6 +117,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   };
 
   const stopListening = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -140,7 +152,55 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   // Al finalizar la transcripción de un dictado, parsear automáticamente
   useEffect(() => {
     if (transcript.trim() && !isListening) {
-      const results = parseMultiVoiceTransaction(transcript, allCategories);
+      const text = transcript.trim();
+
+      // Si había un estado conversacional pendiente (creación de recordatorio o nota):
+      if (pendingAction) {
+        if (pendingAction === 'create_reminder') {
+          let dueDate = '';
+          if (/\bmañana\b/i.test(text)) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dueDate = tomorrow.toISOString().split('T')[0];
+          } else if (/\bhoy\b/i.test(text)) {
+            dueDate = new Date().toISOString().split('T')[0];
+          }
+
+          const reminderCmd: ParsedVoiceCommand = {
+            kind: 'command',
+            action: 'create_reminder',
+            targetUrl: '/servicios/recordatorios',
+            title: 'Nuevo Recordatorio 🔔',
+            content: text.charAt(0).toUpperCase() + text.slice(1),
+            dueDate,
+            time: '20:00',
+            label: 'Guardar Recordatorio',
+            rawText: text
+          };
+          setParsedResults([reminderCmd]);
+          setPendingAction(null);
+          setTranscript('');
+          return;
+        }
+
+        if (pendingAction === 'create_note') {
+          const noteCmd: ParsedVoiceCommand = {
+            kind: 'command',
+            action: 'create_note',
+            targetUrl: '/servicios/notas',
+            title: 'Nueva Nota 📝',
+            content: text.charAt(0).toUpperCase() + text.slice(1),
+            label: 'Guardar Nota',
+            rawText: text
+          };
+          setParsedResults([noteCmd]);
+          setPendingAction(null);
+          setTranscript('');
+          return;
+        }
+      }
+
+      const results = parseMultiVoiceTransaction(text, allCategories);
       setParsedResults(results);
 
       // Si es una pregunta de seguimiento (ask_followup), APAGAR micrófono y LIMPIAR transcript para romper bucles
@@ -149,6 +209,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         if (cmd.action === 'ask_followup' && cmd.prompt) {
           stopListening();
           setTranscript(''); // Limpiar la palabra clave para que no persista
+
+          const isReminder = cmd.prompt.toLowerCase().includes('recordar');
+          const isNote = cmd.prompt.toLowerCase().includes('anotar');
+          if (isReminder) setPendingAction('create_reminder');
+          else if (isNote) setPendingAction('create_note');
+
           const locale = detectUserLocaleAndCurrency(profile?.currency);
           speakText(cmd.prompt, locale.language, () => {
             startListening();
@@ -156,7 +222,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
       }
     }
-  }, [isListening, transcript, allCategories, profile]);
+  }, [isListening, transcript, allCategories, profile, pendingAction]);
 
   const handleRemoveResult = (index: number) => {
     setParsedResults(prev => prev.filter((_, i) => i !== index));
@@ -457,20 +523,26 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   {/* Renderizado de Comandos por Voz (Navegación / Nota / Recordatorio) */}
                   {isCommand && cmd ? (
                     <div>
-                      <div className="flex items-center gap-1.5 mb-1 text-[9px] font-bold text-blue-400 uppercase tracking-wider">
-                        <Compass className="w-3 h-3" />
-                        <span>COMANDO DE VOZ IA</span>
+                      <div className="flex items-center gap-1.5 mb-1 text-[9px] font-bold uppercase tracking-wider text-amber-400">
+                        {cmd.action === 'navigate' ? <Compass className="w-3 h-3 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-3 h-3 text-purple-400 animate-pulse" /> : <Bell className="w-3 h-3 text-amber-400 animate-pulse" />}
+                        <span>
+                          {cmd.action === 'ask_followup' 
+                            ? (cmd.prompt?.includes('anotar') ? '📝 NUEVA NOTA (ESCUCHANDO DETALLES)' : '🔔 NUEVO RECORDATORIO (ESCUCHANDO DETALLES)')
+                            : cmd.action === 'create_reminder' ? '🔔 RECORDATORIO DETECTADO'
+                            : cmd.action === 'create_note' ? '📝 NOTA IMPORTANTE DETECTADA'
+                            : 'COMANDO DE VOZ IA'}
+                        </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-                          {cmd.action === 'navigate' ? <Compass className="w-4 h-4" /> : cmd.action === 'create_note' ? <StickyNote className="w-4 h-4 text-purple-400" /> : <Bell className="w-4 h-4 text-amber-400" />}
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                          {cmd.action === 'navigate' ? <Compass className="w-5 h-5 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-5 h-5 text-purple-400" /> : <Bell className="w-5 h-5 text-amber-400" />}
                         </div>
                         <div className="flex-1 truncate">
                           <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
                             {cmd.title}
                           </p>
-                          <p className="text-[11px] text-text-muted truncate">
-                            {cmd.content || cmd.rawText}
+                          <p className="text-[11px] text-amber-300 font-medium truncate">
+                            {cmd.action === 'ask_followup' ? cmd.prompt : (cmd.content || cmd.rawText)}
                           </p>
                         </div>
                       </div>
@@ -654,20 +726,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                 </>
               )}
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={isListening ? stopListening : startListening}
-              className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                isTechTheme
-                  ? 'border border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase'
-                  : 'bg-white/10 text-text-primary hover:bg-white/20 font-syne'
-              }`}
-            >
-              <RefreshCw className={`w-4 h-4 ${isListening ? 'animate-spin' : ''}`} />
-              <span>{isListening ? 'Detener Micrófono' : 'Dictar por Voz'}</span>
-            </button>
-          )}
+          ) : null}
 
           <button
             type="button"
