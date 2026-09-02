@@ -10,7 +10,7 @@ import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
-import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText } from '@/lib/voiceParser';
+import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle } from '@/lib/voiceParser';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
@@ -227,12 +227,14 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             }
           }
 
+          const cleanTitle = cleanReminderTitle(text);
+
           const reminderCmd: ParsedVoiceCommand = {
             kind: 'command',
             action: 'create_reminder',
             targetUrl: '/servicios/recordatorios',
             title: 'Nuevo Recordatorio 🔔',
-            content: text.charAt(0).toUpperCase() + text.slice(1),
+            content: cleanTitle,
             dueDate,
             time,
             frequency,

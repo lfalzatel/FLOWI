@@ -132,6 +132,28 @@ const CATEGORY_KEYWORDS: { category: string; regex: RegExp }[] = [
   },
 ];
 
+export function cleanReminderTitle(raw: string): string {
+  let text = raw;
+  // Remover patrones de hora
+  text = text.replace(/\ba\s+las\s+\d{1,2}(?::\d{2})?\s*(?:am|pm|de\s+la\s+mañana|de\s+la\s+tarde|de\s+la\s+noche)?\b/gi, '');
+  text = text.replace(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm|de\s+la\s+mañana|de\s+la\s+tarde|de\s+la\s+noche)\b/gi, '');
+
+  // Remover patrones de fecha / frecuencia
+  text = text.replace(/\b(?:para\s+)?(?:mañana|hoy)\b/gi, '');
+  text = text.replace(/\b(?:diario|diaria|cada\s+d[íi]a|todos\s+los\s+d[íi]as)\b/gi, '');
+  text = text.replace(/\b(?:semanal|cada\s+semana|todas\s+las\s+semanas)\b/gi, '');
+  text = text.replace(/\b(?:mensual|cada\s+mes|todos\s+los\s+meses)\b/gi, '');
+  text = text.replace(/\b(?:el\s+d[íi]a\s+\d{1,2}|el\s+\d{1,2})\b/gi, '');
+
+  // Limpiar espacios extras y conectores sobrantes al inicio/fin
+  text = text.replace(/^\s*(?:de|para|a|en|que)\s+/gi, '');
+  text = text.replace(/\s*(?:de|para|a|en)\s*$/gi, '');
+  text = text.trim();
+
+  if (!text) return raw.trim();
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 /**
  * Detecta comandos de navegación por voz o creación de notas/recordatorios
  */
@@ -254,23 +276,42 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
       frequency = 'monthly';
     }
 
-    let dueDate = '';
+    let dueDate = new Date().toISOString().split('T')[0];
     if (/\bmañana\b/i.test(reminderText)) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       dueDate = tomorrow.toISOString().split('T')[0];
     }
 
+    // Detección de Hora por Voz
+    let time = '08:00';
+    const timeMatch = reminderText.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm|de la mañana|de la tarde|de la noche)?\b/i);
+    if (timeMatch) {
+      let hour = parseInt(timeMatch[1], 10);
+      const min = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+      const period = timeMatch[3]?.toLowerCase();
+      if (period && (period.includes('pm') || period.includes('tarde') || period.includes('noche')) && hour < 12) {
+        hour += 12;
+      } else if (period && (period.includes('am') || period.includes('mañana')) && hour === 12) {
+        hour = 0;
+      }
+      if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59) {
+        time = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+      }
+    }
+
+    const cleanTitle = cleanReminderTitle(reminderText);
+
     return {
       kind: 'command',
       action: 'create_reminder',
       targetUrl: '/servicios/recordatorios',
       title: 'Nuevo Recordatorio 🔔',
-      content: reminderText.charAt(0).toUpperCase() + reminderText.slice(1),
+      content: cleanTitle,
       amount: mainAmount,
       frequency,
       dueDate,
-      time: '20:00',
+      time,
       label: 'Guardar Recordatorio',
       rawText: text
     };
