@@ -171,10 +171,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           } else if (cmd.action === 'create_reminder') {
             await addReminder({
               userId: user.uid,
-              title: cmd.title || 'Recordatorio por voz',
-              description: cmd.content || cmd.rawText,
-              type: 'once',
-              time: '20:00',
+              title: cmd.content || cmd.title || 'Recordatorio por voz',
+              description: cmd.rawText,
+              type: cmd.frequency || 'once',
+              date: cmd.dueDate || undefined,
+              time: cmd.time || '20:00',
               sound: true,
               pushEnabled: true,
               inAppEnabled: true,

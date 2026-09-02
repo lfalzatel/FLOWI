@@ -18,7 +18,9 @@ export interface ParsedVoiceCommand {
   title: string;
   content?: string;
   amount?: number | null;
+  frequency?: 'once' | 'daily' | 'weekly' | 'monthly';
   dueDate?: string;
+  time?: string;
   label: string;
   rawText: string;
 }
@@ -199,12 +201,28 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
     };
   }
 
-  // 9. Crear Recordatorio por Voz ("Recordatorio pagar servicio 50 mil")
+  // 9. Crear Recordatorio por Voz ("Recordatorio mensual pagar servicio 50 mil el 15 de septiembre")
   const reminderMatch = clean.match(/\b(?:recordatorio|recordarme|nuevo recordatorio)\s+(.+)/i);
   if (reminderMatch) {
     const reminderText = reminderMatch[1].trim();
     const amounts = extractAllAmounts(reminderText);
     const mainAmount = amounts.length > 0 ? amounts[0] : null;
+
+    let frequency: 'once' | 'daily' | 'weekly' | 'monthly' = 'once';
+    if (/\b(?:diario|diaria|cada día|todos los días)\b/i.test(reminderText)) {
+      frequency = 'daily';
+    } else if (/\b(?:semanal|cada semana|todas las semanas)\b/i.test(reminderText)) {
+      frequency = 'weekly';
+    } else if (/\b(?:mensual|cada mes|todos los meses)\b/i.test(reminderText)) {
+      frequency = 'monthly';
+    }
+
+    let dueDate = '';
+    if (/\bmañana\b/i.test(reminderText)) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      dueDate = tomorrow.toISOString().split('T')[0];
+    }
 
     return {
       kind: 'command',
@@ -213,6 +231,9 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
       title: 'Nuevo Recordatorio 🔔',
       content: reminderText.charAt(0).toUpperCase() + reminderText.slice(1),
       amount: mainAmount,
+      frequency,
+      dueDate,
+      time: '20:00',
       label: 'Guardar Recordatorio',
       rawText: text
     };
