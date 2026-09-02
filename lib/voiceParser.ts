@@ -30,8 +30,13 @@ export interface ParsedVoiceCommand {
 /**
  * Síntesis de voz nativa del navegador para responder al usuario en voz alta
  */
-export function speakText(text: string, lang: string = 'es-CO', onDone?: () => void) {
+export function speakText(text: string, lang: string = 'es-CO', onDone?: () => void, ignoreToggle: boolean = false) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (onDone) onDone();
+    return;
+  }
+  const isSpeechEnabled = localStorage.getItem('sound_speech_enabled') !== 'false';
+  if (!isSpeechEnabled && !ignoreToggle) {
     if (onDone) onDone();
     return;
   }

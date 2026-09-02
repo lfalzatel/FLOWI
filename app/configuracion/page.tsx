@@ -99,6 +99,7 @@ export default function ConfigPage() {
   const [animCardEnabled, setAnimCardEnabled] = useState(true);
   const [animConfettiEnabled, setAnimConfettiEnabled] = useState(true);
   const [animBurstEnabled, setAnimBurstEnabled] = useState(true);
+  const [soundSpeechEnabled, setSoundSpeechEnabled] = useState(true);
 
   // Load from local storage
   useEffect(() => {
@@ -117,6 +118,7 @@ export default function ConfigPage() {
     setAnimCardEnabled(localStorage.getItem('anim_card_enabled') !== 'false');
     setAnimConfettiEnabled(localStorage.getItem('anim_confetti_enabled') !== 'false');
     setAnimBurstEnabled(localStorage.getItem('anim_burst_enabled') !== 'false');
+    setSoundSpeechEnabled(localStorage.getItem('sound_speech_enabled') !== 'false');
   }, []);
 
   const toggleNotifications = () => {
@@ -211,6 +213,12 @@ export default function ConfigPage() {
     const newState = !animBurstEnabled;
     setAnimBurstEnabled(newState);
     localStorage.setItem('anim_burst_enabled', String(newState));
+  };
+
+  const toggleSoundSpeech = () => {
+    const newState = !soundSpeechEnabled;
+    setSoundSpeechEnabled(newState);
+    localStorage.setItem('sound_speech_enabled', String(newState));
   };
 
   const handleClearData = async () => {
@@ -601,6 +609,20 @@ export default function ConfigPage() {
                     className={`w-11 h-6 rounded-full transition-colors relative ${animBurstEnabled ? (isTechTheme ? 'bg-cyan-400 border border-cyan-400' : 'bg-cyan-500') : 'bg-gray-600'}`}
                   >
                     <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animBurstEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                  </button>
+                </div>
+
+                {/* Toggle Voz Hablada de Confirmación 🔊 */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-left">
+                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>Voz Hablada de Confirmación 🔊</p>
+                    <p className="text-[10px] text-text-muted">Respuesta hablada de FLOWI al guardar transacciones, recordatorios y notas</p>
+                  </div>
+                  <button 
+                    onClick={toggleSoundSpeech}
+                    className={`w-11 h-6 rounded-full transition-colors relative ${soundSpeechEnabled ? (isTechTheme ? 'bg-emerald-400 border border-emerald-400' : 'bg-emerald-500') : 'bg-gray-600'}`}
+                  >
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${soundSpeechEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
                   </button>
                 </div>
               </div>

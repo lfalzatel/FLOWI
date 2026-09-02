@@ -8,7 +8,8 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { ProfileModal } from '@/components/forms/ProfileModal';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
-import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2 } from 'lucide-react';
+import { speakText } from '@/lib/voiceParser';
+import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, Volume2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const SERVICES = [
@@ -139,7 +140,7 @@ export default function ServiciosPage() {
             Probar Animaciones & Sonidos Web Audio
           </span>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           <button
             onClick={() => triggerPowerAnimation(50000, 'ingreso')}
             className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
@@ -203,7 +204,7 @@ export default function ServiciosPage() {
                 });
               } catch (e) {}
             }}
-            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 col-span-2 sm:col-span-1 ${
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
               isTechTheme
                 ? 'border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
                 : 'bg-amber-500/10 border border-amber-500/30 text-amber-600 rounded-2xl hover:bg-amber-500/20'
@@ -212,6 +213,19 @@ export default function ServiciosPage() {
             <Sparkles className="w-4 h-4 mb-1" />
             <span className="text-[10px] font-extrabold uppercase">Confeti</span>
             <span className="text-[9px] opacity-80">Celebración</span>
+          </button>
+
+          <button
+            onClick={() => speakText('Transacción guardada con éxito en FLOWI', 'es-CO', undefined, true)}
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
+              isTechTheme
+                ? 'border border-purple-500/40 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20'
+                : 'bg-purple-500/10 border border-purple-500/30 text-purple-600 rounded-2xl hover:bg-purple-500/20'
+            }`}
+          >
+            <Volume2 className="w-4 h-4 mb-1 animate-bounce" />
+            <span className="text-[10px] font-extrabold uppercase">Voz Hablada</span>
+            <span className="text-[9px] opacity-80">Confirmación</span>
           </button>
         </div>
       </div>
