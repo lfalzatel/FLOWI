@@ -10,6 +10,8 @@ import { BalanceCard }     from '@/components/dashboard/BalanceCard';
 import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
 import { TransactionList } from '@/components/dashboard/TransactionList';
 import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
+import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
+import { OnboardingModal } from '@/components/OnboardingModal';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
@@ -27,6 +29,7 @@ export default function DashboardPage() {
   const { totalDeudas } = useDebts();
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(() => !hasShownSplashInThisJSContext);
@@ -44,6 +47,13 @@ export default function DashboardPage() {
   useEffect(() => {
     setMounted(true);
     hasShownSplashInThisJSContext = true;
+
+    // Verificar si el usuario no ha visto el tour de bienvenida
+    const hasSeen = localStorage.getItem('flowi_has_seen_onboarding');
+    if (!hasSeen) {
+      setShowOnboarding(true);
+    }
+
     if (processedUrl.current) return;
 
     const params = new URLSearchParams(window.location.search);
@@ -217,6 +227,9 @@ export default function DashboardPage() {
         {/* Chart */}
         <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} />
 
+        {/* Category Budgets */}
+        <CategoryBudgets transactions={filteredTransactions} currency={profile?.currency} />
+
         {/* Recent transactions */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -264,6 +277,10 @@ export default function DashboardPage() {
           onSuccess={refresh}
           transactionToEdit={editingTransaction}
         />
+      )}
+
+      {showOnboarding && (
+        <OnboardingModal onClose={() => setShowOnboarding(false)} />
       )}
     </div>
   );
