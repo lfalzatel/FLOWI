@@ -13,7 +13,7 @@ export interface ParsedVoiceResult {
 
 export interface ParsedVoiceCommand {
   kind: 'command';
-  action: 'navigate' | 'create_note' | 'create_reminder';
+  action: 'navigate' | 'create_note' | 'create_reminder' | 'ask_followup';
   targetUrl?: string;
   title: string;
   content?: string;
@@ -21,8 +21,26 @@ export interface ParsedVoiceCommand {
   frequency?: 'once' | 'daily' | 'weekly' | 'monthly';
   dueDate?: string;
   time?: string;
+  prompt?: string;
   label: string;
   rawText: string;
+}
+
+/**
+ * Síntesis de voz nativa del navegador para responder al usuario en voz alta
+ */
+export function speakText(text: string, lang: string = 'es-CO') {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  } catch (e) {
+    console.warn('Error al reproducir voz:', e);
+  }
 }
 
 export type ParsedVoiceItem = ParsedVoiceResult | ParsedVoiceCommand;
@@ -235,6 +253,62 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
       dueDate,
       time: '20:00',
       label: 'Guardar Recordatorio',
+      rawText: text
+    };
+  }
+
+  // 10. Detección de Frases Cortas Incompletas (Diálogo Interactivo de 2 Vías)
+  if (/^(?:recordatorio|un recordatorio|nuevo recordatorio)$/i.test(lower)) {
+    return {
+      kind: 'command',
+      action: 'ask_followup',
+      title: 'Asistente de Voz 🎙️',
+      prompt: '¿Qué deseas recordar y en qué fecha?',
+      label: 'Responder',
+      rawText: text
+    };
+  }
+
+  if (/^(?:deuda|una deuda|nueva deuda|debo|me deben)$/i.test(lower)) {
+    return {
+      kind: 'command',
+      action: 'ask_followup',
+      title: 'Asistente de Voz 🎙️',
+      prompt: '¿A quién le debes o quién te debe, y de cuánto es el monto?',
+      label: 'Responder',
+      rawText: text
+    };
+  }
+
+  if (/^(?:tasa de interés|interés|interes)$/i.test(lower)) {
+    return {
+      kind: 'command',
+      action: 'ask_followup',
+      title: 'Asistente de Voz 🎙️',
+      prompt: '¿Cuál es el porcentaje de interés mensual de esta deuda?',
+      label: 'Responder',
+      rawText: text
+    };
+  }
+
+  if (/^(?:gasto|un gasto|nuevo gasto)$/i.test(lower)) {
+    return {
+      kind: 'command',
+      action: 'ask_followup',
+      title: 'Asistente de Voz 🎙️',
+      prompt: '¿De cuánto fue el gasto y en qué lo usaste?',
+      label: 'Responder',
+      rawText: text
+    };
+  }
+
+  if (/^(?:ingreso|un ingreso|nuevo ingreso)$/i.test(lower)) {
+    return {
+      kind: 'command',
+      action: 'ask_followup',
+      title: 'Asistente de Voz 🎙️',
+      prompt: '¿De cuánto fue el ingreso y por qué concepto?',
+      label: 'Responder',
       rawText: text
     };
   }

@@ -8,7 +8,7 @@ import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Tras
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
-import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand } from '@/lib/voiceParser';
+import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText } from '@/lib/voiceParser';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
@@ -126,8 +126,22 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     if (transcript.trim() && !isListening) {
       const results = parseMultiVoiceTransaction(transcript, allCategories);
       setParsedResults(results);
+
+      // Si es una pregunta de seguimiento (ask_followup), FLOWI habla en voz alta y reactiva el micrófono
+      if (results.length === 1 && 'kind' in results[0] && results[0].kind === 'command') {
+        const cmd = results[0] as ParsedVoiceCommand;
+        if (cmd.action === 'ask_followup' && cmd.prompt) {
+          const locale = detectUserLocaleAndCurrency(profile?.currency);
+          speakText(cmd.prompt, locale.language);
+
+          // Reactivar micrófono automáticamente después de hablar
+          setTimeout(() => {
+            startListening();
+          }, 2500);
+        }
+      }
     }
-  }, [isListening, transcript, allCategories]);
+  }, [isListening, transcript, allCategories, profile]);
 
   const handleRemoveResult = (index: number) => {
     setParsedResults(prev => prev.filter((_, i) => i !== index));
