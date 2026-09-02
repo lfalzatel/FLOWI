@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ProfileModal } from '@/components/forms/ProfileModal';
-import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
 import { speakText } from '@/lib/voiceParser';
 import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, Volume2 } from 'lucide-react';
@@ -194,16 +194,7 @@ export default function ServiciosPage() {
           </button>
 
           <button
-            onClick={() => {
-              try {
-                confetti({
-                  particleCount: 120,
-                  spread: 90,
-                  origin: { y: 0.5 },
-                  colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
-                });
-              } catch (e) {}
-            }}
+            onClick={() => triggerConfettiWithSynth(3.0)}
             className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
               isTechTheme
                 ? 'border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'

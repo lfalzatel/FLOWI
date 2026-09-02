@@ -6,6 +6,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/format';
 import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, CheckCircle2, Trophy } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
 import { speakText } from '@/lib/voiceParser';
 
@@ -715,5 +716,101 @@ export function triggerPowerAnimation(
         });
       }, delayMs);
     }
+  }
+}
+
+// Sintetizador autónomo Web Audio API de sonido festivo de confeti
+export function playConfettiSynthSound() {
+  if (typeof window === 'undefined') return;
+  if (localStorage.getItem('sound_enabled') === 'false') return;
+
+  stopCurrentSound();
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+
+  // Acorde festivo ascendente de 6 notas alegres
+  const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+  notes.forEach((freq, idx) => {
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+
+      gain.gain.setValueAtTime(0, now + idx * 0.07);
+      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.07 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.07 + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now + idx * 0.07);
+      osc.stop(now + idx * 0.07 + 0.35);
+    } catch (e) {}
+  });
+
+  // Ráfaga de destellos agudos (Sparkling Confetti Pops)
+  const sparkFreqs = [2093.00, 2637.02, 3135.96, 3520.00, 4186.01];
+  sparkFreqs.forEach((freq, idx) => {
+    const startTime = now + 0.22 + idx * 0.10;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.12, startTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.15);
+    } catch (e) {}
+  });
+}
+
+// Dispara animación continua de confeti extendida junto a sonido sintetizado
+export function triggerConfettiWithSynth(durationSeconds = 3) {
+  if (typeof window === 'undefined') return;
+
+  const isConfettiEnabled = localStorage.getItem('anim_confetti_enabled') !== 'false';
+  if (!isConfettiEnabled) return;
+
+  // 1. Sonido sintetizado Web Audio
+  playConfettiSynthSound();
+
+  // 2. Disparo de ráfagas continuas de confeti durante durationSeconds
+  try {
+    const end = Date.now() + durationSeconds * 1000;
+    const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#00FF41'];
+
+    const frame = () => {
+      confetti({
+        particleCount: 10,
+        angle: 60,
+        spread: 60,
+        origin: { x: 0, y: 0.6 },
+        colors,
+      });
+      confetti({
+        particleCount: 10,
+        angle: 120,
+        spread: 60,
+        origin: { x: 1, y: 0.6 },
+        colors,
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
+  } catch (e) {
+    console.warn('Confetti animation error:', e);
   }
 }

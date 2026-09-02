@@ -14,7 +14,7 @@ import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedV
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
-import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 
 interface VoiceAssistantModalProps {
   onClose: () => void;
@@ -363,8 +363,6 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               content: cmd.content || cmd.rawText,
               color: '#3B82F6',
             });
-            speakText('Nota guardada con éxito', locale.language);
-            if (cmd.targetUrl) router.push(cmd.targetUrl);
           } else if (cmd.action === 'create_reminder') {
             await addReminder({
               userId: user.uid,
@@ -372,14 +370,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               description: cmd.rawText,
               type: cmd.frequency || 'once',
               date: cmd.dueDate || undefined,
-              time: cmd.time || '20:00',
+              time: cmd.time || '08:00',
               sound: true,
               pushEnabled: true,
               inAppEnabled: true,
               active: true,
             });
-            speakText('Recordatorio agendado con éxito', locale.language);
-            if (cmd.targetUrl) router.push(cmd.targetUrl);
           }
           continue;
         }
@@ -410,29 +406,23 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
       }
 
-      // Determinar si aplica disparo de confeti (múltiples transacciones, notas o recordatorios)
-      const isConfettiEnabled = typeof window !== 'undefined' ? localStorage.getItem('anim_confetti_enabled') !== 'false' : true;
-      const isMultipleTx = parsedResults.length > 1;
+      // Determinar animación de confeti + tarjeta 3D holográfica
       const isReminder = parsedResults.some(r => 'kind' in r && r.kind === 'command' && r.action === 'create_reminder');
       const isNote = parsedResults.some(r => 'kind' in r && r.kind === 'command' && r.action === 'create_note');
-      const shouldFireConfetti = isConfettiEnabled && (isMultipleTx || isReminder || isNote);
+      const isMultipleTx = parsedResults.length > 1;
 
-      if (shouldFireConfetti) {
-        try {
-          confetti({
-            particleCount: 90,
-            spread: 80,
-            origin: { y: 0.5 },
-            colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
-          });
-        } catch (e) {}
-        setShowSuccessAnim(true);
+      if (isReminder) {
+        triggerPowerAnimation(0, 'edicion', 'RECORDATORIO AGENDADO', '¡AGENDADO!');
+        triggerConfettiWithSynth(3.0);
+      } else if (isNote) {
+        triggerPowerAnimation(0, 'edicion', 'NOTA GUARDADA', '¡GUARDADA!');
+        triggerConfettiWithSynth(3.0);
+      } else if (isMultipleTx) {
+        triggerConfettiWithSynth(3.0);
       } else if (parsedResults.length === 1 && (!('kind' in parsedResults[0]) || parsedResults[0].kind === 'transaction')) {
-        // Disparar la animación Power Card 3D holográfica + trayectoria de partículas estándar
         const tx = parsedResults[0] as ParsedVoiceResult;
         if (tx.amount && tx.amount > 0) {
-          const animType = tx.type === 'ingreso' ? 'ingreso' : 'gasto';
-          triggerPowerAnimation(tx.amount, animType);
+          triggerPowerAnimation(tx.amount, tx.type === 'ingreso' ? 'ingreso' : 'gasto');
         }
       }
 
@@ -447,7 +437,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         setTimeout(() => {
           if (onSuccessBulk) onSuccessBulk();
           onClose();
-        }, 400);
+        }, 500);
       });
     } catch (err) {
       console.error('Error guardando por voz:', err);
