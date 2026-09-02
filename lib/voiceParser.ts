@@ -9,6 +9,7 @@ export interface ParsedVoiceResult {
   isFixed: boolean;
   rawText: string;
   debtPerson?: string;
+  interestRate?: number;
 }
 
 export interface ParsedVoiceCommand {
@@ -386,10 +387,12 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
   // 1. Determinar el Tipo (Gasto, Ingreso, Deuda)
   let type: 'gasto' | 'ingreso' | 'deuda' = 'gasto';
 
-  if (/\b(?:ingreso|ingresó|ingresaron|me pagaron|me ingresaron|sueldo|nómina|gané|abono)\b/i.test(clean)) {
+  if (/\b(?:ingreso|ingresó|ingresaron|me pagaron|me ingresaron|sueldo|nómina|gané|gane|me gané|me gane|recibí|recibi|abono|premio)\b/i.test(clean)) {
     type = 'ingreso';
   } else if (/\b(?:deuda|deudas|debo|presté|preste|me prestaron|le debo|deber)\b/i.test(clean)) {
     type = 'deuda';
+  } else if (/\b(?:perdí|perdi|se me perdió|se me perdio|pérdida|perdida|gasté|gaste|pagué|pague|compré|compre)\b/i.test(clean)) {
+    type = 'gasto';
   }
 
   // 2. Extraer Montos y Suma Automática
@@ -450,6 +453,15 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
     }
   }
 
+  let interestRate: number | undefined = undefined;
+  if (type === 'deuda') {
+    const interestMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:%|por\s*ciento|de\s*interés|interes)/i);
+    if (interestMatch) {
+      interestRate = parseFloat(interestMatch[1].replace(',', '.'));
+      breakdown += ` (Interés: ${interestRate}%)`;
+    }
+  }
+
   const finalDescription = (description || text) + breakdown;
   const isFixed = isFixedExpenseCategory(category);
 
@@ -462,6 +474,7 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
     isFixed,
     rawText: text,
     debtPerson,
+    interestRate,
   };
 }
 

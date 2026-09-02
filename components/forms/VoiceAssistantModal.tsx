@@ -209,6 +209,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             userId: user.uid,
             title: tx.description || `Deuda con ${tx.debtPerson || 'persona'}`,
             totalAmount: tx.amount,
+            interestRate: tx.interestRate || 0,
             paidAmount: 0,
             status: 'pending',
           });
