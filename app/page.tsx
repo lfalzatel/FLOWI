@@ -183,10 +183,15 @@ export default function DashboardPage() {
             {/* Download Report Button */}
             <button
               onClick={() => setShowExport(true)}
-              className={`w-9 h-9 flex items-center justify-center border transition-all ${isTechTheme ? 'rounded-none border-accent/30 hover:border-accent text-accent' : 'rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary'}`}
-              title="Descargar Reporte"
+              className={`px-3 py-1.5 flex items-center gap-1.5 border transition-all text-xs font-semibold ${
+                isTechTheme 
+                  ? 'rounded-none border-accent/30 hover:border-accent text-accent font-mono uppercase' 
+                  : 'rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-text-primary'
+              }`}
+              title="Descargar Reportes en PDF o Excel"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5 text-accent" />
+              <span>Reportes</span>
             </button>
 
             {/* Desktop FAB */}
