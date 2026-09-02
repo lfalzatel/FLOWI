@@ -24,7 +24,7 @@ const CATEGORY_KEYWORDS: { category: string; regex: RegExp }[] = [
   // Licores y Bares (Prioridad alta antes que comida)
   {
     category: 'Licores y Bares',
-    regex: /\b(?:cerveza|cervezas|pola|polas|licor|licores|trago|tragos|ron|aguardiente|whisky|whiskey|tequila|vodka|vino|vinos|coctel|cóctel|cocteles|cócteles|bar|bares|pub|discoteca|antro|estanco)\b/i
+    regex: /\b(?:cerveza|cervezas|pola|polas|cigarro|cigarros|cigarrillo|cigarrillos|tabaco|licor|licores|trago|tragos|ron|aguardiente|whisky|whiskey|tequila|vodka|vino|vinos|coctel|cóctel|cocteles|cócteles|bar|bares|pub|discoteca|antro|estanco)\b/i
   },
   // Restaurantes y Comida
   {
@@ -78,69 +78,59 @@ const CATEGORY_KEYWORDS: { category: string; regex: RegExp }[] = [
   }
 ];
 
-export function parseVoiceTransaction(text: string, customCategories: { label: string }[] = []): ParsedVoiceResult {
-  const clean = text.toLowerCase().trim();
+export function extractAllAmounts(clean: string): { total: number; breakdown: string } {
+  const foundAmounts: number[] = [];
 
-  // 1. Detección de Tipo
-  let type: 'gasto' | 'ingreso' | 'deuda' = 'gasto';
-  if (/ingreso|ingresó|ingresaron|me pagaron|recibí|recibi|sueldo|nómina|nomina|gané|gane|remuneración/.test(clean)) {
-    type = 'ingreso';
-  } else if (/deuda|debo|debemos|le quedé debiendo|quedé debiendo|presté|preste|prestaron/.test(clean)) {
-    type = 'deuda';
-  }
+  // Reemplazar expresiones especiales
+  let text = clean.replace(/medio mill[oó]n/gi, ' 500000 ');
 
-  // 2. Extracción de Monto Numérico Preciso
-  let amount: number | null = null;
+  // 1. Extraer patrones de "X millones [Y mil]"
+  const millionRegex = /(\d+(?:[.,]\d+)?)\s*(?:millón|millon|millones)(?:\s+(\d+)\s*mil)?/gi;
+  text = text.replace(millionRegex, (_, mill, subMil) => {
+    let val = Math.round(parseFloat(mill.replace(',', '.')) * 1000000);
+    if (subMil) {
+      const extra = parseInt(subMil, 10);
+      val += (extra < 1000 ? extra * 1000 : extra);
+    }
+    foundAmounts.push(val);
+    return ' ';
+  });
 
-  // Caso especial: "medio millón" / "medio millon"
-  if (/medio mill[oó]n/.test(clean)) {
-    amount = 500000;
-  }
+  // 2. Extraer patrones de "X mil" o "X k"
+  const thousandRegex = /(\d+(?:[.,]\d+)?)\s*(?:mil|k)\b/gi;
+  text = text.replace(thousandRegex, (_, num) => {
+    const val = Math.round(parseFloat(num.replace(',', '.')) * 1000);
+    foundAmounts.push(val);
+    return ' ';
+  });
 
-  if (amount === null) {
-    // Buscar patrones tipo: "1.5 millones", "45 mil", "$ 9000", "$9.000", "9000"
-    const millionMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:millón|millon|millones)/i);
-    const thousandMatch = clean.match(/(\d+(?:[.,]\d+)?)\s*(?:mil|k)\b/i);
-    
-    // Regex refinada para cifras directas sin confundir miles sin punto (ej. $9000 o 9000)
-    const directDigitMatch = clean.match(/(?:[$€£]\s*)?(\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,](\d{1,2}))?/);
+  // 3. Unificar números con espacio introducido por dictado de voz (ej. "19 700" -> "19700")
+  text = text.replace(/(\b\d{1,3})\s+(\d{3}\b)/g, '$1$2');
 
-    if (millionMatch) {
-      const numPart = parseFloat(millionMatch[1].replace(',', '.'));
-      amount = Math.round(numPart * 1000000);
+  // 4. Extraer todas las cifras numéricas sueltas (ej. "19700", "9000", "$ 19700")
+  const digitRegex = /(?:[$€£]\s*)?(\d+(?:[.,]\d+)*)/g;
+  let match;
+  while ((match = digitRegex.exec(text)) !== null) {
+    let raw = match[1];
 
-      const subThousand = clean.match(/mill[oó]n(?:es)?\s+(\d+)\s*mil?/i);
-      if (subThousand) {
-        const extraThousand = parseInt(subThousand[1], 10);
-        amount += (extraThousand < 1000 ? extraThousand * 1000 : extraThousand);
-      }
-    } else if (thousandMatch) {
-      const numPart = parseFloat(thousandMatch[1].replace(',', '.'));
-      amount = Math.round(numPart * 1000);
-    } else if (directDigitMatch) {
-      let rawStr = directDigitMatch[1];
-      const decimalStr = directDigitMatch[2];
+    if (/^\d{1,3}(?:[.,]\d{3})+$/.test(raw)) {
+      raw = raw.replace(/[.,]/g, '');
+    } else if (/^\d+[.,]\d{1,2}$/.test(raw)) {
+      raw = raw.replace(',', '.');
+    } else {
+      raw = raw.replace(/[.,]/g, '');
+    }
 
-      // Si tiene puntos de miles (ej. 9.000 o 1.500.000), quitamos los puntos
-      if (rawStr.includes('.') || rawStr.includes(',')) {
-        rawStr = rawStr.replace(/[.,]/g, '');
-      }
-
-      let parsedNum = parseInt(rawStr, 10);
-      if (decimalStr) {
-        parsedNum = parseFloat(`${rawStr}.${decimalStr}`);
-      }
-
-      if (!isNaN(parsedNum) && parsedNum > 0) {
-        amount = parsedNum;
-      }
+    const val = parseFloat(raw);
+    if (!isNaN(val) && val > 0) {
+      foundAmounts.push(val);
     }
   }
 
-  // Fallback por palabras escritas en español (ej. "cincuenta mil", "doscientos mil")
-  if (amount === null) {
+  // 5. Si no se encontraron cifras numéricas, probar palabras escritas en español
+  if (foundAmounts.length === 0) {
     let wordSum = 0;
-    const words = clean.split(/\s+/);
+    const words = text.split(/\s+/);
     let hasNumberWords = false;
 
     for (let i = 0; i < words.length; i++) {
@@ -159,9 +149,32 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
       }
     }
     if (hasNumberWords && wordSum > 0) {
-      amount = wordSum;
+      foundAmounts.push(wordSum);
     }
   }
+
+  const total = foundAmounts.reduce((acc, curr) => acc + curr, 0);
+  const breakdown = foundAmounts.length > 1 
+    ? ` (${foundAmounts.map(a => `$${a.toLocaleString('es-CO')}`).join(' + ')})` 
+    : '';
+
+  return { total, breakdown };
+}
+
+export function parseVoiceTransaction(text: string, customCategories: { label: string }[] = []): ParsedVoiceResult {
+  const clean = text.toLowerCase().trim();
+
+  // 1. Detección de Tipo
+  let type: 'gasto' | 'ingreso' | 'deuda' = 'gasto';
+  if (/ingreso|ingresó|ingresaron|me pagaron|recibí|recibi|sueldo|nómina|nomina|gané|gane|remuneración/.test(clean)) {
+    type = 'ingreso';
+  } else if (/deuda|debo|debemos|le quedé debiendo|quedé debiendo|presté|preste|prestaron/.test(clean)) {
+    type = 'deuda';
+  }
+
+  // 2. Extracción y Suma de Todos los Montos Dictados en la Frase
+  const { total, breakdown } = extractAllAmounts(clean);
+  const amount = total > 0 ? total : null;
 
   // 3. Detección de Categoría Inteligente
   const allAvailableCategories = [...customCategories, ...BASE_CATEGORIES];
@@ -204,15 +217,17 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
       description = 'Deuda por voz';
     }
   } else {
-    // Extraer el comercio/producto mencionado (ej. "cerveza", "frisby", "gasolina Terpel")
+    // Extraer el comercio/producto mencionado (ej. "cerveza y cigarros")
     const afterEnMatch = clean.match(/(?:en|de|por)\s+([a-záéíóúñ0-9\s]+)/i);
     if (afterEnMatch) {
-      const detail = afterEnMatch[1].replace(/para|por|de|un|una|el|la|los|las|\d+/g, '').trim();
+      const detail = afterEnMatch[1].replace(/para|por|de|un|una|el|la|los|las/g, '').trim();
       if (detail.length > 1) {
         description = detail.charAt(0).toUpperCase() + detail.slice(1);
       }
     }
   }
+
+  const finalDescription = (description || text) + breakdown;
 
   // 5. Determinar si es Gasto Fijo
   const isFixed = isFixedExpenseCategory(category);
@@ -221,7 +236,7 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
     type,
     amount,
     category,
-    description: description || text,
+    description: finalDescription,
     isFixed,
     rawText: text,
     debtPerson,
