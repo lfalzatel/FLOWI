@@ -111,8 +111,19 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   };
 
   useEffect(() => {
-    startListening();
+    const locale = detectUserLocaleAndCurrency(profile?.currency);
+    const greetingText = "¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.";
+    speakText(greetingText, locale.language);
+
+    const timer = setTimeout(() => {
+      startListening();
+    }, 3200);
+
     return () => {
+      clearTimeout(timer);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
