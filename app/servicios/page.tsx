@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ProfileModal } from '@/components/forms/ProfileModal';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
 import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -36,15 +37,6 @@ const SERVICES = [
     href: '/servicios/estadisticas',
     color: 'text-cyan-500',
     bgColor: 'bg-cyan-500/10',
-    isNew: true
-  },
-  {
-    id: 'probar_confetti',
-    title: 'Probar Confeti',
-    icon: Sparkles,
-    href: '#',
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-400/10',
     isNew: true
   },
   {
@@ -147,10 +139,10 @@ export default function ServiciosPage() {
             Probar Animaciones & Sonidos Web Audio
           </span>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           <button
             onClick={() => triggerPowerAnimation(50000, 'ingreso')}
-            className={`flex flex-col items-center justify-center p-3 text-center transition-all active:scale-95 ${
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
               isTechTheme
                 ? 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
                 : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 rounded-2xl hover:bg-emerald-500/20'
@@ -163,7 +155,7 @@ export default function ServiciosPage() {
 
           <button
             onClick={() => triggerPowerAnimation(25000, 'gasto')}
-            className={`flex flex-col items-center justify-center p-3 text-center transition-all active:scale-95 ${
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
               isTechTheme
                 ? 'border border-rose-500/40 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
                 : 'bg-rose-500/10 border border-rose-500/30 text-rose-600 rounded-2xl hover:bg-rose-500/20'
@@ -176,7 +168,7 @@ export default function ServiciosPage() {
 
           <button
             onClick={() => triggerPowerAnimation(15000, 'eliminacion')}
-            className={`flex flex-col items-center justify-center p-3 text-center transition-all active:scale-95 ${
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
               isTechTheme
                 ? 'border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20'
                 : 'bg-red-500/10 border border-red-500/30 text-red-600 rounded-2xl hover:bg-red-500/20'
@@ -185,6 +177,41 @@ export default function ServiciosPage() {
             <Trash2 className="w-4 h-4 mb-1" />
             <span className="text-[10px] font-extrabold uppercase">Eliminación</span>
             <span className="text-[9px] opacity-80">$15k</span>
+          </button>
+
+          <button
+            onClick={() => triggerDualBurst({ type: 'ingreso' })}
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
+              isTechTheme
+                ? 'border border-cyan-500/40 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20'
+                : 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 rounded-2xl hover:bg-cyan-500/20'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 mb-1 animate-pulse" />
+            <span className="text-[10px] font-extrabold uppercase">Partículas</span>
+            <span className="text-[9px] opacity-80">Voladoras</span>
+          </button>
+
+          <button
+            onClick={() => {
+              try {
+                confetti({
+                  particleCount: 120,
+                  spread: 90,
+                  origin: { y: 0.5 },
+                  colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
+                });
+              } catch (e) {}
+            }}
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 col-span-2 sm:col-span-1 ${
+              isTechTheme
+                ? 'border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
+                : 'bg-amber-500/10 border border-amber-500/30 text-amber-600 rounded-2xl hover:bg-amber-500/20'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 mb-1" />
+            <span className="text-[10px] font-extrabold uppercase">Confeti</span>
+            <span className="text-[9px] opacity-80">Celebración</span>
           </button>
         </div>
       </div>
@@ -224,27 +251,6 @@ export default function ServiciosPage() {
           if (service.id === 'perfil') {
             return (
               <button key={service.id} onClick={() => setShowProfileModal(true)} className={classNameStr + ' text-left'}>
-                {content}
-              </button>
-            );
-          }
-          if (service.id === 'probar_confetti') {
-            return (
-              <button
-                key={service.id}
-                type="button"
-                onClick={() => {
-                  try {
-                    confetti({
-                      particleCount: 120,
-                      spread: 90,
-                      origin: { y: 0.5 },
-                      colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
-                    });
-                  } catch (e) {}
-                }}
-                className={classNameStr + ' text-left'}
-              >
                 {content}
               </button>
             );
