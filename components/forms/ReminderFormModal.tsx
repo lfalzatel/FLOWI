@@ -466,7 +466,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
           if (!reminder?.id) return;
           setLoading(true);
           try {
-            triggerPowerAnimation(0, 'eliminacion');
+            triggerPowerAnimation(0, 'eliminacion', 'RECORDATORIO ELIMINADO', '¡REMOVIDO!');
             speakText('Recordatorio eliminado con éxito', 'es-CO');
             await deleteReminder(reminder.id);
             setShowConfirmDelete(false);

@@ -12,6 +12,8 @@ import { speakText } from '@/lib/voiceParser';
 interface PowerAnimationEvent {
   amount: number;
   type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion';
+  customTitle?: string;
+  customText?: string;
 }
 
 // Global AudioContext singleton para sintaxis fluida y cero latencia
@@ -440,14 +442,14 @@ export function PowerAnimation() {
     IconComponent = CheckCircle2;
     badgeEmoji = '🔮';
   } else if (data.type === 'eliminacion') {
-    labelPrefix = '✕ ';
+    labelPrefix = data.amount > 0 ? '✕ ' : '';
     colorGradient = 'from-red-400 via-rose-400 to-orange-400';
     borderGradient = 'from-red-500 via-rose-500 to-orange-500';
     primaryColor = '#EF4444';
     secondaryColor = '#F97316';
     shadowRgba = 'rgba(239, 68, 68, 0.75)';
-    actionText = 'REGISTRO ELIMINADO';
-    actionSubtitle = '¡Registro removido!';
+    actionText = data.customTitle || (data.amount > 0 ? 'TRANSACCIÓN ELIMINADA' : 'REGISTRO ELIMINADO');
+    actionSubtitle = '¡Removido con éxito!';
     IconComponent = Trash2;
     badgeEmoji = '⚡';
   } else {
@@ -458,14 +460,14 @@ export function PowerAnimation() {
     primaryColor = '#FF2E63';
     secondaryColor = '#EF4444';
     shadowRgba = 'rgba(255, 46, 99, 0.75)';
-    actionText = 'GASTO REGISTRADO';
+    actionText = data.customTitle || 'GASTO REGISTRADO';
     actionSubtitle = '¡Balance actualizado!';
     IconComponent = TrendingDown;
     badgeEmoji = '💸';
   }
 
   const fmt = (n: number) => formatCurrency(n, profile?.currency).replace(/\.00$/, '');
-  const formattedText = `${labelPrefix}${fmt(data.amount)}`;
+  const formattedText = data.customText || (data.amount > 0 ? `${labelPrefix}${fmt(data.amount)}` : '¡REMOVIDO!');
 
   return createPortal(
     <div 
@@ -642,7 +644,12 @@ export function PowerAnimation() {
 }
 
 // Función helper síncrona: dispara el audio sintetizado al instante de hacer clic
-export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion') {
+export function triggerPowerAnimation(
+  amount: number, 
+  type: 'gasto' | 'ingreso' | 'abono' | 'edicion' | 'eliminacion',
+  customTitle?: string,
+  customText?: string
+) {
   if (typeof window !== 'undefined') {
     const isCardEnabled = localStorage.getItem('anim_card_enabled') !== 'false';
     const isBurstEnabled = localStorage.getItem('anim_burst_enabled') !== 'false';
@@ -653,7 +660,7 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
     else if (type === 'gasto') spokenText = 'Gasto registrado con éxito';
     else if (type === 'abono') spokenText = 'Abono registrado con éxito';
     else if (type === 'edicion') spokenText = 'Transacción actualizada con éxito';
-    else if (type === 'eliminacion') spokenText = 'Transacción eliminada con éxito';
+    else if (type === 'eliminacion' && amount > 0) spokenText = 'Transacción eliminada con éxito';
 
     if (spokenText) {
       speakText(spokenText, 'es-CO');
@@ -663,7 +670,7 @@ export function triggerPowerAnimation(amount: number, type: 'gasto' | 'ingreso' 
       playSynthesizedSound(type);
 
       const event = new CustomEvent('show-power-animation', {
-        detail: { amount, type }
+        detail: { amount, type, customTitle, customText }
       });
       window.dispatchEvent(event);
     }

@@ -98,7 +98,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
 
     setLoading(true);
     try {
-      triggerPowerAnimation(0, 'eliminacion');
+      triggerPowerAnimation(0, 'eliminacion', 'NOTA ELIMINADA', '¡REMOVIDA!');
       speakText('Nota eliminada con éxito', 'es-CO');
       await deleteNote(note.id);
       setShowConfirmDelete(false);

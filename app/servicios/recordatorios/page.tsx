@@ -90,7 +90,7 @@ export default function RecordatoriosPage() {
   const confirmDeleteReminder = async () => {
     if (!deletingReminderId) return;
     try {
-      triggerPowerAnimation(0, 'eliminacion');
+      triggerPowerAnimation(0, 'eliminacion', 'RECORDATORIO ELIMINADO', '¡REMOVIDO!');
       speakText('Recordatorio eliminado con éxito', 'es-CO');
       await deleteReminder(deletingReminderId);
       setDeletingReminderId(null);
