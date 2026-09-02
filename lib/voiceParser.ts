@@ -166,9 +166,9 @@ export function parseVoiceTransaction(text: string, customCategories: { label: s
 
   // 1. Detección de Tipo
   let type: 'gasto' | 'ingreso' | 'deuda' = 'gasto';
-  if (/ingreso|ingresó|ingresaron|me pagaron|recibí|recibi|sueldo|nómina|nomina|gané|gane|remuneración/.test(clean)) {
+  if (/ingreso|ingresó|ingresaron|me pagaron|me ingresaron|recibí|recibi|sueldo|nómina|nomina|gané|gane|remuneración/.test(clean)) {
     type = 'ingreso';
-  } else if (/deuda|debo|debemos|le quedé debiendo|quedé debiendo|presté|preste|prestaron/.test(clean)) {
+  } else if (/deuda|deudas|debo|debemos|le quedé debiendo|quedé debiendo|presté|preste|prestaron/.test(clean)) {
     type = 'deuda';
   }
 
@@ -250,22 +250,25 @@ export function parseMultiVoiceTransaction(text: string, customCategories: { lab
   const clean = text.trim();
   if (!clean) return [];
 
-  // Dividir por conectores de lenguaje natural o puntuación
-  const rawSegments = clean.split(/(?:;|\.|\bpero\b|\badem[áa]s\b|\bluego\b|\bdespu[ée]s\b|\by me\b|\by gast[ée]\b|\by pagu[ée]\b|\by debo\b|\by tambi[ée]n\b)/gi);
+  // Dividir por verbos/cambios de acción (gasté, me ingresaron, debo, deudas) O conectores (pero, luego, además)
+  // Usamos Lookahead (?=...) para que la palabra clave quede al inicio del nuevo segmento
+  const splitRegex = /(?=\b(?:gast[ée]|compr[ée]|pagu[ée]|gasto|gastos|ingreso|ingresos|me ingresaron|me pagaron|recib[íi]|deuda|deudas|debo|debemos|prest[ée])\b)|(?:;|\.|\bpero\b|\badem[áa]s\b|\bluego\b|\bdespu[ée]s\b|\by tambi[ée]n\b)/gi;
+
+  const rawSegments = clean.split(splitRegex);
 
   const results: ParsedVoiceResult[] = [];
   let lastType: 'gasto' | 'ingreso' | 'deuda' = 'gasto';
 
   for (const seg of rawSegments) {
+    if (!seg) continue;
     const trimmed = seg.trim();
     if (trimmed.length < 3) continue;
 
-    // Verificar si el segmento contiene alguna cifra o palabra clave de categoría
     const parsed = parseVoiceTransaction(trimmed, customCategories);
 
     if (parsed.amount !== null || parsed.category !== 'Otros') {
-      // Si el segmento no especificaba tipo nuevo, hereda el tipo anterior si corresponde
-      if (!/ingreso|ingresó|me pagaron|sueldo|nómina|gané|deuda|debo|presté/.test(trimmed.toLowerCase())) {
+      // Si el segmento no tenía tipo explícito, conserva la coherencia con el anterior
+      if (!/ingreso|ingresó|ingresaron|me pagaron|me ingresaron|sueldo|nómina|gané|deuda|deudas|debo|presté/.test(trimmed.toLowerCase())) {
         parsed.type = lastType;
       } else {
         lastType = parsed.type;
@@ -274,7 +277,7 @@ export function parseMultiVoiceTransaction(text: string, customCategories: { lab
     }
   }
 
-  // Si no se pudo segmentar en múltiples, retornar el parseo único estándar
+  // Si no se encontraron múltiples segmentos válidos, retornar el parseo estándar único
   if (results.length === 0) {
     results.push(parseVoiceTransaction(clean, customCategories));
   }
