@@ -1,13 +1,15 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
-import { addReminder, updateReminder, Reminder, ReminderAlert } from '@/lib/firestore';
+import { addReminder, updateReminder, deleteReminder, Reminder, ReminderAlert } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { speakText } from '@/lib/voiceParser';
+import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 interface Props {
   onClose: () => void;
@@ -33,23 +35,24 @@ function ToggleSwitch({ checked, onChange, label, theme }: { checked: boolean; o
 
 export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
   const { user } = useAuth();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState<Reminder['type']>('once');
-  const [time, setTime] = useState('08:00');
-  const [dayOfWeek, setDayOfWeek] = useState(1); // 1 = Lunes
-  const [dayOfMonth, setDayOfMonth] = useState<number | ''>(1);
-  const [date, setDate] = useState('');
-  const [category, setCategory] = useState('');
-  const [budgetPercent, setBudgetPercent] = useState(80);
-  const [alerts, setAlerts] = useState<ReminderAlert[]>([]);
+  const [title, setTitle] = useState(reminder?.title || '');
+  const [description, setDescription] = useState(reminder?.description || '');
+  const [type, setType] = useState<Reminder['type']>(reminder?.type || 'once');
+  const [time, setTime] = useState(reminder?.time || '08:00');
+  const [dayOfWeek, setDayOfWeek] = useState(reminder?.dayOfWeek ?? 1);
+  const [dayOfMonth, setDayOfMonth] = useState<number | ''>(reminder?.dayOfMonth ?? 1);
+  const [date, setDate] = useState(reminder?.date || '');
+  const [category, setCategory] = useState(reminder?.category || '');
+  const [budgetPercent, setBudgetPercent] = useState(reminder?.budgetPercent ?? 80);
+  const [alerts, setAlerts] = useState<ReminderAlert[]>(reminder?.alerts || []);
 
   const { allCategories } = useCategories();
-  const [sound, setSound] = useState(true);
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [inAppEnabled, setInAppEnabled] = useState(true);
-  const [active, setActive] = useState(true);
+  const [sound, setSound] = useState(reminder?.sound ?? true);
+  const [pushEnabled, setPushEnabled] = useState(reminder?.pushEnabled ?? true);
+  const [inAppEnabled, setInAppEnabled] = useState(reminder?.inAppEnabled ?? true);
+  const [active, setActive] = useState(reminder?.active ?? true);
   const [loading, setLoading] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
@@ -427,20 +430,59 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
           </div>
 
           {/* Action button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`
-              w-full flex items-center justify-center py-3 bg-gradient-to-br from-accent to-accent-dim
-              ${theme === 'light' ? 'text-white' : 'text-black'}
-              font-semibold text-sm shadow-lg shadow-accent/20 transition-all hover:opacity-90 active:scale-[0.98] mt-6
-              ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}
-            `}
-          >
-            {loading ? 'Guardando...' : reminder ? 'Actualizar Recordatorio' : 'Crear Recordatorio'}
-          </button>
+          <div className="space-y-2 mt-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`
+                w-full flex items-center justify-center py-3 bg-gradient-to-br from-accent to-accent-dim
+                ${theme === 'light' ? 'text-white' : 'text-black'}
+                font-semibold text-sm shadow-lg shadow-accent/20 transition-all hover:opacity-90 active:scale-[0.98]
+                ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}
+              `}
+            >
+              {loading ? 'Guardando...' : reminder ? 'Actualizar Recordatorio' : 'Crear Recordatorio'}
+            </button>
+
+            {reminder?.id && (
+              <button
+                type="button"
+                onClick={() => setShowConfirmDelete(true)}
+                disabled={loading}
+                className="w-full py-2.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Eliminar Recordatorio</span>
+              </button>
+            )}
+          </div>
         </form>
       </div>
+
+      <ConfirmDialog
+        isOpen={showConfirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
+        onConfirm={async () => {
+          if (!reminder?.id) return;
+          setLoading(true);
+          try {
+            triggerPowerAnimation(0, 'eliminacion');
+            speakText('Recordatorio eliminado con éxito', 'es-CO');
+            await deleteReminder(reminder.id);
+            setShowConfirmDelete(false);
+            onSuccess();
+            onClose();
+          } catch (e) {
+            console.error('Error deleting reminder:', e);
+          } finally {
+            setLoading(false);
+            setShowConfirmDelete(false);
+          }
+        }}
+        title="Eliminar Recordatorio"
+        message="¿Estás seguro de que deseas eliminar este recordatorio? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+      />
     </div>,
     document.body
   );

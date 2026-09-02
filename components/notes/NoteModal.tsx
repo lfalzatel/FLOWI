@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { addNote, updateNote, deleteNote, Note } from '@/lib/firestore';
 import { speakText } from '@/lib/voiceParser';
+import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 interface Props {
   note: Note | null; // null if creating a new note
@@ -33,6 +35,15 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
   const [color, setColor] = useState(note?.color || 'bg-glass');
   const [loading, setLoading] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!note) {
+      setTimeout(() => titleInputRef.current?.focus(), 100);
+    }
+  }, [note]);
 
   // Auto-resize textarea
   const contentRef = useRef<HTMLTextAreaElement>(null);
@@ -77,20 +88,27 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!note?.id) return;
-    const confirmDelete = window.confirm('¿Seguro que deseas eliminar esta nota?');
-    if (!confirmDelete) return;
+    setShowConfirmDelete(true);
+  };
+
+  const confirmDeleteNote = async () => {
+    if (!note?.id) return;
 
     setLoading(true);
     try {
-      await deleteNote(note.id);
+      triggerPowerAnimation(0, 'eliminacion');
       speakText('Nota eliminada con éxito', 'es-CO');
+      await deleteNote(note.id);
+      setShowConfirmDelete(false);
       onSuccess();
+      onClose();
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+      setShowConfirmDelete(false);
     }
   };
 
@@ -175,9 +193,17 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
                           ${isTechTheme ? 'text-white font-mono' : 'text-text-secondary'} leading-relaxed`}
             />
           </div>
-
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showConfirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
+        onConfirm={confirmDeleteNote}
+        title="Eliminar Nota"
+        message="¿Estás seguro de que deseas eliminar esta nota? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+      />
     </div>
   );
 }

@@ -15,6 +15,10 @@ import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { deleteReminder, updateReminder, Reminder } from '@/lib/firestore';
 import { registerReminderSW, requestNotificationPermission, scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
 
+import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { speakText } from '@/lib/voiceParser';
+
 export default function RecordatoriosPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { reminders, loading: remindersLoading, refresh } = useReminders();
@@ -27,6 +31,7 @@ export default function RecordatoriosPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [deletingReminderId, setDeletingReminderId] = useState<string | null>(null);
 
   // Cargar porcentaje de presupuesto
   const { gastosEsteMes } = useExpenses();
@@ -79,8 +84,16 @@ export default function RecordatoriosPage() {
   };
 
   const handleDelete = async (id: string) => {
+    setDeletingReminderId(id);
+  };
+
+  const confirmDeleteReminder = async () => {
+    if (!deletingReminderId) return;
     try {
-      await deleteReminder(id);
+      triggerPowerAnimation(0, 'eliminacion');
+      speakText('Recordatorio eliminado con éxito', 'es-CO');
+      await deleteReminder(deletingReminderId);
+      setDeletingReminderId(null);
       refresh();
     } catch (e) {
       console.error('Error deleting reminder:', e);
@@ -198,6 +211,15 @@ export default function RecordatoriosPage() {
           reminder={editingReminder}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deletingReminderId}
+        onCancel={() => setDeletingReminderId(null)}
+        onConfirm={confirmDeleteReminder}
+        title="Eliminar Recordatorio"
+        message="¿Estás seguro de que deseas eliminar este recordatorio? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+      />
     </div>
   );
 }
