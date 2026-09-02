@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
 import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Edit2, Compass, StickyNote, Bell, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
@@ -33,6 +35,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [savingBulk, setSavingBulk] = useState(false);
+  const [showSuccessAnim, setShowSuccessAnim] = useState(false);
 
   const recognitionRef = useRef<any>(null);
 
@@ -239,10 +242,25 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           });
         }
       }
+
+      // Lluvia de confeti y animación visual de éxito 🎉
+      try {
+        confetti({
+          particleCount: 90,
+          spread: 80,
+          origin: { y: 0.5 },
+          colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
+        });
+      } catch (e) {}
+
       const locale = detectUserLocaleAndCurrency(profile?.currency);
       speakText('Transacciones guardadas con éxito', locale.language);
-      if (onSuccessBulk) onSuccessBulk();
-      onClose();
+      setShowSuccessAnim(true);
+
+      setTimeout(() => {
+        if (onSuccessBulk) onSuccessBulk();
+        onClose();
+      }, 1400);
     } catch (err) {
       console.error('Error guardando por voz:', err);
       setErrorMsg('Error al guardar. Intenta nuevamente.');
@@ -265,8 +283,30 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         className={`w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center overflow-hidden ${
           isTechTheme ? 'rounded-none border border-accent bg-deep uppercase' : 'rounded-3xl shadow-2xl'
         }`}
-        onClick={(e) => e.stopPropagation()}
       >
+        {/* Overlay Animado de Éxito 🎉 */}
+        <AnimatePresence>
+          {showSuccessAnim && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-md p-6 text-center"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -45 }}
+                animate={{ scale: 1.25, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 14 }}
+                className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 mb-4 shadow-[0_0_35px_rgba(16,185,129,0.5)]"
+              >
+                <Check className="w-10 h-10 stroke-[3]" />
+              </motion.div>
+              <h3 className="text-2xl font-bold text-white mb-1">¡Registrado con Éxito! 🎉</h3>
+              <p className="text-emerald-400 text-sm font-medium">Tus datos financieros fueron guardados</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div onClick={(e) => e.stopPropagation()} className="w-full">
         {/* Botón cerrar */}
         <button 
           type="button"
@@ -550,7 +590,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           </button>
         </div>
       </div>
-    </div>,
+    </div>
+  </div>,
     document.body
   );
 }
