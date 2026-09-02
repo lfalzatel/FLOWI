@@ -432,14 +432,18 @@ export function PowerAnimation() {
     IconComponent = RefreshCw;
     badgeEmoji = '💎';
   } else if (data.type === 'edicion') {
-    labelPrefix = '✓ ';
+    labelPrefix = data.amount > 0 ? '✓ ' : '';
     colorGradient = 'from-purple-300 via-indigo-300 to-blue-300';
     borderGradient = 'from-purple-400 via-indigo-400 to-blue-400';
     primaryColor = '#8B5CF6';
     secondaryColor = '#3B82F6';
     shadowRgba = 'rgba(139, 92, 246, 0.75)';
-    actionText = 'TRANSACCIÓN EDITA';
-    actionSubtitle = '¡Cambios guardados con éxito!';
+    actionText = data.customTitle || (data.amount > 0 ? 'TRANSACCIÓN ACTUALIZADA' : 'REGISTRO GUARDADO');
+    actionSubtitle = data.customTitle?.includes('RECORDATORIO')
+      ? '¡Agendado con éxito!'
+      : data.customTitle?.includes('NOTA')
+      ? '¡Nota guardada con éxito!'
+      : '¡Cambios guardados con éxito!';
     IconComponent = CheckCircle2;
     badgeEmoji = '🔮';
   } else if (data.type === 'eliminacion') {
@@ -468,7 +472,7 @@ export function PowerAnimation() {
   }
 
   const fmt = (n: number) => formatCurrency(n, profile?.currency).replace(/\.00$/, '');
-  const formattedText = data.customText || (data.amount > 0 ? `${labelPrefix}${fmt(data.amount)}` : '¡REMOVIDO!');
+  const formattedText = data.customText || (data.amount > 0 ? `${labelPrefix}${fmt(data.amount)}` : '¡ÉXITO!');
 
   return createPortal(
     <div 
