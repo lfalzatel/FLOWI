@@ -9,6 +9,7 @@ export interface Transaction {
   description?: string;
   date: Timestamp | Date;
   userId?: string;
+  isFixed?: boolean;
 }
 
 export interface CustomCategory {
@@ -141,8 +142,20 @@ export const BASE_CATEGORIES = [
 export const FIXED_CATEGORIES = [
   'Arriendo', 'Administración', 'Agua', 'Luz', 'EPM', 'Gas natural', 'Efigas', 'Alcanos',
   'Claro Hogar', 'Claro Móvil', 'Netflix', 'Spotify', 'YouTube', 'YT Music', 'Google', 'Play Store',
-  'Cuota de crédito', 'Gimnasio', 'Empleada', 'Pensión', 'Matrícula', 'SOAT', 'Tecnomecánica'
+  'Cuota de crédito', 'Gimnasio', 'Empleada', 'Pensión', 'Matrícula', 'SOAT', 'Tecnomecánica',
+  'Sura', 'Colsanitas', 'Compensar', 'Nueva EPS', 'FNA', 'Cesantías', 'Impuestos'
 ];
+
+export function isFixedExpenseCategory(category: string): boolean {
+  if (!category) return false;
+  const catLower = category.toLowerCase().trim();
+  const isMatchInList = FIXED_CATEGORIES.some(fixed => {
+    const fixedLower = fixed.toLowerCase();
+    return catLower === fixedLower || catLower.includes(fixedLower) || fixedLower.includes(catLower);
+  });
+  if (isMatchInList) return true;
+  return /servicio|arriendo|renta|suscripcio|suscripció|pension|pensió|matri|seguro|soat|impuesto|plan|fibra|celular|internet|tv|telef/i.test(catLower);
+}
 
 export const EXPENSE_CATEGORIES = BASE_CATEGORIES;
 export const INCOME_CATEGORIES = BASE_CATEGORIES;

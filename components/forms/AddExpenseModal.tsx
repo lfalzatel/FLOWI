@@ -6,7 +6,7 @@ import { X, ChevronDown, FolderPlus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { getLocalDateString } from '@/lib/dateUtils';
-import { addExpense, updateExpense, deleteExpense, addDebt, Transaction } from '@/lib/firestore';
+import { addExpense, updateExpense, deleteExpense, addDebt, Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
@@ -27,6 +27,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [isFixed, setIsFixed] = useState(false);
   const [date, setDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -125,6 +126,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       setAmount(transactionToEdit.amount.toString());
       setDescription(transactionToEdit.description || '');
       setCategory(transactionToEdit.category);
+      if (transactionToEdit.isFixed !== undefined) {
+        setIsFixed(transactionToEdit.isFixed);
+      } else {
+        setIsFixed(isFixedExpenseCategory(transactionToEdit.category));
+      }
       
       if (transactionToEdit.date) {
         const d = transactionToEdit.date instanceof Date ? transactionToEdit.date : new Date();
@@ -162,6 +168,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         description,
         category: finalCategory,
         date: finalDate,
+        ...(type === 'gasto' ? { isFixed } : {}),
       };
 
       const numericAmount = parseFloat(amount);
@@ -375,7 +382,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                         <button
                           key={cat.label}
                           type="button"
-                          onClick={() => { setCategory(cat.label); setIsDropdownOpen(false); setSearchQuery(''); }}
+                          onClick={() => { 
+                            setCategory(cat.label); 
+                            setIsDropdownOpen(false); 
+                            setSearchQuery('');
+                            if (type === 'gasto') {
+                              setIsFixed(isFixedExpenseCategory(cat.label));
+                            }
+                          }}
                           className={`w-full text-left py-2 px-2 hover:bg-glass text-xs flex items-center gap-2 rounded-lg text-text-primary`}
                         >
                           <CategoryIcon icon={cat.icon} label={cat.label} className="w-4 h-4" />
@@ -403,6 +417,37 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
               </div>
             )}
           </div>
+
+          {/* Toggle Gasto Fijo */}
+          {type === 'gasto' && (
+            <div className={`p-3.5 border flex items-center justify-between transition-all ${isTechTheme ? 'bg-accent/5 border-accent/30 rounded-none font-mono' : 'bg-glass border-glass-border rounded-xl'}`}>
+              <div className="flex flex-col pr-2">
+                <span className={`text-xs font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
+                  Gasto Fijo / Recurrente del mes
+                </span>
+                <span className={`text-[11px] mt-0.5 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
+                  {isFixed ? 'Se descontará directamente de tus ingresos del mes' : 'Se tomará como gasto variable diario'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFixed(!isFixed)}
+                className={`relative w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out flex-shrink-0 focus:outline-none ${
+                  isFixed 
+                    ? (isTechTheme ? 'bg-accent' : 'bg-emerald-500') 
+                    : (isTechTheme ? 'bg-accent/20' : 'bg-white/10')
+                }`}
+              >
+                <div
+                  className={`w-4.5 h-4.5 rounded-full transition-transform duration-200 ease-in-out ${
+                    isFixed 
+                      ? 'translate-x-5.5 bg-black shadow' 
+                      : 'translate-x-0 ' + (isTechTheme ? 'bg-accent' : 'bg-text-secondary')
+                  }`}
+                />
+              </button>
+            </div>
+          )}
 
           {/* Date */}
           <div>
