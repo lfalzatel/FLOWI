@@ -30,17 +30,30 @@ export interface ParsedVoiceCommand {
 /**
  * Síntesis de voz nativa del navegador para responder al usuario en voz alta
  */
-export function speakText(text: string, lang: string = 'es-CO') {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+export function speakText(text: string, lang: string = 'es-CO', onDone?: () => void) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (onDone) onDone();
+    return;
+  }
   try {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
+
+    utterance.onend = () => {
+      if (onDone) onDone();
+    };
+
+    utterance.onerror = () => {
+      if (onDone) onDone();
+    };
+
     window.speechSynthesis.speak(utterance);
   } catch (e) {
     console.warn('Error al reproducir voz:', e);
+    if (onDone) onDone();
   }
 }
 

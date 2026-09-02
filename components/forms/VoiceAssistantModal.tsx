@@ -113,14 +113,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   useEffect(() => {
     const locale = detectUserLocaleAndCurrency(profile?.currency);
     const greetingText = "¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.";
-    speakText(greetingText, locale.language);
-
-    const timer = setTimeout(() => {
+    
+    // Encender el micrófono ÚNICAMENTE cuando la voz parlante termine de hablar (0 solapamiento)
+    speakText(greetingText, locale.language, () => {
       startListening();
-    }, 3200);
+    });
 
     return () => {
-      clearTimeout(timer);
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         try { window.speechSynthesis.cancel(); } catch (e) {}
       }
@@ -143,12 +142,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         const cmd = results[0] as ParsedVoiceCommand;
         if (cmd.action === 'ask_followup' && cmd.prompt) {
           const locale = detectUserLocaleAndCurrency(profile?.currency);
-          speakText(cmd.prompt, locale.language);
-
-          // Reactivar micrófono automáticamente después de hablar
-          setTimeout(() => {
+          speakText(cmd.prompt, locale.language, () => {
             startListening();
-          }, 2500);
+          });
         }
       }
     }
