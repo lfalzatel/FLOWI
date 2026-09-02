@@ -12,22 +12,25 @@ import { CategoryIcon } from '@/components/CategoryIcon';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
+import { ParsedVoiceResult } from '@/lib/voiceParser';
+
 interface AddExpenseModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   transactionToEdit?: Transaction;
   initialType?: 'gasto' | 'ingreso';
+  initialVoiceParsed?: ParsedVoiceResult;
 }
 
-export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initialType = 'gasto' }: AddExpenseModalProps) {
+export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initialType = 'gasto', initialVoiceParsed }: AddExpenseModalProps) {
   const { user } = useAuth();
   const { allCategories } = useCategories();
   
-  const [type, setType] = useState<'gasto' | 'ingreso'>(initialType);
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [isFixed, setIsFixed] = useState(false);
+  const [type, setType] = useState<'gasto' | 'ingreso'>(initialVoiceParsed?.type === 'ingreso' ? 'ingreso' : initialType);
+  const [amount, setAmount] = useState(initialVoiceParsed?.amount ? initialVoiceParsed.amount.toString() : '');
+  const [description, setDescription] = useState(initialVoiceParsed?.description || '');
+  const [category, setCategory] = useState(initialVoiceParsed?.category || '');
+  const [isFixed, setIsFixed] = useState(initialVoiceParsed?.isFixed || false);
   const [date, setDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

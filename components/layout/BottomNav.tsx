@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, TrendingDown, TrendingUp,
-  Plus, Bell, CreditCard, Grid
+  Plus, Bell, CreditCard, Grid, Mic
 } from 'lucide-react';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
+import { VoiceAssistantModal } from '@/components/forms/VoiceAssistantModal';
+import { ParsedVoiceResult } from '@/lib/voiceParser';
 import { useTheme } from '@/components/ThemeProvider';
 import { playUISound } from '@/components/dashboard/PowerAnimation';
 
@@ -23,6 +25,9 @@ const navItems = [
 export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const pathname        = usePathname();
   const [showAdd, setShowAdd] = useState(false);
+  const [showVoice, setShowVoice] = useState(false);
+  const [parsedVoiceData, setParsedVoiceData] = useState<ParsedVoiceResult | null>(null);
+
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light';
@@ -74,35 +79,75 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
           ))}
         </nav>
 
-        {/* Floating FAB on the right */}
+        {/* Floating FAB con Micrófono 🎙️ */}
         <button
           onClick={() => {
             playUISound();
-            setShowAdd(true);
+            setParsedVoiceData(null);
+            setShowVoice(true);
           }}
-          aria-label="Nueva transacción"
+          aria-label="Asistente de Voz / Nueva transacción"
+          title="Dictar por Voz"
           className={`pointer-events-auto flex-shrink-0 flex items-center justify-center
                       w-14 h-14
                       bg-gradient-to-br from-accent to-accent-dim
-                      shadow-xl shadow-accent/40 transition-all active:scale-95
+                      shadow-xl shadow-accent/50 transition-all active:scale-95
                       ${isTechTheme ? 'rounded-none border-2 border-black' : 'rounded-full'}
                       ${isLight ? 'text-white' : 'text-black'}`}
           style={{
             animation: 'float-bounce 2.2s ease-in-out infinite',
           }}
         >
-          <Plus className="w-6 h-6 stroke-[2.5]" />
+          <Mic className="w-6 h-6 stroke-[2.5] animate-pulse" />
         </button>
 
       </div>
 
+      {/* Modal de Asistente de Voz */}
+      {showVoice && (
+        <VoiceAssistantModal
+          onClose={() => setShowVoice(false)}
+          onSelectParsed={(result) => {
+            setShowVoice(false);
+            setParsedVoiceData(result);
+            setShowAdd(true);
+          }}
+          onOpenManual={() => {
+            setShowVoice(false);
+            setParsedVoiceData(null);
+            setShowAdd(true);
+          }}
+        />
+      )}
+
+      {/* Modal Tradicional o Pre-llenado por Voz */}
       {showAdd && (
-        pathname === '/deudas' ? (
-          <AddDebtModal onClose={() => setShowAdd(false)} onSuccess={onSuccess || (() => {})} />
+        pathname === '/deudas' || parsedVoiceData?.type === 'deuda' ? (
+          <AddDebtModal 
+            onClose={() => {
+              setShowAdd(false);
+              setParsedVoiceData(null);
+            }} 
+            onSuccess={onSuccess || (() => {})} 
+          />
         ) : pathname.startsWith('/servicios') ? (
-          <ReminderFormModal onClose={() => setShowAdd(false)} onSuccess={onSuccess || (() => {})} />
+          <ReminderFormModal 
+            onClose={() => {
+              setShowAdd(false);
+              setParsedVoiceData(null);
+            }} 
+            onSuccess={onSuccess || (() => {})} 
+          />
         ) : (
-          <AddExpenseModal onClose={() => setShowAdd(false)} onSuccess={onSuccess} initialType={pathname === '/ingresos' ? 'ingreso' : 'gasto'} />
+          <AddExpenseModal 
+            onClose={() => {
+              setShowAdd(false);
+              setParsedVoiceData(null);
+            }} 
+            onSuccess={onSuccess} 
+            initialType={parsedVoiceData?.type === 'ingreso' ? 'ingreso' : pathname === '/ingresos' ? 'ingreso' : 'gasto'}
+            initialVoiceParsed={parsedVoiceData || undefined}
+          />
         )
       )}
     </>
