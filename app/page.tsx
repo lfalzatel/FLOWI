@@ -49,10 +49,12 @@ export default function DashboardPage() {
     hasShownSplashInThisJSContext = true;
 
     // Verificar si el usuario no ha visto el tour de bienvenida
-    const hasSeen = localStorage.getItem('flowi_has_seen_onboarding');
-    if (!hasSeen) {
-      setShowOnboarding(true);
-    }
+    try {
+      const hasSeen = localStorage.getItem('flowi_has_seen_onboarding');
+      if (!hasSeen) {
+        setShowOnboarding(true);
+      }
+    } catch (e) {}
 
     if (processedUrl.current) return;
 

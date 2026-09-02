@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { Mic, Sparkles, X, ChevronRight, ChevronLeft, Check, ShieldCheck, Wallet, Calendar, ArrowRight } from 'lucide-react';
@@ -41,6 +41,12 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const slide = SLIDES[currentSlide];
   const Icon = slide.icon;
 
@@ -48,7 +54,9 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
     if (currentSlide < SLIDES.length - 1) {
       setCurrentSlide(prev => prev + 1);
     } else {
-      localStorage.setItem('flowi_has_seen_onboarding', 'true');
+      try {
+        localStorage.setItem('flowi_has_seen_onboarding', 'true');
+      } catch (e) {}
       onClose();
     }
   };
@@ -59,7 +67,7 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
     }
   };
 
-  if (typeof document === 'undefined') return null;
+  if (!mounted || typeof document === 'undefined') return null;
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono text-sm' : ''}`}>
