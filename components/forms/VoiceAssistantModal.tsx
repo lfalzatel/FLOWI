@@ -295,11 +295,15 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           stopListening();
           setTranscript(''); // Limpiar la palabra clave para que no persista
 
-          const promptLower = cmd.prompt.toLowerCase();
-          if (promptLower.includes('recordar')) setPendingAction('create_reminder');
-          else if (promptLower.includes('anotar')) setPendingAction('create_note');
-          else if (promptLower.includes('ingreso')) setPendingAction('create_income');
-          else if (promptLower.includes('gasto')) setPendingAction('create_expense');
+          if (cmd.pendingAction) {
+            setPendingAction(cmd.pendingAction);
+          } else {
+            const promptLower = cmd.prompt.toLowerCase();
+            if (promptLower.includes('recordar')) setPendingAction('create_reminder');
+            else if (promptLower.includes('anotar') || promptLower.includes('nota') || promptLower.includes('título')) setPendingAction('create_note');
+            else if (promptLower.includes('ingreso')) setPendingAction('create_income');
+            else if (promptLower.includes('gasto')) setPendingAction('create_expense');
+          }
 
           const locale = detectUserLocaleAndCurrency(profile?.currency);
           speakText(cmd.prompt, locale.language, () => {

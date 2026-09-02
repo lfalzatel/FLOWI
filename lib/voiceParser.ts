@@ -15,6 +15,7 @@ export interface ParsedVoiceResult {
 export interface ParsedVoiceCommand {
   kind: 'command';
   action: 'navigate' | 'create_note' | 'create_reminder' | 'ask_followup';
+  pendingAction?: 'create_reminder' | 'create_note' | 'create_income' | 'create_expense';
   targetUrl?: string;
   title: string;
   content?: string;
@@ -341,6 +342,7 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
     return {
       kind: 'command',
       action: 'ask_followup',
+      pendingAction: 'create_reminder',
       title: '🔔 Nuevo Recordatorio',
       prompt: '¿Qué deseas recordar, a qué hora y con qué frecuencia?',
       label: 'Responder',
@@ -352,6 +354,7 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
     return {
       kind: 'command',
       action: 'ask_followup',
+      pendingAction: 'create_note',
       title: '📝 Nueva Nota Importante',
       prompt: '¿Cuál es el título y contenido de tu nota?',
       label: 'Responder',
@@ -385,6 +388,7 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
     return {
       kind: 'command',
       action: 'ask_followup',
+      pendingAction: 'create_expense',
       title: 'Asistente de Voz 🎙️',
       prompt: '¿De cuánto fue el gasto y en qué lo usaste?',
       label: 'Responder',
@@ -396,6 +400,7 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
     return {
       kind: 'command',
       action: 'ask_followup',
+      pendingAction: 'create_income',
       title: 'Asistente de Voz 🎙️',
       prompt: '¿De cuánto fue el ingreso y por qué concepto?',
       label: 'Responder',
