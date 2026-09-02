@@ -183,7 +183,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         // Manejo de Comandos por Voz (Navegación / Notas / Recordatorios)
         if ('kind' in res && res.kind === 'command') {
           const cmd = res as ParsedVoiceCommand;
+          const locale = detectUserLocaleAndCurrency(profile?.currency);
+
           if (cmd.action === 'navigate' && cmd.targetUrl) {
+            speakText(`Navegando a ${cmd.label || cmd.title}`, locale.language);
             router.push(cmd.targetUrl);
           } else if (cmd.action === 'create_note') {
             await addNote({
@@ -192,6 +195,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               content: cmd.content || cmd.rawText,
               color: '#3B82F6',
             });
+            speakText('Nota guardada con éxito', locale.language);
             if (cmd.targetUrl) router.push(cmd.targetUrl);
           } else if (cmd.action === 'create_reminder') {
             await addReminder({
@@ -206,6 +210,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               inAppEnabled: true,
               active: true,
             });
+            speakText('Recordatorio agendado con éxito', locale.language);
             if (cmd.targetUrl) router.push(cmd.targetUrl);
           }
           continue;
@@ -236,6 +241,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           });
         }
       }
+      const locale = detectUserLocaleAndCurrency(profile?.currency);
+      speakText('Transacciones guardadas con éxito', locale.language);
       if (onSuccessBulk) onSuccessBulk();
       onClose();
     } catch (err) {
