@@ -338,7 +338,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <CategoryIcon icon={tx.category} label={tx.category} className="w-8 h-8 flex-shrink-0" />
+                          <CategoryIcon icon={tx.category} label={tx.category} className="w-8 h-8 text-xl flex items-center justify-center flex-shrink-0" />
                           <div>
                             <p className={`text-xs font-bold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tx.category}</p>
                             <p className={`text-[10px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
@@ -408,7 +408,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <CategoryIcon icon={tx.category} label={tx.category} className="w-6 h-6 flex-shrink-0" />
+                            <CategoryIcon icon={tx.category} label={tx.category} className="w-6 h-6 text-base flex items-center justify-center flex-shrink-0" />
                             <div>
                               <p className={`text-xs font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tx.category}</p>
                               <p className={`text-[10px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>

@@ -1,7 +1,49 @@
 import { SiNetflix, SiYoutube, SiYoutubemusic, SiSpotify, SiGoogledrive, SiGmail, SiGooglephotos } from 'react-icons/si';
 import { FcGoogle } from 'react-icons/fc';
 
+const LABEL_EMOJIS: Record<string, string> = {
+  'arriendo': '🏢',
+  'administración': '🔑',
+  'administracion': '🔑',
+  'luz': '💡',
+  'agua': '💧',
+  'gas natural': '🔥',
+  'gas': '🔥',
+  'mercado': '🛒',
+  'restaurantes': '🍽️',
+  'café y antojos': '☕',
+  'licores y bares': '🍺',
+  'transporte': '🚌',
+  'entretenimiento': '🎮',
+  'hogar': '🏠',
+  'sueldo': '💰',
+  'inversiones': '📈',
+  'regalos': '🎁',
+  'gimnasio': '🏋️‍♂️',
+  'mascotas': '🐾',
+  'médico / salud': '🏥',
+  'salud': '🏥',
+  'farmacia': '💊',
+  'educación': '📚',
+  'ropa y calzado': '👟',
+  'cuota de crédito': '💳',
+  'impuestos': '🏛️',
+  'ahorro': '🐷',
+  'préstamos prestados': '💸',
+  'mantenimiento': '🔧',
+  'remodelación': '👷',
+  'vehículo': '🚗',
+  'carro': '🚗',
+  'moto': '🏍️',
+  'viajes': '✈️',
+};
+
 export function CategoryIcon({ icon, label, className }: { icon: string, label: string, className?: string }) {
+  const cleanLabel = (label || icon || '').toLowerCase().trim();
+  if (LABEL_EMOJIS[cleanLabel]) {
+    return <span className={className}>{LABEL_EMOJIS[cleanLabel]}</span>;
+  }
+
   const check = (str: string) => label?.toLowerCase() === str || icon === str;
   if (check('netflix')) return <SiNetflix color="#E50914" className={className || "w-5 h-5"} />;
   if (check('google')) return <FcGoogle className={className || "w-5 h-5"} />;
@@ -457,5 +499,9 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
     );
   }
 
-  return <span className={className}>{icon}</span>;
+  // Si icon es una palabra larga de texto (ej. "Arriendo") y no un icono/emoji, usar emoji predeterminado para evitar superposiciones
+  const isEmojiOrShort = !icon || icon.length <= 4 || !/[a-zA-Z]{3,}/.test(icon);
+  const displayIcon = isEmojiOrShort ? icon : '📝';
+
+  return <span className={className}>{displayIcon}</span>;
 }
