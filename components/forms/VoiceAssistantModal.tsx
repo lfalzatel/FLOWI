@@ -596,8 +596,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     /* Renderizado de Transacciones Estándar */
                     <div>
                       <div className="flex flex-col items-start gap-1 mb-1 pr-14">
-                        <span className="text-[8px] text-amber-300 font-medium">
-                          💡 Toca la etiqueta para convertir a {res.type === 'gasto' ? 'Ingreso 🟢' : 'Gasto 🔴'}
+                        <span className="text-[9px] text-amber-300 font-medium leading-tight">
+                          💡 Toca para convertir a {res.type === 'gasto' ? 'Ingreso 🟢' : 'Gasto 🔴'}
                         </span>
                         <div className="flex items-center gap-2">
                           <button
