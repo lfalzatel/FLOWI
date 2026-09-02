@@ -210,7 +210,7 @@ export default function DashboardPage() {
         ) : (
           <>
             <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
-            <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} />
+            <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh} />
           </>
         )}
 
