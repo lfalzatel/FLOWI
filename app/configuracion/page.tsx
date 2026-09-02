@@ -97,6 +97,7 @@ export default function ConfigPage() {
   const [soundUINav, setSoundUINav] = useState('pop');
   const [soundParticles, setSoundParticles] = useState('crystal');
   const [animCardEnabled, setAnimCardEnabled] = useState(true);
+  const [animConfettiEnabled, setAnimConfettiEnabled] = useState(true);
   const [animBurstEnabled, setAnimBurstEnabled] = useState(true);
 
   // Load from local storage
@@ -114,6 +115,7 @@ export default function ConfigPage() {
     setSoundUINav(localStorage.getItem('sound_ui_nav') || 'pop');
     setSoundParticles(localStorage.getItem('sound_particles') || 'crystal');
     setAnimCardEnabled(localStorage.getItem('anim_card_enabled') !== 'false');
+    setAnimConfettiEnabled(localStorage.getItem('anim_confetti_enabled') !== 'false');
     setAnimBurstEnabled(localStorage.getItem('anim_burst_enabled') !== 'false');
   }, []);
 
@@ -197,6 +199,12 @@ export default function ConfigPage() {
     const newState = !animCardEnabled;
     setAnimCardEnabled(newState);
     localStorage.setItem('anim_card_enabled', String(newState));
+  };
+
+  const toggleAnimConfetti = () => {
+    const newState = !animConfettiEnabled;
+    setAnimConfettiEnabled(newState);
+    localStorage.setItem('anim_confetti_enabled', String(newState));
   };
 
   const toggleAnimBurst = () => {
@@ -575,8 +583,22 @@ export default function ConfigPage() {
                     <p className="text-[10px] text-text-muted">Lluvia de confeti al guardar recordatorios, notas o múltiples transacciones por voz</p>
                   </div>
                   <button 
+                    onClick={toggleAnimConfetti}
+                    className={`w-11 h-6 rounded-full transition-colors relative ${animConfettiEnabled ? (isTechTheme ? 'bg-purple-400 border border-purple-400' : 'bg-purple-500') : 'bg-gray-600'}`}
+                  >
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animConfettiEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                  </button>
+                </div>
+
+                {/* Toggle Partículas Voladoras ✨ */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-left">
+                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>Explosión de Partículas Voladoras ✨</p>
+                    <p className="text-[10px] text-text-muted">Partículas volando en arco hacia el saldo y menú</p>
+                  </div>
+                  <button 
                     onClick={toggleAnimBurst}
-                    className={`w-11 h-6 rounded-full transition-colors relative ${animBurstEnabled ? (isTechTheme ? 'bg-purple-400 border border-purple-400' : 'bg-purple-500') : 'bg-gray-600'}`}
+                    className={`w-11 h-6 rounded-full transition-colors relative ${animBurstEnabled ? (isTechTheme ? 'bg-cyan-400 border border-cyan-400' : 'bg-cyan-500') : 'bg-gray-600'}`}
                   >
                     <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animBurstEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
                   </button>

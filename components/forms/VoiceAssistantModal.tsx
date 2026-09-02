@@ -247,7 +247,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       }
 
       // Determinar si aplica disparo de confeti (múltiples transacciones, notas o recordatorios)
-      const isConfettiEnabled = typeof window !== 'undefined' ? localStorage.getItem('anim_burst_enabled') !== 'false' : true;
+      const isConfettiEnabled = typeof window !== 'undefined' ? localStorage.getItem('anim_confetti_enabled') !== 'false' : true;
       const isMultipleTx = parsedResults.length > 1;
       const isReminder = parsedResults.some(r => 'kind' in r && r.kind === 'command' && r.action === 'create_reminder');
       const isNote = parsedResults.some(r => 'kind' in r && r.kind === 'command' && r.action === 'create_note');

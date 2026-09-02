@@ -39,6 +39,15 @@ const SERVICES = [
     isNew: true
   },
   {
+    id: 'probar_confetti',
+    title: 'Probar Confeti',
+    icon: Sparkles,
+    href: '#',
+    color: 'text-amber-400',
+    bgColor: 'bg-amber-400/10',
+    isNew: true
+  },
+  {
     id: 'metas',
     title: 'Metas de ahorro',
     icon: Target,
@@ -219,37 +228,33 @@ export default function ServiciosPage() {
               </button>
             );
           }
+          if (service.id === 'probar_confetti') {
+            return (
+              <button
+                key={service.id}
+                type="button"
+                onClick={() => {
+                  try {
+                    confetti({
+                      particleCount: 120,
+                      spread: 90,
+                      origin: { y: 0.5 },
+                      colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
+                    });
+                  } catch (e) {}
+                }}
+                className={classNameStr + ' text-left'}
+              >
+                {content}
+              </button>
+            );
+          }
           return (
             <Link href={service.soon ? '#' : service.href} key={service.id} className={classNameStr}>
               {content}
             </Link>
           );
         })}
-      </div>
-
-      {/* Botón de Prueba de Animación de Celebración 🎉 */}
-      <div className="mt-6">
-        <button
-          type="button"
-          onClick={() => {
-            try {
-              confetti({
-                particleCount: 120,
-                spread: 90,
-                origin: { y: 0.5 },
-                colors: ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6']
-              });
-            } catch (e) {}
-          }}
-          className={`w-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${
-            isTechTheme
-              ? 'border border-accent/60 bg-accent/10 text-accent font-mono uppercase tracking-wider hover:bg-accent/20'
-              : 'bg-gradient-to-r from-purple-600 via-pink-500 to-amber-400 text-white rounded-2xl shadow-lg hover:shadow-purple-500/25'
-          }`}
-        >
-          <Sparkles className="w-5 h-5 animate-pulse" />
-          <span>🧪 Probar Animación de Celebración (Confeti) 🎉</span>
-        </button>
       </div>
       </main>
       <BottomNav />
