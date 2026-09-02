@@ -14,6 +14,7 @@ import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedV
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 interface VoiceAssistantModalProps {
   onClose: () => void;
@@ -260,6 +261,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           });
         } catch (e) {}
         setShowSuccessAnim(true);
+      } else if (parsedResults.length === 1 && (!('kind' in parsedResults[0]) || parsedResults[0].kind === 'transaction')) {
+        // Disparar la animación Power Card 3D holográfica + trayectoria de partículas estándar
+        const tx = parsedResults[0] as ParsedVoiceResult;
+        if (tx.amount && tx.amount > 0) {
+          const animType = tx.type === 'ingreso' ? 'ingreso' : 'gasto';
+          triggerPowerAnimation(tx.amount, animType);
+        }
       }
 
       let spokenMsg = 'Transacciones guardadas con éxito';
