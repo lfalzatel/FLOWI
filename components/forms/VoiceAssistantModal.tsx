@@ -193,13 +193,38 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
 
         if (pendingAction === 'create_reminder') {
-          let dueDate = '';
+          let dueDate = new Date().toISOString().split('T')[0];
           if (/\bmañana\b/i.test(text)) {
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             dueDate = tomorrow.toISOString().split('T')[0];
-          } else if (/\bhoy\b/i.test(text)) {
-            dueDate = new Date().toISOString().split('T')[0];
+          }
+
+          // Detección de Frecuencia por Voz
+          let frequency: 'once' | 'daily' | 'weekly' | 'monthly' = 'once';
+          if (/\b(diario|diaria|cada d[íi]a|todos los d[íi]as)\b/i.test(text)) {
+            frequency = 'daily';
+          } else if (/\b(semanal|cada semana|todas las semanas)\b/i.test(text)) {
+            frequency = 'weekly';
+          } else if (/\b(mensual|cada mes|todos los meses)\b/i.test(text)) {
+            frequency = 'monthly';
+          }
+
+          // Detección de Hora por Voz
+          let time = '08:00';
+          const timeMatch = text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm|de la mañana|de la tarde|de la noche)?\b/i);
+          if (timeMatch) {
+            let hour = parseInt(timeMatch[1], 10);
+            const min = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+            const period = timeMatch[3]?.toLowerCase();
+            if (period && (period.includes('pm') || period.includes('tarde') || period.includes('noche')) && hour < 12) {
+              hour += 12;
+            } else if (period && (period.includes('am') || period.includes('mañana')) && hour === 12) {
+              hour = 0;
+            }
+            if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59) {
+              time = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+            }
           }
 
           const reminderCmd: ParsedVoiceCommand = {
@@ -209,7 +234,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             title: 'Nuevo Recordatorio 🔔',
             content: text.charAt(0).toUpperCase() + text.slice(1),
             dueDate,
-            time: '20:00',
+            time,
+            frequency,
             label: 'Guardar Recordatorio',
             rawText: text
           };
@@ -555,29 +581,108 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   {/* Renderizado de Comandos por Voz (Navegación / Nota / Recordatorio) */}
                   {isCommand && cmd ? (
                     <div>
-                      <div className="flex items-center gap-1.5 mb-1 text-[9px] font-bold uppercase tracking-wider text-amber-400">
-                        {cmd.action === 'navigate' ? <Compass className="w-3 h-3 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-3 h-3 text-purple-400 animate-pulse" /> : <Bell className="w-3 h-3 text-amber-400 animate-pulse" />}
-                        <span>
-                          {cmd.action === 'ask_followup' 
-                            ? (cmd.prompt?.includes('anotar') ? '📝 NUEVA NOTA (ESCUCHANDO DETALLES)' : '🔔 NUEVO RECORDATORIO (ESCUCHANDO DETALLES)')
-                            : cmd.action === 'create_reminder' ? '🔔 RECORDATORIO DETECTADO'
-                            : cmd.action === 'create_note' ? '📝 NOTA IMPORTANTE DETECTADA'
-                            : 'COMANDO DE VOZ IA'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                          {cmd.action === 'navigate' ? <Compass className="w-5 h-5 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-5 h-5 text-purple-400" /> : <Bell className="w-5 h-5 text-amber-400" />}
+                      {cmd.action === 'create_reminder' ? (
+                        <div className="space-y-2.5 mt-1">
+                          <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-amber-400">
+                            <Bell className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                            <span>RECORDATORIO DETECTADO</span>
+                          </div>
+
+                          {/* Frecuencia Selectors */}
+                          <div>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-1">Frecuencia</label>
+                            <div className="grid grid-cols-4 gap-1">
+                              {[
+                                { key: 'once', label: 'Una vez' },
+                                { key: 'daily', label: 'Diario' },
+                                { key: 'weekly', label: 'Semanal' },
+                                { key: 'monthly', label: 'Mensual' },
+                              ].map((f) => (
+                                <button
+                                  key={f.key}
+                                  type="button"
+                                  onClick={() => handleUpdateItem(idx, 'frequency', f.key)}
+                                  className={`py-1 px-1 rounded-lg text-[9px] font-bold transition-all ${
+                                    (cmd.frequency || 'once') === f.key
+                                      ? 'bg-amber-500/25 border border-amber-500 text-amber-400'
+                                      : 'bg-white/5 border border-white/10 text-text-muted hover:bg-white/10'
+                                  }`}
+                                >
+                                  {f.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Hora y Fecha */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Hora</label>
+                              <input
+                                type="time"
+                                value={cmd.time || '08:00'}
+                                onFocus={() => stopListening()}
+                                onChange={(e) => handleUpdateItem(idx, 'time', e.target.value)}
+                                className={`w-full px-2 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-400 ${
+                                  isTechTheme ? 'bg-black/60 border border-amber-500/40 text-amber-400 font-mono' : 'bg-black/40 border border-white/20 text-white'
+                                }`}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Fecha</label>
+                              <input
+                                type="date"
+                                value={cmd.dueDate || ''}
+                                onFocus={() => stopListening()}
+                                onChange={(e) => handleUpdateItem(idx, 'dueDate', e.target.value)}
+                                className={`w-full px-2 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:border-amber-400 ${
+                                  isTechTheme ? 'bg-black/60 border border-amber-500/40 text-amber-400 font-mono' : 'bg-black/40 border border-white/20 text-white'
+                                }`}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Detalle */}
+                          <div>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Título / Recordar</label>
+                            <input
+                              type="text"
+                              value={cmd.content || ''}
+                              onFocus={() => stopListening()}
+                              onChange={(e) => handleUpdateItem(idx, 'content', e.target.value)}
+                              placeholder="Escribe el detalle..."
+                              className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none focus:border-amber-400 ${
+                                isTechTheme ? 'bg-black/60 border border-amber-500/40 text-amber-400 font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
+                              }`}
+                            />
+                          </div>
                         </div>
-                        <div className="flex-1 truncate">
-                          <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                            {cmd.title}
-                          </p>
-                          <p className="text-[11px] text-amber-300 font-medium truncate">
-                            {cmd.action === 'ask_followup' ? cmd.prompt : (cmd.content || cmd.rawText)}
-                          </p>
+                      ) : (
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1 text-[9px] font-bold uppercase tracking-wider text-amber-400">
+                            {cmd.action === 'navigate' ? <Compass className="w-3 h-3 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-3 h-3 text-purple-400 animate-pulse" /> : <Bell className="w-3 h-3 text-amber-400 animate-pulse" />}
+                            <span>
+                              {cmd.action === 'ask_followup' 
+                                ? (cmd.prompt?.includes('anotar') ? '📝 NUEVA NOTA (ESCUCHANDO DETALLES)' : '🔔 NUEVO RECORDATORIO (ESCUCHANDO DETALLES)')
+                                : cmd.action === 'create_note' ? '📝 NOTA IMPORTANTE DETECTADA'
+                                : 'COMANDO DE VOZ IA'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                              {cmd.action === 'navigate' ? <Compass className="w-5 h-5 text-blue-400" /> : cmd.action === 'create_note' ? <StickyNote className="w-5 h-5 text-purple-400" /> : <Bell className="w-5 h-5 text-amber-400" />}
+                            </div>
+                            <div className="flex-1 truncate">
+                              <p className={`text-xs font-bold truncate ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
+                                {cmd.title}
+                              </p>
+                              <p className="text-[11px] text-amber-300 font-medium truncate">
+                                {cmd.action === 'ask_followup' ? cmd.prompt : (cmd.content || cmd.rawText)}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   ) : res ? (
                     /* Renderizado de Transacciones Estándar */

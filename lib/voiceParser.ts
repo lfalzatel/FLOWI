@@ -282,7 +282,7 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
       kind: 'command',
       action: 'ask_followup',
       title: '🔔 Nuevo Recordatorio',
-      prompt: '¿Qué deseas recordar y en qué fecha?',
+      prompt: '¿Qué deseas recordar, a qué hora y con qué frecuencia?',
       label: 'Responder',
       rawText: text
     };
