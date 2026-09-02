@@ -11,15 +11,15 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'cyberpunk',
+  theme: 'glassmorphism',
   setTheme: () => null,
-  allowedThemes: ['light', 'cyberpunk', 'kiloCode'],
+  allowedThemes: ['glassmorphism', 'light', 'dark', 'cyberpunk', 'kiloCode'],
   setAllowedThemes: () => null,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('cyberpunk');
-  const [allowedThemes, setAllowedThemesState] = useState<Theme[]>(['light', 'cyberpunk', 'kiloCode']);
+  const [theme, setThemeState] = useState<Theme>('glassmorphism');
+  const [allowedThemes, setAllowedThemesState] = useState<Theme[]>(['glassmorphism', 'light', 'dark', 'cyberpunk', 'kiloCode']);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('flowi-theme') as Theme;
@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setThemeState(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
     } else {
-      document.documentElement.setAttribute('data-theme', 'cyberpunk');
+      document.documentElement.setAttribute('data-theme', 'glassmorphism');
     }
 
     const savedAllowed = localStorage.getItem('flowi-allowed-themes');
