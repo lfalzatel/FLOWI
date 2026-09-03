@@ -356,7 +356,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                     <button
                       key={type}
                       onClick={() => setFilterType(type)}
-                      className={`px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-semibold transition-all ${
+                      className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold transition-all ${
                         filterType === type
                           ? isTechTheme
                             ? 'bg-accent text-black font-mono'
@@ -364,7 +364,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                           : 'text-text-muted hover:text-text-primary'
                       }`}
                     >
-                      {type === 'all' ? 'Todas' : type === 'custom' ? 'PERS.' : 'DEF.'}
+                      {type === 'all' ? 'Todas' : type === 'custom' ? 'Personalizadas' : 'Por Defecto'}
                     </button>
                   ))}
                 </div>
