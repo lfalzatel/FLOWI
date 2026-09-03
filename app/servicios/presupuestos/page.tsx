@@ -73,10 +73,16 @@ export default function PresupuestosPage() {
     });
   }, [allTransactions, filterType, filterValue]);
 
-  // Cálculo del total gastado en el periodo filtrado
+  // Cálculo del total gastado e ingresos en el periodo filtrado
   const totalSpentFiltered = useMemo(() => {
     return filteredTransactions
       .filter(t => t.type === 'gasto')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
+  }, [filteredTransactions]);
+
+  const totalIncomeFiltered = useMemo(() => {
+    return filteredTransactions
+      .filter(t => t.type === 'ingreso')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
   }, [filteredTransactions]);
 
@@ -234,7 +240,18 @@ export default function PresupuestosPage() {
           </div>
 
           {/* Cifras Principales */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
+            {/* 1. Ingresos Totales (Al principio) */}
+            <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-emerald-500/30' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+              <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-emerald-400 font-mono' : 'text-emerald-500'}`}>
+                {filterType === 'all' ? 'Ingresos Totales' : filterType === 'month' ? 'Ingresos este mes' : filterType === 'week' ? 'Ingresos esta semana' : 'Ingresos este día'}
+              </span>
+              <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-emerald-400 font-mono' : 'text-emerald-400'}`}>
+                {formatCurrency(totalIncomeFiltered, currency)}
+              </p>
+            </div>
+
+            {/* 2. Gastado */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
               <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
                 {filterType === 'all' ? 'Gastado Histórico' : filterType === 'month' ? 'Gastado este mes' : filterType === 'week' ? 'Gastado esta semana' : 'Gastado este día'}
@@ -244,7 +261,7 @@ export default function PresupuestosPage() {
               </p>
             </div>
 
-            {/* Presupuesto Mensual con icono de lápiz para editar adentro */}
+            {/* 3. Presupuesto Mensual con icono de lápiz para editar adentro */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
               <div className="flex items-center justify-between">
                 <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>Presupuesto Mensual</span>
@@ -265,6 +282,7 @@ export default function PresupuestosPage() {
               </p>
             </div>
 
+            {/* 4. Restante Libre / Exceso */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
               <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
                 {globalRemaining < 0 ? 'Exceso' : 'Restante Libre'}
