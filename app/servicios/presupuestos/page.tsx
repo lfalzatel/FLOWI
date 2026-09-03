@@ -35,9 +35,10 @@ export default function PresupuestosPage() {
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // Estados de filtro de fecha (idéntico al Dashboard)
+  // Filtros de fecha y agrupación de gráfica
   const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('month');
   const [filterValue, setFilterValue] = useState(() => getLocalMonthString(new Date()));
+  const [chartGrouping, setChartGrouping] = useState<'categories' | 'subcategories'>('categories');
 
   // Cargar transacciones del usuario
   useEffect(() => {
@@ -85,12 +86,34 @@ export default function PresupuestosPage() {
   const isOverGlobalBudget = globalBudget > 0 && totalSpentFiltered > globalBudget;
   const globalRemaining = globalBudget - totalSpentFiltered;
 
-  // Datos para la Gráfica Circular de Distribución del Gasto
+  // Clasificación de subcategoría a Categoría Principal
+  const getMainCategoryName = (label: string): string => {
+    const text = label.toLowerCase();
+    if (/comida|restaurante|almuerzo|cena|desayuno|mercado|supermercado|cafe|café|panaderia|panadería|antojo|snack|licor|bar|cerveza|trago|bebida|cigarro|popsy|frisby|helado|verdura|fruta|vegetal|carne|carniceria|carnicería|pan/.test(text)) {
+      return 'Comida y Ocio';
+    }
+    if (/banco|tarjeta|credito|crédito|ahorro|inversion|inversión|prestamo|préstamo|nequi|bancolombia|bbva|daviplata|davivienda|plata|efectivo|nomina|nómina|sueldo/.test(text)) {
+      return 'Bancos y Finanzas';
+    }
+    if (/claro|movistar|tigo|wom|epm|efigas|alcanos|agua|luz|energia|energía|gas|internet|television|televisión|telefono|teléfono|hogar|arriendo|alquiler|administracion|administración|apartamento|apto|aseo|limpieza/.test(text)) {
+      return 'Hogar y Servicios';
+    }
+    if (/netflix|spotify|google|youtube|yt music|drive|gmail|photos|play store|playstore|app|susbcripcion|suscripción/.test(text)) {
+      return 'Marcas y Apps';
+    }
+    if (/deporte|gym|gimnasio|fitness|piscina|natacion|natación|futbol|fútbol|ciclo|ciclismo|bici|bicicleta|run|running|atletismo|nike|adidas|decathlon/.test(text)) {
+      return 'Deportes';
+    }
+    return 'Otros';
+  };
+
+  // Datos para la Gráfica Circular de Distribución del Gasto (Categorías vs Subcategorías)
   const pieChartData = useMemo(() => {
     const categoryTotals: Record<string, number> = {};
     filteredTransactions.forEach(t => {
       if (t.type === 'gasto' && t.category) {
-        categoryTotals[t.category] = (categoryTotals[t.category] || 0) + (t.amount || 0);
+        const key = chartGrouping === 'categories' ? getMainCategoryName(t.category) : t.category;
+        categoryTotals[key] = (categoryTotals[key] || 0) + (t.amount || 0);
       }
     });
 
@@ -111,7 +134,7 @@ export default function PresupuestosPage() {
         color: colors[idx % colors.length]
       }))
       .sort((a, b) => b.value - a.value);
-  }, [filteredTransactions]);
+  }, [filteredTransactions, chartGrouping]);
 
   // Cálculo de días restantes en el mes para el presupuesto diario sugerido
   const daysInMonth = useMemo(() => {
@@ -159,7 +182,7 @@ export default function PresupuestosPage() {
             </div>
           </div>
 
-          {/* Botón de Exportar (Reemplazando al botón superior de editar) */}
+          {/* Botón de Exportar */}
           <button
             onClick={() => setShowExportModal(true)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-all shrink-0 ${
@@ -190,25 +213,11 @@ export default function PresupuestosPage() {
                 <Target className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h2 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
-                    Presupuesto Global
-                  </h2>
-                  {/* Botón sutil de lápiz para Editar Presupuesto */}
-                  <button
-                    onClick={() => setIsBudgetModalOpen(true)}
-                    title="Editar Presupuesto Mensual"
-                    className={`p-1.5 rounded-lg transition-all ${
-                      isTechTheme 
-                        ? 'text-accent hover:bg-accent/20 border border-accent/40' 
-                        : 'text-text-muted hover:text-accent hover:bg-white/10'
-                    }`}
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                </div>
+                <h2 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
+                  Presupuesto Global del Mes
+                </h2>
                 <p className={`text-xs ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                  Límite total proyectado para tus gastos
+                  Límite total proyectado para todos tus gastos
                 </p>
               </div>
             </div>
@@ -235,8 +244,22 @@ export default function PresupuestosPage() {
               </p>
             </div>
 
+            {/* Presupuesto Mensual con icono de lápiz para editar adentro */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
-              <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>Presupuesto Mensual</span>
+              <div className="flex items-center justify-between">
+                <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>Presupuesto Mensual</span>
+                <button
+                  onClick={() => setIsBudgetModalOpen(true)}
+                  title="Editar Presupuesto Mensual"
+                  className={`p-1 rounded-lg transition-all ${
+                    isTechTheme 
+                      ? 'text-accent hover:bg-accent/20 border border-accent/40' 
+                      : 'text-text-muted hover:text-accent hover:bg-white/10'
+                  }`}
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+              </div>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
                 {globalBudget > 0 ? formatCurrency(globalBudget, currency) : 'Sin asignar'}
               </p>
@@ -285,21 +308,42 @@ export default function PresupuestosPage() {
           )}
         </div>
 
-        {/* 1.8 GRÁFICA CIRCULAR DE DISTRIBUCIÓN DEL GASTO */}
+        {/* 1.8 GRÁFICA CIRCULAR DE DISTRIBUCIÓN DEL GASTO (CON FILTRO DE CATEGORÍA Y SUBCATEGORÍA) */}
         {pieChartData.length > 0 && (
           <div className={`p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/40 bg-black/80' : 'rounded-3xl'}`}>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
               <div className="flex items-center gap-2">
                 <PieChart className="w-5 h-5 text-purple-400" />
                 <h3 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
-                  Distribución del Gasto por Categoría
+                  Distribución del Gasto
                 </h3>
               </div>
-              <span className={`text-[11px] px-2.5 py-0.5 rounded-full ${
-                isTechTheme ? 'bg-purple-500/20 text-purple-400 font-mono border border-purple-500/40' : 'bg-purple-500/10 text-purple-400'
-              }`}>
-                {filterType === 'all' ? 'Histórico' : filterType === 'month' ? 'Del Mes' : filterType === 'week' ? 'De la Semana' : 'Del Día'}
-              </span>
+              
+              {/* Filtro Categorías vs Subcategorías */}
+              <div className="flex items-center gap-1.5 p-0.5 rounded-xl border border-white/10 bg-white/5 text-[10px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => setChartGrouping('categories')}
+                  className={`px-2.5 py-1 rounded-lg transition-all ${
+                    chartGrouping === 'categories'
+                      ? isTechTheme ? 'bg-accent text-black font-mono' : 'bg-accent/20 text-accent'
+                      : 'text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  Categorías
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setChartGrouping('subcategories')}
+                  className={`px-2.5 py-1 rounded-lg transition-all ${
+                    chartGrouping === 'subcategories'
+                      ? isTechTheme ? 'bg-accent text-black font-mono' : 'bg-accent/20 text-accent'
+                      : 'text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  Subcategorías
+                </button>
+              </div>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-6">
@@ -333,7 +377,7 @@ export default function PresupuestosPage() {
                 </ResponsiveContainer>
               </div>
 
-              {/* Leyenda de Categorías */}
+              {/* Leyenda de Categorías / Subcategorías */}
               <div className="w-full md:w-1/2 space-y-2 max-h-56 overflow-y-auto scrollbar-thin">
                 {pieChartData.map(item => (
                   <div key={item.name} className="flex items-center justify-between text-xs p-2 rounded-xl bg-white/5 border border-white/5">
@@ -471,8 +515,8 @@ export default function PresupuestosPage() {
           </div>
         </div>
 
-        {/* 3. PRESUPUESTOS POR CATEGORÍA COMPONENTE REUTILIZABLE CON SEMÁFORO */}
-        <CategoryBudgets transactions={filteredTransactions} currency={currency} />
+        {/* 3. PRESUPUESTOS POR CATEGORÍA COMPONENTE REUTILIZABLE CON SEMÁFORO Y ESCALA SEGÚN FILTRO */}
+        <CategoryBudgets transactions={filteredTransactions} currency={currency} filterType={filterType} />
 
         {/* 4. ALERTAS E INSIGHTS INTELIGENTES DE AHORRO */}
         <div className={`p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/40 bg-black/80' : 'rounded-3xl'}`}>

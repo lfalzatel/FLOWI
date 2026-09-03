@@ -10,9 +10,10 @@ import { Target, Plus, Edit3, Check, AlertTriangle, Sparkles } from 'lucide-reac
 interface CategoryBudgetsProps {
   transactions: Transaction[];
   currency?: string;
+  filterType?: string;
 }
 
-export function CategoryBudgets({ transactions, currency = 'COP' }: CategoryBudgetsProps) {
+export function CategoryBudgets({ transactions, currency = 'COP', filterType = 'month' }: CategoryBudgetsProps) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
@@ -81,7 +82,7 @@ export function CategoryBudgets({ transactions, currency = 'COP' }: CategoryBudg
         <span className={`text-[11px] px-2.5 py-0.5 rounded-full ${
           isTechTheme ? 'bg-accent/20 text-accent font-mono border border-accent/40' : 'bg-white/10 text-text-muted'
         }`}>
-          Metas del Mes
+          {filterType === 'all' ? 'Histórico' : filterType === 'month' ? 'Metas del Mes' : filterType === 'week' ? 'Meta Semanal' : 'Meta Diaria'}
         </span>
       </div>
 
@@ -95,7 +96,14 @@ export function CategoryBudgets({ transactions, currency = 'COP' }: CategoryBudg
         <div className="space-y-4">
           {allCategoryNames.map(catName => {
             const spent = categoryExpenses[catName] || 0;
-            const target = budgets[catName] || 0;
+            const rawTarget = budgets[catName] || 0;
+            let target = rawTarget;
+            if (filterType === 'day' && rawTarget > 0) {
+              target = Math.round(rawTarget / 30);
+            } else if (filterType === 'week' && rawTarget > 0) {
+              target = Math.round(rawTarget / 4.33);
+            }
+
             const percentage = target > 0 ? Math.min(Math.round((spent / target) * 100), 100) : 0;
             const isOverBudget = target > 0 && spent > target;
 
