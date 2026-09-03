@@ -54,11 +54,11 @@ const SERVICES = [
     id: 'presupuestos',
     title: 'Presupuestos',
     icon: PieChart,
-    href: '#',
+    href: '/servicios/presupuestos',
     color: 'text-purple-500',
     bgColor: 'bg-purple-500/10',
-    isNew: false,
-    soon: true
+    isNew: true,
+    soon: false
   },
   {
     id: 'compartidos',
