@@ -41,16 +41,6 @@ const SERVICES = [
     isNew: true
   },
   {
-    id: 'metas',
-    title: 'Metas de ahorro',
-    icon: Target,
-    href: '#',
-    color: 'text-emerald-500',
-    bgColor: 'bg-emerald-500/10',
-    isNew: false,
-    soon: true
-  },
-  {
     id: 'presupuestos',
     title: 'Presupuestos',
     icon: PieChart,
@@ -59,6 +49,16 @@ const SERVICES = [
     bgColor: 'bg-purple-500/10',
     isNew: true,
     soon: false
+  },
+  {
+    id: 'metas',
+    title: 'Metas de ahorro',
+    icon: Target,
+    href: '#',
+    color: 'text-emerald-500',
+    bgColor: 'bg-emerald-500/10',
+    isNew: false,
+    soon: true
   },
   {
     id: 'compartidos',

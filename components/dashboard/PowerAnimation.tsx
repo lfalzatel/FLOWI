@@ -9,6 +9,7 @@ import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, CheckCircle2, Tr
 import confetti from 'canvas-confetti';
 import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
 import { speakText } from '@/lib/voiceParser';
+import { stopAllAudioPreviews } from '@/lib/audioPlayer';
 
 interface PowerAnimationEvent {
   amount: number;
@@ -43,6 +44,8 @@ function getAudioContext(): AudioContext | null {
 
 // Detiene de forma inmediata cualquier audio o tono sintetizado anterior
 export function stopCurrentSound() {
+  stopAllAudioPreviews();
+
   if (activeAudioFile) {
     try {
       activeAudioFile.pause();

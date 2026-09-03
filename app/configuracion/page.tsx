@@ -162,10 +162,11 @@ export default function ConfigPage() {
     setNotificationSound(sound);
     localStorage.setItem('notification_sound', sound);
     
-    // Play a preview of the sound
+    // Play a preview of the sound with instant cancellation of previous sounds
     if (notificationsEnabled) {
-      const audio = new Audio(`/assets/sounds/${sound}`);
-      audio.play().catch(e => console.error('Failed to play preview:', e));
+      import('@/lib/audioPlayer').then(({ playSoundPreview }) => {
+        playSoundPreview(sound);
+      });
     }
   };
 
