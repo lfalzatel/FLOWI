@@ -5,20 +5,36 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Flowi — Tu dinero, en flujo',
-    template: '%s · Flowi',
+    default: 'FLOWI — Tu dinero, en flujo',
+    template: '%s · FLOWI',
   },
-  description: 'Administra tus gastos personales con estilo. PWA con Firebase.',
+  description: 'Organiza tus gastos dictando por voz 🎙️, controla tu presupuesto con la regla 50/30/20 🎯 y mira tus finanzas en tiempo real 📊.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Flowi',
+    title: 'FLOWI',
   },
   formatDetection: { telephone: false },
   icons: {
     icon:  [{ url: '/icons/icon-192.png' }],
     apple: [{ url: '/icons/icon-192.png' }],
+  },
+  openGraph: {
+    title: 'FLOWI — Gastos Personales',
+    description: 'Registra tus gastos por voz 🎙️, controla tu presupuesto 50/30/20 🎯 y mira tus finanzas en tiempo real 📊.',
+    url: 'https://flowi-gastos.web.app/',
+    siteName: 'FLOWI',
+    images: [
+      {
+        url: 'https://flowi-gastos.web.app/icons/icon-512.png',
+        width: 512,
+        height: 512,
+        alt: 'FLOWI App Icon',
+      },
+    ],
+    locale: 'es_CO',
+    type: 'website',
   },
 };
 
