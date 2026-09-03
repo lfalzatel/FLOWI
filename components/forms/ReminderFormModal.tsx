@@ -117,16 +117,18 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
       if (type === 'budget_alert') data.budgetPercent = budgetPercent;
 
       if (reminder?.id) {
-        await updateReminder(reminder.id, data);
+        triggerPowerAnimation(0, 'edicion', 'RECORDATORIO ACTUALIZADO', '¡ACTUALIZADO!');
         speakText('Recordatorio actualizado con éxito', 'es-CO');
+        onClose();
+        await updateReminder(reminder.id, data);
       } else {
-        await addReminder(data);
         triggerPowerAnimation(0, 'edicion', 'RECORDATORIO AGENDADO', '¡AGENDADO!');
         triggerConfettiWithSynth(3.0);
         speakText('Recordatorio agendado con éxito', 'es-CO');
+        onClose();
+        await addReminder(data);
       }
       onSuccess();
-      onClose();
     } catch (error) {
       console.error('Error saving reminder:', error);
     } finally {

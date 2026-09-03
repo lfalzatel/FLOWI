@@ -69,18 +69,21 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
     setLoading(true);
     try {
       if (note?.id) {
-        await updateNote(note.id, { title, content, color });
+        triggerPowerAnimation(0, 'edicion', 'NOTA ACTUALIZADA', '¡ACTUALIZADA!');
         speakText('Nota actualizada con éxito', 'es-CO');
+        onClose();
+        await updateNote(note.id, { title, content, color });
       } else {
+        triggerPowerAnimation(0, 'edicion', 'NOTA GUARDADA', '¡GUARDADA!');
+        triggerConfettiWithSynth(3.0);
+        speakText('Nota guardada con éxito', 'es-CO');
+        onClose();
         await addNote({
           userId: user.uid,
           title,
           content,
           color,
         });
-        triggerPowerAnimation(0, 'edicion', 'NOTA GUARDADA', '¡GUARDADA!');
-        triggerConfettiWithSynth(3.0);
-        speakText('Nota guardada con éxito', 'es-CO');
       }
       onSuccess();
     } catch (err) {
