@@ -17,6 +17,7 @@ import { DateFilter } from '@/components/dashboard/DateFilter';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
+import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
@@ -209,6 +210,13 @@ export default function PresupuestosPage() {
           onChangeType={setFilterType} 
           onChangeValue={setFilterValue}
           transactions={allTransactions}
+        />
+
+        {/* TARJETA DE PROYECCIÓN DE PRESUPUESTO MENSUAL (Idéntica a la página de Inicio) */}
+        <BudgetProjection 
+          filterType={filterType} 
+          filterValue={filterValue} 
+          transactions={allTransactions} 
         />
 
         {/* 1. TARJETA DE SALUD FINANCIERA GLOBAL */}
