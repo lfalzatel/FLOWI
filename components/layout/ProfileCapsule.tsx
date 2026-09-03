@@ -147,15 +147,18 @@ export function ProfileCapsule() {
   const email = profile?.email || user.email || '';
 
   const handleShare = () => {
+    const shareMessage = '¡Organizar tus finanzas nunca fue tan fácil! 🚀 Con FLOWI puedes registrar tus gastos dictando por voz 🎙️, controlar tu presupuesto con la regla 50/30/20 🎯 y ver estadísticas en tiempo real 📊 sin enredos. ¡Pruébala gratis aquí!';
+    const shareUrl = 'https://flowi-gastos.web.app/';
+
     if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
-        title: 'FLOWI',
-        text: '¡Gestiona tus gastos e ingresos con FLOWI!',
-        url: 'https://flowi-gastos.web.app/',
-      });
+        title: 'FLOWI - Gastos Personales',
+        text: shareMessage,
+        url: shareUrl,
+      }).catch(() => {});
     } else if (typeof navigator !== 'undefined') {
-      navigator.clipboard.writeText('https://flowi-gastos.web.app/');
-      alert('¡Enlace copiado al portapapeles!');
+      navigator.clipboard.writeText(`${shareMessage}\n${shareUrl}`);
+      alert('¡Mensaje y enlace de FLOWI copiados al portapapeles!');
     }
   };
 
