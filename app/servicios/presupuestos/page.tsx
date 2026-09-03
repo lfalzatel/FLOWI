@@ -5,16 +5,24 @@ import { useRouter } from 'next/navigation';
 import { 
   ArrowLeft, Target, Wallet, AlertTriangle, TrendingUp, Sparkles, 
   Plus, Edit3, Check, PieChart, ShieldAlert, CheckCircle2, ChevronRight,
-  BookOpen, ShieldCheck
+  Download, BookOpen, ShieldCheck
 } from 'lucide-react';
+import { 
+  PieChart as RechartsPieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer 
+} from 'recharts';
+
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { DateFilter } from '@/components/dashboard/DateFilter';
+import { ExportReportModal } from '@/components/forms/ExportReportModal';
+import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
+import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { getUserTransactions, Transaction } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
-import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
-import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
+import { getLocalDateString, getLocalMonthString, getISOWeekString } from '@/lib/dateUtils';
 
 export default function PresupuestosPage() {
   const router = useRouter();
@@ -25,6 +33,11 @@ export default function PresupuestosPage() {
   const [loading, setLoading] = useState(true);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  // Estados de filtro de fecha (idéntico al Dashboard)
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('month');
+  const [filterValue, setFilterValue] = useState(() => getLocalMonthString(new Date()));
 
   // Cargar transacciones del usuario
   useEffect(() => {
@@ -43,30 +56,62 @@ export default function PresupuestosPage() {
     fetchTxs();
   }, [profile, user]);
 
-  // Transacciones del mes actual
-  const currentMonthTransactions = useMemo(() => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
+  // Filtrado de transacciones según el período seleccionado
+  const filteredTransactions = useMemo(() => {
     return allTransactions.filter(t => {
-      const date = t.date ? (typeof (t.date as any).toDate === 'function' ? (t.date as any).toDate() : new Date(t.date as any)) : new Date();
-      return date.getFullYear() === currentYear && date.getMonth() === currentMonth;
+      if (filterType === 'all') return true;
+      const d = t.date ? (typeof (t.date as any).toDate === 'function' ? (t.date as any).toDate() : new Date(t.date as any)) : new Date();
+      const dateStr = getLocalDateString(d);
+      if (filterType === 'month') {
+        return dateStr.startsWith(filterValue);
+      } else if (filterType === 'week') {
+        return getISOWeekString(d) === filterValue;
+      } else {
+        return dateStr === filterValue;
+      }
     });
-  }, [allTransactions]);
+  }, [allTransactions, filterType, filterValue]);
 
-  // Cálculo de totales del mes
-  const totalSpentThisMonth = useMemo(() => {
-    return currentMonthTransactions
+  // Cálculo del total gastado en el periodo filtrado
+  const totalSpentFiltered = useMemo(() => {
+    return filteredTransactions
       .filter(t => t.type === 'gasto')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
-  }, [currentMonthTransactions]);
+  }, [filteredTransactions]);
 
   const globalBudget = profile?.budget || 0;
   const currency = profile?.currency || 'COP';
-  const percentageSpent = globalBudget > 0 ? Math.min(Math.round((totalSpentThisMonth / globalBudget) * 100), 100) : 0;
-  const isOverGlobalBudget = globalBudget > 0 && totalSpentThisMonth > globalBudget;
-  const globalRemaining = globalBudget - totalSpentThisMonth;
+  const percentageSpent = globalBudget > 0 ? Math.min(Math.round((totalSpentFiltered / globalBudget) * 100), 100) : 0;
+  const isOverGlobalBudget = globalBudget > 0 && totalSpentFiltered > globalBudget;
+  const globalRemaining = globalBudget - totalSpentFiltered;
+
+  // Datos para la Gráfica Circular de Distribución del Gasto
+  const pieChartData = useMemo(() => {
+    const categoryTotals: Record<string, number> = {};
+    filteredTransactions.forEach(t => {
+      if (t.type === 'gasto' && t.category) {
+        categoryTotals[t.category] = (categoryTotals[t.category] || 0) + (t.amount || 0);
+      }
+    });
+
+    const total = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
+    if (total === 0) return [];
+
+    const colors = [
+      '#F5A623', '#3B82F6', '#10B981', '#EC4899', 
+      '#8B5CF6', '#F59E0B', '#06B6D4', '#EF4444',
+      '#14B8A6', '#6366F1', '#D97706', '#E11D48'
+    ];
+
+    return Object.entries(categoryTotals)
+      .map(([name, value], idx) => ({
+        name,
+        value,
+        percentage: Math.round((value / total) * 100),
+        color: colors[idx % colors.length]
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredTransactions]);
 
   // Cálculo de días restantes en el mes para el presupuesto diario sugerido
   const daysInMonth = useMemo(() => {
@@ -89,43 +134,53 @@ export default function PresupuestosPage() {
       <Header />
 
       <main className={`flex-1 max-w-3xl mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-32 ${isTechTheme ? 'font-mono' : ''}`}>
-        {/* Encabezado */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        {/* Encabezado Responsivo */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
             <button 
               onClick={() => router.back()} 
-              className={`p-2 -ml-2 rounded-xl transition-colors ${
+              className={`p-2 -ml-1 rounded-xl transition-colors shrink-0 ${
                 isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-secondary hover:bg-glass'
               }`}
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            <div>
-              <span className={`text-xs font-medium uppercase tracking-wider ${
+            <div className="min-w-0">
+              <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wider block ${
                 isTechTheme ? 'text-accent/70' : 'text-text-muted'
               }`}>
                 Servicios Financieros
               </span>
-              <h1 className={`${
-                isTechTheme ? 'font-bold text-2xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-2xl text-text-primary'
+              <h1 className={`truncate ${
+                isTechTheme ? 'font-bold text-base sm:text-lg text-accent uppercase tracking-wider' : 'font-syne font-bold text-base sm:text-xl text-text-primary'
               }`}>
                 Centro de Presupuestos
               </h1>
             </div>
           </div>
 
+          {/* Botón de Exportar (Reemplazando al botón superior de editar) */}
           <button
-            onClick={() => setIsBudgetModalOpen(true)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold transition-all shadow-md ${
+            onClick={() => setShowExportModal(true)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold transition-all shrink-0 ${
               isTechTheme
-                ? 'bg-accent text-black hover:bg-accent/80 uppercase'
-                : 'bg-accent text-white rounded-xl hover:bg-accent/90 shadow-accent/20'
+                ? 'bg-accent/10 border border-accent text-accent hover:bg-accent/20 font-mono uppercase'
+                : 'glass-button text-accent rounded-xl hover:bg-accent/10'
             }`}
           >
-            <Wallet className="w-4 h-4" />
-            <span>{globalBudget > 0 ? 'Editar Presupuesto' : 'Fichar Presupuesto'}</span>
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Exportar Reporte</span>
           </button>
         </div>
+
+        {/* BARRA DE FILTROS TEMPORALES (Todas / Mes / Semana / Día + Selector de Día por Calendario) */}
+        <DateFilter 
+          filterType={filterType} 
+          filterValue={filterValue} 
+          onChangeType={setFilterType} 
+          onChangeValue={setFilterValue}
+          transactions={allTransactions}
+        />
 
         {/* 1. TARJETA DE SALUD FINANCIERA GLOBAL */}
         <div className={`p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/40 bg-black/80' : 'rounded-3xl'}`}>
@@ -135,11 +190,25 @@ export default function PresupuestosPage() {
                 <Target className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <h2 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
-                  Presupuesto Global del Mes
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
+                    Presupuesto Global
+                  </h2>
+                  {/* Botón sutil de lápiz para Editar Presupuesto */}
+                  <button
+                    onClick={() => setIsBudgetModalOpen(true)}
+                    title="Editar Presupuesto Mensual"
+                    className={`p-1.5 rounded-lg transition-all ${
+                      isTechTheme 
+                        ? 'text-accent hover:bg-accent/20 border border-accent/40' 
+                        : 'text-text-muted hover:text-accent hover:bg-white/10'
+                    }`}
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                </div>
                 <p className={`text-xs ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                  Límite total proyectado para todos tus gastos
+                  Límite total proyectado para tus gastos
                 </p>
               </div>
             </div>
@@ -158,9 +227,11 @@ export default function PresupuestosPage() {
           {/* Cifras Principales */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
-              <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>Gastado este mes</span>
+              <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
+                {filterType === 'all' ? 'Gastado Histórico' : filterType === 'month' ? 'Gastado este mes' : filterType === 'week' ? 'Gastado esta semana' : 'Gastado este día'}
+              </span>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                {formatCurrency(totalSpentThisMonth, currency)}
+                {formatCurrency(totalSpentFiltered, currency)}
               </p>
             </div>
 
@@ -214,7 +285,76 @@ export default function PresupuestosPage() {
           )}
         </div>
 
-        {/* 1.5 TARJETA DE DISTRIBUCIÓN DEL SALARIO & REGLAS ECONÓMICAS */}
+        {/* 1.8 GRÁFICA CIRCULAR DE DISTRIBUCIÓN DEL GASTO */}
+        {pieChartData.length > 0 && (
+          <div className={`p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/40 bg-black/80' : 'rounded-3xl'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-purple-400" />
+                <h3 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
+                  Distribución del Gasto por Categoría
+                </h3>
+              </div>
+              <span className={`text-[11px] px-2.5 py-0.5 rounded-full ${
+                isTechTheme ? 'bg-purple-500/20 text-purple-400 font-mono border border-purple-500/40' : 'bg-purple-500/10 text-purple-400'
+              }`}>
+                {filterType === 'all' ? 'Histórico' : filterType === 'month' ? 'Del Mes' : filterType === 'week' ? 'De la Semana' : 'Del Día'}
+              </span>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="w-full md:w-1/2 h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={pieChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke={isTechTheme ? '#000' : 'rgba(255,255,255,0.1)'} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      formatter={(val: number) => formatCurrency(val, currency)}
+                      contentStyle={{
+                        backgroundColor: isTechTheme ? '#000' : '#1e1e24',
+                        borderColor: isTechTheme ? '#f5a623' : 'rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        color: '#fff'
+                      }}
+                    />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Leyenda de Categorías */}
+              <div className="w-full md:w-1/2 space-y-2 max-h-56 overflow-y-auto scrollbar-thin">
+                {pieChartData.map(item => (
+                  <div key={item.name} className="flex items-center justify-between text-xs p-2 rounded-xl bg-white/5 border border-white/5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                      <span className={`font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-text-muted">{item.percentage}%</span>
+                      <strong className={isTechTheme ? 'text-accent font-mono' : 'text-text-primary'}>
+                        {formatCurrency(item.value, currency)}
+                      </strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2. TARJETA DE DISTRIBUCIÓN DEL SALARIO & REGLAS ECONÓMICAS */}
         <div className={`p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/40 bg-black/80' : 'rounded-3xl'}`}>
           <div className="flex items-center gap-2.5 mb-3">
             <div className={`w-9 h-9 flex items-center justify-center ${isTechTheme ? 'border border-cyan-500/30 bg-cyan-500/10' : 'rounded-xl bg-cyan-500/20'}`}>
@@ -331,10 +471,10 @@ export default function PresupuestosPage() {
           </div>
         </div>
 
-        {/* 2. PRESUPUESTOS POR CATEGORÍA COMPONENTE REUTILIZABLE CON SEMÁFORO */}
-        <CategoryBudgets transactions={currentMonthTransactions} currency={currency} />
+        {/* 3. PRESUPUESTOS POR CATEGORÍA COMPONENTE REUTILIZABLE CON SEMÁFORO */}
+        <CategoryBudgets transactions={filteredTransactions} currency={currency} />
 
-        {/* 3. ALERTAS E INSIGHTS INTELIGENTES DE AHORRO */}
+        {/* 4. ALERTAS E INSIGHTS INTELIGENTES DE AHORRO */}
         <div className={`p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/40 bg-black/80' : 'rounded-3xl'}`}>
           <div className="flex items-center gap-2.5 mb-4">
             <Sparkles className="w-5 h-5 text-amber-400" />
@@ -370,7 +510,7 @@ export default function PresupuestosPage() {
                 <div>
                   <p className="text-xs font-bold text-emerald-400 uppercase">Salud Financiera Estable</p>
                   <p className="text-xs text-text-muted mt-0.5">
-                    Tus gastos se mantienen dentro del rango planificado para este mes. Sigue así para cumplir tus metas de ahorro.
+                    Tus gastos se mantienen dentro del rango planificado para este período. Sigue así para cumplir tus metas de ahorro.
                   </p>
                 </div>
               </div>
@@ -384,6 +524,17 @@ export default function PresupuestosPage() {
       {/* Modal de edición de presupuesto global */}
       {isBudgetModalOpen && (
         <ManageBudgetModal onClose={() => setIsBudgetModalOpen(false)} />
+      )}
+
+      {/* Modal de exportación de reportes */}
+      {showExportModal && (
+        <ExportReportModal
+          onClose={() => setShowExportModal(false)}
+          title="Reporte de Presupuestos y Gastos"
+          transactions={filteredTransactions}
+          filterType={filterType}
+          filterValue={filterValue}
+        />
       )}
     </div>
   );
