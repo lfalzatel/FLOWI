@@ -234,8 +234,8 @@ export default function DashboardPage() {
         {/* Chart */}
         <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} />
 
-        {/* Category Budgets */}
-        <CategoryBudgets transactions={filteredTransactions} currency={profile?.currency} />
+        {/* Category Budgets (2 Acordeones Inteligentes: Categorías Principales 50/30/20 y Subcategorías) */}
+        <CategoryBudgets transactions={filteredTransactions} currency={profile?.currency} filterType={filterType} />
 
         {/* Recent transactions */}
         <div>
