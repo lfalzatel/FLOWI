@@ -9,6 +9,7 @@ import { AlertCircle, CheckCircle2, Calculator, Calendar, X, Wallet, Info } from
 import { Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
+import { getLocalDateString } from '@/lib/dateUtils';
 
 interface Props {
   filterType: string;
@@ -43,9 +44,15 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   const currentMonthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const isCurrentMonth = filterValue === currentMonthValue;
 
-  // Filtrar gastos e ingresos del período
-  const gastosTx = transactions.filter(t => t.type === 'gasto');
-  const ingresosTx = transactions.filter(t => t.type === 'ingreso');
+  // Filtrar estrictamente las transacciones que pertenecen al mes seleccionado (filterValue, ej: '2026-09')
+  const monthTransactions = transactions.filter(t => {
+    const d = t.date ? (typeof (t.date as any).toDate === 'function' ? (t.date as any).toDate() : new Date(t.date as any)) : new Date();
+    const dateStr = getLocalDateString(d);
+    return dateStr.startsWith(filterValue);
+  });
+
+  const gastosTx = monthTransactions.filter(t => t.type === 'gasto');
+  const ingresosTx = monthTransactions.filter(t => t.type === 'ingreso');
 
   const totalIngresos = ingresosTx.reduce((sum, t) => sum + t.amount, 0);
   const baseLimit = totalIngresos > 0 ? totalIngresos : (profile?.budget || 0);

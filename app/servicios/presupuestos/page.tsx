@@ -216,7 +216,7 @@ export default function PresupuestosPage() {
         <BudgetProjection 
           filterType={filterType} 
           filterValue={filterValue} 
-          transactions={allTransactions} 
+          transactions={filteredTransactions} 
         />
 
         {/* 1. TARJETA DE SALUD FINANCIERA GLOBAL */}
