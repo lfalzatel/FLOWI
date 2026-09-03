@@ -10,6 +10,7 @@ import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal'
 import { ManageThemesModal } from '@/components/forms/ManageThemesModal';
 import { ManageUsersModal } from '@/components/forms/ManageUsersModal';
 import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
+import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoundModal';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -36,16 +37,28 @@ export default function ConfigPage() {
   const [isRegeneratingThemes, setIsRegeneratingThemes] = useState(false);
   const [isThemesModalOpen, setIsThemesModalOpen] = useState(false);
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+  const [soundModalAction, setSoundModalAction] = useState<SoundActionType | null>(null);
   const [restoring, setRestoring] = useState(false);
 
   const [openSections, setOpenSections] = useState({
     cuenta: false,
     notificaciones: false,
+    sonidos: false,
     gestion: false,
     apariencia: false,
     finanzas: false,
     privacidad: false
   });
+
+  const [openSoundSubSections, setOpenSoundSubSections] = useState({
+    acciones: true,
+    navegacion: false,
+    animaciones: false
+  });
+
+  const toggleSoundSubSection = (key: keyof typeof openSoundSubSections) => {
+    setOpenSoundSubSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => {
@@ -221,6 +234,59 @@ export default function ConfigPage() {
     localStorage.setItem('sound_speech_enabled', String(newState));
   };
 
+  const getSoundName = (val: string) => {
+    const dict: Record<string, string> = {
+      'mario_1up': '🍄 Mario Bros 1-UP',
+      'mario_coin': '🪙 Mario Bros Coin',
+      'mario_jump': '🍄 Mario Bros Jump',
+      'mario_pipe': '🍄 Mario Bros Pipe',
+      'synth': '🎵 Arpegio / Acorde Sintetizado',
+      'bass': '🔊 Bajo Ciberpunk',
+      'bell': '🔔 Campanada Clásica',
+      'soft': '🔔 Campanada Suave',
+      'rover': '🚀 Rover Landing',
+      'pop': '🍿 Pop / Burbuja (Estilo iOS)',
+      'click': '⚡ Click Digital',
+      'chime': '🎵 Campana Armónica',
+      'haptic': '📳 Toque Háptico',
+      'arcade': '✨ Chime Brillos',
+      'crystal': '🔮 Cristalino Pentatónico',
+      'marimba': '🪵 Marimba Acústica',
+      'synth_laser': '⚡ Neón Ciberpunk',
+      'synth_dissolve': '🌌 Disolución Armónica',
+      'boomstick': '💣 Boomstick Ciberpunk',
+      'notification.mp3': '🫧 Suave (Burbuja)',
+      'notification-sound.mp3': '🔔 Clásico (Campana)',
+      'silent': '🔇 Silencioso'
+    };
+    return dict[val] || val;
+  };
+
+  const handleSelectSound = (action: SoundActionType, val: string) => {
+    if (action === 'ingreso') {
+      setSoundIngreso(val);
+      localStorage.setItem('sound_ingreso', val);
+    } else if (action === 'gasto') {
+      setSoundGasto(val);
+      localStorage.setItem('sound_gasto', val);
+    } else if (action === 'edicion') {
+      setSoundEdicion(val);
+      localStorage.setItem('sound_edicion', val);
+    } else if (action === 'eliminacion') {
+      setSoundEliminacion(val);
+      localStorage.setItem('sound_eliminacion', val);
+    } else if (action === 'ui_nav') {
+      setSoundUINav(val);
+      localStorage.setItem('sound_ui_nav', val);
+    } else if (action === 'particles') {
+      setSoundParticles(val);
+      localStorage.setItem('sound_particles', val);
+    } else if (action === 'notification') {
+      setNotificationSound(val);
+      localStorage.setItem('notification_sound', val);
+    }
+  };
+
   const handleClearData = async () => {
     if (!user) return;
     if (!window.confirm('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?')) return;
@@ -326,7 +392,7 @@ export default function ConfigPage() {
           )}
         </section>
 
-        {/* 1.5 Notificaciones */}
+        {/* 1.5 Notificaciones (Simplificada) */}
         <section className="space-y-3">
           <button 
             onClick={() => toggleSection('notificaciones')}
@@ -397,236 +463,241 @@ export default function ConfigPage() {
               </button>
             </div>
 
-            {/* Efecto de Sonido (Toggle) */}
-            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
-                  <Volume2 className="w-4 h-4 text-[var(--yellow)]" />
-                </div>
-                <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'EFECTO_DE_SONIDO' : 'Efecto de Sonido'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'REPRODUCIR_TONOS' : 'Reproducir tonos'}</p>
-                </div>
-              </div>
-              <button 
-                onClick={toggleSound}
-                disabled={!notificationsEnabled}
-                className={`w-12 h-6 rounded-full transition-colors relative ${soundEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-[var(--yellow)]') : (isTechTheme ? 'bg-black/50 border border-accent/20' : 'bg-gray-600')}`}
-              >
-                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${soundEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
-              </button>
-            </div>
-            
-            {/* Tono de Alerta (Dropdown) */}
-            <div className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 ${!notificationsEnabled || !soundEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+            {/* Tono de Alerta de Notificación (Abre Modal) */}
+            <button 
+              onClick={() => setSoundModalAction('notification')}
+              disabled={!notificationsEnabled}
+              className={`w-full flex items-center justify-between p-4 transition-colors ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : 'hover:bg-white/[0.02]'}`}
+            >
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
                   <Music className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
                   <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TONO_DE_ALERTA' : 'Tono de Alerta'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'ELIGE_TU_TONO_PREFERIDO' : 'Elige tu tono preferido'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{getSoundName(notificationSound)}</p>
                 </div>
               </div>
-              <select
-                value={notificationSound}
-                onChange={(e) => changeSound(e.target.value)}
-                disabled={!notificationsEnabled || !soundEnabled}
-                className={`px-3 py-1.5 text-xs focus:outline-none transition-all ${isTechTheme ? 'bg-black/40 border border-accent/40 text-accent font-mono rounded-none uppercase' : 'bg-white/5 border border-white/10 text-text-primary rounded-xl'}`}
-              >
-                <option value="notification.mp3">Suave (Burbuja)</option>
-                <option value="notification-sound.mp3">Clásico (Campana)</option>
-              </select>
+              <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
+            </button>
             </div>
+          )}
+        </section>
 
-            {/* Configuración de Sonidos por Acción (Web Audio API & Archivos) */}
-            <div className={`p-4 border-t space-y-4 ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!soundEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
-              <div className="flex items-center gap-2 mb-2">
-                <Music className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-emerald-500'}`} />
-                <span className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>
-                  {isTechTheme ? 'MAPA_DE_SONIDOS_POR_ACCION' : 'Mapa de Sonidos Sintetizados & Efectos'}
-                </span>
-              </div>
+        {/* 1.8 SECCIÓN DEDICADA: Sonidos y Animaciones (Organizada en Acordeones) */}
+        <section className="space-y-3">
+          <button 
+            onClick={() => toggleSection('sonidos')}
+            className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
+          >
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Sonidos y Animaciones</h2>
+            {openSections.sonidos ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+          </button>
 
-              {/* 1. Ingresos y Abonos */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <div className="text-left">
-                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-500'}`}>Ingresos y Abonos</p>
-                  <p className="text-[10px] text-text-muted">Vida Extra Mario, Monedas o Arpegios</p>
-                </div>
-                <select
-                  value={soundIngreso}
-                  onChange={(e) => handleActionSoundChange('ingreso', e.target.value)}
-                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-emerald-500/40 text-emerald-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
+          {openSections.sonidos && (
+            <div className="space-y-3 animate-fade-in">
+              {/* ACORDEÓN 1: Sonidos por Acción */}
+              <div className={`overflow-hidden border transition-all ${
+                isTechTheme ? 'border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'
+              }`}>
+                <button 
+                  onClick={() => toggleSoundSubSection('acciones')}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${
+                    openSoundSubSections.acciones ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
+                  }`}
                 >
-                  <option value="mario_1up">🍄 Mario Bros 1-UP (Vida Extra 8-Bit)</option>
-                  <option value="mario_coin">🪙 Mario Bros Coin (Moneda 8-Bit)</option>
-                  <option value="synth">🎵 Arpegio Celestial (Web Audio)</option>
-                  <option value="bass">🔊 Bajo Ciberpunk (WAV)</option>
-                  <option value="bell">🔔 Campanada Clásica (MP3)</option>
-                  <option value="silent">🔇 Silencioso</option>
-                </select>
-              </div>
-
-              {/* 2. Gastos */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <div className="text-left">
-                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-rose-400 uppercase' : 'text-rose-500'}`}>Gastos</p>
-                  <p className="text-[10px] text-text-muted">Moneda Mario, Acordes Resonantes o Rover</p>
-                </div>
-                <select
-                  value={soundGasto}
-                  onChange={(e) => handleActionSoundChange('gasto', e.target.value)}
-                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-rose-500/40 text-rose-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
-                >
-                  <option value="mario_coin">🪙 Mario Bros Coin (Moneda 8-Bit)</option>
-                  <option value="synth">💥 Acorde Resonante (Web Audio)</option>
-                  <option value="rover">🚀 Rover Landing (WAV)</option>
-                  <option value="soft">🔔 Campanada Suave (MP3)</option>
-                  <option value="silent">🔇 Silencioso</option>
-                </select>
-              </div>
-
-              {/* 3. Ediciones */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <div className="text-left">
-                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-500'}`}>Ediciones</p>
-                  <p className="text-[10px] text-text-muted">Salto Mario o Doble Repique Cristalino</p>
-                </div>
-                <select
-                  value={soundEdicion}
-                  onChange={(e) => handleActionSoundChange('edicion', e.target.value)}
-                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-purple-500/40 text-purple-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
-                >
-                  <option value="mario_jump">🍄 Mario Bros Jump (Salto 8-Bit)</option>
-                  <option value="synth">🔮 Doble Repique Cristalino (Web Audio)</option>
-                  <option value="bell">🔔 Campanada Clásica (MP3)</option>
-                  <option value="silent">🔇 Silencioso</option>
-                </select>
-              </div>
-
-              {/* 4. Eliminaciones */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <div className="text-left">
-                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-red-400 uppercase' : 'text-red-500'}`}>Eliminaciones</p>
-                  <p className="text-[10px] text-text-muted">Tubo Mario, De-Rez, Láseres y Disolución</p>
-                </div>
-                <select
-                  value={soundEliminacion}
-                  onChange={(e) => handleActionSoundChange('eliminacion', e.target.value)}
-                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-red-500/40 text-red-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
-                >
-                  <option value="mario_pipe">🍄 Mario Bros Pipe (Tubo 8-Bit)</option>
-                  <option value="synth">⚡ Barrido Descendente De-Rez (Web Audio)</option>
-                  <option value="synth_laser">💥 Láser Ciberpunk Descendente (Web Audio)</option>
-                  <option value="synth_dissolve">🌌 Disolución Armónica Retro (Web Audio)</option>
-                  <option value="boomstick">💣 Boomstick Ciberpunk (MP3)</option>
-                  <option value="silent">🔇 Silencioso</option>
-                </select>
-              </div>
-
-              {/* 5. Menú Inferior & Navegación (Sintetizador PAE) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <div className="text-left">
-                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>Menú Inferior & Navegación (PAE)</p>
-                  <p className="text-[10px] text-text-muted">Micro-feedback al tocar pestañas y botones</p>
-                </div>
-                <select
-                  value={soundUINav}
-                  onChange={(e) => handleUINavSoundChange(e.target.value)}
-                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-cyan-500/40 text-cyan-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
-                >
-                  <option value="pop">🍿 Pop / Burbuja (Estilo iOS)</option>
-                  <option value="click">⚡ Click Digital (Mecánico)</option>
-                  <option value="chime">🎵 Campana Armónica (Micro-acorde)</option>
-                  <option value="haptic">📳 Toque Háptico (Grave)</option>
-                  <option value="arcade">✨ Chime Brillos (Ascendente)</option>
-                  <option value="silent">🔇 Silencioso</option>
-                </select>
-              </div>
-
-              {/* 6. Partículas Voladoras (Trayectoria Dual) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                <div className="text-left">
-                  <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Partículas Voladoras (Trayectoria Dual)</p>
-                  <p className="text-[10px] text-text-muted">Cascada de micro-tonos (Despegue + Absorción)</p>
-                </div>
-                <select
-                  value={soundParticles}
-                  onChange={(e) => handleParticlesSoundChange(e.target.value)}
-                  className={`px-2.5 py-1 text-[11px] focus:outline-none ${isTechTheme ? 'bg-black/60 border border-purple-500/40 text-purple-400 font-mono rounded-none' : 'bg-white/10 border border-white/15 text-text-primary rounded-lg'}`}
-                >
-                  <option value="crystal">🔮 Cristalino Pentatónico (Armónico)</option>
-                  <option value="arcade">✨ Arcade 8-Bit (NES Retro)</option>
-                  <option value="marimba">🪵 Marimba Acústica (Madera)</option>
-                  <option value="synth_laser">⚡ Neón Ciberpunk (Sintetizador)</option>
-                  <option value="silent">🔇 Silenciar solo partículas</option>
-                </select>
-              </div>
-
-              {/* 7. Controles de Activación de Animación Visual */}
-              <div className="pt-3 border-t border-white/10 space-y-3">
-                <p className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>
-                  {isTechTheme ? 'ACTIVACION_DE_ANIMACIONES' : 'Interruptores de Animación Visual'}
-                </p>
-
-                {/* Toggle Tarjeta 3D Central */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-left">
-                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'text-text-primary'}`}>Tarjeta 3D Central (Power Card)</p>
-                    <p className="text-[10px] text-text-muted">Tarjeta holográfica central con el monto</p>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-emerald-500/30 rounded-none bg-emerald-500/5' : 'rounded-xl bg-emerald-500/10'}`}>
+                      <Music className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>Sonidos por Acción</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Ingresos, Gastos, Ediciones y Eliminaciones</p>
+                    </div>
                   </div>
-                  <button 
-                    onClick={toggleAnimCard}
-                    className={`w-11 h-6 rounded-full transition-colors relative ${animCardEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-accent') : 'bg-gray-600'}`}
-                  >
-                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animCardEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
-                  </button>
-                </div>
+                  {openSoundSubSections.acciones ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
+                </button>
 
-                {/* Toggle Celebración y Confeti 🎉 */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-left">
-                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Animaciones de Celebración y Confeti 🎉</p>
-                    <p className="text-[10px] text-text-muted">Lluvia de confeti al guardar recordatorios, notas o múltiples transacciones por voz</p>
-                  </div>
-                  <button 
-                    onClick={toggleAnimConfetti}
-                    className={`w-11 h-6 rounded-full transition-colors relative ${animConfettiEnabled ? (isTechTheme ? 'bg-purple-400 border border-purple-400' : 'bg-purple-500') : 'bg-gray-600'}`}
-                  >
-                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animConfettiEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
-                  </button>
-                </div>
+                {openSoundSubSections.acciones && (
+                  <div className="divide-y divide-white/5 bg-black/20">
+                    <button 
+                      onClick={() => setSoundModalAction('ingreso')}
+                      className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
+                    >
+                      <div>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>Ingresos y Abonos</p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundIngreso)}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-muted" />
+                    </button>
 
-                {/* Toggle Partículas Voladoras ✨ */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-left">
-                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>Explosión de Partículas Voladoras ✨</p>
-                    <p className="text-[10px] text-text-muted">Partículas volando en arco hacia el saldo y menú</p>
-                  </div>
-                  <button 
-                    onClick={toggleAnimBurst}
-                    className={`w-11 h-6 rounded-full transition-colors relative ${animBurstEnabled ? (isTechTheme ? 'bg-cyan-400 border border-cyan-400' : 'bg-cyan-500') : 'bg-gray-600'}`}
-                  >
-                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animBurstEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
-                  </button>
-                </div>
+                    <button 
+                      onClick={() => setSoundModalAction('gasto')}
+                      className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
+                    >
+                      <div>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-rose-400 uppercase' : 'text-rose-400'}`}>Gastos</p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundGasto)}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-muted" />
+                    </button>
 
-                {/* Toggle Voz Hablada de Confirmación 🔊 */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-left">
-                    <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>Voz Hablada de Confirmación 🔊</p>
-                    <p className="text-[10px] text-text-muted">Respuesta hablada de FLOWI al guardar transacciones, recordatorios y notas</p>
+                    <button 
+                      onClick={() => setSoundModalAction('edicion')}
+                      className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
+                    >
+                      <div>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Ediciones</p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundEdicion)}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-muted" />
+                    </button>
+
+                    <button 
+                      onClick={() => setSoundModalAction('eliminacion')}
+                      className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
+                    >
+                      <div>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-red-400 uppercase' : 'text-red-400'}`}>Eliminaciones</p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundEliminacion)}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-muted" />
+                    </button>
                   </div>
-                  <button 
-                    onClick={toggleSoundSpeech}
-                    className={`w-11 h-6 rounded-full transition-colors relative ${soundSpeechEnabled ? (isTechTheme ? 'bg-emerald-400 border border-emerald-400' : 'bg-emerald-500') : 'bg-gray-600'}`}
-                  >
-                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${soundSpeechEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
-                  </button>
-                </div>
+                )}
               </div>
-            </div>
+
+              {/* ACORDEÓN 2: Navegación y Efectos Auditivos */}
+              <div className={`overflow-hidden border transition-all ${
+                isTechTheme ? 'border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'
+              }`}>
+                <button 
+                  onClick={() => toggleSoundSubSection('navegacion')}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${
+                    openSoundSubSections.navegacion ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-cyan-500/30 rounded-none bg-cyan-500/5' : 'rounded-xl bg-cyan-500/10'}`}>
+                      <Volume2 className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>Navegación y Efectos</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Menú inferior y partículas voladoras</p>
+                    </div>
+                  </div>
+                  {openSoundSubSections.navegacion ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
+                </button>
+
+                {openSoundSubSections.navegacion && (
+                  <div className="divide-y divide-white/5 bg-black/20">
+                    <button 
+                      onClick={() => setSoundModalAction('ui_nav')}
+                      className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
+                    >
+                      <div>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>Menú Inferior & Navegación (PAE)</p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundUINav)}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-muted" />
+                    </button>
+
+                    <button 
+                      onClick={() => setSoundModalAction('particles')}
+                      className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
+                    >
+                      <div>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Partículas Voladoras</p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundParticles)}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-muted" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* ACORDEÓN 3: Animaciones Visuales y Voz */}
+              <div className={`overflow-hidden border transition-all ${
+                isTechTheme ? 'border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'
+              }`}>
+                <button 
+                  onClick={() => toggleSoundSubSection('animaciones')}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${
+                    openSoundSubSections.animaciones ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-amber-500/30 rounded-none bg-amber-500/5' : 'rounded-xl bg-amber-500/10'}`}>
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>Animaciones Visuales y Voz</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Tarjeta 3D, confeti, explosiones y asistente</p>
+                    </div>
+                  </div>
+                  {openSoundSubSections.animaciones ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
+                </button>
+
+                {openSoundSubSections.animaciones && (
+                  <div className="p-4 space-y-3 bg-black/20 border-t border-white/5">
+                    {/* Toggle Tarjeta 3D Central */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div className="text-left pr-2">
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'text-text-primary'}`}>Tarjeta 3D Central (Power Card)</p>
+                        <p className="text-[10px] text-text-muted">Efecto 3D holográfico en la tarjeta principal</p>
+                      </div>
+                      <button 
+                        onClick={toggleAnimCard}
+                        className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${animCardEnabled ? (isTechTheme ? 'bg-accent border border-accent' : 'bg-accent') : 'bg-gray-600'}`}
+                      >
+                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animCardEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                      </button>
+                    </div>
+
+                    {/* Toggle Celebración y Confeti 🎉 */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div className="text-left pr-2">
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Celebración y Confeti 🎉</p>
+                        <p className="text-[10px] text-text-muted">Lluvia de confeti al guardar registros</p>
+                      </div>
+                      <button 
+                        onClick={toggleAnimConfetti}
+                        className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${animConfettiEnabled ? (isTechTheme ? 'bg-purple-400 border border-purple-400' : 'bg-purple-500') : 'bg-gray-600'}`}
+                      >
+                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animConfettiEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                      </button>
+                    </div>
+
+                    {/* Toggle Explosión de Partículas ✨ */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div className="text-left pr-2">
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>Explosión de Partículas ✨</p>
+                        <p className="text-[10px] text-text-muted">Trayectoria voladora hacia el menú y saldo</p>
+                      </div>
+                      <button 
+                        onClick={toggleAnimBurst}
+                        className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${animBurstEnabled ? (isTechTheme ? 'bg-cyan-400 border border-cyan-400' : 'bg-cyan-500') : 'bg-gray-600'}`}
+                      >
+                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${animBurstEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                      </button>
+                    </div>
+
+                    {/* Toggle Voz Hablada de Confirmación 🔊 */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div className="text-left pr-2">
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>Voz Hablada de Confirmación 🔊</p>
+                        <p className="text-[10px] text-text-muted">Respuesta por voz al procesar comandos</p>
+                      </div>
+                      <button 
+                        onClick={toggleSoundSpeech}
+                        className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${soundSpeechEnabled ? (isTechTheme ? 'bg-emerald-400 border border-emerald-400' : 'bg-emerald-500') : 'bg-gray-600'}`}
+                      >
+                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${soundSpeechEnabled ? 'translate-x-5 bg-black' : 'translate-x-0 bg-gray-300'}`} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </section>
@@ -890,6 +961,22 @@ export default function ConfigPage() {
       )}
       {isOnboardingOpen && (
         <OnboardingModal onClose={() => setIsOnboardingOpen(false)} />
+      )}
+      {soundModalAction && (
+        <ManageSoundModal
+          actionType={soundModalAction}
+          currentValue={
+            soundModalAction === 'ingreso' ? soundIngreso :
+            soundModalAction === 'gasto' ? soundGasto :
+            soundModalAction === 'edicion' ? soundEdicion :
+            soundModalAction === 'eliminacion' ? soundEliminacion :
+            soundModalAction === 'ui_nav' ? soundUINav :
+            soundModalAction === 'particles' ? soundParticles :
+            notificationSound
+          }
+          onClose={() => setSoundModalAction(null)}
+          onSelect={(val) => handleSelectSound(soundModalAction, val)}
+        />
       )}
     </div>
   );
