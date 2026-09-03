@@ -102,6 +102,12 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           description: `Abono a: ${title}`,
         };
 
+        const status = paid >= total ? 'paid' : 'pending';
+
+        // ⚡ Respuesta optimista inmediata a 0ms: Disparar animación de Abono y cerrar modal al instante
+        triggerPowerAnimation(abonoAmount, 'abono');
+        onClose();
+
         await addExpense({
           userId: user.uid,
           type: 'gasto',
@@ -111,7 +117,6 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           date: finalDate,
         });
 
-        const status = paid >= total ? 'paid' : 'pending';
         await updateDebt(debtToEdit.id!, {
           title,
           totalAmount: total,
@@ -126,7 +131,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
         const status = paid >= total ? 'paid' : 'pending';
         
         // ⚡ Respuesta optimista inmediata a 0ms
-        triggerPowerAnimation(total, debtToEdit?.id ? 'edicion' : 'edicion');
+        triggerPowerAnimation(total, debtToEdit?.id ? 'edicion' : 'gasto');
         onClose();
 
         if (debtToEdit && debtToEdit.id) {
