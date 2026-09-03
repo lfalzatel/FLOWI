@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ArrowLeft, Target, Wallet, AlertTriangle, TrendingUp, Sparkles, 
-  Plus, Edit3, Check, PieChart, ShieldAlert, CheckCircle2, ChevronRight 
+  Plus, Edit3, Check, PieChart, ShieldAlert, CheckCircle2, ChevronRight,
+  BookOpen, ShieldCheck
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -211,6 +212,123 @@ export default function PresupuestosPage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* 1.5 TARJETA DE DISTRIBUCIÓN DEL SALARIO & REGLAS ECONÓMICAS */}
+        <div className={`p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/40 bg-black/80' : 'rounded-3xl'}`}>
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className={`w-9 h-9 flex items-center justify-center ${isTechTheme ? 'border border-cyan-500/30 bg-cyan-500/10' : 'rounded-xl bg-cyan-500/20'}`}>
+              <BookOpen className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div>
+              <h2 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
+                ¿Cómo Repartir tu Salario? (Regla 50 / 30 / 20)
+              </h2>
+              <p className={`text-xs ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
+                Fórmula dorada recomendada por economistas e instituciones financieras
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-text-muted leading-relaxed mb-4">
+            Según los principales marcos de finanzas personales, la distribución idónea del ingreso mensual se divide en 3 pilares clave para garantizar estabilidad y crecimiento económico:
+          </p>
+
+          {/* Barra de Distribución 50 / 30 / 20 */}
+          <div className="space-y-1.5 mb-5">
+            <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/10 p-0.5">
+              <div className="h-full bg-blue-500 rounded-l-full w-[50%]" title="50% Necesidades" />
+              <div className="h-full bg-amber-400 w-[30%]" title="30% Deseos" />
+              <div className="h-full bg-emerald-400 rounded-r-full w-[20%]" title="20% Ahorro" />
+            </div>
+            <div className="flex justify-between text-[11px] font-bold">
+              <span className="text-blue-400">50% Necesidades</span>
+              <span className="text-amber-400">30% Deseos</span>
+              <span className="text-emerald-400">20% Ahorro / Inversión</span>
+            </div>
+          </div>
+
+          {/* Desglose de los 3 Pilares con Simulación de Montos */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+            {/* Pilar 1: 50% Necesidades */}
+            <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-blue-500/30' : 'bg-blue-500/5 border-blue-500/20'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-bold text-blue-400 uppercase">50% Necesidades</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold">Esenciales</span>
+              </div>
+              <p className="text-[11px] text-text-muted mb-2">
+                Vivienda, mercado, servicios públicos, transporte, salud y deudas básicas.
+              </p>
+              {globalBudget > 0 && (
+                <div className="pt-2 border-t border-blue-500/20">
+                  <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
+                  <span className="text-sm font-bold text-blue-400">{formatCurrency(globalBudget * 0.50, currency)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Pilar 2: 30% Deseos */}
+            <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-amber-500/30' : 'bg-amber-500/5 border-amber-500/20'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-bold text-amber-400 uppercase">30% Deseos</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">Estilo de Vida</span>
+              </div>
+              <p className="text-[11px] text-text-muted mb-2">
+                Restaurantes, entretenimiento, hobbies, viajes, compras y gustos personales.
+              </p>
+              {globalBudget > 0 && (
+                <div className="pt-2 border-t border-amber-500/20">
+                  <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
+                  <span className="text-sm font-bold text-amber-400">{formatCurrency(globalBudget * 0.30, currency)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Pilar 3: 20% Ahorro e Inversión */}
+            <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-emerald-500/30' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-bold text-emerald-400 uppercase">20% Ahorro</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">Futuro</span>
+              </div>
+              <p className="text-[11px] text-text-muted mb-2">
+                Fondo de emergencia (3-6 meses), inversiones, retiro y pago de capital.
+              </p>
+              {globalBudget > 0 && (
+                <div className="pt-2 border-t border-emerald-500/20">
+                  <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
+                  <span className="text-sm font-bold text-emerald-400">{formatCurrency(globalBudget * 0.20, currency)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sección de Fuentes Económicas de Prestigio */}
+          <div className="pt-4 border-t border-white/10 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-text-secondary uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-cyan-400" />
+              <span>Fuentes & Referencias Económicas Prestigiadas</span>
+            </div>
+            <ul className="text-[11px] text-text-muted space-y-1.5 pl-1">
+              <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
+                <div>
+                  <strong className="text-text-primary">Harvard Law School / Elizabeth Warren:</strong>
+                  <span className="block text-[10px] text-text-muted">Creadora de la norma 50/30/20 en el libro <em>"All Your Worth: The Ultimate Lifetime Money Plan"</em>.</span>
+                </div>
+              </li>
+              <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
+                <div>
+                  <strong className="text-text-primary">Banco Interamericano de Desarrollo (BID):</strong>
+                  <span className="block text-[10px] text-text-muted">Guías oficiales de Educación y Salud Financiera para hogares de Latinoamérica.</span>
+                </div>
+              </li>
+              <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
+                <div>
+                  <strong className="text-text-primary">Investopedia & CFP Board:</strong>
+                  <span className="block text-[10px] text-text-muted">Estándares internacionales de planificación de presupuestos personales.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* 2. PRESUPUESTOS POR CATEGORÍA COMPONENTE REUTILIZABLE CON SEMÁFORO */}
