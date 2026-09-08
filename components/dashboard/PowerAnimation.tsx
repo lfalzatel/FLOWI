@@ -391,10 +391,22 @@ export function PowerAnimation() {
 
   useEffect(() => {
     if (active) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('power-animation-started'));
+      }
       const timer = setTimeout(() => {
         setActive(false);
       }, 3400);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('power-animation-ended'));
+        }
+      };
+    } else {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('power-animation-ended'));
+      }
     }
   }, [active]);
 

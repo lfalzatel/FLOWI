@@ -43,7 +43,11 @@ export function speakText(text: string, lang: string = 'es-CO', onDone?: () => v
   }
   try {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+
+    // 🗣️ Reemplazar "PAE" / "P.A.E." por "Pae" para que se pronuncie como una sola palabra ("Pae") en lugar de deletrear "P-A-E"
+    const formattedText = text.replace(/\bPAE\b|\bP\.A\.E\.\b|\bpae\b/gi, 'Pae');
+
+    const utterance = new SpeechSynthesisUtterance(formattedText);
     utterance.lang = lang;
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
