@@ -783,8 +783,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 value={res.amount || ''}
                                 onFocus={() => stopListening()}
                                 onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
-                                className={`w-full pl-6 pr-2 py-1.5 rounded-xl text-xs font-extrabold focus:outline-none focus:border-accent ${
-                                  isTechTheme ? 'bg-black/60 border border-accent/40 text-accent font-mono' : 'bg-black/40 border border-white/20 text-accent'
+                                className={`w-full pl-6 pr-2 py-1.5 text-xs font-extrabold focus:outline-none focus:border-accent ${
+                                  isTechTheme ? 'rounded-none bg-black/60 border border-accent/40 text-accent font-mono' : 'rounded-xl bg-black/40 border border-white/20 text-accent'
                                 }`}
                               />
                             </div>
@@ -798,8 +798,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 stopListening();
                                 setShowCategoryPickerIdx(idx);
                               }}
-                              className={`w-full flex items-center justify-between p-1.5 rounded-xl text-xs border truncate active:scale-95 transition-all ${
-                                isTechTheme ? 'bg-black/60 border-accent/40 text-accent font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
+                              className={`w-full flex items-center justify-between p-1.5 text-xs border truncate active:scale-95 transition-all ${
+                                isTechTheme ? 'rounded-none bg-black/60 border-accent/40 text-accent font-mono' : 'rounded-xl bg-black/40 border border-white/20 text-text-primary'
                               }`}
                             >
                               <span className="flex items-center gap-1.5 truncate">
@@ -819,8 +819,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             onFocus={() => stopListening()}
                             onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
                             placeholder="Escribe la descripción..."
-                            className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none focus:border-accent ${
-                              isTechTheme ? 'bg-black/60 border border-accent/40 text-accent font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
+                            className={`w-full px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-accent ${
+                              isTechTheme ? 'rounded-none bg-black/60 border border-accent/40 text-accent font-mono' : 'rounded-xl bg-black/40 border border-white/20 text-text-primary'
                             }`}
                           />
                         </div>
@@ -875,16 +875,18 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       </div>
     </div>
 
-    {/* Modal Selector de Categorías (90% de pantalla) */}
+    {/* Modal Selector de Categorías (Centrado y Adaptativo al Tema) */}
     {showCategoryPickerIdx !== null && (
-      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
         <div 
-          className={`w-full max-w-md h-[85vh] max-h-[90vh] rounded-t-3xl sm:rounded-3xl p-5 flex flex-col shadow-2xl border ${
-            isTechTheme ? 'bg-slate-950 border-accent font-mono text-accent' : 'bg-gray-900 border-white/20 text-white'
+          className={`w-full max-w-md h-[80vh] max-h-[85vh] p-5 flex flex-col shadow-2xl border ${
+            isTechTheme 
+              ? 'bg-slate-950 border-accent font-mono text-accent rounded-none' 
+              : 'bg-gray-900 border-white/20 text-white rounded-3xl'
           }`}
         >
           {/* Header Modal */}
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+          <div className={`flex items-center justify-between pb-3 mb-3 border-b ${isTechTheme ? 'border-accent/30' : 'border-white/10'}`}>
             <div className="flex items-center gap-2">
               <Layers className="w-5 h-5 text-accent" />
               <h3 className="text-sm font-bold uppercase tracking-wider">Seleccionar Categoría</h3>
@@ -895,7 +897,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                 setShowCategoryPickerIdx(null);
                 setCategorySearch('');
               }}
-              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-text-muted hover:text-white transition-colors"
+              className={`p-1.5 transition-colors ${
+                isTechTheme 
+                  ? 'rounded-none border border-accent/40 bg-accent/10 text-accent hover:bg-accent/20' 
+                  : 'rounded-xl bg-white/10 text-text-muted hover:bg-white/20 hover:text-white'
+              }`}
             >
               <X className="w-5 h-5" />
             </button>
@@ -903,19 +909,23 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
           {/* Buscador de Categorías */}
           <div className="relative mb-4">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-text-muted" />
+            <Search className={`w-4 h-4 absolute left-3 top-3 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             <input
               type="text"
               placeholder="Buscar categoría..."
               value={categorySearch}
               onChange={(e) => setCategorySearch(e.target.value)}
               onFocus={() => stopListening()}
-              className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-white/10 border border-white/15 text-white focus:outline-none focus:border-accent"
+              className={`w-full pl-9 pr-3 py-2.5 text-xs focus:outline-none focus:border-accent ${
+                isTechTheme
+                  ? 'rounded-none bg-black border border-accent text-accent font-mono placeholder:text-accent/40'
+                  : 'rounded-xl bg-white/10 border border-white/15 text-white'
+              }`}
             />
           </div>
 
-          {/* Grid de 2 Columnas de Categorías */}
-          <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-2.5 pr-1 scrollbar-hide">
+          {/* Grid de 2 Columnas de Categorías (content-start evita que se estiren al buscar) */}
+          <div className="flex-1 overflow-y-auto grid grid-cols-2 content-start auto-rows-max gap-2.5 pr-1 scrollbar-hide">
             {allCategories
               .filter(c => c.label.toLowerCase().includes(categorySearch.toLowerCase()))
               .map((cat) => {
@@ -933,13 +943,21 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                       setShowCategoryPickerIdx(null);
                       setCategorySearch('');
                     }}
-                    className={`flex items-center gap-2.5 p-3 rounded-xl text-left text-xs transition-all ${
+                    className={`flex items-center gap-2.5 p-3 text-left text-xs transition-all ${
+                      isTechTheme ? 'rounded-none font-mono' : 'rounded-xl font-semibold'
+                    } ${
                       isSelected
-                        ? 'bg-accent/25 border-2 border-accent text-accent font-bold shadow-lg'
-                        : 'bg-white/5 border border-white/10 hover:bg-white/15 text-text-primary'
+                        ? isTechTheme
+                          ? 'bg-accent/20 border-2 border-accent text-accent font-bold shadow-lg'
+                          : 'bg-accent/25 border-2 border-accent text-accent font-bold shadow-lg'
+                        : isTechTheme
+                          ? 'bg-black/60 border border-accent/30 hover:bg-accent/10 text-accent/80'
+                          : 'bg-white/5 border border-white/10 hover:bg-white/15 text-text-primary'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
+                    <div className={`w-8 h-8 flex items-center justify-center shrink-0 ${
+                      isTechTheme ? 'rounded-none bg-accent/10 border border-accent/30' : 'rounded-lg bg-accent/15'
+                    }`}>
                       <CategoryIcon icon={cat.icon || cat.label} label={cat.label} className="w-4 h-4 text-accent" />
                     </div>
                     <span className="truncate font-semibold">{cat.label}</span>
