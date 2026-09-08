@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -27,23 +27,10 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [showAdd, setShowAdd] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
   const [parsedVoiceData, setParsedVoiceData] = useState<ParsedVoiceResult | null>(null);
-  const [hideNav, setHideNav] = useState(false);
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light';
-
-  useEffect(() => {
-    const handleStart = () => setHideNav(true);
-    const handleEnd = () => setHideNav(false);
-
-    window.addEventListener('power-animation-started', handleStart);
-    window.addEventListener('power-animation-ended', handleEnd);
-    return () => {
-      window.removeEventListener('power-animation-started', handleStart);
-      window.removeEventListener('power-animation-ended', handleEnd);
-    };
-  }, []);
 
   return (
     <>
@@ -66,9 +53,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       `}</style>
 
       {/* Main Container for Nav and FAB (Side by Side) */}
-      <div className={`md:hidden fixed bottom-5 left-0 right-0 z-50 flex items-center justify-between pointer-events-none px-2 w-full max-w-[100vw] transition-all duration-300 ${
-        hideNav ? 'opacity-0 translate-y-12 pointer-events-none' : 'opacity-100 translate-y-0'
-      }`}>
+      <div className="md:hidden fixed bottom-5 left-0 right-0 z-50 flex items-center justify-between pointer-events-none px-2 w-full max-w-[100vw]">
         
         {/* Navigation Menu */}
         <nav
