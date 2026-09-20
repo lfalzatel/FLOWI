@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { Transaction, Debt } from '@/lib/firestore';
 
-import { PowerAnimation } from '@/components/dashboard/PowerAnimation';
+import { PowerAnimation, playUISound } from '@/components/dashboard/PowerAnimation';
 import { DualTrajectoryBurstGlobal } from '@/components/dashboard/DualTrajectoryBurst';
 
 interface DataContextType {
@@ -151,6 +151,52 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     import('@/lib/notifications').then((m) => {
       m.registerReminderSW();
     });
+  }, []);
+
+  // 🔊 Escuchador global de interfaz para reproducir el micro-feedback (Burbuja / Pop u opción elegida) en cualquier botón de la app
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let lastSoundTime = 0;
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastSoundTime < 60) return; // 60ms throttle para evitar dobles clics
+
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // Detectar botón, enlace interactivo, rol button o input clickeable
+      const clickable = target.closest(
+        'button, [role="button"], a[href], input[type="submit"], input[type="button"], input[type="reset"]'
+      );
+
+      if (!clickable) return;
+
+      // Ignorar si está deshabilitado
+      if (
+        (clickable as any).disabled ||
+        clickable.getAttribute('aria-disabled') === 'true' ||
+        clickable.classList.contains('disabled') ||
+        clickable.classList.contains('pointer-events-none')
+      ) {
+        return;
+      }
+
+      // Ignorar elementos marcados para no reproducir sonido (ej. probador de sonido en configuración)
+      if (clickable.closest('[data-no-ui-sound="true"]')) {
+        return;
+      }
+
+      lastSoundTime = now;
+      playUISound();
+    };
+
+    document.addEventListener('click', handleGlobalClick, { capture: true, passive: true });
+
+    return () => {
+      document.removeEventListener('click', handleGlobalClick, { capture: true });
+    };
   }, []);
 
   return (

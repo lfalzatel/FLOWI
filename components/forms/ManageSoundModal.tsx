@@ -223,6 +223,7 @@ export function ManageSoundModal({ actionType, currentValue, onClose, onSelect }
                 {/* Botón Escuchar / Vista Previa */}
                 <button
                   type="button"
+                  data-no-ui-sound="true"
                   onClick={(e) => handlePlayPreview(opt.value, e)}
                   title="Escuchar vista previa"
                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition ${

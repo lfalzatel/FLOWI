@@ -12,7 +12,6 @@ import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { VoiceAssistantModal } from '@/components/forms/VoiceAssistantModal';
 import { ParsedVoiceResult } from '@/lib/voiceParser';
 import { useTheme } from '@/components/ThemeProvider';
-import { playUISound } from '@/components/dashboard/PowerAnimation';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Inicio',        href: '/',          id: 'nav-inicio' },
@@ -82,7 +81,6 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
         {/* Floating FAB con Micrófono 🎙️ */}
         <button
           onClick={() => {
-            playUISound();
             setParsedVoiceData(null);
             setShowVoice(true);
           }}
@@ -160,7 +158,6 @@ function NavItem({ icon: Icon, label, href, id, active, isTechTheme, isLight }: 
     <Link 
       id={id}
       href={href}
-      onClick={() => playUISound()}
       className={`relative flex flex-col items-center justify-center flex-1 gap-0.5 py-1.5
                   transition-all duration-200 ${isTechTheme ? 'rounded-none' : 'rounded-[20px]'}
                   ${active
