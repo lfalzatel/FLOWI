@@ -532,7 +532,7 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">3</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Busca la opción que dice <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Agregar a inicio"</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Add to Home Screen"</strong> y selecciónala.
+                  Busca la opción que dice <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>&quot;Agregar a inicio&quot;</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>&quot;Add to Home Screen&quot;</strong> y selecciónala.
                 </p>
               </div>
             </div>
@@ -549,7 +549,7 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Busca y selecciona la opción <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Instalar aplicación"</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Agregar a la pantalla principal"</strong>.
+                  Busca y selecciona la opción <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>&quot;Instalar aplicación&quot;</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>&quot;Agregar a la pantalla principal&quot;</strong>.
                 </p>
               </div>
               <div className="flex gap-4 items-start">
@@ -572,7 +572,7 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Haz clic en él y confirma la instalación seleccionando <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Instalar"</strong>.
+                  Haz clic en él y confirma la instalación seleccionando <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>&quot;Instalar&quot;</strong>.
                 </p>
               </div>
             </div>
