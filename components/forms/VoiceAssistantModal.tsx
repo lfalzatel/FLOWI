@@ -505,7 +505,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         </div>
 
         <p className={`text-xs max-w-xs mb-4 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-          Dicta transacciones, comandos como "abrir estadísticas" o crea notas y recordatorios.
+          Dicta transacciones, comandos como &quot;abrir estadísticas&quot; o crea notas y recordatorios.
         </p>
 
         {/* Animación del Micrófono */}
@@ -537,11 +537,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         <div className="my-2 min-h-[2.5rem] flex flex-col items-center justify-center">
           {isListening ? (
             <span className={`text-xs font-bold animate-pulse ${isTechTheme ? 'text-accent' : 'text-accent'}`}>
-              🎙️ Escuchando... Di "Estadísticas" o "Gasté 9000 en cerveza"
+              🎙️ Escuchando... Di &quot;Estadísticas&quot; o &quot;Gasté 9000 en cerveza&quot;
             </span>
           ) : transcript ? (
             <span className={`text-xs font-medium italic max-w-xs ${isTechTheme ? 'text-accent/90' : 'text-text-primary'}`}>
-              "{transcript}"
+              &quot;{transcript}&quot;
             </span>
           ) : (
             <span className={`text-xs font-semibold ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>

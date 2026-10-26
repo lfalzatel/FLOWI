@@ -68,7 +68,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
                     {displayLabel}
                   </p>
                   <p className="text-[9px] text-accent/60 font-mono mt-0.5 uppercase tracking-wider truncate">
-                    {t.category.replace(/\s+/g, '_')} // {fmtDate(t.date as Timestamp)}
+                    {t.category.replace(/\s+/g, '_')}{' // '}{fmtDate(t.date as Timestamp)}
                   </p>
                 </div>
               </div>

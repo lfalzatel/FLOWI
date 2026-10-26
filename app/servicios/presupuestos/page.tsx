@@ -522,7 +522,7 @@ export default function PresupuestosPage() {
               <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
                 <div>
                   <strong className="text-text-primary">Harvard Law School / Elizabeth Warren:</strong>
-                  <span className="block text-[10px] text-text-muted">Creadora de la norma 50/30/20 en el libro <em>"All Your Worth: The Ultimate Lifetime Money Plan"</em>.</span>
+                  <span className="block text-[10px] text-text-muted">Creadora de la norma 50/30/20 en el libro <em>&quot;All Your Worth: The Ultimate Lifetime Money Plan&quot;</em>.</span>
                 </div>
               </li>
               <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
