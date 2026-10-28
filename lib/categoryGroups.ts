@@ -67,6 +67,7 @@ function getGroupByKeywords(text: string): string {
 
 /**
  * Construye un resolvedor "categoría guardada en la transacción" -> { label canónico, grupo }.
+ * Por defecto resuelve gastos; con type 'ingreso' usa los grupos de ingreso.
  * Recibe las categorías del usuario (useCategories) para respetar sus personalizadas, que el
  * selector muestra en el grupo "Personalizadas". Normaliza mayúsculas, tildes y espacios para que
  * "mercado " y "Mercado" sumen en la misma subcategoría.
@@ -77,11 +78,18 @@ export function createCategoryResolver(userCategories: { label: string; group?: 
     if (c.isCustom) custom.set(normalizeText(c.label), c.label);
   });
 
-  return (rawLabel: string): { label: string; group: string } => {
+  return (rawLabel: string, type: 'gasto' | 'ingreso' = 'gasto'): { label: string; group: string } => {
     const key = normalizeText(rawLabel);
 
     const customLabel = custom.get(key);
     if (customLabel) return { label: customLabel, group: CUSTOM_GROUP };
+
+    // Los ingresos se agrupan con los grupos de ingreso del catálogo (Trabajo, Negocio...)
+    if (type === 'ingreso') {
+      const incomeDef = INCOME_CATEGORY_DEFS.find(c => normalizeText(c.label) === key);
+      if (incomeDef) return { label: incomeDef.label, group: incomeDef.group };
+      return { label: groupByLabel.get(key)?.label || rawLabel.trim(), group: 'Otros ingresos' };
+    }
 
     const known = groupByLabel.get(key);
     if (known) return known;

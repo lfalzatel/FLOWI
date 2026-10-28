@@ -14,6 +14,8 @@ import {
   CartesianGrid, AreaChart, Area, PieChart as RechartsPieChart, Pie, Cell, Legend
 } from 'recharts';
 import { Header } from '@/components/layout/Header';
+import { useCategories } from '@/hooks/useCategories';
+import { createCategoryResolver } from '@/lib/categoryGroups';
 
 export default function EstadisticasPage() {
   const router = useRouter();
@@ -31,6 +33,12 @@ export default function EstadisticasPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'gasto' | 'ingreso'>('all');
   const [topOrder, setTopOrder] = useState<'amount' | 'frequency'>('amount');
+  const [chartGrouping, setChartGrouping] = useState<'categories' | 'subcategories'>('categories');
+
+  // Misma clasificación que Presupuestos: une nombres repetidos ("mercado " = "Mercado") y agrupa por el catálogo
+  const { allCategories: userCategories } = useCategories();
+  const resolveCategory = useMemo(() => createCategoryResolver(userCategories), [userCategories]);
+  const categoryLabelOf = (t: Transaction) => resolveCategory(t.category || '', t.type).label;
 
   useEffect(() => {
     if (!profile || !user) return;
@@ -73,7 +81,7 @@ export default function EstadisticasPage() {
       else if (periodFilter === 'this_year') matchPeriod = d.getFullYear() === currentYear;
       
       // Categoría
-      const matchCategory = categoryFilter === 'all' || t.category === categoryFilter;
+      const matchCategory = categoryFilter === 'all' || categoryLabelOf(t) === categoryFilter;
       
       // Tipo
       const matchType = typeFilter === 'all' || t.type === typeFilter;
@@ -96,8 +104,10 @@ export default function EstadisticasPage() {
     filteredTxs.forEach(t => {
       if (typeFilter !== 'ingreso' && t.type !== 'gasto') return; // Si filtramos por ingresos, no contamos gastos para el pie. Para simplificar, agrupamos lo que haya pasado el filtro.
       // Mejor: agrupar lo que haya pasado el filtro `typeFilter`.
-      const current = catMap.get(t.category) || { amount: 0, count: 0 };
-      catMap.set(t.category, { amount: current.amount + t.amount, count: current.count + 1 });
+      const resolved = resolveCategory(t.category || '', t.type);
+      const key = chartGrouping === 'categories' ? resolved.group : resolved.label;
+      const current = catMap.get(key) || { amount: 0, count: 0 };
+      catMap.set(key, { amount: current.amount + t.amount, count: current.count + 1 });
     });
 
     const topCategories = Array.from(catMap.entries())
@@ -154,14 +164,15 @@ export default function EstadisticasPage() {
       checkDate.setDate(checkDate.getDate() - 1);
     }
 
-    const allCategories = Array.from(new Set(allTransactions.map(t => t.category)));
+    const allCategories = Array.from(new Set(allTransactions.map(categoryLabelOf)))
+      .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
     return { 
       totalIncome, totalExpense, netBalance, savingsRatio, 
       topCategories, monthlyHistory,
       streak, allCategories 
     };
-  }, [allTransactions, periodFilter, categoryFilter, typeFilter, topOrder]);
+  }, [allTransactions, periodFilter, categoryFilter, typeFilter, topOrder, chartGrouping, resolveCategory]);
 
   // --- HEATMAP WEEKLY LOGIC ---
   const weeklyHeatmapData = useMemo(() => {
@@ -186,7 +197,7 @@ export default function EstadisticasPage() {
       filtered = filtered.filter(t => t.type === typeFilter);
     }
     if (categoryFilter !== 'all') {
-      filtered = filtered.filter(t => t.category === categoryFilter);
+      filtered = filtered.filter(t => categoryLabelOf(t) === categoryFilter);
     }
 
     const daysMap: Record<number, { day: string; total: number }> = {
@@ -222,7 +233,7 @@ export default function EstadisticasPage() {
         : `${formatDayMonth(startOfTargetWeek)} - ${formatDayMonth(endOfTargetWeek)}`;
 
     return { days: orderedDays, maxTotal, weekLabel };
-  }, [allTransactions, weeksAgo, typeFilter, categoryFilter]);
+  }, [allTransactions, weeksAgo, typeFilter, categoryFilter, resolveCategory]);
 
   const COLORS = isTechTheme 
     ? ['#00FF9D', '#F97316', '#EAB308', '#3B82F6', '#EC4899', '#8B5CF6']
@@ -370,6 +381,15 @@ export default function EstadisticasPage() {
                   <PieChart className={`w-5 h-5 ${isTechTheme ? 'text-accent' : 'text-emerald-500'}`} />
                   <h2 className={`font-bold ${isTechTheme ? 'font-mono uppercase text-accent text-sm' : 'font-syne'}`}>Distribución</h2>
                 </div>
+                <div className="flex items-center gap-1.5">
+                <select
+                  value={chartGrouping}
+                  onChange={(e) => setChartGrouping(e.target.value as any)}
+                  className={`text-[10px] uppercase font-bold p-1 outline-none ${isTechTheme ? 'bg-[#051114] text-accent font-mono border border-accent/30' : 'bg-card border border-glass-border rounded text-text-secondary'}`}
+                >
+                  <option value="categories" className={isTechTheme ? "bg-[#051114]" : "bg-card text-text-primary"}>Categorías</option>
+                  <option value="subcategories" className={isTechTheme ? "bg-[#051114]" : "bg-card text-text-primary"}>Subcategorías</option>
+                </select>
                 <select 
                   value={topOrder} 
                   onChange={(e) => setTopOrder(e.target.value as any)}
@@ -378,6 +398,7 @@ export default function EstadisticasPage() {
                   <option value="amount" className={isTechTheme ? "bg-[#051114]" : "bg-card text-text-primary"}>Por Monto</option>
                   <option value="frequency" className={isTechTheme ? "bg-[#051114]" : "bg-card text-text-primary"}>Por Frecuencia</option>
                 </select>
+                </div>
               </div>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
