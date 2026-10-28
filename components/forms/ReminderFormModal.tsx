@@ -46,7 +46,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
   const [budgetPercent, setBudgetPercent] = useState(reminder?.budgetPercent ?? 80);
   const [alerts, setAlerts] = useState<ReminderAlert[]>(reminder?.alerts || []);
 
-  const { allCategories } = useCategories();
+  const { allCategories: categoryOptions, merchantOptions } = useCategories();
+  const allCategories = [...categoryOptions, ...merchantOptions.filter(mer => !categoryOptions.some(c => c.label === mer.label))];
   const [sound, setSound] = useState(reminder?.sound ?? true);
   const [pushEnabled, setPushEnabled] = useState(reminder?.pushEnabled ?? true);
   const [inAppEnabled, setInAppEnabled] = useState(reminder?.inAppEnabled ?? true);

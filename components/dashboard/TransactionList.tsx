@@ -5,6 +5,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from './AnimatedNumber';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { useCategories } from '@/hooks/useCategories';
+import { findCatalogEntry } from '@/lib/categories';
 
 interface Props { 
   transactions: Transaction[]; 
@@ -30,6 +31,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
 
   const getCategoryIcon = (category: string) => {
     return allCategories.find(c => c.label.toLowerCase() === category.toLowerCase()) 
+      || findCatalogEntry(category)
       || { label: 'Otro', icon: '💡', color: '#6B7280' };
   };
 
@@ -46,6 +48,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
     <div key={animationKey} className="space-y-2">
       {items.map((t, i) => {
         const cat = getCategoryIcon(t.category);
+        const details = [t.category, t.merchant, t.paymentMethod].filter(Boolean).join(' · ');
         const displayName = t.description || t.category;
         const displayLabel = isCyberpunk 
           ? `>_ ${displayName.toUpperCase().replace(/\s+/g, '_')}` 
@@ -68,7 +71,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
                     {displayLabel}
                   </p>
                   <p className="text-[9px] text-accent/60 font-mono mt-0.5 uppercase tracking-wider truncate">
-                    {t.category.replace(/\s+/g, '_')} // {fmtDate(t.date as Timestamp)}
+                    {details.replace(/\s+/g, '_')} // {fmtDate(t.date as Timestamp)}
                   </p>
                 </div>
               </div>
@@ -97,7 +100,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
               <p className="text-[13px] font-semibold text-text-primary truncate">
                 {displayLabel}
               </p>
-              <p className="text-[11px] text-text-secondary mt-0.5">{t.category} • {fmtDate(t.date as Timestamp)}</p>
+              <p className="text-[11px] text-text-secondary mt-0.5 truncate">{details} • {fmtDate(t.date as Timestamp)}</p>
             </div>
             {/* Amount */}
             <p className={`text-[13px] font-bold flex-shrink-0

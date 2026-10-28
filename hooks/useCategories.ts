@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { CustomCategory, BASE_CATEGORIES } from '@/lib/firestore';
+import { CUSTOM_GROUP, MERCHANTS, TransactionKind } from '@/lib/categories';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
@@ -10,6 +11,9 @@ export interface CategoryOption {
   color: string;
   isCustom?: boolean;
   id?: string;
+  group?: string;
+  // Sin tipo = sirve tanto para gastos como para ingresos (categorías personalizadas)
+  type?: TransactionKind;
 }
 
 // Variables en memoria a nivel de módulo para almacenar el estado y los listeners compartidos
@@ -102,16 +106,26 @@ export function useCategories() {
       icon: cat.icon,
       color: cat.color,
       isCustom: true,
-      id: cat.id
+      id: cat.id,
+      group: CUSTOM_GROUP
     });
   });
 
   const allCategories: CategoryOption[] = Array.from(allCategoriesMap.values())
     .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
 
+  const expenseCategories = allCategories.filter(cat => !cat.type || cat.type === 'gasto');
+  const incomeCategories = allCategories.filter(cat => !cat.type || cat.type === 'ingreso');
+
+  // Comercios como opciones seleccionables (útil para recordatorios de pagos: EPM, Netflix, etc.)
+  const merchantOptions: CategoryOption[] = MERCHANTS.map(({ label, icon, color }) => ({ label, icon, color }));
+
   return {
     customCategories,
     allCategories,
+    expenseCategories,
+    incomeCategories,
+    merchantOptions,
     loading,
     refreshCategories: () => {} // Kept for backwards compatibility
   };

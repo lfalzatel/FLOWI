@@ -1,4 +1,5 @@
 import { db } from './firebase';
+import { BASE_CATEGORY_DEFS, EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS } from './categories';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc, arrayUnion, orderBy } from 'firebase/firestore';
 
 export interface Transaction {
@@ -10,6 +11,8 @@ export interface Transaction {
   date: Timestamp | Date;
   userId?: string;
   isFixed?: boolean;
+  merchant?: string | null;
+  paymentMethod?: string | null;
 }
 
 export interface CustomCategory {
@@ -20,130 +23,16 @@ export interface CustomCategory {
   userId: string;
 }
 
-export const BASE_CATEGORIES = [
-  // Originales / Comida y Ocio expandidos
-  { label: 'Restaurantes', icon: '🍽️', color: '#FF5B5B' },
-  { label: 'Mercado', icon: '🛒', color: '#10B981' },
-  { label: 'Café y Antojos', icon: '☕', color: '#D1A153' },
-  { label: 'Licores y Bares', icon: '🍺', color: '#F5A623' },
-  { label: 'Transporte', icon: '🚌', color: '#F5A623' },
-  { label: 'Entretenimiento', icon: '🎮', color: '#A855F7' },
-  { label: 'Hogar', icon: '🏠', color: '#00E5A0' },
-  { label: 'Arriendo', icon: '🏢', color: '#F59E0B' },
-  { label: 'Sueldo', icon: '💰', color: '#00E5A0' },
-  { label: 'Inversiones', icon: '📈', color: '#3B82F6' },
-  { label: 'Regalos', icon: '🎁', color: '#EC4899' },
-  // Nuevas pedidas por el usuario (con iconos corporativos nativos)
-  { label: 'Claro Hogar', icon: 'claro_hogar', color: '#E11D48' },
-  { label: 'Claro Móvil', icon: 'claro_movil', color: '#E11D48' },
-  { label: 'Netflix', icon: 'netflix', color: '#E50914' },
-  { label: 'Spotify', icon: 'spotify', color: '#1DB954' },
-  { label: 'Google', icon: 'google', color: '#4285F4' },
-  { label: 'Play Store', icon: 'play_store', color: '#607D8B' },
-  { label: 'YouTube', icon: 'youtube', color: '#FF0000' },
-  { label: 'YT Music', icon: 'yt music', color: '#FF0000' },
-  { label: 'Viajes', icon: '✈️', color: '#06B6D4' },
-  { label: 'Agua', icon: '💧', color: '#3B82F6' },
-  { label: 'Luz', icon: '💡', color: '#F5A623' },
-  { label: 'EPM', icon: 'epm', color: '#00A859' },
-  { label: 'Administración', icon: '🔑', color: '#8B5CF6' },
-  { label: 'Alcanos', icon: 'alcanos', color: '#0054A6' },
-  { label: 'Efigas', icon: 'efigas', color: '#009EE0' },
-  { label: 'Gas natural', icon: '🔥', color: '#EF4444' },
-  { label: 'Parqueadero', icon: 'parqueadero', color: '#1E3A8A' },
-  { label: 'Cine', icon: 'cine', color: '#7F1D1D' },
-  { label: 'Fútbol', icon: '⚽', color: '#0F766E' },
-  { label: 'Gimnasio', icon: '🏋️‍♂️', color: '#1E293B' },
-  { label: 'Ciclismo', icon: '🚲', color: '#0369A1' },
-  { label: 'Running', icon: '🏃‍♂️', color: '#B45309' },
-  { label: 'Decathlon', icon: 'decathlon', color: '#0082C3' },
-  { label: 'Nike', icon: 'nike', color: '#000000' },
-  { label: 'Adidas', icon: 'adidas', color: '#000000' },
-  { label: 'D1', icon: 'd1', color: '#E30613' },
-  { label: 'Olímpica', icon: 'olimpica', color: '#E30613' },
-  { label: 'Jumbo', icon: 'jumbo', color: '#00A859' },
-  { label: 'Carulla', icon: 'carulla', color: '#005A36' },
-  { label: 'Homecenter', icon: 'homecenter', color: '#004B87' },
-  { label: 'Ktronix', icon: 'ktronix', color: '#FF6A00' },
-  { label: 'Panamericana', icon: 'panamericana', color: '#0A2240' },
-  { label: 'Frisby', icon: 'frisby', color: '#E30613' },
-  { label: 'Popsy', icon: 'popsy', color: '#E10074' },
-  { label: 'BBVA', icon: 'bbva', color: '#1D4ED8' },
-  { label: 'Bancolombia', icon: 'bancolombia', color: '#FBBF24' },
-  { label: 'Nequi', icon: 'nequi', color: '#D946EF' },
-  { label: 'Daviplata', icon: 'daviplata', color: '#E30613' },
-  { label: 'Davivienda', icon: 'davivienda', color: '#E30613' },
-  // Compras y mercado (las más solicitadas)
-  { label: 'Tienda / Minimercado', icon: '🏪', color: '#10B981' },
-  { label: 'Verduras y Frutas',    icon: '🥦', color: '#22C55E' },
-  { label: 'Carnicería',           icon: '🥩', color: '#EF4444' },
-  { label: 'Panadería',            icon: '🥐', color: '#D97706' },
-  { label: 'Aseo del hogar',       icon: '🧹', color: '#6366F1' },
-  { label: 'Mascotas',             icon: '🐾', color: '#F59E0B' },
-  { label: 'Médico / Salud',       icon: '🏥', color: '#3B82F6' },
-  { label: 'Farmacia',             icon: '💊', color: '#14B8A6' },
-  { label: 'Educación',            icon: '📚', color: '#8B5CF6' },
-  { label: 'Ropa y Calzado',       icon: '👟', color: '#EC4899' },
-  // Nuevas agregadas
-  { label: 'Sura', icon: 'sura', color: '#0033A0' },
-  { label: 'Colsanitas', icon: 'colsanitas', color: '#00467F' },
-  { label: 'Compensar', icon: 'compensar', color: '#00873A' },
-  { label: 'Nueva EPS', icon: 'nueva eps', color: '#005A9C' },
-  { label: 'Odontología', icon: '🦷', color: '#14B8A6' },
-  { label: 'Bienestar / Spa', icon: '💆', color: '#EC4899' },
-  { label: 'Exámenes', icon: '🧪', color: '#8B5CF6' },
-  { label: 'FNA', icon: 'fna', color: '#003DA5' },
-  { label: 'Cesantías', icon: '🏦', color: '#10B981' },
-  { label: 'Cuota de crédito', icon: '💳', color: '#F59E0B' },
-  { label: 'Impuestos', icon: '🏛️', color: '#EF4444' },
-  { label: 'Bolsa / Acciones', icon: '📊', color: '#3B82F6' },
-  { label: 'Ahorro', icon: '🐷', color: '#F472B6' },
-  { label: 'Comfama', icon: 'comfama', color: '#FF6A00' },
-  { label: 'Colsubsidio', icon: 'colsubsidio', color: '#E30613' },
-  { label: 'Ropa', icon: '👕', color: '#8B5CF6' },
-  { label: 'Calzado', icon: '👠', color: '#EC4899' },
-  { label: 'Zara', icon: 'zara', color: '#000000' },
-  { label: 'H&M', icon: 'h&m', color: '#CD102D' },
-  { label: 'Belleza', icon: '💄', color: '#EC4899' },
-  { label: 'Matrícula', icon: '🎓', color: '#F59E0B' },
-  { label: 'Udemy', icon: 'udemy', color: '#A435F0' },
-  { label: 'Coursera', icon: 'coursera', color: '#0056D2' },
-  { label: 'Útiles', icon: '✏️', color: '#F5A623' },
-  { label: 'Gasolina', icon: '⛽', color: '#EF4444' },
-  { label: 'Rappi', icon: 'rappi', color: '#FF441F' },
-  { label: 'Uber', icon: 'uber', color: '#000000' },
-  { label: 'SOAT', icon: '🚗', color: '#10B981' },
-  { label: 'Tecnomecánica', icon: '🔧', color: '#64748B' },
-  { label: 'Peajes', icon: '🛣️', color: '#6B7280' },
-  { label: 'Multas', icon: '🛑', color: '#EF4444' },
-  { label: 'Rumba', icon: '🪩', color: '#D946EF' },
-  { label: 'Apuestas', icon: '🎲', color: '#F59E0B' },
-  { label: 'Eventos', icon: '🎫', color: '#8B5CF6' },
-  { label: 'Empleada', icon: '🧹', color: '#0EA5E9' },
-  { label: 'Reparaciones', icon: '🔨', color: '#64748B' },
-  { label: 'Veterinaria', icon: '🩺', color: '#14B8A6' },
-  { label: 'Guardería', icon: '🐕', color: '#F59E0B' },
-  { label: 'Inventario', icon: '📦', color: '#8B4513' },
-  { label: 'Nómina', icon: '💼', color: '#3B82F6' },
-  { label: 'Insumos', icon: '🛒', color: '#10B981' },
-  { label: 'Diezmo', icon: '⛪', color: '#F59E0B' },
-  { label: 'Ayuda familiar', icon: '🤝', color: '#EC4899' },
-  { label: 'Préstamos prestados', icon: '💸', color: '#059669' },
-  { label: 'Mantenimiento', icon: '🔧', color: '#64748B' },
-  { label: 'Mudanza', icon: '📦', color: '#8B4513' },
-  { label: 'Muebles', icon: '🛋️', color: '#D97706' },
-  { label: 'Remodelación', icon: '👷', color: '#F59E0B' },
-  { label: 'Freelance', icon: '💻', color: '#3B82F6' },
-  { label: 'Arriendo recibido', icon: '🏘️', color: '#10B981' },
-  { label: 'Transferencia', icon: '📲', color: '#06B6D4' },
-  { label: 'Venta', icon: '🏷️', color: '#10B981' },
-];
+// Catálogo completo en lib/categories.ts (gastos, ingresos, comercios y medios de pago)
+export const BASE_CATEGORIES = BASE_CATEGORY_DEFS;
 
 export const FIXED_CATEGORIES = [
   'Arriendo', 'Administración', 'Agua', 'Luz', 'EPM', 'Gas natural', 'Efigas', 'Alcanos',
   'Claro Hogar', 'Claro Móvil', 'Netflix', 'Spotify', 'YouTube', 'YT Music', 'Google', 'Play Store',
   'Cuota de crédito', 'Gimnasio', 'Empleada', 'Pensión', 'Matrícula', 'SOAT', 'Tecnomecánica',
-  'Sura', 'Colsanitas', 'Compensar', 'Nueva EPS', 'FNA', 'Cesantías', 'Impuestos'
+  'Sura', 'Colsanitas', 'Compensar', 'Nueva EPS', 'FNA', 'Cesantías', 'Impuestos',
+  'Internet', 'Medicina prepagada', 'Seguros', 'Cuota de manejo', 'Suscripciones', 'Apps e IA',
+  'Música', 'Nube / almacenamiento', 'Natillera', 'Fondo de empleados', 'Cuota alimentaria'
 ];
 
 export function isFixedExpenseCategory(category: string): boolean {
@@ -157,8 +46,8 @@ export function isFixedExpenseCategory(category: string): boolean {
   return /servicio|arriendo|renta|suscripcio|suscripció|pension|pensió|matri|seguro|soat|impuesto|plan|fibra|celular|internet|tv|telef/i.test(catLower);
 }
 
-export const EXPENSE_CATEGORIES = BASE_CATEGORIES;
-export const INCOME_CATEGORIES = BASE_CATEGORIES;
+export const EXPENSE_CATEGORIES = EXPENSE_CATEGORY_DEFS;
+export const INCOME_CATEGORIES = INCOME_CATEGORY_DEFS;
 
 export async function getUserTransactions(userId: string, type?: 'gasto' | 'ingreso') {
   const expensesRef = collection(db, 'fl_expenses');
