@@ -16,6 +16,7 @@ import {
 import { Header } from '@/components/layout/Header';
 import { useCategories } from '@/hooks/useCategories';
 import { createCategoryResolver } from '@/lib/categoryGroups';
+import { formatCompactCOP } from '@/lib/chartFormat';
 
 export default function EstadisticasPage() {
   const router = useRouter();
@@ -449,7 +450,7 @@ export default function EstadisticasPage() {
               
               <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.monthlyHistory} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <BarChart data={data.monthlyHistory} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isTechTheme ? 'rgba(0, 255, 157, 0.1)' : 'rgba(150,150,150,0.1)'} />
                     <XAxis 
                       dataKey="monthStr" 
@@ -461,7 +462,8 @@ export default function EstadisticasPage() {
                       axisLine={false} 
                       tickLine={false} 
                       tick={{ fill: isTechTheme ? 'rgba(0,255,157,0.5)' : '#999', fontSize: 10 }}
-                      tickFormatter={(val) => `$${(val / 1000)}k`}
+                      width={44}
+                      tickFormatter={formatCompactCOP}
                     />
                     <RechartsTooltip 
                       cursor={{ fill: isTechTheme ? 'rgba(0, 255, 157, 0.1)' : 'rgba(0,0,0,0.05)' }}
@@ -477,6 +479,7 @@ export default function EstadisticasPage() {
                     {(typeFilter === 'all' || typeFilter === 'ingreso') && (
                       <Bar 
                         dataKey="ingreso" 
+                        maxBarSize={28}
                         name="Ingresos"
                         fill={isTechTheme ? '#00FF9D' : '#10B981'} 
                         radius={isTechTheme ? 0 : [4, 4, 0, 0]} 
@@ -485,6 +488,7 @@ export default function EstadisticasPage() {
                     {(typeFilter === 'all' || typeFilter === 'gasto') && (
                       <Bar 
                         dataKey="gasto" 
+                        maxBarSize={28}
                         name="Gastos"
                         fill={isTechTheme ? '#f97316' : '#EF4444'} 
                         radius={isTechTheme ? 0 : [4, 4, 0, 0]} 
