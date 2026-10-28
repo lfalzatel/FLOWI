@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Transaction } from '@/lib/firestore';
+import { Timestamp } from 'firebase/firestore';
+import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { formatCurrency } from '@/lib/format';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +15,14 @@ import {
   Target, Plus, Edit3, Check, AlertTriangle, Sparkles, 
   ChevronDown, ChevronUp, Layers, ListFilter 
 } from 'lucide-react';
+
+const VISIBLE_TRANSACTIONS = 8;
+
+const toDate = (value: Transaction['date']) => (value instanceof Timestamp ? value.toDate() : new Date(value as any));
+
+function formatShortDate(d: Date) {
+  return `${d.getDate()} ${d.toLocaleDateString('es-CO', { month: 'short' }).replace('.', '')}`;
+}
 
 interface CategoryBudgetsProps {
   transactions: Transaction[];
@@ -37,6 +47,11 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
   const [budgets, setBudgets] = useState<Record<string, number>>({});
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [tempBudgetVal, setTempBudgetVal] = useState<string>('');
+
+  // Detalle desplegable de una categoría principal y gasto abierto para editar
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
 
   useEffect(() => {
     try {
@@ -77,6 +92,25 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
     });
     return expenses;
   }, [subcategoryExpenses, resolveCategory]);
+
+  // Gastos del periodo agrupados por categoría principal (para el detalle al tocar una tarjeta)
+  const groupDetails = useMemo(() => {
+    const details: Record<string, { transactions: Transaction[]; subcategories: Record<string, number> }> = {};
+    transactions.forEach(t => {
+      if (t.type !== 'gasto' || !t.category) return;
+      const { label, group } = resolveCategory(t.category);
+      const entry = details[group] ||= { transactions: [], subcategories: {} };
+      entry.transactions.push(t);
+      entry.subcategories[label] = (entry.subcategories[label] || 0) + (t.amount || 0);
+    });
+    Object.values(details).forEach(d => d.transactions.sort((a, b) => toDate(b.date).getTime() - toDate(a.date).getTime()));
+    return details;
+  }, [transactions, resolveCategory]);
+
+  const toggleGroup = (group: string) => {
+    setExpandedGroup(prev => (prev === group ? null : group));
+    setShowAllTransactions(false);
+  };
 
   // Personalizadas solo se muestra si tiene gastos en el período
   const mainCategoryNames = BUDGET_GROUP_ORDER.filter(
@@ -184,8 +218,17 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                   progressColor = 'bg-yellow-500';
                 }
 
+                const isExpanded = expandedGroup === mainCatName;
+                const detail = groupDetails[mainCatName];
+
                 return (
-                  <div key={mainCatName} className={`p-3.5 rounded-2xl border transition-all ${config.bg}`}>
+                  <div key={mainCatName} className={`rounded-2xl border transition-all ${config.bg}`}>
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(mainCatName)}
+                      aria-expanded={isExpanded}
+                      className="w-full text-left p-3.5 active:scale-[0.99] transition-transform"
+                    >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-base">{config.icon}</span>
@@ -199,15 +242,18 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-text-primary">
-                          {formatCurrency(spent, currency)}
-                        </span>
-                        {target > 0 && (
-                          <span className="text-[10px] text-text-muted block">
-                            Meta: {formatCurrency(target, currency)}
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <span className="text-xs font-bold text-text-primary">
+                            {formatCurrency(spent, currency)}
                           </span>
-                        )}
+                          {target > 0 && (
+                            <span className="text-[10px] text-text-muted block">
+                              Meta: {formatCurrency(target, currency)}
+                            </span>
+                          )}
+                        </div>
+                        {isExpanded ? <ChevronUp className="w-4 h-4 text-text-muted shrink-0" /> : <ChevronDown className="w-4 h-4 text-text-muted shrink-0" />}
                       </div>
                     </div>
 
@@ -237,6 +283,73 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                       <p className="text-[10px] text-text-muted italic pt-1">
                         Configura tu Presupuesto Global Mensual para activar los estimados de la regla 50/30/20.
                       </p>
+                    )}
+                    </button>
+
+                    {isExpanded && (
+                      <div className={`px-3.5 pb-3.5 pt-1 space-y-3 border-t ${isTechTheme ? 'border-accent/20' : 'border-white/10'}`}>
+                        {!detail ? (
+                          <p className="text-[11px] text-text-muted text-center py-3">No hay gastos en esta categoría en el periodo.</p>
+                        ) : (
+                          <>
+                            {/* En qué subcategorías se fue el dinero */}
+                            <div className="space-y-1.5 pt-2">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">En qué se fue</p>
+                              {Object.entries(detail.subcategories)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([subcat, amount]) => {
+                                  const share = spent > 0 ? Math.round((amount / spent) * 100) : 0;
+                                  return (
+                                    <div key={subcat} className="flex items-center gap-2 text-[11px]">
+                                      <CategoryIcon icon={subcat} label={subcat} className="w-5 h-5 text-sm flex items-center justify-center shrink-0" />
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between gap-2">
+                                          <span className="truncate text-text-primary">{subcat}</span>
+                                          <span className="shrink-0 font-semibold text-text-primary">{formatCurrency(amount, currency)}</span>
+                                        </div>
+                                        <div className="h-1 mt-1 bg-white/10 rounded-full overflow-hidden">
+                                          <div className="h-full bg-accent/70 rounded-full" style={{ width: `${share}%` }} />
+                                        </div>
+                                      </div>
+                                      <span className="w-8 text-right text-[10px] text-text-muted shrink-0">{share}%</span>
+                                    </div>
+                                  );
+                                })}
+                            </div>
+
+                            {/* Gastos del periodo, del más reciente al más antiguo */}
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                                Gastos ({detail.transactions.length})
+                              </p>
+                              {(showAllTransactions ? detail.transactions : detail.transactions.slice(0, VISIBLE_TRANSACTIONS)).map((t, i) => (
+                                <button
+                                  key={t.id || i}
+                                  type="button"
+                                  onClick={() => setTransactionToEdit(t)}
+                                  className="w-full flex items-center gap-2 py-1.5 text-left text-[11px] hover:bg-white/5 rounded-lg px-1 -mx-1"
+                                >
+                                  <span className="w-12 shrink-0 text-text-muted normal-case">{formatShortDate(toDate(t.date))}</span>
+                                  <span className="flex-1 min-w-0 truncate text-text-primary normal-case">
+                                    {t.description || t.category}
+                                    {t.merchant && <span className="text-text-muted"> · {t.merchant}</span>}
+                                  </span>
+                                  <span className="shrink-0 font-semibold text-text-primary">{formatCurrency(t.amount, currency)}</span>
+                                </button>
+                              ))}
+                              {detail.transactions.length > VISIBLE_TRANSACTIONS && (
+                                <button
+                                  type="button"
+                                  onClick={() => setShowAllTransactions(!showAllTransactions)}
+                                  className="w-full text-center text-[11px] font-semibold text-accent pt-1"
+                                >
+                                  {showAllTransactions ? 'Ver menos' : `Ver todos (${detail.transactions.length})`}
+                                </button>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
                 );
@@ -412,6 +525,13 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
           )}
         </div>
       </div>
+
+      {transactionToEdit && (
+        <AddExpenseModal
+          transactionToEdit={transactionToEdit}
+          onClose={() => setTransactionToEdit(null)}
+        />
+      )}
     </div>
   );
 }
