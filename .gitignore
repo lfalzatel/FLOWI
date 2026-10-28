@@ -37,3 +37,7 @@ public/workbox-*.js.map
 # Firebase CLI (el log de depuración puede contener tokens)
 firebase-debug.log
 firebase-debug.*.log
+
+# Claves de cuentas de servicio de Google Cloud (nunca se suben)
+tienda-38d40-*.json
+*-serviceaccount*.json
