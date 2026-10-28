@@ -33,3 +33,7 @@ public/sw.js
 public/workbox-*.js
 public/sw.js.map
 public/workbox-*.js.map
+
+# Firebase CLI (el log de depuración puede contener tokens)
+firebase-debug.log
+firebase-debug.*.log

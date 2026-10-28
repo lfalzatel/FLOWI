@@ -1,0 +1,48 @@
+# Publica FLOWI en Firebase Hosting (sitio flowi-gastos) cada vez que llega un cambio a main.
+# También se puede lanzar a mano desde la pestaña Actions de GitHub ("Run workflow").
+name: Publicar en Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Evita dos publicaciones al mismo tiempo; la más reciente espera a que termine la anterior
+concurrency:
+  group: firebase-hosting-live
+  cancel-in-progress: false
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compilar (exportación estática a out/)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          # Configuración web pública de la app "FLOWI App" (proyecto tienda-38d40).
+          # No son secretos: ya van incluidos en el JavaScript que se publica en el sitio.
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyBzJDDPxsHbwARgfq_IKiMPg7w9_uI2s0s
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: tienda-38d40.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: tienda-38d40
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: tienda-38d40.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '887130100035'
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:887130100035:web:b28ccb84e6dbcdf8fcdff6
+
+      - name: Publicar en el sitio flowi-gastos
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIENDA_38D40 }}
+          projectId: tienda-38d40
+          target: flowi
+          channelId: live
