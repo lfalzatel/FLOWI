@@ -318,18 +318,22 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         <div className={`fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
           <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
           <div
-            className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}
+            // dvh = alto visible real en el celular (sin la barra del navegador), para que no se desborde
+            className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[92dvh] sm:max-h-[90vh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={onClose} aria-label="Cerrar" className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
-              <X className="w-5 h-5" />
-            </button>
+        <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
+          <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent tracking-wide' : 'font-syne font-bold text-xl text-text-primary'}`}>
+            {transactionToEdit ? 'Editar Transacción' : 'Nueva Transacción'}
+          </h2>
+          <button type="button" onClick={onClose} aria-label="Cerrar" className={`p-1 -mr-1 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-5 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-text-primary mb-5'}`}>
-          {transactionToEdit ? 'Editar Transacción' : 'Nueva Transacción'}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
+          {/* Campos con scroll; el botón de guardar queda fijo abajo */}
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 pb-5 space-y-5">
           {/* Type Toggle */}
           <div className={`flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-glass border border-glass-border rounded-xl'}`}>
             {(['gasto', 'ingreso'] as const).map(option => (
@@ -522,17 +526,6 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             />
           </div>
 
-          {/* Submit */}
-          <div className="pt-1">
-            <button
-              type="submit"
-              disabled={loading || !amount}
-              className={`w-full py-4 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent text-white hover:bg-accent/90`}`}
-            >
-              {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : (type === 'gasto' ? 'Añadir gasto' : 'Añadir ingreso')}
-            </button>
-          </div>
-
           {transactionToEdit && (
             <div className="flex gap-2">
               <button
@@ -556,6 +549,18 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
               )}
             </div>
           )}
+          </div>
+
+          {/* Submit siempre visible, con fondo sólido para que no se transparente la barra inferior de la app */}
+          <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
+            <button
+              type="submit"
+              disabled={loading || !amount}
+              className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent text-white hover:bg-accent/90`}`}
+            >
+              {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : (type === 'gasto' ? 'Añadir gasto' : 'Añadir ingreso')}
+            </button>
+          </div>
             </form>
           </div>
         </div>,
