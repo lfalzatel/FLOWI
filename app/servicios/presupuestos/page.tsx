@@ -17,6 +17,8 @@ import { DateFilter } from '@/components/dashboard/DateFilter';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
+import { useCategories } from '@/hooks/useCategories';
+import { createCategoryResolver } from '@/lib/categoryGroups';
 import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -93,33 +95,17 @@ export default function PresupuestosPage() {
   const isOverGlobalBudget = globalBudget > 0 && totalSpentFiltered > globalBudget;
   const globalRemaining = globalBudget - totalSpentFiltered;
 
-  // Clasificación de subcategoría a Categoría Principal
-  const getMainCategoryName = (label: string): string => {
-    const text = label.toLowerCase();
-    if (/comida|restaurante|almuerzo|cena|desayuno|mercado|supermercado|cafe|café|panaderia|panadería|antojo|snack|licor|bar|cerveza|trago|bebida|cigarro|popsy|frisby|helado|verdura|fruta|vegetal|carne|carniceria|carnicería|pan/.test(text)) {
-      return 'Comida y Ocio';
-    }
-    if (/banco|tarjeta|credito|crédito|ahorro|inversion|inversión|prestamo|préstamo|nequi|bancolombia|bbva|daviplata|davivienda|plata|efectivo|nomina|nómina|sueldo/.test(text)) {
-      return 'Bancos y Finanzas';
-    }
-    if (/claro|movistar|tigo|wom|epm|efigas|alcanos|agua|luz|energia|energía|gas|internet|television|televisión|telefono|teléfono|hogar|arriendo|alquiler|administracion|administración|apartamento|apto|aseo|limpieza/.test(text)) {
-      return 'Hogar y Servicios';
-    }
-    if (/netflix|spotify|google|youtube|yt music|drive|gmail|photos|play store|playstore|app|susbcripcion|suscripción/.test(text)) {
-      return 'Marcas y Apps';
-    }
-    if (/deporte|gym|gimnasio|fitness|piscina|natacion|natación|futbol|fútbol|ciclo|ciclismo|bici|bicicleta|run|running|atletismo|nike|adidas|decathlon/.test(text)) {
-      return 'Deportes';
-    }
-    return 'Otros';
-  };
+  // Clasificación de subcategoría a su grupo del catálogo (igual que el selector y Presupuestos por Categoría)
+  const { allCategories } = useCategories();
+  const resolveCategory = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
 
   // Datos para la Gráfica Circular de Distribución del Gasto (Categorías vs Subcategorías)
   const pieChartData = useMemo(() => {
     const categoryTotals: Record<string, number> = {};
     filteredTransactions.forEach(t => {
       if (t.type === 'gasto' && t.category) {
-        const key = chartGrouping === 'categories' ? getMainCategoryName(t.category) : t.category;
+        const resolved = resolveCategory(t.category);
+        const key = chartGrouping === 'categories' ? resolved.group : resolved.label;
         categoryTotals[key] = (categoryTotals[key] || 0) + (t.amount || 0);
       }
     });
@@ -141,7 +127,7 @@ export default function PresupuestosPage() {
         color: colors[idx % colors.length]
       }))
       .sort((a, b) => b.value - a.value);
-  }, [filteredTransactions, chartGrouping]);
+  }, [filteredTransactions, chartGrouping, resolveCategory]);
 
   // Cálculo de días restantes en el mes para el presupuesto diario sugerido
   const daysInMonth = useMemo(() => {

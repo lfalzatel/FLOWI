@@ -6,6 +6,9 @@ import { formatCurrency } from '@/lib/format';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { useCategories } from '@/hooks/useCategories';
+import { CUSTOM_GROUP } from '@/lib/categories';
+import { BUDGET_GROUP_ORDER, GROUP_BUDGET_CONFIG, PILLAR_STYLES, createCategoryResolver } from '@/lib/categoryGroups';
 import { 
   Target, Plus, Edit3, Check, AlertTriangle, Sparkles, 
   ChevronDown, ChevronUp, Layers, ListFilter 
@@ -17,38 +20,11 @@ interface CategoryBudgetsProps {
   filterType?: string;
 }
 
-const MAIN_CATEGORIES_CONFIG: Record<string, { icon: string; rule: string; weight: number; color: string; bg: string }> = {
-  'Hogar y Servicios': { icon: '🏠', rule: '50% Necesidades', weight: 0.50, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-  'Comida y Ocio': { icon: '🍽️', rule: '30% Estilo de Vida', weight: 0.15, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
-  'Bancos y Finanzas': { icon: '🏦', rule: '20% Ahorro', weight: 0.20, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
-  'Marcas y Apps': { icon: '📱', rule: '30% Estilo de Vida', weight: 0.05, color: 'text-amber-400', bg: 'bg-purple-500/10 border-purple-500/20' },
-  'Deportes': { icon: '⚽', rule: '30% Estilo de Vida', weight: 0.05, color: 'text-amber-400', bg: 'bg-cyan-500/10 border-cyan-500/20' },
-  'Otros': { icon: '📦', rule: '30% Estilo de Vida', weight: 0.05, color: 'text-amber-400', bg: 'bg-rose-500/10 border-rose-500/20' }
-};
-
-function getMainCategoryName(label: string): string {
-  const text = label.toLowerCase();
-  if (/comida|restaurante|almuerzo|cena|desayuno|mercado|supermercado|cafe|café|panaderia|panadería|antojo|snack|licor|bar|cerveza|trago|bebida|cigarro|popsy|frisby|helado|verdura|fruta|vegetal|carne|carniceria|carnicería|pan/.test(text)) {
-    return 'Comida y Ocio';
-  }
-  if (/banco|tarjeta|credito|crédito|ahorro|inversion|inversión|prestamo|préstamo|nequi|bancolombia|bbva|daviplata|davivienda|plata|efectivo|nomina|nómina|sueldo/.test(text)) {
-    return 'Bancos y Finanzas';
-  }
-  if (/claro|movistar|tigo|wom|epm|efigas|alcanos|agua|luz|energia|energía|gas|internet|television|televisión|telefono|teléfono|hogar|arriendo|alquiler|administracion|administración|apartamento|apto|aseo|limpieza/.test(text)) {
-    return 'Hogar y Servicios';
-  }
-  if (/netflix|spotify|google|youtube|yt music|drive|gmail|photos|play store|playstore|app|susbcripcion|suscripción/.test(text)) {
-    return 'Marcas y Apps';
-  }
-  if (/deporte|gym|gimnasio|fitness|piscina|natacion|natación|futbol|fútbol|ciclo|ciclismo|bici|bicicleta|run|running|atletismo|nike|adidas|decathlon/.test(text)) {
-    return 'Deportes';
-  }
-  return 'Otros';
-}
-
 export function CategoryBudgets({ transactions, currency = 'COP', filterType = 'month' }: CategoryBudgetsProps) {
   const { theme } = useTheme();
   const { profile } = useAuth();
+  const { allCategories } = useCategories();
+  const resolveCategory = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   const globalBudget = profile?.budget || 0;
@@ -85,30 +61,27 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
     const expenses: Record<string, number> = {};
     transactions.forEach(t => {
       if (t.type === 'gasto' && t.category) {
-        expenses[t.category] = (expenses[t.category] || 0) + (t.amount || 0);
+        const { label } = resolveCategory(t.category);
+        expenses[label] = (expenses[label] || 0) + (t.amount || 0);
       }
     });
     return expenses;
-  }, [transactions]);
+  }, [transactions, resolveCategory]);
 
-  // 2. Gastos acumulados por Categoría Principal
+  // 2. Gastos acumulados por Categoría Principal (grupos del catálogo, los mismos del selector)
   const mainCategoryExpenses = useMemo(() => {
-    const expenses: Record<string, number> = {
-      'Hogar y Servicios': 0,
-      'Comida y Ocio': 0,
-      'Bancos y Finanzas': 0,
-      'Marcas y Apps': 0,
-      'Deportes': 0,
-      'Otros': 0
-    };
-
+    const expenses: Record<string, number> = {};
     Object.entries(subcategoryExpenses).forEach(([subcat, amount]) => {
-      const mainGroup = getMainCategoryName(subcat);
-      expenses[mainGroup] = (expenses[mainGroup] || 0) + amount;
+      const group = resolveCategory(subcat).group;
+      expenses[group] = (expenses[group] || 0) + amount;
     });
-
     return expenses;
-  }, [subcategoryExpenses]);
+  }, [subcategoryExpenses, resolveCategory]);
+
+  // Personalizadas solo se muestra si tiene gastos en el período
+  const mainCategoryNames = BUDGET_GROUP_ORDER.filter(
+    name => name !== CUSTOM_GROUP || (mainCategoryExpenses[name] || 0) > 0
+  );
 
   // Subcategorías históricas usadas
   const allSubcategoryNames = useMemo(() => {
@@ -188,7 +161,8 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
 
           {openMainAccordion && (
             <div className="p-4 space-y-3.5 bg-black/20">
-              {Object.entries(MAIN_CATEGORIES_CONFIG).map(([mainCatName, config]) => {
+              {mainCategoryNames.map(mainCatName => {
+                const config = { ...GROUP_BUDGET_CONFIG[mainCatName], ...PILLAR_STYLES[GROUP_BUDGET_CONFIG[mainCatName].pillar] };
                 const spent = mainCategoryExpenses[mainCatName] || 0;
                 let rawTarget = globalBudget > 0 ? Math.round(globalBudget * config.weight) : 0;
 
@@ -319,8 +293,8 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
               ) : (
                 allSubcategoryNames.map(subcatName => {
                   const spent = subcategoryExpenses[subcatName] || 0;
-                  const mainCatName = getMainCategoryName(subcatName);
-                  const mainConfig = MAIN_CATEGORIES_CONFIG[mainCatName];
+                  const mainCatName = resolveCategory(subcatName).group;
+                  const mainConfig = GROUP_BUDGET_CONFIG[mainCatName];
                   
                   // Meta calculada estimada o manual personalizada
                   const manualTarget = budgets[subcatName] || 0;

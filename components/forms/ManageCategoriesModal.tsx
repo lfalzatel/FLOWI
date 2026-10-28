@@ -7,6 +7,8 @@ import { useCategories, CategoryOption } from '@/hooks/useCategories';
 import { addCustomCategory, updateCustomCategory, deleteCustomCategory, CustomCategory, hideBaseCategory } from '@/lib/firestore';
 import { useTheme } from '@/components/ThemeProvider';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { CUSTOM_GROUP, EXPENSE_GROUPS, INCOME_GROUPS } from '@/lib/categories';
+import { GROUP_BUDGET_CONFIG } from '@/lib/categoryGroups';
 
 const CATEGORIZED_ICONS = {
   'Comida y Ocio': [
@@ -29,14 +31,16 @@ const CATEGORIZED_ICONS = {
   ]
 };
 
+// Iconos de los grupos del catálogo (los mismos que usa el selector de categorías)
 const MAIN_CATEGORY_ICONS: Record<string, string> = {
-  'Comida y Ocio': '🍽️',
-  'Bancos y Finanzas': '🏦',
-  'Hogar y Servicios': '🏠',
-  'Marcas y Apps': '📱',
-  'Deportes': '⚽',
-  'Otros': '📦'
+  ...Object.fromEntries(Object.entries(GROUP_BUDGET_CONFIG).map(([group, { icon }]) => [group, icon])),
+  'Trabajo': '💼',
+  'Rentas e inversiones': '📈',
+  'Otros ingresos': '➕'
 };
+
+// Orden de los grupos en la lista: gastos, ingresos y al final las personalizadas
+const GROUP_ORDER = Array.from(new Set([...EXPENSE_GROUPS, ...INCOME_GROUPS, CUSTOM_GROUP]));
 
 const COLORS = ['#FF5B5B', '#F5A623', '#A855F7', '#00E5A0', '#3B82F6', '#EC4899', '#E11D48', '#10B981', '#8B5CF6', '#F97316', '#EF4444', '#1D4ED8', '#FBBF24', '#D946EF', '#6B7280'];
 
@@ -170,49 +174,9 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
     }
   };
 
-  const getTabByKeywords = (label: string): keyof typeof CATEGORIZED_ICONS | null => {
-    const text = label.toLowerCase();
-    if (/comida|restaurante|almuerzo|cena|desayuno|mercado|supermercado|cafe|café|panaderia|panadería|antojo|snack|licor|bar|cerveza|trago|bebida|cigarro|popsy|frisby|helado|verdura|fruta|vegetal|carne|carniceria|carnicería|pan/.test(text)) {
-      return 'Comida y Ocio';
-    }
-    if (/banco|tarjeta|credito|crédito|ahorro|inversion|inversión|prestamo|préstamo|nequi|bancolombia|bbva|daviplata|davivienda|plata|efectivo|nomina|nómina|sueldo/.test(text)) {
-      return 'Bancos y Finanzas';
-    }
-    if (/claro|movistar|tigo|wom|epm|efigas|alcanos|agua|luz|energia|energía|gas|internet|television|televisión|telefono|teléfono|hogar|arriendo|alquiler|administracion|administración|apartamento|apto|aseo|limpieza/.test(text)) {
-      return 'Hogar y Servicios';
-    }
-    if (/netflix|spotify|google|youtube|yt music|drive|gmail|photos|play store|playstore|app|susbcripcion|suscripción/.test(text)) {
-      return 'Marcas y Apps';
-    }
-    if (/deporte|gym|gimnasio|fitness|piscina|natacion|natación|futbol|fútbol|ciclo|ciclismo|bici|bicicleta|run|running|atletismo|nike|adidas|decathlon/.test(text)) {
-      return 'Deportes';
-    }
-    if (/mascota|mascotas|perro|gato|medico|médico|salud|droga|farmacia|drogueria|droguería|doctor|educacion|educación|estudio|colegio|universidad|libro|libros|ropa|calzado|zapatos|vestir/.test(text)) {
-      return 'Otros';
-    }
-    return null;
-  };
-
-  const getCategoryGroup = (cat: CategoryOption): keyof typeof CATEGORIZED_ICONS => {
-    const keywordTab = getTabByKeywords(cat.label);
-    if (keywordTab) return keywordTab;
-
-    for (const [tab, icons] of Object.entries(CATEGORIZED_ICONS)) {
-      if (icons.includes(cat.icon)) return tab as keyof typeof CATEGORIZED_ICONS;
-    }
-    return 'Otros';
-  };
-
-  // Agrupación inteligente de subcategorías por Categoría Principal
+  // Agrupación por el grupo del catálogo (igual que el selector y los presupuestos)
   const groupedCategories = useMemo(() => {
-    const groups: Record<keyof typeof CATEGORIZED_ICONS, CategoryOption[]> = {
-      'Comida y Ocio': [],
-      'Bancos y Finanzas': [],
-      'Hogar y Servicios': [],
-      'Marcas y Apps': [],
-      'Deportes': [],
-      'Otros': []
-    };
+    const groups: Record<string, CategoryOption[]> = {};
 
     allCategories.forEach(cat => {
       if (filterType === 'custom' && !cat.isCustom) return;
@@ -225,11 +189,13 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
         if (!matchesName && !matchesIcon) return;
       }
 
-      const group = getCategoryGroup(cat);
-      groups[group].push(cat);
+      const group = cat.group && GROUP_ORDER.includes(cat.group) ? cat.group : CUSTOM_GROUP;
+      (groups[group] ||= []).push(cat);
     });
 
-    return groups;
+    return Object.fromEntries(
+      GROUP_ORDER.filter(group => groups[group]?.length).map(group => [group, groups[group]])
+    );
   }, [allCategories, searchQuery, filterType]);
 
   const totalFilteredCount = useMemo(() => {
@@ -245,7 +211,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
 
   const toggleExpandAll = (expand: boolean) => {
     const nextState: Record<string, boolean> = {};
-    Object.keys(CATEGORIZED_ICONS).forEach(key => {
+    GROUP_ORDER.forEach(key => {
       nextState[key] = expand;
     });
     setExpandedGroups(nextState);
