@@ -14,7 +14,7 @@ import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
-  Sun, Monitor, Terminal, Moon, Layers
+  Sun, Monitor, Terminal, Moon, Layers, Heart
 } from 'lucide-react';
 
 const menuItems = [
@@ -24,6 +24,7 @@ const menuItems = [
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
   { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: false, isNotificationToggle: true },
   { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: true,  soon: false },
+  { icon: Heart,      label: 'Apoyar a FLOWI',    href: '/configuracion#apoyar', divider: false, soon: false },
 ];
 
 export function ProfileCapsule() {

@@ -13,6 +13,7 @@ import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoundModal';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
+import { SupportProject } from '@/components/settings/SupportProject';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { CURRENCIES } from '@/lib/format';
@@ -812,6 +813,8 @@ export default function ConfigPage() {
         </section>
 
         <AiAssistantSettings isTechTheme={isTechTheme} />
+
+        <SupportProject isTechTheme={isTechTheme} />
 
         {/* 4. Finanzas */}
         <section className="space-y-3">
