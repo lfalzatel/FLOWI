@@ -45,7 +45,6 @@ export async function processGoogleUser(user: any) {
   const snap    = await getDoc(userRef);
 
   let isNewUser = false;
-  const isAdminEmail = user.email === 'lfalzatel@gmail.com';
 
   if (!snap.exists()) {
     isNewUser = true;
@@ -53,7 +52,8 @@ export async function processGoogleUser(user: any) {
       name:      user.displayName,
       email:     user.email,
       photoURL:  user.photoURL,
-      role:      isAdminEmail ? 'admin' : 'Usuario',
+      // El rol de administrador se asigna desde "Gestionar usuarios" y queda guardado en el perfil
+      role:      'Usuario',
       currency:  'COP',
       createdAt: serverTimestamp(),
     });
@@ -64,9 +64,6 @@ export async function processGoogleUser(user: any) {
       email: user.email,
       photoURL: user.photoURL || data.photoURL || '',
     };
-    if (isAdminEmail && data.role !== 'admin') {
-      updates.role = 'admin';
-    }
     await setDoc(userRef, updates, { merge: true });
   }
 
