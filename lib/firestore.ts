@@ -106,6 +106,8 @@ export interface Debt {
   createdAt?: Timestamp | Date;
   description?: string;
   interestRate?: number; // Tasa efectiva anual (E.A. %) opcional
+  // "debo" = yo le debo a alguien (por defecto); "me_deben" = alguien me debe a mí
+  direction?: 'debo' | 'me_deben';
   payments?: Array<{
     id: string;
     amount: number;

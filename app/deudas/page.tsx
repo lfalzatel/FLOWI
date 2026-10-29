@@ -165,6 +165,11 @@ export default function DeudasPage() {
                               <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-medium bg-orange-400/10 px-1.5 py-0.5 rounded">
                                 <Clock className="w-3 h-3" /> Pendiente
                               </span>
+                              {debt.direction === 'me_deben' && (
+                                <span className="text-[10px] text-emerald-400 font-medium bg-emerald-400/10 px-1.5 py-0.5 rounded">
+                                  Me deben
+                                </span>
+                              )}
                               {debt.interestRate ? (
                                 <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-1 rounded text-[9px] uppercase tracking-wider">
                                   {debt.interestRate}% EA

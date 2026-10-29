@@ -390,6 +390,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             title: tx.description || `Deuda con ${tx.debtPerson || 'persona'}`,
             totalAmount: tx.amount,
             interestRate: tx.interestRate || 0,
+            direction: tx.debtDirection || 'debo',
             paidAmount: 0,
             status: 'pending',
           });
@@ -402,6 +403,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             description: tx.description,
             date: new Date(),
             isFixed: tx.isFixed,
+            ...(tx.merchant ? { merchant: tx.merchant } : {}),
           });
         }
       }
@@ -760,7 +762,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 : 'text-red-400 bg-red-500/15 border-red-500/40 hover:bg-red-500/25'
                             }`}
                           >
-                            <span>{res.type.toUpperCase()} DETECTADO</span>
+                            <span>{res.type === 'deuda' && res.debtDirection === 'me_deben' ? 'ME DEBEN' : res.type.toUpperCase()} DETECTADO</span>
                             <RefreshCw className="w-2.5 h-2.5 opacity-70" />
                           </button>
                           {res.isFixed && res.type === 'gasto' && (

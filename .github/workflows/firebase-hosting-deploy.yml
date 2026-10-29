@@ -25,6 +25,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Probar el analizador de comandos de voz
+        run: npm run test:voice
+
       - name: Compilar (exportación estática a out/)
         run: npm run build
         env:

@@ -1,0 +1,394 @@
+[
+  {
+    "frase": "gasté 5 mil en cerveza y 10 mil en cigarrillos",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 5000,
+        "category": "Licores y Bares"
+      },
+      {
+        "type": "gasto",
+        "amount": 10000,
+        "category": "Licores y Bares"
+      }
+    ]
+  },
+  {
+    "frase": "5 mil en cerveza y 10 mil en cigarrillos",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 5000
+      },
+      {
+        "type": "gasto",
+        "amount": 10000
+      }
+    ]
+  },
+  {
+    "frase": "compré cerveza y cigarrillos, en total 15 mil",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 15000,
+        "category": "Licores y Bares"
+      }
+    ]
+  },
+  {
+    "frase": "gasté 20 mil en mercado y 15 mil en gasolina",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 20000,
+        "category": "Mercado"
+      },
+      {
+        "type": "gasto",
+        "amount": 15000,
+        "category": "Gasolina"
+      }
+    ]
+  },
+  {
+    "frase": "me pagaron 2 millones de sueldo, gasté 50 mil en almuerzo y le debo 100 mil a Juan",
+    "espera": [
+      {
+        "type": "ingreso",
+        "amount": 2000000,
+        "category": "Sueldo"
+      },
+      {
+        "type": "gasto",
+        "amount": 50000,
+        "category": "Restaurantes"
+      },
+      {
+        "type": "deuda",
+        "amount": 100000,
+        "debtDirection": "debo",
+        "debtPerson": "Juan"
+      }
+    ]
+  },
+  {
+    "frase": "ingreso de 500 mil por venta y gasto de 20 mil en taxi",
+    "espera": [
+      {
+        "type": "ingreso",
+        "amount": 500000,
+        "category": "Venta"
+      },
+      {
+        "type": "gasto",
+        "amount": 20000,
+        "category": "Taxi / plataformas"
+      }
+    ]
+  },
+  {
+    "frase": "recibí 300 mil de freelance y compré mercado por 80 mil",
+    "espera": [
+      {
+        "type": "ingreso",
+        "amount": 300000,
+        "category": "Freelance"
+      },
+      {
+        "type": "gasto",
+        "amount": 80000,
+        "category": "Mercado"
+      }
+    ]
+  },
+  {
+    "frase": "debo 200 mil a Pedro y gasté 30 mil en taxi",
+    "espera": [
+      {
+        "type": "deuda",
+        "amount": 200000,
+        "debtDirection": "debo",
+        "debtPerson": "Pedro"
+      },
+      {
+        "type": "gasto",
+        "amount": 30000,
+        "category": "Taxi / plataformas"
+      }
+    ]
+  },
+  {
+    "frase": "Juan me debe 50 mil",
+    "espera": [
+      {
+        "type": "deuda",
+        "amount": 50000,
+        "debtDirection": "me_deben",
+        "debtPerson": "Juan"
+      }
+    ]
+  },
+  {
+    "frase": "le presté 80 mil a Carlos",
+    "espera": [
+      {
+        "type": "deuda",
+        "amount": 80000,
+        "debtDirection": "me_deben",
+        "debtPerson": "Carlos"
+      }
+    ]
+  },
+  {
+    "frase": "pagué la luz 85 mil y el agua 60 mil",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 85000,
+        "category": "Luz"
+      },
+      {
+        "type": "gasto",
+        "amount": 60000,
+        "category": "Agua"
+      }
+    ]
+  },
+  {
+    "frase": "gasté 1,5 millones en arriendo",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 1500000,
+        "category": "Arriendo"
+      }
+    ]
+  },
+  {
+    "frase": "me pagaron 2 millones 500 mil de sueldo",
+    "espera": [
+      {
+        "type": "ingreso",
+        "amount": 2500000,
+        "category": "Sueldo"
+      }
+    ]
+  },
+  {
+    "frase": "pagué $1.250.000 de arriendo",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 1250000,
+        "category": "Arriendo"
+      }
+    ]
+  },
+  {
+    "frase": "gasté veinticinco mil en almuerzo",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 25000,
+        "category": "Restaurantes"
+      }
+    ]
+  },
+  {
+    "frase": "gasté treinta y cinco mil en el mercado",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 35000,
+        "category": "Mercado"
+      }
+    ]
+  },
+  {
+    "frase": "me pagaron un millón y medio",
+    "espera": [
+      {
+        "type": "ingreso",
+        "amount": 1500000
+      }
+    ]
+  },
+  {
+    "frase": "compré 3 cervezas a 5 mil cada una",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 15000,
+        "category": "Licores y Bares"
+      }
+    ]
+  },
+  {
+    "frase": "compré 2 pizzas por 60 mil",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 60000,
+        "category": "Comidas rápidas"
+      }
+    ]
+  },
+  {
+    "frase": "gasté 45 mil en helado y ensalada",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 45000,
+        "category": "Café y Antojos",
+        "description": "Helado y ensalada"
+      }
+    ]
+  },
+  {
+    "frase": "pagué 120 mil de la nota de crédito del banco",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 120000
+      }
+    ]
+  },
+  {
+    "frase": "gasté 60 mil en gasolina",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 60000,
+        "category": "Gasolina"
+      }
+    ]
+  },
+  {
+    "frase": "pagué 90 mil del gimnasio",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 90000,
+        "category": "Gimnasio"
+      }
+    ]
+  },
+  {
+    "frase": "compré mercado en Jumbo por 230 mil",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 230000,
+        "category": "Mercado",
+        "merchant": "Jumbo"
+      }
+    ]
+  },
+  {
+    "frase": "le debo 300 mil al banco al 2%",
+    "espera": [
+      {
+        "type": "deuda",
+        "amount": 300000,
+        "debtDirection": "debo",
+        "interestRate": 2
+      }
+    ]
+  },
+  {
+    "frase": "hoy gasté 12 mil en tinto y pan",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 12000,
+        "category": "Café y Antojos"
+      }
+    ]
+  },
+  {
+    "frase": "me consignaron 450.000 de la quincena",
+    "espera": [
+      {
+        "type": "ingreso",
+        "amount": 450000,
+        "category": "Sueldo"
+      }
+    ]
+  },
+  {
+    "frase": "pagué netflix 26.900",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 26900,
+        "category": "Suscripciones"
+      }
+    ]
+  },
+  {
+    "frase": "gasté 20 mil en uber, 15 mil en almuerzo y me prestaron 200 mil",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 20000,
+        "category": "Taxi / plataformas"
+      },
+      {
+        "type": "gasto",
+        "amount": 15000,
+        "category": "Restaurantes"
+      },
+      {
+        "type": "deuda",
+        "amount": 200000,
+        "debtDirection": "debo"
+      }
+    ]
+  },
+  {
+    "frase": "compré unos tenis por 250 mil en Nike",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 250000,
+        "category": "Calzado",
+        "merchant": "Nike"
+      }
+    ]
+  },
+  {
+    "frase": "le pagué 50 mil a María que le debía",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 50000
+      }
+    ]
+  },
+  {
+    "frase": "nota comprar leche mañana",
+    "espera": [
+      {
+        "command": "create_note"
+      }
+    ]
+  },
+  {
+    "frase": "recordatorio pagar el arriendo cada mes",
+    "espera": [
+      {
+        "command": "create_reminder"
+      }
+    ]
+  },
+  {
+    "frase": "abrir estadísticas",
+    "espera": [
+      {
+        "command": "navigate"
+      }
+    ]
+  }
+]
