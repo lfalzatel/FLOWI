@@ -12,6 +12,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
 import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle } from '@/lib/voiceParser';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
+import { getAiKey, improveWithAi, needsAiHelp } from '@/lib/aiAssist';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
@@ -43,6 +44,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [pendingAction, setPendingAction] = useState<'create_reminder' | 'create_note' | 'create_income' | 'create_expense' | null>(null);
 
   const recognitionRef = useRef<any>(null);
+  // Respaldo con IA gratuita (solo si el usuario la conectó y el analizador local no quedó seguro)
+  const [aiStatus, setAiStatus] = useState<'idle' | 'loading' | 'done' | 'failed'>('idle');
+  const aiRequestRef = useRef(0);
+  // Último dictado ya procesado: evita volver a analizarlo (y a consultar la IA) en cada redibujado
+  const processedTranscriptRef = useRef<string | null>(null);
 
   // Iniciar reconocimiento de voz de forma dinámica
   const startListening = () => {
@@ -52,6 +58,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     }
 
     setTranscript('');
+    processedTranscriptRef.current = null;
     if (!pendingAction) {
       setParsedResults([]);
     }
@@ -157,6 +164,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   useEffect(() => {
     if (transcript.trim() && !isListening) {
       const text = transcript.trim();
+      if (processedTranscriptRef.current === text) return;
+      processedTranscriptRef.current = text;
 
       // Si había un estado conversacional pendiente (creación de recordatorio, nota, ingreso o gasto):
       if (pendingAction) {
@@ -287,6 +296,23 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
       const results = parseMultiVoiceTransaction(text, allCategories);
       setParsedResults(results);
+
+      const requestId = ++aiRequestRef.current;
+      setAiStatus('idle');
+      if (getAiKey() && needsAiHelp(results)) {
+        setAiStatus('loading');
+        improveWithAi(text, allCategories)
+          .then(aiResults => {
+            if (requestId !== aiRequestRef.current) return;
+            if (aiResults) {
+              setParsedResults(aiResults);
+              setAiStatus('done');
+            } else {
+              setAiStatus('failed');
+            }
+          })
+          .catch(() => { if (requestId === aiRequestRef.current) setAiStatus('failed'); });
+      }
 
       // Si es una pregunta de seguimiento (ask_followup), APAGAR micrófono y LIMPIAR transcript para romper bucles
       if (results.length === 1 && 'kind' in results[0] && results[0].kind === 'command') {
@@ -563,6 +589,14 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         {/* Vista previa de los Datos Parseados */}
         {parsedResults.length > 0 && (
           <div className="w-full my-3 space-y-2 max-h-56 overflow-y-auto scrollbar-hide pr-1">
+            {aiStatus !== 'idle' && (
+              <p className={`text-[10px] px-1 flex items-center gap-1.5 normal-case ${aiStatus === 'failed' ? 'text-text-muted' : 'text-accent'}`}>
+                <Sparkles className={`w-3 h-3 ${aiStatus === 'loading' ? 'animate-pulse' : ''}`} />
+                {aiStatus === 'loading' && 'Consultando la IA para entender mejor…'}
+                {aiStatus === 'done' && 'Ajustado con IA. Revisa antes de guardar.'}
+                {aiStatus === 'failed' && 'La IA no respondió; se usa el resultado local.'}
+              </p>
+            )}
             {parsedResults.length > 1 && (
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-bold text-accent flex items-center gap-1.5">

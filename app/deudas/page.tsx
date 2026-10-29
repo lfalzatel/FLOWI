@@ -12,6 +12,23 @@ import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
+import { DateFilter } from '@/components/dashboard/DateFilter';
+import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
+
+const toDate = (value: any): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value.toDate === 'function') return value.toDate();
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+// Fecha en que se terminó de pagar: el último abono, o la creación si se registró ya pagada
+function settledDate(debt: Debt): Date | null {
+  const paymentDates = (debt.payments || []).map(p => toDate(p.date)).filter((d): d is Date => !!d);
+  if (paymentDates.length) return new Date(Math.max(...paymentDates.map(d => d.getTime())));
+  return toDate(debt.createdAt);
+}
 
 export default function DeudasPage() {
   const { theme } = useTheme();
@@ -23,6 +40,8 @@ export default function DeudasPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'month' | 'week' | 'day'>('month');
+  const [filterValue, setFilterValue] = useState(getLocalMonthString());
 
   // Calcular el total de deudas acumulando dinámicamente los intereses generados
   const totalDeudasConInteres = debts
@@ -33,8 +52,19 @@ export default function DeudasPage() {
       return sum + basePending + interestData.accumulatedInterest;
     }, 0);
 
+  const isInPeriod = (d: Date | null) => {
+    if (filterType === 'all') return true;
+    if (!d) return false;
+    const dateStr = getLocalDateString(d);
+    if (filterType === 'month') return dateStr.startsWith(filterValue);
+    if (filterType === 'week') return getISOWeekString(d) === filterValue;
+    return dateStr === filterValue;
+  };
+
+  // Las pendientes se ven siempre (siguen vigentes); las liquidadas, solo en el periodo en que se pagaron
   const activeDebts = debts.filter(d => d.status !== 'paid');
-  const paidDebts = debts.filter(d => d.status === 'paid');
+  const paidDebts = debts.filter(d => d.status === 'paid' && isInPeriod(settledDate(d)));
+  const hiddenPaidCount = debts.filter(d => d.status === 'paid').length - paidDebts.length;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -109,6 +139,13 @@ export default function DeudasPage() {
             <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>Suma de todas tus deudas activas</p>
           </div>
         </div>
+
+        <DateFilter
+          filterType={filterType}
+          filterValue={filterValue}
+          onChangeType={setFilterType}
+          onChangeValue={setFilterValue}
+        />
 
         {/* Debts List */}
         <div className="space-y-3">
@@ -211,7 +248,7 @@ export default function DeudasPage() {
               {/* Historial de Deudas Liquidadas */}
               {paidDebts.length > 0 && (
                 <div className="space-y-2 pt-2">
-                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas ({paidDebts.length})</h3>
+                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas en este periodo ({paidDebts.length})</h3>
                   {paidDebts.map((debt, i) => {
                     const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
                     const createdDate = debt.createdAt instanceof Date 
@@ -251,6 +288,12 @@ export default function DeudasPage() {
                     );
                   })}
                 </div>
+              )}
+
+              {hiddenPaidCount > 0 && (
+                <p className={`text-[11px] text-center text-text-muted ${isCyberpunk ? 'font-mono' : ''}`}>
+                  {hiddenPaidCount} {hiddenPaidCount === 1 ? 'deuda liquidada' : 'deudas liquidadas'} en otros periodos. Cambia el filtro para verlas.
+                </p>
               )}
             </div>
           )}
