@@ -7,7 +7,7 @@ export interface DonationKey {
 }
 
 export const DONATION_KEYS: DonationKey[] = [
-  { bank: 'Nequi', icon: 'nequi', keys: ['@3104604592', '75107425', 'lfalzatel@gmail.com'] },
-  { bank: 'Bancolombia', icon: 'bancolombia', keys: ['@alzate7425', '3104604592'] },
+  { bank: 'Nequi', icon: 'nequi', keys: ['@3104604592'] },
+  { bank: 'Bancolombia', icon: 'bancolombia', keys: ['@alzate7425'] },
   { bank: 'BBVA', icon: 'bbva', keys: ['@bbva3104604592'] },
 ];
