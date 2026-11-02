@@ -5,6 +5,7 @@ import { signInWithPopup, getAdditionalUserInfo } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Wallet } from 'lucide-react';
 import { SplashScreen } from '@/components/layout/SplashScreen';
+import { FlowLines } from '@/components/FlowLines';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -69,8 +70,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050B14] p-4">
-      <div className="w-full max-w-md bg-[#0D1527] border border-white/5 rounded-3xl p-8 space-y-8 relative overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-[#050B14] p-4 overflow-hidden">
+      <FlowLines className="absolute inset-0" />
+      <div className="w-full max-w-md bg-[#0D1527] border border-white/5 rounded-3xl p-8 space-y-8 relative z-10 overflow-hidden">
         {/* Glow effects */}
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full" />
         <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-violet-500/10 blur-3xl rounded-full" />

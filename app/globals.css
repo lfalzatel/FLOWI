@@ -313,3 +313,34 @@ body {
 }
 
 
+
+/* ─── Fondo animado de ondas (components/FlowLines.tsx) ─── */
+.flow-lines-pulse {
+  stroke-dasharray: 70 1400;
+  stroke-dashoffset: 1470;
+  animation: flow-lines-run linear infinite;
+}
+.flow-lines-coin {
+  offset-rotate: 0deg;
+  animation: flow-lines-travel linear infinite;
+  filter: drop-shadow(0 0 6px rgb(var(--accent) / 0.8));
+}
+.flow-lines-drift {
+  transform-origin: center;
+  animation: flow-lines-breathe 14s ease-in-out infinite;
+}
+@keyframes flow-lines-run {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes flow-lines-travel {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+@keyframes flow-lines-breathe {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-10px) scaleY(1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-lines-pulse, .flow-lines-coin, .flow-lines-drift { animation: none; }
+  .flow-lines-coin { display: none; }
+}
