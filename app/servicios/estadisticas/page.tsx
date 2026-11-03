@@ -255,7 +255,7 @@ export default function EstadisticasPage() {
   };
 
   return (
-    <div className="relative isolate min-h-screen flex flex-col bg-deep w-full max-w-[100vw] overflow-x-clip">
+    <div className="relative min-h-screen flex flex-col bg-deep w-full max-w-[100vw] overflow-x-clip">
       <Header />
       
       {/* Botón de retroceso opcional para esta vista */}
@@ -325,7 +325,7 @@ export default function EstadisticasPage() {
         </div>
       </div>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full p-4 pb-24 space-y-6">
+      <main className="relative flex-1 max-w-2xl mx-auto w-full p-4 pb-24 space-y-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 opacity-50">
             <Loader2 className={`w-8 h-8 animate-spin mb-4 ${isTechTheme ? 'text-accent' : 'text-emerald-500'}`} />

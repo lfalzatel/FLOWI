@@ -83,10 +83,10 @@ export default function GastosPage() {
   });
 
   return (
-    <div className="relative isolate min-h-screen bg-deep flex flex-col">
+    <div className="relative min-h-screen bg-deep flex flex-col">
       <Header />
       
-      <main className="flex-1 p-4 pb-24 max-w-2xl mx-auto w-full animate-fade-in-up stagger">
+      <main className="relative flex-1 p-4 pb-24 max-w-2xl mx-auto w-full animate-fade-in-up stagger">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>Mis Gastos</h1>

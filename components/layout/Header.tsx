@@ -145,8 +145,9 @@ export function Header() {
 
   return (
     <>
-    {/* Ondas animadas detrás de la parte superior de cada página (la página debe tener "relative isolate") */}
-    <FlowLines variant="hero" className="absolute inset-x-0 top-0 h-[300px] -z-10" />
+    {/* Ondas animadas detrás de la parte superior de cada página (la página debe ser "relative" y su <main> también).
+        Sin "isolate": aislar la página dejaba la capa de cierre del menú de perfil por encima del menú. */}
+    <FlowLines variant="hero" className="absolute inset-x-0 top-0 h-[300px]" />
     <header
       ref={headerRef}
       className={`

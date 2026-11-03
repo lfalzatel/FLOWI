@@ -316,9 +316,9 @@ export default function ConfigPage() {
   if (authLoading) return <div className="min-h-screen bg-deep flex flex-col items-center justify-center"><div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="relative isolate min-h-screen flex flex-col bg-deep">
+    <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
-      <main className="flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-24">
+      <main className="relative flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-24">
         {/* Header section */}
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className={`p-2 -ml-2 rounded-xl transition-colors ${isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-secondary hover:bg-glass'}`}>

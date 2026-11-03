@@ -146,10 +146,10 @@ export default function PresupuestosPage() {
   }, [globalRemaining, remainingDays]);
 
   return (
-    <div className="relative isolate min-h-screen flex flex-col bg-deep">
+    <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
 
-      <main className={`flex-1 max-w-3xl mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-32 ${isTechTheme ? 'font-mono' : ''}`}>
+      <main className={`relative flex-1 max-w-3xl mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-32 ${isTechTheme ? 'font-mono' : ''}`}>
         {/* Encabezado Responsivo */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">

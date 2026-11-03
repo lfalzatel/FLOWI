@@ -153,7 +153,7 @@ export default function DashboardPage() {
   const filteredBalance = filteredIngresos - filteredGastos;
 
   return (
-    <div className="relative isolate min-h-screen flex flex-col bg-deep">
+    <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
 
       <main className="relative z-[1] flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">

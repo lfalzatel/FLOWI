@@ -34,9 +34,9 @@ export default function NotasPage() {
   };
 
   return (
-    <div className="relative isolate min-h-screen flex flex-col bg-deep">
+    <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
-      <main className={`flex-1 pb-32 p-4 pt-6 max-w-5xl mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
+      <main className={`relative flex-1 pb-32 p-4 pt-6 max-w-5xl mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Link href="/servicios" className={`p-2 -ml-2 bg-glass border hover:bg-white/[0.05] transition-colors ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
