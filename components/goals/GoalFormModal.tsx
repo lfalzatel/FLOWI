@@ -77,10 +77,10 @@ export function GoalFormModal({ goal, onClose, onDelete }: Props) {
   }`;
 
   return createPortal(
-    <div className={`fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 ${isTechTheme ? 'font-mono' : ''}`}>
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
       <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <div
-        className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[92dvh] sm:max-h-[90vh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}
+        className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[88dvh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
@@ -158,7 +158,7 @@ export function GoalFormModal({ goal, onClose, onDelete }: Props) {
             )}
           </div>
 
-          <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
+          <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-4 border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             <button type="submit" disabled={!canSave}
                     className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : 'rounded-xl bg-accent text-white hover:bg-accent/90'}`}>
               {loading ? 'Guardando...' : goal ? 'Guardar cambios' : 'Crear meta'}
