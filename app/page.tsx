@@ -20,7 +20,6 @@ import { SplashScreen } from '@/components/layout/SplashScreen';
 import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
-import { FlowLines } from '@/components/FlowLines';
 
 let hasShownSplashInThisJSContext = false;
 
@@ -154,10 +153,8 @@ export default function DashboardPage() {
   const filteredBalance = filteredIngresos - filteredGastos;
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-deep">
+    <div className="relative isolate min-h-screen flex flex-col bg-deep">
       <Header />
-      {/* Ondas animadas solo detrás del saludo: no debajo de las tarjetas de vidrio, que se volverían lentas */}
-      <FlowLines variant="hero" className="absolute inset-x-0 top-0 h-[300px] z-0" />
 
       <main className="relative z-[1] flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
         {/* Welcome Message for New Users */}

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ProfileCapsule } from './ProfileCapsule';
 import { X } from 'lucide-react';
@@ -10,13 +10,26 @@ import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useReminders } from '@/hooks/useReminders';
 import { Reminder } from '@/lib/firestore';
 import { Bell, Clock, Info, MessageCircle } from 'lucide-react';
+import { FlowLines } from '@/components/FlowLines';
 
 export function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const [showLogoModal, setShowLogoModal] = useState(false);
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+
+  // Publica la altura del encabezado (--header-h) para que los filtros fijos queden justo debajo
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => document.documentElement.style.setProperty('--header-h', `${el.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -131,7 +144,11 @@ export function Header() {
   }
 
   return (
+    <>
+    {/* Ondas animadas detrás de la parte superior de cada página (la página debe tener "relative isolate") */}
+    <FlowLines variant="hero" className="absolute inset-x-0 top-0 h-[300px] -z-10" />
     <header
+      ref={headerRef}
       className={`
         sticky top-0 z-[60] w-full px-4 py-3
         flex items-center justify-between
@@ -407,5 +424,6 @@ export function Header() {
         document.body
       )}
     </header>
+    </>
   );
 }

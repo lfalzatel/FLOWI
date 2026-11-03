@@ -34,7 +34,7 @@ export default function NotasPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-deep">
+    <div className="relative isolate min-h-screen flex flex-col bg-deep">
       <Header />
       <main className={`flex-1 pb-32 p-4 pt-6 max-w-5xl mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
         <div className="flex items-center justify-between mb-6">

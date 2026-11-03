@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getISOWeekString, formatFilterText, navigateFilter, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { Transaction } from '@/lib/firestore';
@@ -21,6 +21,25 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+
+  // El filtro se queda pegado bajo el encabezado al hacer scroll; al quedar pegado se compacta
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      const el = rootRef.current;
+      if (!el) return;
+      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
+      setStuck(el.getBoundingClientRect().top <= headerH + 1);
+    };
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check);
+    return () => {
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+  }, []);
 
   const handleTypeChange = (type: FilterType) => {
     onChangeType(type);
@@ -108,7 +127,14 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
   });
 
   return (
-    <div className="flex flex-col gap-3 mb-6 relative z-40">
+    <div
+      ref={rootRef}
+      className={`sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 mb-6 flex flex-col transition-[padding,background-color,gap] duration-200 ${
+        stuck
+          ? `gap-1.5 py-2 bg-deep/80 backdrop-blur-xl shadow-lg shadow-black/10 border-b ${isTechTheme ? 'border-accent/20' : 'border-glass-border'}`
+          : 'gap-3 py-0 border-b border-transparent'
+      }`}
+    >
       {/* Pestañas superiores */}
       <div 
         className={`relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/10 bg-glass backdrop-blur-3xl border border-glass-border ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-[28px]'}`}
@@ -143,7 +169,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Navegador inferior (oculto si es Todo) */}
       {filterType !== 'all' && (
-        <div className={`flex items-center justify-between px-4 py-3 bg-card w-full max-w-sm mx-auto border border-glass-border mt-2 shadow-sm ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-full'}`}>
+        <div className={`flex items-center justify-between px-4 bg-card w-full max-w-sm mx-auto border border-glass-border shadow-sm transition-all ${stuck ? 'py-1.5' : 'py-3 mt-2'} ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-full'}`}>
           <button 
             onClick={handlePrev}
             className={`p-1 hover:bg-glass-hover active:scale-95 transition-all text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}

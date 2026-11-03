@@ -83,7 +83,7 @@ export default function GastosPage() {
   });
 
   return (
-    <div className="min-h-screen bg-deep flex flex-col">
+    <div className="relative isolate min-h-screen bg-deep flex flex-col">
       <Header />
       
       <main className="flex-1 p-4 pb-24 max-w-2xl mx-auto w-full animate-fade-in-up stagger">

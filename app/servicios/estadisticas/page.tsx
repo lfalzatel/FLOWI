@@ -255,7 +255,7 @@ export default function EstadisticasPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-deep w-full max-w-[100vw] overflow-x-hidden">
+    <div className="relative isolate min-h-screen flex flex-col bg-deep w-full max-w-[100vw] overflow-x-clip">
       <Header />
       
       {/* Botón de retroceso opcional para esta vista */}
@@ -283,7 +283,7 @@ export default function EstadisticasPage() {
       </div>
 
       {/* BARRA DE FILTROS STICKY */}
-      <div className={`sticky top-[72px] z-30 backdrop-blur-xl border-b ${isTechTheme ? 'bg-deep/90 border-accent/20' : 'glass-card border-none'}`}>
+      <div className={`sticky top-[var(--header-h,64px)] z-30 backdrop-blur-xl border-b ${isTechTheme ? 'bg-deep/90 border-accent/20' : 'glass-card border-none'}`}>
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 px-4 py-3 justify-center">
           <select 

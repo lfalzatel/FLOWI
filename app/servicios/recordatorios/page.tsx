@@ -109,7 +109,7 @@ export default function RecordatoriosPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-deep">
+    <div className="relative isolate min-h-screen flex flex-col bg-deep">
       <Header />
       
       <main className="flex-1 max-w-2xl mx-auto w-full p-4 pb-24 space-y-6 animate-fade-in-up">

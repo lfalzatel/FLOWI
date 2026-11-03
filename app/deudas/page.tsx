@@ -88,7 +88,7 @@ export default function DeudasPage() {
   const fmt = (n: number) => formatCurrency(n, profile?.currency);
 
   return (
-    <div className="min-h-screen flex flex-col bg-deep">
+    <div className="relative isolate min-h-screen flex flex-col bg-deep">
       <Header />
       
       <main className="flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
