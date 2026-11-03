@@ -4,6 +4,7 @@ import { Reminder } from '@/lib/firestore';
 import { scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { updateReminder } from '@/lib/firestore';
+import { dateKey } from '@/lib/reminderDue';
 
 export function useReminderScheduler(reminders: Reminder[], budgetPercent: number) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -19,7 +20,6 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
         if (!r.active) continue;
 
         let shouldFire = false;
-        let isMainEventPassed = false;
 
         if (r.type === 'budget_alert') {
           shouldFire = budgetPercent >= (r.budgetPercent ?? 80);
@@ -74,9 +74,8 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
              }
           }
           
-          if (r.type === 'once' && now >= eventDate) {
-              isMainEventPassed = true;
-          }
+          // Si ese vencimiento ya se marcó como pagado, no hace falta avisar
+          if ((r.paidDates || []).includes(dateKey(eventDate))) shouldFire = false;
         }
 
         if (!shouldFire) continue;
@@ -108,7 +107,8 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
           try {
             await updateReminder(r.id, { 
               lastTriggered: now, 
-              active: (r.type === 'once' && isMainEventPassed) ? false : r.active 
+              // Los de una vez siguen activos hasta que se marquen como pagados (así no desaparecen de la campana)
+              active: r.active 
             });
           } catch (e) {
             console.error('Error updating lastTriggered for reminder:', e);

@@ -334,6 +334,7 @@ export interface Reminder {
   lastTriggered?: Timestamp | Date | null;
   date?: string; // Formato YYYY-MM-DD para recordatorios 'once'
   alerts?: ReminderAlert[]; // Alertas múltiples relativas al tiempo principal
+  paidDates?: string[];     // Vencimientos ya pagados (YYYY-MM-DD de cada ocurrencia)
 }
 
 export async function getUserReminders(userId: string): Promise<Reminder[]> {
@@ -365,6 +366,11 @@ export async function updateReminder(id: string, data: Partial<Reminder>) {
   const docRef = doc(db, 'fl_reminders', id);
   // Si mandamos un Date para lastTriggered, se guarda como Timestamp de Firebase
   await updateDoc(docRef, data);
+}
+
+// Marca como pagado un vencimiento puntual; el recordatorio sigue activo para los siguientes
+export async function markReminderPaid(id: string, dueDateKey: string) {
+  await updateDoc(doc(db, 'fl_reminders', id), { paidDates: arrayUnion(dueDateKey) });
 }
 
 export async function deleteReminder(id: string) {

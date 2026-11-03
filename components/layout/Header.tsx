@@ -8,7 +8,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useReminders } from '@/hooks/useReminders';
-import { Reminder } from '@/lib/firestore';
+import { getPendingDues, dueLabel, ReminderDue } from '@/lib/reminderDue';
+import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
 import { Bell, Clock, Info, MessageCircle } from 'lucide-react';
 import { FlowLines } from '@/components/FlowLines';
 
@@ -54,6 +55,7 @@ export function Header() {
   const { notifications } = useInAppNotifications();
   const { reminders } = useReminders();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [payingDue, setPayingDue] = useState<ReminderDue | null>(null);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -79,43 +81,8 @@ export function Header() {
     };
   }, [showDropdown]);
 
-  const getUpcomingReminders = () => {
-    const upcoming: { reminder: Reminder, daysLeft: number }[] = [];
-    const now = new Date();
-    now.setHours(0, 0, 0, 0); // Normalize to start of day
-    
-    for (const r of reminders) {
-      if (!r.active) continue;
-      
-      let days = -1;
-      if (r.type === 'monthly' && r.dayOfMonth !== undefined) {
-        let currentDayOfMonth = now.getDate();
-        days = r.dayOfMonth - currentDayOfMonth;
-        if (days < 0) {
-          const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-          days = daysInMonth - currentDayOfMonth + r.dayOfMonth;
-        }
-      } else if (r.type === 'weekly' && r.dayOfWeek !== undefined) {
-        let currentDayOfWeek = now.getDay();
-        days = r.dayOfWeek - currentDayOfWeek;
-        if (days < 0) days += 7;
-      } else if (r.type === 'once' && r.date) {
-        const targetParts = r.date.split('-');
-        if (targetParts.length === 3) {
-           const targetDate = new Date(Number(targetParts[0]), Number(targetParts[1]) - 1, Number(targetParts[2]));
-           const diff = targetDate.getTime() - now.getTime();
-           days = Math.ceil(diff / (1000 * 3600 * 24));
-        }
-      }
-
-      if (days >= 0 && days <= 7) {
-        upcoming.push({ reminder: r, daysLeft: days });
-      }
-    }
-    return upcoming.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 5); // top 5
-  };
-
-  const upcomingReminders = getUpcomingReminders();
+  // Pagos pendientes: vencidos sin pagar y los que vencen en los próximos 7 días
+  const upcomingReminders = getPendingDues(reminders).slice(0, 6);
   const unread = notifications.length + upcomingReminders.length;
 
   // Dynamic colors for the logo based on theme
@@ -329,26 +296,36 @@ export function Header() {
                     </div>
                   ))}
 
-                  {/* Próximos eventos (Próximos 7 días) */}
+                  {/* Pagos vencidos sin pagar y próximos 7 días */}
                   {upcomingReminders.length > 0 && (
                     <>
                       <p className={`text-[10px] text-text-muted uppercase tracking-wider font-semibold px-2 pt-2 pb-1 ${isTechTheme ? 'font-mono' : ''}`}>
-                        Próximos 7 días
+                        Pagos pendientes
                       </p>
-                      {upcomingReminders.map(({ reminder, daysLeft }, i) => (
-                        <div key={reminder.id || i} className={`p-2.5 hover:bg-white/5 transition-colors flex gap-3 items-center ${isTechTheme ? 'rounded-none border-l-2 border-transparent hover:border-accent' : 'rounded-xl'}`}>
+                      {upcomingReminders.map((due) => {
+                        const { reminder, daysLeft } = due;
+                        const overdue = daysLeft < 0;
+                        return (
+                        <div key={`${reminder.id}-${daysLeft}`} className={`p-2.5 hover:bg-white/5 transition-colors flex gap-3 items-center ${isTechTheme ? 'rounded-none border-l-2 border-transparent hover:border-accent' : 'rounded-xl'}`}>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                                          ${daysLeft === 0 ? 'bg-accent/20 text-accent' : 'bg-glass border border-glass-border text-text-secondary'}`}>
+                                          ${overdue ? 'bg-red-500/15 text-red-400' : daysLeft === 0 ? 'bg-accent/20 text-accent' : 'bg-glass border border-glass-border text-text-secondary'}`}>
                             <Clock className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                             <p className={`text-sm font-medium text-text-primary truncate ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? `>_ ${reminder.title}` : reminder.title}</p>
-                            <p className={`text-xs text-text-muted mt-0.5 truncate ${isTechTheme ? 'font-mono' : ''}`}>
-                              {daysLeft === 0 ? '¡Vence hoy!' : daysLeft === 1 ? 'Mañana' : `Faltan ${daysLeft} días`}
+                            <p className={`text-sm font-medium text-text-primary truncate ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? `>_ ${reminder.title}` : reminder.title}</p>
+                            <p className={`text-xs mt-0.5 truncate ${overdue ? 'text-red-400 font-semibold' : 'text-text-muted'} ${isTechTheme ? 'font-mono' : ''}`}>
+                              {dueLabel(daysLeft)}
                             </p>
                           </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setShowDropdown(false); setPayingDue(due); }}
+                            className={`shrink-0 px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${isTechTheme ? 'rounded-none border border-accent/50 text-accent font-mono uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
+                          >
+                            Ya lo pagué
+                          </button>
                         </div>
-                      ))}
+                        );
+                      })}
                     </>
                   )}
                 </div>
@@ -425,6 +402,7 @@ export function Header() {
         document.body
       )}
     </header>
+    {payingDue && <MarkPaidDialog due={payingDue} onClose={() => setPayingDue(null)} />}
     </>
   );
 }

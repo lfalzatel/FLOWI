@@ -16,6 +16,8 @@ import { deleteReminder, updateReminder, Reminder } from '@/lib/firestore';
 import { registerReminderSW, requestNotificationPermission, scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
 
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
+import { getPendingDue, dueLabel, ReminderDue } from '@/lib/reminderDue';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { speakText } from '@/lib/voiceParser';
 
@@ -32,6 +34,7 @@ export default function RecordatoriosPage() {
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [deletingReminderId, setDeletingReminderId] = useState<string | null>(null);
+  const [payingDue, setPayingDue] = useState<ReminderDue | null>(null);
 
   // Cargar porcentaje de presupuesto
   const { gastosEsteMes } = useExpenses();
@@ -194,6 +197,8 @@ export default function RecordatoriosPage() {
                 onEdit={() => { setEditingReminder(r); setShowForm(true); }}
                 onToggle={() => handleToggle(r)}
                 onDelete={() => handleDelete(r.id!)}
+                due={getPendingDue(r)}
+                onPay={setPayingDue}
                 isTechTheme={isTechTheme}
                 delay={i * 0.08}
               />
@@ -212,6 +217,8 @@ export default function RecordatoriosPage() {
         />
       )}
 
+      {payingDue && <MarkPaidDialog due={payingDue} onClose={() => setPayingDue(null)} />}
+
       <ConfirmDialog
         isOpen={!!deletingReminderId}
         onCancel={() => setDeletingReminderId(null)}
@@ -224,8 +231,10 @@ export default function RecordatoriosPage() {
   );
 }
 
-function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay }: {
+function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay, due, onPay }: {
   reminder: Reminder;
+  due: ReminderDue | null;
+  onPay: (due: ReminderDue) => void;
   onEdit: () => void;
   onToggle: () => void;
   onDelete: () => void;
@@ -301,6 +310,19 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
               {reminder.sound && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">Sonido</span>}
             </div>
           </div>
+          {due && (
+            <div className={`mt-3 flex items-center justify-between gap-2 px-3 py-2 ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${due.daysLeft < 0 ? 'bg-red-500/10 border border-red-500/25' : 'bg-accent/5 border border-accent/15'}`}>
+              <span className={`text-xs font-semibold ${due.daysLeft < 0 ? 'text-red-400' : 'text-text-secondary'}`}>
+                {dueLabel(due.daysLeft)} · {due.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
+              </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onPay(due); }}
+                className={`shrink-0 px-3 py-1.5 text-[11px] font-bold ${isTechTheme ? 'rounded-none border border-accent text-accent uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
+              >
+                Ya lo pagué
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* Toggle */}
