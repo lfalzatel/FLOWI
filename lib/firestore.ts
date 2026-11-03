@@ -422,3 +422,54 @@ export async function deleteNote(id: string) {
   await deleteDoc(docRef);
 }
 
+
+// ─── METAS DE AHORRO (GOALS) ───────────────────────────────────────────────
+
+export type GoalPriority = 'alta' | 'media' | 'baja';
+
+export interface GoalMovement {
+  amount: number;  // positivo = ahorro, negativo = retiro
+  date: string;    // ISO
+  note?: string;
+}
+
+export interface Goal {
+  id?: string;
+  userId: string;
+  name: string;
+  emoji: string;
+  targetAmount: number;
+  savedAmount: number;
+  priority: GoalPriority;
+  deadline?: string | null; // YYYY-MM
+  movements?: GoalMovement[];
+  completedAt?: string | null;
+  createdAt?: Timestamp | Date;
+}
+
+export async function addGoal(goal: Omit<Goal, 'id' | 'createdAt'>): Promise<string> {
+  const docRef = await addDoc(collection(db, 'fl_goals'), { ...goal, createdAt: serverTimestamp() });
+  return docRef.id;
+}
+
+export async function updateGoal(id: string, data: Partial<Goal>) {
+  await updateDoc(doc(db, 'fl_goals', id), data);
+}
+
+export async function deleteGoal(id: string) {
+  await deleteDoc(doc(db, 'fl_goals', id));
+}
+
+// Registra un ahorro (o retiro, con monto negativo) y actualiza el acumulado
+export async function addGoalMovement(goal: Goal, amount: number, note?: string) {
+  if (!goal.id) return;
+  const savedAmount = Math.max(0, goal.savedAmount + amount);
+  const movement: GoalMovement = { amount, date: new Date().toISOString(), ...(note ? { note } : {}) };
+  const reached = savedAmount >= goal.targetAmount;
+  await updateDoc(doc(db, 'fl_goals', goal.id), {
+    savedAmount,
+    movements: arrayUnion(movement),
+    completedAt: reached ? (goal.completedAt || movement.date) : null,
+  });
+  return { savedAmount, reached };
+}

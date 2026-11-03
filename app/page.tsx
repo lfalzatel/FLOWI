@@ -11,6 +11,7 @@ import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
 import { TransactionList } from '@/components/dashboard/TransactionList';
 import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
 import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
+import { GoalsSummaryCard } from '@/components/dashboard/GoalsSummaryCard';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
@@ -230,6 +231,9 @@ export default function DashboardPage() {
             <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh} />
           </>
         )}
+
+        {/* Meta de ahorro principal */}
+        <GoalsSummaryCard currency={profile?.currency} />
 
         {/* Chart */}
         <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} />

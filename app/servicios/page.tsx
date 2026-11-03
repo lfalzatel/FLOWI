@@ -54,11 +54,11 @@ const SERVICES = [
     id: 'metas',
     title: 'Metas de ahorro',
     icon: Target,
-    href: '#',
+    href: '/servicios/metas',
     color: 'text-emerald-500',
     bgColor: 'bg-emerald-500/10',
-    isNew: false,
-    soon: true
+    isNew: true,
+    soon: false
   },
   {
     id: 'compartidos',
