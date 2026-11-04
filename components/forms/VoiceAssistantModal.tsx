@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
-import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Compass, StickyNote, Bell, ArrowRight, Search, ChevronDown } from 'lucide-react';
+import { Mic, MicOff, X, Sparkles, Check, RefreshCw, Keyboard, AlertCircle, Trash2, Layers, Compass, StickyNote, Bell, ArrowRight, Search, ChevronDown, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,7 +12,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
 import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle } from '@/lib/voiceParser';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
-import { getAiKey, improveWithAi, needsAiHelp } from '@/lib/aiAssist';
+import { getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi } from '@/lib/aiAssist';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
@@ -49,6 +49,32 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const aiRequestRef = useRef(0);
   // Último dictado ya procesado: evita volver a analizarlo (y a consultar la IA) en cada redibujado
   const processedTranscriptRef = useRef<string | null>(null);
+  // Gasto por foto del recibo (usa la misma IA gratuita, con un modelo que lee imágenes)
+  const receiptInputRef = useRef<HTMLInputElement>(null);
+  const [receiptStatus, setReceiptStatus] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
+  const [receiptError, setReceiptError] = useState('');
+
+  const handleReceiptFile = async (file: File | undefined) => {
+    if (!file) return;
+    stopListening();
+    setErrorMsg(null);
+    setTranscript('');
+    setReceiptStatus('loading');
+    aiRequestRef.current++; // descarta respuestas de IA de un dictado anterior
+    setAiStatus('idle');
+    const read = await readReceiptWithAi(file, allCategories);
+    if (read.ok) {
+      setParsedResults([read.result]);
+      setReceiptStatus('done');
+      return;
+    }
+    setReceiptStatus(read.reason === 'no-key' ? 'no-key' : 'error');
+    setReceiptError(
+      read.reason === 'unreadable' ? 'No pude leer el total en la foto. Prueba con más luz, el recibo derecho y completo en la imagen.'
+      : read.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
+      : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'
+    );
+  };
 
   // Iniciar reconocimiento de voz de forma dinámica
   const startListening = () => {
@@ -59,6 +85,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
     setTranscript('');
     processedTranscriptRef.current = null;
+    setReceiptStatus('idle');
     if (!pendingAction) {
       setParsedResults([]);
     }
@@ -427,7 +454,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             type: tx.type,
             category: tx.category,
             description: tx.description,
-            date: new Date(),
+            date: tx.date ? new Date(`${tx.date}T12:00:00`) : new Date(),
             isFixed: tx.isFixed,
             ...(tx.merchant ? { merchant: tx.merchant } : {}),
           });
@@ -533,7 +560,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         </div>
 
         <p className={`text-xs max-w-xs mb-4 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-          Dicta transacciones, comandos como "abrir estadísticas" o crea notas y recordatorios.
+          Dicta transacciones, comandos como "abrir estadísticas" o crea notas y recordatorios. También puedes registrar un gasto con la foto del recibo.
         </p>
 
         {/* Animación del Micrófono */}
@@ -578,6 +605,30 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           )}
         </div>
 
+        {/* Gasto por foto del recibo */}
+        <input ref={receiptInputRef} type="file" accept="image/*" className="hidden"
+               onChange={(e) => { handleReceiptFile(e.target.files?.[0]); e.target.value = ''; }} />
+        <button
+          type="button"
+          onClick={() => getAiKey() ? receiptInputRef.current?.click() : setReceiptStatus('no-key')}
+          disabled={receiptStatus === 'loading'}
+          className={`mb-1 px-4 py-2 text-xs font-semibold flex items-center gap-2 border transition-colors disabled:opacity-60 ${
+            isTechTheme ? 'rounded-none border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase' : 'rounded-xl border-glass-border text-text-primary hover:bg-white/10'
+          }`}
+        >
+          <Camera className={`w-4 h-4 text-accent ${receiptStatus === 'loading' ? 'animate-pulse' : ''}`} />
+          {receiptStatus === 'loading' ? 'Leyendo el recibo…' : 'Registrar con foto del recibo'}
+        </button>
+        {receiptStatus === 'no-key' && (
+          <p className="text-[11px] text-text-muted max-w-xs mb-1 normal-case">
+            Para leer recibos necesitas la IA gratuita.{' '}
+            <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a> (es gratis y tu clave queda solo en este celular).
+          </p>
+        )}
+        {receiptStatus === 'error' && (
+          <p className="text-[11px] text-red-400 max-w-xs mb-1 normal-case">{receiptError}</p>
+        )}
+
         {/* Mensaje de Error */}
         {errorMsg && (
           <div className="my-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2 w-full">
@@ -595,6 +646,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                 {aiStatus === 'loading' && 'Consultando la IA para entender mejor…'}
                 {aiStatus === 'done' && 'Ajustado con IA. Revisa antes de guardar.'}
                 {aiStatus === 'failed' && 'La IA no respondió; se usa el resultado local.'}
+              </p>
+            )}
+            {receiptStatus === 'done' && aiStatus === 'idle' && (
+              <p className="text-[10px] px-1 flex items-center gap-1.5 normal-case text-accent">
+                <Camera className="w-3 h-3" /> Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.
               </p>
             )}
             {parsedResults.length > 1 && (
@@ -860,6 +916,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             }`}
                           />
                         </div>
+                        {res.date && (
+                          <p className="text-[10px] text-text-muted normal-case">
+                            Fecha del recibo: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ) : null}

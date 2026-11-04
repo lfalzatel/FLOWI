@@ -17,7 +17,7 @@ interface Step { target?: string; title: string; text: string }
 
 const STEPS: Step[] = [
   { title: '¡Hola! Te muestro FLOWI', text: 'Primero te enseño a registrar tu plata y después a leer tu pantalla de inicio. Lo que ves ahora son datos de ejemplo: tus datos no se tocan. Puedes omitir el recorrido cuando quieras.' },
-  { target: 'voice|add', title: '1. Registra con tu voz', text: 'Es la forma más rápida. Toca el micrófono y habla normal: "gasté veinte mil en almuerzo", "me pagaron el sueldo, tres millones y medio" o "le debo doscientos mil a Juan". Puedes decir varias cosas a la vez. Si prefieres escribir, ahí mismo está la opción con teclado.' },
+  { target: 'voice|add', title: '1. Registra con tu voz', text: 'Es la forma más rápida. Toca el micrófono y habla normal: "gasté veinte mil en almuerzo", "me pagaron el sueldo, tres millones y medio" o "le debo doscientos mil a Juan". Puedes decir varias cosas a la vez. Ahí mismo puedes tomarle foto a un recibo para que la IA lo lea, o escribir con el teclado.' },
   { target: '#nav-gastos', title: '2. Gastos e ingresos', text: 'En estas pestañas ves la lista completa de gastos y de ingresos, y puedes editar o borrar. Cuando un gasto se repite cada mes, como el arriendo o los servicios, márcalo como gasto fijo; los demás son tus gastos del día a día.' },
   { target: '#nav-deudas', title: '3. Deudas', text: 'Aquí registras lo que debes y también lo que te deben, con intereses si aplica. Cada vez que pagas una parte, registras el abono y la deuda va bajando.' },
   { target: 'filter', title: 'Ahora, tu inicio: el período', text: 'Aquí escoges si ves todo, el mes, la semana o un día. Con las flechas cambias de mes. Todas las cifras de abajo dependen de lo que elijas aquí.' },

@@ -8,6 +8,8 @@ import type { ParsedVoiceItem, ParsedVoiceResult } from './voiceParser';
 const KEY_STORAGE = 'flowi_openrouter_key';
 const VERIFIER_STORAGE = 'flowi_openrouter_verifier';
 const MODELS_CACHE = 'flowi_openrouter_free_models';
+const VISION_MODELS_CACHE = 'flowi_openrouter_free_vision_models';
+const RECEIPT_TIMEOUT_MS = 40_000;
 const MODELS_CACHE_MS = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 15_000;
 
@@ -30,6 +32,7 @@ export function getAiKey(): string | null {
 export function disconnectAi() {
   storageRemove(KEY_STORAGE);
   storageRemove(MODELS_CACHE);
+  storageRemove(VISION_MODELS_CACHE);
 }
 
 function base64Url(bytes: Uint8Array): string {
@@ -189,6 +192,139 @@ export async function improveWithAi(text: string, categories: { label: string; i
     return results.length ? results : null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── Gasto por foto del recibo ─────────────────────────────────────────────
+// La foto se reduce en el dispositivo y se envía solo al modelo gratuito para leerla; FLOWI no la guarda.
+
+const PREFERRED_VISION = ['gemini', 'gemma-4-31b', 'gemma', '-vl', 'qwen', 'llama-4', 'llama-3.2', 'mistral-small', 'nemotron'];
+// Modelos que aceptan imágenes pero no sirven para leer un recibo (música, clasificadores, experimentales)
+const NOT_FOR_RECEIPTS = /safety|guard|lyria|stealth|^openrouter\//i;
+
+async function getFreeVisionModels(key: string): Promise<string[]> {
+  const cached = storageGet(VISION_MODELS_CACHE);
+  if (cached) {
+    try {
+      const { at, models } = JSON.parse(cached);
+      if (Date.now() - at < MODELS_CACHE_MS && models?.length) return models;
+    } catch {}
+  }
+  const res = await fetch('https://openrouter.ai/api/v1/models', { headers: { Authorization: `Bearer ${key}` } });
+  if (!res.ok) return [];
+  const { data } = await res.json();
+  const free: string[] = (data || [])
+    .filter((m: any) => String(m.id).endsWith(':free') || (m.pricing?.prompt === '0' && m.pricing?.completion === '0'))
+    .filter((m: any) => (m.architecture?.input_modalities || []).includes('image'))
+    .filter((m: any) => (m.architecture?.output_modalities || ['text']).includes('text') && !NOT_FOR_RECEIPTS.test(String(m.id)))
+    .map((m: any) => String(m.id));
+  const rank = (id: string) => {
+    const i = PREFERRED_VISION.findIndex(p => id.includes(p));
+    return i === -1 ? PREFERRED_VISION.length : i;
+  };
+  const models = free.sort((a, b) => rank(a) - rank(b)).slice(0, 3);
+  storageSet(VISION_MODELS_CACHE, JSON.stringify({ at: Date.now(), models }));
+  return models;
+}
+
+// Reduce la foto (máx. 1280 px, JPEG) para que viaje rápido incluso con datos móviles
+async function shrinkImage(file: File): Promise<string> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    const scale = Math.min(1, 1280 / Math.max(img.width, img.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.82);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function receiptPrompt(customLabels: string[]) {
+  return `Lees fotos de recibos, facturas y tiquetes de compra de Colombia.
+Responde SOLO con un JSON: {"total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","category":"...","description":"texto corto de lo que se compró"}
+Reglas:
+- "total" es el TOTAL A PAGAR del recibo (no el subtotal, ni el IVA, ni el cambio, ni lo recibido en efectivo).
+- En Colombia el punto separa miles: "$45.900" = 45900 y "1.250.000" = 1250000. Si hay centavos con coma, ignóralos.
+- "date" es la fecha de la compra impresa en el recibo; null si no se ve.
+- category debe ser exactamente una de: ${[...EXPENSE_LABELS, ...customLabels].join(', ')}.
+- Si la foto no es un recibo o no se puede leer el total, responde {"total":null}.`;
+}
+
+export type ReceiptReadResult =
+  | { ok: true; result: ParsedVoiceResult }
+  | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' };
+
+export async function readReceiptWithAi(file: File, categories: { label: string; isCustom?: boolean }[]): Promise<ReceiptReadResult> {
+  const key = getAiKey();
+  if (!key) return { ok: false, reason: 'no-key' };
+  const models = await getFreeVisionModels(key).catch(() => []);
+  if (!models.length) return { ok: false, reason: 'no-model' };
+  const customLabels = categories.filter(c => c.isCustom).map(c => c.label);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RECEIPT_TIMEOUT_MS);
+  try {
+    const image = await shrinkImage(file);
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'FLOWI',
+      },
+      body: JSON.stringify({
+        model: models[0],
+        models,
+        temperature: 0,
+        messages: [
+          { role: 'system', content: receiptPrompt(customLabels) },
+          { role: 'user', content: [
+            { type: 'text', text: 'Lee este recibo.' },
+            { type: 'image_url', image_url: { url: image } },
+          ] },
+        ],
+      }),
+    });
+    if (!res.ok) return { ok: false, reason: 'failed' };
+    const data = await res.json();
+    const parsed = extractJson(data?.choices?.[0]?.message?.content || '');
+    const total = Number(parsed?.total);
+    if (!parsed || !Number.isFinite(total) || total <= 0) return { ok: false, reason: 'unreadable' };
+
+    const category = matchCategory(parsed.category, 'gasto', customLabels);
+    const merchant = typeof parsed.merchant === 'string' && parsed.merchant.trim() && parsed.merchant !== 'null' ? parsed.merchant.trim().slice(0, 60) : undefined;
+    // La fecha del recibo solo se usa si es válida y no está en el futuro
+    let date: string | undefined;
+    if (typeof parsed.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parsed.date)) {
+      const [y, m, d] = parsed.date.split('-').map(Number);
+      const when = new Date(y, m - 1, d);
+      if (when.getMonth() === m - 1 && when <= new Date() && Date.now() - when.getTime() < 400 * 86400000) date = parsed.date;
+    }
+    return {
+      ok: true,
+      result: {
+        kind: 'transaction', type: 'gasto', amount: Math.round(total), category,
+        description: String(parsed.description || merchant || category).slice(0, 80),
+        isFixed: isFixedExpenseCategory(category), rawText: 'Recibo',
+        ...(merchant ? { merchant } : {}),
+        ...(date ? { date } : {}),
+      },
+    };
+  } catch {
+    return { ok: false, reason: 'failed' };
   } finally {
     clearTimeout(timer);
   }

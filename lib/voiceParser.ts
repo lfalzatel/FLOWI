@@ -14,6 +14,8 @@ export interface ParsedVoiceResult {
   merchant?: string;
   // Solo para deudas: "debo" (yo le debo a alguien) o "me_deben" (alguien me debe a mí)
   debtDirection?: 'debo' | 'me_deben';
+  // Fecha del movimiento (YYYY-MM-DD) cuando se conoce, p. ej. la del recibo; si falta, es hoy
+  date?: string;
 }
 
 export interface ParsedVoiceCommand {
