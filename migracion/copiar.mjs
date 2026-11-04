@@ -97,7 +97,7 @@ function toImportRecord(u) {
 }
 
 async function main() {
-  console.log(`\n${APPLY ? 'COPIANDO' : 'REVISIÓN (no escribe nada)'}: ${SOURCE} → ${TARGET}\n`);
+  console.log(`\n${APPLY ? 'COPIANDO' : BACKUP_ONLY ? 'RESPALDO (solo lee)' : 'REVISIÓN (no escribe nada)'}: ${SOURCE} → ${TARGET}\n`);
 
   // 1. Datos de FLOWI en el origen
   const data = {};
