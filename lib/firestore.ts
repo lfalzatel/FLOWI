@@ -289,6 +289,10 @@ export async function hideBaseCategory(userId: string, label: string) {
 export async function skipCommitment(userId: string, entry: string) {
   await setDoc(doc(db, 'users', userId), { commitmentSkips: arrayUnion(entry) }, { merge: true });
 }
+// Marca un mes (YYYY-MM) como cerrado, ver lib/monthClose.ts
+export async function closeMonth(userId: string, month: string) {
+  await setDoc(doc(db, 'users', userId), { closedMonths: arrayUnion(month) }, { merge: true });
+}
 export async function getCustomCategories(userId: string) {
   const categoriesRef = collection(db, 'fl_customCategories');
   const q = query(categoriesRef, where('userId', '==', userId));

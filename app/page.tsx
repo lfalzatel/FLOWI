@@ -15,6 +15,8 @@ import { GoalsSummaryCard } from '@/components/dashboard/GoalsSummaryCard';
 import { CommitmentsCard } from '@/components/dashboard/CommitmentsCard';
 import { useCommitments } from '@/hooks/useCommitments';
 import { getDailyBudget } from '@/lib/dailyBudget';
+import { MonthCloseCard } from '@/components/dashboard/MonthCloseCard';
+import { monthToClose } from '@/lib/monthClose';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
@@ -213,6 +215,15 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Cierre del mes anterior (primeros días del mes) */}
+        {!loading && !commitments.loading && (() => {
+          const month = monthToClose(transactions, profile?.closedMonths);
+          return month && (
+            <MonthCloseCard month={month} transactions={transactions} currency={profile?.currency}
+                            pendingCommitments={commitments.pendingTotal} pendingCount={commitments.pending.length} />
+          );
+        })()}
 
         {/* Filter */}
         <DateFilter 

@@ -13,6 +13,7 @@ export interface UserProfile {
   budget?: number;
   currency?: string;
   commitmentSkips?: string[]; // compromisos omitidos por mes ("YYYY-MM|clave")
+  closedMonths?: string[];    // meses ya revisados con "Cerrar el mes" (YYYY-MM)
 }
 
 export function useAuth() {
