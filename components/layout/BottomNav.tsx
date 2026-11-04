@@ -85,6 +85,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
             setShowVoice(true);
           }}
           aria-label="Asistente de Voz / Nueva transacción"
+          data-tour="voice"
           title="Dictar por Voz"
           className={`pointer-events-auto flex-shrink-0 flex items-center justify-center
                       w-14 h-14

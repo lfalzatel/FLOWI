@@ -36,7 +36,7 @@ export function MonthCloseCard({ month, transactions, pendingCommitments, pendin
 
   return (
     <>
-      <div className={`flex items-center gap-2 ${isTechTheme ? 'bg-accent/10 border border-accent/40 rounded-none' : 'rounded-3xl bg-gradient-to-r from-accent/15 to-accent/5 border border-accent/25'}`}>
+      <div data-tour="next-action" className={`flex items-center gap-2 ${isTechTheme ? 'bg-accent/10 border border-accent/40 rounded-none' : 'rounded-3xl bg-gradient-to-r from-accent/15 to-accent/5 border border-accent/25'}`}>
         <button type="button" onClick={() => setOpen(true)} className="flex-1 min-w-0 flex items-center gap-3 p-4 text-left">
           <div className="w-10 h-10 rounded-2xl bg-accent/20 flex items-center justify-center shrink-0">
             <CalendarCheck2 className="w-5 h-5 text-accent" />

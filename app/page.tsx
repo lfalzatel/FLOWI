@@ -22,7 +22,7 @@ import { getNextActions } from '@/lib/nextAction';
 import { useGoals } from '@/hooks/useGoals';
 import { isGoalDone } from '@/lib/goals';
 import { formatCurrency } from '@/lib/format';
-import { OnboardingModal } from '@/components/OnboardingModal';
+import { AppTour, TourOffer, TOUR_DONE_KEY, readTourVoicePref } from '@/components/tour/AppTour';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
@@ -43,7 +43,8 @@ export default function DashboardPage() {
   const { skipped: skippedActions, skip: skipAction } = useSkippedActions();
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showTourOffer, setShowTourOffer] = useState(false);
+  const [tourVoice, setTourVoice] = useState<boolean | null>(null); // null = recorrido cerrado
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(() => !hasShownSplashInThisJSContext);
@@ -62,17 +63,19 @@ export default function DashboardPage() {
     setMounted(true);
     hasShownSplashInThisJSContext = true;
 
-    // Verificar si el usuario no ha visto el tour de bienvenida
-    try {
-      const hasSeen = localStorage.getItem('flowi_has_seen_onboarding');
-      if (!hasSeen) {
-        setShowOnboarding(true);
-      }
-    } catch (e) {}
+    // Recorrido guiado: se ofrece una vez, o se abre directo desde Configuración (?tour=1)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tour') === '1') {
+      setTourVoice(readTourVoicePref());
+      window.history.replaceState({}, '', '/');
+    } else {
+      try {
+        if (!localStorage.getItem(TOUR_DONE_KEY)) setShowTourOffer(true);
+      } catch (e) {}
+    }
 
     if (processedUrl.current) return;
 
-    const params = new URLSearchParams(window.location.search);
     const isLogin = params.get('login') === 'true' || params.get('newuser') === 'true';
 
     if (isLogin) {
@@ -262,23 +265,23 @@ export default function DashboardPage() {
             <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas}
                          currency={profile?.currency}
                          today={isCurrentMonthView ? todayBudget : null} />
-            <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh}
-                              pendingCommitments={commitments.loading ? 0 : commitments.pendingTotal} />
+            <div data-tour="projection"><BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh}
+                              pendingCommitments={commitments.loading ? 0 : commitments.pendingTotal} /></div>
             {/* Lo que falta por pagar este mes (solo mirando el mes actual) */}
             {isCurrentMonthView && !commitments.loading && (
-              <CommitmentsCard summary={commitments} currency={profile?.currency} onRefresh={refresh} />
+              <div data-tour="commitments"><CommitmentsCard summary={commitments} currency={profile?.currency} onRefresh={refresh} /></div>
             )}
           </>
         )}
 
         {/* Meta de ahorro principal */}
-        <GoalsSummaryCard currency={profile?.currency} />
+        <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} /></div>
 
         {/* Chart */}
-        <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} />
+        <div data-tour="chart"><ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} /></div>
 
         {/* Category Budgets (2 Acordeones Inteligentes: Categorías Principales 50/30/20 y Subcategorías) */}
-        <CategoryBudgets transactions={filteredTransactions} currency={profile?.currency} filterType={filterType} />
+        <div data-tour="budgets"><CategoryBudgets transactions={filteredTransactions} currency={profile?.currency} filterType={filterType} /></div>
 
         {/* Recent transactions */}
         <div>
@@ -329,8 +332,15 @@ export default function DashboardPage() {
         />
       )}
 
-      {showOnboarding && (
-        <OnboardingModal onClose={() => setShowOnboarding(false)} />
+      {/* El recorrido espera a que los datos estén en pantalla */}
+      {!loading && showTourOffer && tourVoice === null && (
+        <TourOffer
+          onStart={(voice) => { setShowTourOffer(false); setTourVoice(voice); }}
+          onSkip={() => { setShowTourOffer(false); try { localStorage.setItem(TOUR_DONE_KEY, 'true'); } catch (e) {} }}
+        />
+      )}
+      {!loading && tourVoice !== null && (
+        <AppTour voice={tourVoice} onClose={() => setTourVoice(null)} />
       )}
     </div>
   );

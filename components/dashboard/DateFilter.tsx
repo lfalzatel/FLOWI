@@ -129,6 +129,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
   return (
     <div
       ref={rootRef}
+      data-tour="filter"
       className={`sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 mb-6 flex flex-col transition-[padding,background-color,gap] duration-200 ${
         stuck
           ? `gap-1.5 py-2 bg-deep/80 backdrop-blur-xl shadow-lg shadow-black/10 border-b ${isTechTheme ? 'border-accent/20' : 'border-glass-border'}`

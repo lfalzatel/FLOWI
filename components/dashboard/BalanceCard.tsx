@@ -96,7 +96,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
       </div>
 
       {/* Gastos + Ingresos row + Deudas */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3" data-tour="totals">
         {/* Tarjeta Total Gastos */}
         <div 
           id="total-gastos-card" 
@@ -139,6 +139,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
         <button
           type="button"
           onClick={() => setInfo('debts')}
+          data-tour="debts"
           id="total-deudas-card" 
           className={`glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 ${today ? '' : 'col-span-2'} animate-card-mix transition-all duration-300 ${
             absorbingId === 'total-deudas-card' ? 'scale-105 border-yellow-500/80 shadow-[0_0_35px_rgba(245,158,11,0.7)]' : ''
@@ -159,7 +160,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
 
         {/* Hoy puedes gastar (se repite con más detalle en Control y Proyección) */}
         {today && (
-          <button type="button" onClick={() => setInfo('today')}
+          <button type="button" onClick={() => setInfo('today')} data-tour="today"
                   className="glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 transition-all duration-300 animate-card-mix" style={{ animationDelay: '0.45s' }}>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">

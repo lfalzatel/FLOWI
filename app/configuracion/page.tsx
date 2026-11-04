@@ -22,7 +22,7 @@ import {
   User, Wallet, Bell, Shield, RefreshCw, Sparkles,
   ChevronRight, ChevronDown, ChevronUp, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
-  FileText, Settings, Volume2, Smartphone, MessageSquare, Music
+  FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass
 } from 'lucide-react';
 
 export default function ConfigPage() {
@@ -354,6 +354,19 @@ export default function ConfigPage() {
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
+
+            <a href="/?tour=1" className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/30 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
+                  <Compass className="w-4 h-4 text-accent" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'RECORRIDO_POR_INICIO' : 'Recorrido por la pantalla de inicio 🔊'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'QUE_SIGNIFICA_CADA_CIFRA' : 'Qué significa cada cifra, con voz opcional'}</p>
+                </div>
+              </div>
+              <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
+            </a>
 
             <button onClick={() => setIsOnboardingOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
