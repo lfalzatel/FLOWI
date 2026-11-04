@@ -9,11 +9,12 @@ import { ReminderDue, dateKey, dueLabel } from '@/lib/reminderDue';
 
 interface Props {
   due: ReminderDue;
+  amount?: number | null; // valor sugerido para el gasto (lo pagado el mes pasado)
   onClose: () => void;
 }
 
 // "Ya lo pagué": marca solo este vencimiento y, si quieres, abre el registro del gasto ya prellenado
-export function MarkPaidDialog({ due, onClose }: Props) {
+export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [saving, setSaving] = useState(false);
@@ -43,7 +44,7 @@ export function MarkPaidDialog({ due, onClose }: Props) {
       <AddExpenseModal
         initialType="gasto"
         initialVoiceParsed={{
-          type: 'gasto', amount: null, category: reminder.category || '',
+          type: 'gasto', amount, category: reminder.category || '',
           description: reminder.title, isFixed: true, rawText: '',
         }}
         onClose={onClose}

@@ -16,9 +16,10 @@ interface Props {
   filterValue: string;
   transactions: Transaction[];
   onRefresh?: () => void;
+  pendingCommitments?: number; // pagos fijos que faltan este mes (ver lib/commitments.ts)
 }
 
-export function BudgetProjection({ filterType, filterValue, transactions, onRefresh }: Props) {
+export function BudgetProjection({ filterType, filterValue, transactions, onRefresh, pendingCommitments = 0 }: Props) {
   const { theme } = useTheme();
   const { profile } = useAuth();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -79,8 +80,11 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   const daysPassed = isCurrentMonth ? Math.max(1, now.getDate()) : daysInMonth;
   const diasRestantes = isCurrentMonth ? Math.max(1, daysInMonth - now.getDate() + 1) : 0;
 
-  const cuotaDiaria = (isCurrentMonth && disponibleParaGastar > 0 && diasRestantes > 0)
-    ? disponibleParaGastar / diasRestantes
+  // La cuota diaria reserva primero lo que falta pagar de compromisos fijos
+  const compromisos = isCurrentMonth ? pendingCommitments : 0;
+  const disponibleTrasCompromisos = disponibleParaGastar - compromisos;
+  const cuotaDiaria = (isCurrentMonth && disponibleTrasCompromisos > 0 && diasRestantes > 0)
+    ? disponibleTrasCompromisos / diasRestantes
     : 0;
 
   const promedioGastoDiarioActual = daysPassed > 0 ? (gastosVariables / daysPassed) : 0;
@@ -249,7 +253,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               `Has superado tus ingresos/presupuesto del mes por ${formatCurrency(Math.abs(disponibleParaGastar), profile?.currency)}. Procura restringir tus nuevos gastos variables.`
             ) : isCurrentMonth ? (
               <>
-                Te quedan <strong>{formatCurrency(disponibleParaGastar, profile?.currency)}</strong> libres. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong>{formatCurrency(cuotaDiaria, profile?.currency)}/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
+                Te quedan <strong>{formatCurrency(disponibleParaGastar, profile?.currency)}</strong> libres{compromisos > 0 && <> y aún debes pagar <strong>{formatCurrency(compromisos, profile?.currency)}</strong> en compromisos</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong>{formatCurrency(cuotaDiaria, profile?.currency)}/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
               </>
             ) : (
               disponibleParaGastar >= 0 
@@ -469,7 +473,9 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                       {formatCurrency(disponibleParaGastar, profile?.currency)}
                     </p>
                     <span className={`text-[9px] ${isTechTheme ? 'text-accent/50' : 'text-text-muted'}`}>
-                      Para repartir en {diasRestantes} días
+                      {compromisos > 0
+                        ? `Menos ${formatCurrency(compromisos, profile?.currency)} de compromisos por pagar`
+                        : `Para repartir en ${diasRestantes} días`}
                     </span>
                   </div>
                 </div>

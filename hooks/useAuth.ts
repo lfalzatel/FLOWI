@@ -12,6 +12,7 @@ export interface UserProfile {
   hiddenCategories?: string[];
   budget?: number;
   currency?: string;
+  commitmentSkips?: string[]; // compromisos omitidos por mes ("YYYY-MM|clave")
 }
 
 export function useAuth() {

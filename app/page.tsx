@@ -12,6 +12,8 @@ import { TransactionList } from '@/components/dashboard/TransactionList';
 import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
 import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
 import { GoalsSummaryCard } from '@/components/dashboard/GoalsSummaryCard';
+import { CommitmentsCard } from '@/components/dashboard/CommitmentsCard';
+import { useCommitments } from '@/hooks/useCommitments';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
@@ -28,6 +30,7 @@ export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const { totalDeudas } = useDebts();
+  const commitments = useCommitments(transactions);
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -228,7 +231,12 @@ export default function DashboardPage() {
         ) : (
           <>
             <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas} />
-            <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh} />
+            <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh}
+                              pendingCommitments={commitments.loading ? 0 : commitments.pendingTotal} />
+            {/* Lo que falta por pagar este mes (solo mirando el mes actual) */}
+            {filterType === 'month' && filterValue === getLocalMonthString() && !commitments.loading && (
+              <CommitmentsCard summary={commitments} currency={profile?.currency} onRefresh={refresh} />
+            )}
           </>
         )}
 
