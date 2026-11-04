@@ -9,13 +9,14 @@ export interface DailyBudget {
   hasBase: boolean;      // hay ingresos o presupuesto con qué calcular
   base: number;           // ingresos del mes, o el presupuesto si no hay ingresos
   baseIsBudget: boolean;
-  spentBeforeToday: number; // gastos del mes sin contar los variables de hoy
+  spentMonth: number;     // todos los gastos del mes (igual que la tarjeta Gastos)
   pendingCommitments: number;
   freeAtStartOfDay: number; // lo libre para repartir desde hoy hasta fin de mes
   todayAllowance: number; // cuota para hoy al empezar el día
   spentToday: number;     // gastos variables de hoy
   remainingToday: number; // negativo = se pasó hoy
   daysLeft: number;       // incluye hoy
+  tomorrowAllowance: number | null; // cuota de cada día desde mañana con lo que va hoy (null el último día)
 }
 
 function toDate(v: any): Date {
@@ -50,12 +51,13 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
     hasBase: base > 0,
     base,
     baseIsBudget: ingresos <= 0 && budget > 0,
-    spentBeforeToday: gastos - spentToday,
+    spentMonth: gastos,
     pendingCommitments,
     freeAtStartOfDay,
     todayAllowance,
     spentToday,
     remainingToday: todayAllowance - spentToday,
     daysLeft,
+    tomorrowAllowance: daysLeft > 1 ? Math.max(0, (freeAtStartOfDay - spentToday) / (daysLeft - 1)) : null,
   };
 }

@@ -10,6 +10,7 @@ import { Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { getLocalDateString } from '@/lib/dateUtils';
+import { getDailyBudget } from '@/lib/dailyBudget';
 
 interface Props {
   filterType: string;
@@ -80,12 +81,11 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   const daysPassed = isCurrentMonth ? Math.max(1, now.getDate()) : daysInMonth;
   const diasRestantes = isCurrentMonth ? Math.max(1, daysInMonth - now.getDate() + 1) : 0;
 
-  // La cuota diaria reserva primero lo que falta pagar de compromisos fijos
+  // La cuota diaria es la misma "cuota de hoy" de la tarjeta "Hoy puedes gastar": reserva primero
+  // los compromisos por pagar y no descuenta lo gastado hoy (eso sale de la cuota de hoy)
   const compromisos = isCurrentMonth ? pendingCommitments : 0;
-  const disponibleTrasCompromisos = disponibleParaGastar - compromisos;
-  const cuotaDiaria = (isCurrentMonth && disponibleTrasCompromisos > 0 && diasRestantes > 0)
-    ? disponibleTrasCompromisos / diasRestantes
-    : 0;
+  const hoy = isCurrentMonth ? getDailyBudget(monthTransactions, profile?.budget || 0, compromisos) : null;
+  const cuotaDiaria = hoy ? hoy.todayAllowance : 0;
 
   const promedioGastoDiarioActual = daysPassed > 0 ? (gastosVariables / daysPassed) : 0;
   const isWarning = baseLimit > 0 && disponibleParaGastar < 0;
@@ -251,6 +251,10 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               'Ingresa tus pagos del mes para habilitar el dinero libre disponible y tu presupuesto diario recomendado.'
             ) : isWarning ? (
               `Has superado tus ingresos/presupuesto del mes por ${formatCurrency(Math.abs(disponibleParaGastar), profile?.currency)}. Procura restringir tus nuevos gastos variables.`
+            ) : isCurrentMonth && hoy && hoy.remainingToday < 0 && hoy.tomorrowAllowance !== null ? (
+              <>
+                Te quedan <strong>{formatCurrency(disponibleParaGastar, profile?.currency)}</strong> libres{compromisos > 0 && <> y aún debes pagar <strong>{formatCurrency(compromisos, profile?.currency)}</strong> en compromisos</>}. Hoy ya superaste tu cuota de {formatCurrency(cuotaDiaria, profile?.currency)}; desde mañana procura no pasar de <strong>{formatCurrency(hoy.tomorrowAllowance, profile?.currency)}/día</strong> durante los <strong>{diasRestantes - 1} días restantes</strong>.
+              </>
             ) : isCurrentMonth ? (
               <>
                 Te quedan <strong>{formatCurrency(disponibleParaGastar, profile?.currency)}</strong> libres{compromisos > 0 && <> y aún debes pagar <strong>{formatCurrency(compromisos, profile?.currency)}</strong> en compromisos</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong>{formatCurrency(cuotaDiaria, profile?.currency)}/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
@@ -447,7 +451,8 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                     {formatCurrency(cuotaDiaria, profile?.currency)} <span className="text-sm font-normal">/ día</span>
                   </p>
                   <p className={`text-xs mt-1 ${isTechTheme ? 'text-accent/80' : 'text-text-secondary'}`}>
-                    Basado en tus {diasRestantes} días restantes del mes.
+                    Basado en tus {diasRestantes} días restantes del mes, contando hoy.
+                    {hoy && hoy.spentToday > 0 && <> Hoy llevas {formatCurrency(hoy.spentToday, profile?.currency)} de esta cuota.</>}
                   </p>
                 </div>
 
@@ -490,7 +495,9 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                   <p className="text-xs leading-relaxed">
                     {disponibleParaGastar < 0 
                       ? '⚠️ Has superado tu disponible mensual. Si haces nuevos gastos variables, aumentará tu déficit del mes.'
-                      : `💡 Si mantienes tus gastos variables diarios por debajo de ${formatCurrency(cuotaDiaria, profile?.currency)} cada día, cerrarás el mes sin sobrepasar tus ingresos.`
+                      : hoy && hoy.remainingToday < 0 && hoy.tomorrowAllowance !== null
+                        ? `⚠️ Hoy ya superaste tu cuota por ${formatCurrency(-hoy.remainingToday, profile?.currency)}. Desde mañana, procura no pasar de ${formatCurrency(hoy.tomorrowAllowance, profile?.currency)} por día para cerrar el mes sin sobrepasar tus ingresos.`
+                        : `💡 Si mantienes tus gastos variables diarios por debajo de ${formatCurrency(cuotaDiaria, profile?.currency)} cada día, cerrarás el mes sin sobrepasar tus ingresos.`
                     }
                   </p>
                 </div>

@@ -100,11 +100,14 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">Así se calcula</p>
         <Row label={today.baseIsBudget ? 'Tu presupuesto del mes' : 'Ingresos del mes'} value={f(today.base)} sign="+" />
-        <Row label="Lo que ya gastaste este mes" hint="Sin contar tus gastos del día a día de hoy" value={f(today.spentBeforeToday)} sign="−" />
+        <Row label="Gastos del mes" hint="Lo mismo que la tarjeta Gastos" value={f(today.spentMonth)} sign="−" />
         {today.pendingCommitments > 0 && (
           <Row label="Compromisos por pagar" hint="Pagos fijos que aún faltan este mes (los reservo primero)" value={f(today.pendingCommitments)} sign="−" />
         )}
-        <Row label="Libre para lo que queda del mes" value={f(Math.max(0, today.freeAtStartOfDay))} strong />
+        {today.spentToday > 0 && (
+          <Row label="Más lo que gastaste hoy" hint="Lo devuelvo aquí porque se descuenta abajo, de tu cuota de hoy" value={f(today.spentToday)} sign="+" />
+        )}
+        <Row label="Libre desde el inicio de hoy" value={f(Math.max(0, today.freeAtStartOfDay))} strong />
         <Row label={`Repartido en ${today.daysLeft} días`} hint="Los días que faltan del mes, contando hoy" value={`÷ ${today.daysLeft}`} />
         <Row label="Tu cuota de hoy" value={f(today.todayAllowance)} strong />
         <Row label="Lo que llevas gastado hoy" hint="Gastos variables (mercado, comida, transporte…)" value={f(today.spentToday)} sign="−" />
@@ -112,8 +115,10 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
       </div>
 
       <p className="text-xs text-text-muted leading-relaxed">
-        💡 Si hoy gastas menos, lo que sobre se reparte en los días siguientes y tu cuota de mañana sube.
-        En <strong>Control y Proyección</strong> (más abajo) la "Cuota diaria" ya descuenta lo que gastaste hoy, por eso puede dar un número un poco distinto.
+        {over && today.tomorrowAllowance !== null
+          ? <>💡 Desde mañana tu cuota sería de <strong>{f(today.tomorrowAllowance)}</strong> por día para no superar tus ingresos.</>
+          : <>💡 Si hoy gastas menos, lo que sobre se reparte en los días siguientes y tu cuota de mañana sube.</>}
+        {' '}Es la misma cuota que ves en <strong>Límite diario</strong>, más abajo.
       </p>
     </div>
   );
