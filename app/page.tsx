@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +21,8 @@ import { NextActionCard, useSkippedActions } from '@/components/dashboard/NextAc
 import { getNextActions } from '@/lib/nextAction';
 import { useGoals } from '@/hooks/useGoals';
 import { isGoalDone } from '@/lib/goals';
+import { buildDemoData } from '@/lib/demoData';
+import { getCommitments } from '@/lib/commitments';
 import { formatCurrency } from '@/lib/format';
 import { AppTour, TourOffer, TOUR_DONE_KEY, readTourVoicePref } from '@/components/tour/AppTour';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
@@ -36,15 +38,31 @@ let hasShownSplashInThisJSContext = false;
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
-  const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
-  const { totalDeudas } = useDebts();
-  const commitments = useCommitments(transactions);
-  const { goals, loading: goalsLoading } = useGoals();
+  const { transactions: realTransactions, loading: realLoading, refresh } = useExpenses();
+  const { totalDeudas: realTotalDeudas } = useDebts();
+  const realCommitments = useCommitments(realTransactions);
+  const { goals: realGoals, loading: realGoalsLoading } = useGoals();
   const { skipped: skippedActions, skip: skipAction } = useSkippedActions();
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showTourOffer, setShowTourOffer] = useState(false);
   const [tourVoice, setTourVoice] = useState<boolean | null>(null); // null = recorrido cerrado
+
+  // Durante el recorrido, Inicio muestra datos de ejemplo (solo en memoria) en lugar de los reales
+  const touring = tourVoice !== null;
+  const demo = useMemo(() => {
+    if (!touring) return null;
+    const data = buildDemoData();
+    return { ...data, commitments: { ...getCommitments(data.transactions, data.reminders), loading: false } };
+  }, [touring]);
+  const transactions = demo ? demo.transactions : realTransactions;
+  const loading = demo ? false : realLoading;
+  const commitments = demo ? demo.commitments : realCommitments;
+  const goals = demo ? demo.goals : realGoals;
+  const goalsLoading = demo ? false : realGoalsLoading;
+  const totalDeudas = demo
+    ? demo.debts.filter(d => d.direction !== 'me_deben').reduce((s, d) => s + d.totalAmount - d.paidAmount, 0)
+    : realTotalDeudas;
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(() => !hasShownSplashInThisJSContext);
@@ -59,6 +77,21 @@ export default function DashboardPage() {
 
   const processedUrl = useRef(false);
 
+  // El recorrido explica el mes actual, así que fija el filtro en él
+  function startTour(voice: boolean) {
+    setFilterType('month');
+    setFilterValue(getLocalMonthString());
+    setShowTourOffer(false);
+    setTourVoice(voice);
+  }
+
+  // "Ver tutorial" desde el menú de perfil estando ya en Inicio
+  useEffect(() => {
+    const onStart = () => startTour(readTourVoicePref());
+    window.addEventListener('flowi-start-tour', onStart);
+    return () => window.removeEventListener('flowi-start-tour', onStart);
+  }, []);
+
   useEffect(() => {
     setMounted(true);
     hasShownSplashInThisJSContext = true;
@@ -66,7 +99,7 @@ export default function DashboardPage() {
     // Recorrido guiado: se ofrece una vez, o se abre directo desde Configuración (?tour=1)
     const params = new URLSearchParams(window.location.search);
     if (params.get('tour') === '1') {
-      setTourVoice(readTourVoicePref());
+      startTour(readTourVoicePref());
       window.history.replaceState({}, '', '/');
     } else {
       try {
@@ -172,7 +205,7 @@ export default function DashboardPage() {
   const pendingCommitments = commitments.loading ? 0 : commitments.pendingTotal;
   // La cuota de hoy siempre es del mes actual, aunque se esté mirando otro mes
   const todayBudget = getDailyBudget(transactions, profile?.budget, pendingCommitments);
-  const monthToCloseNow = monthToClose(transactions, profile?.closedMonths);
+  const monthToCloseNow = demo ? null : monthToClose(transactions, profile?.closedMonths);
   const nextAction = getNextActions({
     transactions, pending: commitments.pending, today: todayBudget,
     hasGoals: goals.some(g => !isGoalDone(g)),
@@ -226,6 +259,7 @@ export default function DashboardPage() {
             {/* Desktop FAB */}
             <button
               onClick={() => setShowAdd(true)}
+              data-tour="add"
               className={`hidden sm:flex items-center gap-2 px-4 py-2.5 transition-all
                          ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
             >
@@ -275,7 +309,7 @@ export default function DashboardPage() {
         )}
 
         {/* Meta de ahorro principal */}
-        <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} /></div>
+        <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} demoGoals={demo?.goals} /></div>
 
         {/* Chart */}
         <div data-tour="chart"><ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} /></div>
@@ -335,12 +369,12 @@ export default function DashboardPage() {
       {/* El recorrido espera a que los datos estén en pantalla */}
       {!loading && showTourOffer && tourVoice === null && (
         <TourOffer
-          onStart={(voice) => { setShowTourOffer(false); setTourVoice(voice); }}
+          onStart={startTour}
           onSkip={() => { setShowTourOffer(false); try { localStorage.setItem(TOUR_DONE_KEY, 'true'); } catch (e) {} }}
         />
       )}
       {!loading && tourVoice !== null && (
-        <AppTour voice={tourVoice} onClose={() => setTourVoice(null)} />
+        <AppTour voice={tourVoice} demo onClose={() => setTourVoice(null)} />
       )}
     </div>
   );

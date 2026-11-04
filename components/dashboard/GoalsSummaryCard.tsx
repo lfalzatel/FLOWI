@@ -4,15 +4,18 @@ import { ChevronRight, Target } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useGoals } from '@/hooks/useGoals';
 import { formatCurrency } from '@/lib/format';
+import { Goal } from '@/lib/firestore';
 import { goalProgress, isGoalDone } from '@/lib/goals';
 
 // Tarjeta compacta de Inicio: la meta de ahorro más prioritaria, o una invitación a crear la primera
-export function GoalsSummaryCard({ currency = 'COP' }: { currency?: string }) {
+// `demoGoals` reemplaza las metas reales durante el recorrido guiado
+export function GoalsSummaryCard({ currency = 'COP', demoGoals }: { currency?: string; demoGoals?: Goal[] }) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const { goals, loading, error } = useGoals();
+  const real = useGoals();
+  const goals = demoGoals || real.goals;
 
-  if (loading || error) return null;
+  if (!demoGoals && (real.loading || real.error)) return null;
 
   const active = goals.filter(g => !isGoalDone(g));
   const top = active[0];

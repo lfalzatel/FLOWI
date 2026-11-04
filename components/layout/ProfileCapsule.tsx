@@ -14,7 +14,7 @@ import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
-  Sun, Monitor, Terminal, Moon, Layers, Heart
+  Sun, Monitor, Terminal, Moon, Layers, Heart, Compass
 } from 'lucide-react';
 
 const menuItems = [
@@ -23,7 +23,8 @@ const menuItems = [
   { icon: Download,   label: 'Instalar app',      href: '#',              divider: false, soon: false },
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
   { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: false, isNotificationToggle: true },
-  { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: true,  soon: false },
+  { icon: Compass,    label: 'Ver tutorial',      href: '/?tour=1',       divider: true,  soon: false },
+  { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: false, soon: false },
   { icon: Heart,      label: 'Apoyar a FLOWI',    href: '/configuracion#apoyar', divider: false, soon: false },
 ];
 
@@ -175,6 +176,7 @@ export function ProfileCapsule() {
       {/* ── Capsule button ── */}
       <button
         onClick={() => setOpen(o => !o)}
+        data-tour="profile"
         className={`flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-transparent border border-accent hover:bg-accent hover:text-black' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
       >
         {/* Avatar */}
@@ -316,6 +318,21 @@ export function ProfileCapsule() {
                 ) : item.label === 'Compartir app' ? (
                   <button
                     onClick={() => { handleShare(); setOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
+                      <item.icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                  </button>
+                ) : item.label === 'Ver tutorial' ? (
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      // En Inicio se abre ahí mismo; desde otra página se va a Inicio con el recorrido
+                      if (window.location.pathname === '/') window.dispatchEvent(new Event('flowi-start-tour'));
+                      else window.location.href = '/?tour=1';
+                    }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
                   >
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">

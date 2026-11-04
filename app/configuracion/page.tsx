@@ -11,7 +11,6 @@ import { ManageThemesModal } from '@/components/forms/ManageThemesModal';
 import { ManageUsersModal } from '@/components/forms/ManageUsersModal';
 import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoundModal';
-import { OnboardingModal } from '@/components/OnboardingModal';
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
 import { SupportProject } from '@/components/settings/SupportProject';
 import { db } from '@/lib/firebase';
@@ -32,7 +31,6 @@ export default function ConfigPage() {
   const { user, profile, loading: authLoading } = useAuth();
   
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
   const [isClearDataConfirmOpen, setIsClearDataConfirmOpen] = useState(false);
@@ -361,25 +359,13 @@ export default function ConfigPage() {
                   <Compass className="w-4 h-4 text-accent" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'RECORRIDO_POR_INICIO' : 'Recorrido por la pantalla de inicio 🔊'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'QUE_SIGNIFICA_CADA_CIFRA' : 'Qué significa cada cifra, con voz opcional'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'VER_TUTORIAL' : 'Ver tutorial 🔊'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'REGISTRAR_Y_LEER_TU_INICIO' : 'Cómo registrar y leer tu inicio, con voz opcional'}</p>
                 </div>
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </a>
 
-            <button onClick={() => setIsOnboardingOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-amber-500/30 rounded-none bg-amber-500/5' : 'rounded-xl bg-amber-500/10'}`}>
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                </div>
-                <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-amber-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TOUR_DE_BIENVENIDA' : 'Ver Tour de Bienvenida 🎙️'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-amber-400/60' : 'text-text-muted'}`}>{isTechTheme ? 'APRENDE_A_USAR_EL_ASISTENTE_DE_VOZ' : 'Aprende a usar el asistente de voz e IA'}</p>
-                </div>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
-            </button>
             <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
@@ -978,9 +964,6 @@ export default function ConfigPage() {
       )}
       {isBudgetModalOpen && (
         <ManageBudgetModal onClose={() => setIsBudgetModalOpen(false)} />
-      )}
-      {isOnboardingOpen && (
-        <OnboardingModal onClose={() => setIsOnboardingOpen(false)} />
       )}
       {soundModalAction && (
         <ManageSoundModal

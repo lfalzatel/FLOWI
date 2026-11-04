@@ -4,40 +4,46 @@ import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Compass, Volume2, VolumeX, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 
-// Recorrido guiado por la pantalla de Inicio: resalta cada parte (marcada con data-tour="...")
-// y explica cómo leerla. La voz usa la síntesis del propio navegador: no tiene costo ni
-// necesita internet. Las partes que no estén en pantalla (p. ej. sin metas) se saltan.
+// Recorrido guiado: primero cómo registrar, luego cómo leer cada parte de Inicio (marcadas con
+// data-tour="..."). Mientras dura, Inicio muestra datos de ejemplo que no se guardan. La voz usa
+// la síntesis del propio navegador: no tiene costo ni necesita internet. Las partes que no
+// estén en pantalla (p. ej. el menú inferior en computador) se saltan.
 
 export const TOUR_DONE_KEY = 'flowi_tour_done';
 const VOICE_KEY = 'flowi_tour_voice';
 
+// target admite alternativas separadas por "|" (la primera que esté en pantalla)
 interface Step { target?: string; title: string; text: string }
 
 const STEPS: Step[] = [
-  { title: '¡Hola! Te muestro FLOWI', text: 'En un minuto te explico cómo leer tu pantalla de inicio. Puedes omitir el recorrido cuando quieras.' },
-  { target: 'filter', title: 'Elige qué período ver', text: 'Aquí escoges si ves todo, el mes, la semana o un día. Con las flechas cambias de mes. Todas las cifras de abajo dependen de lo que elijas aquí.' },
-  { target: '#balance-card', title: 'Dinero disponible', text: 'Es lo que entró menos lo que salió en el período. Si sale en rojo, gastaste más de lo que entró. Debajo, el balance neto también descuenta tus deudas.' },
-  { target: 'totals', title: 'Gastos e ingresos', text: 'En rojo, todo lo que salió en el período. En verde, todo lo que entró.' },
-  { target: 'debts', title: 'Deudas pendientes', text: 'Lo que te falta por pagar de tus deudas, con intereses si tienen tasa. Tócala para ver cada deuda.' },
-  { target: 'today', title: 'Hoy puedes gastar', text: 'La cifra más útil del día: cuánto puedes gastar hoy sin quedarte corto a fin de mes. Ya aparta tus pagos fijos pendientes. Si te pasas, se pone en rojo y te dice cuánto puedes gastar desde mañana. Tócala para ver la cuenta.' },
-  { target: 'next-action', title: 'Tu siguiente acción', text: 'Lo más útil que puedes hacer ahora: pagar algo que vence, registrar tu sueldo o cerrar el mes. Tócala para hacerlo, o sáltala por hoy con la X.' },
+  { title: '¡Hola! Te muestro FLOWI', text: 'Primero te enseño a registrar tu plata y después a leer tu pantalla de inicio. Lo que ves ahora son datos de ejemplo: tus datos no se tocan. Puedes omitir el recorrido cuando quieras.' },
+  { target: 'voice|add', title: '1. Registra con tu voz', text: 'Es la forma más rápida. Toca el micrófono y habla normal: "gasté veinte mil en almuerzo", "me pagaron el sueldo, tres millones y medio" o "le debo doscientos mil a Juan". Puedes decir varias cosas a la vez. Si prefieres escribir, ahí mismo está la opción con teclado.' },
+  { target: '#nav-gastos', title: '2. Gastos e ingresos', text: 'En estas pestañas ves la lista completa de gastos y de ingresos, y puedes editar o borrar. Cuando un gasto se repite cada mes, como el arriendo o los servicios, márcalo como gasto fijo; los demás son tus gastos del día a día.' },
+  { target: '#nav-deudas', title: '3. Deudas', text: 'Aquí registras lo que debes y también lo que te deben, con intereses si aplica. Cada vez que pagas una parte, registras el abono y la deuda va bajando.' },
+  { target: 'filter', title: 'Ahora, tu inicio: el período', text: 'Aquí escoges si ves todo, el mes, la semana o un día. Con las flechas cambias de mes. Todas las cifras de abajo dependen de lo que elijas aquí.' },
+  { target: '#balance-card', title: 'Dinero disponible', text: 'Es lo que entró menos lo que salió en el período. En el ejemplo entraron tres millones y medio de sueldo y ya salió el arriendo. Si sale en rojo, gastaste más de lo que entró. Debajo, el balance neto también descuenta tus deudas.' },
+  { target: 'totals', title: 'Gastos e ingresos del período', text: 'En rojo, todo lo que salió. En verde, todo lo que entró.' },
+  { target: 'debts', title: 'Deudas pendientes', text: 'Lo que te falta por pagar de tus deudas. En el ejemplo, del préstamo de Juan ya se abonaron doscientos mil y faltan cuatrocientos mil. Tócala para ver el detalle.' },
+  { target: 'today', title: 'Hoy puedes gastar', text: 'La cifra más útil del día: cuánto puedes gastar hoy sin quedarte corto a fin de mes. Ya aparta los pagos fijos que faltan, como el internet. Si te pasas, se pone en rojo y te dice cuánto puedes gastar desde mañana. Tócala para ver la cuenta.' },
+  { target: 'next-action', title: 'Tu siguiente acción', text: 'Lo más útil que puedes hacer ahora. En el ejemplo, pagar el internet que vence pronto. Tócala para registrarlo, o sáltala por hoy con la X. Al empezar cada mes aquí te invito a cerrar el mes anterior.' },
   { target: 'projection', title: 'Control y proyección', text: 'Tus gastos fijos, el dinero libre que te queda y tu límite diario. Cada cuadro se puede tocar para ver el desglose.' },
   { target: 'commitments', title: 'Próximos compromisos', text: 'Los pagos fijos que te faltan este mes, con el valor que pagaste el mes pasado. Cuando pagues uno, tócalo para registrarlo.' },
   { target: 'goals', title: 'Metas de ahorro', text: 'Tu meta principal y cuánto llevas. Toca para ver todas tus metas y cuándo las lograrías.' },
   { target: 'chart', title: 'Gráfica del período', text: 'Muestra cómo se movió tu plata día a día en el período que elegiste.' },
   { target: 'budgets', title: 'Gastos por categoría', text: 'Compara en qué gastas con una guía sana: necesidades, gustos y ahorro. Toca cada grupo para ver sus categorías.' },
-  { target: 'voice', title: 'Registra con tu voz', text: 'La forma más rápida de anotar: toca el micrófono y di algo como "gasté veinte mil en almuerzo". La app lo entiende y lo guarda.' },
-  { title: '¡Listo!', text: 'Ya sabes leer tu inicio. Puedes repetir este recorrido cuando quieras desde Configuración.' },
+  { target: 'profile', title: 'Personaliza FLOWI', text: 'En tu foto cambias el tema y los colores: Cyber, Día, Noche y más. Ahí mismo está "Ver tutorial" para repetir este recorrido cuando quieras.' },
+  { title: '¡Listo!', text: 'Ya sabes registrar y leer tu inicio. Al cerrar vuelven tus datos reales. ¡A llevar tus cuentas claras!' },
 ];
-
-const selectorOf = (t: string) => (t.startsWith('#') ? t : `[data-tour="${t}"]`);
 
 function findTarget(step: Step): HTMLElement | null {
   if (!step.target) return null;
-  const el = document.querySelector<HTMLElement>(selectorOf(step.target));
-  if (!el) return null;
-  const r = el.getBoundingClientRect();
-  return r.width > 0 && r.height > 0 ? el : null;
+  for (const t of step.target.split('|')) {
+    const el = document.querySelector<HTMLElement>(t.startsWith('#') ? t : `[data-tour="${t}"]`);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) return el;
+  }
+  return null;
 }
 
 function pickSpanishVoice(): SpeechSynthesisVoice | null {
@@ -77,18 +83,20 @@ export function TourOffer({ onStart, onSkip }: { onStart: (voice: boolean) => vo
   );
 }
 
-export function AppTour({ voice: initialVoice, onClose }: { voice: boolean; onClose: () => void }) {
+export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice: boolean; demo?: boolean; onClose: () => void }) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  // Solo los pasos cuya parte está en pantalla al empezar (sin metas no hay paso de metas, etc.)
-  const [steps] = useState(() => STEPS.filter(s => !s.target || findTarget(s)));
+  // Solo los pasos cuya parte está en pantalla; se calcula después de pintar, cuando Inicio
+  // ya muestra los datos de ejemplo
+  const [steps, setSteps] = useState<Step[] | null>(null);
+  useLayoutEffect(() => { setSteps(STEPS.filter(s => !s.target || findTarget(s))); }, []);
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [voice, setVoice] = useState(initialVoice);
   const dir = useRef(1);
   const target = useRef<HTMLElement | null>(null);
   const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
-  const step = steps[index];
+  const step = steps?.[index] ?? STEPS[0];
 
   const finish = useCallback(() => {
     if (canSpeak) window.speechSynthesis.cancel();
@@ -102,13 +110,13 @@ export function AppTour({ voice: initialVoice, onClose }: { voice: boolean; onCl
     const el = findTarget(step);
     if (!el) {
       const next = index + dir.current;
-      if (next >= 0 && next < steps.length) setIndex(next);
+      if (steps && next >= 0 && next < steps.length) setIndex(next);
       return;
     }
     target.current = el;
     if (getComputedStyle(el).position !== 'fixed') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setRect(el.getBoundingClientRect());
-  }, [index, step, steps.length]);
+  }, [index, step, steps]);
 
   // Sigue a la parte resaltada mientras termina el desplazamiento o cambia el tamaño
   useEffect(() => {
@@ -154,6 +162,7 @@ export function AppTour({ voice: initialVoice, onClose }: { voice: boolean; onCl
 
   function go(delta: number) {
     const next = index + delta;
+    if (!steps) return;
     if (next >= steps.length) return finish();
     if (next < 0) return;
     dir.current = delta;
@@ -167,7 +176,7 @@ export function AppTour({ voice: initialVoice, onClose }: { voice: boolean; onCl
     });
   }
 
-  if (typeof document === 'undefined') return null;
+  if (typeof document === 'undefined' || !steps) return null;
 
   const pad = 8;
   const vh = window.innerHeight;
@@ -196,6 +205,12 @@ export function AppTour({ voice: initialVoice, onClose }: { voice: boolean; onCl
              style={{ top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2, boxShadow: '0 0 0 9999px rgba(0,0,0,0.72)' }} />
       ) : (
         <div className="absolute inset-0 bg-black/70 pointer-events-none" />
+      )}
+
+      {demo && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-400 text-black text-[11px] font-bold shadow-lg pointer-events-none whitespace-nowrap">
+          Datos de ejemplo · tus datos no se tocan
+        </div>
       )}
 
       <div className={`absolute glass-dropdown p-4 shadow-2xl animate-fade-in-up ${isTechTheme ? 'rounded-none border border-accent/50 bg-deep' : 'rounded-2xl'}`} style={cardStyle}>
