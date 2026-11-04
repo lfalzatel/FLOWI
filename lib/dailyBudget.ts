@@ -7,6 +7,11 @@ import { getLocalDateString, getLocalMonthString } from './dateUtils';
 
 export interface DailyBudget {
   hasBase: boolean;      // hay ingresos o presupuesto con qué calcular
+  base: number;           // ingresos del mes, o el presupuesto si no hay ingresos
+  baseIsBudget: boolean;
+  spentBeforeToday: number; // gastos del mes sin contar los variables de hoy
+  pendingCommitments: number;
+  freeAtStartOfDay: number; // lo libre para repartir desde hoy hasta fin de mes
   todayAllowance: number; // cuota para hoy al empezar el día
   spentToday: number;     // gastos variables de hoy
   remainingToday: number; // negativo = se pasó hoy
@@ -43,6 +48,11 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
 
   return {
     hasBase: base > 0,
+    base,
+    baseIsBudget: ingresos <= 0 && budget > 0,
+    spentBeforeToday: gastos - spentToday,
+    pendingCommitments,
+    freeAtStartOfDay,
     todayAllowance,
     spentToday,
     remainingToday: todayAllowance - spentToday,

@@ -44,8 +44,9 @@ export default function DeudasPage() {
   const [filterValue, setFilterValue] = useState(getLocalMonthString());
 
   // Calcular el total de deudas acumulando dinámicamente los intereses generados
+  // (solo lo que yo debo; lo que me deben no es plata por pagar)
   const totalDeudasConInteres = debts
-    .filter(d => d.status !== 'paid')
+    .filter(d => d.status !== 'paid' && (d.direction || 'debo') === 'debo')
     .reduce((sum, d) => {
       const basePending = d.totalAmount - d.paidAmount;
       const interestData = calculateDebtInterest(d);

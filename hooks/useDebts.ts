@@ -8,14 +8,17 @@ export function useDebts() {
 
   const refresh = async () => {}; // No-op para mantener compatibilidad
 
-  // Calcular el total pendiente de deudas incluyendo intereses
-  const totalDeudas = debts
-    .filter(d => d.status === 'pending')
+  // Calcular el total pendiente de deudas incluyendo intereses.
+  // Las que "me deben" van aparte: no son plata que yo tenga que pagar.
+  const pendingOf = (direction: 'debo' | 'me_deben') => debts
+    .filter(d => d.status === 'pending' && (d.direction || 'debo') === direction)
     .reduce((sum, d) => {
       const basePending = Math.max(0, d.totalAmount - d.paidAmount);
       const interestData = calculateDebtInterest(d);
       return sum + basePending + interestData.accumulatedInterest;
     }, 0);
+  const totalDeudas = pendingOf('debo');
+  const totalMeDeben = pendingOf('me_deben');
 
-  return { debts, loading, error, refresh, totalDeudas };
+  return { debts, loading, error, refresh, totalDeudas, totalMeDeben };
 }

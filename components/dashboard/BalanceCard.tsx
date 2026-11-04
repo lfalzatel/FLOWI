@@ -5,6 +5,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatCurrency } from '@/lib/format';
 import { DailyBudget } from '@/lib/dailyBudget';
+import { BalanceInfoModal } from './BalanceInfoModal';
 
 interface Props {
   balance:       number;
@@ -21,6 +22,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
   const isLight = theme === 'light';
 
   const [absorbingId, setAbsorbingId] = useState<string | null>(null);
+  const [info, setInfo] = useState<'today' | 'debts' | null>(null);
 
   useEffect(() => {
     const handleAbsorb = (e: Event) => {
@@ -134,9 +136,11 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
         </div>
         
         {/* Tarjeta de Deudas a lo ancho */}
-        <div 
+        <button
+          type="button"
+          onClick={() => setInfo('debts')}
           id="total-deudas-card" 
-          className={`glass-card p-4 rounded-2xl ${today ? '' : 'col-span-2'} animate-card-mix transition-all duration-300 ${
+          className={`glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 ${today ? '' : 'col-span-2'} animate-card-mix transition-all duration-300 ${
             absorbingId === 'total-deudas-card' ? 'scale-105 border-yellow-500/80 shadow-[0_0_35px_rgba(245,158,11,0.7)]' : ''
           }`} 
           style={{ animationDelay: '0.35s' }}
@@ -150,11 +154,13 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
           <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)] tracking-wider' : 'font-syne font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)]'} ${absorbingId === 'total-deudas-card' ? 'drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]' : ''}`}>
             <AnimatedNumber value={totalDeudas} delay={0.35} />
           </p>
-        </div>
+          <p className={`text-[10px] mt-0.5 ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Toca para ver el detalle</p>
+        </button>
 
         {/* Hoy puedes gastar (se repite con más detalle en Control y Proyección) */}
         {today && (
-          <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.45s' }}>
+          <button type="button" onClick={() => setInfo('today')}
+                  className="glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 transition-all duration-300 animate-card-mix" style={{ animationDelay: '0.45s' }}>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">
                 <CalendarCheck className="w-3 h-3 text-accent" />
@@ -173,9 +179,12 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
                   ? `Llevas ${formatCurrency(today.spentToday, currency)} de ${formatCurrency(today.todayAllowance, currency)}`
                   : `Cuota de hoy · quedan ${today.daysLeft} días`}
             </p>
-          </div>
+          </button>
         )}
       </div>
+
+      {info === 'today' && today && <BalanceInfoModal kind="today" today={today} currency={currency} onClose={() => setInfo(null)} />}
+      {info === 'debts' && <BalanceInfoModal kind="debts" balance={balance} currency={currency} onClose={() => setInfo(null)} />}
     </div>
   );
 }
