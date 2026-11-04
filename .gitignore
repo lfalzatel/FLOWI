@@ -45,4 +45,5 @@ tienda-38d40-*.json
 # Migración a flowi-9af82: llaves de cuentas de servicio y dependencias locales
 migracion/llaves/
 migracion/node_modules/
+migracion/respaldos/
 flowi-9af82-*.json

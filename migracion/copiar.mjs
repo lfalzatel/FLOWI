@@ -1,7 +1,8 @@
 // Copia los datos y usuarios de FLOWI del proyecto compartido tienda-38d40 al proyecto propio flowi-9af82.
 //
 //   node copiar.mjs            → solo revisa: cuenta lo que se copiaría, no escribe nada
-//   node copiar.mjs --copiar   → copia (usuarios de inicio de sesión + Firestore) y verifica
+//   node copiar.mjs --copiar   → guarda un respaldo local, copia (inicio de sesión + Firestore) y verifica
+//   node copiar.mjs --respaldo → solo guarda el respaldo local en ./respaldos/
 //
 // Solo LEE de tienda-38d40 (nunca escribe ni borra allí). En flowi-9af82 deja las colecciones de
 // FLOWI como espejo exacto del origen, así que se puede volver a correr justo antes del cambio
@@ -9,7 +10,7 @@
 //
 // Necesita en ./llaves/ una llave de cuenta de servicio de cada proyecto (se borran al terminar).
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initializeApp, cert } from 'firebase-admin/app';
@@ -20,6 +21,7 @@ const SOURCE = 'tienda-38d40';
 const TARGET = 'flowi-9af82';
 const COLLECTIONS = ['fl_expenses', 'fl_debts', 'fl_customCategories', 'fl_notes', 'fl_reminders', 'fl_goals'];
 const APPLY = process.argv.includes('--copiar');
+const BACKUP_ONLY = process.argv.includes('--respaldo');
 
 const here = dirname(fileURLToPath(import.meta.url));
 const keysDir = join(here, 'llaves');
@@ -144,8 +146,19 @@ async function main() {
   }
   console.log(`\n  En ${TARGET} hoy: ${Object.entries(targetCounts).map(([k, v]) => `${k}=${v}`).join(', ')}`);
 
+  if (APPLY || BACKUP_ONLY) {
+    // Respaldo local de todo lo de FLOWI tal como está en el origen (tiene datos personales: no compartirlo)
+    const dir = join(here, 'respaldos');
+    mkdirSync(dir, { recursive: true });
+    const file = join(dir, `flowi-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+    const dump = { origen: SOURCE, fecha: new Date().toISOString(), users: Object.fromEntries(profiles.map(d => [d.id, d.data()])) };
+    for (const name of COLLECTIONS) dump[name] = Object.fromEntries(data[name].map(d => [d.id, d.data()]));
+    writeFileSync(file, JSON.stringify(dump, null, 1));
+    console.log(`\n  Respaldo guardado: ${file}`);
+  }
+
   if (!APPLY) {
-    console.log(`\nNada se escribió. Para copiar: node copiar.mjs --copiar\n`);
+    if (!BACKUP_ONLY) console.log(`\nNada se escribió. Para copiar: node copiar.mjs --copiar\n`);
     return;
   }
 
