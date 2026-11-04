@@ -138,7 +138,8 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
     synth.cancel();
     if (!voice) return;
     const speak = () => {
-      const u = new SpeechSynthesisUtterance(`${step.title}. ${step.text}`);
+      // En mayúsculas la voz lo deletrea ("F, L, O…"); así lo lee como palabra
+      const u = new SpeechSynthesisUtterance(`${step.title}. ${step.text}`.replace(/FLOWI/g, 'Flowi'));
       const v = pickSpanishVoice();
       if (v) u.voice = v;
       u.lang = v?.lang || 'es-CO';
