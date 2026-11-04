@@ -95,6 +95,8 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
   const [voice, setVoice] = useState(initialVoice);
   const dir = useRef(1);
   const target = useRef<HTMLElement | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [cardH, setCardH] = useState(240); // alto real del cuadro (cambia con el texto y el tema)
   const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
   const step = steps?.[index] ?? STEPS[0];
 
@@ -114,9 +116,31 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
       return;
     }
     target.current = el;
-    if (getComputedStyle(el).position !== 'fixed') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setRect(el.getBoundingClientRect());
   }, [index, step, steps]);
+
+  // Mide el cuadro después de pintarlo, para ubicarlo sin tapar la parte explicada
+  useLayoutEffect(() => {
+    const h = cardRef.current?.offsetHeight;
+    if (h && Math.abs(h - cardH) > 2) setCardH(h);
+  });
+
+  // Desplaza la página para que la parte y el cuadro quepan juntos debajo del encabezado
+  useEffect(() => {
+    const el = target.current;
+    if (!el || !steps) return;
+    const pos = getComputedStyle(el).position;
+    if (pos === 'fixed' || pos === 'sticky' || el.closest('header')) return;
+    const r = el.getBoundingClientRect();
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
+    const filter = document.querySelector<HTMLElement>('[data-tour="filter"]');
+    const topSafe = headerH + (filter && filter !== el ? filter.offsetHeight : 0) + 12;
+    const avail = window.innerHeight - topSafe - 16;
+    const needed = r.height + 16 + 12 + cardH;
+    const desiredTop = needed <= avail ? topSafe + 8 + (avail - needed) / 2 : topSafe + 8;
+    const delta = r.top - desiredTop;
+    if (Math.abs(delta) > 8) window.scrollBy({ top: delta, behavior: 'smooth' });
+  }, [index, steps, cardH]);
 
   // Sigue a la parte resaltada mientras termina el desplazamiento o cambia el tamaño
   useEffect(() => {
@@ -185,14 +209,17 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
   const cardW = Math.min(360, vw - 32);
   let cardStyle: React.CSSProperties;
   if (rect) {
+    // Debajo si cabe, si no encima; si no cabe en ninguno, del lado con más espacio
     const below = rect.bottom + pad + 12;
-    const fitsBelow = below + 230 < vh;
-    const top = fitsBelow ? below : Math.max(12, rect.top - pad - 12 - 230);
+    const above = rect.top - pad - 12 - cardH;
+    const top = below + cardH + 12 <= vh ? below
+      : above >= 12 ? above
+      : (vh - rect.bottom > rect.top ? vh - cardH - 12 : 12);
     const left = Math.min(Math.max(16, rect.left + rect.width / 2 - cardW / 2), vw - cardW - 16);
     cardStyle = { top, left, width: cardW };
   } else {
     // Posición explícita: la animación de entrada usa transform y anularía un translate de centrado
-    cardStyle = { top: Math.max(16, vh / 2 - 110), left: (vw - cardW) / 2, width: cardW };
+    cardStyle = { top: Math.max(16, (vh - cardH) / 2), left: (vw - cardW) / 2, width: cardW };
   }
   const isLast = index === steps.length - 1;
   const total = steps.length;
@@ -214,7 +241,7 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
         </div>
       )}
 
-      <div className={`absolute glass-dropdown p-4 shadow-2xl animate-fade-in-up ${isTechTheme ? 'rounded-none border border-accent/50 bg-deep' : 'rounded-2xl'}`} style={cardStyle}>
+      <div ref={cardRef} className={`absolute glass-dropdown p-4 shadow-2xl animate-fade-in-up ${isTechTheme ? 'rounded-none border border-accent/50 bg-deep' : 'rounded-2xl'}`} style={cardStyle}>
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <h3 className={`font-bold ${isTechTheme ? 'text-accent uppercase text-sm' : 'font-syne text-text-primary'}`}>{step.title}</h3>
           <div className="flex items-center gap-1 -mr-1 -mt-1 shrink-0">
