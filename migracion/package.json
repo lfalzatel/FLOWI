@@ -1,0 +1,9 @@
+{
+  "name": "flowi-migracion",
+  "private": true,
+  "type": "module",
+  "description": "Copia única de los datos de FLOWI de tienda-38d40 a flowi-9af82",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

@@ -1,0 +1,90 @@
+rules_version = '2';
+
+// Reglas de Firestore del proyecto propio de FLOWI (flowi-9af82).
+// OJO: se publican SOLO con  firebase deploy --config firebase.firestore.json --project flowi-9af82 --only firestore
+// (nunca en tienda-38d40, que comparte base de datos con la app de la tienda).
+//
+// Cada persona solo puede ver y cambiar sus propios datos. El rol "admin" solo lo puede
+// asignar otro administrador desde "Gestionar usuarios"; nadie puede dárselo a sí mismo.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin';
+    }
+
+    // Documentos de las colecciones fl_*: el dueño es el campo userId
+    function ownsExisting() {
+      return signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function createsOwn() {
+      return signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ── Perfiles ──────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+      // Al crear el perfil no se puede nacer administrador
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.get('role', 'Usuario') != 'admin';
+
+      allow update: if signedIn() && (
+        // La persona edita su perfil, pero sin tocar su rol
+        (request.auth.uid == uid
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+        // Un administrador solo cambia el rol de otros (o el suyo)
+        || (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']))
+      );
+
+      allow delete: if false;
+    }
+
+    // ── Datos de cada persona ─────────────────────────────────
+    match /fl_expenses/{id} {
+      allow read, delete: if ownsExisting();
+      allow create: if createsOwn();
+      allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
+    }
+
+    match /fl_debts/{id} {
+      allow read, delete: if ownsExisting();
+      allow create: if createsOwn();
+      allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
+    }
+
+    match /fl_customCategories/{id} {
+      allow read, delete: if ownsExisting();
+      allow create: if createsOwn();
+      allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
+    }
+
+    match /fl_notes/{id} {
+      allow read, delete: if ownsExisting();
+      allow create: if createsOwn();
+      allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
+    }
+
+    match /fl_reminders/{id} {
+      allow read, delete: if ownsExisting();
+      allow create: if createsOwn();
+      allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
+    }
+
+    match /fl_goals/{id} {
+      allow read, delete: if ownsExisting();
+      allow create: if createsOwn();
+      allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
+    }
+
+    // Todo lo demás queda cerrado
+  }
+}

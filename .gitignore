@@ -41,3 +41,8 @@ firebase-debug.*.log
 # Claves de cuentas de servicio de Google Cloud (nunca se suben)
 tienda-38d40-*.json
 *-serviceaccount*.json
+
+# Migración a flowi-9af82: llaves de cuentas de servicio y dependencias locales
+migracion/llaves/
+migracion/node_modules/
+flowi-9af82-*.json
