@@ -17,6 +17,11 @@ import { useCommitments } from '@/hooks/useCommitments';
 import { getDailyBudget } from '@/lib/dailyBudget';
 import { MonthCloseCard } from '@/components/dashboard/MonthCloseCard';
 import { monthToClose } from '@/lib/monthClose';
+import { NextActionCard, useSkippedActions } from '@/components/dashboard/NextActionCard';
+import { getNextActions } from '@/lib/nextAction';
+import { useGoals } from '@/hooks/useGoals';
+import { isGoalDone } from '@/lib/goals';
+import { formatCurrency } from '@/lib/format';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
@@ -34,6 +39,8 @@ export default function DashboardPage() {
   const { transactions, loading, totalGastos, totalIngresos, balance, refresh } = useExpenses();
   const { totalDeudas } = useDebts();
   const commitments = useCommitments(transactions);
+  const { goals, loading: goalsLoading } = useGoals();
+  const { skipped: skippedActions, skip: skipAction } = useSkippedActions();
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -159,6 +166,15 @@ export default function DashboardPage() {
     
   const filteredBalance = filteredIngresos - filteredGastos;
   const isCurrentMonthView = filterType === 'month' && filterValue === getLocalMonthString();
+  const pendingCommitments = commitments.loading ? 0 : commitments.pendingTotal;
+  // La cuota de hoy siempre es del mes actual, aunque se esté mirando otro mes
+  const todayBudget = getDailyBudget(transactions, profile?.budget, pendingCommitments);
+  const monthToCloseNow = monthToClose(transactions, profile?.closedMonths);
+  const nextAction = getNextActions({
+    transactions, pending: commitments.pending, today: todayBudget,
+    hasGoals: goals.some(g => !isGoalDone(g)),
+    formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
+  })[0];
 
   return (
     <div className="relative min-h-screen flex flex-col bg-deep">
@@ -216,14 +232,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Cierre del mes anterior (primeros días del mes) */}
-        {!loading && !commitments.loading && (() => {
-          const month = monthToClose(transactions, profile?.closedMonths);
-          return month && (
-            <MonthCloseCard month={month} transactions={transactions} currency={profile?.currency}
-                            pendingCommitments={commitments.pendingTotal} pendingCount={commitments.pending.length} />
-          );
-        })()}
+        {/* Tu siguiente acción: cerrar el mes anterior (primeros días) o lo más útil para hacer ahora */}
+        {!loading && !commitments.loading && !goalsLoading && (monthToCloseNow ? (
+          <MonthCloseCard month={monthToCloseNow} transactions={transactions} currency={profile?.currency}
+                          pendingCommitments={commitments.pendingTotal} pendingCount={commitments.pending.length} />
+        ) : nextAction && (
+          <NextActionCard key={nextAction.id} action={nextAction} today={todayBudget} currency={profile?.currency}
+                          onSkip={() => skipAction(nextAction.id)} onRefresh={refresh} />
+        ))}
 
         {/* Filter */}
         <DateFilter 
@@ -245,7 +261,7 @@ export default function DashboardPage() {
           <>
             <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas}
                          currency={profile?.currency}
-                         today={isCurrentMonthView ? getDailyBudget(transactions, profile?.budget, commitments.loading ? 0 : commitments.pendingTotal) : null} />
+                         today={isCurrentMonthView ? todayBudget : null} />
             <BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh}
                               pendingCommitments={commitments.loading ? 0 : commitments.pendingTotal} />
             {/* Lo que falta por pagar este mes (solo mirando el mes actual) */}
