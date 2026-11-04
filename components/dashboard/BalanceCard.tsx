@@ -1,17 +1,21 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { CalendarCheck, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from './AnimatedNumber';
+import { formatCurrency } from '@/lib/format';
+import { DailyBudget } from '@/lib/dailyBudget';
 
 interface Props {
   balance:       number;
   totalGastos:   number;
   totalIngresos: number;
   totalDeudas:   number;
+  today?:        DailyBudget | null; // solo al mirar el mes actual
+  currency?:     string;
 }
 
-export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }: Props) {
+export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, today, currency }: Props) {
   const { theme } = useTheme();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light';
@@ -132,7 +136,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
         {/* Tarjeta de Deudas a lo ancho */}
         <div 
           id="total-deudas-card" 
-          className={`glass-card p-4 rounded-2xl col-span-2 animate-card-mix transition-all duration-300 ${
+          className={`glass-card p-4 rounded-2xl ${today ? '' : 'col-span-2'} animate-card-mix transition-all duration-300 ${
             absorbingId === 'total-deudas-card' ? 'scale-105 border-yellow-500/80 shadow-[0_0_35px_rgba(245,158,11,0.7)]' : ''
           }`} 
           style={{ animationDelay: '0.35s' }}
@@ -147,6 +151,30 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas }
             <AnimatedNumber value={totalDeudas} delay={0.35} />
           </p>
         </div>
+
+        {/* Hoy puedes gastar (se repite con más detalle en Control y Proyección) */}
+        {today && (
+          <div className="glass-card p-4 rounded-2xl animate-card-mix" style={{ animationDelay: '0.45s' }}>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">
+                <CalendarCheck className="w-3 h-3 text-accent" />
+              </div>
+              <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>
+                {today.remainingToday < 0 ? 'Hoy te pasaste' : 'Hoy puedes gastar'}
+              </span>
+            </div>
+            <p className={`${isCyberpunk ? 'font-mono tracking-wider' : 'font-syne'} font-bold text-[clamp(12px,5vw,18px)] ${today.remainingToday < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
+              <AnimatedNumber value={Math.abs(today.remainingToday)} delay={0.45} />
+            </p>
+            <p className={`text-[10px] mt-0.5 leading-tight ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
+              {!today.hasBase
+                ? 'Registra tus ingresos del mes'
+                : today.spentToday > 0
+                  ? `Llevas ${formatCurrency(today.spentToday, currency)} de ${formatCurrency(today.todayAllowance, currency)}`
+                  : `Cuota de hoy · quedan ${today.daysLeft} días`}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
