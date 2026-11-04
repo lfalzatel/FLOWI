@@ -39,17 +39,18 @@ function loadKey(projectId) {
 let sourceKey, targetKey;
 try {
   sourceKey = loadKey(SOURCE);
-  targetKey = loadKey(TARGET);
+  // El respaldo solo lee del origen; no necesita la llave del destino
+  if (!BACKUP_ONLY) targetKey = loadKey(TARGET);
 } catch (err) {
   console.error(`\n${err.message}\n`);
   process.exit(1);
 }
 const sourceApp = initializeApp({ credential: cert(sourceKey) }, 'origen');
-const targetApp = initializeApp({ credential: cert(targetKey) }, 'destino');
+const targetApp = targetKey ? initializeApp({ credential: cert(targetKey) }, 'destino') : null;
 const src = getFirestore(sourceApp);
-const dst = getFirestore(targetApp);
+const dst = targetApp && getFirestore(targetApp);
 const srcAuth = getAuth(sourceApp);
-const dstAuth = getAuth(targetApp);
+const dstAuth = targetApp && getAuth(targetApp);
 
 async function readAll(db, name) {
   const snap = await db.collection(name).get();
@@ -132,6 +133,26 @@ async function main() {
   if (passwordUsers.length) console.log(`    ⚠ ${passwordUsers.length} usan correo y contraseña: su contraseña no se copia; tendrían que restablecerla.`);
   if (missingAuth.length) console.log(`    ⚠ ${missingAuth.length} identificadores con datos no tienen cuenta (datos huérfanos; se copian igual).`);
 
+  if (APPLY || BACKUP_ONLY) {
+    // Respaldo local de todo lo de FLOWI tal como está en el origen (tiene datos personales: no compartirlo)
+    const dir = join(here, 'respaldos');
+    mkdirSync(dir, { recursive: true });
+    const file = join(dir, `flowi-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+    const dump = {
+      origen: SOURCE,
+      fecha: new Date().toISOString(),
+      users: Object.fromEntries(profiles.map(d => [d.id, d.data()])),
+      cuentas: authUsers.map(toImportRecord),
+    };
+    for (const name of COLLECTIONS) dump[name] = Object.fromEntries(data[name].map(d => [d.id, d.data()]));
+    writeFileSync(file, JSON.stringify(dump, null, 1));
+    console.log(`\n  Respaldo guardado: ${file}`);
+  }
+  if (BACKUP_ONLY) {
+    console.log(`\nSolo se guardó el respaldo; no se escribió nada en Firebase.\n`);
+    return;
+  }
+
   // 4. Estado del destino
   let targetCounts;
   try {
@@ -146,19 +167,8 @@ async function main() {
   }
   console.log(`\n  En ${TARGET} hoy: ${Object.entries(targetCounts).map(([k, v]) => `${k}=${v}`).join(', ')}`);
 
-  if (APPLY || BACKUP_ONLY) {
-    // Respaldo local de todo lo de FLOWI tal como está en el origen (tiene datos personales: no compartirlo)
-    const dir = join(here, 'respaldos');
-    mkdirSync(dir, { recursive: true });
-    const file = join(dir, `flowi-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
-    const dump = { origen: SOURCE, fecha: new Date().toISOString(), users: Object.fromEntries(profiles.map(d => [d.id, d.data()])) };
-    for (const name of COLLECTIONS) dump[name] = Object.fromEntries(data[name].map(d => [d.id, d.data()]));
-    writeFileSync(file, JSON.stringify(dump, null, 1));
-    console.log(`\n  Respaldo guardado: ${file}`);
-  }
-
   if (!APPLY) {
-    if (!BACKUP_ONLY) console.log(`\nNada se escribió. Para copiar: node copiar.mjs --copiar\n`);
+    console.log(`\nNada se escribió. Para copiar: node copiar.mjs --copiar\n`);
     return;
   }
 
