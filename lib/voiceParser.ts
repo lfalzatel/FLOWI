@@ -817,3 +817,12 @@ export function parseMultiVoiceTransaction(text: string, customCategories: Voice
   }
   return results;
 }
+
+/**
+ * Categoría para un texto suelto (p. ej. la descripción de un movimiento del extracto del banco),
+ * con las mismas reglas que el dictado.
+ */
+export function categorizeText(text: string, type: 'gasto' | 'ingreso', customCategories: VoiceCategory[] = []): { category: string; merchant?: string } {
+  const normalized = normalizeText(text).replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ');
+  return detectCategory(normalized, type, customCategories);
+}
