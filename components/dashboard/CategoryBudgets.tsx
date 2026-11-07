@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
@@ -32,7 +34,7 @@ interface CategoryBudgetsProps {
 
 export function CategoryBudgets({ transactions, currency = 'COP', filterType = 'month' }: CategoryBudgetsProps) {
   const { theme } = useTheme();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const { allCategories } = useCategories();
   const resolveCategory = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -43,8 +45,10 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
   const [openMainAccordion, setOpenMainAccordion] = useState(true); // DESPLEGADO POR DEFECTO
   const [openSubAccordion, setOpenSubAccordion] = useState(false);  // COLAPSADO POR DEFECTO
 
-  // Presupuestos personalizados guardados en localStorage
-  const [budgets, setBudgets] = useState<Record<string, number>>({});
+  // Presupuestos por subcategoría: se guardan en el perfil (users/{uid}.categoryBudgets) para que
+  // no se pierdan al cambiar de celular. Antes vivían solo en este dispositivo (localStorage).
+  const [localBudgets, setLocalBudgets] = useState<Record<string, number>>({});
+  const budgets = profile?.categoryBudgets ?? localBudgets;
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [tempBudgetVal, setTempBudgetVal] = useState<string>('');
 
@@ -56,19 +60,31 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
   useEffect(() => {
     try {
       const saved = localStorage.getItem('flowi_category_budgets');
-      if (saved) {
-        setBudgets(JSON.parse(saved));
-      }
+      if (saved) setLocalBudgets(JSON.parse(saved));
     } catch (e) {
       console.warn('Error cargando presupuestos:', e);
     }
   }, []);
 
+  // Migración única: si la cuenta aún no tiene presupuestos y este celular sí, se suben.
+  // La copia local se deja como respaldo.
+  useEffect(() => {
+    if (!user || !profile || profile.categoryBudgets !== undefined) return;
+    if (!Object.keys(localBudgets).length) return;
+    updateDoc(doc(db, 'users', user.uid), { categoryBudgets: localBudgets })
+      .catch(e => console.warn('No se pudieron subir los presupuestos:', e));
+  }, [user, profile, localBudgets]);
+
   const saveBudgets = (updated: Record<string, number>) => {
-    setBudgets(updated);
+    setLocalBudgets(updated);
     try {
       localStorage.setItem('flowi_category_budgets', JSON.stringify(updated));
     } catch (e) {}
+    // updateDoc reemplaza el mapa completo, así un presupuesto borrado también se borra en la nube
+    if (user) {
+      updateDoc(doc(db, 'users', user.uid), { categoryBudgets: updated })
+        .catch(e => console.warn('No se pudo guardar el presupuesto:', e));
+    }
   };
 
   // 1. Gastos reales por subcategoría en el periodo filtrado

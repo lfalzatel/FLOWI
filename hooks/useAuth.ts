@@ -14,6 +14,7 @@ export interface UserProfile {
   currency?: string;
   commitmentSkips?: string[]; // compromisos omitidos por mes ("YYYY-MM|clave")
   closedMonths?: string[];    // meses ya revisados con "Cerrar el mes" (YYYY-MM)
+  categoryBudgets?: Record<string, number>; // presupuesto mensual por subcategoría
 }
 
 export function useAuth() {
