@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { FlowLines } from '@/components/FlowLines';
 
 interface SplashScreenProps {
   duration?: number;
@@ -109,6 +110,10 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
       {/* Glow effects */}
       <div className="absolute -top-32 -right-32 w-64 h-64 bg-accent/10 blur-3xl rounded-full" />
       <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-accent-dim/10 blur-3xl rounded-full" />
+
+      {/* Ondas de FLOWI arriba y abajo (la de abajo, en espejo) */}
+      <FlowLines className="absolute inset-x-0 top-0 h-[34%]" />
+      <FlowLines className="absolute inset-x-0 bottom-0 h-[34%] -scale-y-100" />
 
       <div className="relative w-40 h-40 mx-auto z-10">
         {/* SVG Lines */}

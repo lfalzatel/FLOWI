@@ -22,6 +22,18 @@ const PULSES: [number, number, number, boolean][] = [
   [4, 16, -9, false],
 ];
 
+// Puntos de dinero: [onda, duración en s, retraso en s, sentido inverso, de vez en cuando].
+// Los "de vez en cuando" cruzan la onda y luego desaparecen un rato antes de volver a salir.
+const COINS: [number, number, number, boolean, boolean][] = [
+  [0, 20, 0, false, false],
+  [3, 26, -7, false, false],
+  [1, 30, -3, true, true],
+  [2, 24, -14, false, true],
+  [4, 34, -21, true, true],
+  [0, 38, -26, true, true],
+  [3, 32, -9, true, true],
+];
+
 interface Props {
   className?: string;
   // 'full' para fondos de pantalla completa; 'hero' para una franja superior más sutil
@@ -75,16 +87,18 @@ export function FlowLines({ className = '', variant = 'full' }: Props) {
                   }} />
           ))}
 
-          {/* Puntos de dinero que viajan por dos ondas */}
-          {[0, 3].map((wave, i) => (
-            <circle key={`c${i}`} r={4} className="flow-lines-coin"
+          {/* Puntos de dinero: viajan por todas las ondas, unos seguido y otros de vez en cuando */}
+          {COINS.map(([wave, duration, delay, reverse, occasional], i) => (
+            <circle key={`c${i}`} r={occasional ? 3.5 : 4} className={occasional ? 'flow-lines-coin flow-lines-coin-occasional' : 'flow-lines-coin'}
                     style={{
                       offsetPath: `path('${WAVES[wave]}')`,
-                      animationDuration: `${20 + i * 6}s`,
-                      animationDelay: `${-i * 7}s`,
+                      animationDuration: `${duration}s`,
+                      animationDelay: `${delay}s`,
+                      animationDirection: reverse ? 'reverse' : 'normal',
                       fill: 'rgb(var(--accent))',
                       opacity: Math.min(1, baseOpacity + 0.25),
-                    }} />
+                      ['--coin-opacity' as string]: Math.min(1, baseOpacity + 0.25),
+                    } as React.CSSProperties} />
           ))}
         </g>
       </svg>

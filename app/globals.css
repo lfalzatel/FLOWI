@@ -336,6 +336,17 @@ body {
   from { offset-distance: 0%; }
   to { offset-distance: 100%; }
 }
+/* Cruza la onda en la primera mitad del ciclo y descansa invisible el resto */
+.flow-lines-coin-occasional {
+  animation-name: flow-lines-travel-occasional;
+}
+@keyframes flow-lines-travel-occasional {
+  0% { offset-distance: 0%; opacity: 0; }
+  4% { opacity: var(--coin-opacity, 0.8); }
+  52% { opacity: var(--coin-opacity, 0.8); }
+  55% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
 @keyframes flow-lines-breathe {
   0%, 100% { transform: translateY(0) scaleY(1); }
   50% { transform: translateY(-10px) scaleY(1.04); }

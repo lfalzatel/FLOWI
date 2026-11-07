@@ -348,6 +348,10 @@ export function Header() {
           onClick={() => setShowLogoModal(false)}
           className="fixed inset-0 bg-black/90 backdrop-blur-lg z-[120] flex flex-col items-center justify-center p-4 cursor-pointer animate-fade-in"
         >
+          {/* Ondas de FLOWI arriba y abajo (la de abajo, en espejo) */}
+          <FlowLines className="absolute inset-x-0 top-0 h-[34%]" />
+          <FlowLines className="absolute inset-x-0 bottom-0 h-[34%] -scale-y-100" />
+
           {/* Giant Logo (Without card frame) */}
           <div className="relative w-56 h-56 mb-8 select-none pointer-events-none">
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
