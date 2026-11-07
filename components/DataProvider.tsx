@@ -147,12 +147,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user]);
 
-  useEffect(() => {
-    import('@/lib/notifications').then((m) => {
-      m.registerReminderSW();
-    });
-  }, []);
-
   // 🔊 Escuchador global de interfaz para reproducir el micro-feedback (Burbuja / Pop u opción elegida) en cualquier botón de la app
   useEffect(() => {
     if (typeof window === 'undefined') return;

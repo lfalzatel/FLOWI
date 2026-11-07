@@ -50,6 +50,7 @@ export const viewport: Viewport = {
 import { DataProvider } from '@/components/DataProvider';
 import { WelcomeTour } from '@/components/layout/WelcomeTour';
 import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
+import { ReminderWatcher } from '@/components/reminders/ReminderWatcher';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
               <WelcomeTour />
               <InAppToastStack />
+              <ReminderWatcher />
             </DataProvider>
           </ThemeProvider>
         </InAppNotificationProvider>

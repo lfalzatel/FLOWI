@@ -7,14 +7,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useTheme } from '@/components/ThemeProvider';
 import { useReminders } from '@/hooks/useReminders';
-import { useReminderScheduler } from '@/hooks/useReminderScheduler';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useData } from '@/components/DataProvider';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { deleteReminder, updateReminder, Reminder } from '@/lib/firestore';
-import { registerReminderSW, requestNotificationPermission, scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
+import { requestNotificationPermission, scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
 
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
@@ -43,8 +42,7 @@ export default function RecordatoriosPage() {
   const userBudget = profile?.budget || 0;
   const budgetPercent = userBudget > 0 ? (gastosEsteMes / userBudget) * 100 : 0;
 
-  // Ejecutar el motor planificador en primer plano
-  useReminderScheduler(reminders, budgetPercent);
+  // Los avisos los vigila ReminderWatcher en toda la app
 
   // Solicitar permisos y registrar SW
   useEffect(() => {
@@ -53,8 +51,7 @@ export default function RecordatoriosPage() {
       return;
     }
     
-    // Registrar el sw companion e inmediatamente comprobar el permiso actual
-    registerReminderSW();
+    // Comprobar el permiso actual de notificaciones
     if ('Notification' in window) {
       setPermissionGranted(Notification.permission === 'granted');
     }

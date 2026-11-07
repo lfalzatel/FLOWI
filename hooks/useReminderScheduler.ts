@@ -131,7 +131,7 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
             title: r.title,
             body: r.description || 'Recordatorio de Flowi',
             tag: `reminder-${r.id || Date.now()}`,
-            data: { reminderId: r.id, url: '/recordatorios' },
+            data: { reminderId: r.id, url: '/servicios/recordatorios' },
           });
         }
 

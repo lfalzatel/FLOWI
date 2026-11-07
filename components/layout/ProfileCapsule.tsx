@@ -9,7 +9,7 @@ import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal'
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useTheme } from '@/components/ThemeProvider';
-import { requestNotificationPermission, registerReminderSW } from '@/lib/notifications';
+import { requestNotificationPermission } from '@/lib/notifications';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
@@ -54,7 +54,6 @@ export function ProfileCapsule() {
       const granted = await requestNotificationPermission();
       if (granted) {
         localStorage.setItem('notifications_enabled', 'true');
-        await registerReminderSW();
         setNotificationsActive(true);
       } else {
         alert('Por favor, activa los permisos de notificación en la configuración de tu navegador.');

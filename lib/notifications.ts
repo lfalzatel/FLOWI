@@ -9,18 +9,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return result === 'granted';
 }
 
-// ── 2. Registrar Service Worker secundario para recordatorios ──────
-export async function registerReminderSW(): Promise<ServiceWorkerRegistration | null> {
-  if (!('serviceWorker' in navigator)) return null;
-  try {
-    return await navigator.serviceWorker.register('/sw-reminders.js', { scope: '/' });
-  } catch (e) {
-    console.error('Reminder SW registration failed:', e);
-    return null;
-  }
-}
-
-// ── 3. Despachar notificación push via SW (funciona con app cerrada) ──
+// ── 2. Mostrar una notificación en la barra del celular ────────────
+// Se muestra a través del service worker principal de la app (en Android es la única forma);
+// sin service worker (p. ej. en desarrollo) se usa la notificación simple del navegador.
 export async function scheduleNotificationViaSW(payload: {
   title: string;
   body: string;
@@ -29,17 +20,25 @@ export async function scheduleNotificationViaSW(payload: {
   data?: Record<string, any>;
   delayMs?: number;   // 0 = inmediato
 }) {
-  if (!('serviceWorker' in navigator)) return;
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    // Enviar mensaje al SW para que programe la notificación
-    reg.active?.postMessage({
-      type: 'SCHEDULE_NOTIFICATION',
-      payload,
-    });
-  } catch (e) {
-    console.error('Failed to postMessage to Service Worker:', e);
-  }
+  if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const show = async () => {
+    const options: NotificationOptions = {
+      body: payload.body,
+      icon: payload.icon || '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag: payload.tag || `flowi-${Date.now()}`,
+      data: { url: '/', ...(payload.data || {}) },
+    };
+    try {
+      const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : undefined;
+      if (reg) await reg.showNotification(payload.title, options);
+      else new Notification(payload.title, options);
+    } catch (e) {
+      console.error('Failed to show notification:', e);
+    }
+  };
+  if (payload.delayMs) setTimeout(show, payload.delayMs);
+  else await show();
 }
 
 // ── 4. Reproducir sonido in-app ────────────────────────────────────
