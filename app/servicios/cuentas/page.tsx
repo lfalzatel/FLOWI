@@ -13,8 +13,9 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { AccountFormModal, AdjustBalanceModal, TransferModal } from '@/components/accounts/AccountModals';
+import { AccountIcon } from '@/components/accounts/AccountIcon';
 import { Account, deleteAccount, deleteTransfer } from '@/lib/firestore';
-import { AccountState, KIND_EMOJI, KIND_LABEL, accountStates, netWorth } from '@/lib/accounts';
+import { AccountState, KIND_LABEL, accountStates, netWorth } from '@/lib/accounts';
 import { formatCurrency } from '@/lib/format';
 
 export default function CuentasPage() {
@@ -149,10 +150,11 @@ export default function CuentasPage() {
                 return (
                   <article key={a.id} className={`${card} p-4`}>
                     <button type="button" onClick={() => setExpanded(open ? null : a.id!)} className="w-full flex items-center gap-3 text-left">
-                      <div className={`shrink-0 w-11 h-11 flex items-center justify-center text-2xl bg-glass border ${isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>{KIND_EMOJI[a.kind]}</div>
+                      <div className={`shrink-0 w-11 h-11 flex items-center justify-center text-2xl bg-glass border ${isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}><AccountIcon account={a} className="w-7 h-7 text-2xl flex items-center justify-center" /></div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className={`font-bold truncate ${isTech ? 'text-accent uppercase text-sm' : 'text-text-primary'}`}>{a.name}</h3>
+                          {a.purpose === 'ahorro' && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 ${isTech ? 'rounded-none' : 'rounded-full'}`}>Ahorro</span>}
                           {a.isDefault && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-accent/15 text-accent ${isTech ? 'rounded-none' : 'rounded-full'}`}>Principal</span>}
                         </div>
                         <p className="text-[11px] text-text-muted truncate">{KIND_LABEL[a.kind]}{a.methods.length ? ` · ${a.methods.join(', ')}` : ''}</p>

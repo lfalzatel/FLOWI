@@ -9,12 +9,15 @@ import { useData } from '@/components/DataProvider';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import {
-  DEFAULT_FREQUENT, PAYMENT_METHODS, detectMerchantInText, findCatalogEntry, getFrequent, softHyphenate,
+  DEFAULT_FREQUENT, PAYMENT_METHODS, normalizeText, detectMerchantInText, findCatalogEntry, getFrequent, softHyphenate,
   getMerchantsForCategory, getRecent, recordUsage,
 } from '@/lib/categories';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { useAccounts } from '@/hooks/useAccounts';
+import { AccountFormModal } from '@/components/accounts/AccountModals';
+import { AccountKind } from '@/lib/firestore';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { dateKey } from '@/lib/reminderDue';
@@ -131,13 +134,30 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     return labels;
   }, [type, category, merchant, usageVersion]);
 
+  // Cuentas: los medios de pago que tienen cuenta salen primero, y al elegir uno que no tiene
+  // cuenta se ofrece crearla (para que el movimiento sume o reste en Cuentas y patrimonio)
+  const { accounts } = useAccounts();
+  const activeAccounts = accounts.filter(a => !a.archived && a.id);
+  const accountMethods = activeAccounts.flatMap(a => a.methods);
+  const norm = (x: string) => normalizeText(x);
+  const accountOfMethod = paymentMethod ? activeAccounts.find(a => a.methods.some(m => norm(m) === norm(paymentMethod))) : undefined;
+  const mainAccount = activeAccounts.find(a => a.isDefault);
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const guessKind = (m: string): AccountKind => {
+    const k = norm(m);
+    if (k === 'efectivo') return 'efectivo';
+    if (/tarjeta credito|addi|sistecredito/.test(k)) return 'credito';
+    if (/nequi|daviplata|rappipay/.test(k)) return 'billetera';
+    return 'banco';
+  };
+
   const paymentOptions = useMemo(() => {
-    const labels = Array.from(new Set([...getFrequent('payment'), ...PAYMENT_METHODS.map(p => p.label)]));
+    const labels = Array.from(new Set([...accountMethods, ...getFrequent('payment'), ...PAYMENT_METHODS.map(p => p.label)]));
     if (paymentMethod && !labels.slice(0, VISIBLE_PAYMENTS).includes(paymentMethod)) {
       return [paymentMethod, ...labels.filter(l => l !== paymentMethod)];
     }
     return labels;
-  }, [paymentMethod, usageVersion]);
+  }, [paymentMethod, usageVersion, accountMethods.join('|')]);
 
   const selectCategory = (label: string, merchantLabel?: string) => {
     if (label !== category) {
@@ -488,6 +508,26 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 {showAllPayments ? 'Menos' : 'Más…'}
               </button>
             </div>
+            {activeAccounts.length > 0 && (
+              paymentMethod && !accountOfMethod ? (
+                <div className="mt-2 flex items-center gap-2 text-[11px] text-text-secondary normal-case">
+                  <span className="flex-1">Aún no tienes una cuenta para {paymentMethod}{mainAccount ? `; iría a ${mainAccount.name}` : ''}.</span>
+                  <button type="button" onClick={() => setCreatingAccount(true)} className="shrink-0 font-semibold text-accent">Crear cuenta</button>
+                </div>
+              ) : (accountOfMethod || mainAccount) ? (
+                <p className="mt-2 text-[11px] text-text-muted normal-case">
+                  {type === 'gasto' ? 'Se descuenta de' : 'Se suma a'} <b className="text-text-secondary">{(accountOfMethod || mainAccount)!.name}</b>
+                  {!paymentMethod ? ' (tu cuenta principal)' : ''}.
+                </p>
+              ) : null
+            )}
+            {creatingAccount && paymentMethod && (
+              <AccountFormModal
+                accounts={accounts}
+                initial={{ name: paymentMethod, kind: guessKind(paymentMethod), methods: [paymentMethod] }}
+                onClose={() => setCreatingAccount(false)}
+              />
+            )}
           </div>
 
           {/* Date + time */}

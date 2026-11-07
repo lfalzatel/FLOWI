@@ -1,7 +1,7 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
 import { Account } from '@/lib/firestore';
-import { KIND_EMOJI } from '@/lib/accounts';
+import { AccountIcon } from '@/components/accounts/AccountIcon';
 
 // Elegir una de mis cuentas (o ninguna). Si no hay cuentas registradas no muestra nada.
 export function AccountPicker({ accounts, value, onChange, label, noneLabel, hint }: {
@@ -19,7 +19,7 @@ export function AccountPicker({ accounts, value, onChange, label, noneLabel, hin
       <span className={`${isTech ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{label}</span>
       <div className="flex flex-wrap gap-1.5">
         {active.map(a => (
-          <button key={a.id} type="button" onClick={() => onChange(a.id!)} className={chip(value === a.id)}>{KIND_EMOJI[a.kind]} {a.name}</button>
+          <button key={a.id} type="button" onClick={() => onChange(a.id!)} className={`${chip(value === a.id)} inline-flex items-center gap-1.5`}><AccountIcon account={a} className="w-4 h-4 text-sm flex items-center justify-center" /> {a.name}</button>
         ))}
         {noneLabel && <button type="button" onClick={() => onChange(null)} className={chip(value === null)}>{noneLabel}</button>}
       </div>

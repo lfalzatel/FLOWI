@@ -94,14 +94,25 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         <p className="text-xs text-text-secondary mt-1">
           {over
             ? `Tu cuota de hoy era ${f(today.todayAllowance)} y llevas ${f(today.spentToday)}. Lo que te pasaste se descuenta de los próximos días.`
-            : `Es lo que puedes gastar hoy sin quedarte corto antes de fin de mes.`}
+            : today.mode === 'cuentas' && today.nextIncome
+              ? `Es lo que puedes gastar hoy sin quedarte corto antes de tu próximo ingreso (${today.nextIncome.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}).`
+              : `Es lo que puedes gastar hoy sin quedarte corto antes de fin de mes.`}
         </p>
       </div>
 
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">Así se calcula</p>
-        <Row label={today.baseIsBudget ? 'Tu presupuesto del mes' : 'Ingresos del mes'} value={f(today.base)} sign="+" />
-        <Row label="Gastos del mes" hint="Lo mismo que la tarjeta Gastos (incluye lo de hoy)" value={f(today.spentMonth)} sign="−" />
+        {today.mode === 'cuentas' ? (
+          <>
+            <Row label="Plata en tus cuentas para gastar" hint="Saldo de hoy en Cuentas y patrimonio (sin las cuentas de ahorro)" value={f(today.cash)} sign="+" />
+            {today.cardDebt > 0 && <Row label="Lo que debes en tarjetas" hint="Lo reservo para pagarlas" value={f(today.cardDebt)} sign="−" />}
+          </>
+        ) : (
+          <>
+            <Row label={today.baseIsBudget ? 'Tu presupuesto del mes' : 'Ingresos del mes'} value={f(today.base)} sign="+" />
+            <Row label="Gastos del mes" hint="Lo mismo que la tarjeta Gastos (incluye lo de hoy)" value={f(today.spentMonth)} sign="−" />
+          </>
+        )}
         {today.pendingCommitments > 0 && (
           <Row label="Compromisos por pagar" hint="Pagos fijos que aún faltan este mes (los reservo primero)" value={f(today.pendingCommitments)} sign="−" />
         )}
@@ -111,7 +122,11 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         <Row label="Libre ahora" value={f(Math.max(0, freeNow))} strong />
         {today.tomorrowAllowance !== null && (
           <>
-            <Row label={`Repartido en ${today.daysLeft - 1} días`} hint="Los días que faltan del mes, desde mañana" value={`÷ ${today.daysLeft - 1}`} />
+            <Row label={`Repartido en ${today.daysLeft - 1} días`}
+                 hint={today.mode === 'cuentas' && today.nextIncome
+                   ? `Desde mañana hasta tu próximo ingreso (${today.nextIncome.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}), según cuándo te llegó el último`
+                   : 'Los días que faltan del mes, desde mañana'}
+                 value={`÷ ${today.daysLeft - 1}`} />
             <Row label="Desde mañana puedes gastar" value={`${f(today.tomorrowAllowance)} / día`} strong />
           </>
         )}

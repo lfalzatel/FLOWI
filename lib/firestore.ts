@@ -581,6 +581,7 @@ export interface Account {
   kind: AccountKind;
   methods: string[];         // medios de pago que caen en esta cuenta ("Bancolombia", "Tarjeta débito")
   isDefault?: boolean;       // recibe los movimientos que no dicen con qué se pagaron
+  purpose?: 'gastar' | 'ahorro'; // 'ahorro' no cuenta en "Hoy puedes gastar" (por defecto 'gastar')
   baseBalance: number;       // saldo en baseAt (en crédito: negativo = lo que se debe)
   baseAt: string;            // ISO
   adjustments?: { at: string; from: number; to: number }[];

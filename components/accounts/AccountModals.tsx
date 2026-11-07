@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Account, AccountKind, addAccount, addTransfer, updateAccount } from '@/lib/firestore';
 import { PAYMENT_METHODS } from '@/lib/categories';
 import { KIND_EMOJI, KIND_LABEL, suggestMethods } from '@/lib/accounts';
+import { AccountIcon } from '@/components/accounts/AccountIcon';
 // Montos con miles y hasta dos decimales con coma, como en la app del banco ("1.234.567,89")
 export function formatMoneyInput(value: string | number): string {
   let raw = typeof value === 'number' ? value.toFixed(2).replace('.', ',').replace(/,00$/, '') : value;
@@ -67,16 +68,19 @@ const permissionMsg = (err: any) => err?.code === 'permission-denied'
   : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
 
 // ── Nueva / editar cuenta ────────────────────────────────────────────────
-export function AccountFormModal({ account, accounts, onClose, onDelete }: {
+export function AccountFormModal({ account, accounts, onClose, onDelete, initial, onCreated }: {
   account?: Account | null; accounts: Account[]; onClose: () => void; onDelete?: (a: Account) => void;
+  initial?: { name: string; kind: AccountKind; methods: string[] }; // crear desde el formulario de un gasto/ingreso
+  onCreated?: (id: string) => void;
 }) {
   const s = useStyles();
   const { user } = useAuth();
   const isFirst = !accounts.some(a => !a.archived);
-  const [name, setName] = useState(account?.name || '');
-  const [kind, setKind] = useState<AccountKind>(account?.kind || 'banco');
-  const [methods, setMethods] = useState<string[]>(account?.methods || []);
-  const [methodsTouched, setMethodsTouched] = useState(!!account);
+  const [name, setName] = useState(account?.name || initial?.name || '');
+  const [kind, setKind] = useState<AccountKind>(account?.kind || initial?.kind || 'banco');
+  const [methods, setMethods] = useState<string[]>(account?.methods || initial?.methods || []);
+  const [methodsTouched, setMethodsTouched] = useState(!!account || !!initial);
+  const [purpose, setPurpose] = useState<'gastar' | 'ahorro'>(account?.purpose || 'gastar');
   const [balance, setBalance] = useState('');
   const [isDefault, setIsDefault] = useState(account ? !!account.isDefault : isFirst);
   const [saving, setSaving] = useState(false);
@@ -108,14 +112,16 @@ export function AccountFormModal({ account, accounts, onClose, onDelete }: {
         await Promise.all(accounts.filter(a => a.isDefault && a.id && a.id !== account?.id).map(a => updateAccount(a.id!, { isDefault: false })));
       }
       if (account?.id) {
-        await updateAccount(account.id, { name: name.trim(), kind, methods: finalMethods, isDefault });
+        await updateAccount(account.id, { name: name.trim(), kind, methods: finalMethods, isDefault, purpose: kind === 'credito' ? 'gastar' : purpose });
       } else {
         const amount = parseMoneyInput(balance);
-        await addAccount({
+        const id = await addAccount({
           userId: user.uid, name: name.trim(), kind, methods: finalMethods, isDefault,
+          purpose: kind === 'credito' ? 'gastar' : purpose,
           baseBalance: kind === 'credito' ? -amount : amount,
           baseAt: new Date().toISOString(), adjustments: [], archived: false,
         });
+        onCreated?.(id);
       }
       onClose();
     } catch (err) {
@@ -147,7 +153,7 @@ export function AccountFormModal({ account, accounts, onClose, onDelete }: {
 
       {!account && (
         <div>
-          <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? '¿Cuánto debes hoy en la tarjeta?' : '¿Cuánto tienes hoy en esta cuenta?'}</label>
+          <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? '¿Cuánto debes hoy en la tarjeta?' : initial ? `¿Cuánto tenías en ${name || 'esta cuenta'} antes de este movimiento?` : '¿Cuánto tienes hoy en esta cuenta?'}</label>
           <input id="acc-balance" type="text" inputMode="decimal" placeholder="$ 0" value={balance}
                  onChange={(e) => setBalance(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>Míralo en la app del banco. Desde hoy, tus gastos e ingresos de esta cuenta lo van moviendo.</p>
@@ -168,6 +174,19 @@ export function AccountFormModal({ account, accounts, onClose, onDelete }: {
         </div>
         <p className={s.hint}>Los gastos e ingresos que registres con estos medios de pago mueven esta cuenta.</p>
       </div>
+
+      {kind !== 'credito' && (
+        <div>
+          <span className={s.label}>¿Para qué es esta plata?</span>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setPurpose('gastar')} className={s.chip(purpose === 'gastar')}>Para gastar</button>
+            <button type="button" onClick={() => setPurpose('ahorro')} className={s.chip(purpose === 'ahorro')}>Ahorro</button>
+          </div>
+          <p className={s.hint}>{purpose === 'gastar'
+            ? 'Cuenta en "Hoy puedes gastar": es la plata del día a día.'
+            : 'No cuenta en "Hoy puedes gastar" (por ejemplo, tu fondo de emergencia), pero sí en tu patrimonio.'}</p>
+        </div>
+      )}
 
       <label className="flex items-start gap-3 cursor-pointer">
         <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--accent)]" />
@@ -275,7 +294,7 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
   const picker = (value: string, set: (v: string) => void, exclude?: string) => (
     <div className="flex flex-wrap gap-1.5">
       {active.filter(a => a.id !== exclude).map(a => (
-        <button key={a.id} type="button" onClick={() => set(a.id!)} className={s.chip(value === a.id)}>{KIND_EMOJI[a.kind]} {a.name}</button>
+        <button key={a.id} type="button" onClick={() => set(a.id!)} className={`${s.chip(value === a.id)} inline-flex items-center gap-1.5`}><AccountIcon account={a} className="w-4 h-4 text-sm flex items-center justify-center" /> {a.name}</button>
       ))}
     </div>
   );
