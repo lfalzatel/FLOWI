@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, TrendingDown, TrendingUp,
   Plus, Bell, CreditCard, Grid, Mic
@@ -12,6 +12,10 @@ import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { VoiceAssistantModal } from '@/components/forms/VoiceAssistantModal';
 import { ParsedVoiceResult } from '@/lib/voiceParser';
 import { useTheme } from '@/components/ThemeProvider';
+import { useAuth } from '@/hooks/useAuth';
+import { NoteModal } from '@/components/notes/NoteModal';
+import { InvestmentFormModal } from '@/components/investments/InvestmentFormModal';
+import { QuickAction, QuickActionsSheet } from '@/components/layout/QuickActionsSheet';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Inicio',        href: '/',          id: 'nav-inicio' },
@@ -26,6 +30,27 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [showAdd, setShowAdd] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
   const [parsedVoiceData, setParsedVoiceData] = useState<ParsedVoiceResult | null>(null);
+  // Menú del botón flotante y el formulario que se abrió desde él
+  const [showSheet, setShowSheet] = useState(false);
+  const [quick, setQuick] = useState<Exclude<QuickAction, 'voz' | 'extracto'> | null>(null);
+  const [receipt, setReceipt] = useState<File | 'no-key' | null>(null);
+  const router = useRouter();
+  const { profile } = useAuth();
+  // Mantener presionado = hablar directo (como antes)
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressed = useRef(false);
+  const openVoice = (withReceipt: File | 'no-key' | null = null) => {
+    setParsedVoiceData(null);
+    setReceipt(withReceipt);
+    setShowVoice(true);
+  };
+  const onQuickAction = (a: QuickAction) => {
+    setShowSheet(false);
+    if (a === 'voz') openVoice();
+    else if (a === 'extracto') router.push('/servicios/importar');
+    else setQuick(a);
+  };
+  const closeQuick = () => setQuick(null);
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -80,13 +105,24 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
         {/* Floating FAB con Micrófono 🎙️ */}
         <button
-          onClick={() => {
-            setParsedVoiceData(null);
-            setShowVoice(true);
+          onPointerDown={() => {
+            longPressed.current = false;
+            pressTimer.current = setTimeout(() => {
+              longPressed.current = true;
+              try { navigator.vibrate?.(20); } catch { /* sin vibración */ }
+              openVoice();
+            }, 450);
           }}
-          aria-label="Asistente de Voz / Nueva transacción"
+          onPointerUp={() => { if (pressTimer.current) clearTimeout(pressTimer.current); }}
+          onPointerLeave={() => { if (pressTimer.current) clearTimeout(pressTimer.current); }}
+          onContextMenu={(e) => e.preventDefault()}
+          onClick={() => {
+            if (longPressed.current) { longPressed.current = false; return; }
+            setShowSheet(true);
+          }}
+          aria-label="Registrar: toca para ver opciones, mantén presionado para hablar"
           data-tour="voice"
-          title="Dictar por Voz"
+          title="Registrar (mantén presionado para hablar)"
           className={`pointer-events-auto flex-shrink-0 flex items-center justify-center
                       w-14 h-14
                       bg-gradient-to-br from-accent to-accent-dim
@@ -97,7 +133,10 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
             animation: 'float-bounce 2.2s ease-in-out infinite',
           }}
         >
-          <Mic className="w-6 h-6 stroke-[2.5] animate-pulse" />
+          <span className="relative">
+            <Plus className="w-7 h-7 stroke-[2.5]" />
+            <Mic className={`absolute -bottom-1.5 -right-2 w-3.5 h-3.5 stroke-[3] p-[1px] ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${isLight ? 'bg-accent-dim text-white' : 'bg-accent-dim text-black'}`} />
+          </span>
         </button>
 
       </div>
@@ -105,7 +144,8 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       {/* Modal de Asistente de Voz */}
       {showVoice && (
         <VoiceAssistantModal
-          onClose={() => setShowVoice(false)}
+          receipt={receipt}
+          onClose={() => { setShowVoice(false); setReceipt(null); }}
           onSuccessBulk={onSuccess}
           onSelectParsed={(result) => {
             setShowVoice(false);
@@ -119,6 +159,23 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
           }}
         />
       )}
+
+      {showSheet && (
+        <QuickActionsSheet
+          onClose={() => setShowSheet(false)}
+          onAction={onQuickAction}
+          onReceipt={(file) => { setShowSheet(false); openVoice(file); }}
+        />
+      )}
+
+      {/* Formularios abiertos desde el menú del botón */}
+      {(quick === 'gasto' || quick === 'ingreso') && (
+        <AddExpenseModal initialType={quick} onClose={closeQuick} onSuccess={onSuccess} />
+      )}
+      {quick === 'deuda' && <AddDebtModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}
+      {quick === 'recordatorio' && <ReminderFormModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}
+      {quick === 'nota' && <NoteModal note={null} onClose={closeQuick} onSuccess={closeQuick} />}
+      {quick === 'cdt' && <InvestmentFormModal currency={profile?.currency || 'COP'} onClose={closeQuick} />}
 
       {/* Modal Tradicional o Pre-llenado por Voz */}
       {showAdd && (

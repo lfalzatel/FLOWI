@@ -22,9 +22,11 @@ interface VoiceAssistantModalProps {
   onSelectParsed: (result: ParsedVoiceResult) => void;
   onOpenManual: () => void;
   onSuccessBulk?: () => void;
+  // Desde el menú del botón flotante: abrir directo con la foto de un recibo (sin saludo ni micrófono)
+  receipt?: File | 'no-key' | null;
 }
 
-export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk }: VoiceAssistantModalProps) {
+export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk, receipt = null }: VoiceAssistantModalProps) {
   const router = useRouter();
   const { theme } = useTheme();
   const { user, profile } = useAuth();
@@ -170,10 +172,14 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     const locale = detectUserLocaleAndCurrency(profile?.currency);
     const greetingText = "¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.";
     
-    // Encender el micrófono ÚNICAMENTE cuando la voz parlante termine de hablar (0 solapamiento)
-    speakText(greetingText, locale.language, () => {
-      startListening();
-    });
+    if (receipt === 'no-key') setReceiptStatus('no-key');
+    else if (receipt) handleReceiptFile(receipt);
+    else {
+      // Encender el micrófono ÚNICAMENTE cuando la voz parlante termine de hablar (0 solapamiento)
+      speakText(greetingText, locale.language, () => {
+        startListening();
+      });
+    }
 
     return () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
