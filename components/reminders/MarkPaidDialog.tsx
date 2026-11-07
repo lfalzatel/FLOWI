@@ -6,6 +6,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { markReminderPaid } from '@/lib/firestore';
 import { ReminderDue, dateKey, dueLabel } from '@/lib/reminderDue';
+import { askForNotifications } from '@/lib/notifPrompt';
 
 interface Props {
   due: ReminderDue;
@@ -28,6 +29,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
     setError('');
     try {
       await markReminderPaid(reminder.id, dateKey(dueDate));
+      setTimeout(() => askForNotifications({ context: `el próximo pago de ${reminder.title}` }), 1200);
       if (withExpense) setRegisterExpense(true);
       else onClose();
     } catch (err) {

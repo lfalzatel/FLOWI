@@ -9,6 +9,7 @@ import { BalanceInfoModal } from './BalanceInfoModal';
 import { NextAction } from '@/lib/nextAction';
 import { DailyBudget } from '@/lib/dailyBudget';
 import { getLocalDateString } from '@/lib/dateUtils';
+import { askForNotifications } from '@/lib/notifPrompt';
 
 // Las acciones saltadas se guardan solo en este dispositivo y solo por hoy
 const skipKey = () => `flowi_next_action_skip_${getLocalDateString()}`;
@@ -66,7 +67,7 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh }: P
       <div className={box} data-tour="next-action">
         {action.kind === 'link'
           ? <Link href={action.href} className={inner}>{body}</Link>
-          : <button type="button" onClick={() => setOpen(true)} className={inner}>{body}</button>}
+          : <button type="button" onClick={() => (action.kind === 'notify' ? askForNotifications({ force: true }) : setOpen(true))} className={inner}>{body}</button>}
         <button type="button" onClick={onSkip} title="Saltar por hoy" aria-label="Saltar esta sugerencia por hoy"
                 className="p-2 mr-2 text-text-muted hover:text-text-primary shrink-0">
           <X className="w-4 h-4" />

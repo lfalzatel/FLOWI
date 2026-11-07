@@ -11,6 +11,7 @@ import { signOut } from '@/lib/auth';
 import { useTheme } from '@/components/ThemeProvider';
 import { requestNotificationPermission, scheduleNotificationViaSW } from '@/lib/notifications';
 import { removePushToken, syncPushToken } from '@/lib/push';
+import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
@@ -40,11 +41,11 @@ export function ProfileCapsule() {
   const [notificationsActive, setNotificationsActive] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const allowed = Notification.permission === 'granted';
-      const pref = localStorage.getItem('notifications_enabled') !== 'false';
-      setNotificationsActive(allowed && pref);
-    }
+    const refresh = () => setNotificationsActive(notificationsState() === 'enabled');
+    refresh();
+    // Se activan también desde los mensajes de la app (NotificationPrompter)
+    window.addEventListener(CHANGED_EVENT, refresh);
+    return () => window.removeEventListener(CHANGED_EVENT, refresh);
   }, []);
 
   const handleToggleNotifications = async (e: React.MouseEvent) => {
@@ -52,15 +53,25 @@ export function ProfileCapsule() {
     if (typeof window === 'undefined') return;
 
     if (!notificationsActive) {
+      const state = notificationsState();
+      // Bloqueadas o iPhone sin instalar: se explica cómo activarlas
+      if (state === 'blocked' || state === 'ios-needs-install' || state === 'unsupported') {
+        setOpen(false);
+        askForNotifications({ force: true });
+        return;
+      }
       const granted = await requestNotificationPermission();
       if (granted) {
         localStorage.setItem('notifications_enabled', 'true');
         setNotificationsActive(true);
         if (user) syncPushToken(user.uid);
-        // Confirmación visible de que las notificaciones quedaron activas
+        // Confirmación visible: notificación en la barra y el mensaje "¡Listo!"
         scheduleNotificationViaSW({ title: 'Notificaciones activadas ✓', body: 'Te avisaremos tus pagos y recordatorios, incluso con FLOWI cerrada.', tag: 'flowi-notif-on' });
+        setOpen(false);
+        window.dispatchEvent(new CustomEvent(CHANGED_EVENT, { detail: { enabled: true } }));
       } else {
-        alert('Por favor, activa los permisos de notificación en la configuración de tu navegador.');
+        setOpen(false);
+        askForNotifications({ force: true });
       }
     } else {
       localStorage.setItem('notifications_enabled', 'false');

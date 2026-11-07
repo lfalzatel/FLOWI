@@ -22,6 +22,7 @@ import { getNextActions } from '@/lib/nextAction';
 import { useGoals } from '@/hooks/useGoals';
 import { isGoalDone } from '@/lib/goals';
 import { buildDemoData } from '@/lib/demoData';
+import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
 import { getCommitments } from '@/lib/commitments';
 import { formatCurrency } from '@/lib/format';
 import { AppTour, TourOffer, TOUR_DONE_KEY, readTourVoicePref } from '@/components/tour/AppTour';
@@ -47,6 +48,13 @@ export default function DashboardPage() {
   const [showExport, setShowExport] = useState(false);
   const [showTourOffer, setShowTourOffer] = useState(false);
   const [tourVoice, setTourVoice] = useState<boolean | null>(null); // null = recorrido cerrado
+  const [notificationsOff, setNotificationsOff] = useState(false);
+  useEffect(() => {
+    const refresh = () => setNotificationsOff(['off', 'blocked', 'ios-needs-install'].includes(notificationsState()));
+    refresh();
+    window.addEventListener(CHANGED_EVENT, refresh);
+    return () => window.removeEventListener(CHANGED_EVENT, refresh);
+  }, []);
 
   // Durante el recorrido, Inicio muestra datos de ejemplo (solo en memoria) en lugar de los reales
   const touring = tourVoice !== null;
@@ -209,6 +217,7 @@ export default function DashboardPage() {
   const nextAction = getNextActions({
     transactions, pending: commitments.pending, today: todayBudget,
     hasGoals: goals.some(g => !isGoalDone(g)),
+    notificationsOff: !demo && notificationsOff,
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
   })[0];
 
@@ -374,7 +383,7 @@ export default function DashboardPage() {
         />
       )}
       {!loading && tourVoice !== null && (
-        <AppTour voice={tourVoice} demo onClose={() => setTourVoice(null)} />
+        <AppTour voice={tourVoice} demo onClose={() => { setTourVoice(null); setTimeout(() => askForNotifications(), 600); }} />
       )}
     </div>
   );

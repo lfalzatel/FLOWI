@@ -9,6 +9,7 @@ import { addReminder, updateReminder, deleteReminder, Reminder, ReminderAlert } 
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { speakText } from '@/lib/voiceParser';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { askForNotifications } from '@/lib/notifPrompt';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 
 interface Props {
@@ -132,6 +133,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
         speakText('Recordatorio agendado con éxito', 'es-CO');
         onClose();
         await addReminder(data);
+        // Momento natural para pedir los avisos: acaba de crear algo que quiere que le recuerden
+        setTimeout(() => askForNotifications({ context: data.title }), 1200);
       }
       onSuccess();
     } catch (error) {

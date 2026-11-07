@@ -142,8 +142,55 @@ export default function ServiciosPage() {
         />
       </div>
 
+      <div className="mb-4 flex items-center gap-2">
+        <GridIcon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`} />
+        <h2 className={`text-lg font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
+          Categorías
+        </h2>
+      </div>
+
+      {/* Grid de Servicios */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        {filteredServices.map((service) => {
+          const content = (
+            <>
+              {service.isNew && (
+                <span className={`absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                  Nuevo
+                </span>
+              )}
+              {service.soon && (
+                <span className={`absolute top-2 right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-text-muted/20 text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                  Pronto
+                </span>
+              )}
+              <div className={`w-10 h-10 flex items-center justify-center mb-3 ${isTechTheme ? 'bg-transparent border border-accent/40' : service.bgColor + ' rounded-xl'}`}>
+                <service.icon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : service.color}`} />
+              </div>
+              <span className={`text-sm font-medium ${isTechTheme ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>
+                {service.title}
+              </span>
+            </>
+          );
+          const classNameStr = `relative flex flex-col justify-center p-4 glass-card transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
+
+          if (service.id === 'perfil') {
+            return (
+              <button key={service.id} onClick={() => setShowProfileModal(true)} className={classNameStr + ' text-left'}>
+                {content}
+              </button>
+            );
+          }
+          return (
+            <Link href={service.soon ? '#' : service.href} key={service.id} className={classNameStr}>
+              {content}
+            </Link>
+          );
+        })}
+      </div>
+
       {/* 3 Botones de prueba para ver las animaciones */}
-      <div className="mb-8 space-y-2">
+      <div className="mt-8 space-y-2">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-emerald-500'}`} />
           <span className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>
@@ -229,53 +276,6 @@ export default function ServiciosPage() {
             <span className="text-[9px] opacity-80">Confirmación</span>
           </button>
         </div>
-      </div>
-
-      <div className="mb-4 flex items-center gap-2">
-        <GridIcon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`} />
-        <h2 className={`text-lg font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
-          Categorías
-        </h2>
-      </div>
-
-      {/* Grid de Servicios */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        {filteredServices.map((service) => {
-          const content = (
-            <>
-              {service.isNew && (
-                <span className={`absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                  Nuevo
-                </span>
-              )}
-              {service.soon && (
-                <span className={`absolute top-2 right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-text-muted/20 text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                  Pronto
-                </span>
-              )}
-              <div className={`w-10 h-10 flex items-center justify-center mb-3 ${isTechTheme ? 'bg-transparent border border-accent/40' : service.bgColor + ' rounded-xl'}`}>
-                <service.icon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : service.color}`} />
-              </div>
-              <span className={`text-sm font-medium ${isTechTheme ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>
-                {service.title}
-              </span>
-            </>
-          );
-          const classNameStr = `relative flex flex-col justify-center p-4 glass-card transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
-
-          if (service.id === 'perfil') {
-            return (
-              <button key={service.id} onClick={() => setShowProfileModal(true)} className={classNameStr + ' text-left'}>
-                {content}
-              </button>
-            );
-          }
-          return (
-            <Link href={service.soon ? '#' : service.href} key={service.id} className={classNameStr}>
-              {content}
-            </Link>
-          );
-        })}
       </div>
       </main>
       <BottomNav />

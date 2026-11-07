@@ -11,6 +11,7 @@ export type NextAction =
   | { id: string; kind: 'income'; title: string; detail: string; prefill: { amount: number; category: string; description: string }; tone: 'normal' }
   | { id: string; kind: 'today'; title: string; detail: string; tone: 'alert' }
   | { id: string; kind: 'add'; title: string; detail: string; tone: 'normal' }
+  | { id: string; kind: 'notify'; title: string; detail: string; tone: 'normal' }
   | { id: string; kind: 'link'; title: string; detail: string; href: string; tone: 'normal' };
 
 interface Input {
@@ -18,6 +19,7 @@ interface Input {
   pending: Commitment[];
   today: DailyBudget | null;
   hasGoals: boolean;
+  notificationsOff?: boolean; // los avisos de pagos no están activos en este celular
   formatMoney: (n: number) => string;
   skipped?: string[];
   now?: Date;
@@ -29,7 +31,7 @@ function toDate(v: any): Date {
   return new Date(v);
 }
 
-export function getNextActions({ transactions, pending, today, hasGoals, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
+export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
   const out: NextAction[] = [];
   const month = getLocalMonthString(now);
   const lastMonth = getLocalMonthString(new Date(now.getFullYear(), now.getMonth() - 1, 1));
@@ -61,6 +63,16 @@ export function getNextActions({ transactions, pending, today, hasGoals, formatM
         prefill: { amount: main.amount, category: main.category, description: main.description || '' },
       });
     }
+  }
+
+  // 2b. Tiene pagos por delante pero los avisos están apagados
+  if (notificationsOff && pending.length) {
+    const next = pending.find(c => c.daysLeft >= 0) || pending[0];
+    out.push({
+      id: 'notify', kind: 'notify', tone: 'normal',
+      title: 'Activa los avisos de tus pagos',
+      detail: `Te avisamos de ${next.title} y tus otros pagos antes de que venzan, aunque FLOWI esté cerrada.`,
+    });
   }
 
   // 3. Hoy ya se pasó de la cuota
