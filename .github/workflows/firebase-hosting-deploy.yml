@@ -41,6 +41,8 @@ jobs:
           NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: flowi-9af82.firebasestorage.app
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '501090670275'
           NEXT_PUBLIC_FIREBASE_APP_ID: 1:501090670275:web:1ebfd5841ec8afabc33476
+          # Clave pública de push web (Cloud Messaging → Certificados push web)
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY: BGugTA8YUa_WOpoiYPW7FGgw9SfD3VBSjmIKJ0oZ73zWEtDLrDOzW5aXD2NL5-lXd_8wLhgt3RHNPocvdv8r5Do
 
       - name: Publicar en el sitio flowi-gastos
         uses: FirebaseExtended/action-hosting-deploy@v0
