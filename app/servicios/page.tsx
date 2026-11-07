@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark } from 'lucide-react';
+import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -57,6 +57,16 @@ const SERVICES = [
     href: '/servicios/metas',
     color: 'text-emerald-500',
     bgColor: 'bg-emerald-500/10',
+    isNew: true,
+    soon: false
+  },
+  {
+    id: 'cuentas',
+    title: 'Cuentas y patrimonio',
+    icon: Wallet,
+    href: '/servicios/cuentas',
+    color: 'text-lime-500',
+    bgColor: 'bg-lime-500/10',
     isNew: true,
     soon: false
   },

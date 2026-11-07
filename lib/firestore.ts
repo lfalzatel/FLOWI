@@ -552,3 +552,54 @@ export async function updateInvestment(id: string, data: Partial<Investment>) {
 export async function deleteInvestment(id: string) {
   await deleteDoc(doc(db, 'fl_investments', id));
 }
+
+
+// ─── CUENTAS Y TRANSFERENCIAS ──────────────────────────────────────────────
+// El saldo de una cuenta parte del "saldo base" que la persona escribe (o ajusta) en una fecha,
+// y desde ahí lo mueven los gastos/ingresos de esa cuenta y las transferencias. Ver lib/accounts.ts.
+// Por privacidad no se guardan números de cuenta.
+
+export type AccountKind = 'banco' | 'billetera' | 'efectivo' | 'credito';
+
+export interface Account {
+  id?: string;
+  userId: string;
+  name: string;              // "Bancolombia", "Nequi", "Efectivo"…
+  kind: AccountKind;
+  methods: string[];         // medios de pago que caen en esta cuenta ("Bancolombia", "Tarjeta débito")
+  isDefault?: boolean;       // recibe los movimientos que no dicen con qué se pagaron
+  baseBalance: number;       // saldo en baseAt (en crédito: negativo = lo que se debe)
+  baseAt: string;            // ISO
+  adjustments?: { at: string; from: number; to: number }[];
+  archived?: boolean;
+  createdAt?: Timestamp | Date;
+}
+
+export interface Transfer {
+  id?: string;
+  userId: string;
+  fromId: string;
+  toId: string;
+  amount: number;
+  date: string;              // ISO
+  note?: string;
+  createdAt?: Timestamp | Date;
+}
+
+export async function addAccount(a: Omit<Account, 'id' | 'createdAt'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'fl_accounts'), { ...a, createdAt: serverTimestamp() });
+  return ref.id;
+}
+export async function updateAccount(id: string, data: Partial<Account>) {
+  await updateDoc(doc(db, 'fl_accounts', id), data);
+}
+export async function deleteAccount(id: string) {
+  await deleteDoc(doc(db, 'fl_accounts', id));
+}
+export async function addTransfer(t: Omit<Transfer, 'id' | 'createdAt'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'fl_transfers'), { ...t, createdAt: serverTimestamp() });
+  return ref.id;
+}
+export async function deleteTransfer(id: string) {
+  await deleteDoc(doc(db, 'fl_transfers', id));
+}
