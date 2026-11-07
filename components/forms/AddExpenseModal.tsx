@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { X, LayoutGrid, Plus } from 'lucide-react';
+import { X, LayoutGrid, Plus, BellPlus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories, CategoryOption } from '@/hooks/useCategories';
 import { useData } from '@/components/DataProvider';
@@ -16,6 +16,7 @@ import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal'
 import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
+import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 import { ParsedVoiceResult } from '@/lib/voiceParser';
@@ -63,6 +64,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   // ConfirmDialog states
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showConfirmConvert, setShowConfirmConvert] = useState(false);
+  const [showReminder, setShowReminder] = useState(false);
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [categoriesInitialView, setCategoriesInitialView] = useState<'list' | 'form'>('list');
 
@@ -549,6 +551,17 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
               )}
             </div>
           )}
+
+          {transactionToEdit && type === 'gasto' && (
+            <button
+              type="button"
+              onClick={() => setShowReminder(true)}
+              disabled={loading}
+              className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/10 border border-accent/50 text-accent hover:bg-accent/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-accent/10 text-accent hover:bg-accent/20 text-xs'}`}
+            >
+              <BellPlus className="w-4 h-4" /> Recordarme este pago
+            </button>
+          )}
           </div>
 
           {/* Submit siempre visible, con fondo sólido para que no se transparente la barra inferior de la app */}
@@ -609,6 +622,22 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         message="¿Estás seguro de que quieres convertir este gasto en una deuda activa? Se creará una deuda pendiente y se eliminará este gasto."
         confirmText="Convertir"
       />
+
+      {/* Recordatorio a partir del gasto: mismo nombre y categoría, el mismo día de cada mes */}
+      {showReminder && transactionToEdit && (
+        <ReminderFormModal
+          prefill={{
+            title: (description || category).trim(),
+            category,
+            type: 'monthly',
+            dayOfMonth: (transactionToEdit.date instanceof Date ? transactionToEdit.date : transactionToEdit.date.toDate()).getDate(),
+            time: '08:00',
+            description: `Último pago: $${Number(amount || 0).toLocaleString('es-CO')}`,
+          }}
+          onClose={() => setShowReminder(false)}
+          onSuccess={() => setShowReminder(false)}
+        />
+      )}
 
       {isManageCategoriesOpen && (
         <ManageCategoriesModal

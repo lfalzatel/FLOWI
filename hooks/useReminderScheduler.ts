@@ -34,6 +34,16 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
           if (r.type === 'daily') eventMatchesToday = true;
           else if (r.type === 'weekly' && r.dayOfWeek === now.getDay()) eventMatchesToday = true;
           else if (r.type === 'monthly' && r.dayOfMonth === now.getDate()) eventMatchesToday = true;
+          else if (r.type === 'yearly' && r.date) {
+              // Cada año el mismo día y mes (un 29 de febrero se avisa el 28 en años no bisiestos).
+              // Se usa la próxima fecha para que los avisos "N días antes" funcionen.
+              const [, m, d] = r.date.split('-').map(Number);
+              const occurrence = (year: number) => new Date(year, m - 1, Math.min(d, new Date(year, m, 0).getDate()), hours, minutes, 0, 0);
+              eventDate = occurrence(now.getFullYear());
+              const endOfToday = new Date(now); endOfToday.setHours(23, 59, 59, 999);
+              if (eventDate < new Date(now.getFullYear(), now.getMonth(), now.getDate())) eventDate = occurrence(now.getFullYear() + 1);
+              eventMatchesToday = eventDate <= endOfToday;
+          }
           else if (r.type === 'once' && r.date) {
               const [y, m, d] = r.date.split('-').map(Number);
               if (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d) {
@@ -45,7 +55,7 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
           const triggers: Date[] = [];
           
           // Add main event if applicable
-          if (eventMatchesToday || r.type === 'once') {
+          if (eventMatchesToday || r.type === 'once' || r.type === 'yearly') {
              triggers.push(eventDate);
           }
 

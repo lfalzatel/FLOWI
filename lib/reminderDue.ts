@@ -7,7 +7,13 @@ import { Reminder } from './firestore';
 const TRACKING_START = new Date(2026, 10, 1);
 const UPCOMING_DAYS = 7;
 
-export const PAYABLE_TYPES: Reminder['type'][] = ['once', 'weekly', 'monthly'];
+export const PAYABLE_TYPES: Reminder['type'][] = ['once', 'weekly', 'monthly', 'yearly'];
+
+// Un recordatorio anual sin categoría es una fecha (cumpleaños), no un pago
+export function isPayable(r: Reminder): boolean {
+  if (!PAYABLE_TYPES.includes(r.type)) return false;
+  return r.type !== 'yearly' || !!r.category;
+}
 
 export function dateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -33,6 +39,10 @@ function occurrences(r: Reminder, today: Date): Date[] {
     const base = new Date(today);
     base.setDate(today.getDate() + (r.dayOfWeek - today.getDay()));
     return [-7, 0, 7].map(o => { const d = new Date(base); d.setDate(base.getDate() + o); return d; });
+  }
+  if (r.type === 'yearly' && r.date) {
+    const [, m, d] = r.date.split('-').map(Number);
+    if (m && d) return [-1, 0, 1].map(o => monthlyDate(today.getFullYear() + o, m - 1, d));
   }
   if (r.type === 'once' && r.date) {
     const [y, m, d] = r.date.split('-').map(Number);
@@ -60,7 +70,7 @@ export interface ReminderDue {
 
 // El vencimiento pendiente más antiguo (vencido o dentro de los próximos 7 días), o null
 export function getPendingDue(r: Reminder, now = new Date()): ReminderDue | null {
-  if (!r.active || !PAYABLE_TYPES.includes(r.type)) return null;
+  if (!r.active || !isPayable(r)) return null;
   const today = startOfDay(now);
   const created = toDate(r.createdAt);
   const since = created && startOfDay(created) > TRACKING_START ? startOfDay(created) : TRACKING_START;

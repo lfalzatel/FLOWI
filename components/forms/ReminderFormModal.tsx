@@ -15,6 +15,7 @@ interface Props {
   onClose: () => void;
   onSuccess: () => void;
   reminder?: Reminder | null;
+  prefill?: Partial<Reminder>; // valores iniciales de un recordatorio nuevo (p. ej. desde un gasto)
 }
 
 function ToggleSwitch({ checked, onChange, label, theme }: { checked: boolean; onChange: (v: boolean) => void; label: string, theme: string }) {
@@ -33,25 +34,26 @@ function ToggleSwitch({ checked, onChange, label, theme }: { checked: boolean; o
   );
 }
 
-export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
+export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Props) {
   const { user } = useAuth();
-  const [title, setTitle] = useState(reminder?.title || '');
-  const [description, setDescription] = useState(reminder?.description || '');
-  const [type, setType] = useState<Reminder['type']>(reminder?.type || 'once');
-  const [time, setTime] = useState(reminder?.time || '08:00');
-  const [dayOfWeek, setDayOfWeek] = useState(reminder?.dayOfWeek ?? 1);
-  const [dayOfMonth, setDayOfMonth] = useState<number | ''>(reminder?.dayOfMonth ?? 1);
-  const [date, setDate] = useState(reminder?.date || '');
-  const [category, setCategory] = useState(reminder?.category || '');
-  const [budgetPercent, setBudgetPercent] = useState(reminder?.budgetPercent ?? 80);
-  const [alerts, setAlerts] = useState<ReminderAlert[]>(reminder?.alerts || []);
+  const initial = reminder || prefill;
+  const [title, setTitle] = useState(initial?.title || '');
+  const [description, setDescription] = useState(initial?.description || '');
+  const [type, setType] = useState<Reminder['type']>(initial?.type || 'once');
+  const [time, setTime] = useState(initial?.time || '08:00');
+  const [dayOfWeek, setDayOfWeek] = useState(initial?.dayOfWeek ?? 1);
+  const [dayOfMonth, setDayOfMonth] = useState<number | ''>(initial?.dayOfMonth ?? 1);
+  const [date, setDate] = useState(initial?.date || '');
+  const [category, setCategory] = useState(initial?.category || '');
+  const [budgetPercent, setBudgetPercent] = useState(initial?.budgetPercent ?? 80);
+  const [alerts, setAlerts] = useState<ReminderAlert[]>(initial?.alerts || []);
 
   const { allCategories: categoryOptions, merchantOptions } = useCategories();
   const allCategories = [...categoryOptions, ...merchantOptions.filter(mer => !categoryOptions.some(c => c.label === mer.label))];
-  const [sound, setSound] = useState(reminder?.sound ?? true);
-  const [pushEnabled, setPushEnabled] = useState(reminder?.pushEnabled ?? true);
-  const [inAppEnabled, setInAppEnabled] = useState(reminder?.inAppEnabled ?? true);
-  const [active, setActive] = useState(reminder?.active ?? true);
+  const [sound, setSound] = useState(initial?.sound ?? true);
+  const [pushEnabled, setPushEnabled] = useState(initial?.pushEnabled ?? true);
+  const [inAppEnabled, setInAppEnabled] = useState(initial?.inAppEnabled ?? true);
+  const [active, setActive] = useState(initial?.active ?? true);
   const [loading, setLoading] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   
@@ -112,7 +114,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
 
       if (category.trim()) data.category = category.trim();
 
-      if (type === 'once' && date.trim()) data.date = date;
+      if ((type === 'once' || type === 'yearly') && date.trim()) data.date = date;
       if (type === 'weekly') data.dayOfWeek = dayOfWeek;
       if (type === 'monthly') data.dayOfMonth = dayOfMonth === '' ? 1 : dayOfMonth;
       if (type === 'budget_alert') data.budgetPercent = budgetPercent;
@@ -257,6 +259,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
               <option value="daily">Diario</option>
               <option value="weekly">Semanal</option>
               <option value="monthly">Mensual</option>
+              <option value="yearly">Anual (cumpleaños, SOAT…)</option>
               <option value="budget_alert">Alerta de Presupuesto</option>
             </select>
           </div>
@@ -264,9 +267,9 @@ export function ReminderFormModal({ onClose, onSuccess, reminder }: Props) {
           {/* Campos condicionales */}
           {type !== 'budget_alert' && (
             <div className="flex gap-4">
-              {type === 'once' && (
+              {(type === 'once' || type === 'yearly') && (
                 <div className="flex-1">
-                  <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Fecha</label>
+                  <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>{type === 'yearly' ? 'Fecha (se repite cada año)' : 'Fecha'}</label>
                   <input
                     type="date"
                     required

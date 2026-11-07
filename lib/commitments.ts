@@ -1,5 +1,5 @@
 import { Reminder, Transaction, isFixedExpenseCategory } from './firestore';
-import { dateKey } from './reminderDue';
+import { dateKey, isPayable } from './reminderDue';
 
 // Próximos compromisos del mes: pagos fijos que aún no aparecen registrados este mes.
 // Salen de dos fuentes que se cruzan entre sí:
@@ -153,9 +153,13 @@ export function getCommitments(
   // 2. Recordatorios de pago con vencimiento este mes
   const dueReminders: { r: Reminder; due: Date; words: string[]; group?: Group }[] = [];
   for (const r of reminders) {
-    if (!r.active) continue;
+    if (!r.active || !isPayable(r)) continue;
     let due: Date | null = null;
     if (r.type === 'monthly' && r.dayOfMonth) due = dayInMonth(year, month, r.dayOfMonth);
+    else if (r.type === 'yearly' && r.date) {
+      const [, m, d] = r.date.split('-').map(Number);
+      if (m - 1 === month) due = dayInMonth(year, month, d);
+    }
     else if (r.type === 'once' && r.date?.startsWith(thisMonth)) {
       const [y, m, d] = r.date.split('-').map(Number);
       due = new Date(y, m - 1, d);

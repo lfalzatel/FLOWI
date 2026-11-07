@@ -329,7 +329,7 @@ export interface Reminder {
   title: string;               // "Pagar arriendo"
   description?: string;        // nota opcional
   category?: string;           // mismo tipo que Transaction.category
-  type: 'once' | 'daily' | 'weekly' | 'monthly' | 'budget_alert';
+  type: 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'budget_alert';
   time: string;                // "08:30" en formato HH:mm
   dayOfWeek?: number;          // 0-6 para weekly (0=Domingo, 1=Lunes...)
   dayOfMonth?: number;         // 1-31 para monthly
@@ -340,7 +340,7 @@ export interface Reminder {
   active: boolean;
   createdAt?: Timestamp | Date;
   lastTriggered?: Timestamp | Date | null;
-  date?: string; // Formato YYYY-MM-DD para recordatorios 'once'
+  date?: string; // YYYY-MM-DD: la fecha de 'once', o el día y mes que se repite cada año en 'yearly'
   alerts?: ReminderAlert[]; // Alertas múltiples relativas al tiempo principal
   paidDates?: string[];     // Vencimientos ya pagados (YYYY-MM-DD de cada ocurrencia)
 }

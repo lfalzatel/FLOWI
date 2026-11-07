@@ -246,6 +246,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
     daily: 'Diario',
     weekly: 'Semanal',
     monthly: 'Mensual',
+    yearly: 'Anual',
     budget_alert: 'Alerta presupuesto',
   }[reminder.type] ?? reminder.type;
 
@@ -257,6 +258,10 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
     }
     if (reminder.type === 'monthly' && reminder.dayOfMonth !== undefined) {
       return `el día ${reminder.dayOfMonth} del mes`;
+    }
+    if (reminder.type === 'yearly' && reminder.date) {
+      const [, m, d] = reminder.date.split('-').map(Number);
+      return `cada año el ${new Date(2000, m - 1, d).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}`;
     }
     if (reminder.type === 'budget_alert' && reminder.budgetPercent !== undefined) {
       return `al consumir el ${reminder.budgetPercent}%`;
