@@ -487,3 +487,50 @@ export async function addGoalMovement(goal: Goal, amount: number, note?: string)
   });
   return { savedAmount, reached };
 }
+
+
+// ─── INVERSIONES (CDT) ─────────────────────────────────────────────────────
+// Plata guardada a plazo: no es un gasto ni cuenta en lo disponible del mes.
+// Por privacidad no se guardan números de CDT, de cuenta ni nombres de titulares.
+
+export interface InvestmentPeriod {
+  startDate: string;     // YYYY-MM-DD
+  maturityDate: string;  // YYYY-MM-DD
+  amount: number;
+  rateEA: number;
+  interest: number;      // intereses brutos del periodo
+  outcome: 'renovado' | 'pagado';
+}
+
+export interface Investment {
+  id?: string;
+  userId: string;
+  kind: 'cdt';
+  bank: string;
+  amount: number;              // capital
+  rateEA: number;              // tasa efectiva anual, en %
+  nominalRate?: number | null; // tasa nominal que muestra el banco (opcional)
+  startDate: string;           // YYYY-MM-DD (apertura o última renovación)
+  maturityDate: string;        // YYYY-MM-DD
+  bankInterest?: number | null; // intereses del periodo según el banco; si falta, se estiman
+  withholdingPct: number;      // retención en la fuente sobre los intereses, en %
+  autoRenew?: boolean;
+  note?: string;
+  status: 'activo' | 'cerrado';
+  closedAt?: string | null;
+  history?: InvestmentPeriod[];
+  createdAt?: Timestamp | Date;
+}
+
+export async function addInvestment(inv: Omit<Investment, 'id' | 'createdAt'>): Promise<string> {
+  const docRef = await addDoc(collection(db, 'fl_investments'), { ...inv, createdAt: serverTimestamp() });
+  return docRef.id;
+}
+
+export async function updateInvestment(id: string, data: Partial<Investment>) {
+  await updateDoc(doc(db, 'fl_investments', id), data);
+}
+
+export async function deleteInvestment(id: string) {
+  await deleteDoc(doc(db, 'fl_investments', id));
+}

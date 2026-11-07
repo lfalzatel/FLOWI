@@ -6,6 +6,7 @@
 //    en la ventana de 30 minutos en que caen.
 //  - Pagos y fechas (mensuales y anuales): un solo resumen a las 7:00 a. m. con lo que vence
 //    hoy y mañana, sin lo ya pagado (marcado con "Ya lo pagué" o con un gasto registrado).
+//  - CDT (fl_investments): en el mismo resumen, 3 días antes, el día anterior y el día que vencen.
 //
 // Necesita el secreto FIREBASE_SERVICE_ACCOUNT_FLOWI (llave de cuenta de servicio de flowi-9af82).
 
@@ -107,13 +108,19 @@ function isCoveredByExpense(r, occDate, expenses, shared) {
   });
 }
 
-async function morningSummary(uid, reminders, todayLocal) {
+async function morningSummary(uid, reminders, investments, todayLocal) {
   const today = Date.UTC(todayLocal.getUTCFullYear(), todayLocal.getUTCMonth(), todayLocal.getUTCDate());
   const candidates = reminders.filter(r => r.pushEnabled !== false && (r.type === 'monthly' || r.type === 'yearly'));
-  if (!candidates.length) return null;
+  if (!candidates.length && !investments.length) return null;
 
   let expenses = null;
   const items = [];
+  for (const inv of investments) {
+    const [y, m, d] = String(inv.maturityDate || '').split('-').map(Number);
+    if (!y) continue;
+    const daysLeft = Math.round((Date.UTC(y, m - 1, d) - today) / DAY);
+    if (daysLeft === 0 || daysLeft === 1 || daysLeft === 3) items.push({ title: `CDT ${inv.bank}`, daysLeft, isCdt: true });
+  }
   for (const r of candidates) {
     const isPayment = r.type === 'monthly' || !!r.category;
     const alertDays = (r.alerts || []).filter(a => a.unit === 'days').map(a => Number(a.value) || 0);
@@ -139,12 +146,14 @@ async function morningSummary(uid, reminders, todayLocal) {
   if (!items.length) return null;
   items.sort((a, b) => a.daysLeft - b.daysLeft);
   const when = (n) => (n === 0 ? 'hoy' : n === 1 ? 'mañana' : `en ${n} días`);
-  const body = items.map(i => `${i.isPayment ? '💳' : '🎉'} ${i.title} (${when(i.daysLeft)})`).join(' · ');
+  const when2 = (i) => (i.isCdt ? `vence ${when(i.daysLeft)}` : when(i.daysLeft));
+  const body = items.map(i => `${i.isCdt ? '🏦' : i.isPayment ? '💳' : '🎉'} ${i.title} (${when2(i)})`).join(' · ');
   const payments = items.filter(i => i.isPayment).length;
+  const onlyCdt = items.every(i => i.isCdt);
   return {
-    title: payments ? (payments === 1 ? 'Tienes 1 pago por hacer' : `Tienes ${payments} pagos por hacer`) : 'Fechas importantes',
+    title: payments ? (payments === 1 ? 'Tienes 1 pago por hacer' : `Tienes ${payments} pagos por hacer`) : onlyCdt ? 'Tu CDT está por vencer' : 'Fechas importantes',
     body,
-    url: '/servicios/recordatorios',
+    url: onlyCdt ? '/servicios/inversiones' : '/servicios/recordatorios',
     tag: `summary-${dateKey(todayLocal.getUTCFullYear(), todayLocal.getUTCMonth(), todayLocal.getUTCDate())}`,
   };
 }
@@ -202,7 +211,9 @@ async function main() {
     }
 
     if (summaryNow) {
-      const summary = await morningSummary(u.id, reminders, todayLocal);
+      const invSnap = await db.collection('fl_investments').where('userId', '==', u.id).get();
+      const investments = invSnap.docs.map(d => d.data()).filter(i => i.status === 'activo');
+      const summary = await morningSummary(u.id, reminders, investments, todayLocal);
       if (summary) sent += await send(u.id, tokens, summary);
     }
   }

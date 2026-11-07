@@ -20,6 +20,7 @@ interface Input {
   today: DailyBudget | null;
   hasGoals: boolean;
   notificationsOff?: boolean; // los avisos de pagos no están activos en este celular
+  maturing?: { id: string; bank: string; amount: number; daysLeft: number }[]; // CDT que vencen pronto
   formatMoney: (n: number) => string;
   skipped?: string[];
   now?: Date;
@@ -31,7 +32,7 @@ function toDate(v: any): Date {
   return new Date(v);
 }
 
-export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
+export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
   const out: NextAction[] = [];
   const month = getLocalMonthString(now);
   const lastMonth = getLocalMonthString(new Date(now.getFullYear(), now.getMonth() - 1, 1));
@@ -46,6 +47,19 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
       id: `pay:${c.key}`, kind: 'pay', commitment: c, tone: c.daysLeft < 0 ? 'alert' : 'normal',
       title: `Paga ${c.title}`,
       detail: `${when[0].toUpperCase()}${when.slice(1)}${c.amount ? ` · el mes pasado fueron ${formatMoney(c.amount)}` : ''}. Toca para registrarlo.`,
+    });
+  }
+
+  // 1b. Un CDT vence en los próximos 3 días (o ya venció y no se ha marcado)
+  for (const m of maturing) {
+    if (m.daysLeft > 3) continue;
+    const when = m.daysLeft < 0 ? 'ya venció' : m.daysLeft === 0 ? 'vence hoy' : m.daysLeft === 1 ? 'vence mañana' : `vence en ${m.daysLeft} días`;
+    out.push({
+      id: `cdt:${m.id}`, kind: 'link', href: '/servicios/inversiones', tone: 'normal',
+      title: `Tu CDT de ${m.bank} ${when}`,
+      detail: m.daysLeft > 0
+        ? `${formatMoney(m.amount)}. Antes de que se renueve, compara la tasa con otros bancos.`
+        : `${formatMoney(m.amount)}. Cuéntame si lo renovaste o te lo pagaron.`,
     });
   }
 

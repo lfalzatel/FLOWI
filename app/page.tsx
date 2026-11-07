@@ -20,6 +20,9 @@ import { monthToClose } from '@/lib/monthClose';
 import { NextActionCard, useSkippedActions } from '@/components/dashboard/NextActionCard';
 import { getNextActions } from '@/lib/nextAction';
 import { useGoals } from '@/hooks/useGoals';
+import { useInvestments } from '@/hooks/useInvestments';
+import { investmentStatus } from '@/lib/investments';
+import { InvestmentsSummaryCard } from '@/components/dashboard/InvestmentsSummaryCard';
 import { isGoalDone } from '@/lib/goals';
 import { buildDemoData } from '@/lib/demoData';
 import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
@@ -43,6 +46,7 @@ export default function DashboardPage() {
   const { totalDeudas: realTotalDeudas } = useDebts();
   const realCommitments = useCommitments(realTransactions);
   const { goals: realGoals, loading: realGoalsLoading } = useGoals();
+  const { investments } = useInvestments();
   const { skipped: skippedActions, skip: skipAction } = useSkippedActions();
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -218,6 +222,8 @@ export default function DashboardPage() {
     transactions, pending: commitments.pending, today: todayBudget,
     hasGoals: goals.some(g => !isGoalDone(g)),
     notificationsOff: !demo && notificationsOff,
+    maturing: demo ? [] : investments.filter(i => i.status === 'activo' && i.id)
+      .map(i => ({ id: i.id!, bank: i.bank, amount: i.amount, daysLeft: investmentStatus(i).daysLeft })),
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
   })[0];
 
@@ -319,6 +325,7 @@ export default function DashboardPage() {
 
         {/* Meta de ahorro principal */}
         <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} demoGoals={demo?.goals} /></div>
+        {!demo && <InvestmentsSummaryCard currency={profile?.currency} />}
 
         {/* Chart */}
         <div data-tour="chart"><ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} /></div>

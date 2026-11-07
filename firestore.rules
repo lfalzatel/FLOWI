@@ -85,6 +85,12 @@ service cloud.firestore {
       allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
     }
 
+    match /fl_investments/{id} {
+      allow read, delete: if ownsExisting();
+      allow create: if createsOwn();
+      allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
+    }
+
     // Todo lo demás queda cerrado
   }
 }

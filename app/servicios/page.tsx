@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet } from 'lucide-react';
+import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -57,6 +57,16 @@ const SERVICES = [
     href: '/servicios/metas',
     color: 'text-emerald-500',
     bgColor: 'bg-emerald-500/10',
+    isNew: true,
+    soon: false
+  },
+  {
+    id: 'inversiones',
+    title: 'Mis inversiones (CDT)',
+    icon: Landmark,
+    href: '/servicios/inversiones',
+    color: 'text-teal-500',
+    bgColor: 'bg-teal-500/10',
     isNew: true,
     soon: false
   },
