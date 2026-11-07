@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
+import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { formatCurrency } from '@/lib/format';
 import { skipCommitment } from '@/lib/firestore';
 import { Commitment, CommitmentsSummary, commitmentWhen, monthKey, skipEntry } from '@/lib/commitments';
@@ -131,7 +132,11 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
           onClose={() => { setPaying(null); onRefresh?.(); }}
         />
       )}
-      {paying && !paying.reminder && (
+      {paying?.debt && (
+        <AddDebtModal debtToEdit={paying.debt} initialAbono={paying.amount}
+                      onClose={() => setPaying(null)} onSuccess={() => onRefresh?.()} />
+      )}
+      {paying && !paying.reminder && !paying.debt && (
         <AddExpenseModal
           initialType="gasto"
           initialVoiceParsed={{

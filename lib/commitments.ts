@@ -1,10 +1,11 @@
-import { Reminder, Transaction, isFixedExpenseCategory } from './firestore';
+import { Debt, Reminder, Transaction, isFixedExpenseCategory } from './firestore';
 import { dateKey, isPayable } from './reminderDue';
 
 // Próximos compromisos del mes: pagos fijos que aún no aparecen registrados este mes.
 // Salen de dos fuentes que se cruzan entre sí:
 //  - los gastos fijos del mes pasado (de ahí sale el valor y el día habitual)
 //  - los recordatorios mensuales o de una vez (de ahí sale la fecha exacta de vencimiento)
+//  - las cuotas de deudas con día de pago (se cubren al registrar un abono ese mes)
 // Un compromiso desaparece cuando se registra un gasto fijo parecido este mes, cuando el
 // recordatorio se marca con "Ya lo pagué" o cuando la persona lo omite para este mes.
 
@@ -15,6 +16,7 @@ export interface Commitment {
   dueDate: Date;
   amount: number | null;     // lo pagado el mes pasado; null si solo hay recordatorio
   reminder?: Reminder;       // si viene (o se cruzó) con un recordatorio
+  debt?: Debt;               // cuota de una deuda: se paga registrando un abono
   exactDate: boolean;        // true = fecha del recordatorio; false = día habitual de pago
   daysLeft: number;          // negativo = ya pasó la fecha
 }
@@ -96,6 +98,7 @@ export function getCommitments(
   reminders: Reminder[],
   skipped: string[] = [],
   now = new Date(),
+  debts: Debt[] = [],
 ): CommitmentsSummary {
   const today = startOfDay(now);
   const year = today.getFullYear();
@@ -206,6 +209,23 @@ export function getCommitments(
     const due = dayInMonth(year, month, g.day);
     items.push({
       key, title: g.title, category: g.category, dueDate: due, amount: g.amount, exactDate: false,
+      daysLeft: Math.round((due.getTime() - today.getTime()) / 86400000),
+    });
+  }
+
+  // 4. Cuotas de deudas (las que yo debo) con día de pago
+  for (const d of debts) {
+    if (d.status !== 'pending' || d.direction === 'me_deben' || !d.paymentDay || !d.installment || !d.id) continue;
+    const due = dayInMonth(year, month, d.paymentDay);
+    const start = toDate(d.createdAt);
+    // La primera cuota se paga al mes siguiente de tomar el crédito
+    if (!isNaN(start.getTime()) && due.getTime() - start.getTime() < 20 * 86400000) continue;
+    const key = `d:${d.id}`;
+    const paidNow = (d.payments || []).some(p => monthKey(toDate(p.date)) === thisMonth);
+    if (paidNow) { paidCount++; continue; }
+    if (skipped.includes(skipEntry(thisMonth, key))) continue;
+    items.push({
+      key, title: `Cuota ${d.title}`, category: 'Deudas', dueDate: due, amount: d.installment, debt: d, exactDate: true,
       daysLeft: Math.round((due.getTime() - today.getTime()) / 86400000),
     });
   }

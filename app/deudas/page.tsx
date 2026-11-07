@@ -3,7 +3,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebts } from '@/hooks/useDebts';
-import { calculateDebtInterest, deleteDebt, updateDebt, type Debt } from '@/lib/firestore';
+import { calculateDebtInterest, deleteDebt, nextDebtPaymentDate, updateDebt, type Debt } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -211,6 +211,11 @@ export default function DeudasPage() {
                               {debt.interestRate ? (
                                 <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-1 rounded text-[9px] uppercase tracking-wider">
                                   {debt.interestRate}% EA
+                                </span>
+                              ) : null}
+                              {debt.installment && nextDebtPaymentDate(debt) ? (
+                                <span className="text-[10px] text-text-secondary font-medium bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                                  Cuota {fmt(debt.installment)} · {nextDebtPaymentDate(debt)!.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
                                 </span>
                               ) : null}
                             </div>

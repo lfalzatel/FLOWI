@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { addDebt, updateDebt, deleteDebt, addExpense, calculateDebtInterest, Debt } from '@/lib/firestore';
+import { addDebt, updateDebt, deleteDebt, addExpense, calculateDebtInterest, estimateInstallment, nextDebtPaymentDate, Debt } from '@/lib/firestore';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { getLocalDateString } from '@/lib/dateUtils';
@@ -13,16 +13,22 @@ interface Props {
   onClose: () => void;
   onSuccess: () => void;
   debtToEdit?: Debt | null;
+  initialAbono?: number | null; // al venir desde "Próximos compromisos": la cuota del mes
 }
 
-export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
+export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: Props) {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [paidAmount, setPaidAmount] = useState('');
   const [interestRate, setInterestRate] = useState('');
   const [description, setDescription] = useState('');
-  const [abono, setAbono] = useState('');
+  const [abono, setAbono] = useState(initialAbono ? String(initialAbono) : '');
+  const [insurance, setInsurance] = useState('');
+  const [installment, setInstallment] = useState('');
+  const [termMonths, setTermMonths] = useState('');
+  const [paymentDay, setPaymentDay] = useState('');
+  const [showPlan, setShowPlan] = useState(false);
   const [abonoDate, setAbonoDate] = useState(getLocalDateString());
   const [debtDate, setDebtDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
@@ -47,6 +53,11 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       setPaidAmount(debtToEdit.paidAmount.toString());
       setInterestRate(debtToEdit.interestRate ? debtToEdit.interestRate.toString() : '');
       setDescription(debtToEdit.description || '');
+      setInsurance(debtToEdit.monthlyInsurance ? String(debtToEdit.monthlyInsurance) : '');
+      setInstallment(debtToEdit.installment ? String(debtToEdit.installment) : '');
+      setTermMonths(debtToEdit.termMonths ? String(debtToEdit.termMonths) : '');
+      setPaymentDay(debtToEdit.paymentDay ? String(debtToEdit.paymentDay) : '');
+      setShowPlan(!!(debtToEdit.monthlyInsurance || debtToEdit.installment || debtToEdit.paymentDay));
       if (debtToEdit.createdAt) {
         const d = debtToEdit.createdAt instanceof Date ? debtToEdit.createdAt : new Date();
         setDebtDate(getLocalDateString(d));
@@ -67,6 +78,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
       const total = parseFloat(totalAmount);
       let paid = parseFloat(paidAmount) || 0;
       const rate = interestRate ? parseFloat(interestRate) : 0;
+      const day = Math.min(31, Math.max(0, parseInt(paymentDay) || 0));
+      const plan = {
+        monthlyInsurance: parseInt(insurance) || null,
+        installment: parseInt(installment) || null,
+        termMonths: parseInt(termMonths) || null,
+        paymentDay: day || null,
+      };
+      // Con intereses, la deuda queda saldada cuando lo abonado cubre capital + intereses causados
+      const owedExtra = debtToEdit ? calculateDebtInterest(debtToEdit).accumulatedInterest : 0;
 
       let finalDebtDate: Date;
       const todayStr = new Date().toLocaleDateString('sv-SE');
@@ -102,7 +122,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           description: `Abono a: ${title}`,
         };
 
-        const status = paid >= total ? 'paid' : 'pending';
+        const status = paid >= total + owedExtra ? 'paid' : 'pending';
 
         // ⚡ Respuesta optimista inmediata a 0ms: Disparar animación de Abono y cerrar modal al instante
         triggerPowerAnimation(abonoAmount, 'abono');
@@ -123,12 +143,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
           paidAmount: paid,
           status,
           interestRate: rate,
+          ...plan,
           description,
           createdAt: finalDebtDate,
           payments: [...(debtToEdit.payments || []), newPayment],
         });
       } else {
-        const status = paid >= total ? 'paid' : 'pending';
+        const status = paid >= total + owedExtra ? 'paid' : 'pending';
         
         // ⚡ Respuesta optimista inmediata a 0ms
         triggerPowerAnimation(total, debtToEdit?.id ? 'edicion' : 'gasto');
@@ -141,6 +162,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             paidAmount: paid,
             status,
             interestRate: rate,
+            ...plan,
             description,
             createdAt: finalDebtDate,
           });
@@ -152,6 +174,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             paidAmount: paid,
             status,
             interestRate: rate,
+            ...plan,
             description,
             createdAt: finalDebtDate,
             payments: [],
@@ -302,35 +325,97 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit }: Props) {
             </div>
           </div>
 
-          {debtToEdit && debtToEdit.interestRate && debtToEdit.interestRate > 0 && (() => {
+          {!isReadOnly && (() => {
+            const inputCls = `w-full bg-glass border py-2 px-3 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-glass-border rounded-xl focus:border-accent text-xs'}`;
+            const labelCls = `${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`;
+            const suggested = estimateInstallment(
+              Math.max(0, (parseFloat(totalAmount) || 0) - (parseFloat(paidAmount) || 0)),
+              parseFloat(interestRate) || 0, parseInt(termMonths) || 0,
+            );
+            const ins = parseInt(insurance) || 0;
+            if (!showPlan) {
+              return (
+                <button type="button" onClick={() => setShowPlan(true)} className="text-xs text-accent font-semibold">
+                  + Cuotas, seguro y día de pago (créditos de banco)
+                </button>
+              );
+            }
+            return (
+              <div className={`p-3 border space-y-3 ${isTechTheme ? 'border-accent/20 rounded-none' : 'border-glass-border rounded-2xl'}`}>
+                <p className={`text-[11px] font-semibold ${isTechTheme ? 'text-accent' : 'text-text-secondary'}`}>Crédito con cuotas (opcional)</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className={labelCls}>Plazo (meses)</label>
+                    <input type="text" inputMode="numeric" value={termMonths} onChange={(e) => setTermMonths(e.target.value.replace(/[^0-9]/g, ''))} className={inputCls} placeholder="60" />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Día de pago</label>
+                    <input type="text" inputMode="numeric" value={paymentDay} onChange={(e) => setPaymentDay(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))} className={inputCls} placeholder="15" />
+                  </div>
+                  <div>
+                    <label className={labelCls} title="Seguro de vida deudor que cobra el banco cada mes">Seguro / mes</label>
+                    <input type="text" inputMode="numeric" value={insurance} onChange={(e) => setInsurance(e.target.value.replace(/[^0-9]/g, ''))} className={inputCls} placeholder="Opcional" />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Cuota mensual</label>
+                  <input type="text" inputMode="numeric" value={installment} onChange={(e) => setInstallment(e.target.value.replace(/[^0-9]/g, ''))} className={inputCls} placeholder="La que te informó el banco" />
+                  {suggested > 0 && String(suggested) !== installment && (
+                    <button type="button" onClick={() => setInstallment(String(suggested))} className="mt-1 text-[11px] text-accent text-left">
+                      Con esa tasa y plazo sería unos ${suggested.toLocaleString('es-CO')}{ins ? ` (más $${ins.toLocaleString('es-CO')} de seguro si el banco lo cobra aparte)` : ''} · usar
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-text-muted leading-snug">
+                  Con el día de pago, la cuota aparece en Próximos compromisos y se descuenta de lo que puedes gastar hasta que registres el abono.
+                </p>
+              </div>
+            );
+          })()}
+
+          {debtToEdit && ((debtToEdit.interestRate || 0) > 0 || (debtToEdit.monthlyInsurance || 0) > 0) && (() => {
             const interestData = calculateDebtInterest(debtToEdit);
             const pendingAmount = Math.max(0, debtToEdit.totalAmount - debtToEdit.paidAmount);
             const totalWithInterest = pendingAmount + interestData.accumulatedInterest;
             return (
               <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-glass border-glass-border rounded-2xl text-xs space-y-1 text-text-secondary'}`}>
                 <div className="flex justify-between items-center text-text-muted mb-2">
-                  <span>RESUMEN FINANCIERO (E.A. {debtToEdit.interestRate}%)</span>
+                  <span>RESUMEN FINANCIERO{debtToEdit.interestRate ? ` (E.A. ${debtToEdit.interestRate}%)` : ''}</span>
                   {debtToEdit.status !== 'paid' && (
                     <span className="text-[10px] text-accent font-bold uppercase tracking-wider animate-pulse">Capitalización Diaria</span>
                   )}
                 </div>
                 <div className="flex justify-between">
                   <span>Saldo base {isReadOnly ? 'liquidado' : 'pendiente'}:</span>
-                  <span className="text-text-primary">${pendingAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-text-primary">${pendingAmount.toLocaleString('es-CO')}</span>
                 </div>
-                {interestData.accumulatedInterest > 0 && (
+                {interestData.interest > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-red-400 font-semibold">Interés acumulado final:</span>
-                    <span className="text-red-400 font-bold font-mono">+${interestData.accumulatedInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-red-400 font-semibold">Intereses causados:</span>
+                    <span className="text-red-400 font-bold font-mono">+${interestData.interest.toLocaleString('es-CO')}</span>
+                  </div>
+                )}
+                {interestData.insurance > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-red-400 font-semibold">Seguro causado:</span>
+                    <span className="text-red-400 font-bold font-mono">+${interestData.insurance.toLocaleString('es-CO')}</span>
                   </div>
                 )}
                 <hr className="border-glass-border my-1.5" />
                 <div className="flex justify-between text-sm font-bold">
                   <span className={isTechTheme ? 'text-accent' : 'text-text-primary font-syne'}>{isReadOnly ? 'Total pagado:' : 'Total a pagar hoy:'}</span>
                   <span className={isTechTheme ? 'text-accent font-mono' : 'text-[#00E5A0] font-mono'}>
-                    ${totalWithInterest.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    ${totalWithInterest.toLocaleString('es-CO')}
                   </span>
                 </div>
+                {!isReadOnly && debtToEdit.installment && nextDebtPaymentDate(debtToEdit) && (
+                  <div className="flex justify-between pt-1">
+                    <span>Próxima cuota:</span>
+                    <span className="text-text-primary">
+                      ${debtToEdit.installment.toLocaleString('es-CO')} el {nextDebtPaymentDate(debtToEdit)!.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })()}

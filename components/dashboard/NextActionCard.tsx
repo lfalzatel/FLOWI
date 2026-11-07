@@ -5,6 +5,7 @@ import { ChevronRight, Sparkles, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
+import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { BalanceInfoModal } from './BalanceInfoModal';
 import { NextAction } from '@/lib/nextAction';
 import { DailyBudget } from '@/lib/dailyBudget';
@@ -81,7 +82,11 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh }: P
           onClose={() => { setOpen(false); onRefresh?.(); }}
         />
       )}
-      {open && action.kind === 'pay' && !action.commitment.reminder && (
+      {open && action.kind === 'pay' && action.commitment.debt && (
+        <AddDebtModal debtToEdit={action.commitment.debt} initialAbono={action.commitment.amount}
+                      onClose={() => setOpen(false)} onSuccess={() => onRefresh?.()} />
+      )}
+      {open && action.kind === 'pay' && !action.commitment.reminder && !action.commitment.debt && (
         <AddExpenseModal
           initialType="gasto"
           initialVoiceParsed={{ type: 'gasto', amount: action.commitment.amount, category: action.commitment.category, description: action.commitment.title, isFixed: true, rawText: '' }}

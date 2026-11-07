@@ -106,6 +106,10 @@ export interface Debt {
   createdAt?: Timestamp | Date;
   description?: string;
   interestRate?: number; // Tasa efectiva anual (E.A. %) opcional
+  monthlyInsurance?: number | null; // seguro que cobra el banco cada mes (opcional)
+  installment?: number | null;      // cuota fija mensual (opcional)
+  termMonths?: number | null;       // plazo en meses (opcional)
+  paymentDay?: number | null;       // día del mes en que se paga la cuota (opcional)
   // "debo" = yo le debo a alguien (por defecto); "me_deben" = alguien me debe a mí
   direction?: 'debo' | 'me_deben';
   payments?: Array<{
@@ -179,80 +183,94 @@ export async function deleteDebt(id: string) {
   await deleteDoc(docRef);
 }
 
-// Función financiera para calcular intereses acumulados día a día (Capitalización Diaria de la E.A.)
-export function calculateDebtInterest(debt: Debt): { accumulatedInterest: number, currentTotal: number } {
-  const defaultResult = { accumulatedInterest: 0, currentTotal: debt.totalAmount };
-  
-  if (!debt.interestRate || debt.interestRate <= 0) {
-    return defaultResult;
+// Intereses (y seguro) causados día a día, como los liquidan los bancos colombianos:
+//  - tasa E.A. → nominal mes vencido → tasa diaria comercial (÷ 360)
+//  - cada abono paga primero los intereses y el seguro pendientes y luego el capital
+//  - los centavos se truncan (el banco no redondea hacia arriba)
+// accumulatedInterest = todo lo causado desde el inicio (intereses + seguro), de modo que
+// lo que se debe hoy = totalAmount − paidAmount + accumulatedInterest.
+export function calculateDebtInterest(debt: Debt, now = new Date()): {
+  accumulatedInterest: number; interest: number; insurance: number; currentTotal: number; principalLeft: number;
+} {
+  const base = Math.max(0, debt.totalAmount - debt.paidAmount);
+  const defaultResult = { accumulatedInterest: 0, interest: 0, insurance: 0, currentTotal: base, principalLeft: base };
+  const rate = debt.interestRate && debt.interestRate > 0 ? debt.interestRate : 0;
+  const insuranceMonthly = debt.monthlyInsurance && debt.monthlyInsurance > 0 ? debt.monthlyInsurance : 0;
+  if (!rate && !insuranceMonthly) return defaultResult;
+
+  const createdDate = debt.createdAt instanceof Date
+    ? debt.createdAt
+    : (debt.createdAt && 'toDate' in (debt.createdAt as any) ? (debt.createdAt as any).toDate() : new Date());
+  if (createdDate.getTime() >= now.getTime()) return defaultResult;
+
+  const nominalMensual = Math.pow(1 + rate / 100, 1 / 12) - 1;
+  const dailyRate = (nominalMensual * 12) / 360;
+  const dailyInsurance = insuranceMonthly / 30;
+
+  const toD = (v: any) => (v instanceof Date ? v : new Date(v));
+  const paymentsByDay = new Map<string, number>();
+  for (const p of debt.payments || []) {
+    const k = toD(p.date).toLocaleDateString('sv-SE');
+    paymentsByDay.set(k, (paymentsByDay.get(k) || 0) + p.amount);
   }
+  // Abonos registrados antes de que existiera el historial (o el "monto pagado" inicial)
+  const logged = Array.from(paymentsByDay.values()).reduce((s, n) => s + n, 0);
+  let principal = Math.max(0, debt.totalAmount - Math.max(0, debt.paidAmount - logged));
 
-  const createdDate = debt.createdAt instanceof Date 
-    ? debt.createdAt 
-    : (debt.createdAt && 'toDate' in (debt.createdAt as any) 
-        ? (debt.createdAt as any).toDate() 
-        : new Date());
+  let interest = 0, insurance = 0, owedCharges = 0;
+  const day = new Date(createdDate.getTime());
+  day.setHours(0, 0, 0, 0);
+  const target = new Date(now.getTime());
+  target.setHours(0, 0, 0, 0);
 
-  const today = new Date();
-  
-  // Si por algún motivo la fecha de creación es futura, retornar valores por defecto
-  if (createdDate.getTime() >= today.getTime()) {
-    return defaultResult;
-  }
-
-  // Convertir Tasa Efectiva Anual (E.A.) a Tasa Nominal Mensual y luego a Nominal Anual (N.A.M.V)
-  const nominalMensual = Math.pow(1 + debt.interestRate / 100, 1 / 12) - 1;
-  const nominalAnual = nominalMensual * 12;
-  
-  // Dividir la tasa Nominal Anual por 360 días para obtener la tasa diaria comercial
-  const dailyRate = nominalAnual / 360;
-
-  // Ordenar el historial de abonos cronológicamente
-  const paymentsSorted = debt.payments 
-    ? [...debt.payments].sort((a, b) => {
-        const da = a.date instanceof Date ? a.date : new Date(a.date as any);
-        const db = b.date instanceof Date ? b.date : new Date(b.date as any);
-        return da.getTime() - db.getTime();
-      })
-    : [];
-
-  let currentBalance = debt.totalAmount;
-  let accumulatedInterest = 0;
-  let currentDate = new Date(createdDate.getTime());
-  
-  // Normalizar currentDate a las 00:00:00 del día de creación
-  currentDate.setHours(0, 0, 0, 0);
-  const targetDate = new Date(today.getTime());
-  targetDate.setHours(0, 0, 0, 0);
-
-  // Simulación día a día para acumular interés y aplicar abonos a tiempo
-  while (currentDate.getTime() < targetDate.getTime()) {
-    // 1. Calcular el interés diario sobre el saldo actual (interés simple diario)
-    const dailyInterest = currentBalance * dailyRate;
-    accumulatedInterest += dailyInterest;
-
-    // 2. Avanzar un día
-    currentDate.setDate(currentDate.getDate() + 1);
-
-    // 3. Aplicar los abonos correspondientes a este día específico
-    const dateStr = currentDate.toLocaleDateString('sv-SE');
-    const dayPayments = paymentsSorted.filter(p => {
-      const pd = p.date instanceof Date ? p.date : new Date(p.date as any);
-      return pd.toLocaleDateString('sv-SE') === dateStr;
-    });
-
-    for (const pay of dayPayments) {
-      currentBalance = Math.max(0, currentBalance - pay.amount);
+  while (day.getTime() < target.getTime()) {
+    const i = principal * dailyRate;
+    const ins = principal > 0 ? dailyInsurance : 0;
+    interest += i;
+    insurance += ins;
+    owedCharges += i + ins;
+    day.setDate(day.getDate() + 1);
+    const paid = paymentsByDay.get(day.toLocaleDateString('sv-SE')) || 0;
+    if (paid > 0) {
+      const toCharges = Math.min(paid, owedCharges);
+      owedCharges -= toCharges;
+      principal = Math.max(0, principal - (paid - toCharges));
     }
   }
 
-  // Redondear el interés acumulado al entero más cercano (comportamiento bancario estándar en COP)
-  accumulatedInterest = Math.round(accumulatedInterest);
-
+  interest = Math.floor(interest);
+  insurance = Math.floor(insurance);
+  const accumulatedInterest = interest + insurance;
   return {
-    accumulatedInterest,
-    currentTotal: currentBalance + accumulatedInterest,
+    accumulatedInterest, interest, insurance,
+    principalLeft: Math.floor(principal),
+    currentTotal: Math.max(0, debt.totalAmount - debt.paidAmount + accumulatedInterest),
   };
+}
+
+// Cuota fija mensual (sistema francés) para un crédito: capital, tasa E.A. y plazo en meses
+export function estimateInstallment(amount: number, rateEA: number, months: number, monthlyInsurance = 0): number {
+  if (amount <= 0 || months <= 0) return 0;
+  const i = Math.pow(1 + (rateEA || 0) / 100, 1 / 12) - 1;
+  const base = i > 0 ? (amount * i) / (1 - Math.pow(1 + i, -months)) : amount / months;
+  return Math.round(base + monthlyInsurance);
+}
+
+// Próxima fecha de pago de la cuota (desde hoy, incluido). La primera cuota cae al menos
+// 20 días después de tomar el crédito (si se tomó el 5 de nov y se paga los 15, la primera es el 15 de dic)
+export function nextDebtPaymentDate(debt: Debt, now = new Date()): Date | null {
+  if (!debt.paymentDay) return null;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const created = debt.createdAt instanceof Date ? debt.createdAt
+    : (debt.createdAt && 'toDate' in (debt.createdAt as any) ? (debt.createdAt as any).toDate() : null);
+  const earliest = created ? new Date(created.getTime() + 20 * 86400000) : today;
+  for (const o of [0, 1, 2]) {
+    const y = today.getFullYear(), m = today.getMonth() + o;
+    const last = new Date(y, m + 1, 0).getDate();
+    const d = new Date(y, m, Math.min(debt.paymentDay, last));
+    if (d >= today && d >= earliest) return d;
+  }
+  return null;
 }
 
 export interface UserProfile {

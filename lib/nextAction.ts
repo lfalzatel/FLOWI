@@ -46,7 +46,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     out.push({
       id: `pay:${c.key}`, kind: 'pay', commitment: c, tone: c.daysLeft < 0 ? 'alert' : 'normal',
       title: `Paga ${c.title}`,
-      detail: `${when[0].toUpperCase()}${when.slice(1)}${c.amount ? ` · el mes pasado fueron ${formatMoney(c.amount)}` : ''}. Toca para registrarlo.`,
+      detail: `${when[0].toUpperCase()}${when.slice(1)}${c.amount ? (c.debt ? ` · cuota de ${formatMoney(c.amount)}` : ` · el mes pasado fueron ${formatMoney(c.amount)}`) : ''}. Toca para registrarlo.`,
     });
   }
 
