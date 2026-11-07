@@ -1,4 +1,4 @@
-import { Reminder } from './firestore';
+import { Reminder, Transaction } from './firestore';
 
 // Vencimientos de recordatorios de pago: cada ocurrencia (fecha) se marca como pagada por separado,
 // y lo que no se ha pagado sigue apareciendo aunque ya haya vencido.
@@ -62,6 +62,33 @@ export function isOccurrencePaid(r: Reminder, occurrence: Date): boolean {
   return (r.paidDates || []).includes(dateKey(occurrence));
 }
 
+const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const words = (s: string) => normalize(s).split(/[^a-z0-9]+/).filter(w => w.length >= 4);
+
+// Días alrededor del vencimiento en que un gasto registrado cuenta como el pago de esa vez
+const PAY_WINDOW: Partial<Record<Reminder['type'], [number, number]>> = {
+  weekly: [3, 3], monthly: [20, 10], yearly: [45, 30], once: [45, 30],
+};
+
+// ¿Ya hay un gasto registrado que corresponde a este vencimiento? (misma categoría y fecha cercana).
+// Si otro recordatorio comparte la categoría, el gasto también debe nombrarlo (Claro panorama vs. Claro Manizales).
+function isCoveredByExpense(r: Reminder, occurrence: Date, transactions: Transaction[], sharedCategory: boolean): boolean {
+  if (!r.category) return false;
+  const [before, after] = PAY_WINDOW[r.type] || [0, 0];
+  const from = occurrence.getTime() - before * 86400000;
+  const to = occurrence.getTime() + (after + 1) * 86400000;
+  const category = normalize(r.category);
+  const titleWords = words(r.title).filter(w => !words(r.category!).includes(w));
+  return transactions.some(t => {
+    if (t.type !== 'gasto' || normalize(t.category || '') !== category) return false;
+    const when = toDate(t.date)?.getTime() ?? 0;
+    if (when < from || when > to) return false;
+    if (!sharedCategory || !titleWords.length) return true;
+    const desc = words(`${t.description || ''} ${t.merchant || ''}`);
+    return titleWords.some(w => desc.includes(w));
+  });
+}
+
 export interface ReminderDue {
   reminder: Reminder;
   dueDate: Date;
@@ -69,7 +96,7 @@ export interface ReminderDue {
 }
 
 // El vencimiento pendiente más antiguo (vencido o dentro de los próximos 7 días), o null
-export function getPendingDue(r: Reminder, now = new Date()): ReminderDue | null {
+export function getPendingDue(r: Reminder, now = new Date(), transactions: Transaction[] = [], sharedCategory = false): ReminderDue | null {
   if (!r.active || !isPayable(r)) return null;
   const today = startOfDay(now);
   const created = toDate(r.createdAt);
@@ -79,18 +106,24 @@ export function getPendingDue(r: Reminder, now = new Date()): ReminderDue | null
     const daysLeft = Math.round((occ.getTime() - today.getTime()) / 86400000);
     // Ocurrencias pasadas anteriores a la creación (o al inicio del seguimiento) no cuentan como atrasos
     if (daysLeft < 0 && occ < since) continue;
-    if (isOccurrencePaid(r, occ)) continue;
+    if (isOccurrencePaid(r, occ) || isCoveredByExpense(r, occ, transactions, sharedCategory)) continue;
     if (daysLeft > UPCOMING_DAYS) return null;
     return { reminder: r, dueDate: occ, daysLeft };
   }
   return null;
 }
 
-export function getPendingDues(reminders: Reminder[], now = new Date()): ReminderDue[] {
+export function getPendingDues(reminders: Reminder[], now = new Date(), transactions: Transaction[] = []): ReminderDue[] {
   return reminders
-    .map(r => getPendingDue(r, now))
+    .map(r => getPendingDue(r, now, transactions, isCategoryShared(r, reminders)))
     .filter((d): d is ReminderDue => d !== null)
     .sort((a, b) => a.daysLeft - b.daysLeft);
+}
+
+export function isCategoryShared(r: Reminder, reminders: Reminder[]): boolean {
+  if (!r.category) return false;
+  const c = normalize(r.category);
+  return reminders.some(o => o !== r && o.active && o.category && normalize(o.category) === c);
 }
 
 export function dueLabel(daysLeft: number): string {

@@ -9,6 +9,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useReminders } from '@/hooks/useReminders';
 import { useReminderScheduler } from '@/hooks/useReminderScheduler';
 import { useExpenses } from '@/hooks/useExpenses';
+import { useData } from '@/components/DataProvider';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
@@ -17,7 +18,7 @@ import { registerReminderSW, requestNotificationPermission, scheduleNotification
 
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
-import { getPendingDue, dueLabel, ReminderDue } from '@/lib/reminderDue';
+import { getPendingDue, dueLabel, ReminderDue, isCategoryShared } from '@/lib/reminderDue';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { speakText } from '@/lib/voiceParser';
 
@@ -38,6 +39,7 @@ export default function RecordatoriosPage() {
 
   // Cargar porcentaje de presupuesto
   const { gastosEsteMes } = useExpenses();
+  const { transactions } = useData();
   const userBudget = profile?.budget || 0;
   const budgetPercent = userBudget > 0 ? (gastosEsteMes / userBudget) * 100 : 0;
 
@@ -197,7 +199,7 @@ export default function RecordatoriosPage() {
                 onEdit={() => { setEditingReminder(r); setShowForm(true); }}
                 onToggle={() => handleToggle(r)}
                 onDelete={() => handleDelete(r.id!)}
-                due={getPendingDue(r)}
+                due={getPendingDue(r, new Date(), transactions, isCategoryShared(r, reminders))}
                 onPay={setPayingDue}
                 isTechTheme={isTechTheme}
                 delay={i * 0.08}

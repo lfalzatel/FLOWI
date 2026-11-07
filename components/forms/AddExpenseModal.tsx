@@ -17,6 +17,7 @@ import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
+import { dateKey } from '@/lib/reminderDue';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 import { ParsedVoiceResult } from '@/lib/voiceParser';
@@ -631,6 +632,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             category,
             type: 'monthly',
             dayOfMonth: (transactionToEdit.date instanceof Date ? transactionToEdit.date : transactionToEdit.date.toDate()).getDate(),
+            // Este gasto ya es el pago de ese mes: el recordatorio no debe salir como pendiente
+            paidDates: [dateKey(transactionToEdit.date instanceof Date ? transactionToEdit.date : transactionToEdit.date.toDate())],
             time: '08:00',
             description: `Último pago: $${Number(amount || 0).toLocaleString('es-CO')}`,
           }}

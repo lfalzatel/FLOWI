@@ -113,6 +113,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
       };
 
       if (category.trim()) data.category = category.trim();
+      // Creado desde un gasto: ese vencimiento ya está pagado
+      if (!reminder && prefill?.paidDates?.length) data.paidDates = prefill.paidDates;
 
       if ((type === 'once' || type === 'yearly') && date.trim()) data.date = date;
       if (type === 'weekly') data.dayOfWeek = dayOfWeek;

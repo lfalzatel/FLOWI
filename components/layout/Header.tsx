@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useReminders } from '@/hooks/useReminders';
 import { getPendingDues, dueLabel, ReminderDue } from '@/lib/reminderDue';
+import { useData } from '@/components/DataProvider';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
 import { Bell, Clock, Info, MessageCircle } from 'lucide-react';
 import { FlowLines } from '@/components/FlowLines';
@@ -82,7 +83,9 @@ export function Header() {
   }, [showDropdown]);
 
   // Pagos pendientes: vencidos sin pagar y los que vencen en los próximos 7 días
-  const upcomingReminders = getPendingDues(reminders).slice(0, 6);
+  // (un gasto ya registrado de esa categoría cerca del vencimiento cuenta como pagado)
+  const { transactions } = useData();
+  const upcomingReminders = getPendingDues(reminders, new Date(), transactions).slice(0, 6);
   const unread = notifications.length + upcomingReminders.length;
 
   // Dynamic colors for the logo based on theme
