@@ -9,7 +9,7 @@ import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal'
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useTheme } from '@/components/ThemeProvider';
-import { requestNotificationPermission } from '@/lib/notifications';
+import { requestNotificationPermission, scheduleNotificationViaSW } from '@/lib/notifications';
 import { removePushToken, syncPushToken } from '@/lib/push';
 import {
   User, Settings, CreditCard, Bell,
@@ -57,6 +57,8 @@ export function ProfileCapsule() {
         localStorage.setItem('notifications_enabled', 'true');
         setNotificationsActive(true);
         if (user) syncPushToken(user.uid);
+        // Confirmación visible de que las notificaciones quedaron activas
+        scheduleNotificationViaSW({ title: 'Notificaciones activadas ✓', body: 'Te avisaremos tus pagos y recordatorios, incluso con FLOWI cerrada.', tag: 'flowi-notif-on' });
       } else {
         alert('Por favor, activa los permisos de notificación en la configuración de tu navegador.');
       }
