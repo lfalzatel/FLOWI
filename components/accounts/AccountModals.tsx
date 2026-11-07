@@ -7,7 +7,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { Account, AccountKind, addAccount, addTransfer, updateAccount } from '@/lib/firestore';
 import { PAYMENT_METHODS } from '@/lib/categories';
 import { KIND_EMOJI, KIND_LABEL, suggestMethods } from '@/lib/accounts';
-import { formatAmountInput, parseAmountInput } from '@/components/goals/GoalFormModal';
+// Montos con miles y hasta dos decimales con coma, como en la app del banco ("1.234.567,89")
+export function formatMoneyInput(value: string | number): string {
+  let raw = typeof value === 'number' ? value.toFixed(2).replace('.', ',').replace(/,00$/, '') : value;
+  // Teclados que solo tienen punto: un punto recién escrito al final es la coma decimal
+  // (los puntos de miles los pone el formato, nunca quedan al final)
+  if (typeof value === 'string' && !raw.includes(',') && raw.endsWith('.')) raw = `${raw.slice(0, -1)},`;
+  const [intPart, ...rest] = raw.replace(/[^\d,]/g, '').split(',');
+  const digits = intPart.replace(/^0+(?=\d)/, '');
+  const int = digits ? Number(digits).toLocaleString('es-CO') : (rest.length ? '0' : '');
+  return rest.length ? `${int},${rest.join('').slice(0, 2)}` : int;
+}
+export function parseMoneyInput(value: string): number {
+  const n = Number(value.replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : Math.round(n * 100) / 100;
+}
 import { formatCurrency } from '@/lib/format';
 import { getLocalDateString } from '@/lib/dateUtils';
 
@@ -96,7 +110,7 @@ export function AccountFormModal({ account, accounts, onClose, onDelete }: {
       if (account?.id) {
         await updateAccount(account.id, { name: name.trim(), kind, methods: finalMethods, isDefault });
       } else {
-        const amount = parseAmountInput(balance);
+        const amount = parseMoneyInput(balance);
         await addAccount({
           userId: user.uid, name: name.trim(), kind, methods: finalMethods, isDefault,
           baseBalance: kind === 'credito' ? -amount : amount,
@@ -134,8 +148,8 @@ export function AccountFormModal({ account, accounts, onClose, onDelete }: {
       {!account && (
         <div>
           <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? '¿Cuánto debes hoy en la tarjeta?' : '¿Cuánto tienes hoy en esta cuenta?'}</label>
-          <input id="acc-balance" type="text" inputMode="numeric" placeholder="$ 0" value={balance}
-                 onChange={(e) => setBalance(formatAmountInput(e.target.value))} className={`${s.input} font-bold`} />
+          <input id="acc-balance" type="text" inputMode="decimal" placeholder="$ 0" value={balance}
+                 onChange={(e) => setBalance(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>Míralo en la app del banco. Desde hoy, tus gastos e ingresos de esta cuenta lo van moviendo.</p>
         </div>
       )}
@@ -181,10 +195,10 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
 }) {
   const s = useStyles();
   const credit = account.kind === 'credito';
-  const [value, setValue] = useState(formatAmountInput(Math.abs(Math.round(current))));
+  const [value, setValue] = useState(formatMoneyInput(Math.abs(Math.round(current * 100) / 100)));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const amount = parseAmountInput(value);
+  const amount = parseMoneyInput(value);
   const target = credit ? -amount : amount;
   const diff = target - current;
 
@@ -195,7 +209,7 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
       const at = new Date().toISOString();
       await updateAccount(account.id, {
         baseBalance: target, baseAt: at,
-        adjustments: [...(account.adjustments || []), { at, from: Math.round(current), to: target }].slice(-20),
+        adjustments: [...(account.adjustments || []), { at, from: Math.round(current * 100) / 100, to: target }].slice(-20),
       });
       onClose();
     } catch (err) {
@@ -210,9 +224,9 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
            footer={<button type="button" disabled={saving} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar saldo'}</button>}>
       <div>
         <label htmlFor="adj" className={s.label}>{credit ? '¿Cuánto debes hoy según el banco?' : '¿Cuánto dice el banco que tienes hoy?'}</label>
-        <input id="adj" type="text" inputMode="numeric" value={value} onChange={(e) => setValue(formatAmountInput(e.target.value))} className={`${s.input} font-bold`} autoFocus />
+        <input id="adj" type="text" inputMode="decimal" value={value} onChange={(e) => setValue(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus />
         <p className={s.hint}>
-          FLOWI calculaba {formatCurrency(Math.abs(Math.round(current)), currency)}.
+          FLOWI calculaba {formatCurrency(Math.abs(current), currency)}.
           {diff !== 0 && <> La diferencia ({diff > 0 ? '+' : '−'}{formatCurrency(Math.abs(Math.round(diff)), currency)}) suele ser algo que no registraste, como un cobro del banco o unos intereses.</>}
         </p>
       </div>
@@ -236,7 +250,7 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const value = parseAmountInput(amount);
+  const value = parseMoneyInput(amount);
   const canSave = !!from && !!to && from !== to && value > 0 && !saving;
   const toAcc = active.find(a => a.id === to);
 
@@ -274,7 +288,7 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="tr-amount" className={s.label}>Monto</label>
-          <input id="tr-amount" type="text" inputMode="numeric" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatAmountInput(e.target.value))} className={`${s.input} font-bold`} />
+          <input id="tr-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
         </div>
         <div>
           <label htmlFor="tr-date" className={s.label}>Fecha</label>

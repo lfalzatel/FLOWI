@@ -105,6 +105,9 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         {today.pendingCommitments > 0 && (
           <Row label="Compromisos por pagar" hint="Pagos fijos que aún faltan este mes (los reservo primero)" value={f(today.pendingCommitments)} sign="−" />
         )}
+        {today.savedMonth > 0 && (
+          <Row label="Ahorrado en CDT este mes" hint="Plata que salió de tus cuentas hacia un CDT: no es gasto, pero ya no está disponible" value={f(today.savedMonth)} sign="−" />
+        )}
         <Row label="Libre ahora" value={f(Math.max(0, freeNow))} strong />
         {today.tomorrowAllowance !== null && (
           <>

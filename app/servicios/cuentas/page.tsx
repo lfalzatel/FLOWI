@@ -27,7 +27,14 @@ export default function CuentasPage() {
   const { investments } = useInvestments();
   const { debts } = useDebts();
   const currency = profile?.currency || 'COP';
-  const fmt = (n: number) => formatCurrency(Math.round(n), currency);
+  // Las cuentas pueden tener centavos (como en la app del banco): se muestran solo si los hay
+  const fmt = (n: number) => {
+    const v = Math.round(n * 100) / 100;
+    const cents = Math.abs(v % 1) > 0.004;
+    try {
+      return new Intl.NumberFormat('es-CO', { style: 'currency', currency, minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: 2 }).format(v);
+    } catch { return formatCurrency(v, currency); }
+  };
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Account | null>(null);
@@ -41,7 +48,7 @@ export default function CuentasPage() {
     if (!authLoading && !user) router.push('/login');
   }, [authLoading, user, router]);
 
-  const states = useMemo(() => accountStates(accounts, transactions, transfers), [accounts, transactions, transfers]);
+  const states = useMemo(() => accountStates(accounts, transactions, transfers, investments), [accounts, transactions, transfers, investments]);
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
 
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';

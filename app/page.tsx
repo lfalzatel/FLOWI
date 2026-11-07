@@ -21,7 +21,7 @@ import { NextActionCard, useSkippedActions } from '@/components/dashboard/NextAc
 import { getNextActions } from '@/lib/nextAction';
 import { useGoals } from '@/hooks/useGoals';
 import { useInvestments } from '@/hooks/useInvestments';
-import { investmentStatus } from '@/lib/investments';
+import { investmentStatus, monthSavings } from '@/lib/investments';
 import { InvestmentsSummaryCard } from '@/components/dashboard/InvestmentsSummaryCard';
 import { NetWorthCard } from '@/components/dashboard/NetWorthCard';
 import { isGoalDone } from '@/lib/goals';
@@ -217,7 +217,7 @@ export default function DashboardPage() {
   const isCurrentMonthView = filterType === 'month' && filterValue === getLocalMonthString();
   const pendingCommitments = commitments.loading ? 0 : commitments.pendingTotal;
   // La cuota de hoy siempre es del mes actual, aunque se esté mirando otro mes
-  const todayBudget = getDailyBudget(transactions, profile?.budget, pendingCommitments);
+  const todayBudget = getDailyBudget(transactions, profile?.budget, pendingCommitments, new Date(), demo ? 0 : monthSavings(investments));
   const monthToCloseNow = demo ? null : monthToClose(transactions, profile?.closedMonths);
   const nextAction = getNextActions({
     transactions, pending: commitments.pending, today: todayBudget,

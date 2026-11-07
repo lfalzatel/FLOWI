@@ -3,10 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Plus, Landmark, Pencil, CalendarClock, TrendingUp, RefreshCw, CheckCircle2, Info } from 'lucide-react';
+import { ChevronLeft, Plus, Landmark, Pencil, CalendarClock, TrendingUp, RefreshCw, CheckCircle2, Info, PlusCircle } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useInvestments } from '@/hooks/useInvestments';
+import { useAccounts } from '@/hooks/useAccounts';
+import { AccountPicker } from '@/components/accounts/AccountPicker';
+import { formatMoneyInput, parseMoneyInput } from '@/components/accounts/AccountModals';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
@@ -29,6 +32,14 @@ export default function InversionesPage() {
   const [closing, setClosing] = useState<Investment | null>(null);
   const [deleting, setDeleting] = useState<Investment | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const { accounts } = useAccounts();
+  const hasAccounts = accounts.some(a => !a.archived);
+  const [closeAccount, setCloseAccount] = useState<string | null | undefined>(undefined);
+  // Abonar plata a un CDT abierto
+  const [abonando, setAbonando] = useState<Investment | null>(null);
+  const [abonoAmount, setAbonoAmount] = useState('');
+  const [abonoAccount, setAbonoAccount] = useState<string | null | undefined>(undefined);
+  const [abonoSaving, setAbonoSaving] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/login');
@@ -45,8 +56,12 @@ export default function InversionesPage() {
   async function closeInvestment(inv: Investment, registerIncome: boolean) {
     if (!inv.id || !user) return;
     const s = investmentStatus(inv);
+    const at = parseDay(inv.maturityDate) > new Date() ? new Date() : parseDay(inv.maturityDate);
+    const acc = closeAccount ?? null;
     await updateInvestment(inv.id, {
       status: 'cerrado', closedAt: new Date().toISOString(),
+      // El capital (y los intereses, si no se registran como ingreso) vuelven a la cuenta
+      payouts: [...(inv.payouts || []), { at: at.toISOString(), amount: inv.amount + (registerIncome ? 0 : s.netInterest), accountId: acc, kind: 'pago' }],
       history: [...(inv.history || []), {
         startDate: inv.startDate, maturityDate: inv.maturityDate, amount: inv.amount,
         rateEA: inv.rateEA, interest: s.interest, outcome: 'pagado',
@@ -55,10 +70,31 @@ export default function InversionesPage() {
     if (registerIncome && s.netInterest > 0) {
       await addExpense({
         userId: user.uid, type: 'ingreso', amount: s.netInterest, category: 'Rendimientos / intereses',
-        description: `Intereses CDT ${inv.bank}`, date: parseDay(inv.maturityDate) > new Date() ? new Date() : parseDay(inv.maturityDate), isFixed: false,
+        description: `Intereses CDT ${inv.bank}`, date: at, isFixed: false,
+        ...(acc ? { accountId: acc } : {}),
       });
     }
     setClosing(null);
+    setCloseAccount(undefined);
+  }
+
+  async function saveAbono() {
+    const inv = abonando;
+    const value = parseMoneyInput(abonoAmount);
+    if (!inv?.id || value <= 0 || abonoSaving || (hasAccounts && abonoAccount === undefined)) return;
+    setAbonoSaving(true);
+    try {
+      await updateInvestment(inv.id, {
+        amount: inv.amount + value,
+        bankInterest: null, // con más capital, los intereses que dio el banco ya no aplican: se estiman
+        fundings: [...(inv.fundings || []), { at: new Date().toISOString(), amount: value, accountId: abonoAccount ?? null, kind: 'abono' }],
+      });
+      setAbonando(null);
+      setAbonoAmount('');
+      setAbonoAccount(undefined);
+    } finally {
+      setAbonoSaving(false);
+    }
   }
 
   return (
@@ -201,12 +237,20 @@ export default function InversionesPage() {
                           <CheckCircle2 className="w-4 h-4" /> Me lo pagaron
                         </button>
                       </div>
-                    ) : soon ? (
-                      <p className="mt-3 flex items-start gap-1.5 text-[12px] text-amber-500">
-                        <CalendarClock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                        <span>Antes de que se renueve, compara la tasa con otros bancos.</span>
-                      </p>
-                    ) : null}
+                    ) : (
+                      <>
+                        {soon && (
+                          <p className="mt-3 flex items-start gap-1.5 text-[12px] text-amber-500">
+                            <CalendarClock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                            <span>Antes de que se renueve, compara la tasa con otros bancos.</span>
+                          </p>
+                        )}
+                        <button onClick={() => { setAbonando(inv); setAbonoAmount(''); setAbonoAccount(undefined); }}
+                                className={`mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold border transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase' : 'rounded-xl border-glass-border text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                          <PlusCircle className="w-4 h-4" /> Abonar a este CDT
+                        </button>
+                      </>
+                    )}
                   </article>
                 );
               })}
@@ -258,14 +302,49 @@ export default function InversionesPage() {
             <p className="text-sm text-text-secondary mb-5">
               ¿Registro los {fmt(investmentStatus(closing).netInterest)} de intereses como un ingreso? El capital ({fmt(closing.amount)}) era tuyo, así que no lo cuento como ingreso.
             </p>
+            {hasAccounts && (
+              <div className="mb-4">
+                <AccountPicker accounts={accounts} value={closeAccount} onChange={setCloseAccount}
+                               label="¿A qué cuenta llegó la plata?" noneLabel="A ninguna de mis cuentas" />
+              </div>
+            )}
             <div className="space-y-2">
-              <button onClick={() => closeInvestment(closing, true)} className={`w-full py-3 font-bold ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white'}`}>
+              <button onClick={() => closeInvestment(closing, true)} disabled={hasAccounts && closeAccount === undefined} className={`w-full py-3 font-bold disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white'}`}>
                 Sí, registrar intereses
               </button>
-              <button onClick={() => closeInvestment(closing, false)} className={`w-full py-3 text-sm font-semibold border ${isTechTheme ? 'rounded-none border-accent/30 text-accent' : 'rounded-xl border-glass-border text-text-secondary'}`}>
+              <button onClick={() => closeInvestment(closing, false)} disabled={hasAccounts && closeAccount === undefined} className={`w-full py-3 text-sm font-semibold border ${isTechTheme ? 'rounded-none border-accent/30 text-accent' : 'rounded-xl border-glass-border text-text-secondary'}`}>
                 Solo marcarlo como terminado
               </button>
               <button onClick={() => setClosing(null)} className="w-full py-2 text-xs text-text-muted">Cancelar</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {abonando && typeof document !== 'undefined' && createPortal(
+        <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
+          <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setAbonando(null)} aria-hidden="true" />
+          <div className={`w-full max-w-sm relative z-10 animate-fade-in-up glass-dropdown p-6 space-y-4 ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}>
+            <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>Abonar al CDT {abonando.bank}</h2>
+            <div>
+              <label htmlFor="abono-amount" className="text-xs text-text-muted mb-1.5 block">¿Cuánto le agregas?</label>
+              <input id="abono-amount" type="text" inputMode="decimal" placeholder="$ 0" value={abonoAmount} autoFocus
+                     onChange={(e) => setAbonoAmount(formatMoneyInput(e.target.value))}
+                     className={`w-full bg-glass border px-4 py-3 font-bold text-text-primary focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
+              {parseMoneyInput(abonoAmount) > 0 && (
+                <p className="text-[11px] text-text-muted mt-1.5">El CDT queda en {fmt(abonando.amount + parseMoneyInput(abonoAmount))}. Los intereses se recalculan con la tasa.</p>
+              )}
+            </div>
+            <AccountPicker accounts={accounts} value={abonoAccount} onChange={setAbonoAccount}
+                           label="¿De qué cuenta sale?" noneLabel="No descontar"
+                           hint="Lo descuento del saldo de la cuenta y de lo que puedes gastar este mes (es ahorro, no gasto)." />
+            <div className="space-y-2">
+              <button onClick={saveAbono} disabled={parseMoneyInput(abonoAmount) <= 0 || abonoSaving || (hasAccounts && abonoAccount === undefined)}
+                      className={`w-full py-3 font-bold disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white'}`}>
+                {abonoSaving ? 'Guardando...' : 'Abonar'}
+              </button>
+              <button onClick={() => setAbonando(null)} className="w-full py-2 text-xs text-text-muted">Cancelar</button>
             </div>
           </div>
         </div>,

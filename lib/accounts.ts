@@ -1,4 +1,4 @@
-import { Account, AccountKind, Debt, Investment, Transaction, Transfer, calculateDebtInterest } from './firestore';
+import { Account, AccountKind, Debt, Investment, InvestmentFunding, Transaction, Transfer, calculateDebtInterest } from './firestore';
 import { investmentStatus } from './investments';
 import { normalizeText } from './categories';
 
@@ -24,6 +24,7 @@ function toDate(v: any): Date {
 export type Movement =
   | { kind: 'tx'; date: Date; amount: number; label: string; tx: Transaction }
   | { kind: 'transfer'; date: Date; amount: number; label: string; transfer: Transfer }
+  | { kind: 'cdt'; date: Date; amount: number; label: string }
   | { kind: 'base'; date: Date; amount: number; label: string };
 
 export interface AccountState {
@@ -35,6 +36,7 @@ export interface AccountState {
 // ¿A qué cuenta va un movimiento? (id o null si no hay cuentas que lo reciban)
 export function accountFor(tx: Transaction, accounts: Account[]): string | null {
   const active = accounts.filter(a => !a.archived && a.id);
+  if (tx.accountId && active.some(a => a.id === tx.accountId)) return tx.accountId;
   const pm = tx.paymentMethod ? normalizeText(tx.paymentMethod) : '';
   if (pm) {
     const hit = active.find(a => a.methods.some(m => normalizeText(m) === pm));
@@ -44,7 +46,7 @@ export function accountFor(tx: Transaction, accounts: Account[]): string | null 
   return main ? main.id! : null;
 }
 
-export function accountStates(accounts: Account[], transactions: Transaction[], transfers: Transfer[]): AccountState[] {
+export function accountStates(accounts: Account[], transactions: Transaction[], transfers: Transfer[], investments: Investment[] = []): AccountState[] {
   const states = new Map<string, AccountState>();
   for (const a of accounts) {
     if (!a.id || a.archived) continue;
@@ -76,6 +78,21 @@ export function accountStates(accounts: Account[], transactions: Transaction[], 
       to.movements.push({ kind: 'transfer', date, amount: tr.amount, label: `Desde ${from?.account.name || 'otra cuenta'}`, transfer: tr });
     }
   }
+  // CDT: lo que salió de una cuenta para abrirlo o abonarle, y lo que volvió al pagarlo
+  const cdtMove = (f: InvestmentFunding, sign: 1 | -1, inv: Investment) => {
+    const st = f.accountId ? states.get(f.accountId) : undefined;
+    if (!st) return;
+    const date = new Date(f.at);
+    if (date.getTime() < new Date(st.account.baseAt).getTime()) return;
+    st.balance += sign * f.amount;
+    const what = f.kind === 'pago' ? 'Te pagaron el' : f.kind === 'abono' ? 'Abono al' : f.kind === 'renovacion' ? 'Renovación del' : 'Apertura del';
+    st.movements.push({ kind: 'cdt', date, amount: sign * f.amount, label: `${what} CDT ${inv.bank}` });
+  };
+  for (const inv of investments) {
+    for (const f of inv.fundings || []) cdtMove(f, -1, inv);
+    for (const f of inv.payouts || []) cdtMove(f, 1, inv);
+  }
+
   const order: AccountKind[] = ['banco', 'billetera', 'efectivo', 'credito'];
   return Array.from(states.values())
     .map(s => ({ ...s, movements: s.movements.sort((a, b) => b.date.getTime() - a.date.getTime()) }))

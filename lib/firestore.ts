@@ -13,6 +13,7 @@ export interface Transaction {
   isFixed?: boolean;
   merchant?: string | null;
   paymentMethod?: string | null;
+  accountId?: string | null; // cuenta exacta (gana sobre el medio de pago); ver lib/accounts.ts
 }
 
 export interface CustomCategory {
@@ -537,7 +538,19 @@ export interface Investment {
   status: 'activo' | 'cerrado';
   closedAt?: string | null;
   history?: InvestmentPeriod[];
+  // Plata que entró al CDT desde una cuenta (apertura, abono o renovación con más capital).
+  // accountId null = ya estaba ahorrada: no se descuenta de ninguna cuenta.
+  fundings?: InvestmentFunding[];
+  // Plata que volvió a una cuenta (al pagarlo o al retirar parte al renovar)
+  payouts?: InvestmentFunding[];
   createdAt?: Timestamp | Date;
+}
+
+export interface InvestmentFunding {
+  at: string;               // ISO
+  amount: number;
+  accountId: string | null;
+  kind: 'apertura' | 'abono' | 'renovacion' | 'pago';
 }
 
 export async function addInvestment(inv: Omit<Investment, 'id' | 'createdAt'>): Promise<string> {

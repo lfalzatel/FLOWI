@@ -11,6 +11,7 @@ export interface DailyBudget {
   baseIsBudget: boolean;
   spentMonth: number;     // todos los gastos del mes (igual que la tarjeta Gastos)
   pendingCommitments: number;
+  savedMonth: number;     // plata del mes que se fue a CDT (ahorro, no gasto)
   freeAtStartOfDay: number; // lo libre para repartir desde hoy hasta fin de mes
   todayAllowance: number; // cuota para hoy al empezar el día
   spentToday: number;     // gastos variables de hoy
@@ -27,7 +28,7 @@ function toDate(v: any): Date {
 
 const isFixedTx = (t: Transaction) => t.isFixed !== undefined ? t.isFixed : isFixedExpenseCategory(t.category);
 
-export function getDailyBudget(transactions: Transaction[], budget = 0, pendingCommitments = 0, now = new Date()): DailyBudget {
+export function getDailyBudget(transactions: Transaction[], budget = 0, pendingCommitments = 0, now = new Date(), savedMonth = 0): DailyBudget {
   const month = getLocalMonthString(now);
   const today = getLocalDateString(now);
   let ingresos = 0, gastos = 0, spentToday = 0;
@@ -44,7 +45,7 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
   const base = ingresos > 0 ? ingresos : budget;
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
-  const freeAtStartOfDay = base - gastos - pendingCommitments + spentToday;
+  const freeAtStartOfDay = base - gastos - pendingCommitments - savedMonth + spentToday;
   const todayAllowance = Math.max(0, freeAtStartOfDay / daysLeft);
 
   return {
@@ -53,6 +54,7 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
     baseIsBudget: ingresos <= 0 && budget > 0,
     spentMonth: gastos,
     pendingCommitments,
+    savedMonth,
     freeAtStartOfDay,
     todayAllowance,
     spentToday,

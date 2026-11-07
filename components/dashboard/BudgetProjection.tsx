@@ -11,6 +11,8 @@ import { CategoryIcon } from '@/components/CategoryIcon';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { getDailyBudget } from '@/lib/dailyBudget';
+import { useInvestments } from '@/hooks/useInvestments';
+import { monthSavings } from '@/lib/investments';
 
 interface Props {
   filterType: string;
@@ -21,6 +23,7 @@ interface Props {
 }
 
 export function BudgetProjection({ filterType, filterValue, transactions, onRefresh, pendingCommitments = 0 }: Props) {
+  const { investments } = useInvestments();
   const { theme } = useTheme();
   const { profile } = useAuth();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -84,7 +87,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   // La cuota diaria es la misma "cuota de hoy" de la tarjeta "Hoy puedes gastar": reserva primero
   // los compromisos por pagar y no descuenta lo gastado hoy (eso sale de la cuota de hoy)
   const compromisos = isCurrentMonth ? pendingCommitments : 0;
-  const hoy = isCurrentMonth ? getDailyBudget(monthTransactions, profile?.budget || 0, compromisos) : null;
+  const hoy = isCurrentMonth ? getDailyBudget(monthTransactions, profile?.budget || 0, compromisos, now, monthSavings(investments)) : null;
   const cuotaDiaria = hoy ? hoy.todayAllowance : 0;
 
   const promedioGastoDiarioActual = daysPassed > 0 ? (gastosVariables / daysPassed) : 0;

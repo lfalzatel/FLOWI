@@ -110,6 +110,21 @@ export function sortInvestments(list: Investment[]): Investment[] {
   });
 }
 
+// Plata del mes que se fue a CDT desde una cuenta: ya no está disponible para gastar,
+// pero tampoco es un gasto (cuenta como ahorro)
+export function monthSavings(investments: Investment[], now = new Date()): number {
+  const y = now.getFullYear(), m = now.getMonth();
+  let total = 0;
+  for (const inv of investments) {
+    for (const f of inv.fundings || []) {
+      if (!f.accountId) continue;
+      const d = new Date(f.at);
+      if (d.getFullYear() === y && d.getMonth() === m) total += f.amount;
+    }
+  }
+  return total;
+}
+
 export function formatDay(s: string): string {
   return parseDay(s).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
 }

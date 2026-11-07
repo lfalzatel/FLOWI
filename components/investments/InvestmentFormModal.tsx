@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 import { X, Trash2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
+import { useAccounts } from '@/hooks/useAccounts';
+import { AccountPicker } from '@/components/accounts/AccountPicker';
 import { Investment, addExpense, addInvestment, updateInvestment } from '@/lib/firestore';
 import { formatAmountInput, parseAmountInput } from '@/components/goals/GoalFormModal';
 import { formatCurrency } from '@/lib/format';
@@ -53,13 +55,28 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
   const [note, setNote] = useState(renewing ? '' : base?.note || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // ¿De qué cuenta sale la plata? (undefined = aún no elige; null = ya estaba ahorrada, no descontar)
+  const { accounts } = useAccounts();
+  const hasAccounts = accounts.some(a => !a.archived);
+  const [moneyAccount, setMoneyAccount] = useState<string | null | undefined>(undefined);
 
   const fmt = (n: number) => formatCurrency(n, currency);
   const amountN = parseAmountInput(amount);
   const rateN = parseRate(rate);
   const days = start && maturity ? days360(parseDay(start), parseDay(maturity)) : 0;
   const preview = estimateInterest(amountN, rateN, days);
-  const canSave = bank.trim().length > 0 && amountN > 0 && rateN > 0 && days > 0 && !loading;
+  // Al renovar: lo que se agrega (o se retira) frente a lo que ya estaba en el CDT
+  const renewBase = renewFrom && prev ? renewFrom.amount + (interestMode === 'suma' ? prev.netInterest : 0) : 0;
+  const extra = renewing ? amountN - renewBase : 0;
+  const needsAccount = hasAccounts && (
+    (!renewing && !investment) || (renewing && (Math.abs(extra) >= 1 || (interestMode === 'pagado' && (prev?.netInterest || 0) > 0)))
+  );
+  const canSave = bank.trim().length > 0 && amountN > 0 && rateN > 0 && days > 0 && !loading && (!needsAccount || moneyAccount !== undefined);
+  const movedAt = () => {
+    const today = dayKey(new Date());
+    const d = renewing ? renewFrom!.maturityDate : start;
+    return d === today ? new Date().toISOString() : new Date(`${d}T12:00:00`).toISOString();
+  };
 
   const setAmountFromMode = (mode: 'suma' | 'pagado') => {
     setInterestMode(mode);
@@ -81,8 +98,12 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
     };
     try {
       if (renewFrom?.id && prev) {
+        const acc = moneyAccount ?? null;
+        const at = movedAt();
         await updateInvestment(renewFrom.id, {
           ...data, status: 'activo', closedAt: null,
+          fundings: [...(renewFrom.fundings || []), ...(extra >= 1 ? [{ at, amount: extra, accountId: acc, kind: 'renovacion' as const }] : [])],
+          payouts: [...(renewFrom.payouts || []), ...(extra <= -1 ? [{ at, amount: -extra, accountId: acc, kind: 'pago' as const }] : [])],
           history: [...(renewFrom.history || []), {
             startDate: renewFrom.startDate, maturityDate: renewFrom.maturityDate, amount: renewFrom.amount,
             rateEA: renewFrom.rateEA, interest: prev.interest, outcome: 'renovado',
@@ -92,12 +113,17 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
           await addExpense({
             userId: user.uid, type: 'ingreso', amount: prev.netInterest, category: 'Rendimientos / intereses',
             description: `Intereses CDT ${renewFrom.bank}`, date: parseDay(renewFrom.maturityDate), isFixed: false,
+            ...(acc ? { accountId: acc } : {}),
           });
         }
       } else if (investment?.id) {
         await updateInvestment(investment.id, data);
       } else {
-        await addInvestment({ userId: user.uid, kind: 'cdt', status: 'activo', closedAt: null, history: [], ...data });
+        await addInvestment({
+          userId: user.uid, kind: 'cdt', status: 'activo', closedAt: null, history: [], ...data,
+          fundings: [{ at: movedAt(), amount: amountN, accountId: moneyAccount ?? null, kind: 'apertura' }],
+          payouts: [],
+        });
       }
       onClose();
     } catch (err: any) {
@@ -196,6 +222,21 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
               <div className={`p-3 text-xs text-text-secondary bg-accent/5 border border-accent/20 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
                 {days} días a {rate}% E.A.: unos <b className="text-text-primary">{fmt(preview)}</b> de intereses antes de retención.
               </div>
+            )}
+
+            {needsAccount && (
+              <AccountPicker
+                accounts={accounts}
+                value={moneyAccount}
+                onChange={setMoneyAccount}
+                label={renewing
+                  ? extra >= 1 ? `¿De qué cuenta sale lo que agregas (${fmt(extra)})?`
+                    : extra <= -1 ? `¿A qué cuenta llega lo que retiras (${fmt(-extra)})?`
+                    : '¿A qué cuenta te pagaron los intereses?'
+                  : '¿De dónde sale la plata?'}
+                noneLabel={renewing ? 'No moverla de mis cuentas' : 'Ya la tenía ahorrada'}
+                hint={renewing ? undefined : 'Si sale de una cuenta, la descuento de su saldo y de lo que puedes gastar este mes (cuenta como ahorro, no como gasto).'}
+              />
             )}
 
             <div>
