@@ -7,23 +7,49 @@ import {
 
 export type BudgetPillar = 'necesidades' | 'deseos' | 'ahorro';
 
-// Pilar 50/30/20 y peso sobre el presupuesto global de cada grupo (los pesos suman 1)
+// Pilar 50/30/20 principal y peso sobre el presupuesto global de cada grupo (los pesos suman 1:
+// necesidades 0,50 · deseos 0,30 · ahorro 0,20). Algunas subcategorías tienen un pilar distinto al
+// de su grupo (ver SUBCATEGORY_PILLAR).
 export const GROUP_BUDGET_CONFIG: Record<string, { icon: string; pillar: BudgetPillar; weight: number }> = {
   'Hogar y servicios': { icon: '🏠', pillar: 'necesidades', weight: 0.20 },
-  'Comida': { icon: '🍽️', pillar: 'necesidades', weight: 0.14 },
+  'Mercado': { icon: '🛒', pillar: 'necesidades', weight: 0.10 },
   'Transporte': { icon: '🚌', pillar: 'necesidades', weight: 0.06 },
   'Salud y cuidado': { icon: '🏥', pillar: 'necesidades', weight: 0.04 },
+  'Obligaciones': { icon: '🧾', pillar: 'necesidades', weight: 0.04 },
   'Educación': { icon: '📚', pillar: 'necesidades', weight: 0.03 },
   'Familia y mascotas': { icon: '👨‍👩‍👧', pillar: 'necesidades', weight: 0.03 },
-  'Compras': { icon: '🛍️', pillar: 'deseos', weight: 0.07 },
-  'Ocio y viajes': { icon: '🎭', pillar: 'deseos', weight: 0.09 },
+  'Comer fuera': { icon: '🍽️', pillar: 'deseos', weight: 0.06 },
+  'Ocio y viajes': { icon: '🎭', pillar: 'deseos', weight: 0.07 },
+  'Compras': { icon: '🛍️', pillar: 'deseos', weight: 0.05 },
   'Suscripciones': { icon: '📺', pillar: 'deseos', weight: 0.03 },
-  'Deporte': { icon: '⚽', pillar: 'deseos', weight: 0.03 },
-  'Negocio': { icon: '💼', pillar: 'deseos', weight: 0.03 },
+  'Deporte': { icon: '⚽', pillar: 'deseos', weight: 0.02 },
+  'Negocio': { icon: '💼', pillar: 'deseos', weight: 0.02 },
   'Otros': { icon: '📌', pillar: 'deseos', weight: 0.02 },
   [CUSTOM_GROUP]: { icon: '⭐', pillar: 'deseos', weight: 0.03 },
-  'Finanzas': { icon: '🏦', pillar: 'ahorro', weight: 0.20 },
+  'Ahorro e inversión': { icon: '🐷', pillar: 'ahorro', weight: 0.20 },
 };
+
+// Subcategorías cuyo pilar no es el de su grupo (regla 50/30/20: necesidades = lo que hay que
+// pagar para vivir y trabajar, incluidas las cuotas mínimas de deudas; deseos = estilo de vida)
+const SUBCATEGORY_PILLAR: Record<string, BudgetPillar> = {
+  'corrientazo / almuerzo': 'necesidades', // almuerzo de trabajo
+  'decoracion': 'deseos',
+  'remodelacion': 'deseos',
+  'lavadero': 'deseos',
+  'unas': 'deseos',
+  'belleza': 'deseos',
+  'bienestar / spa': 'deseos',
+  'cumpleanos': 'deseos',
+  'navidad / novenas': 'deseos',
+  'fechas especiales': 'deseos',
+  'tramites / notaria': 'necesidades',
+  'lavanderia': 'necesidades',
+};
+
+// Pilar 50/30/20 de una subcategoría ya resuelta (label canónico y grupo)
+export function pillarOf(label: string, group: string): BudgetPillar {
+  return SUBCATEGORY_PILLAR[normalizeText(label)] || GROUP_BUDGET_CONFIG[group]?.pillar || 'deseos';
+}
 
 export const PILLAR_STYLES: Record<BudgetPillar, { rule: string; color: string; bg: string }> = {
   necesidades: { rule: '50% Necesidades', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
@@ -39,11 +65,13 @@ const LEGACY_GROUPS: Record<string, string> = {
   'medico / salud': 'Salud y cuidado',
   'ropa y calzado': 'Compras',
   'diezmo': 'Otros',
-  'bbva': 'Finanzas',
-  'bancolombia': 'Finanzas',
-  'nequi': 'Finanzas',
-  'daviplata': 'Finanzas',
-  'davivienda': 'Finanzas',
+  'bbva': 'Obligaciones',
+  'bancolombia': 'Obligaciones',
+  'nequi': 'Obligaciones',
+  'daviplata': 'Obligaciones',
+  'davivienda': 'Obligaciones',
+  'comida': 'Mercado',
+  'finanzas': 'Obligaciones',
 };
 
 const groupByLabel = new Map<string, { label: string; group: string }>();
@@ -51,11 +79,14 @@ EXPENSE_CATEGORY_DEFS.forEach(c => groupByLabel.set(normalizeText(c.label), { la
 
 // Último recurso para nombres libres que no están en el catálogo
 function getGroupByKeywords(text: string): string {
-  if (/mercado|restaurante|almuerzo|comida|\bcafe|panader|carne|fruta|verdura|licor|cerveza|domicilio|\bpan\b|empanada/.test(text)) return 'Comida';
+  if (/licor|cerveza|\bbar\b|bares|trago|guaro|aguardiente/.test(text)) return 'Ocio y viajes';
+  if (/restaurante|almuerzo|corrientazo|\bcafe|domicilio|empanada|hamburgues|pizza|perro|antojo|helado/.test(text)) return 'Comer fuera';
+  if (/mercado|comida|panader|carne|fruta|verdura|\bpan\b|tienda|supermercado|huevo|leche/.test(text)) return 'Mercado';
   if (/arriendo|administracion|\bluz\b|\bagua\b|\bgas\b|internet|celular|telefono|hogar|aseo|energia|claro|movistar|\btigo\b/.test(text)) return 'Hogar y servicios';
   if (/transporte|taxi|\bbus\b|gasolina|parqueadero|peaje|soat|moto|carro|vehiculo/.test(text)) return 'Transporte';
   if (/salud|medic|farmacia|drogueria|doctor|odontolog|\beps\b|belleza|peluquer|barber/.test(text)) return 'Salud y cuidado';
-  if (/banco|tarjeta|credito|ahorro|inversion|prestamo|cuota|impuesto|seguro/.test(text)) return 'Finanzas';
+  if (/ahorro|inversion|cdt|acciones|natillera|pension voluntaria/.test(text)) return 'Ahorro e inversión';
+  if (/banco|tarjeta|credito|prestamo|cuota|impuesto|seguro|deuda|interes/.test(text)) return 'Obligaciones';
   if (/netflix|spotify|youtube|suscripcion|\bapps?\b/.test(text)) return 'Suscripciones';
   if (/deporte|\bgym\b|gimnasio|futbol|ciclismo|\bbici|running/.test(text)) return 'Deporte';
   if (/ropa|calzado|zapato|tecnologia|regalo/.test(text)) return 'Compras';
@@ -103,7 +134,7 @@ export function createCategoryResolver(userCategories: { label: string; group?: 
 
     // Una categoría de ingreso registrada como gasto (ej. "Cesantías")
     const income = INCOME_CATEGORY_DEFS.find(c => normalizeText(c.label) === key);
-    if (income) return { label: income.label, group: 'Finanzas' };
+    if (income) return { label: income.label, group: 'Ahorro e inversión' };
 
     const label = rawLabel.trim();
     return { label, group: LEGACY_GROUPS[key] || getGroupByKeywords(key) };

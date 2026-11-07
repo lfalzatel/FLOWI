@@ -25,9 +25,13 @@ export interface PaymentMethodDef {
   color: string;
 }
 
+// Grupos de gasto. "Mercado" (comida en casa) y "Comer fuera" van separados, y las finanzas se
+// dividen en obligaciones (lo que hay que pagar sí o sí) y ahorro e inversión, como en la regla
+// 50/30/20 de Elizabeth Warren. El pilar de cada subcategoría está en lib/categoryGroups.ts.
 export const EXPENSE_GROUPS = [
-  'Comida', 'Hogar y servicios', 'Transporte', 'Salud y cuidado', 'Compras', 'Suscripciones',
-  'Ocio y viajes', 'Familia y mascotas', 'Educación', 'Finanzas', 'Deporte', 'Negocio', 'Otros',
+  'Mercado', 'Comer fuera', 'Hogar y servicios', 'Transporte', 'Salud y cuidado', 'Obligaciones',
+  'Familia y mascotas', 'Educación', 'Compras', 'Suscripciones', 'Ocio y viajes', 'Deporte',
+  'Ahorro e inversión', 'Negocio', 'Otros',
 ];
 
 export const INCOME_GROUPS = ['Trabajo', 'Negocio', 'Rentas e inversiones', 'Otros ingresos'];
@@ -41,18 +45,19 @@ const i = (group: string, items: [string, string, string][]): CategoryDef[] =>
   items.map(([label, icon, color]) => ({ label, icon, color, group, type: 'ingreso' }));
 
 export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
-  ...g('Comida', [
+  ...g('Mercado', [
     ['Mercado', '🛒', '#10B981'],
-    ['Restaurantes', '🍽️', '#FF5B5B'],
-    ['Domicilios', '🛵', '#F97316'],
-    ['Corrientazo / almuerzo', '🍛', '#D97706'],
-    ['Comidas rápidas', '🍔', '#EF4444'],
-    ['Café y Antojos', '☕', '#D1A153'],
-    ['Panadería', '🥐', '#D97706'],
     ['Tienda / Minimercado', '🏪', '#10B981'],
     ['Verduras y Frutas', '🥦', '#22C55E'],
     ['Carnicería', '🥩', '#EF4444'],
-    ['Licores y Bares', '🍺', '#F5A623'],
+    ['Panadería', '🥐', '#D97706'],
+  ]),
+  ...g('Comer fuera', [
+    ['Restaurantes', '🍽️', '#FF5B5B'],
+    ['Corrientazo / almuerzo', '🍛', '#D97706'],
+    ['Domicilios', '🛵', '#F97316'],
+    ['Comidas rápidas', '🍔', '#EF4444'],
+    ['Café y Antojos', '☕', '#D1A153'],
   ]),
   ...g('Hogar y servicios', [
     ['Arriendo', '🏢', '#F59E0B'],
@@ -121,6 +126,7 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
   ...g('Ocio y viajes', [
     ['Entretenimiento', '🎭', '#A855F7'],
     ['Cine', 'cine', '#7F1D1D'],
+    ['Licores y Bares', '🍺', '#F5A623'],
     ['Rumba', '🪩', '#D946EF'],
     ['Eventos', '🎫', '#8B5CF6'],
     ['Viajes', '✈️', '#06B6D4'],
@@ -151,14 +157,17 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
     ['Libros', '📖', '#D97706'],
     ['Útiles', '✏️', '#F5A623'],
   ]),
-  ...g('Finanzas', [
-    ['Tarjeta de crédito', '💳', '#F59E0B'],
+  ...g('Obligaciones', [
     ['Cuota de crédito', '🏦', '#F59E0B'],
+    ['Tarjeta de crédito', '💳', '#F59E0B'],
+    ['Deudas', '🧾', '#F97316'],
+    ['Intereses', '📉', '#EF4444'],
     ['Cuota de manejo', '🧾', '#64748B'],
     ['4x1000', '🧾', '#64748B'],
-    ['Intereses', '📉', '#EF4444'],
     ['Impuestos', '🏛️', '#EF4444'],
     ['Seguros', '🛡️', '#3B82F6'],
+  ]),
+  ...g('Ahorro e inversión', [
     ['Ahorro', '🐷', '#F472B6'],
     ['Natillera', '🫙', '#10B981'],
     ['Fondo de empleados', '🤝', '#0EA5E9'],

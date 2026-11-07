@@ -18,7 +18,8 @@ import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { CategoryBudgets } from '@/components/dashboard/CategoryBudgets';
 import { useCategories } from '@/hooks/useCategories';
-import { createCategoryResolver } from '@/lib/categoryGroups';
+import { BudgetPillar, createCategoryResolver, pillarOf } from '@/lib/categoryGroups';
+import { useInvestments } from '@/hooks/useInvestments';
 import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -98,6 +99,39 @@ export default function PresupuestosPage() {
   // Clasificación de subcategoría a su grupo del catálogo (igual que el selector y Presupuestos por Categoría)
   const { allCategories } = useCategories();
   const resolveCategory = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
+
+  // Lo gastado en el periodo según la regla 50/30/20 (cada subcategoría con su pilar).
+  // Lo que se fue a CDT desde las cuentas en el periodo también cuenta como ahorro.
+  const { investments } = useInvestments();
+  const pillarSpent = useMemo(() => {
+    const totals: Record<BudgetPillar, number> = { necesidades: 0, deseos: 0, ahorro: 0 };
+    filteredTransactions.forEach(t => {
+      if (t.type !== 'gasto' || !t.category) return;
+      const r = resolveCategory(t.category);
+      totals[pillarOf(r.label, r.group)] += t.amount || 0;
+    });
+    const inPeriod = (iso: string) => {
+      const d = new Date(iso);
+      if (filterType === 'all') return true;
+      if (filterType === 'month') return getLocalMonthString(d) === filterValue;
+      if (filterType === 'week') return getISOWeekString(d) === filterValue;
+      return getLocalDateString(d) === filterValue;
+    };
+    for (const inv of investments) for (const f of inv.fundings || []) if (f.accountId && inPeriod(f.at)) totals.ahorro += f.amount;
+    return totals;
+  }, [filteredTransactions, resolveCategory, investments, filterType, filterValue]);
+  const pillarBase = totalIncomeFiltered > 0 ? totalIncomeFiltered : globalBudget;
+  const pillarLine = (pillar: BudgetPillar, target: number, color: string) => {
+    const spent = pillarSpent[pillar];
+    const pct = pillarBase > 0 ? Math.round((spent / pillarBase) * 100) : null;
+    const over = pillar !== 'ahorro' && pillarBase > 0 && spent > pillarBase * target;
+    return (
+      <div className="pt-2 mt-2 border-t border-white/10">
+        <span className="text-[10px] text-text-muted block">{pillar === 'ahorro' ? 'Llevas ahorrado' : 'Llevas gastado'}{pct !== null ? ` (${pct}% de ${totalIncomeFiltered > 0 ? 'tus ingresos' : 'tu presupuesto'})` : ''}:</span>
+        <span className={`text-sm font-bold ${over ? 'text-red-400' : color}`}>{formatCurrency(spent, currency)}</span>
+      </div>
+    );
+  };
 
   // Datos para la Gráfica Circular de Distribución del Gasto (Categorías vs Subcategorías)
   const pieChartData = useMemo(() => {
@@ -453,7 +487,7 @@ export default function PresupuestosPage() {
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold">Esenciales</span>
               </div>
               <p className="text-[11px] text-text-muted mb-2">
-                Vivienda, mercado, servicios públicos, transporte, salud y deudas básicas.
+                Vivienda, mercado, servicios, transporte, salud, educación y cuotas de tus deudas.
               </p>
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-blue-500/20">
@@ -461,6 +495,7 @@ export default function PresupuestosPage() {
                   <span className="text-sm font-bold text-blue-400">{formatCurrency(globalBudget * 0.50, currency)}</span>
                 </div>
               )}
+              {pillarLine('necesidades', 0.5, 'text-blue-400')}
             </div>
 
             {/* Pilar 2: 30% Deseos */}
@@ -470,7 +505,7 @@ export default function PresupuestosPage() {
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">Estilo de Vida</span>
               </div>
               <p className="text-[11px] text-text-muted mb-2">
-                Restaurantes, entretenimiento, hobbies, viajes, compras y gustos personales.
+                Comer fuera, licores y rumba, entretenimiento, viajes, compras, suscripciones y gustos personales.
               </p>
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-amber-500/20">
@@ -478,6 +513,7 @@ export default function PresupuestosPage() {
                   <span className="text-sm font-bold text-amber-400">{formatCurrency(globalBudget * 0.30, currency)}</span>
                 </div>
               )}
+              {pillarLine('deseos', 0.3, 'text-amber-400')}
             </div>
 
             {/* Pilar 3: 20% Ahorro e Inversión */}
@@ -487,7 +523,7 @@ export default function PresupuestosPage() {
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">Futuro</span>
               </div>
               <p className="text-[11px] text-text-muted mb-2">
-                Fondo de emergencia (3-6 meses), inversiones, retiro y pago de capital.
+                Fondo de emergencia (3-6 meses), CDT, inversiones, pensión voluntaria y abonos extra a deudas.
               </p>
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-emerald-500/20">
@@ -495,6 +531,7 @@ export default function PresupuestosPage() {
                   <span className="text-sm font-bold text-emerald-400">{formatCurrency(globalBudget * 0.20, currency)}</span>
                 </div>
               )}
+              {pillarLine('ahorro', 0.2, 'text-emerald-400')}
             </div>
           </div>
 
