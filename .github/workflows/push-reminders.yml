@@ -1,0 +1,36 @@
+# Envía los recordatorios de FLOWI como notificaciones push cuando la app está cerrada.
+# Corre cada 30 minutos (GitHub puede atrasarlo unos minutos). Gratis: el repositorio es público,
+# Firebase Cloud Messaging no cobra y el proyecto está en el plan gratuito (Spark).
+name: Enviar recordatorios push
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+# Si una corrida se demora, la siguiente espera en vez de enviar avisos dobles
+concurrency:
+  group: push-reminders
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: push/package-lock.json
+
+      - run: npm ci
+        working-directory: push
+
+      - name: Enviar los avisos que tocan
+        run: node send-reminders.mjs
+        working-directory: push
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLOWI }}

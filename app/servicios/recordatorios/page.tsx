@@ -14,6 +14,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { deleteReminder, updateReminder, Reminder } from '@/lib/firestore';
 import { requestNotificationPermission, scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
+import { syncPushToken } from '@/lib/push';
 
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
@@ -60,6 +61,7 @@ export default function RecordatoriosPage() {
   const handleRequestPermission = async () => {
     const granted = await requestNotificationPermission();
     setPermissionGranted(granted);
+    if (granted && user) syncPushToken(user.uid);
   };
 
   const handleTestNotification = () => {

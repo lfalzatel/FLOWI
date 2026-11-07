@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
 import { useTheme } from '@/components/ThemeProvider';
 import { requestNotificationPermission } from '@/lib/notifications';
+import { removePushToken, syncPushToken } from '@/lib/push';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
@@ -55,12 +56,14 @@ export function ProfileCapsule() {
       if (granted) {
         localStorage.setItem('notifications_enabled', 'true');
         setNotificationsActive(true);
+        if (user) syncPushToken(user.uid);
       } else {
         alert('Por favor, activa los permisos de notificación en la configuración de tu navegador.');
       }
     } else {
       localStorage.setItem('notifications_enabled', 'false');
       setNotificationsActive(false);
+      if (user) removePushToken(user.uid);
     }
   };
   const ref               = useRef<HTMLDivElement>(null);
