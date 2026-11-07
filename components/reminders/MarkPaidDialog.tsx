@@ -25,13 +25,16 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
 
   async function markPaid(withExpense: boolean) {
     if (!reminder.id || saving) return;
+    // Con gasto: primero se abre el formulario y se marca como pagado solo al guardarlo.
+    // Si se marcara antes, la tarjeta que abrió este diálogo (Tu siguiente acción o
+    // Próximos compromisos) desaparece y se lleva el formulario sin dejar registrar el gasto.
+    if (withExpense) { setRegisterExpense(true); return; }
     setSaving(true);
     setError('');
     try {
       await markReminderPaid(reminder.id, dateKey(dueDate));
       setTimeout(() => askForNotifications({ context: `el próximo pago de ${reminder.title}` }), 1200);
-      if (withExpense) setRegisterExpense(true);
-      else onClose();
+      onClose();
     } catch (err) {
       console.error('Error marking reminder as paid:', err);
       setError('No se pudo marcar como pagado. Revisa tu conexión e inténtalo de nuevo.');
@@ -50,6 +53,12 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
           description: reminder.title, isFixed: true, rawText: '',
         }}
         onClose={onClose}
+        onSuccess={() => {
+          if (!reminder.id) return;
+          markReminderPaid(reminder.id, dateKey(dueDate))
+            .then(() => setTimeout(() => askForNotifications({ context: `el próximo pago de ${reminder.title}` }), 1200))
+            .catch(err => console.error('Error marking reminder as paid:', err));
+        }}
       />
     );
   }
