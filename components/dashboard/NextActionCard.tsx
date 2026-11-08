@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Sparkles, X } from 'lucide-react';
+import { ChevronRight, Sparkles, X, Heart, Lightbulb, BarChart3 } from 'lucide-react';
+import { SupportModal } from '@/components/settings/SupportModal';
 import { useTheme } from '@/components/ThemeProvider';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
@@ -40,24 +41,30 @@ interface Props {
   currency?: string;
   onSkip: () => void;
   onRefresh?: () => void;
+  onUsed?: () => void; // al tocar una idea de "Descubre FLOWI" (no vuelve a salir)
 }
 
-export function NextActionCard({ action, today, currency, onSkip, onRefresh }: Props) {
+export function NextActionCard({ action, today, currency, onSkip, onRefresh, onUsed }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [open, setOpen] = useState(false);
   const [adjusting, setAdjusting] = useState(false);
   const { accounts } = useAccounts();
   const alert = action.tone === 'alert';
+  const isTip = action.id.startsWith('tip:');
+  const isSupport = action.kind === 'support';
+  const isReview = action.id.startsWith('review:');
+  const Icon = isSupport ? Heart : isTip ? Lightbulb : isReview ? BarChart3 : Sparkles;
+  const eyebrow = isSupport ? 'Apoya a FLOWI' : isTip ? 'Descubre FLOWI' : isReview ? 'Resumen del mes' : 'Tu siguiente acción';
   const reconcileAccount = action.kind === 'reconcile' ? accounts.find(a => a.id === action.accountId) : undefined;
 
   const body = (
     <>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${alert ? 'bg-red-500/15' : 'bg-accent/20'}`}>
-        <Sparkles className={`w-5 h-5 ${alert ? 'text-red-400' : 'text-accent'}`} />
+      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${alert ? 'bg-red-500/15' : isSupport ? 'bg-pink-500/15' : 'bg-accent/20'}`}>
+        <Icon className={`w-5 h-5 ${alert ? 'text-red-400' : isSupport ? 'text-pink-400' : 'text-accent'}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Tu siguiente acción</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{eyebrow}</p>
         <p className={`text-sm font-bold ${alert ? 'text-red-400' : isTechTheme ? 'text-accent' : 'text-text-primary'} ${isTechTheme ? 'uppercase font-mono' : 'font-syne'}`}>
           {action.title}
         </p>
@@ -76,7 +83,12 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh }: P
     <>
       <div className={box} data-tour="next-action">
         {action.kind === 'link'
-          ? <Link href={action.href} className={inner}>{body}</Link>
+          ? <Link href={action.href} className={inner}
+                  onClick={(e) => {
+                    if (isTip) onUsed?.();
+                    // "Foto del recibo" abre el menú del botón + en vez de navegar
+                    if (action.href.startsWith('/?accion=')) { e.preventDefault(); window.dispatchEvent(new CustomEvent('flowi-open-quick-actions')); }
+                  }}>{body}</Link>
           : <button type="button" onClick={() => (action.kind === 'notify' ? askForNotifications({ force: true }) : setOpen(true))} className={inner}>{body}</button>}
         <button type="button" onClick={onSkip} title="Saltar por hoy" aria-label="Saltar esta sugerencia por hoy"
                 className="p-2 mr-2 text-text-muted hover:text-text-primary shrink-0">
@@ -144,6 +156,7 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh }: P
       {adjusting && reconcileAccount && action.kind === 'reconcile' && (
         <AdjustBalanceModal account={reconcileAccount} current={action.balance} currency={currency} onClose={() => setAdjusting(false)} />
       )}
+      {open && action.kind === 'support' && <SupportModal onClose={() => setOpen(false)} />}
       {open && action.kind === 'today' && today && (
         <BalanceInfoModal kind="today" today={today} currency={currency} onClose={() => setOpen(false)} />
       )}

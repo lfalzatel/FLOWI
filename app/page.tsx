@@ -17,7 +17,13 @@ import { useCommitments } from '@/hooks/useCommitments';
 import { getDailyBudget } from '@/lib/dailyBudget';
 import { MonthCloseCard } from '@/components/dashboard/MonthCloseCard';
 import { monthToClose } from '@/lib/monthClose';
-import { NextActionCard, useSkippedActions } from '@/components/dashboard/NextActionCard';
+import { useSkippedActions } from '@/components/dashboard/NextActionCard';
+import { NextActionCarousel } from '@/components/dashboard/NextActionCarousel';
+import { useAccounts } from '@/hooks/useAccounts';
+import { useReminders } from '@/hooks/useReminders';
+import { useCategories } from '@/hooks/useCategories';
+import { createCategoryResolver } from '@/lib/categoryGroups';
+import { buildMonthSummary, shiftMonth } from '@/lib/monthSummary';
 import { getNextActions } from '@/lib/nextAction';
 import { useGoals } from '@/hooks/useGoals';
 import { useInvestments } from '@/hooks/useInvestments';
@@ -25,7 +31,6 @@ import { useRealMoney } from '@/hooks/useRealMoney';
 import { investmentStatus, monthSavings } from '@/lib/investments';
 import { InvestmentsSummaryCard } from '@/components/dashboard/InvestmentsSummaryCard';
 import { NetWorthCard } from '@/components/dashboard/NetWorthCard';
-import { MonthSummaryCard } from '@/components/dashboard/MonthSummaryCard';
 import { isGoalDone } from '@/lib/goals';
 import { buildDemoData } from '@/lib/demoData';
 import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
@@ -52,6 +57,20 @@ export default function DashboardPage() {
   const { investments } = useInvestments();
   const realMoney = useRealMoney();
   const { skipped: skippedActions, skip: skipAction } = useSkippedActions();
+  const { accounts: myAccounts } = useAccounts();
+  const { reminders: myReminders } = useReminders();
+  const { allCategories: myCategories } = useCategories();
+  // Ideas de "Descubre FLOWI" ya tocadas: no vuelven a salir (en este dispositivo)
+  const [seenTips, setSeenTips] = useState<string[]>([]);
+  useEffect(() => {
+    try { setSeenTips(JSON.parse(localStorage.getItem('flowi_seen_tips') || '[]')); } catch { /* sin almacenamiento */ }
+  }, []);
+  const markTipSeen = (id: string) => {
+    if (!id.startsWith('tip:')) return;
+    const next = Array.from(new Set([...seenTips, id]));
+    setSeenTips(next);
+    try { localStorage.setItem('flowi_seen_tips', JSON.stringify(next)); } catch { /* sin almacenamiento */ }
+  };
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showTourOffer, setShowTourOffer] = useState(false);
@@ -222,7 +241,17 @@ export default function DashboardPage() {
   // La cuota de hoy siempre es del mes actual, aunque se esté mirando otro mes
   const todayBudget = getDailyBudget(transactions, profile?.budget, pendingCommitments, new Date(), demo ? 0 : monthSavings(investments), demo ? null : realMoney);
   const monthToCloseNow = demo ? null : monthToClose(transactions, profile?.closedMonths);
-  const nextAction = getNextActions({
+  // Resumen del mes pasado, del día 1 al 10
+  const lastMonth = shiftMonth(getLocalMonthString(), -1);
+  // (sin useMemo: este cálculo va después de los return tempranos de la página)
+  const monthRecap = (() => {
+    if (demo || new Date().getDate() > 10) return null;
+    const s = buildMonthSummary(transactions, lastMonth, createCategoryResolver(myCategories), (n) => formatCurrency(Math.round(n), profile?.currency));
+    if (!s.hasData) return null;
+    return { month: lastMonth, name: s.monthName, hint: s.insights[0] ? `${s.insights[0].emoji} ${s.insights[0].text}` : undefined };
+  })();
+
+  const nextActions = getNextActions({
     transactions, pending: commitments.pending, today: todayBudget,
     hasGoals: goals.some(g => !isGoalDone(g)),
     notificationsOff: !demo && notificationsOff,
@@ -235,8 +264,14 @@ export default function DashboardPage() {
       .map(s => ({ id: s.account.id!, name: s.account.name, balance: s.balance })),
     maturing: demo ? [] : investments.filter(i => i.status === 'activo' && i.id && (i.kind || 'cdt') === 'cdt')
       .map(i => ({ id: i.id!, bank: i.bank, amount: i.amount, daysLeft: investmentStatus(i).daysLeft })),
+    summary: monthRecap,
+    discover: demo ? undefined : {
+      hasAccounts: myAccounts.some(a => !a.archived), hasInvestments: investments.some(i => i.status === 'activo'),
+      reminders: myReminders.length, seenTips,
+    },
+    showSupport: !demo && (profile?.activeDays ?? 0) >= 5,
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
-  })[0];
+  });
 
   return (
     <div className="relative min-h-screen flex flex-col bg-deep">
@@ -299,9 +334,9 @@ export default function DashboardPage() {
         {!loading && !commitments.loading && !goalsLoading && (monthToCloseNow ? (
           <MonthCloseCard month={monthToCloseNow} transactions={transactions} currency={profile?.currency}
                           pendingCommitments={commitments.pendingTotal} pendingCount={commitments.pending.length} />
-        ) : nextAction && (
-          <NextActionCard key={nextAction.id} action={nextAction} today={todayBudget} currency={profile?.currency}
-                          onSkip={() => skipAction(nextAction.id)} onRefresh={refresh} />
+        ) : nextActions.length > 0 && (
+          <NextActionCarousel actions={nextActions} today={todayBudget} currency={profile?.currency}
+                              onSkip={skipAction} onRefresh={refresh} onUsed={markTipSeen} />
         ))}
 
         {/* Filter */}
@@ -338,7 +373,6 @@ export default function DashboardPage() {
 
         {/* Meta de ahorro principal */}
         <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} demoGoals={demo?.goals} /></div>
-        {!demo && <MonthSummaryCard transactions={transactions} currency={profile?.currency} />}
         {!demo && <NetWorthCard transactions={transactions} currency={profile?.currency} />}
         {!demo && <InvestmentsSummaryCard currency={profile?.currency} />}
 

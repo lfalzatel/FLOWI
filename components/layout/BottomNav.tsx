@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -51,6 +51,11 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     else setQuick(a);
   };
   const closeQuick = () => setQuick(null);
+  useEffect(() => {
+    const open = () => setShowSheet(true);
+    window.addEventListener('flowi-open-quick-actions', open);
+    return () => window.removeEventListener('flowi-open-quick-actions', open);
+  }, []);
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';

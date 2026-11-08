@@ -13,7 +13,11 @@ export type NextAction =
   | { id: string; kind: 'add'; title: string; detail: string; tone: 'normal' }
   | { id: string; kind: 'notify'; title: string; detail: string; tone: 'normal' }
   | { id: string; kind: 'link'; title: string; detail: string; href: string; tone: 'normal' }
-  | { id: string; kind: 'reconcile'; title: string; detail: string; tone: 'normal'; accountId: string; balance: number };
+  | { id: string; kind: 'reconcile'; title: string; detail: string; tone: 'normal'; accountId: string; balance: number }
+  | { id: string; kind: 'support'; title: string; detail: string; tone: 'normal' };
+
+// Ideas para descubrir funciones que la persona aún no usa (se ocultan para siempre al tocarlas)
+export const TIP_IDS = ['tip:cuentas', 'tip:inversiones', 'tip:recibo', 'tip:extracto', 'tip:recordatorios'] as const;
 
 interface Input {
   transactions: Transaction[];
@@ -24,6 +28,9 @@ interface Input {
   maturing?: { id: string; bank: string; amount: number; daysLeft: number }[]; // CDT que vencen pronto
   // Cuentas cuyo saldo no se revisa hace 15 días o más (se pregunta si cuadra con el banco)
   toReconcile?: { id: string; name: string; balance: number }[];
+  summary?: { month: string; name: string; hint?: string } | null; // resumen del mes pasado listo (días 1 a 10)
+  discover?: { hasAccounts: boolean; hasInvestments: boolean; reminders: number; seenTips: string[] };
+  showSupport?: boolean;
   formatMoney: (n: number) => string;
   skipped?: string[];
   now?: Date;
@@ -35,7 +42,7 @@ function toDate(v: any): Date {
   return new Date(v);
 }
 
-export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
+export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], summary = null, discover, showSupport = false, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
   const out: NextAction[] = [];
   const month = getLocalMonthString(now);
   const lastMonth = getLocalMonthString(new Date(now.getFullYear(), now.getMonth() - 1, 1));
@@ -143,5 +150,49 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     });
   }
 
-  return out.filter(a => !skipped.includes(a.id));
+  // 7. Resumen del mes pasado (del 1 al 10)
+  if (summary) {
+    out.push({
+      id: `review:${summary.month}`, kind: 'link', href: `/servicios/resumen?mes=${summary.month}`, tone: 'normal',
+      title: `Revisa tu resumen de ${summary.name}`,
+      detail: summary.hint || `Mira en qué se fue tu plata en ${summary.name} y cómo vas frente al mes anterior.`,
+    });
+  }
+
+  // 8. Descubrir FLOWI: funciones que aún no usa
+  if (discover) {
+    const tips: NextAction[] = [];
+    if (!discover.hasAccounts) tips.push({ id: 'tip:cuentas', kind: 'link', href: '/servicios/cuentas', tone: 'normal', title: 'Agrega tus cuentas y mira tu patrimonio', detail: 'Bancolombia, Nequi, efectivo… y tu "Dinero disponible" será la plata real que tienes.' });
+    if (!discover.hasInvestments) tips.push({ id: 'tip:inversiones', kind: 'link', href: '/servicios/inversiones', tone: 'normal', title: '¿Ahorras en Nu o tienes un CDT?', detail: 'Regístralo y te digo cuánto vas ganando con su tasa.' });
+    tips.push({ id: 'tip:recibo', kind: 'link', href: '/?accion=foto', tone: 'normal', title: 'Registra un gasto con la foto del recibo', detail: 'Toca el botón + y elige "Foto del recibo": la IA lee el total por ti.' });
+    tips.push({ id: 'tip:extracto', kind: 'link', href: '/servicios/importar', tone: 'normal', title: 'Importa el extracto de tu banco', detail: 'Sube el Excel y registro todos los movimientos de una vez.' });
+    if (discover.reminders < 3) tips.push({ id: 'tip:recordatorios', kind: 'link', href: '/servicios/recordatorios', tone: 'normal', title: 'Crea recordatorios para tus pagos fijos', detail: 'Te aviso antes de que venzan y los reservo en lo que puedes gastar.' });
+    out.push(...tips.filter(t => !discover.seenTips.includes(t.id)));
+  }
+
+  // 9. Apoyar el proyecto (siempre de último)
+  if (showSupport) {
+    out.push({ id: 'support', kind: 'support', tone: 'normal', title: '¿Te sirve FLOWI? Apoya el proyecto', detail: 'Es gratis y sin publicidad. Toca para ver cómo ayudar a que siga creciendo.' });
+  }
+
+  // Orden: lo urgente primero; luego ideas para descubrir y al final el apoyo. Máximo 6 tarjetas.
+  const rank = (a: NextAction) => {
+    const id = a.id;
+    if (id.startsWith('pay:')) return a.tone === 'alert' ? 0 : 1;
+    if (id.startsWith('cdt:')) return 2;
+    if (id === 'income') return 3;
+    if (id === 'today-over') return 4;
+    if (id.startsWith('review:')) return 5;
+    if (id.startsWith('reconcile:')) return 6;
+    if (id === 'notify') return 7;
+    if (id.startsWith('goal-')) return 8;
+    if (id === 'add-today') return 9;
+    if (id.startsWith('tip:')) return 10;
+    return 11; // apoyo
+  };
+  const visible = out.filter(a => !skipped.includes(a.id)).sort((a, b) => rank(a) - rank(b));
+  const main = visible.filter(a => !a.id.startsWith('tip:') && a.id !== 'support').slice(0, 5);
+  const tips = visible.filter(a => a.id.startsWith('tip:')).slice(0, Math.max(0, 5 - main.length));
+  const support = visible.filter(a => a.id === 'support');
+  return [...main, ...tips, ...support];
 }
