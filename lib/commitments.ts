@@ -217,7 +217,17 @@ export function getCommitments(
     }
 
     const key = r.id ? `r:${r.id}` : `t:${normalize(r.title)}`;
-    const merchantPaid = (t: Transaction) => !!r.merchant && (
+    // Varios recordatorios del mismo comercio (EPM: "Luz Manizales" y "EPM APTO 101"): un pago solo
+    // cubre el recordatorio cuyo nombre se le parece, no todos los de ese comercio
+    const sameMerchant = r.merchant
+      ? reminders.filter(o => o !== r && o.active && isPayable(o) && o.merchant && normalize(o.merchant) === normalize(r.merchant!))
+      : [];
+    const otherWords = new Set(sameMerchant.flatMap(o => tokens(o.title)));
+    const ownTitleWords = tokens(r.title).filter(w => !otherWords.has(w));
+    const isThisOne = (t: Transaction) => sameMerchant.length === 0
+      || normalize(t.description || '') === normalize(r.title)
+      || tokens(t.description).some(x => ownTitleWords.some(w => sameWord(w, x)));
+    const merchantPaid = (t: Transaction) => !!r.merchant && isThisOne(t) && (
       normalize(t.merchant || '') === normalize(r.merchant) || normalize(t.category) === normalize(r.merchant)
       || (!!group && normalize(t.category) === normalize(group.category) && normalize(t.description || '') === normalize(group.title)));
     const covered = (r.paidDates || []).includes(dateKey(due))
