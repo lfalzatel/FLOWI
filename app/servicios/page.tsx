@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
+import { Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -46,7 +46,6 @@ const SERVICES: ServiceItem[] = [
 export default function ServiciosPage() {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const [searchTerm, setSearchTerm] = useState('');
   const [showProfileModal, setShowProfileModal] = useState(false);
 
 
@@ -58,20 +57,6 @@ export default function ServiciosPage() {
           Servicios
         </h1>
 
-      {/* Buscador */}
-      <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-text-muted" />
-        </div>
-        <input
-          type="text"
-          className={`block w-full pl-10 pr-3 py-3 bg-glass border placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-accent ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent text-sm' : 'border-glass-border rounded-xl text-sm'}`}
-          placeholder="¿Qué servicio necesitas?"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
       <div className="mb-4 flex items-center gap-2">
         <GridIcon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`} />
         <h2 className={`text-lg font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
@@ -80,7 +65,7 @@ export default function ServiciosPage() {
       </div>
 
       {/* Grid de Servicios (agrupada; se puede reordenar manteniendo presionada una tarjeta) */}
-      <ServiceGrid services={SERVICES} groups={SERVICE_GROUPS} query={searchTerm} onProfile={() => setShowProfileModal(true)} />
+      <ServiceGrid services={SERVICES} groups={SERVICE_GROUPS} query="" onProfile={() => setShowProfileModal(true)} />
 
       {/* 3 Botones de prueba para ver las animaciones */}
       <div className="mt-8 space-y-2">
