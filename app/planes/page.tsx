@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { FREE_LIMITS, PLANS, PlanOption, usePlan } from '@/lib/plans';
-import { payPlan } from '@/lib/wompi';
+import { confirmPayment, payPlan } from '@/lib/wompi';
 import { formatCurrency } from '@/lib/format';
 
 const ROWS: { label: string; free: string | boolean; premium: string | boolean }[] = [
@@ -36,9 +36,15 @@ export default function PlanesPage() {
 
   // Al volver de Wompi por redirección (?id=...) se espera la activación que hace el servidor
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('id')) {
-      setMessage({ ok: true, text: 'Estamos confirmando tu pago con Wompi. Premium se activa solo en unos segundos.' });
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (id) {
+      setMessage({ ok: true, text: 'Estamos confirmando tu pago con Wompi…' });
       window.history.replaceState({}, '', '/planes');
+      confirmPayment(id).then(s => setMessage(
+        s === 'APPROVED' ? { ok: true, text: '¡Pago aprobado! Ya tienes FLOWI Premium.' }
+        : s === 'PENDING' ? { ok: true, text: 'Tu pago está en proceso. Premium se activa apenas Wompi lo apruebe.' }
+        : s ? { ok: false, text: 'El pago no se aprobó. No se te cobró nada.' }
+        : { ok: true, text: 'Estamos confirmando tu pago. Premium se activa solo apenas Wompi lo apruebe.' }));
     }
   }, []);
 

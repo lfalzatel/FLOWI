@@ -30,6 +30,17 @@ function loadWidget(): Promise<void> {
 
 export type PayResult = { status: string; id?: string } | null;
 
+/** Pide al servidor que consulte el pago en Wompi y active Premium si quedó aprobado. */
+export async function confirmPayment(id: string): Promise<string | null> {
+  try {
+    const fn = httpsCallable<{ id: string }, { status: string }>(getFunctions(app, 'us-central1'), 'wompiConfirmar');
+    return (await fn({ id })).data.status;
+  } catch (e) {
+    console.error('Confirmar pago:', e);
+    return null;
+  }
+}
+
 export async function payPlan(plan: PlanOption['id'], email?: string | null): Promise<PayResult> {
   const firmar = httpsCallable<{ plan: string }, Firma>(getFunctions(app, 'us-central1'), 'wompiFirma');
   const [{ data }] = await Promise.all([firmar({ plan }), loadWidget()]);
@@ -45,7 +56,10 @@ export async function payPlan(plan: PlanOption['id'], email?: string | null): Pr
     });
     checkout.open((result: any) => {
       const t = result?.transaction;
-      resolve(t ? { status: t.status, id: t.id } : null);
+      if (!t) return resolve(null);
+      // Confirmación directa con Wompi (por si el aviso al servidor tarda o no llega)
+      if (t.id) confirmPayment(t.id).then(s => resolve({ status: s || t.status, id: t.id }));
+      else resolve({ status: t.status, id: t.id });
     });
   });
 }

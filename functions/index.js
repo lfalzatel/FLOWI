@@ -53,6 +53,56 @@ exports.wompiFirma = onCall({ secrets: [WOMPI_INTEGRITY], region: 'us-central1' 
 // Lee "transaction.id" dentro de body.data
 const pick = (obj, path) => path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
 
+// Aplica el resultado de una transacción de Wompi a su pago y, si quedó APROBADA por el valor
+// exacto, suma los meses de Premium. Sirve para el aviso de Wompi y para la confirmación desde la app.
+async function applyTransaction(tx) {
+  const payRef = db.collection('fl_payments').doc(String(tx.reference));
+  return db.runTransaction(async (t) => {
+    const pay = await t.get(payRef);
+    if (!pay.exists) { logger.warn('Pago desconocido', { reference: tx.reference }); return null; }
+    const p = pay.data();
+    if (p.status === 'APPROVED') return p; // ya se procesó (Wompi puede repetir el aviso)
+
+    const update = { status: tx.status, wompiId: tx.id || null, updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+    if (tx.status !== 'APPROVED') { t.update(payRef, update); return { ...p, ...update }; }
+    if (Number(tx.amount_in_cents) !== p.amountInCents || tx.currency !== p.currency) {
+      logger.error('Valor del pago no coincide', { reference: tx.reference, amount: tx.amount_in_cents });
+      t.update(payRef, { ...update, status: 'AMOUNT_MISMATCH' });
+      return null;
+    }
+
+    // Premium se suma al tiempo que ya tenga (renovar antes no hace perder días)
+    const userRef = db.collection('users').doc(p.userId);
+    const user = await t.get(userRef);
+    const now = new Date();
+    const current = user.exists && user.data().premiumUntil ? user.data().premiumUntil.toDate() : null;
+    const from = current && current > now ? current : now;
+    const until = new Date(from);
+    until.setMonth(until.getMonth() + p.months);
+
+    t.set(userRef, { premiumUntil: admin.firestore.Timestamp.fromDate(until), plan: p.plan }, { merge: true });
+    t.update(payRef, { ...update, premiumUntil: admin.firestore.Timestamp.fromDate(until) });
+    return { ...p, ...update };
+  });
+}
+
+// Respaldo del aviso: al terminar el pago, la app pide confirmar la transacción. El servidor la
+// consulta directamente a Wompi (no confía en lo que diga la app) y la aplica.
+exports.wompiConfirmar = onCall({ region: 'us-central1' }, async (req) => {
+  if (!req.auth) throw new HttpsError('unauthenticated', 'Inicia sesión.');
+  const id = String(req.data?.id || '');
+  if (!/^[\w-]{5,80}$/.test(id)) throw new HttpsError('invalid-argument', 'Transacción no válida.');
+  const base = WOMPI_PUBLIC_KEY.value().startsWith('pub_test_') ? 'https://sandbox.wompi.co/v1' : 'https://production.wompi.co/v1';
+  const r = await fetch(`${base}/transactions/${encodeURIComponent(id)}`);
+  if (!r.ok) throw new HttpsError('not-found', 'Wompi no encontró la transacción.');
+  const tx = (await r.json())?.data;
+  if (!tx?.reference || !String(tx.reference).startsWith(`FLW-${req.auth.uid}-`)) {
+    throw new HttpsError('permission-denied', 'Esta transacción no es tuya.');
+  }
+  const p = await applyTransaction(tx);
+  return { status: p?.status || tx.status };
+});
+
 exports.wompiEventos = onRequest({ secrets: [WOMPI_EVENTS], region: 'us-central1' }, async (req, res) => {
   if (req.method !== 'POST') { res.status(405).send('Método no permitido'); return; }
   const body = req.body || {};
@@ -71,34 +121,8 @@ exports.wompiEventos = onRequest({ secrets: [WOMPI_EVENTS], region: 'us-central1
   const tx = body.data?.transaction;
   if (body.event !== 'transaction.updated' || !tx?.reference) { res.status(200).send('ok'); return; }
 
-  const payRef = db.collection('fl_payments').doc(String(tx.reference));
   try {
-    await db.runTransaction(async (t) => {
-      const pay = await t.get(payRef);
-      if (!pay.exists) { logger.warn('Pago desconocido', { reference: tx.reference }); return; }
-      const p = pay.data();
-      if (p.status === 'APPROVED') return; // ya se procesó (Wompi puede repetir el aviso)
-
-      const update = { status: tx.status, wompiId: tx.id || null, updatedAt: admin.firestore.FieldValue.serverTimestamp() };
-      if (tx.status !== 'APPROVED') { t.update(payRef, update); return; }
-      if (Number(tx.amount_in_cents) !== p.amountInCents || tx.currency !== p.currency) {
-        logger.error('Valor del pago no coincide', { reference: tx.reference, amount: tx.amount_in_cents });
-        t.update(payRef, { ...update, status: 'AMOUNT_MISMATCH' });
-        return;
-      }
-
-      // Premium se suma al tiempo que ya tenga (renovar antes no hace perder días)
-      const userRef = db.collection('users').doc(p.userId);
-      const user = await t.get(userRef);
-      const now = new Date();
-      const current = user.exists && user.data().premiumUntil ? user.data().premiumUntil.toDate() : null;
-      const from = current && current > now ? current : now;
-      const until = new Date(from);
-      until.setMonth(until.getMonth() + p.months);
-
-      t.set(userRef, { premiumUntil: admin.firestore.Timestamp.fromDate(until), plan: p.plan }, { merge: true });
-      t.update(payRef, { ...update, premiumUntil: admin.firestore.Timestamp.fromDate(until) });
-    });
+    await applyTransaction(tx);
     res.status(200).send('ok');
   } catch (e) {
     logger.error('Error procesando aviso de Wompi', e);
