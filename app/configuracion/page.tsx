@@ -316,7 +316,7 @@ export default function ConfigPage() {
   return (
     <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
-      <main className="relative flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-24">
+      <main className="relative flex-1 max-w-2xl lg:max-w-6xl mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-24">
         {/* Header section */}
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className={`p-2 -ml-2 rounded-xl transition-colors ${isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-secondary hover:bg-glass'}`}>

@@ -132,7 +132,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     <div
       ref={rootRef}
       data-tour={inline ? undefined : 'filter'}
-      className={`${inline ? 'relative mb-0' : 'sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 mb-6'} flex flex-col transition-[padding,background-color,gap] duration-200 ${
+      className={`${inline ? 'relative mb-0' : 'sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 mb-6 md:flex-row md:items-center md:justify-center'} flex flex-col transition-[padding,background-color,gap] duration-200 ${
         stuck
           ? `gap-1.5 py-2 bg-deep/80 backdrop-blur-xl shadow-lg shadow-black/10 border-b ${isTechTheme ? 'border-accent/20' : 'border-glass-border'}`
           : 'gap-3 py-0 border-b border-transparent'
@@ -140,7 +140,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     >
       {/* Pestañas superiores */}
       <div 
-        className={`relative flex items-center p-1 w-full max-w-sm mx-auto shadow-2xl shadow-black/10 bg-glass backdrop-blur-3xl border border-glass-border ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-[28px]'}`}
+        className={`relative flex items-center p-1 w-full max-w-sm mx-auto ${inline ? '' : 'md:mx-0'} shadow-2xl shadow-black/10 bg-glass backdrop-blur-3xl border border-glass-border ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-[28px]'}`}
       >
         <div className={`absolute inset-0 pointer-events-none overflow-hidden ${isTechTheme ? 'rounded-none' : 'rounded-[28px]'}`}>
           <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -172,7 +172,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Navegador inferior (oculto si es Todo) */}
       {filterType !== 'all' && (
-        <div className={`flex items-center justify-between px-4 bg-card w-full max-w-sm mx-auto border border-glass-border shadow-sm transition-all ${stuck ? 'py-1.5' : 'py-3 mt-2'} ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-full'}`}>
+        <div className={`flex items-center justify-between px-4 bg-card w-full max-w-sm mx-auto border border-glass-border shadow-sm transition-all ${stuck ? 'py-1.5' : `py-3 mt-2 ${inline ? '' : 'md:mt-0 md:py-2'}`} ${inline ? '' : 'md:mx-0 md:max-w-xs'} ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-full'}`}>
           <button 
             onClick={handlePrev}
             className={`p-1 hover:bg-glass-hover active:scale-95 transition-all text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}
@@ -195,7 +195,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Heatmap Calendar Modal */}
       {showCalendar && (
-        <div className={`absolute top-[100%] left-0 right-0 z-50 mt-2 p-5 shadow-2xl border animate-fade-in-up ${
+        <div className={`absolute top-[100%] left-0 right-0 z-50 mt-2 p-5 shadow-2xl border animate-fade-in-up ${inline ? '' : 'md:mx-auto md:max-w-sm'} ${
           isTechTheme 
             ? 'bg-deep rounded-none border-accent/40 shadow-[0_10px_50px_rgba(0,0,0,0.8)]' 
             : 'bg-deep rounded-3xl border-glass-border shadow-black/20'

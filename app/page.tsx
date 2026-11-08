@@ -277,7 +277,7 @@ export default function DashboardPage() {
     <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
 
-      <main className="relative z-[1] flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
+      <main className="relative z-[1] flex-1 max-w-2xl lg:max-w-6xl mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
         {/* Welcome Message for New Users */}
         {showNewUserMsg && (
           <div className={`p-4 mb-2 animate-slide-down flex justify-between items-start ${isTechTheme ? 'bg-accent/10 border border-accent rounded-none' : 'glass-card'}`}>

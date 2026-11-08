@@ -92,7 +92,7 @@ export default function DeudasPage() {
     <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
       
-      <main className="relative flex-1 max-w-2xl lg:max-w-none mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
+      <main className="relative flex-1 max-w-2xl lg:max-w-6xl mx-auto w-full space-y-6 animate-fade-in-up stagger p-4 pb-24">
         {/* Header section */}
         <div className="flex items-center justify-between">
           <div>
