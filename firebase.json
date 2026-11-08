@@ -10,7 +10,7 @@
     ],
     "headers": [
       {
-        "regex": "^/(?!_next/static/).*",
+        "source": "**",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       },
       {
