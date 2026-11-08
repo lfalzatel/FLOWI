@@ -2,11 +2,21 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
+import { usePopupBusy, usePopupHold } from '@/lib/tourGate';
 
 export function WelcomeTour() {
   const { user } = useAuth();
   const { theme } = useTheme();
   const [show, setShow] = useState(false);
+  // Espera a que termine el tutorial (u otra ventana); cuando le toca, toma el turno
+  const busy = usePopupBusy();
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!show || visible || busy) return;
+    const t = setTimeout(() => setVisible(true), 600);
+    return () => clearTimeout(t);
+  }, [show, visible, busy]);
+  usePopupHold(visible);
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
@@ -26,9 +36,10 @@ export function WelcomeTour() {
   const handleDismiss = () => {
     localStorage.setItem('flowi_welcome_tour_v1', 'completed');
     setShow(false);
+    setVisible(false);
   };
 
-  if (!show || !user) return null;
+  if (!show || !visible || !user) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col pointer-events-none select-none">

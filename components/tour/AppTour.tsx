@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Compass, Volume2, VolumeX, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { usePopupHold } from '@/lib/tourGate';
 
 // Recorrido guiado: primero cómo registrar, luego cómo leer cada parte de Inicio (marcadas con
 // data-tour="..."). Mientras dura, Inicio muestra datos de ejemplo que no se guardan. La voz usa
@@ -59,6 +60,7 @@ export function readTourVoicePref(): boolean {
 // Ofrecimiento la primera vez que se entra a Inicio
 export function TourOffer({ onStart, onSkip }: { onStart: (voice: boolean) => void; onSkip: () => void }) {
   const { theme } = useTheme();
+  usePopupHold(); // nada más se abre mientras se ofrece el recorrido
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   if (typeof document === 'undefined') return null;
   const primary = `w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs tracking-wider' : 'rounded-xl bg-accent text-white hover:bg-accent/90 text-sm'}`;
@@ -85,6 +87,7 @@ export function TourOffer({ onStart, onSkip }: { onStart: (voice: boolean) => vo
 
 export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice: boolean; demo?: boolean; onClose: () => void }) {
   const { theme } = useTheme();
+  usePopupHold(); // ni avisos ni otras ventanas encima del recorrido
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   // Solo los pasos cuya parte está en pantalla; se calcula después de pintar, cuando Inicio
   // ya muestra los datos de ejemplo

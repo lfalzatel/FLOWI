@@ -7,12 +7,14 @@ import {
   ASK_EVENT, CHANGED_EVENT, canAutoAsk, markDismissed, markShown, notificationsState,
 } from '@/lib/notifPrompt';
 import { NotificationDialog, NotificationDialogKind } from './NotificationDialog';
+import { usePopupBusy } from '@/lib/tourGate';
 
 // Muestra, desde cualquier pantalla, los mensajes para activar las notificaciones
 // (ver lib/notifPrompt.ts para cuándo se piden).
 export function NotificationPrompter() {
   const { user } = useAuth();
   const [dialog, setDialog] = useState<{ kind: NotificationDialogKind; context?: string } | null>(null);
+  const busy = usePopupBusy(); // si el tutorial u otra ventana está abierta, el mensaje espera
 
   useEffect(() => {
     const onAsk = (e: Event) => {
@@ -39,7 +41,7 @@ export function NotificationPrompter() {
     };
   }, []);
 
-  if (!dialog) return null;
+  if (!dialog || busy) return null;
 
   async function confirm() {
     if (dialog?.kind !== 'ask') { setDialog(null); return; }

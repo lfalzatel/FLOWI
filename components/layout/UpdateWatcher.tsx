@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { usePopupBusy } from '@/lib/tourGate';
 
 // Mantiene la app instalada al día. El service worker nuevo se activa solo (skipWaiting), pero la
 // página abierta sigue con el código viejo hasta recargar. Aquí:
@@ -9,6 +10,7 @@ import { RefreshCw } from 'lucide-react';
 //  - si está en primer plano, se ofrece "Actualizar" (para no perder lo que se esté escribiendo).
 export function UpdateWatcher() {
   const [ready, setReady] = useState(false);
+  const busy = usePopupBusy(); // no tapar el tutorial: el aviso aparece al terminar
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
@@ -42,7 +44,7 @@ export function UpdateWatcher() {
     };
   }, [ready]);
 
-  if (!ready) return null;
+  if (!ready || busy) return null;
   return (
     <div className="fixed left-1/2 -translate-x-1/2 bottom-28 md:bottom-6 z-[120] w-[min(92vw,380px)] animate-fade-in-up">
       <div className="glass-dropdown rounded-2xl border border-accent/40 p-3 flex items-center gap-3 shadow-xl">
