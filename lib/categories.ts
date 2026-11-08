@@ -191,8 +191,13 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
     ['Clases deportivas', '🏅', '#F59E0B'],
   ]),
   ...g('Negocio', [
-    ['Inventario', '📦', '#8B4513'],
+    ['Inventario', '📦', '#8B4513'],          // mercancía para vender
     ['Insumos', '🧰', '#10B981'],
+    ['Empaques', '🛍️', '#F59E0B'],            // bolsas, cajas, etiquetas
+    ['Envíos a clientes', '🚚', '#F97316'],
+    ['Publicidad', '📣', '#EC4899'],          // pauta en Instagram/Facebook, volantes
+    ['Comisiones y plataformas', '💳', '#8B5CF6'], // datáfono, Wompi, Mercado Libre
+    ['Arriendo del local', '🏬', '#64748B'],
     ['Nómina', '💼', '#3B82F6'],
   ]),
   ...g('Otros', [
@@ -220,6 +225,8 @@ export const INCOME_CATEGORY_DEFS: CategoryDef[] = [
   ...i('Negocio', [
     ['Venta', '🏷️', '#10B981'],
     ['Venta por catálogo', '📒', '#EC4899'],
+    ['Abono de cliente', '🧾', '#06B6D4'],    // clientes que pagan por cuotas
+    ['Servicios prestados', '🛠️', '#3B82F6'], // uñas a domicilio, arreglos, clases…
     ['Negocio propio', '🏪', '#F97316'],
   ]),
   ...i('Rentas e inversiones', [

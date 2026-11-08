@@ -257,6 +257,13 @@ function detectType(normalized: string): { type: TxType; direction?: 'debo' | 'm
 // ─── 4. Categoría (catálogo actual) ─────────────────────────────────────────────────────────
 
 const EXPENSE_KEYWORDS: [RegExp, string][] = [
+  // Negocio
+  [/\b(?:mercancia|surtido|inventario|para\s+(?:vender|la\s+venta|el\s+negocio)|proveedor(?:es)?)\b/, 'Inventario'],
+  [/\b(?:empaques?|bolsas?\s+(?:para|de)\s+(?:empacar|los\s+pedidos|la\s+ropa)|cajas?\s+para\s+(?:empacar|enviar)|etiquetas|stickers)\b/, 'Empaques'],
+  [/\b(?:envios?\s+(?:a|de|del|para)\s+(?:cliente|clientes|pedido|pedidos)|interrapidisimo|servientrega|coordinadora|envia\s+colvanes|guia\s+de\s+envio)\b/, 'Envíos a clientes'],
+  [/\b(?:publicidad|pauta|anuncios?|volantes|ads)\b/, 'Publicidad'],
+  [/\b(?:datafono|comision\s+(?:de\s+)?(?:wompi|mercado\s+libre|bold|datafono|la\s+plataforma))\b/, 'Comisiones y plataformas'],
+  [/\b(?:arriendo|alquiler)\s+(?:del\s+)?(?:local|negocio|bodega)\b/, 'Arriendo del local'],
   [/\b(?:cervezas?|polas?|aguardiente|ron|tragos?|licor(?:es)?|bar|bares|discoteca|cigarr\w*|tabaco|estanco|vinos?|whisky|tequila|vodka|cocteles?)\b/, 'Licores y Bares'],
   [/\b(?:gasolina|tanque\w*|combustible|acpm|diesel)\b/, 'Gasolina'],
   [/\b(?:taxis?|uber|didi|cabify|indrive|indriver|picap)\b/, 'Taxi / plataformas'],
@@ -330,7 +337,10 @@ const INCOME_KEYWORDS: [RegExp, string][] = [
   [/\b(?:reembolso|devolucion|me\s+devolvieron)\b/, 'Reembolso / devolución'],
   [/\b(?:remesa)\b/, 'Remesas del exterior'],
   [/\b(?:regalo|me\s+regalaron)\b/, 'Regalo recibido'],
-  [/\b(?:vendi|venta|ventas)\b/, 'Venta'],
+  [/\b(?:abono\s+de\s+(?:un\s+|una\s+)?(?:cliente|clienta)|me\s+abono|me\s+abonaron|abono\s+de\s+\w+\s+por\s+(?:la|el|los|las)\b)/, 'Abono de cliente'],
+  [/\b(?:catalogo|avon|esika|natura|yanbal|cyzone|leonisa|ebel|lbel|novaventa|belcorp)\b/, 'Venta por catálogo'],
+  [/\b(?:vendi|venta|ventas|pedido|pedidos|encargo|encargos)\b/, 'Venta'],
+  [/\b(?:servicio\s+de|me\s+pagaron\s+(?:el|un)\s+(?:arreglo|servicio|trabajo)|manicure\s+a\s+domicilio|clase\s+particular)\b/, 'Servicios prestados'],
   [/\b(?:transferencia|me\s+transfirieron|me\s+consignaron|me\s+giraron)\b/, 'Transferencia'],
 ];
 

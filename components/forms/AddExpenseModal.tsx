@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { X, LayoutGrid, Plus, BellPlus } from 'lucide-react';
@@ -9,6 +9,7 @@ import { useData } from '@/components/DataProvider';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import { isBusinessCategory } from '@/lib/business';
+import { suggestTxCategory } from '@/lib/txSuggest';
 import {
   DEFAULT_FREQUENT, PAYMENT_METHODS, normalizeText, detectMerchantInText, findCatalogEntry, getFrequent, softHyphenate,
   getMerchantsForCategory, getRecent, recordUsage,
@@ -184,12 +185,30 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     setMerchant('');
   };
 
+  // Categoría sugerida por lo que se escribe en la descripción ("compré mercancía" → Inventario).
+  // Si no se ha elegido categoría (o la eligió la sugerencia) se aplica sola; si la persona ya eligió
+  // otra, se ofrece como botón para no cambiarle nada sin querer.
+  const autoCategory = useRef('');
+  const [suggestedCat, setSuggestedCat] = useState<string | null>(null);
+  const suggestFromText = (value: string) => {
+    if (transactionToEdit) return;
+    const s = suggestTxCategory(value, type, transactions, typedCategories);
+    if (!s || s === category) { setSuggestedCat(null); return; }
+    if (!category || category === autoCategory.current) {
+      autoCategory.current = s;
+      selectCategory(s);
+      setSuggestedCat(null);
+    } else {
+      setSuggestedCat(s);
+    }
+  };
+
   const handleDescriptionChange = (value: string) => {
     setDescription(value);
-    if (type !== 'gasto' || merchant) return;
+    if (type !== 'gasto' || merchant) { suggestFromText(value); return; }
     // "Mercado en jumbo" → Mercado · Jumbo
     const detected = detectMerchantInText(value);
-    if (!detected) return;
+    if (!detected) { suggestFromText(value); return; }
     if (!category) {
       const suggested = detected.categories.find(c => expenseCategories.some(e => e.label === c));
       if (suggested) {
@@ -597,6 +616,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
               onChange={(e) => handleDescriptionChange(e.target.value)}
               className={`w-full bg-glass border py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
             />
+            {suggestedCat && (
+              <button type="button" onClick={() => { autoCategory.current = suggestedCat; selectCategory(suggestedCat); setSuggestedCat(null); }}
+                      className={`mt-2 text-[11px] font-semibold px-2.5 py-1 border border-accent/40 bg-accent/10 text-accent transition-all active:scale-95 ${isTechTheme ? 'rounded-none font-mono' : 'rounded-full'}`}>
+                💡 ¿Es «{suggestedCat}»? Toca para usarla
+              </button>
+            )}
           </div>
 
           {transactionToEdit && (
