@@ -16,7 +16,8 @@ import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
-  Sun, Monitor, Terminal, Moon, Layers, Heart, Compass
+  Sun, Monitor, Terminal, Moon, Layers, Heart, Compass,
+  Crown,
 } from 'lucide-react';
 
 const menuItems = [
@@ -26,6 +27,7 @@ const menuItems = [
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
   { icon: Bell,       label: 'Notificaciones',    href: '#',              divider: false, soon: false, isNotificationToggle: true },
   { icon: Compass,    label: 'Ver tutorial',      href: '/?tour=1',       divider: true,  soon: false },
+  { icon: Crown,      label: 'Planes y Premium',  href: '/planes',        divider: false, soon: false },
   { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: false, soon: false },
   { icon: Heart,      label: 'Apoyar a FLOWI',    href: '/configuracion#apoyar', divider: false, soon: false },
 ];

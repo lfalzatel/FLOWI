@@ -34,18 +34,25 @@ service cloud.firestore {
 
       // Al crear el perfil no se puede nacer administrador
       allow create: if signedIn() && request.auth.uid == uid
-        && request.resource.data.get('role', 'Usuario') != 'admin';
+        && request.resource.data.get('role', 'Usuario') != 'admin'
+        && !request.resource.data.keys().hasAny(['premiumUntil', 'plan']);
 
       allow update: if signedIn() && (
         // La persona edita su perfil, pero sin tocar su rol
         (request.auth.uid == uid
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'premiumUntil', 'plan']))
         // Un administrador solo cambia el rol de otros (o el suyo)
         || (isAdmin()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']))
       );
 
       allow delete: if false;
+    }
+
+    // ── Pagos de planes: solo el servidor (Wompi) los escribe; cada quien lee los suyos
+    match /fl_payments/{id} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
     }
 
     // ── Datos de cada persona ─────────────────────────────────

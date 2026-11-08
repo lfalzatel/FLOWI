@@ -1,4 +1,6 @@
 'use client';
+import { usePlanGate } from '@/lib/plans';
+import { useGoals } from '@/hooks/useGoals';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2 } from 'lucide-react';
@@ -23,7 +25,14 @@ interface Props {
   onDelete?: (goal: Goal) => void;
 }
 
-export function GoalFormModal({ goal, onClose, onDelete }: Props) {
+// Plan gratis: hasta 2 metas activas (las cumplidas no cuentan)
+export function GoalFormModal(props: Props) {
+  const { goals, loading } = useGoals();
+  const ok = usePlanGate('goals', goals.filter(g => !g.completedAt).length, loading, !!props.goal, props.onClose);
+  return ok ? <GoalFormModalInner {...props} /> : null;
+}
+
+function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const { user } = useAuth();

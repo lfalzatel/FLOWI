@@ -1,4 +1,6 @@
 'use client';
+import { usePlanGate } from '@/lib/plans';
+import { useInvestments } from '@/hooks/useInvestments';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2, Camera, ChevronDown } from 'lucide-react';
@@ -30,7 +32,14 @@ interface Props {
   onDelete?: (inv: Investment) => void;
 }
 
-export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', onClose, onDelete }: Props) {
+// Plan gratis: hasta 2 inversiones activas (renovar un CDT no cuenta como una nueva)
+export function InvestmentFormModal(props: Props) {
+  const { investments, loading } = useInvestments();
+  const ok = usePlanGate('investments', investments.filter(i => i.status === 'activo').length, loading, !!(props.investment || props.renewFrom), props.onClose);
+  return ok ? <InvestmentFormModalInner {...props} /> : null;
+}
+
+function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onClose, onDelete }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const { user } = useAuth();

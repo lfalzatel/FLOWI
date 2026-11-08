@@ -49,3 +49,6 @@ migracion/node_modules/
 push/node_modules/
 migracion/respaldos/
 flowi-9af82-*.json
+
+# servidor de pagos
+/functions/node_modules

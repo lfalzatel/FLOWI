@@ -1,4 +1,6 @@
 'use client';
+import { receiptsUsed, showLimit, usePlan } from '@/lib/plans';
+import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark } from 'lucide-react';
@@ -26,6 +28,8 @@ interface Props {
 
 // Menú del botón flotante: hablar arriba (lo más rápido) y debajo todo lo que se puede registrar
 export function QuickActionsSheet({ onClose, onAction, onReceipt }: Props) {
+  const { profile } = useAuth();
+  const { canAdd } = usePlan();
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light';
@@ -69,6 +73,7 @@ export function QuickActionsSheet({ onClose, onAction, onReceipt }: Props) {
             <button key={a.id} type="button"
                     onClick={() => {
                       if (a.id === 'foto') {
+                        if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
                         // El selector se abre aquí mismo, dentro del toque, para que el celular lo permita
                         if (getAiKey()) fileRef.current?.click(); else onReceipt('no-key');
                         return;

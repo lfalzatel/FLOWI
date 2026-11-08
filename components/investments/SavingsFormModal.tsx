@@ -1,4 +1,6 @@
 'use client';
+import { usePlanGate } from '@/lib/plans';
+import { useInvestments } from '@/hooks/useInvestments';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2 } from 'lucide-react';
@@ -22,9 +24,18 @@ const PLACES: Record<Exclude<InvestmentKind, 'cdt'>, string[]> = {
 
 const parseRate = (s: string) => Number(String(s).replace(',', '.')) || 0;
 
-export function SavingsFormModal({ kind, investment, onClose, onDelete }: {
+type SavingsFormProps = {
   kind: Exclude<InvestmentKind, 'cdt'>; investment?: Investment | null; onClose: () => void; onDelete?: (inv: Investment) => void;
-}) {
+};
+
+// Plan gratis: hasta 2 inversiones o ahorros activos
+export function SavingsFormModal(props: SavingsFormProps) {
+  const { investments, loading } = useInvestments();
+  const ok = usePlanGate('investments', investments.filter(i => i.status === 'activo').length, loading, !!props.investment, props.onClose);
+  return ok ? <SavingsFormModalInner {...props} /> : null;
+}
+
+function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsFormProps) {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
   const { user } = useAuth();

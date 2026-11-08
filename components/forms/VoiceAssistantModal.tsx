@@ -1,5 +1,7 @@
 'use client';
 
+import { updateUserProfile } from '@/lib/firestore';
+import { monthKeyNow, receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
@@ -30,6 +32,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const router = useRouter();
   const { theme } = useTheme();
   const { user, profile } = useAuth();
+  const { canAdd } = usePlan();
   const { allCategories } = useCategories();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
@@ -58,6 +61,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
   const handleReceiptFile = async (file: File | undefined) => {
     if (!file) return;
+    if (!canAdd('receipts', receiptsUsed(profile))) { showLimit('receipts'); return; }
     stopListening();
     setErrorMsg(null);
     setTranscript('');
@@ -68,6 +72,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     if (read.ok) {
       setParsedResults([read.result]);
       setReceiptStatus('done');
+      if (user) updateUserProfile(user.uid, { receiptUsage: { month: monthKeyNow(), count: receiptsUsed(profile) + 1 } }).catch(() => {});
       return;
     }
     setReceiptStatus(read.reason === 'no-key' ? 'no-key' : 'error');

@@ -1,4 +1,5 @@
 'use client';
+import { usePlanGate } from '@/lib/plans';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2 } from 'lucide-react';
@@ -69,11 +70,19 @@ const permissionMsg = (err: any) => err?.code === 'permission-denied'
   : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
 
 // ── Nueva / editar cuenta ────────────────────────────────────────────────
-export function AccountFormModal({ account, accounts, onClose, onDelete, initial, onCreated }: {
+type AccountFormProps = {
   account?: Account | null; accounts: Account[]; onClose: () => void; onDelete?: (a: Account) => void;
   initial?: { name: string; kind: AccountKind; methods: string[] }; // crear desde el formulario de un gasto/ingreso
   onCreated?: (id: string) => void;
-}) {
+};
+
+// Plan gratis: hasta 2 cuentas activas; al pasar el límite se muestran los planes
+export function AccountFormModal(props: AccountFormProps) {
+  const ok = usePlanGate('accounts', props.accounts.filter(a => !a.archived).length, false, !!props.account, props.onClose);
+  return ok ? <AccountFormModalInner {...props} /> : null;
+}
+
+function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, onCreated }: AccountFormProps) {
   const s = useStyles();
   const { user } = useAuth();
   const isFirst = !accounts.some(a => !a.archived);

@@ -53,6 +53,7 @@ import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
 import { ReminderWatcher } from '@/components/reminders/ReminderWatcher';
 import { NotificationPrompter } from '@/components/notifications/NotificationPrompter';
 import { UpdateWatcher } from '@/components/layout/UpdateWatcher';
+import { LimitPrompter } from '@/components/plans/LimitPrompter';
 import { UsageTracker } from '@/components/layout/UsageTracker';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 
@@ -76,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ReminderWatcher />
               <NotificationPrompter />
               <UpdateWatcher />
+              <LimitPrompter />
               <UsageTracker />
             </DataProvider>
           </ThemeProvider>
