@@ -1,12 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Sparkles, Check, Unplug, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Check, Unplug, ChevronDown, ChevronUp, PlayCircle } from 'lucide-react';
+import { AiConnectGuide } from './AiConnectGuide';
 import { AI_CALLBACK_PATH, completeOpenRouterConnect, disconnectAi, getAiKey, startOpenRouterConnect } from '@/lib/aiAssist';
 
 // Tarjeta de Configuración para conectar la IA gratuita (cuenta OpenRouter del propio usuario)
 export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { isTechTheme: boolean; open?: boolean; onToggle?: () => void }) {
   const [connected, setConnected] = useState(false);
   const [status, setStatus] = useState<'idle' | 'connecting' | 'error' | 'success'>('idle');
+  const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
     setConnected(!!getAiKey());
@@ -56,8 +58,8 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
             </p>
             <p className="text-[11px] text-text-muted normal-case leading-relaxed mt-0.5">
               {connected
-                ? 'Cuando el asistente no entienda una frase, la consultará con modelos gratuitos usando tu cuenta de OpenRouter. Siempre podrás revisar antes de guardar.'
-                : 'Conecta tu cuenta gratuita de OpenRouter (puedes crearla con Google en un minuto). No pagas nada: solo se usan modelos gratuitos y la conexión queda guardada solo en este dispositivo.'}
+                ? 'Cuando el asistente no entienda una frase, la consultará con modelos gratuitos usando tu cuenta de OpenRouter. Siempre podrás revisar antes de guardar. Es gratis: FLOWI solo usa modelos gratuitos y nunca te pedirá pagar por esto.'
+                : 'Conecta tu cuenta gratuita de OpenRouter (puedes crearla con Google en un minuto). Es gratis hoy y después de configurarla: solo se usan modelos gratuitos y la conexión queda guardada solo en este dispositivo.'}
             </p>
           </div>
         </div>
@@ -80,6 +82,14 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
             </button>
           </div>
         ) : (
+          <>
+          <button
+            type="button"
+            onClick={() => setShowGuide(true)}
+            className={`w-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider text-xs' : 'rounded-xl'}`}
+          >
+            <PlayCircle className="w-4 h-4 text-accent" /> ¿Cómo se conecta? Ver paso a paso con voz
+          </button>
           <button
             type="button"
             onClick={() => startOpenRouterConnect()}
@@ -87,7 +97,12 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
           >
             Conectar IA gratis
           </button>
+          <p className={`text-[10px] text-text-muted normal-case leading-relaxed ${mono}`}>
+            Si OpenRouter te pide una tarjeta, no la pongas: baja y toca "Later" o "Skip". Sin tarjeta no hay forma de que te cobren.
+          </p>
+          </>
         )}
+        {showGuide && <AiConnectGuide onClose={() => setShowGuide(false)} />}
 
         <p className={`text-[10px] text-text-muted normal-case leading-relaxed ${mono}`}>
           Privacidad: al usar la IA, la frase dictada se envía al modelo gratuito elegido por OpenRouter, que podría usarla para mejorar sus servicios. Si no la conectas, todo se procesa en tu dispositivo.
