@@ -13,6 +13,7 @@ import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoundModal';
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
 import { SupportProject } from '@/components/settings/SupportProject';
+import { PlanCard } from '@/components/plans/PlanCard';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { CURRENCIES } from '@/lib/format';
@@ -337,6 +338,9 @@ export default function ConfigPage() {
             <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>Configuración</h1>
           </div>
         </div>
+
+        {/* Tu plan (Gratis / Premium) con acceso a Planes */}
+        <PlanCard isTechTheme={isTechTheme} />
 
         {/* 1. Cuenta y Perfil */}
         <section className="space-y-3">

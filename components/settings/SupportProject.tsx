@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Heart, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { DONATION_KEYS } from '@/lib/donations';
+import { PlanCard } from '@/components/plans/PlanCard';
 
 async function copyText(text: string): Promise<boolean> {
   try {
@@ -92,6 +93,9 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
         <p className={`text-[10px] text-text-muted normal-case ${mono}`}>
           Antes de confirmar, tu banco te mostrará el nombre del titular para que verifiques. ¡Gracias por tu apoyo!
         </p>
+
+        <p className={`text-[11px] text-text-secondary normal-case ${mono}`}>¿Prefieres apoyar con una suscripción y tener más funciones?</p>
+        <PlanCard isTechTheme={isTechTheme} />
       </div>
       )}
     </section>

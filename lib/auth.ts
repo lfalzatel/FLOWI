@@ -31,9 +31,12 @@ export function saveKnownAccount(user: any) {
 }
 
 export async function signInWithGoogle(promptSelectAccount?: boolean, loginHint?: string) {
-  const customParams: any = {};
-  if (promptSelectAccount) customParams.prompt = 'select_account';
+  // Siempre el selector de cuentas de Google: con login_hint solo, Google salta directo a pedir la
+  // contraseña si esa cuenta no tiene la sesión abierta en el navegador; con el selector se elige
+  // una cuenta que ya esté abierta en el celular sin escribir nada.
+  const customParams: any = { prompt: 'select_account' };
   if (loginHint) customParams.login_hint = loginHint;
+  void promptSelectAccount;
   googleProvider.setCustomParameters(customParams);
 
   const result  = await signInWithPopup(auth, googleProvider);

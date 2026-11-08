@@ -77,9 +77,11 @@ export default function PlanesPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/configuracion" aria-label="Volver" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <button type="button" aria-label="Volver"
+                  onClick={() => { if (window.history.length > 1) router.back(); else router.push('/'); }}
+                  className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
-          </Link>
+          </button>
           <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Planes de FLOWI</h1>
         </div>
 
