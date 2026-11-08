@@ -101,6 +101,7 @@ function isCoveredByExpense(r: Reminder, occurrence: Date, transactions: Transac
   return transactions.some(t => {
     if (t.type !== 'gasto') return false;
     const byMerchant = !!merchant && (normalize(t.merchant || '') === merchant || normalize(t.category || '') === merchant);
+    if (merchant && !byMerchant) return false;
     if (!byMerchant && normalize(t.category || '') !== category) return false;
     const when = toDate(t.date)?.getTime() ?? 0;
     if (when < from || when > to) return false;
@@ -156,7 +157,7 @@ export function lastPaymentFor(r: Reminder, transactions: Transaction[], sharedC
       const when = toDate(t.date);
       if (ok && when && (!hit || when > hit.date)) hit = { amount: t.amount, date: when };
     }
-    if (hit) return hit;
+    return hit; // con comercio no se mira el resto de la categoría (no mezclar Claude con ChatGPT)
   }
   if (!r.category) return null;
   const category = normalize(r.category);

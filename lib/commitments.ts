@@ -93,6 +93,7 @@ interface Group {
   day: number;
   words: string[];
   txs: { amount: number; words: string[] }[];
+  merchants: Set<string>;    // comercios de esos pagos (para cruzar recordatorios con comercio)
 }
 
 export function getCommitments(
@@ -129,9 +130,10 @@ export function getCommitments(
       g.day = Math.min(g.day, day);
       g.words = Array.from(new Set(g.words.concat(tx.words)));
       g.txs.push(tx);
+      if (t.merchant) g.merchants.add(normalize(t.merchant));
       g.title = t.category; // varios pagos en la categoría: se nombra por la categoría
     } else {
-      byCategory.set(key, { key, category: t.category, title: t.description?.trim() || t.category, amount: t.amount, day, words: tokens(t.category, t.description), txs: [tx] });
+      byCategory.set(key, { key, category: t.category, title: t.description?.trim() || t.category, amount: t.amount, day, words: tokens(t.category, t.description), txs: [tx], merchants: new Set(t.merchant ? [normalize(t.merchant)] : []) });
     }
   }
   const groups = Array.from(byCategory.values());
@@ -185,9 +187,13 @@ export function getCommitments(
     // Mismo nombre que un pago fijo del mes pasado = el mismo compromiso, aunque la categoría
     // no coincida (recordatorio "Google AI pro" en Play Store y el pago "Google AI pro" en Google)
     const sameTitle = groups.find(g => normalize(g.title) === normalize(r.title));
+    // Con comercio (Alcanos, Google AI Pro): solo los pagos de ese comercio, aunque estén en otra
+    // categoría o en la categoría vieja con el nombre del comercio; nunca otro de la misma categoría
+    const mer = r.merchant ? normalize(r.merchant) : '';
     const group = sameTitle
-      ?? (r.category ? groups.find(g => normalize(g.category) === normalize(r.category!)) : undefined)
-      ?? (r.category ? undefined : groups.find(g => matches(undefined, words, g.category, g.words)));
+      ?? (mer ? groups.find(g => g.merchants.has(mer) || normalize(g.category) === mer) : undefined)
+      ?? (!mer && r.category ? groups.find(g => normalize(g.category) === normalize(r.category!)) : undefined)
+      ?? (!mer && !r.category ? groups.find(g => matches(undefined, words, g.category, g.words)) : undefined);
     dueReminders.push({ r, due, words, group });
   }
 
@@ -211,8 +217,11 @@ export function getCommitments(
     }
 
     const key = r.id ? `r:${r.id}` : `t:${normalize(r.title)}`;
+    const merchantPaid = (t: Transaction) => !!r.merchant && (
+      normalize(t.merchant || '') === normalize(r.merchant) || normalize(t.category) === normalize(r.merchant)
+      || (!!group && normalize(t.category) === normalize(group.category) && normalize(t.description || '') === normalize(group.title)));
     const covered = (r.paidDates || []).includes(dateKey(due))
-      || (shared
+      || (r.merchant ? fixedThisMonth.some(merchantPaid) : shared
         ? fixedThisMonth.some(t => normalize(t.category) === normalize(group!.category) && tokens(t.description).some(x => ownWords.some(w => sameWord(w, x))))
         : r.category
           ? fixedThisMonth.some(t => normalize(t.category) === normalize(r.category!)

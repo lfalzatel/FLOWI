@@ -53,13 +53,29 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
   const orderRef = useRef(order);
   orderRef.current = order;
 
-  // Mientras se arrastra, la página no hace scroll
+  // Mientras se arrastra, la página no hace scroll. El listener está siempre puesto y no es pasivo:
+  // así el primer movimiento del dedo ya se bloquea y el navegador no cancela el arrastre.
+  const gridRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!dragId) return;
-    const stop = (e: TouchEvent) => e.preventDefault();
-    document.addEventListener('touchmove', stop, { passive: false });
-    return () => document.removeEventListener('touchmove', stop);
-  }, [dragId]);
+    const el = gridRef.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => {
+      if (!press.current?.started) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      if (t) moveRef.current(t.clientX, t.clientY);
+    };
+    const end = () => { if (press.current?.started) endRef.current(); };
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchcancel', end);
+    const noSelect = (e: Event) => { if (press.current) e.preventDefault(); };
+    el.addEventListener('touchmove', stop, { passive: false });
+    document.addEventListener('selectstart', noSelect);
+    return () => {
+      el.removeEventListener('touchmove', stop); el.removeEventListener('touchend', end); el.removeEventListener('touchcancel', end);
+      document.removeEventListener('selectstart', noSelect);
+    };
+  }, []);
 
   const saveOrder = (ids: string[] | null) => {
     if (!user) return;
@@ -92,17 +108,20 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
     };
   };
 
-  const onPointerMove = (e: React.PointerEvent) => {
+  const onPointerMove = (e: React.PointerEvent) => moveTo(e.clientX, e.clientY);
+
+  // Mover a (x, y): sirve tanto para eventos de puntero como de toque
+  const moveTo = (clientX: number, clientY: number) => {
     const p = press.current;
     if (!p) return;
     if (!p.started) {
       // Si se mueve antes de tiempo, es scroll: se cancela
-      if (Math.hypot(e.clientX - p.x, e.clientY - p.y) > 10) { if (p.timer) clearTimeout(p.timer); press.current = null; }
+      if (Math.hypot(clientX - p.x, clientY - p.y) > 10) { if (p.timer) clearTimeout(p.timer); press.current = null; }
       return;
     }
-    setOffset({ x: e.clientX - p.x, y: e.clientY - p.y });
+    setOffset({ x: clientX - p.x, y: clientY - p.y });
     // ¿Sobre qué tarjeta está el dedo? (la que se arrastra no recibe eventos)
-    const under = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-svc]') as HTMLElement | null;
+    const under = document.elementFromPoint(clientX, clientY)?.closest('[data-svc]') as HTMLElement | null;
     const target = under?.dataset.svc;
     if (target && target !== p.id) {
       const cur = orderRef.current;
@@ -138,6 +157,11 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
     setOffset({ x: 0, y: 0 });
   };
 
+  const moveRef = useRef(moveTo);
+  moveRef.current = moveTo;
+  const endRef = useRef(endPress);
+  endRef.current = endPress;
+
   const q = query.toLowerCase();
   const visible = order.map(id => byId.get(id)!).filter(s => s && `${s.title} ${s.description}`.toLowerCase().includes(q));
 
@@ -167,7 +191,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
       onPointerDown: (e: React.PointerEvent) => onPointerDown(e, service.id),
       onPointerMove,
       onPointerUp: endPress,
-      onPointerCancel: endPress,
+      onPointerCancel: () => { if (!press.current?.started) endPress(); },
       onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
       onClickCapture: (e: React.MouseEvent) => { if (justDragged.current) { e.preventDefault(); e.stopPropagation(); } },
       style: dragging ? { transform: `translate(${offset.x}px, ${offset.y}px) scale(1.05)`, touchAction: 'none' as const } : undefined,
@@ -215,7 +239,8 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+      <div ref={gridRef} className="grid grid-cols-2 gap-3 sm:gap-4 select-none [&_*]:select-none"
+           style={{ WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}>
         {custom || query || dragId
           ? visible.map(renderCard)
           : groups.map(g => {
