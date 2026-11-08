@@ -17,6 +17,7 @@ import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { useAccounts } from '@/hooks/useAccounts';
 import { AccountFormModal } from '@/components/accounts/AccountModals';
+import { BankPickerSheet } from '@/components/accounts/BankPickerSheet';
 import { AccountKind } from '@/lib/firestore';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
@@ -333,7 +334,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   }`;
 
   const visibleMerchants = showAllMerchants ? merchantSuggestions : merchantSuggestions.slice(0, VISIBLE_MERCHANTS);
-  const visiblePayments = showAllPayments ? paymentOptions : paymentOptions.slice(0, VISIBLE_PAYMENTS);
+  const visiblePayments = paymentOptions.slice(0, VISIBLE_PAYMENTS);
 
   return (
     <>
@@ -504,9 +505,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                   </button>
                 );
               })}
-              <button type="button" onClick={() => setShowAllPayments(!showAllPayments)} className={`${chipClass(false)} normal-case`}>
-                {showAllPayments ? 'Menos' : 'Más…'}
+              <button type="button" onClick={() => setShowAllPayments(true)} className={`${chipClass(false)} normal-case`}>
+                Más…
               </button>
+              {showAllPayments && (
+                <BankPickerSheet title={type === 'gasto' ? '¿Con qué pagaste?' : '¿Dónde lo recibiste?'}
+                                 selected={paymentMethod ? [paymentMethod] : []} favorites={accountMethods}
+                                 onChange={(v) => setPaymentMethod(v[0] || '')} onClose={() => setShowAllPayments(false)} />
+              )}
             </div>
             {activeAccounts.length > 0 && (
               paymentMethod && !accountOfMethod ? (

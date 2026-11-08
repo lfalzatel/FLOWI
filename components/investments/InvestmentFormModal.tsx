@@ -3,8 +3,7 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2, Camera } from 'lucide-react';
 import { getAiKey, readCdtWithAi } from '@/lib/aiAssist';
-import { CategoryIcon } from '@/components/CategoryIcon';
-import { findCatalogEntry } from '@/lib/categories';
+import { BankField, BankPickerSheet } from '@/components/accounts/BankPickerSheet';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useAccounts } from '@/hooks/useAccounts';
@@ -41,6 +40,7 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
   const prevTermMonths = renewFrom ? Math.round(days360(parseDay(renewFrom.startDate), parseDay(renewFrom.maturityDate)) / 30) : 0;
 
   const [bank, setBank] = useState(base?.bank || '');
+  const [bankSheet, setBankSheet] = useState(false);
   // Al renovar, por defecto los intereses se suman al capital (así lo hacen los bancos)
   const [interestMode, setInterestMode] = useState<'suma' | 'pagado'>('suma');
   const initialAmount = renewing && prev ? renewFrom!.amount + prev.netInterest : base?.amount || 0;
@@ -238,18 +238,12 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
             )}
 
             <div>
-              <label htmlFor="inv-bank" className={labelClass}>Banco</label>
-              <input id="inv-bank" type="text" value={bank} maxLength={30} onChange={(e) => setBank(e.target.value)}
-                     placeholder="Ej: Bancolombia" className={inputClass} required />
-              {!renewing && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {BANKS.map(b => (
-                    <button key={b} type="button" onClick={() => setBank(b)} className={`${chipClass(bank === b)} inline-flex items-center gap-1.5`}>
-                      {findCatalogEntry(b) && <CategoryIcon icon={findCatalogEntry(b)!.icon} label={b} className="w-4 h-4 text-sm flex items-center justify-center" />}
-                      {b}
-                    </button>
-                  ))}
-                </div>
+              <span className={labelClass}>Banco</span>
+              <BankField value={bank} onClick={() => setBankSheet(true)} />
+              {bankSheet && (
+                <BankPickerSheet selected={bank ? [bank] : []} onlyBanks allowCustom extra={BANKS}
+                                 favorites={accounts.filter(a => !a.archived).flatMap(a => a.methods)}
+                                 onChange={(v) => setBank((v[0] || '').slice(0, 30))} onClose={() => setBankSheet(false)} />
               )}
             </div>
 

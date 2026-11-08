@@ -2,11 +2,16 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { X, Plus, Trash2, ChevronDown, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { addReminder, updateReminder, deleteReminder, Reminder, ReminderAlert } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
+import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
+import { useData } from '@/components/DataProvider';
+import { suggestReminderCategory } from '@/lib/reminderSuggest';
+import { useMemo } from 'react';
 import { speakText } from '@/lib/voiceParser';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { askForNotifications } from '@/lib/notifPrompt';
@@ -54,7 +59,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const [startMonth, setStartMonth] = useState<string>(initial?.startMonth || thisMonthKey);
   const [amountText, setAmountText] = useState(initial?.amount ? Number(initial.amount).toLocaleString('es-CO') : '');
 
-  const { allCategories: categoryOptions, merchantOptions } = useCategories();
+  const { allCategories: categoryOptions, merchantOptions, expenseCategories } = useCategories();
   const allCategories = [...categoryOptions, ...merchantOptions.filter(mer => !categoryOptions.some(c => c.label === mer.label))];
   const [sound, setSound] = useState(initial?.sound ?? true);
   const [pushEnabled, setPushEnabled] = useState(initial?.pushEnabled ?? true);
@@ -63,7 +68,11 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const [loading, setLoading] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [catSheet, setCatSheet] = useState(false);
+  const [manageView, setManageView] = useState<'form' | 'list' | null>(null);
+  const [showNote, setShowNote] = useState(false);
+  const [showAlerts, setShowAlerts] = useState(false);
+  const { transactions } = useData();
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -170,352 +179,222 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   };
 
   const selectedCategoryData = allCategories.find(c => c.label === category);
+  // Sugerencia de categoría según el título (historial propio y reglas del dictado), sin IA
+  const suggestion = useMemo(
+    () => (title.trim().length >= 3 ? suggestReminderCategory(title, transactions, categoryOptions) : null),
+    [title, transactions, categoryOptions],
+  );
+  const suggestionData = suggestion ? allCategories.find(c => c.label === suggestion) : undefined;
+
+  // ── Estilos y piezas del formulario compacto ──
+  const lbl = `block text-[11px] uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`;
+  const field = `w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'rounded-none font-mono text-accent focus:border-accent' : 'rounded-xl focus:border-accent'}`;
+  const chip = (on: boolean) => `px-2.5 py-2 text-xs font-semibold border transition-all active:scale-95 ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${
+    on ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary hover:text-text-primary hover:bg-white/5'}`;
+  const TYPES: { id: Reminder['type']; label: string }[] = [
+    { id: 'once', label: 'Una vez' }, { id: 'monthly', label: 'Mensual' }, { id: 'yearly', label: 'Anual' },
+    { id: 'weekly', label: 'Semanal' }, { id: 'daily', label: 'Diario' }, { id: 'budget_alert', label: 'Presupuesto' },
+  ];
+  const WEEK = [[1, 'L'], [2, 'M'], [3, 'X'], [4, 'J'], [5, 'V'], [6, 'S'], [0, 'D']] as const;
+  const UNITS: { id: ReminderAlert['unit']; label: string }[] = [{ id: 'minutes', label: 'min' }, { id: 'hours', label: 'horas' }, { id: 'days', label: 'días' }];
+  const hasAmount = type !== 'daily' && type !== 'budget_alert';
+  const timeInput = (
+    <input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className={field} aria-label="Hora" />
+  );
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Overlay */}
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
       <div onClick={onClose} className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} />
 
-      {/* Card container */}
-      <div className={`
-        relative w-full max-w-md max-h-[90vh] overflow-y-auto z-10 p-6 glass-dropdown animate-slide-down
-        ${isTechTheme ? 'border border-accent/50 rounded-none font-mono text-accent' : 'rounded-3xl'}
-      `}>
-        <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
-          <X className="w-5 h-5" />
-        </button>
-        <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2 uppercase font-mono' : 'font-syne font-bold text-xl text-text-primary mb-6'}`}>
-          {reminder ? 'Editar Recordatorio' : 'Nuevo Recordatorio'}
-        </h2>
+      <div className={`relative w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden z-10 glass-dropdown animate-fade-in-up ${isTechTheme ? 'border border-accent/50 rounded-none' : 'rounded-3xl'}`}>
+        <div className={`shrink-0 flex items-center justify-between px-5 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
+          <h2 className={isTechTheme ? 'font-bold text-xl text-accent tracking-wide uppercase' : 'font-syne font-bold text-xl text-text-primary'}>
+            {reminder ? 'Editar recordatorio' : 'Nuevo recordatorio'}
+          </h2>
+          <button type="button" onClick={onClose} aria-label="Cerrar" className={isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Título */}
-          <div>
-            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Título del recordatorio</label>
-            <input
-              type="text"
-              required
-              placeholder="Ej: Pagar arriendo"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={`
-                w-full px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all bg-glass border border-glass-border text-text-primary
-                ${isTechTheme ? 'rounded-none font-mono text-accent placeholder-accent/40' : 'rounded-2xl'}
-              `}
-            />
-          </div>
-
-          {/* Descripción */}
-          <div>
-            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Nota o Descripción (Opcional)</label>
-            <textarea
-              placeholder="Ej: Banco de Bogotá, cuenta corriente"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              className={`
-                w-full px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent transition-all bg-glass border border-glass-border text-text-primary resize-none
-                ${isTechTheme ? 'rounded-none font-mono text-accent placeholder-accent/40' : 'rounded-2xl'}
-              `}
-            />
-          </div>
-
-          {/* Categoría Personalizada */}
-          <div className="relative">
-            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Categoría (Opcional)</label>
-            <div 
-              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              className={`
-                w-full px-3 py-2.5 text-sm flex items-center justify-between cursor-pointer bg-deep border border-glass-border text-text-primary
-                ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
-              `}
-            >
-              {category && selectedCategoryData ? (
-                <div className="flex items-center gap-2">
-                  <CategoryIcon icon={selectedCategoryData.icon} label={selectedCategoryData.label} className="w-4 h-4" />
-                  <span>{selectedCategoryData.label}</span>
-                </div>
-              ) : (
-                <span className="text-text-muted">Sin categoría</span>
+        <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-4">
+            {/* Título + sugerencia de categoría */}
+            <div>
+              <label className={lbl} htmlFor="rem-title">Título</label>
+              <input id="rem-title" type="text" required placeholder="Ej: Pagar arriendo, cambio de aceite" value={title}
+                     onChange={(e) => setTitle(e.target.value)} className={field} />
+              {suggestion && !category && type !== 'budget_alert' && (
+                <button type="button" onClick={() => setCategory(suggestion)}
+                        className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] border border-dashed border-accent/50 text-accent ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
+                  <Sparkles className="w-3.5 h-3.5" /> ¿Categoría
+                  {suggestionData && <CategoryIcon icon={suggestionData.icon} label={suggestionData.label} className="w-4 h-4 text-sm flex items-center justify-center" />}
+                  <b>{suggestion}</b>? Usar
+                </button>
               )}
             </div>
-            
-            {isCategoryOpen && (
-              <div className={`absolute z-20 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-deep border border-glass-border shadow-lg ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
-                <div 
-                  className="px-3 py-2 hover:bg-white/10 cursor-pointer text-sm text-text-primary border-b border-glass-border/30"
-                  onClick={() => { setCategory(''); setIsCategoryOpen(false); }}
-                >
-                  Sin categoría
+
+            {/* Categoría | Valor */}
+            {type !== 'budget_alert' && (
+              <div className={`grid gap-2 ${hasAmount ? 'grid-cols-[1.3fr_1fr]' : 'grid-cols-1'}`}>
+                <div className="min-w-0">
+                  <span className={lbl}>Categoría</span>
+                  <button type="button" onClick={() => setCatSheet(true)} className={`${field} flex items-center gap-2 text-left`}>
+                    {selectedCategoryData
+                      ? <><CategoryIcon icon={selectedCategoryData.icon} label={selectedCategoryData.label} className="w-4 h-4 text-sm flex items-center justify-center shrink-0" /><span className="truncate">{selectedCategoryData.label}</span></>
+                      : <span className="text-text-muted truncate">{category || 'Elegir'}</span>}
+                    <ChevronDown className="w-4 h-4 ml-auto text-text-muted shrink-0" />
+                  </button>
                 </div>
-                {allCategories.map(cat => (
-                  <div 
-                    key={cat.label}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 cursor-pointer text-sm text-text-primary"
-                    onClick={() => { setCategory(cat.label); setIsCategoryOpen(false); }}
-                  >
-                    <CategoryIcon icon={cat.icon} label={cat.label} className="w-4 h-4" />
-                    <span>{cat.label}</span>
+                {hasAmount && (
+                  <div className="min-w-0">
+                    <label className={lbl} htmlFor="rem-amount">Valor</label>
+                    <input id="rem-amount" type="text" inputMode="numeric" placeholder="Opcional" value={amountText}
+                           onChange={(e) => { const d = e.target.value.replace(/\D/g, ''); setAmountText(d ? Number(d).toLocaleString('es-CO') : ''); }}
+                           className={field} />
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
 
-          {/* Tipo / Frecuencia */}
-          <div>
-            <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Frecuencia / Tipo</label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as Reminder['type'])}
-              className={`
-                w-full px-3 py-2.5 text-sm focus:outline-none bg-deep border border-glass-border text-text-primary
-                ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
-              `}
-            >
-              <option value="once">Una vez</option>
-              <option value="daily">Diario</option>
-              <option value="weekly">Semanal</option>
-              <option value="monthly">Mensual</option>
-              <option value="yearly">Anual (cumpleaños, SOAT…)</option>
-              <option value="budget_alert">Alerta de Presupuesto</option>
-            </select>
-          </div>
+            {/* Frecuencia */}
+            <div>
+              <span className={lbl}>Frecuencia</span>
+              <div className="grid grid-cols-3 gap-1.5">
+                {TYPES.map(t => <button key={t.id} type="button" onClick={() => setType(t.id)} className={chip(type === t.id)}>{t.label}</button>)}
+              </div>
+            </div>
 
-          {/* Campos condicionales */}
-          {type !== 'budget_alert' && (
-            <div className="flex gap-4">
-              {(type === 'once' || type === 'yearly') && (
-                <div className="flex-1">
-                  <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>{type === 'yearly' ? 'Fecha (se repite cada año)' : 'Fecha'}</label>
-                  <input
-                    type="date"
-                    required
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className={`
-                      w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'}
-                      ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
-                    `}
-                  />
+            {/* Cuándo: cambia según la frecuencia */}
+            {(type === 'once' || type === 'yearly') && (
+              <div className="grid grid-cols-[1.4fr_1fr] gap-2">
+                <div>
+                  <label className={lbl} htmlFor="rem-date">{type === 'yearly' ? 'Fecha (cada año)' : 'Fecha'}</label>
+                  <input id="rem-date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={field} />
                 </div>
-              )}
-              <div className="flex-1">
-                <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Hora {type === 'once' ? 'del evento' : 'base'}</label>
-                <input
-                  type="time"
-                  required
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className={`
-                    w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'}
-                    ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
-                  `}
-                />
+                <div><span className={lbl}>Hora</span>{timeInput}</div>
               </div>
-            </div>
-          )}
-
-          {type === 'weekly' && (
-            <div>
-              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Día de la semana</label>
-              <select
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(Number(e.target.value))}
-                className={`
-                  w-full px-3 py-2.5 text-sm focus:outline-none bg-deep border border-glass-border text-text-primary
-                  ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
-                `}
-              >
-                <option value={1}>Lunes</option>
-                <option value={2}>Martes</option>
-                <option value={3}>Miércoles</option>
-                <option value={4}>Jueves</option>
-                <option value={5}>Viernes</option>
-                <option value={6}>Sábado</option>
-                <option value={0}>Domingo</option>
-              </select>
-            </div>
-          )}
-
-          {type === 'monthly' && (
-            <div>
-              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Día del mes (1 - 31)</label>
-              <input
-                type="number"
-                min={1}
-                max={31}
-                required
-                value={dayOfMonth}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val === '') {
-                    setDayOfMonth('');
-                  } else {
-                    const num = parseInt(val, 10);
-                    if (!isNaN(num)) {
-                      setDayOfMonth(Math.max(1, Math.min(31, num)));
-                    }
-                  }
-                }}
-                className={`
-                  w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary
-                  ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
-                `}
-              />
-            </div>
-          )}
-
-          {type === 'monthly' && (
-            <div>
-              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Repetir cada</label>
-              <div className="flex flex-wrap gap-1.5">
-                {[1, 2, 3, 4, 6].map(n => (
-                  <button key={n} type="button" onClick={() => setEveryMonths(n)}
-                          className={`px-3 py-2 text-xs font-semibold border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${everyMonths === n ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary'}`}>
-                    {n === 1 ? 'Mes' : `${n} meses`}
-                  </button>
-                ))}
-              </div>
-              {everyMonths > 1 && (
-                <div className="mt-3">
-                  <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>¿En qué mes toca la próxima vez?</label>
-                  <input type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value || thisMonthKey)}
-                         className={`w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}`} />
-                  <p className="text-[11px] text-text-muted mt-1">Desde ahí se repite cada {everyMonths} meses, el día {dayOfMonth || 1}.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {type !== 'daily' && type !== 'budget_alert' && (
-            <div>
-              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Valor aproximado (opcional)</label>
-              <input type="text" inputMode="numeric" placeholder="$ 0" value={amountText}
-                     onChange={(e) => { const d = e.target.value.replace(/\D/g, ''); setAmountText(d ? Number(d).toLocaleString('es-CO') : ''); }}
-                     className={`w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}`} />
-              <p className="text-[11px] text-text-muted mt-1">Lo muestro en Próximos compromisos y lo reservo en "Hoy puedes gastar" hasta que lo pagues.</p>
-            </div>
-          )}
-
-          {type === 'budget_alert' && (
-            <div>
-              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-                % del presupuesto mensual: {budgetPercent}%
-              </label>
-              <input
-                type="range"
-                min={50}
-                max={100}
-                value={budgetPercent}
-                onChange={(e) => setBudgetPercent(Number(e.target.value))}
-                className="w-full accent-accent bg-white/10 h-1.5 rounded-lg appearance-none cursor-pointer"
-              />
-            </div>
-          )}
-          
-          {/* Múltiples Alertas (Solo si no es budget_alert) */}
-          {type !== 'budget_alert' && (
-            <div className="pt-2 border-t border-glass-border/40">
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs text-text-muted uppercase tracking-wider">Alertas previas (Opcional)</label>
-                <button
-                  type="button"
-                  onClick={addAlert}
-                  className="flex items-center gap-1 text-xs text-accent hover:underline"
-                >
-                  <Plus className="w-3 h-3" /> Agregar alerta
-                </button>
-              </div>
-              
+            )}
+            {type === 'daily' && <div className="w-1/2"><span className={lbl}>Hora</span>{timeInput}</div>}
+            {type === 'weekly' && (
               <div className="space-y-2">
+                <span className={lbl}>Día de la semana</span>
+                <div className="grid grid-cols-7 gap-1">
+                  {WEEK.map(([d, l]) => <button key={d} type="button" onClick={() => setDayOfWeek(d)} className={`${chip(dayOfWeek === d)} px-0`}>{l}</button>)}
+                </div>
+                <div className="w-1/2"><span className={lbl}>Hora</span>{timeInput}</div>
+              </div>
+            )}
+            {type === 'monthly' && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-[0.8fr_1fr] gap-2">
+                  <div>
+                    <label className={lbl} htmlFor="rem-day">Día del mes</label>
+                    <input id="rem-day" type="number" min={1} max={31} required value={dayOfMonth} inputMode="numeric"
+                           onChange={(e) => { const v = e.target.value; if (v === '') setDayOfMonth(''); else { const n = parseInt(v, 10); if (!isNaN(n)) setDayOfMonth(Math.max(1, Math.min(31, n))); } }}
+                           className={field} />
+                  </div>
+                  <div><span className={lbl}>Hora</span>{timeInput}</div>
+                </div>
+                <div>
+                  <span className={lbl}>Repetir cada</span>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[1, 2, 3, 4, 6].map(n => <button key={n} type="button" onClick={() => setEveryMonths(n)} className={`${chip(everyMonths === n)} px-0`}>{n === 1 ? 'Mes' : `${n} m`}</button>)}
+                  </div>
+                </div>
+                {everyMonths > 1 && (
+                  <div>
+                    <label className={lbl} htmlFor="rem-start">¿En qué mes toca la próxima vez?</label>
+                    <input id="rem-start" type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value || thisMonthKey)} className={field} />
+                    <p className="text-[11px] text-text-muted mt-1">Desde ahí se repite cada {everyMonths} meses, el día {dayOfMonth || 1}.</p>
+                  </div>
+                )}
+              </div>
+            )}
+            {type === 'budget_alert' && (
+              <div>
+                <span className={lbl}>Avisar al consumir el {budgetPercent}% del presupuesto</span>
+                <input type="range" min={50} max={100} value={budgetPercent} onChange={(e) => setBudgetPercent(Number(e.target.value))}
+                       className="w-full accent-accent bg-white/10 h-1.5 rounded-lg appearance-none cursor-pointer" />
+              </div>
+            )}
+
+            {/* Cómo avisar */}
+            <div>
+              <span className={lbl}>Cómo avisarte</span>
+              <div className="grid grid-cols-4 gap-1.5">
+                <button type="button" onClick={() => setPushEnabled(!pushEnabled)} className={`${chip(pushEnabled)} px-0`}>Push</button>
+                <button type="button" onClick={() => setInAppEnabled(!inAppEnabled)} className={`${chip(inAppEnabled)} px-0`}>En la app</button>
+                <button type="button" onClick={() => setSound(!sound)} className={`${chip(sound)} px-0`}>Sonido</button>
+                <button type="button" onClick={() => setActive(!active)} className={`${chip(active)} px-0`}>{active ? 'Activo' : 'Pausado'}</button>
+              </div>
+            </div>
+
+            {/* Opcionales plegados */}
+            {(showNote || description) ? (
+              <div>
+                <label className={lbl} htmlFor="rem-note">Nota</label>
+                <textarea id="rem-note" rows={2} placeholder="Ej: referencia de pago, cuenta, observaciones" value={description}
+                          onChange={(e) => setDescription(e.target.value)} className={`${field} resize-none`} />
+              </div>
+            ) : null}
+
+            {type !== 'budget_alert' && (showAlerts || alerts.length > 0) && (
+              <div className="space-y-2">
+                <span className={lbl}>Avisarme antes</span>
                 {alerts.map(alert => (
-                  <div key={alert.id} className="flex gap-2 items-center">
-                    <input
-                      type="number"
-                      min={1}
-                      value={alert.value}
-                      onChange={e => updateAlert(alert.id, 'value', Number(e.target.value))}
-                      className={`w-16 px-2 py-1.5 text-sm bg-glass border border-glass-border text-text-primary text-center ${isTechTheme ? 'rounded-none font-mono' : 'rounded-lg'}`}
-                    />
-                    <select
-                      value={alert.unit}
-                      onChange={e => updateAlert(alert.id, 'unit', e.target.value)}
-                      className={`flex-1 px-2 py-1.5 text-sm bg-deep border border-glass-border text-text-primary ${isTechTheme ? 'rounded-none font-mono' : 'rounded-lg'}`}
-                    >
-                      <option value="minutes">Minutos antes</option>
-                      <option value="hours">Horas antes</option>
-                      <option value="days">Días antes</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => removeAlert(alert.id)}
-                      className="p-1.5 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div key={alert.id} className="flex items-center gap-1.5">
+                    <input type="number" min={1} value={alert.value} inputMode="numeric"
+                           onChange={e => updateAlert(alert.id, 'value', Number(e.target.value))}
+                           className={`${field} !w-16 text-center px-1`} aria-label="Cantidad" />
+                    {UNITS.map(u => (
+                      <button key={u.id} type="button" onClick={() => updateAlert(alert.id, 'unit', u.id)} className={`${chip(alert.unit === u.id)} flex-1 px-0`}>{u.label}</button>
+                    ))}
+                    <button type="button" onClick={() => removeAlert(alert.id)} aria-label="Quitar aviso" className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 ))}
+                <button type="button" onClick={addAlert} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Otro aviso</button>
               </div>
+            )}
+
+            <div className="flex flex-wrap gap-4">
+              {!showNote && !description && (
+                <button type="button" onClick={() => setShowNote(true)} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Nota</button>
+              )}
+              {type !== 'budget_alert' && !showAlerts && alerts.length === 0 && (
+                <button type="button" onClick={() => { setShowAlerts(true); addAlert(); }} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Avisarme antes</button>
+              )}
             </div>
-          )}
-
-          <div className="border-t border-glass-border/40 pt-3 space-y-2">
-            <ToggleSwitch
-              label="Notificación Push (Segundo plano)"
-              checked={pushEnabled}
-              onChange={setPushEnabled}
-              theme={theme}
-            />
-            <ToggleSwitch
-              label="Notificación In-App (Toast)"
-              checked={inAppEnabled}
-              onChange={setInAppEnabled}
-              theme={theme}
-            />
-            <ToggleSwitch
-              label="Efecto de Sonido"
-              checked={sound}
-              onChange={setSound}
-              theme={theme}
-            />
-            <ToggleSwitch
-              label="Recordatorio Activo"
-              checked={active}
-              onChange={setActive}
-              theme={theme}
-            />
-          </div>
-
-          {/* Action button */}
-          <div className="space-y-2 mt-6">
-            <button
-              type="submit"
-              disabled={loading}
-              className={`
-                w-full flex items-center justify-center py-3 bg-gradient-to-br from-accent to-accent-dim
-                ${theme === 'light' ? 'text-white' : 'text-black'}
-                font-semibold text-sm shadow-lg shadow-accent/20 transition-all hover:opacity-90 active:scale-[0.98]
-                ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}
-              `}
-            >
-              {loading ? 'Guardando...' : reminder ? 'Actualizar Recordatorio' : 'Crear Recordatorio'}
-            </button>
 
             {reminder?.id && (
-              <button
-                type="button"
-                onClick={() => setShowConfirmDelete(true)}
-                disabled={loading}
-                className="w-full py-2.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors flex items-center justify-center gap-1.5"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Eliminar Recordatorio</span>
+              <button type="button" onClick={() => setShowConfirmDelete(true)} disabled={loading}
+                      className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${isTechTheme ? 'rounded-none uppercase' : 'rounded-xl'}`}>
+                <Trash2 className="w-4 h-4" /> Eliminar recordatorio
               </button>
             )}
           </div>
+
+          <div className={`shrink-0 px-5 pt-3 pb-4 border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
+            <button type="submit" disabled={loading}
+                    className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+              {loading ? 'Guardando...' : reminder ? 'Guardar cambios' : 'Crear recordatorio'}
+            </button>
+          </div>
         </form>
       </div>
+
+      {catSheet && (
+        <CategoryPickerSheet
+          type="gasto"
+          categories={expenseCategories}
+          selected={category}
+          recent={suggestion ? [suggestion] : []}
+          onSelect={(label) => { setCategory(label); setCatSheet(false); }}
+          onClose={() => setCatSheet(false)}
+          onCreate={() => { setCatSheet(false); setManageView('form'); }}
+          onManage={() => { setCatSheet(false); setManageView('list'); }}
+        />
+      )}
+      {manageView && (
+        <ManageCategoriesModal onClose={() => setManageView(null)} onCreated={(newLabel) => setCategory(newLabel)} initialView={manageView} />
+      )}
 
       <ConfirmDialog
         isOpen={showConfirmDelete}

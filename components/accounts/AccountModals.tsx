@@ -5,9 +5,10 @@ import { X, Trash2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { Account, AccountKind, addAccount, addTransfer, updateAccount } from '@/lib/firestore';
-import { PAYMENT_METHODS } from '@/lib/categories';
 import { KIND_EMOJI, KIND_LABEL, suggestMethods } from '@/lib/accounts';
 import { AccountIcon } from '@/components/accounts/AccountIcon';
+import { BankLogo, BankPickerSheet } from '@/components/accounts/BankPickerSheet';
+import { Plus } from 'lucide-react';
 // Montos con miles y hasta dos decimales con coma, como en la app del banco ("1.234.567,89")
 export function formatMoneyInput(value: string | number): string {
   let raw = typeof value === 'number' ? value.toFixed(2).replace('.', ',').replace(/,00$/, '') : value;
@@ -81,6 +82,7 @@ export function AccountFormModal({ account, accounts, onClose, onDelete, initial
   const [methods, setMethods] = useState<string[]>(account?.methods || initial?.methods || []);
   const [methodsTouched, setMethodsTouched] = useState(!!account || !!initial);
   const [purpose, setPurpose] = useState<'gastar' | 'ahorro'>(account?.purpose || 'gastar');
+  const [methodsSheet, setMethodsSheet] = useState(false);
   const [balance, setBalance] = useState('');
   const [isDefault, setIsDefault] = useState(account ? !!account.isDefault : isFirst);
   const [saving, setSaving] = useState(false);
@@ -163,15 +165,23 @@ export function AccountFormModal({ account, accounts, onClose, onDelete, initial
       <div>
         <span className={s.label}>¿Qué movimientos caen aquí?</span>
         <div className="flex flex-wrap gap-1.5">
-          {PAYMENT_METHODS.map(p => p.label).map(m => {
-            const owner = taken.get(m);
-            return (
-              <button key={m} type="button" disabled={!!owner} onClick={() => toggleMethod(m)}
-                      title={owner ? `Ya está en ${owner}` : undefined}
-                      className={`${s.chip(shownMethods.includes(m) && !owner)} disabled:opacity-35`}>{m}</button>
-            );
-          })}
+          {shownMethods.filter(m => !taken.has(m)).map(m => (
+            <span key={m} className={`${s.chip(true)} inline-flex items-center gap-1.5`}>
+              <BankLogo label={m} className="w-4 h-4 text-sm flex items-center justify-center" /> {m}
+              <button type="button" onClick={() => toggleMethod(m)} aria-label={`Quitar ${m}`} className="ml-0.5 opacity-70 hover:opacity-100"><X className="w-3.5 h-3.5" /></button>
+            </span>
+          ))}
+          <button type="button" onClick={() => setMethodsSheet(true)} className={`${s.chip(false)} inline-flex items-center gap-1`}>
+            <Plus className="w-3.5 h-3.5" /> Agregar
+          </button>
         </div>
+        {methodsSheet && (
+          <BankPickerSheet title="¿Qué movimientos caen aquí?" multiple
+                           selected={shownMethods.filter(m => !taken.has(m))}
+                           disabled={Object.fromEntries(Array.from(taken.entries()).map(([m, owner]) => [m, `Ya está en ${owner}`]))}
+                           onChange={(v) => { setMethodsTouched(true); setMethods(v); }}
+                           onClose={() => setMethodsSheet(false)} />
+        )}
         <p className={s.hint}>Los gastos e ingresos que registres con estos medios de pago mueven esta cuenta.</p>
       </div>
 
