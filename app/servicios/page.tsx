@@ -57,12 +57,6 @@ export default function ServiciosPage() {
           Servicios
         </h1>
 
-      <div className="mb-4 flex items-center gap-2">
-        <GridIcon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`} />
-        <h2 className={`text-lg font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
-          Categorías
-        </h2>
-      </div>
 
       {/* Grid de Servicios (agrupada; se puede reordenar manteniendo presionada una tarjeta) */}
       <ServiceGrid services={SERVICES} groups={SERVICE_GROUPS} query="" onProfile={() => setShowProfileModal(true)} />
@@ -159,16 +153,5 @@ export default function ServiciosPage() {
       <BottomNav />
       {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
     </div>
-  );
-}
-
-function GridIcon(props: any) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect width="7" height="7" x="3" y="3" rx="1" />
-      <rect width="7" height="7" x="14" y="3" rx="1" />
-      <rect width="7" height="7" x="14" y="14" rx="1" />
-      <rect width="7" height="7" x="3" y="14" rx="1" />
-    </svg>
   );
 }
