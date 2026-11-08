@@ -60,6 +60,15 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
 
   const check = (str: string) => label?.toLowerCase() === str || icon === str;
   if (check('netflix')) return <SiNetflix color="#E50914" className={className || "w-5 h-5"} />;
+  if (check('flowi')) return (
+    <svg className={className || 'w-5 h-5'} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="FLOWI">
+      <rect width="100" height="100" rx="22" fill="#0B1220" />
+      <line x1="28" y1="25" x2="28" y2="75" stroke="#00C4CC" strokeWidth="14" strokeLinecap="round" />
+      <line x1="28" y1="25" x2="60" y2="25" stroke="#10B981" strokeWidth="14" strokeLinecap="round" />
+      <line x1="28" y1="50" x2="48" y2="50" stroke="#00C4CC" strokeWidth="14" strokeLinecap="round" />
+      <circle cx="72" cy="50" r="7" fill="#F97316" />
+    </svg>
+  );
   const cls = className || 'w-5 h-5';
   if (check('steam')) return <SiSteam color="#66C0F4" className={cls} />;
   if (check('epic games')) return <SiEpicgames color="#FFFFFF" className={cls} />;

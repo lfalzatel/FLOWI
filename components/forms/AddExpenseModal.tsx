@@ -209,8 +209,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     // "Mercado en jumbo" → Mercado · Jumbo
     const detected = detectMerchantInText(value);
     if (!detected) { suggestFromText(value); return; }
-    if (!category) {
-      const suggested = detected.categories.find(c => expenseCategories.some(e => e.label === c));
+    if (!category || category === autoCategory.current) {
+      const byText = suggestTxCategory(value, type, transactions, typedCategories);
+      const suggested = (byText && detected.categories.includes(byText) ? byText : null)
+        ?? detected.categories.find(c => expenseCategories.some(e => e.label === c));
+      if (suggested) autoCategory.current = suggested;
       if (suggested) {
         selectCategory(suggested, detected.label);
       }

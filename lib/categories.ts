@@ -386,6 +386,10 @@ const MERCHANT_LIST: MerchantDef[] = [
   ...m(['Idiomas', 'Apps e IA'], [
     ['Duolingo', '🦉', '#58CC02'],
   ]),
+  // FLOWI: el pago de Premium (Suscripciones) o un aporte para apoyar la app (Donaciones)
+  ...m(['Suscripciones', 'Donaciones'], [
+    ['FLOWI', 'flowi', '#00C4CC'],
+  ]),
   ...m(['Suscripciones'], [
     ['Netflix', 'netflix', '#E50914'],
     ['Disney+', '📺', '#113CCF'],

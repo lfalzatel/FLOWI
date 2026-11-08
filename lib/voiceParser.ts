@@ -257,6 +257,7 @@ function detectType(normalized: string): { type: TxType; direction?: 'debo' | 'm
 // ─── 4. Categoría (catálogo actual) ─────────────────────────────────────────────────────────
 
 const EXPENSE_KEYWORDS: [RegExp, string][] = [
+  [/\b(?:donacion|donaciones|done|aporte\s+(?:a|para)|apoyo\s+(?:a|para)|apoyar\s+(?:a|el))\b/, 'Donaciones'],
   // Negocio
   [/\b(?:mercancia|surtido|inventario|para\s+(?:vender|la\s+venta|el\s+negocio)|proveedor(?:es)?)\b/, 'Inventario'],
   [/\b(?:empaques?|bolsas?\s+(?:para|de)\s+(?:empacar|los\s+pedidos|la\s+ropa)|cajas?\s+para\s+(?:empacar|enviar)|etiquetas|stickers)\b/, 'Empaques'],
