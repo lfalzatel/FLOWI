@@ -166,7 +166,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             <p className={`text-xs sm:text-sm font-bold truncate ${
               isTechTheme ? 'text-orange-400 font-mono' : 'text-orange-400 font-syne'
             }`}>
-              {formatCurrency(gastosFijos, profile?.currency)}
+              <AnimatedNumber value={gastosFijos} format={(n: number) => formatCurrency(n, profile?.currency)} />
             </p>
             <span className={`block text-[9px] mt-0.5 truncate ${
               isTechTheme ? 'text-accent/50' : 'text-text-muted'
@@ -198,7 +198,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                 ? 'text-red-400 font-syne' 
                 : isTechTheme ? 'text-accent font-mono' : 'text-emerald-400 font-syne'
             }`}>
-              {formatCurrency(disponibleParaGastar, profile?.currency)}
+              <AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} />
             </p>
             <span className={`block text-[9px] mt-0.5 truncate ${
               isTechTheme ? 'text-accent/50' : 'text-text-muted'
@@ -227,8 +227,8 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               isTechTheme ? 'text-accent font-mono' : 'text-accent font-syne'
             }`}>
               {isCurrentMonth 
-                ? formatCurrency(cuotaDiaria, profile?.currency) 
-                : formatCurrency(baseLimit > 0 ? baseLimit / daysInMonth : 0, profile?.currency)
+                ? <AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} /> 
+                : <AnimatedNumber value={baseLimit > 0 ? baseLimit / daysInMonth : 0} format={(n: number) => formatCurrency(n, profile?.currency)} />
               }
             </p>
             <span className="block text-[9px] mt-0.5 truncate text-accent/80">
@@ -259,11 +259,11 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               `Has superado tus ingresos/presupuesto del mes por ${formatCurrency(Math.abs(disponibleParaGastar), profile?.currency)}. Procura restringir tus nuevos gastos variables.`
             ) : isCurrentMonth && hoy && hoy.remainingToday < 0 && hoy.tomorrowAllowance !== null ? (
               <>
-                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Hoy ya superaste tu cuota de {formatCurrency(cuotaDiaria, profile?.currency)}; desde mañana procura no pasar de <strong>{formatCurrency(hoy.tomorrowAllowance, profile?.currency)}/día</strong> durante los <strong>{diasRestantes - 1} días restantes</strong>.
+                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Hoy ya superaste tu cuota de <AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} />; desde mañana procura no pasar de <strong><AnimatedNumber value={hoy.tomorrowAllowance} format={(n: number) => formatCurrency(n, profile?.currency)} />/día</strong> durante los <strong>{diasRestantes - 1} días restantes</strong>.
               </>
             ) : isCurrentMonth ? (
               <>
-                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong>{formatCurrency(cuotaDiaria, profile?.currency)}/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
+                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong><AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} />/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
               </>
             ) : (
               disponibleParaGastar >= 0 
@@ -334,7 +334,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                 <div className={`p-4 rounded-2xl ${isTechTheme ? 'bg-accent/10 border border-accent/30' : 'bg-orange-500/10 border border-orange-500/20'}`}>
                   <span className={`text-xs block font-semibold ${isTechTheme ? 'text-accent' : 'text-orange-400'}`}>Total Gastos Fijos</span>
                   <p className={`text-2xl font-bold mt-1 ${isTechTheme ? 'text-accent font-mono' : 'text-orange-400 font-syne'}`}>
-                    {formatCurrency(gastosFijos, profile?.currency)}
+                    <AnimatedNumber value={gastosFijos} format={(n: number) => formatCurrency(n, profile?.currency)} />
                   </p>
                   <p className={`text-xs mt-1 ${isTechTheme ? 'text-accent/70' : 'text-text-secondary'}`}>
                     Corresponde a {fixedTransactionsList.length} pagos recurrentes en este período.
@@ -368,7 +368,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                           </div>
                         </div>
                         <span className={`text-xs font-bold ${isTechTheme ? 'text-orange-400 font-mono' : 'text-orange-400 font-syne'}`}>
-                          {formatCurrency(tx.amount, profile?.currency)}
+                          <AnimatedNumber value={tx.amount} format={(n: number) => formatCurrency(n, profile?.currency)} />
                         </span>
                       </div>
                     ))
@@ -404,7 +404,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                       (=) Disponible Libre Restante
                     </span>
                     <span className={`text-base font-bold ${disponibleParaGastar < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                      {formatCurrency(disponibleParaGastar, profile?.currency)}
+                      <AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} />
                     </span>
                   </div>
                 </div>
@@ -438,7 +438,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                             </div>
                           </div>
                           <span className={`text-xs font-bold ${isTechTheme ? 'text-accent font-mono' : 'text-text-primary font-syne'}`}>
-                            {formatCurrency(tx.amount, profile?.currency)}
+                            <AnimatedNumber value={tx.amount} format={(n: number) => formatCurrency(n, profile?.currency)} />
                           </span>
                         </div>
                       ))}
@@ -454,11 +454,11 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                 <div className={`p-4 rounded-2xl ${isTechTheme ? 'bg-accent/10 border border-accent/30' : 'bg-accent/10 border border-accent/20'}`}>
                   <span className="text-xs block font-bold text-accent uppercase tracking-wider">Cuota Diaria Recomendada</span>
                   <p className={`text-3xl font-bold mt-1 text-accent ${isTechTheme ? 'font-mono' : 'font-syne'}`}>
-                    {formatCurrency(cuotaDiaria, profile?.currency)} <span className="text-sm font-normal">/ día</span>
+                    <AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} /> <span className="text-sm font-normal">/ día</span>
                   </p>
                   <p className={`text-xs mt-1 ${isTechTheme ? 'text-accent/80' : 'text-text-secondary'}`}>
                     Basado en tus {diasRestantes} días restantes del mes, contando hoy.
-                    {hoy && hoy.spentToday > 0 && <> Hoy llevas {formatCurrency(hoy.spentToday, profile?.currency)} de esta cuota.</>}
+                    {hoy && hoy.spentToday > 0 && <> Hoy llevas <AnimatedNumber value={hoy.spentToday} format={(n: number) => formatCurrency(n, profile?.currency)} /> de esta cuota.</>}
                   </p>
                 </div>
 
@@ -469,7 +469,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                       Gasto Diario Promedio Real
                     </span>
                     <p className={`text-sm font-bold mt-0.5 ${isTechTheme ? 'text-accent font-mono' : 'text-text-primary font-syne'}`}>
-                      {formatCurrency(promedioGastoDiarioActual, profile?.currency)} / día
+                      <AnimatedNumber value={promedioGastoDiarioActual} format={(n: number) => formatCurrency(n, profile?.currency)} /> / día
                     </p>
                     <span className={`text-[9px] ${isTechTheme ? 'text-accent/50' : 'text-text-muted'}`}>
                       En los últimos {daysPassed} días
@@ -481,7 +481,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                       Disponible Total
                     </span>
                     <p className={`text-sm font-bold mt-0.5 ${disponibleParaGastar < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                      {formatCurrency(disponibleParaGastar, profile?.currency)}
+                      <AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} />
                     </p>
                     <span className={`text-[9px] ${isTechTheme ? 'text-accent/50' : 'text-text-muted'}`}>
                       {compromisos > 0

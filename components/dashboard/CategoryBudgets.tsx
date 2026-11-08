@@ -328,7 +328,7 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                                           <div className="h-full bg-accent/70 rounded-full" style={{ width: `${share}%` }} />
                                         </div>
                                       </div>
-                                      <span className="w-8 text-right text-[10px] text-text-muted shrink-0">{share}%</span>
+                                      <span className="w-8 text-right text-[10px] text-text-muted shrink-0"><AnimatedNumber value={share} format={(n: number) => `${Math.round(n)}%`} /></span>
                                     </div>
                                   );
                                 })}

@@ -264,7 +264,7 @@ export default function PresupuestosPage() {
                   ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                   : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
             }`}>
-              {isOverGlobalBudget ? 'EXCEDIDO' : `${percentageSpent}% CONSUMIDO`}
+              {isOverGlobalBudget ? 'EXCEDIDO' : <><AnimatedNumber value={percentageSpent} format={(n: number) => `${Math.round(n)}%`} /> CONSUMIDO</>}
             </span>
           </div>
 
@@ -276,7 +276,7 @@ export default function PresupuestosPage() {
                 {filterType === 'all' ? 'Ingresos Totales' : filterType === 'month' ? 'Ingresos este mes' : filterType === 'week' ? 'Ingresos esta semana' : 'Ingresos este día'}
               </span>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-emerald-400 font-mono' : 'text-emerald-400'}`}>
-                {formatCurrency(totalIncomeFiltered, currency)}
+                <AnimatedNumber value={totalIncomeFiltered} format={(n: number) => formatCurrency(n, currency)} />
               </p>
             </div>
 
@@ -286,7 +286,7 @@ export default function PresupuestosPage() {
                 {filterType === 'all' ? 'Gastado Histórico' : filterType === 'month' ? 'Gastado este mes' : filterType === 'week' ? 'Gastado esta semana' : 'Gastado este día'}
               </span>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                {formatCurrency(totalSpentFiltered, currency)}
+                <AnimatedNumber value={totalSpentFiltered} format={(n: number) => formatCurrency(n, currency)} />
               </p>
             </div>
 
@@ -307,7 +307,7 @@ export default function PresupuestosPage() {
                 </button>
               </div>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                {globalBudget > 0 ? formatCurrency(globalBudget, currency) : 'Sin asignar'}
+                {globalBudget > 0 ? <AnimatedNumber value={globalBudget} format={(n: number) => formatCurrency(n, currency)} /> : 'Sin asignar'}
               </p>
             </div>
 
@@ -319,7 +319,7 @@ export default function PresupuestosPage() {
               <p className={`text-lg font-bold mt-0.5 ${
                 globalRemaining < 0 ? 'text-red-400' : 'text-emerald-400'
               }`}>
-                {globalBudget > 0 ? formatCurrency(Math.abs(globalRemaining), currency) : '$0'}
+                {globalBudget > 0 ? <AnimatedNumber value={Math.abs(globalRemaining)} format={(n: number) => formatCurrency(n, currency)} /> : '$0'}
               </p>
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function PresupuestosPage() {
                 {dailyRecommendedBudget > 0 && !isOverGlobalBudget && (
                   <span className="text-emerald-400 font-semibold flex items-center gap-1">
                     <TrendingUp className="w-3.5 h-3.5" />
-                    Sugerido diario: {formatCurrency(dailyRecommendedBudget, currency)}/día
+                    Sugerido diario: <AnimatedNumber value={dailyRecommendedBudget} format={(n: number) => formatCurrency(n, currency)} />/día
                   </span>
                 )}
               </div>
@@ -433,9 +433,9 @@ export default function PresupuestosPage() {
                       <span className={`font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{item.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-text-muted">{item.percentage}%</span>
+                      <span className="text-text-muted"><AnimatedNumber value={item.percentage} format={(n: number) => `${Math.round(n)}%`} /></span>
                       <strong className={isTechTheme ? 'text-accent font-mono' : 'text-text-primary'}>
-                        {formatCurrency(item.value, currency)}
+                        <AnimatedNumber value={item.value} format={(n: number) => formatCurrency(n, currency)} />
                       </strong>
                     </div>
                   </div>
@@ -584,7 +584,7 @@ export default function PresupuestosPage() {
                 <div>
                   <p className="text-xs font-bold text-red-400 uppercase">Alerta de Presupuesto Global Excedido</p>
                   <p className="text-xs text-text-muted mt-0.5">
-                    Has superado tu límite mensual proyectado por {formatCurrency(Math.abs(globalRemaining), currency)}. Intenta moderar los gastos variables en los {remainingDays} días restantes.
+                    Has superado tu límite mensual proyectado por <AnimatedNumber value={Math.abs(globalRemaining)} format={(n: number) => formatCurrency(n, currency)} />. Intenta moderar los gastos variables en los {remainingDays} días restantes.
                   </p>
                 </div>
               </div>
@@ -594,7 +594,7 @@ export default function PresupuestosPage() {
                 <div>
                   <p className="text-xs font-bold text-yellow-400 uppercase">Presupuesto al 80% de Capacidad</p>
                   <p className="text-xs text-text-muted mt-0.5">
-                    Estás cerca de alcanzar tu límite mensual. Te recomendamos mantener tu gasto diario por debajo de {formatCurrency(dailyRecommendedBudget, currency)}.
+                    Estás cerca de alcanzar tu límite mensual. Te recomendamos mantener tu gasto diario por debajo de <AnimatedNumber value={dailyRecommendedBudget} format={(n: number) => formatCurrency(n, currency)} />.
                   </p>
                 </div>
               </div>
