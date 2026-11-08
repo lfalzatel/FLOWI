@@ -8,6 +8,7 @@ import { useCategories, CategoryOption } from '@/hooks/useCategories';
 import { useData } from '@/components/DataProvider';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction, isFixedExpenseCategory } from '@/lib/firestore';
+import { isBusinessCategory } from '@/lib/business';
 import {
   DEFAULT_FREQUENT, PAYMENT_METHODS, normalizeText, detectMerchantInText, findCatalogEntry, getFrequent, softHyphenate,
   getMerchantsForCategory, getRecent, recordUsage,
@@ -32,6 +33,7 @@ interface AddExpenseModalProps {
   transactionToEdit?: Transaction;
   initialType?: 'gasto' | 'ingreso';
   initialVoiceParsed?: ParsedVoiceResult;
+  initialBusiness?: boolean; // abrir ya marcado como del negocio (desde Mi negocio)
 }
 
 const QUICK_SLOTS = 7;
@@ -42,7 +44,7 @@ function toTimeString(d: Date): string {
 const VISIBLE_MERCHANTS = 8;
 const VISIBLE_PAYMENTS = 4;
 
-export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initialType = 'gasto', initialVoiceParsed }: AddExpenseModalProps) {
+export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initialType = 'gasto', initialVoiceParsed, initialBusiness = false }: AddExpenseModalProps) {
   const { user } = useAuth();
   const { expenseCategories, incomeCategories } = useCategories();
   const { transactions } = useData();
@@ -54,6 +56,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [merchant, setMerchant] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isFixed, setIsFixed] = useState(initialVoiceParsed?.isFixed || false);
+  // Modo negocio: se marca solo con categorías de negocio (Venta, Inventario…) y se puede cambiar
+  const [isBusiness, setIsBusiness] = useState(() => initialBusiness ||
+    (initialVoiceParsed?.category ? isBusinessCategory(initialVoiceParsed.category, initialVoiceParsed.type === 'ingreso' ? 'ingreso' : initialType) : false));
   const [date, setDate] = useState(getLocalDateString());
   // Hora local "HH:MM"; por defecto la actual y editable para gastos pasados o futuros
   const [time, setTime] = useState(() => toTimeString(new Date()));
@@ -169,6 +174,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     }
     setCategory(label);
     if (type === 'gasto') setIsFixed(isFixedExpenseCategory(label));
+    setIsBusiness(initialBusiness || isBusinessCategory(label, type));
   };
 
   const switchType = (next: 'gasto' | 'ingreso') => {
@@ -214,6 +220,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       } else {
         setIsFixed(isFixedExpenseCategory(transactionToEdit.category));
       }
+      setIsBusiness(transactionToEdit.business ?? isBusinessCategory(transactionToEdit.category, transactionToEdit.type));
 
       if (transactionToEdit.date) {
         const d = transactionToEdit.date instanceof Date ? transactionToEdit.date : transactionToEdit.date.toDate();
@@ -253,6 +260,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         date: finalDate,
         ...extras,
         ...(type === 'gasto' ? { isFixed } : {}),
+        business: isBusiness,
       };
 
       recordUsage(usageBucket, finalCategory);
@@ -397,8 +405,23 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
           {/* Category */}
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-2">
               <span className={labelClass}>Categoría</span>
+
+              <div className="flex items-center gap-1.5 flex-wrap justify-end">
+              <button
+                type="button"
+                onClick={() => setIsBusiness(!isBusiness)}
+                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 transition-all active:scale-95 cursor-pointer ${
+                  isBusiness
+                    ? (isTechTheme ? 'bg-orange-500/20 border border-orange-400 text-orange-300 font-mono' : 'bg-orange-500/20 border border-orange-500/40 text-orange-400')
+                    : (isTechTheme ? 'bg-white/5 border border-white/10 text-accent/50 font-mono' : 'bg-white/5 border border-white/10 text-text-muted')
+                }`}
+                title="Separar este movimiento como de tu negocio (Mi negocio en Servicios)"
+              >
+                <span>🏪 Negocio:</span>
+                <span className={isBusiness ? 'font-black underline' : ''}>{isBusiness ? 'Sí' : 'No'}</span>
+              </button>
 
               {type === 'gasto' && (
                 <button
@@ -415,6 +438,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                   <span className={isFixed ? 'font-black underline' : ''}>{isFixed ? 'Sí' : 'No'}</span>
                 </button>
               )}
+              </div>
             </div>
 
             <div className="grid grid-cols-4 gap-1.5">

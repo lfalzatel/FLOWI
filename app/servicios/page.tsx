@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { CalendarClock, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
+import { Store, CalendarClock, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -29,6 +29,8 @@ const SERVICES: ServiceItem[] = [
     icon: Target, href: '/servicios/metas', color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
   { id: 'inversiones', group: 'Tu plata', title: 'Ahorro e inversiones', description: 'Donde tu plata crece: CDT, Nu, Trii, fondos',
     icon: Landmark, href: '/servicios/inversiones', color: 'text-teal-500', bgColor: 'bg-teal-500/10', isNew: true },
+  { id: 'negocio', group: 'Tu plata', title: 'Mi negocio', description: 'Tus ventas, costos y ganancia aparte de tu plata personal',
+    icon: Store, href: '/servicios/negocio', color: 'text-orange-500', bgColor: 'bg-orange-500/10', isNew: true },
   { id: 'resumen', group: 'Entiende tus gastos', title: 'Resumen del mes', description: 'Qué pasó con tu plata y cómo vas frente al mes pasado',
     icon: Sparkles, href: '/servicios/resumen', color: 'text-amber-500', bgColor: 'bg-amber-500/10', isNew: true },
   { id: 'estadisticas', group: 'Entiende tus gastos', title: 'Estadísticas', description: 'En qué se te va la plata, mes a mes',
