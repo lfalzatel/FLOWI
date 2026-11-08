@@ -4,6 +4,9 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
+// Varios componentes usan useAuth a la vez: el perfil faltante se crea una sola vez
+let creatingProfile = false;
+
 export interface UserProfile {
   name: string;
   email: string;
@@ -39,10 +42,20 @@ export function useAuth() {
         unsubscribeProfile = onSnapshot(doc(db, 'users', firebaseUser.uid), (snap) => {
           if (snap.exists()) {
             setProfile(snap.data() as UserProfile);
+            setLoading(false);
           } else {
             setProfile(null);
+            // Cuenta de Google sin perfil: pasa cuando la ventana de Google recarga la página (en el
+            // celular o con la app instalada) antes de crear el perfil. Se crea aquí; el listener lo
+            // recibe enseguida. Mientras tanto se sigue "cargando" para no devolver a la landing.
+            if (!creatingProfile) {
+              creatingProfile = true;
+              import('@/lib/auth')
+                .then(({ processGoogleUser }) => processGoogleUser(firebaseUser))
+                .catch((e) => { console.error('No se pudo crear el perfil:', e); setLoading(false); })
+                .finally(() => { creatingProfile = false; });
+            }
           }
-          setLoading(false);
         }, (error) => {
           console.error('Error al obtener el perfil de usuario:', error);
           setLoading(false);

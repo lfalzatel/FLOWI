@@ -178,9 +178,22 @@ export default function LoginPage() {
       const { isNewUser } = await processGoogleUser(result.user);
       setAuthDoneUrl(isNewUser ? '/?newuser=true' : '/?login=true');
     } catch (error) {
+      console.error('Error logging in:', error);
+      // En algunos celulares la ventana de Google responde con error aunque la sesión sí quedó
+      // abierta: en ese caso se sigue (se crea el perfil si falta) en lugar de volver a la portada
+      try {
+        const { auth } = await import('@/lib/firebase');
+        if (auth.currentUser) {
+          const { processGoogleUser } = await import('@/lib/auth');
+          const { isNewUser } = await processGoogleUser(auth.currentUser);
+          setAuthDoneUrl(isNewUser ? '/?newuser=true' : '/?login=true');
+          return;
+        }
+      } catch (e) {
+        console.error('No se pudo terminar el ingreso:', e);
+      }
       sessionStorage.removeItem('login_in_progress');
       setShowSplash(false);
-      console.error('Error logging in:', error);
     }
   };
 
