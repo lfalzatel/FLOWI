@@ -5,6 +5,7 @@
 //    secreto de eventos y, si el pago quedó APROBADO por el valor exacto, se activa Premium.
 const crypto = require('crypto');
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { defineSecret, defineString } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
@@ -162,4 +163,32 @@ exports.revisarPagoManual = onCall({ region: 'us-central1' }, async (req) => {
     t.update(ref, { status: 'APPROVED', premiumUntil: admin.firestore.Timestamp.fromDate(until), ...reviewed });
     return { status: 'APPROVED', premiumUntil: until.toISOString() };
   });
+});
+
+
+// Aviso al administrador (notificación push) cada vez que alguien envía un comprobante
+exports.avisarComprobante = onDocumentCreated({ document: 'fl_manual_payments/{id}', region: 'us-central1' }, async (event) => {
+  const p = event.data?.data();
+  if (!p || p.status !== 'PENDING') return;
+  const admins = await db.collection('users').where('role', '==', 'admin').get();
+  const amount = Number(p.amount || 0).toLocaleString('es-CO');
+  for (const a of admins.docs) {
+    const tokens = (a.get('pushTokens') || []).filter(Boolean);
+    if (!tokens.length) continue;
+    const res = await admin.messaging().sendEachForMulticast({
+      tokens,
+      data: {
+        title: '🧾 Nuevo comprobante por revisar',
+        body: `${p.userName || p.userEmail || 'Alguien'} envió $${amount} (plan ${p.plan}). Toca para revisarlo.`,
+        url: '/planes',
+        tag: `comprobante-${event.params.id}`,
+      },
+      webpush: { headers: { Urgency: 'high', TTL: '86400' } },
+    });
+    const dead = tokens.filter((_, i) => {
+      const code = res.responses[i].error?.code || '';
+      return code.includes('registration-token-not-registered') || code.includes('invalid-registration-token');
+    });
+    if (dead.length) await a.ref.update({ pushTokens: admin.firestore.FieldValue.arrayRemove(...dead) });
+  }
 });

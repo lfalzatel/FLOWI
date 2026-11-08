@@ -12,6 +12,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { requestNotificationPermission, scheduleNotificationViaSW } from '@/lib/notifications';
 import { removePushToken, syncPushToken } from '@/lib/push';
 import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
+import { watchPendingManualPayments } from '@/lib/manualPay';
 import {
   User, Settings, CreditCard, Bell,
   HelpCircle, LogOut, ChevronDown,
@@ -163,6 +164,9 @@ export function ProfileCapsule() {
   const displayName = profile?.name || user.displayName || 'Usuario';
   const photoURL = profile?.photoURL || user.photoURL || '/default-avatar.png';
   const role = profile?.role || 'Usuario';
+  // Administrador: cuántos comprobantes de transferencia esperan revisión (punto en la foto y contador)
+  const [pendingReceipts, setPendingReceipts] = useState(0);
+  useEffect(() => (profile?.role === 'admin' ? watchPendingManualPayments(l => setPendingReceipts(l.length)) : undefined), [profile?.role]);
   const email = profile?.email || user.email || '';
 
   const handleShare = () => {
@@ -194,7 +198,7 @@ export function ProfileCapsule() {
       <button
         onClick={() => setOpen(o => !o)}
         data-tour="profile"
-        className={`flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-transparent border border-accent hover:bg-accent hover:text-black' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
+        className={`relative flex items-center gap-2 px-2 py-1.5 transition-all duration-200 group active:scale-[0.97] ${isTechTheme ? 'rounded-none bg-transparent border border-accent hover:bg-accent hover:text-black' : 'rounded-full bg-glass border border-glass-border hover:bg-glass-hover hover:border-glass-strong'}`}
       >
         {/* Avatar */}
         <div className={`relative w-7 h-7 overflow-hidden ring-1 ring-offset-1 ring-offset-transparent ${isTechTheme ? 'rounded-none ring-accent' : 'rounded-full ring-transparent group-hover:ring-[var(--accent-glow)]'}`}>
@@ -205,6 +209,10 @@ export function ProfileCapsule() {
             className="object-cover"
           />
         </div>
+        {pendingReceipts > 0 && (
+          <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-amber-400 text-black text-[10px] font-bold z-10"
+                title="Comprobantes por revisar">{pendingReceipts}</span>
+        )}
 
         {/* Name + role */}
         <div className="flex flex-col items-start leading-none gap-0.5 mr-0.5">
@@ -409,6 +417,9 @@ export function ProfileCapsule() {
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
                     <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                    {item.href === '/planes' && pendingReceipts > 0 && (
+                      <span className="ml-auto px-1.5 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-bold">{pendingReceipts} por revisar</span>
+                    )}
                   </Link>
                 )}
               </div>
