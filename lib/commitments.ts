@@ -1,5 +1,6 @@
 import { Debt, Reminder, Transaction, isFixedExpenseCategory } from './firestore';
 import { dateKey, isPayable, lastPaymentFor, monthlyOccursIn } from './reminderDue';
+import { aliasKey } from './categories';
 
 // Próximos compromisos del mes: pagos fijos que aún no aparecen registrados este mes.
 // Salen de dos fuentes que se cruzan entre sí:
@@ -34,8 +35,9 @@ const STOPWORDS = new Set([
   'setiembre', 'octubre', 'noviembre', 'diciembre',
 ]);
 
+// Minúsculas, sin tildes y con nombres repetidos unificados (Play Store = Google Play)
 function normalize(s: string): string {
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  return aliasKey(s);
 }
 
 function tokens(...parts: (string | undefined)[]): string[] {

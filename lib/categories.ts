@@ -403,7 +403,6 @@ const MERCHANT_LIST: MerchantDef[] = [
     ['Google', 'google', '#4285F4'],
     ['Canva', 'canva', '#00C4CC'],
     ['Microsoft 365', '💼', '#0078D4'],
-    ['Play Store', 'play_store', '#607D8B'],
   ]),
   ...m(['Nube / almacenamiento'], [
     ['Google One', 'google one', '#4285F4'],
@@ -546,8 +545,21 @@ export function softHyphenate(label: string): string {
 }
 
 // Busca icono y color para cualquier etiqueta guardada (categoría, comercio, medio de pago o antigua)
+// Nombres viejos o repetidos que son el mismo comercio ("Play Store" es la tienda Google Play)
+const ALIASES: Record<string, string> = { 'play store': 'Google Play', playstore: 'Google Play' };
+
+// Clave normalizada y unificada: "Play Store" y "Google Play" dan lo mismo
+export function aliasKey(text: string): string {
+  const key = normalizeText(text);
+  return ALIASES[key] ? normalizeText(ALIASES[key]) : key;
+}
+
+export function canonicalLabel(label: string): string {
+  return ALIASES[normalizeText(label)] || label;
+}
+
 export function findCatalogEntry(label: string): { label: string; icon: string; color: string } | undefined {
-  const key = normalizeText(label);
+  const key = aliasKey(label);
   if (!key) return undefined;
   const pools = [BASE_CATEGORY_DEFS, MERCHANTS, PAYMENT_METHODS, LEGACY_CATEGORIES];
   for (const pool of pools) {
@@ -558,7 +570,7 @@ export function findCatalogEntry(label: string): { label: string; icon: string; 
 }
 
 export function findMerchant(label: string): MerchantDef | undefined {
-  const key = normalizeText(label);
+  const key = aliasKey(label);
   return MERCHANTS.find(mer => normalizeText(mer.label) === key);
 }
 

@@ -29,7 +29,7 @@ export const BASE_CATEGORIES = BASE_CATEGORY_DEFS;
 
 export const FIXED_CATEGORIES = [
   'Arriendo', 'Administración', 'Agua', 'Luz', 'EPM', 'Gas natural', 'Efigas', 'Alcanos',
-  'Claro Hogar', 'Claro Móvil', 'Netflix', 'Spotify', 'YouTube', 'YT Music', 'Google', 'Play Store',
+  'Claro Hogar', 'Claro Móvil', 'Netflix', 'Spotify', 'YouTube', 'YT Music', 'Google', 'Play Store', 'Google Play', 'Google AI Pro', 'Google One',
   'Cuota de crédito', 'Gimnasio', 'Empleada', 'Pensión', 'Matrícula', 'SOAT', 'Tecnomecánica',
   'Sura', 'Colsanitas', 'Compensar', 'Nueva EPS', 'FNA', 'Cesantías', 'Impuestos',
   'Internet', 'Medicina prepagada', 'Seguros', 'Cuota de manejo', 'Suscripciones', 'Apps e IA',

@@ -1,4 +1,5 @@
 import { Reminder, Transaction } from './firestore';
+import { aliasKey } from './categories';
 
 // Vencimientos de recordatorios de pago: cada ocurrencia (fecha) se marca como pagada por separado,
 // y lo que no se ha pagado sigue apareciendo aunque ya haya vencido.
@@ -79,7 +80,7 @@ export function isOccurrencePaid(r: Reminder, occurrence: Date): boolean {
   return (r.paidDates || []).includes(dateKey(occurrence));
 }
 
-const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const normalize = (s: string) => aliasKey(s);
 const words = (s: string) => normalize(s).split(/[^a-z0-9]+/).filter(w => w.length >= 4);
 
 // Días alrededor del vencimiento en que un gasto registrado cuenta como el pago de esa vez
