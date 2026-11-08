@@ -1,5 +1,5 @@
 import { Debt, Reminder, Transaction, isFixedExpenseCategory } from './firestore';
-import { dateKey, isPayable, monthlyOccursIn } from './reminderDue';
+import { dateKey, isPayable, lastPaymentFor, monthlyOccursIn } from './reminderDue';
 
 // Próximos compromisos del mes: pagos fijos que aún no aparecen registrados este mes.
 // Salen de dos fuentes que se cruzan entre sí:
@@ -162,7 +162,9 @@ export function getCommitments(
       if (monthlyOccursIn(r, year, month)) due = dayInMonth(year, month, r.dayOfMonth);
       else {
         // No toca este mes: que el pago del mes pasado tampoco aparezca como pendiente
-        const g = groups.find(x => matches(r.category, tokens(r.title, r.category), x.category, x.words));
+        const g = r.category
+          ? groups.find(x => normalize(x.category) === normalize(r.category!))
+          : groups.find(x => matches(undefined, tokens(r.title), x.category, x.words));
         if (g) usedGroups.add(g.key);
       }
     }
@@ -176,7 +178,12 @@ export function getCommitments(
     }
     if (!due) continue;
     const words = tokens(r.title, r.category);
-    dueReminders.push({ r, due, words, group: groups.find(g => matches(r.category, words, g.category, g.words)) });
+    // Con categoría, solo cuenta un pago de esa misma categoría (las palabras sueltas como el nombre de
+    // la ciudad confunden: "Claro Manizales" no es "Aguas de Manizales"); sin categoría, por palabras
+    const group = r.category
+      ? groups.find(g => normalize(g.category) === normalize(r.category!))
+      : groups.find(g => matches(undefined, words, g.category, g.words));
+    dueReminders.push({ r, due, words, group });
   }
 
   for (const { r, due, words, group } of dueReminders) {
@@ -192,11 +199,18 @@ export function getCommitments(
       amount = best ? best.amount : null;
     }
 
+    if (amount === null) {
+      const sharedCat = reminders.some(o => o !== r && o.active && o.category && r.category && normalize(o.category) === normalize(r.category));
+      amount = lastPaymentFor(r, transactions, sharedCat)?.amount ?? null;
+    }
+
     const key = r.id ? `r:${r.id}` : `t:${normalize(r.title)}`;
     const covered = (r.paidDates || []).includes(dateKey(due))
       || (shared
         ? fixedThisMonth.some(t => normalize(t.category) === normalize(group!.category) && tokens(t.description).some(x => ownWords.some(w => sameWord(w, x))))
-        : paidThisMonth(r.category, words) || (group ? paidThisMonth(group.category, group.words) : false));
+        : r.category
+          ? fixedThisMonth.some(t => normalize(t.category) === normalize(r.category!))
+          : paidThisMonth(undefined, words) || (group ? paidThisMonth(group.category, group.words) : false));
     if (covered) { paidCount++; continue; }
     if (skipped.includes(skipEntry(thisMonth, key))) continue;
 

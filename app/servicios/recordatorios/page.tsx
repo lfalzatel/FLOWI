@@ -18,7 +18,7 @@ import { syncPushToken } from '@/lib/push';
 
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
-import { getPendingDue, dueLabel, ReminderDue, isCategoryShared } from '@/lib/reminderDue';
+import { getPendingDue, dueLabel, ReminderDue, isCategoryShared, lastPaymentFor } from '@/lib/reminderDue';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { speakText } from '@/lib/voiceParser';
 
@@ -199,6 +199,7 @@ export default function RecordatoriosPage() {
                 onToggle={() => handleToggle(r)}
                 onDelete={() => handleDelete(r.id!)}
                 due={getPendingDue(r, new Date(), transactions, isCategoryShared(r, reminders))}
+                lastPay={r.amount ? null : lastPaymentFor(r, transactions, isCategoryShared(r, reminders))}
                 onPay={setPayingDue}
                 isTechTheme={isTechTheme}
                 delay={i * 0.08}
@@ -218,7 +219,7 @@ export default function RecordatoriosPage() {
         />
       )}
 
-      {payingDue && <MarkPaidDialog due={payingDue} onClose={() => setPayingDue(null)} />}
+      {payingDue && <MarkPaidDialog due={payingDue} amount={payingDue.reminder.amount || lastPaymentFor(payingDue.reminder, transactions, isCategoryShared(payingDue.reminder, reminders))?.amount || null} onClose={() => setPayingDue(null)} />}
 
       <ConfirmDialog
         isOpen={!!deletingReminderId}
@@ -232,7 +233,8 @@ export default function RecordatoriosPage() {
   );
 }
 
-function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay, due, onPay }: {
+function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay, due, onPay, lastPay }: {
+  lastPay?: { amount: number; date: Date } | null;
   reminder: Reminder;
   due: ReminderDue | null;
   onPay: (due: ReminderDue) => void;
@@ -301,7 +303,10 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
             )}
           </div>
           <p className="text-xs text-text-secondary mt-0.5 truncate">
-            {reminder.amount ? <b className="text-text-primary">${reminder.amount.toLocaleString('es-CO')} · </b> : null}{reminder.description || 'Sin notas'}
+            {reminder.amount
+              ? <b className="text-text-primary">${reminder.amount.toLocaleString('es-CO')} · </b>
+              : lastPay ? <b className="text-text-primary">${lastPay.amount.toLocaleString('es-CO')} <span className="font-normal text-text-muted">(último pago, {lastPay.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })})</span> · </b> : null}
+            {reminder.description || 'Sin notas'}
           </p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {reminder.type !== 'budget_alert' && (
@@ -348,7 +353,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
         <div className={`mt-3 flex items-center justify-between gap-3 px-3 py-2.5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${due.daysLeft < 0 ? 'bg-red-500/10 border border-red-500/25' : 'bg-accent/5 border border-accent/15'}`}>
           <span className={`text-xs font-semibold ${due.daysLeft < 0 ? 'text-red-400' : 'text-text-secondary'}`}>
             {dueLabel(due.daysLeft)} · {due.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
-            {reminder.amount ? <span className="text-text-muted font-normal"> · ${reminder.amount.toLocaleString('es-CO')}</span> : null}
+            {(reminder.amount || lastPay?.amount) ? <span className="text-text-muted font-normal"> · ${(reminder.amount || lastPay!.amount).toLocaleString('es-CO')}</span> : null}
           </span>
           <button
             onClick={(e) => { e.stopPropagation(); onPay(due); }}

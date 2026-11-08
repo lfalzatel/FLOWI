@@ -137,6 +137,28 @@ export function getPendingDues(reminders: Reminder[], now = new Date(), transact
     .sort((a, b) => a.daysLeft - b.daysLeft);
 }
 
+// Último pago registrado de un recordatorio: el gasto más reciente de su categoría (si otro
+// recordatorio comparte la categoría, el gasto debe nombrarlo, como "Claro Manizales").
+// Sirve para mostrar y reservar su valor sin tener que escribirlo a mano.
+export function lastPaymentFor(r: Reminder, transactions: Transaction[], sharedCategory = false): { amount: number; date: Date } | null {
+  if (!r.category) return null;
+  const category = normalize(r.category);
+  const titleWords = words(r.title).filter(w => !words(r.category!).includes(w));
+  const limit = Date.now() - 400 * 86400000;
+  let best: { amount: number; date: Date } | null = null;
+  for (const t of transactions) {
+    if (t.type !== 'gasto' || normalize(t.category || '') !== category) continue;
+    const when = toDate(t.date);
+    if (!when || when.getTime() < limit) continue;
+    if (sharedCategory && titleWords.length) {
+      const desc = words(`${t.description || ''} ${t.merchant || ''}`);
+      if (!titleWords.some(w => desc.includes(w))) continue;
+    }
+    if (!best || when > best.date) best = { amount: t.amount, date: when };
+  }
+  return best;
+}
+
 export function isCategoryShared(r: Reminder, reminders: Reminder[]): boolean {
   if (!r.category) return false;
   const c = normalize(r.category);
