@@ -162,7 +162,9 @@ export default function CuentasPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <p className={`font-bold ${st.balance < 0 ? 'text-red-400' : 'text-text-primary'} ${isTech ? '' : 'font-syne'}`}>
-                          {credit && st.balance < 0 ? `Debes ${fmt(-st.balance)}` : `${st.balance < 0 ? '−' : ''}${fmt(Math.abs(st.balance))}`}
+                          {credit && st.balance < 0
+                            ? <>Debes <AnimatedNumber value={-st.balance} format={fmt} /></>
+                            : <>{st.balance < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(st.balance)} format={fmt} /></>}
                         </p>
                         <ChevronDown className={`w-4 h-4 ml-auto text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
                       </div>
@@ -177,7 +179,7 @@ export default function CuentasPage() {
                               <span className="flex-1 min-w-0 truncate text-text-secondary">{m.label}</span>
                               {m.kind === 'base'
                                 ? <span className="text-text-muted"><AnimatedNumber value={m.amount} format={fmt} /></span>
-                                : <span className={m.amount >= 0 ? 'text-emerald-400 font-semibold' : 'text-text-primary'}>{m.amount >= 0 ? '+' : '−'}{fmt(Math.abs(m.amount))}</span>}
+                                : <span className={m.amount >= 0 ? 'text-emerald-400 font-semibold' : 'text-text-primary'}>{m.amount >= 0 ? '+' : '−'}<AnimatedNumber value={Math.abs(m.amount)} format={fmt} /></span>}
                               {m.kind === 'transfer' && m.transfer.id && (
                                 <button type="button" onClick={() => deleteTransfer(m.transfer.id!)} aria-label="Borrar transferencia" className="text-text-muted hover:text-[var(--red)] px-1">×</button>
                               )}

@@ -348,11 +348,14 @@ export default function EstadisticasPage() {
                 </div>
                 <div>
                   <h3 className={`text-sm font-bold ${isTechTheme ? 'font-mono uppercase tracking-widest text-accent' : ''}`}>Racha Actual</h3>
-                  <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/80' : 'text-white/80'}`}>Días seguidos registrando</p>
+                  <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/80' : 'text-white/80'}`}>Días seguidos con algo registrado</p>
+                  <p className={`text-[10px] leading-snug mt-0.5 ${isTechTheme ? 'font-mono text-accent/60' : 'text-white/70'}`}>
+                    Cuenta los días, de hoy hacia atrás, con al menos un gasto o ingreso en esa fecha. Si hoy aún no registras nada, cuenta desde ayer.
+                  </p>
                 </div>
               </div>
               <div className={`text-2xl font-black ${isTechTheme ? 'font-mono text-accent' : ''}`}>
-                {data.streak} 🔥
+                <AnimatedNumber value={data.streak} format={(n: number) => String(Math.round(n))} /> 🔥
               </div>
             </div>
 
@@ -372,7 +375,7 @@ export default function EstadisticasPage() {
               </div>
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'glass-card rounded-2xl'}`}>
                 <p className={`text-xs mb-1 ${isTechTheme ? 'font-mono uppercase text-blue-400' : 'text-blue-500 font-semibold'}`}>Ahorro</p>
-                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-blue-400' : 'text-text-primary'}`}>{data.savingsRatio.toFixed(1)}%</p>
+                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-blue-400' : 'text-text-primary'}`}><AnimatedNumber value={data.savingsRatio} format={(n: number) => `${n.toFixed(1)}%`} /></p>
               </div>
             </div>
             
