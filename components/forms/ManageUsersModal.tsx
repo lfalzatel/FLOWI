@@ -103,6 +103,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   });
   const periodIngresos = periodTx.filter(t => t.type === 'ingreso').reduce((a, t) => a + t.amount, 0);
   const periodGastos = periodTx.filter(t => t.type === 'gasto').reduce((a, t) => a + t.amount, 0);
+  const periodDays = new Set(periodTx.map(t => getLocalDateString((t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any)))).size;
   const money = (n: number) => formatCurrency(Math.round(n), 'COP');
 
   const handleChangeRole = async (userId: string, newRole: string) => {
@@ -287,7 +288,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                     <p className={`${lbl} mb-2`}>Actividad</p>
                     <div className="grid grid-cols-3 gap-x-2 gap-y-2">
                       <div><p className={lbl}>Registros</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (filterType === 'all' ? (userStats.txCount ?? '—') : periodTx.length)}</p></div>
-                      <div><p className={lbl}>Días con registros</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (userStats.txDays ?? '—')}</p></div>
+                      <div><p className={lbl}>Días con registros</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (filterType === 'all' ? (userStats.txDays ?? '—') : periodDays)}</p></div>
                       <div><p className={lbl}>Días en la app</p><p className={`${val} text-text-primary`}>{selectedUser.activeDays ?? '—'}</p></div>
                       <div><p className={lbl}>Primer registro</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(userStats.firstTx)}</p></div>
                       <div><p className={lbl}>Último registro</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(last)}</p></div>

@@ -1,6 +1,11 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { X, LogOut, Shield, Mail, User as UserIcon, Phone, Camera, Trash2, Plus } from 'lucide-react';
+import { X, LogOut, User as UserIcon, Phone, Camera, Trash2 } from 'lucide-react';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
+import { DateFilter, type FilterType } from '@/components/dashboard/DateFilter';
+import { getISOWeekString, getLocalDateString } from '@/lib/dateUtils';
+import { formatCurrency } from '@/lib/format';
+import type { Transaction } from '@/lib/firestore';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/auth';
@@ -22,6 +27,10 @@ export function ProfileModal({ onClose }: Props) {
   const [userStats, setUserStats] = useState<{gastos: number, ingresos: number, deudas: number, loading: boolean}>({
     gastos: 0, ingresos: 0, deudas: 0, loading: true
   });
+  // Movimientos para filtrar por todo / mes / semana / día como en Inicio
+  const [userTx, setUserTx] = useState<Transaction[]>([]);
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterValue, setFilterValue] = useState('');
 
   useEffect(() => {
     if (profile && 'phone' in profile) {
@@ -65,12 +74,36 @@ export function ProfileModal({ onClose }: Props) {
       const totalIngresos = ingresosTx.reduce((acc, t) => acc + t.amount, 0);
       const totalDeudas = deudas.filter(d => d.status === 'pending' && d.direction !== 'me_deben').reduce((acc, d) => acc + Math.max(0, d.totalAmount - d.paidAmount) + calculateDebtInterest(d).accumulatedInterest, 0);
       
+      setUserTx([...gastosTx, ...ingresosTx]);
       setUserStats({ gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false });
     } catch (error) {
       console.error('Error loading stats:', error);
       setUserStats(prev => ({ ...prev, loading: false }));
     }
   };
+
+  const txDate = (t: Transaction) => ((t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any));
+  const periodTx = userTx.filter(t => {
+    if (filterType === 'all') return true;
+    const d = txDate(t);
+    const day = getLocalDateString(d);
+    if (filterType === 'month') return day.startsWith(filterValue);
+    if (filterType === 'week') return getISOWeekString(d) === filterValue;
+    return day === filterValue;
+  });
+  const periodIngresos = periodTx.filter(t => t.type === 'ingreso').reduce((a, t) => a + t.amount, 0);
+  const periodGastos = periodTx.filter(t => t.type === 'gasto').reduce((a, t) => a + t.amount, 0);
+  const money = (n: number) => formatCurrency(Math.round(n), 'COP');
+
+  // Racha: días seguidos con al menos un registro (igual que en Estadísticas)
+  const streak = (() => {
+    const days = new Set(userTx.map(t => txDate(t).toDateString()));
+    let n = 0;
+    const d = new Date();
+    if (!days.has(d.toDateString())) d.setDate(d.getDate() - 1);
+    while (days.has(d.toDateString())) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  })();
 
   const handleSignOut = async () => {
     try {
@@ -150,74 +183,64 @@ export function ProfileModal({ onClose }: Props) {
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isCyberpunk ? 'font-mono uppercase text-sm' : ''}`}>
       <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10 backdrop-blur-[2px]' : 'bg-black/40 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
-      <div 
-        className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 glass-dropdown ${isCyberpunk ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
+      <div
+        className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-5 glass-dropdown ${isCyberpunk ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className={`absolute top-4 right-4 transition-colors ${isCyberpunk ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
+        <button onClick={onClose} aria-label="Cerrar" className={`absolute top-4 right-4 transition-colors ${isCyberpunk ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className={`${isCyberpunk ? 'font-mono font-bold text-accent uppercase tracking-widest' : 'font-syne font-bold text-text-primary'} text-xl mb-6`}>
+        <h2 className={`${isCyberpunk ? 'font-mono font-bold text-accent uppercase tracking-widest' : 'font-syne font-bold text-text-primary'} text-lg mb-3`}>
           {isCyberpunk ? '>_ MI_PERFIL' : 'Mi Perfil'}
         </h2>
 
-        <div className="flex flex-col items-center mb-6">
-          <div 
-            className={`relative w-24 h-24 mb-4 cursor-pointer group ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {user?.photoURL ? (
-              <Image
-                src={user.photoURL}
-                alt={user.displayName || 'Usuario'}
-                fill
-                className={`${isCyberpunk ? 'rounded-none border-2 border-accent' : 'rounded-full border-2 border-accent'} object-cover group-hover:opacity-75 transition-opacity`}
-              />
-            ) : (
-              <div className={`w-24 h-24 ${isCyberpunk ? 'rounded-none border border-accent/30 bg-accent/5' : 'rounded-full border-2 border-glass-border bg-glass'} flex items-center justify-center group-hover:bg-white/10 transition-colors`}>
-                <UserIcon className={`w-12 h-12 ${isCyberpunk ? 'text-accent/50' : 'text-text-muted'}`} />
+        <div className="space-y-3">
+          {/* Encabezado: foto a la izquierda; nombre, correo y rol a la derecha */}
+          <div className="flex items-center gap-3">
+            <div
+              className={`relative w-16 h-16 shrink-0 cursor-pointer group ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}
+              onClick={() => fileInputRef.current?.click()}
+              title="Cambiar foto"
+            >
+              {user?.photoURL ? (
+                <Image src={user.photoURL} alt={user.displayName || 'Usuario'} fill
+                  className={`${isCyberpunk ? 'rounded-none' : 'rounded-full'} border-2 border-accent object-cover group-hover:opacity-75 transition-opacity`} />
+              ) : (
+                <div className={`w-16 h-16 ${isCyberpunk ? 'rounded-none border border-accent/30 bg-accent/5' : 'rounded-full border-2 border-glass-border bg-glass'} flex items-center justify-center`}>
+                  <UserIcon className={`w-8 h-8 ${isCyberpunk ? 'text-accent/50' : 'text-text-muted'}`} />
+                </div>
+              )}
+              <div className={`absolute -bottom-1 -right-1 w-6 h-6 flex items-center justify-center bg-accent text-black ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}>
+                <Camera className="w-3.5 h-3.5" />
               </div>
-            )}
-            <div className={`absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${isCyberpunk ? 'bg-accent/20' : ''}`}>
-              <Camera className={`w-8 h-8 ${isCyberpunk ? 'text-accent' : 'text-text-primary'}`} />
+              {uploadingPhoto && (
+                <div className={`absolute inset-0 bg-black/80 flex items-center justify-center ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}>
+                  <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
             </div>
-            {uploadingPhoto && (
-              <div className={`absolute inset-0 bg-black/80 flex items-center justify-center ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}>
-                <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
-            <div className={`absolute -bottom-2 -right-2 bg-accent text-black text-[10px] uppercase font-bold px-2 py-0.5 ${isCyberpunk ? 'rounded-none font-mono tracking-widest border border-black' : 'rounded-full'}`}>
-              {profile?.role === 'admin' ? 'Propietario' : 'Usuario'}
-            </div>
-          </div>
-          <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-
-          <h3 className={`${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'font-syne text-text-primary'} font-bold text-lg mt-2`}>{user?.displayName || 'Usuario'}</h3>
-          <p className={`${isCyberpunk ? 'font-mono text-accent/50 text-xs' : 'text-text-secondary text-sm'}`}>{user?.email}</p>
-        </div>
-
-        <div className="space-y-4 mb-6">
-          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} p-4 flex items-center gap-3`}>
-            <Mail className="w-5 h-5 text-accent" />
-            <div className="flex-1">
-              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Correo Electrónico</p>
-              <p className={`text-sm font-medium truncate ${isCyberpunk ? 'font-mono text-white' : 'text-text-primary'}`}>{user?.email || 'No disponible'}</p>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+            <div className="min-w-0 flex-1 pr-6">
+              <h3 className={`${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'font-syne text-text-primary'} font-bold text-base truncate`}>{user?.displayName || 'Usuario'}</h3>
+              <p className={`truncate ${isCyberpunk ? 'font-mono text-accent/60 text-[11px]' : 'text-text-secondary text-xs'}`}>{user?.email}</p>
+              <span className={`inline-block mt-1 bg-accent/15 text-accent border border-accent/40 text-[10px] uppercase font-bold px-2 py-0.5 ${isCyberpunk ? 'rounded-none font-mono tracking-widest' : 'rounded-full'}`}>
+                {profile?.role === 'admin' ? 'Propietario' : 'Usuario'}
+              </span>
             </div>
           </div>
 
-          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} p-4 flex items-center gap-3`}>
-            <Phone className="w-5 h-5 text-accent" />
-            <div className="flex-1">
-              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Teléfono</p>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={`bg-transparent text-sm font-medium focus:outline-none w-full ${isCyberpunk ? 'font-mono text-accent placeholder:text-accent/30' : 'text-text-primary'}`}
-                placeholder="Ingresa tu teléfono"
-              />
-            </div>
+          {/* Teléfono */}
+          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} px-3 py-2 flex items-center gap-3`}>
+            <Phone className="w-4 h-4 text-accent shrink-0" />
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className={`flex-1 min-w-0 bg-transparent text-sm font-medium focus:outline-none ${isCyberpunk ? 'font-mono text-accent placeholder:text-accent/30' : 'text-text-primary'}`}
+              placeholder="Ingresa tu teléfono"
+              aria-label="Teléfono"
+            />
             <button
               onClick={handleSavePhone}
               disabled={savingPhone}
@@ -227,75 +250,76 @@ export function ProfileModal({ onClose }: Props) {
             </button>
           </div>
 
-          <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} p-4 flex items-center gap-3`}>
-            <Shield className="w-5 h-5 text-accent" />
-            <div>
-              <p className={`text-xs ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>Rol de Cuenta</p>
-              <p className={`text-sm font-medium ${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'text-text-primary'}`}>
-                {profile?.role === 'admin' ? 'Propietario (Acceso Total)' : 'Usuario Estándar'}
-              </p>
+          {/* Días usando FLOWI y racha, lado a lado */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className={`p-3 flex items-center gap-2 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
+              <span className="text-xl">📅</span>
+              <div className="min-w-0">
+                <p className={`text-[10px] uppercase tracking-wider leading-tight ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Días usando FLOWI</p>
+                <p className={`text-base font-bold ${isCyberpunk ? 'font-mono text-accent' : 'text-text-primary'}`}>
+                  <AnimatedNumber value={profile?.activeDays ?? 0} /> {(profile?.activeDays ?? 0) === 1 ? 'día' : 'días'}
+                </p>
+              </div>
+            </div>
+            <div className={`p-3 flex items-center gap-2 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
+              <span className="text-xl">🔥</span>
+              <div className="min-w-0">
+                <p className={`text-[10px] uppercase tracking-wider leading-tight ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Racha actual</p>
+                <p className={`text-base font-bold ${isCyberpunk ? 'font-mono text-accent' : 'text-text-primary'}`}>
+                  {userStats.loading ? '…' : <><AnimatedNumber value={streak} /> {streak === 1 ? 'día' : 'días'}</>}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
+          {/* Filtro igual al de Inicio */}
+          <DateFilter inline filterType={filterType} filterValue={filterValue} transactions={userTx}
+                      onChangeType={setFilterType} onChangeValue={setFilterValue} />
 
-        {(profile?.activeDays ?? 0) > 0 && (
-          <div className={`mb-6 p-4 flex items-center gap-3 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
-            <span className="text-2xl">📅</span>
-            <div className="flex-1 min-w-0">
-              <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Días usando FLOWI</p>
-              <p className={`text-lg font-bold ${isCyberpunk ? 'font-mono text-accent' : 'text-text-primary'}`}>{profile!.activeDays} {profile!.activeDays === 1 ? 'día' : 'días'}</p>
-              <p className="text-[10px] text-text-muted">
-                {profile!.firstActiveDay ? `Desde el ${new Date(profile!.firstActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
-                {profile!.lastActiveDay ? ` · último uso: ${new Date(profile!.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}
-              </p>
-            </div>
+          {/* Finanzas del periodo */}
+          <div className={`p-3 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
+            {userStats.loading ? (
+              <div className="flex justify-center py-3">
+                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                <div>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Ingresos</p>
+                  <p className={`text-sm font-semibold text-green-400 ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={periodIngresos} format={money} /></p>
+                </div>
+                <div>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Gastos</p>
+                  <p className={`text-sm font-semibold text-red-400 ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={periodGastos} format={money} /></p>
+                </div>
+                <div>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Balance</p>
+                  <p className={`text-sm font-semibold text-accent ${isCyberpunk ? 'font-mono' : ''}`}>{periodIngresos - periodGastos < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(periodIngresos - periodGastos)} format={money} /></p>
+                </div>
+                <div>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Deudas hoy</p>
+                  <p className={`text-sm font-semibold text-orange-400 ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={userStats.deudas} format={money} /></p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-        <div className={`mb-6 p-4 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
-          <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isCyberpunk ? 'font-mono text-accent' : 'text-text-secondary'}`}>Estadísticas Financieras</h4>
-          {userStats.loading ? (
-            <div className="flex justify-center py-4">
-              <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Ingresos</p>
-                <p className={`text-sm font-semibold text-green-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.ingresos.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Gastos</p>
-                <p className={`text-sm font-semibold text-red-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.gastos.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Deudas</p>
-                <p className={`text-sm font-semibold text-orange-400 ${isCyberpunk ? 'font-mono' : ''}`}>${userStats.deudas.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Balance</p>
-                <p className={`text-sm font-semibold text-accent ${isCyberpunk ? 'font-mono' : ''}`}>${(userStats.ingresos - userStats.gastos - userStats.deudas).toLocaleString()}</p>
-              </div>
-            </div>
-          )}
-        </div>
 
-        <div className="space-y-3">
-          <button
-            onClick={handleSignOut}
-            className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-transparent border border-white text-white rounded-none uppercase font-mono tracking-widest hover:bg-white hover:text-black' : 'bg-glass border border-glass-border text-text-primary rounded-xl hover:bg-glass-hover active:scale-[0.98]'}`}
-          >
-            <LogOut className="w-4 h-4" />
-            {isCyberpunk ? '>_ CERRAR_SESION' : 'Cerrar Sesión'}
-          </button>
-
-          <button
-            onClick={handleDeleteAccountClick}
-            className={`w-full font-bold py-3.5 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-black border border-red-500/50 text-red-500 rounded-none uppercase font-mono tracking-widest hover:bg-red-500/10' : 'bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500/20 active:scale-[0.98]'}`}
-          >
-            <Trash2 className="w-4 h-4" />
-            {isCyberpunk ? '>_ ELIMINAR_CUENTA' : 'Eliminar Cuenta'}
-          </button>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleSignOut}
+              className={`w-full font-bold py-3 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-transparent border border-white text-white rounded-none uppercase font-mono tracking-widest hover:bg-white hover:text-black' : 'bg-glass border border-glass-border text-text-primary rounded-xl hover:bg-glass-hover active:scale-[0.98]'}`}
+            >
+              <LogOut className="w-4 h-4" />
+              {isCyberpunk ? 'SALIR' : 'Cerrar sesión'}
+            </button>
+            <button
+              onClick={handleDeleteAccountClick}
+              className={`w-full font-bold py-3 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-black border border-red-500/50 text-red-500 rounded-none uppercase font-mono tracking-widest hover:bg-red-500/10' : 'bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500/20 active:scale-[0.98]'}`}
+            >
+              <Trash2 className="w-4 h-4" />
+              {isCyberpunk ? 'ELIMINAR' : 'Eliminar cuenta'}
+            </button>
+          </div>
         </div>
       </div>
 
