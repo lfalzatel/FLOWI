@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
+import { CalendarClock, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -19,6 +19,8 @@ const SERVICE_GROUPS = ['Tu plata', 'Entiende tus gastos', 'Herramientas', 'Pró
 const SERVICES: ServiceItem[] = [
   { id: 'recordatorios', group: 'Tu plata', title: 'Recordatorios', description: 'Pagos y fechas importantes para que no se te pasen',
     icon: Bell, href: '/servicios/recordatorios', color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+  { id: 'compromisos', group: 'Tu plata', title: 'Próximos compromisos', description: 'Los pagos fijos que te faltan este mes',
+    icon: CalendarClock, href: '/servicios/compromisos', color: 'text-orange-500', bgColor: 'bg-orange-500/10', isNew: true },
   { id: 'cuentas', group: 'Tu plata', title: 'Cuentas y patrimonio', description: 'Cuánto tienes en cada banco y en efectivo',
     icon: Wallet, href: '/servicios/cuentas', color: 'text-lime-500', bgColor: 'bg-lime-500/10', isNew: true },
   { id: 'presupuestos', group: 'Tu plata', title: 'Presupuestos', description: 'Cuánto quieres gastar por categoría (50/30/20)',

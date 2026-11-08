@@ -430,7 +430,10 @@ const MERCHANT_LIST: MerchantDef[] = [
     ['ETB', '📡', '#0054A6'],
   ]),
   ...m(['Luz', 'Agua', 'Gas natural'], [
+    // Dos empresas distintas con la misma sigla: EPM es Empresas Públicas de Medellín;
+    // en Manizales es Empresas Públicas de Manizales (se separan para no confundir los pagos)
     ['EPM', 'epm', '#00A859'],
+    ['EPM Manizales', 'badge:#0E7490:EP MZL', '#0E7490'],
     ['Enel', '⚡', '#0555FA'],
     ['Celsia', '⚡', '#E30613'],
     ['Air-e', '⚡', '#0054A6'],

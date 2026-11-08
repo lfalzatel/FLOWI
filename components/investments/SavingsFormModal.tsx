@@ -1,9 +1,10 @@
 'use client';
 import { usePlanGate } from '@/lib/plans';
 import { useInvestments } from '@/hooks/useInvestments';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Camera } from 'lucide-react';
+import { getAiKey, readSavingsWithAi } from '@/lib/aiAssist';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useAccounts } from '@/hooks/useAccounts';
@@ -57,6 +58,39 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
   const needsFrom = !investment && hasAccounts;
   const canSave = bank.trim().length > 0 && amountN > 0 && (!isSavings || parseRate(rate) > 0) && (!needsFrom || from !== undefined) && !saving;
 
+  // Llenar desde capturas de la app (IA gratuita, la misma de los recibos y los CDT)
+  const shotsRef = useRef<HTMLInputElement>(null);
+  const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
+  const [aiMsg, setAiMsg] = useState('');
+  async function readShots(files: File[]) {
+    if (!files.length) return;
+    setAiState('loading');
+    setAiMsg('');
+    const r = await readSavingsWithAi(files, kind);
+    if (!r.ok) {
+      setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
+      setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos. Prueba con una captura donde se vea el saldo y, si la hay, la tasa.'
+        : r.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
+        : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.');
+      return;
+    }
+    const d = r.data;
+    if (d.bank) setBank(d.bank);
+    if (isSavings) {
+      if (d.balance) setAmount(formatMoneyInput(String(d.balance)));
+      if (d.rateEA) setRate(String(d.rateEA).replace('.', ','));
+    } else {
+      // Fondos y pensión: lo invertido y el valor actual (si solo hay uno, se usa como ambos)
+      if (d.invested || d.balance) setAmount(formatMoneyInput(String(d.invested || d.balance)));
+      if (d.balance) setCurrent(formatMoneyInput(String(d.balance)));
+    }
+    const missing = isSavings
+      ? [!d.balance && 'saldo', !d.rateEA && 'tasa E.A.'].filter(Boolean)
+      : [!d.balance && 'valor actual', !d.invested && 'lo invertido'].filter(Boolean);
+    setAiState('done');
+    setAiMsg(missing.length ? `Listo. Revisa y completa: ${missing.join(', ')}.` : 'Listo. Revisa los datos antes de guardar.');
+  }
+
   async function save() {
     if (!user || !canSave) return;
     setSaving(true);
@@ -106,6 +140,25 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-5">
+          {!investment && (
+            <div>
+              <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
+                     onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
+              <button type="button" disabled={aiState === 'loading'}
+                      onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
+                      className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>
+                <Camera className={`w-4 h-4 ${aiState === 'loading' ? 'animate-pulse' : ''}`} />
+                {aiState === 'loading' ? 'Leyendo las capturas…' : 'Llenar desde captura de la app'}
+              </button>
+              <p className={hint}>
+                {aiState === 'no-key'
+                  ? <>Para leer capturas necesitas la IA gratuita (gratis siempre). <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a>.</>
+                  : aiMsg
+                    ? <span className={aiState === 'error' ? 'text-red-400' : 'text-text-secondary'}>{aiMsg}</span>
+                    : 'Sube la captura donde se vea el saldo (y la tasa si aparece). No se guardan números de cuenta.'}
+              </p>
+            </div>
+          )}
           <div>
             <span className={lbl}>{kind === 'fondo' ? 'Plataforma o entidad' : 'Entidad'}</span>
             <BankField value={bank} placeholder="Elegir" onClick={() => setBankSheet(true)} />

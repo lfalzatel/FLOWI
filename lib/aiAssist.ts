@@ -428,3 +428,87 @@ export async function readCdtWithAi(files: File[]): Promise<CdtReadResult> {
     clearTimeout(timer);
   }
 }
+
+
+// ── Cajitas, fondos y pensión desde capturas ──────────────────────────────
+// Lee el saldo o valor de la inversión, lo invertido (si aparece) y la tasa E.A.
+
+export interface SavingsReading {
+  bank?: string;
+  balance?: number;   // saldo o valor actual
+  invested?: number;  // lo aportado / invertido (fondos), si aparece
+  rateEA?: number;    // tasa efectiva anual en %
+}
+
+export type SavingsReadResult =
+  | { ok: true; data: SavingsReading; found: number }
+  | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' };
+
+const SAVINGS_KIND_TEXT: Record<string, string> = {
+  ahorro: 'una cuenta de ahorro o "cajita" que paga intereses (Nu, Nequi, Lulo, Pibank, bancos)',
+  fondo: 'un fondo de inversión, acciones o ETF (Trii, Tyba, fiduciarias, bancos)',
+  pension: 'un fondo de pensión voluntaria u obligatoria (Porvenir, Protección, Colfondos, Skandia)',
+};
+
+export async function readSavingsWithAi(files: File[], kind: string): Promise<SavingsReadResult> {
+  const key = getAiKey();
+  if (!key) return { ok: false, reason: 'no-key' };
+  const models = await getFreeVisionModels(key).catch(() => []);
+  if (!models.length) return { ok: false, reason: 'no-model' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RECEIPT_TIMEOUT_MS * 2);
+  const prompt = `Eres un asistente que lee capturas de pantalla de la app de una entidad financiera colombiana sobre ${SAVINGS_KIND_TEXT[kind] || 'un ahorro o inversión'}.
+Pueden ser varias capturas del mismo producto. Responde SOLO un JSON con estas claves (null si no aparece):
+{"bank": nombre de la entidad o app, "balance": saldo total o valor actual en pesos (número sin puntos),
+ "invested": total aportado o invertido en pesos si aparece separado del valor actual, "rateEA": tasa efectiva anual en % si aparece (número, ej 9.25)}
+No incluyas números de cuenta, de documento ni nombres de personas. Los montos colombianos usan punto de miles y coma decimal.`;
+  try {
+    const images = await Promise.all(files.slice(0, 4).map(shrinkImage));
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'FLOWI',
+      },
+      body: JSON.stringify({
+        model: models[0],
+        models,
+        temperature: 0,
+        messages: [
+          { role: 'system', content: prompt },
+          { role: 'user', content: [
+            { type: 'text', text: `Estas son ${images.length} captura(s).` },
+            ...images.map(url => ({ type: 'image_url', image_url: { url } })),
+          ] },
+        ],
+      }),
+    });
+    if (!res.ok) return { ok: false, reason: 'failed' };
+    const json = await res.json();
+    const p = extractJson(json?.choices?.[0]?.message?.content || '');
+    if (!p) return { ok: false, reason: 'unreadable' };
+    const num = (v: any) => {
+      if (typeof v === 'number') return Number.isFinite(v) && v > 0 ? v : undefined;
+      if (typeof v !== 'string') return undefined;
+      const n = Number(v.replace(/[^\d.,]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    };
+    const rate = num(p.rateEA);
+    const data: SavingsReading = {
+      bank: typeof p.bank === 'string' && p.bank.trim() && p.bank !== 'null' ? p.bank.trim().slice(0, 30) : undefined,
+      balance: num(p.balance) ? Math.round(num(p.balance)!) : undefined,
+      invested: num(p.invested) ? Math.round(num(p.invested)!) : undefined,
+      rateEA: rate !== undefined && rate < 60 ? Math.round(rate * 100) / 100 : undefined,
+    };
+    const found = Object.values(data).filter(v => v !== undefined).length;
+    if (!found) return { ok: false, reason: 'unreadable' };
+    return { ok: true, data, found };
+  } catch {
+    return { ok: false, reason: 'failed' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
