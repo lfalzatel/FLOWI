@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { ChevronRight, Wallet } from 'lucide-react';
@@ -29,7 +30,7 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
       <div className="flex-1 min-w-0">
         <p className="text-[11px] text-text-muted">Tu patrimonio neto</p>
         <p className={`text-sm font-bold ${worth.total < 0 ? 'text-[var(--red)]' : isTech ? 'text-accent' : 'text-text-primary'} ${isTech ? 'uppercase font-mono' : 'font-syne'}`}>
-          {worth.total < 0 ? '−' : ''}{fmt(Math.abs(worth.total))}
+          {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
         </p>
         <p className="text-[11px] text-text-muted truncate">
           Cuentas {fmt(worth.accounts)}{worth.investments ? ` · CDT ${fmt(worth.investments)}` : ''}{worth.liabilities ? ` · debes ${fmt(worth.liabilities)}` : ''}

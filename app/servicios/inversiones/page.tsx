@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
@@ -146,7 +147,7 @@ export default function InversionesPage() {
             </div>
             <button onClick={() => setShowHelp(v => !v)} aria-label="¿Cómo se calcula?" className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
           </div>
-          <p className={`font-bold text-[clamp(24px,8vw,34px)] leading-none text-accent ${isTechTheme ? '' : 'font-syne'}`}>{fmt(summary.invested)}</p>
+          <p className={`font-bold text-[clamp(24px,8vw,34px)] leading-none text-accent ${isTechTheme ? '' : 'font-syne'}`}><AnimatedNumber value={summary.invested} format={fmt} /></p>
           {summary.active.length > 0 && (
             <p className="text-xs text-text-muted mt-1">
               en {summary.active.length} {summary.active.length === 1 ? 'lugar' : 'lugares'}{summary.avgRate ? ` · tasa promedio ${summary.avgRate.toFixed(2).replace('.', ',')}% E.A.` : ''}
@@ -156,12 +157,12 @@ export default function InversionesPage() {
             <div className={`mt-4 pt-4 border-t ${isTechTheme ? 'border-accent/20' : 'border-glass-border'} grid grid-cols-2 gap-3`}>
               <div>
                 <p className="text-[11px] text-text-muted">Llevas ganado</p>
-                <p className={`font-bold ${summary.earnedToDate < 0 ? 'text-red-400' : 'text-text-primary'}`}>{summary.earnedToDate < 0 ? '−' : ''}{fmt(Math.abs(summary.earnedToDate))}</p>
+                <p className={`font-bold ${summary.earnedToDate < 0 ? 'text-red-400' : 'text-text-primary'}`}>{summary.earnedToDate < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(summary.earnedToDate)} format={fmt} /></p>
               </div>
               {hasCdt && (
                 <div>
                   <p className="text-[11px] text-text-muted">Intereses de CDT al vencer</p>
-                  <p className="font-bold text-emerald-500">{fmt(summary.netInterest)}</p>
+                  <p className="font-bold text-emerald-500"><AnimatedNumber value={summary.netInterest} format={fmt} /></p>
                   <p className="text-[10px] text-text-muted">después de retención</p>
                 </div>
               )}
@@ -225,7 +226,7 @@ export default function InversionesPage() {
                       <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
                         <div>
                           <p className="text-text-muted">{k === 'ahorro' ? 'Saldo hoy (aprox.)' : 'Vale hoy'}</p>
-                          <p className="font-bold text-base text-text-primary">{fmt(v.value)}</p>
+                          <p className="font-bold text-base text-text-primary"><AnimatedNumber value={v.value} format={fmt} /></p>
                           {k !== 'ahorro' && inv.valueAt && <p className="text-[10px] text-text-muted">actualizado el {new Date(inv.valueAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</p>}
                         </div>
                         <div>
@@ -254,7 +255,7 @@ export default function InversionesPage() {
                 const soon = s.daysLeft <= 3;
                 return (
                   <article key={inv.id} className={`${card} p-4`}>
-                    {header(<><b className="text-text-primary">{fmt(inv.amount)}</b>&nbsp;· {s.termDays} días</>, `${String(inv.rateEA).replace('.', ',')}% E.A.`)}
+                    {header(<><b className="text-text-primary"><AnimatedNumber value={inv.amount} format={fmt} /></b>&nbsp;· {s.termDays} días</>, `${String(inv.rateEA).replace('.', ',')}% E.A.`)}
                     {inv.note && <p className="text-[11px] text-text-muted truncate mt-1">{inv.note}</p>}
 
                     <div className="mt-3 flex items-center gap-3">
@@ -268,15 +269,15 @@ export default function InversionesPage() {
                     <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
                       <div>
                         <p className="text-text-muted">Llevas ganado</p>
-                        <p className="font-semibold text-text-primary">{fmt(s.earnedToDate)}</p>
+                        <p className="font-semibold text-text-primary"><AnimatedNumber value={s.earnedToDate} format={fmt} /></p>
                       </div>
                       <div>
                         <p className="text-text-muted">Intereses del periodo{s.isEstimate ? ' (aprox.)' : ''}</p>
-                        <p className="font-semibold text-text-primary">{fmt(s.interest)}</p>
+                        <p className="font-semibold text-text-primary"><AnimatedNumber value={s.interest} format={fmt} /></p>
                       </div>
                       <div>
                         <p className="text-text-muted">Recibirás al vencer</p>
-                        <p className="font-semibold text-emerald-500">{fmt(s.netAtMaturity)}</p>
+                        <p className="font-semibold text-emerald-500"><AnimatedNumber value={s.netAtMaturity} format={fmt} /></p>
                         <p className="text-[10px] text-text-muted">menos {fmt(s.withholding)} de retención</p>
                       </div>
                       <div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -258,11 +259,11 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               `Has superado tus ingresos/presupuesto del mes por ${formatCurrency(Math.abs(disponibleParaGastar), profile?.currency)}. Procura restringir tus nuevos gastos variables.`
             ) : isCurrentMonth && hoy && hoy.remainingToday < 0 && hoy.tomorrowAllowance !== null ? (
               <>
-                Te quedan <strong>{formatCurrency(disponibleParaGastar, profile?.currency)}</strong> libres{compromisos > 0 && <> y aún debes pagar <strong>{formatCurrency(compromisos, profile?.currency)}</strong> en compromisos</>}. Hoy ya superaste tu cuota de {formatCurrency(cuotaDiaria, profile?.currency)}; desde mañana procura no pasar de <strong>{formatCurrency(hoy.tomorrowAllowance, profile?.currency)}/día</strong> durante los <strong>{diasRestantes - 1} días restantes</strong>.
+                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Hoy ya superaste tu cuota de {formatCurrency(cuotaDiaria, profile?.currency)}; desde mañana procura no pasar de <strong>{formatCurrency(hoy.tomorrowAllowance, profile?.currency)}/día</strong> durante los <strong>{diasRestantes - 1} días restantes</strong>.
               </>
             ) : isCurrentMonth ? (
               <>
-                Te quedan <strong>{formatCurrency(disponibleParaGastar, profile?.currency)}</strong> libres{compromisos > 0 && <> y aún debes pagar <strong>{formatCurrency(compromisos, profile?.currency)}</strong> en compromisos</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong>{formatCurrency(cuotaDiaria, profile?.currency)}/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
+                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong>{formatCurrency(cuotaDiaria, profile?.currency)}/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
               </>
             ) : (
               disponibleParaGastar >= 0 
@@ -385,17 +386,17 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                 }`}>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-emerald-400 font-semibold">(+) Ingresos del Mes</span>
-                    <span className="font-bold text-emerald-400">+{formatCurrency(totalIngresos, profile?.currency)}</span>
+                    <span className="font-bold text-emerald-400">+<AnimatedNumber value={totalIngresos} format={(n: number) => formatCurrency(n, profile?.currency)} /></span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-orange-400 font-semibold">(-) Gastos Fijos</span>
-                    <span className="font-bold text-orange-400">-{formatCurrency(gastosFijos, profile?.currency)}</span>
+                    <span className="font-bold text-orange-400">-<AnimatedNumber value={gastosFijos} format={(n: number) => formatCurrency(n, profile?.currency)} /></span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-red-400 font-semibold">(-) Gastos Variables Acumulados</span>
-                    <span className="font-bold text-red-400">-{formatCurrency(gastosVariables, profile?.currency)}</span>
+                    <span className="font-bold text-red-400">-<AnimatedNumber value={gastosVariables} format={(n: number) => formatCurrency(n, profile?.currency)} /></span>
                   </div>
 
                   <div className="pt-2.5 border-t border-white/10 flex justify-between items-center">

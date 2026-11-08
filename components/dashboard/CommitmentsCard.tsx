@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState } from 'react';
 import { CalendarClock, CheckCircle2, ChevronDown, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -70,7 +71,7 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
           </div>
           {pendingTotal > 0 && (
             <div className="text-right shrink-0">
-              <p className={`text-base font-bold text-orange-400 ${isTechTheme ? 'font-mono' : 'font-syne'}`}>{formatCurrency(pendingTotal, currency)}</p>
+              <p className={`text-base font-bold text-orange-400 ${isTechTheme ? 'font-mono' : 'font-syne'}`}><AnimatedNumber value={pendingTotal} format={(n: number) => formatCurrency(n, currency)} /></p>
               <p className="text-[10px] text-text-muted">por pagar</p>
             </div>
           )}

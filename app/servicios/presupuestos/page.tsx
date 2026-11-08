@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
@@ -128,7 +129,7 @@ export default function PresupuestosPage() {
     return (
       <div className="pt-2 mt-2 border-t border-white/10">
         <span className="text-[10px] text-text-muted block">{pillar === 'ahorro' ? 'Llevas ahorrado' : 'Llevas gastado'}{pct !== null ? ` (${pct}% de ${totalIncomeFiltered > 0 ? 'tus ingresos' : 'tu presupuesto'})` : ''}:</span>
-        <span className={`text-sm font-bold ${over ? 'text-red-400' : color}`}>{formatCurrency(spent, currency)}</span>
+        <span className={`text-sm font-bold ${over ? 'text-red-400' : color}`}><AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} /></span>
       </div>
     );
   };
@@ -492,7 +493,7 @@ export default function PresupuestosPage() {
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-blue-500/20">
                   <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
-                  <span className="text-sm font-bold text-blue-400">{formatCurrency(globalBudget * 0.50, currency)}</span>
+                  <span className="text-sm font-bold text-blue-400"><AnimatedNumber value={globalBudget * 0.50} format={(n: number) => formatCurrency(n, currency)} /></span>
                 </div>
               )}
               {pillarLine('necesidades', 0.5, 'text-blue-400')}
@@ -510,7 +511,7 @@ export default function PresupuestosPage() {
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-amber-500/20">
                   <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
-                  <span className="text-sm font-bold text-amber-400">{formatCurrency(globalBudget * 0.30, currency)}</span>
+                  <span className="text-sm font-bold text-amber-400"><AnimatedNumber value={globalBudget * 0.30} format={(n: number) => formatCurrency(n, currency)} /></span>
                 </div>
               )}
               {pillarLine('deseos', 0.3, 'text-amber-400')}
@@ -528,7 +529,7 @@ export default function PresupuestosPage() {
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-emerald-500/20">
                   <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
-                  <span className="text-sm font-bold text-emerald-400">{formatCurrency(globalBudget * 0.20, currency)}</span>
+                  <span className="text-sm font-bold text-emerald-400"><AnimatedNumber value={globalBudget * 0.20} format={(n: number) => formatCurrency(n, currency)} /></span>
                 </div>
               )}
               {pillarLine('ahorro', 0.2, 'text-emerald-400')}

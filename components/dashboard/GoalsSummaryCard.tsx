@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import Link from 'next/link';
 import { ChevronRight, Target } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -55,7 +56,7 @@ export function GoalsSummaryCard({ currency = 'COP', demoGoals }: { currency?: s
           <div className={`mt-1.5 h-2 overflow-hidden bg-glass ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
             <div className={`h-full bg-gradient-to-r from-accent-dim to-accent ${isTechTheme ? '' : 'rounded-full'}`} style={{ width: `${pct}%` }} />
           </div>
-          <p className="text-[11px] text-text-muted mt-1">{formatCurrency(top.savedAmount, currency)} de {formatCurrency(top.targetAmount, currency)}</p>
+          <p className="text-[11px] text-text-muted mt-1">{formatCurrency(top.savedAmount, currency)} de <AnimatedNumber value={top.targetAmount} format={(n: number) => formatCurrency(n, currency)} /></p>
         </div>
       </div>
     </Link>

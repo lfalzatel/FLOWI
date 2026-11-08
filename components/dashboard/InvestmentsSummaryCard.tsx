@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import Link from 'next/link';
 import { ChevronRight, Landmark } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -22,7 +23,7 @@ export function InvestmentsSummaryCard({ currency = 'COP' }: { currency?: string
       <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center shrink-0"><Landmark className="w-5 h-5 text-accent" /></div>
       <div className="flex-1 min-w-0">
         <p className="text-[11px] text-text-muted">Ahorro e inversiones · llevas {formatCurrency(s.earnedToDate, currency)} ganados</p>
-        <p className={`text-sm font-bold ${isTechTheme ? 'text-accent uppercase font-mono' : 'text-text-primary font-syne'}`}>{formatCurrency(s.invested, currency)}</p>
+        <p className={`text-sm font-bold ${isTechTheme ? 'text-accent uppercase font-mono' : 'text-text-primary font-syne'}`}><AnimatedNumber value={s.invested} format={(n: number) => formatCurrency(n, currency)} /></p>
         {s.next && (
           <p className={`text-[11px] ${soon ? 'text-amber-500' : 'text-text-muted'}`}>
             {s.next.inv.bank}: {whenText(s.next.daysLeft)} ({formatDay(s.next.inv.maturityDate)})

@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect, useMemo } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -321,7 +322,7 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                                       <div className="flex-1 min-w-0">
                                         <div className="flex justify-between gap-2">
                                           <span className="truncate text-text-primary">{subcat}</span>
-                                          <span className="shrink-0 font-semibold text-text-primary">{formatCurrency(amount, currency)}</span>
+                                          <span className="shrink-0 font-semibold text-text-primary"><AnimatedNumber value={amount} format={(n: number) => formatCurrency(n, currency)} /></span>
                                         </div>
                                         <div className="h-1 mt-1 bg-white/10 rounded-full overflow-hidden">
                                           <div className="h-full bg-accent/70 rounded-full" style={{ width: `${share}%` }} />
@@ -350,7 +351,7 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                                     {t.description || t.category}
                                     {t.merchant && <span className="text-text-muted"> · {t.merchant}</span>}
                                   </span>
-                                  <span className="shrink-0 font-semibold text-text-primary">{formatCurrency(t.amount, currency)}</span>
+                                  <span className="shrink-0 font-semibold text-text-primary"><AnimatedNumber value={t.amount} format={(n: number) => formatCurrency(n, currency)} /></span>
                                 </button>
                               ))}
                               {detail.transactions.length > VISIBLE_TRANSACTIONS && (
@@ -498,7 +499,7 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                           >
                             {target > 0 ? (
                               <span className="font-bold text-text-secondary">
-                                Meta: <strong className="text-text-primary">{formatCurrency(target, currency)}</strong>
+                                Meta: <strong className="text-text-primary"><AnimatedNumber value={target} format={(n: number) => formatCurrency(n, currency)} /></strong>
                               </span>
                             ) : (
                               <span className="text-[11px] italic underline flex items-center gap-1">
@@ -523,7 +524,7 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                           <div className="flex justify-between items-center text-[10px]">
                             <span className={isOverBudget ? 'text-red-400 font-bold flex items-center gap-1' : 'text-text-muted'}>
                               {isOverBudget && <AlertTriangle className="w-3 h-3" />}
-                              Gastado: <strong>{formatCurrency(spent, currency)}</strong> ({percentage}%)
+                              Gastado: <strong><AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} /></strong> ({percentage}%)
                             </span>
                             <span className="text-text-muted">
                               {isOverBudget 

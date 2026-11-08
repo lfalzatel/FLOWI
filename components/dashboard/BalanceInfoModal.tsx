@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
@@ -90,7 +91,7 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
     <div className="space-y-4">
       <div className={`p-4 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'} ${over ? 'bg-red-500/10 border border-red-500/20' : 'bg-accent/10 border border-accent/20'}`}>
         <p className={`text-xs font-bold uppercase tracking-wider ${over ? 'text-red-400' : 'text-accent'}`}>{over ? 'Hoy te pasaste' : 'Te queda para hoy'}</p>
-        <p className={`text-3xl font-bold mt-1 ${over ? 'text-red-400' : 'text-accent'} ${isTechTheme ? '' : 'font-syne'}`}>{f(Math.abs(today.remainingToday))}</p>
+        <p className={`text-3xl font-bold mt-1 ${over ? 'text-red-400' : 'text-accent'} ${isTechTheme ? '' : 'font-syne'}`}><AnimatedNumber value={Math.abs(today.remainingToday)} format={f} /></p>
         <p className="text-xs text-text-secondary mt-1">
           {over
             ? `Tu cuota de hoy era ${f(today.todayAllowance)} y llevas ${f(today.spentToday)}. Lo que te pasaste se descuenta de los próximos días.`
@@ -135,11 +136,11 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
       <div className="p-3 rounded-2xl bg-white/5 border border-glass-border">
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">Y hoy</p>
         <p className="text-xs text-text-secondary leading-relaxed">
-          Al empezar el día tu cuota era de <strong>{f(today.todayAllowance)}</strong> (lo libre que tenías esta mañana ÷ {today.daysLeft} días, contando hoy).
+          Al empezar el día tu cuota era de <strong><AnimatedNumber value={today.todayAllowance} format={f} /></strong> (lo libre que tenías esta mañana ÷ {today.daysLeft} días, contando hoy).
           {today.spentToday > 0
-            ? <> Llevas <strong>{f(today.spentToday)}</strong> en gastos del día a día: {over
-                ? <>te pasaste <strong className="text-red-400">{f(-today.remainingToday)}</strong>, y por eso la cuota de los próximos días baja.</>
-                : <>te quedan <strong className="text-accent">{f(today.remainingToday)}</strong> para hoy.</>}</>
+            ? <> Llevas <strong><AnimatedNumber value={today.spentToday} format={f} /></strong> en gastos del día a día: {over
+                ? <>te pasaste <strong className="text-red-400"><AnimatedNumber value={-today.remainingToday} format={f} /></strong>, y por eso la cuota de los próximos días baja.</>
+                : <>te quedan <strong className="text-accent"><AnimatedNumber value={today.remainingToday} format={f} /></strong> para hoy.</>}</>
             : <> Aún no registras gastos del día a día hoy.</>}
         </p>
       </div>
@@ -189,7 +190,7 @@ function DebtsContent({ balance, currency, onClose }: { balance: number; currenc
       <div className="p-3 rounded-2xl bg-white/5 border border-glass-border">
         <p className="text-xs text-text-secondary leading-relaxed">
           <strong>Balance neto (con deudas)</strong>, en la tarjeta de arriba, es tu dinero disponible menos estas deudas:
-          {' '}{f(balance)} − {f(totalDeudas)} = <strong className={balance - totalDeudas < 0 ? 'text-red-400' : 'text-accent'}>{f(balance - totalDeudas)}</strong>.
+          {' '}{f(balance)} − {f(totalDeudas)} = <strong className={balance - totalDeudas < 0 ? 'text-red-400' : 'text-accent'}><AnimatedNumber value={balance - totalDeudas} format={f} /></strong>.
           Te dice con cuánto quedarías si pagaras todo hoy.
         </p>
       </div>

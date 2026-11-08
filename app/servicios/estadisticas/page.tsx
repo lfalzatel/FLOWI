@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { TrendingUp, Calendar, PieChart, Loader2, BarChart2, Flame, ArrowLeft, Download } from 'lucide-react';
@@ -359,15 +360,15 @@ export default function EstadisticasPage() {
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'glass-card rounded-2xl'}`}>
                 <p className={`text-xs mb-1 ${isTechTheme ? 'font-mono uppercase text-emerald-400' : 'text-emerald-500 font-semibold'}`}>Ingresos</p>
-                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-emerald-400' : 'text-text-primary'}`}>{formatCurrency(data.totalIncome, profile?.currency)}</p>
+                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-emerald-400' : 'text-text-primary'}`}><AnimatedNumber value={data.totalIncome} format={(n: number) => formatCurrency(n, profile?.currency)} /></p>
               </div>
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'glass-card rounded-2xl'}`}>
                 <p className={`text-xs mb-1 ${isTechTheme ? 'font-mono uppercase text-orange-400' : 'text-orange-500 font-semibold'}`}>Gastos</p>
-                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-orange-400' : 'text-text-primary'}`}>{formatCurrency(data.totalExpense, profile?.currency)}</p>
+                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-orange-400' : 'text-text-primary'}`}><AnimatedNumber value={data.totalExpense} format={(n: number) => formatCurrency(n, profile?.currency)} /></p>
               </div>
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'glass-card rounded-2xl'}`}>
                 <p className={`text-xs mb-1 ${isTechTheme ? 'font-mono uppercase text-accent' : 'text-text-secondary font-semibold'}`}>Balance Neto</p>
-                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{formatCurrency(data.netBalance, profile?.currency)}</p>
+                <p className={`text-base font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}><AnimatedNumber value={data.netBalance} format={(n: number) => formatCurrency(n, profile?.currency)} /></p>
               </div>
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'glass-card rounded-2xl'}`}>
                 <p className={`text-xs mb-1 ${isTechTheme ? 'font-mono uppercase text-blue-400' : 'text-blue-500 font-semibold'}`}>Ahorro</p>

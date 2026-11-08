@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -91,7 +92,7 @@ export default function CuentasPage() {
             <button onClick={() => setShowHelp(v => !v)} aria-label="¿Qué es el patrimonio neto?" className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
           </div>
           <p className={`font-bold text-[clamp(26px,9vw,38px)] leading-none ${worth.total >= 0 ? 'text-accent' : 'text-[var(--red)]'} ${isTech ? '' : 'font-syne'}`}>
-            {worth.total < 0 ? '−' : ''}{fmt(Math.abs(worth.total))}
+            {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
           </p>
           <p className="text-xs text-text-muted mt-1">Tienes {fmt(worth.assets)} · debes {fmt(worth.liabilities)}</p>
 
@@ -101,7 +102,7 @@ export default function CuentasPage() {
                 <>
                   <r.icon className={`w-4 h-4 shrink-0 ${r.sign > 0 ? 'text-accent' : 'text-red-400'}`} />
                   <span className="flex-1 text-sm text-text-secondary">{r.label}</span>
-                  <span className={`text-sm font-semibold ${r.sign > 0 ? 'text-text-primary' : 'text-red-400'}`}>{r.sign < 0 ? '−' : ''}{fmt(r.value)}</span>
+                  <span className={`text-sm font-semibold ${r.sign > 0 ? 'text-text-primary' : 'text-red-400'}`}>{r.sign < 0 ? '−' : ''}<AnimatedNumber value={r.value} format={fmt} /></span>
                 </>
               );
               return r.href
@@ -175,7 +176,7 @@ export default function CuentasPage() {
                               <span className="w-14 shrink-0 text-text-muted">{m.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</span>
                               <span className="flex-1 min-w-0 truncate text-text-secondary">{m.label}</span>
                               {m.kind === 'base'
-                                ? <span className="text-text-muted">{fmt(m.amount)}</span>
+                                ? <span className="text-text-muted"><AnimatedNumber value={m.amount} format={fmt} /></span>
                                 : <span className={m.amount >= 0 ? 'text-emerald-400 font-semibold' : 'text-text-primary'}>{m.amount >= 0 ? '+' : '−'}{fmt(Math.abs(m.amount))}</span>}
                               {m.kind === 'transfer' && m.transfer.id && (
                                 <button type="button" onClick={() => deleteTransfer(m.transfer.id!)} aria-label="Borrar transferencia" className="text-text-muted hover:text-[var(--red)] px-1">×</button>

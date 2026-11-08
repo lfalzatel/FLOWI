@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -81,7 +82,7 @@ export default function MetasPage() {
             <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center"><PiggyBank className="w-4 h-4 text-accent" /></div>
             <span className={`text-xs font-medium ${isTechTheme ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>Ahorrado en tus metas</span>
           </div>
-          <p className={`font-bold text-[clamp(24px,8vw,34px)] leading-none text-accent ${isTechTheme ? '' : 'font-syne'}`}>{fmt(totalSaved)}</p>
+          <p className={`font-bold text-[clamp(24px,8vw,34px)] leading-none text-accent ${isTechTheme ? '' : 'font-syne'}`}><AnimatedNumber value={totalSaved} format={fmt} /></p>
           {totalTarget > 0 && <p className="text-xs text-text-muted mt-1">de {fmt(totalTarget)} en {goals.length} {goals.length === 1 ? 'meta' : 'metas'}</p>}
 
           <div className={`mt-4 pt-4 border-t ${isTechTheme ? 'border-accent/20' : 'border-glass-border'} flex items-start gap-2.5`}>
@@ -129,7 +130,7 @@ export default function MetasPage() {
                           }`}>{PRIORITY_LABEL[goal.priority]}</span>
                         </div>
                         <p className="text-xs text-text-secondary mt-0.5">
-                          <b className="text-text-primary">{fmt(goal.savedAmount)}</b> de {fmt(goal.targetAmount)}
+                          <b className="text-text-primary"><AnimatedNumber value={goal.savedAmount} format={fmt} /></b> de {fmt(goal.targetAmount)}
                         </p>
                       </div>
                       <button onClick={() => { setEditing(goal); setShowForm(true); }} aria-label={`Editar ${goal.name}`}
