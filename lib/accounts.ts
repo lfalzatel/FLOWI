@@ -1,5 +1,5 @@
 import { Account, AccountKind, Debt, Investment, InvestmentFunding, Transaction, Transfer, calculateDebtInterest } from './firestore';
-import { investmentStatus } from './investments';
+import { investmentValue } from './investments';
 import { normalizeText } from './categories';
 
 // Saldos de cuentas y patrimonio neto.
@@ -85,8 +85,10 @@ export function accountStates(accounts: Account[], transactions: Transaction[], 
     const date = new Date(f.at);
     if (date.getTime() < new Date(st.account.baseAt).getTime()) return;
     st.balance += sign * f.amount;
-    const what = f.kind === 'pago' ? 'Te pagaron el' : f.kind === 'abono' ? 'Abono al' : f.kind === 'renovacion' ? 'Renovación del' : 'Apertura del';
-    st.movements.push({ kind: 'cdt', date, amount: sign * f.amount, label: `${what} CDT ${inv.bank}` });
+    const k = inv.kind || 'cdt';
+    const name = k === 'cdt' ? `CDT ${inv.bank}` : inv.note ? `${inv.bank} · ${inv.note}` : inv.bank;
+    const what = f.kind === 'pago' ? 'Te pagaron' : f.kind === 'deposito' || f.kind === 'abono' ? 'Depósito a' : f.kind === 'retiro' ? 'Retiro de' : f.kind === 'renovacion' ? 'Renovación' : 'Apertura';
+    st.movements.push({ kind: 'cdt', date, amount: sign * f.amount, label: `${what} ${name}` });
   };
   for (const inv of investments) {
     for (const f of inv.fundings || []) cdtMove(f, -1, inv);
@@ -118,7 +120,7 @@ export function netWorth(states: AccountState[], investments: Investment[], debt
   }
   const investmentsTotal = investments
     .filter(i => i.status === 'activo')
-    .reduce((sum, i) => sum + i.amount + investmentStatus(i, now).earnedToDate, 0);
+    .reduce((sum, i) => sum + investmentValue(i, now).value, 0);
   let owedToMe = 0, owed = 0;
   for (const d of debts) {
     if (d.status !== 'pending') continue;

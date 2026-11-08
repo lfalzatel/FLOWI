@@ -5,6 +5,9 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
 import { Goal } from '@/lib/firestore';
 import { sortGoals } from '@/lib/goals';
+import { useInvestments } from '@/hooks/useInvestments';
+import { investmentValue, kindOf } from '@/lib/investments';
+import { useMemo } from 'react';
 
 export function useGoals() {
   const { user } = useAuth();
@@ -41,5 +44,15 @@ export function useGoals() {
     return () => unsubscribe();
   }, [user]);
 
-  return { goals, loading, error };
+  // Metas enlazadas a una inversión: lo ahorrado es lo que vale hoy esa inversión
+  const { investments } = useInvestments();
+  const linked = useMemo(() => sortGoals(goals.map(g => {
+    if (!g.linkedInvestmentId) return g;
+    const inv = investments.find(i => i.id === g.linkedInvestmentId && i.status === 'activo');
+    if (!inv) return g;
+    const name = kindOf(inv) === 'cdt' ? `CDT ${inv.bank}` : inv.note || inv.bank;
+    return { ...g, savedAmount: Math.round(investmentValue(inv).value), linkedName: name };
+  })), [goals, investments]);
+
+  return { goals: linked, loading, error };
 }

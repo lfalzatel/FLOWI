@@ -482,7 +482,17 @@ const MERCHANT_LIST: MerchantDef[] = [
   ...m(['Cuota de crédito', 'Ahorro', 'Cesantías'], [
     ['FNA', 'fna', '#003DA5'],
   ]),
+  ...m(['Inversiones', 'Bolsa / Acciones', 'Ahorro'], [
+    ['Trii', 'badge:#5B21B6:trii', '#5B21B6'],
+    ['tyba', 'badge:#0EA5E9:tyba', '#0EA5E9'],
+    ['Pibank', 'badge:#6D28D9:PIBANK', '#6D28D9'],
+    ['Ualá', 'badge:#2563EB:UALÁ', '#2563EB'],
+    ['Fiduciaria Bogotá', 'badge:#0054A6:FIDU', '#0054A6'],
+    ['Credicorp Capital', 'badge:#1E3A8A:CREDICORP', '#1E3A8A'],
+    ['Acciones y Valores', 'badge:#0F766E:A&V', '#0F766E'],
+  ]),
   ...m(['Pensión voluntaria', 'Cesantías'], [
+    ['Skandia', 'badge:#00A19A:SKANDIA', '#00A19A'],
     ['Porvenir', '🏦', '#E30613'],
     ['Protección', '🏦', '#0054A6'],
     ['Colfondos', '🏦', '#00A859'],

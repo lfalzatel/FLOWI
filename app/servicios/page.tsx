@@ -16,6 +16,7 @@ const SERVICES = [
   {
     id: 'recordatorios',
     title: 'Recordatorios',
+    description: 'Pagos y fechas importantes para que no se te pasen',
     icon: Bell,
     href: '/servicios/recordatorios',
     color: 'text-pink-500',
@@ -24,7 +25,8 @@ const SERVICES = [
   },
   {
     id: 'notas',
-    title: 'Notas importantes',
+    title: 'Notas',
+    description: 'Datos que no quieres olvidar',
     icon: StickyNote,
     href: '/servicios/notas',
     color: 'text-blue-500',
@@ -34,6 +36,7 @@ const SERVICES = [
   {
     id: 'estadisticas',
     title: 'Estadísticas',
+    description: 'En qué se te va la plata, mes a mes',
     icon: BarChart2,
     href: '/servicios/estadisticas',
     color: 'text-cyan-500',
@@ -43,6 +46,7 @@ const SERVICES = [
   {
     id: 'presupuestos',
     title: 'Presupuestos',
+    description: 'Cuánto quieres gastar por categoría (50/30/20)',
     icon: PieChart,
     href: '/servicios/presupuestos',
     color: 'text-purple-500',
@@ -52,7 +56,8 @@ const SERVICES = [
   },
   {
     id: 'metas',
-    title: 'Metas de ahorro',
+    title: 'Metas',
+    description: '¿Para qué ahorras? Viaje, moto, emergencias…',
     icon: Target,
     href: '/servicios/metas',
     color: 'text-emerald-500',
@@ -63,6 +68,7 @@ const SERVICES = [
   {
     id: 'cuentas',
     title: 'Cuentas y patrimonio',
+    description: 'Cuánto tienes en cada banco y en efectivo',
     icon: Wallet,
     href: '/servicios/cuentas',
     color: 'text-lime-500',
@@ -72,7 +78,8 @@ const SERVICES = [
   },
   {
     id: 'inversiones',
-    title: 'Mis inversiones (CDT)',
+    title: 'Ahorro e inversiones',
+    description: 'Donde tu plata crece: CDT, Nu, Trii, fondos',
     icon: Landmark,
     href: '/servicios/inversiones',
     color: 'text-teal-500',
@@ -83,6 +90,7 @@ const SERVICES = [
   {
     id: 'importar',
     title: 'Importar extracto',
+    description: 'Sube el Excel del banco y registro todo de una',
     icon: FileSpreadsheet,
     href: '/servicios/importar',
     color: 'text-sky-500',
@@ -93,6 +101,7 @@ const SERVICES = [
   {
     id: 'compartidos',
     title: 'Gastos compartidos',
+    description: 'Divide cuentas con amigos o en pareja',
     icon: Users,
     href: '#',
     color: 'text-orange-500',
@@ -103,6 +112,7 @@ const SERVICES = [
   {
     id: 'facturas',
     title: 'Mis facturas',
+    description: 'Tus facturas guardadas en un solo lugar',
     icon: Receipt,
     href: '#',
     color: 'text-rose-500',
@@ -113,6 +123,7 @@ const SERVICES = [
   {
     id: 'configuracion',
     title: 'Configuración',
+    description: 'Moneda, temas, sonidos y avisos',
     icon: Settings,
     href: '/configuracion',
     color: 'text-gray-500',
@@ -121,7 +132,8 @@ const SERVICES = [
   },
   {
     id: 'perfil',
-    title: 'Mi Perfil',
+    title: 'Mi perfil',
+    description: 'Tu nombre, foto y datos de la cuenta',
     icon: User,
     href: '#',
     color: 'text-gray-500',
@@ -137,7 +149,7 @@ export default function ServiciosPage() {
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   const filteredServices = SERVICES.filter(s => 
-    s.title.toLowerCase().includes(searchTerm.toLowerCase())
+    `${s.title} ${s.description}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -190,9 +202,10 @@ export default function ServiciosPage() {
               <span className={`text-sm font-medium ${isTechTheme ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>
                 {service.title}
               </span>
+              <span className="mt-1 text-[11px] leading-snug text-text-muted">{service.description}</span>
             </>
           );
-          const classNameStr = `relative flex flex-col justify-center p-4 glass-card transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
+          const classNameStr = `relative flex flex-col justify-start p-4 glass-card transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
 
           if (service.id === 'perfil') {
             return (

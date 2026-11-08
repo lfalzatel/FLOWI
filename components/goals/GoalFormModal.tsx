@@ -6,6 +6,9 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { Goal, GoalPriority, addGoal, updateGoal } from '@/lib/firestore';
 import { GOAL_EMOJIS, PRIORITY_LABEL } from '@/lib/goals';
+import { useInvestments } from '@/hooks/useInvestments';
+import { investmentValue, kindOf } from '@/lib/investments';
+import { formatCurrency } from '@/lib/format';
 
 // Montos con separador de miles mientras se escribe ("1.500.000")
 export const formatAmountInput = (value: number | string) => {
@@ -31,6 +34,12 @@ export function GoalFormModal({ goal, onClose, onDelete }: Props) {
   const [saved, setSaved] = useState(goal ? formatAmountInput(goal.savedAmount) : '');
   const [priority, setPriority] = useState<GoalPriority>(goal?.priority || 'media');
   const [deadline, setDeadline] = useState(goal?.deadline || '');
+  // ¿Dónde está guardada esta plata? (enlazar a una inversión)
+  const { investments } = useInvestments();
+  const activeInv = investments.filter(i => i.status === 'activo' && i.id);
+  const [linkedId, setLinkedId] = useState<string | null>(goal?.linkedInvestmentId || null);
+  const linkedInv = activeInv.find(i => i.id === linkedId);
+  const invName = (i: typeof activeInv[number]) => kindOf(i) === 'cdt' ? `CDT ${i.bank}` : i.note ? `${i.note} (${i.bank})` : i.bank;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -42,18 +51,18 @@ export function GoalFormModal({ goal, onClose, onDelete }: Props) {
     if (!user || !canSave) return;
     setLoading(true);
     setError('');
-    const savedAmount = parseAmountInput(saved);
+    const savedAmount = linkedInv ? Math.round(investmentValue(linkedInv).value) : parseAmountInput(saved);
     try {
       if (goal?.id) {
         await updateGoal(goal.id, {
           name: name.trim(), emoji, targetAmount, savedAmount, priority,
-          deadline: deadline || null,
+          deadline: deadline || null, linkedInvestmentId: linkedId,
           completedAt: savedAmount >= targetAmount ? (goal.completedAt || new Date().toISOString()) : null,
         });
       } else {
         await addGoal({
           userId: user.uid, name: name.trim(), emoji, targetAmount, savedAmount, priority,
-          deadline: deadline || null,
+          deadline: deadline || null, linkedInvestmentId: linkedId,
           movements: savedAmount > 0 ? [{ amount: savedAmount, date: new Date().toISOString(), note: 'Saldo inicial' }] : [],
           completedAt: savedAmount >= targetAmount ? new Date().toISOString() : null,
         });
@@ -119,10 +128,31 @@ export function GoalFormModal({ goal, onClose, onDelete }: Props) {
               </div>
               <div>
                 <label htmlFor="goal-saved" className={labelClass}>Ya tengo ahorrado</label>
-                <input id="goal-saved" type="text" inputMode="numeric" placeholder="$ 0" value={saved}
-                       onChange={(e) => setSaved(formatAmountInput(e.target.value))} className={inputClass} />
+                {linkedInv ? (
+                  <div className={`${inputClass} text-text-secondary`}>{formatCurrency(Math.round(investmentValue(linkedInv).value), 'COP')}</div>
+                ) : (
+                  <input id="goal-saved" type="text" inputMode="numeric" placeholder="$ 0" value={saved}
+                         onChange={(e) => setSaved(formatAmountInput(e.target.value))} className={inputClass} />
+                )}
               </div>
             </div>
+
+            {activeInv.length > 0 && (
+              <div>
+                <span className={labelClass}>¿Dónde guardas esta plata?</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <button type="button" onClick={() => setLinkedId(null)} className={`${chipClass(!linkedId)} !flex-none px-3`}>Lo registro a mano</button>
+                  {activeInv.map(i => (
+                    <button key={i.id} type="button" onClick={() => setLinkedId(i.id!)} className={`${chipClass(linkedId === i.id)} !flex-none px-3`}>{invName(i)}</button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-text-muted mt-1.5">
+                  {linkedInv
+                    ? `Lo ahorrado será lo que tengas en ${invName(linkedInv)}, con sus depósitos e intereses. No tienes que registrarlo a mano.`
+                    : 'Si la plata de esta meta está en una Cajita, un CDT o un fondo, enlázala y el progreso se actualiza solo.'}
+                </p>
+              </div>
+            )}
 
             <div>
               <span className={labelClass}>Prioridad</span>

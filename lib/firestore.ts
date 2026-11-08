@@ -482,6 +482,10 @@ export interface Goal {
   movements?: GoalMovement[];
   completedAt?: string | null;
   createdAt?: Timestamp | Date;
+  // Dónde está guardada la plata de la meta (una inversión: Cajita de Nu, CDT, fondo…).
+  // Si está enlazada, lo ahorrado es el valor de esa inversión y no hace falta registrarlo a mano.
+  linkedInvestmentId?: string | null;
+  linkedName?: string; // solo en la app (no se guarda): nombre de la inversión enlazada
 }
 
 export async function addGoal(goal: Omit<Goal, 'id' | 'createdAt'>): Promise<string> {
@@ -528,8 +532,12 @@ export interface InvestmentPeriod {
 export interface Investment {
   id?: string;
   userId: string;
-  kind: 'cdt';
-  bank: string;
+  // cdt: plazo fijo · ahorro: cuenta que paga intereses (Nu, Lulo, Pibank…) ·
+  // fondo: acciones o fondos con valor que sube y baja (Trii, tyba, FIC) · pension: pensión voluntaria
+  kind: InvestmentKind;
+  bank: string;                // entidad o plataforma
+  currentValue?: number | null; // fondo/pensión: valor actual que la persona actualiza
+  valueAt?: string | null;      // cuándo se actualizó ese valor
   amount: number;              // capital
   rateEA: number;              // tasa efectiva anual, en %
   nominalRate?: number | null; // tasa nominal que muestra el banco (opcional)
@@ -554,8 +562,10 @@ export interface InvestmentFunding {
   at: string;               // ISO
   amount: number;
   accountId: string | null;
-  kind: 'apertura' | 'abono' | 'renovacion' | 'pago';
+  kind: 'apertura' | 'abono' | 'renovacion' | 'pago' | 'deposito' | 'retiro';
 }
+
+export type InvestmentKind = 'cdt' | 'ahorro' | 'fondo' | 'pension';
 
 export async function addInvestment(inv: Omit<Investment, 'id' | 'createdAt'>): Promise<string> {
   const docRef = await addDoc(collection(db, 'fl_investments'), { ...inv, createdAt: serverTimestamp() });

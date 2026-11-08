@@ -59,7 +59,7 @@ export default function MetasPage() {
             <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className={`text-xl font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Metas de ahorro</h1>
+            <h1 className={`text-xl font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Metas</h1>
           </div>
           {goals.length > 0 && (
             <button onClick={openNew}
@@ -168,10 +168,17 @@ export default function MetasPage() {
                       )}
                     </div>
 
-                    <button onClick={() => setMoving(goal)}
+                    {goal.linkedName ? (
+                      <Link href="/servicios/inversiones"
                             className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs tracking-wider' : 'rounded-xl bg-accent/15 text-accent hover:bg-accent/25'}`}>
-                      <PiggyBank className="w-4 h-4" /> Registrar ahorro
-                    </button>
+                        <PiggyBank className="w-4 h-4" /> Guardada en {goal.linkedName} · depositar
+                      </Link>
+                    ) : (
+                      <button onClick={() => setMoving(goal)}
+                              className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs tracking-wider' : 'rounded-xl bg-accent/15 text-accent hover:bg-accent/25'}`}>
+                        <PiggyBank className="w-4 h-4" /> Registrar ahorro
+                      </button>
+                    )}
                   </article>
                 );
               })}

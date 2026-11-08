@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { X, Search, Check, ChevronDown } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { CategoryIcon } from '@/components/CategoryIcon';
-import { PAYMENT_METHODS, normalizeText } from '@/lib/categories';
+import { PAYMENT_METHODS, findCatalogEntry, normalizeText } from '@/lib/categories';
 
 // Selector de bancos, billeteras y medios de pago con su logo: un campo que abre una hoja con
 // buscador y cuadrícula, en vez de decenas de botones ocupando el formulario.
@@ -15,7 +15,10 @@ const OTHERS = ['Efectivo', 'Tarjeta débito', 'Tarjeta crédito', 'Transferenci
 export function bankMeta(label: string): { icon: string; label: string } | null {
   const k = normalizeText(label);
   const hit = PAYMENT_METHODS.find(p => normalizeText(p.label) === k);
-  return hit ? { icon: hit.icon, label: hit.label } : null;
+  if (hit) return { icon: hit.icon, label: hit.label };
+  // Plataformas de inversión y fondos de pensión están en el catálogo de comercios
+  const mer = findCatalogEntry(label);
+  return mer ? { icon: mer.icon, label: mer.label } : null;
 }
 
 export function BankLogo({ label, className = 'w-5 h-5 text-base flex items-center justify-center' }: { label: string; className?: string }) {
