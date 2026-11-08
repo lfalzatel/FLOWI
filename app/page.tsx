@@ -348,6 +348,10 @@ export default function DashboardPage() {
           onChangeValue={setFilterValue} 
         />
 
+        {/* En PC dos columnas: a la izquierda las cifras del día a día, a la derecha el detalle.
+            En el celular queda una sola columna en el mismo orden de siempre. */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="min-w-0 space-y-6">
         {/* Balance */}
         {loading ? (
           <div className="glass-card rounded-3xl p-8 animate-pulse">
@@ -375,6 +379,9 @@ export default function DashboardPage() {
         <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} demoGoals={demo?.goals} /></div>
         {!demo && <NetWorthCard transactions={transactions} currency={profile?.currency} />}
         {!demo && <InvestmentsSummaryCard currency={profile?.currency} />}
+        </div>
+
+        <div className="min-w-0 space-y-6">
 
         {/* Chart */}
         <div data-tour="chart"><ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} /></div>
@@ -404,6 +411,8 @@ export default function DashboardPage() {
                 animationKey={`${filterType}-${filterValue}`}
              />
           )}
+        </div>
+        </div>
         </div>
       </main>
 
