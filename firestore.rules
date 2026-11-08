@@ -50,13 +50,17 @@ service cloud.firestore {
 
     // ── Datos de cada persona ─────────────────────────────────
     match /fl_expenses/{id} {
-      allow read, delete: if ownsExisting();
+      // El administrador puede LEER (no cambiar ni borrar) para ver los totales en Gestionar usuarios
+      allow read: if ownsExisting() || isAdmin();
+      allow delete: if ownsExisting();
       allow create: if createsOwn();
       allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
     }
 
     match /fl_debts/{id} {
-      allow read, delete: if ownsExisting();
+      // El administrador puede LEER (no cambiar ni borrar) para ver los totales en Gestionar usuarios
+      allow read: if ownsExisting() || isAdmin();
+      allow delete: if ownsExisting();
       allow create: if createsOwn();
       allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
     }

@@ -18,7 +18,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   
-  const [userStats, setUserStats] = useState<{gastos: number, ingresos: number, deudas: number, loading: boolean}>({
+  const [userStats, setUserStats] = useState<{gastos: number, ingresos: number, deudas: number, loading: boolean, error?: boolean}>({
     gastos: 0, ingresos: 0, deudas: 0, loading: false
   });
 
@@ -43,7 +43,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   };
 
   const loadUserStats = async (userId: string) => {
-    setUserStats(prev => ({ ...prev, loading: true }));
+    setUserStats(prev => ({ ...prev, loading: true, error: false }));
     try {
       const { getUserTransactions, getUserDebts, calculateDebtInterest } = await import('@/lib/firestore');
       const [gastosTx, ingresosTx, deudas] = await Promise.all([
@@ -58,13 +58,13 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
       setUserStats({ gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false });
     } catch (error) {
       console.error('Error loading stats:', error);
-      setUserStats(prev => ({ ...prev, loading: false }));
+      setUserStats(prev => ({ ...prev, loading: false, error: true }));
     }
   };
 
   const handleSelectUser = (u: UserProfile) => {
     setSelectedUser(u);
-    if (u.email === currentUserEmail) loadUserStats(u.id!); // solo las finanzas propias se pueden leer
+    loadUserStats(u.id!); // el administrador puede leer los totales de cada usuario
   };
 
   const handleChangeRole = async (userId: string, newRole: string) => {
@@ -256,10 +256,12 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                 </div>
               </div>
 
-              {selectedUser.email === currentUserEmail ? (
+              <>
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
                 <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Estadísticas Financieras</h4>
-                {userStats.loading ? (
+                {userStats.error ? (
+                  <p className="text-xs text-amber-500 leading-snug">No hay acceso a los montos de este usuario. Falta publicar la regla de Firestore que permite al administrador leerlos.</p>
+                ) : userStats.loading ? (
                   <div className="flex justify-center py-4">
                     <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                   </div>
@@ -284,7 +286,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                   </div>
                 )}
               </div>
-              ) : (
+              {selectedUser.email !== currentUserEmail && (
                 <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
                   <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Actividad</h4>
                   <div className="grid grid-cols-2 gap-4">
@@ -297,9 +299,9 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                       <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</p>
                     </div>
                   </div>
-                  <p className="text-[10px] text-text-muted mt-3 leading-snug">Por privacidad no ves los montos de otras personas: cada quien solo ve sus propias finanzas.</p>
                 </div>
               )}
+              </>
             </div>
           </>
         )}
