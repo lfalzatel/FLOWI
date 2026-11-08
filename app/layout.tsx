@@ -52,6 +52,7 @@ import { WelcomeTour } from '@/components/layout/WelcomeTour';
 import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
 import { ReminderWatcher } from '@/components/reminders/ReminderWatcher';
 import { NotificationPrompter } from '@/components/notifications/NotificationPrompter';
+import { UpdateWatcher } from '@/components/layout/UpdateWatcher';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -73,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <InAppToastStack />
               <ReminderWatcher />
               <NotificationPrompter />
+              <UpdateWatcher />
             </DataProvider>
           </ThemeProvider>
         </InAppNotificationProvider>
