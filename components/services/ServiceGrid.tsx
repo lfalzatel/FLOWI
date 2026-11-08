@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Hand, RotateCcw } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -47,7 +48,9 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
 
   // ── Arrastrar ──
   const [dragId, setDragId] = useState<string | null>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  // Copia flotante pegada al dedo: tamaño de la tarjeta y el punto exacto donde se agarró
+  const [ghost, setGhost] = useState<{ w: number; h: number; grabX: number; grabY: number } | null>(null);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
   const press = useRef<{ id: string; x: number; y: number; timer: ReturnType<typeof setTimeout> | null; started: boolean } | null>(null);
   const justDragged = useRef(false);
   const orderRef = useRef(order);
@@ -93,17 +96,11 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
         press.current.started = true;
         try { el.setPointerCapture(pointerId); } catch { /* sin captura */ }
         try { navigator.vibrate?.(25); } catch { /* sin vibración */ }
-        // Al empezar, la vista pasa de grupos a lista: se compensa el salto de la tarjeta
-        const before = el.getBoundingClientRect();
+        const rect = el.getBoundingClientRect();
+        const p = press.current;
+        setGhost({ w: rect.width, h: rect.height, grabX: p.x - rect.left, grabY: p.y - rect.top });
+        setPos({ x: p.x, y: p.y });
         setDragId(id);
-        setOffset({ x: 0, y: 0 });
-        requestAnimationFrame(() => {
-          const now = (document.querySelector(`[data-svc="${id}"]`) as HTMLElement | null)?.getBoundingClientRect();
-          if (now && press.current) {
-            press.current.x += now.left - before.left;
-            press.current.y += now.top - before.top;
-          }
-        });
       }, LONG_PRESS_MS),
     };
   };
@@ -119,8 +116,8 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
       if (Math.hypot(clientX - p.x, clientY - p.y) > 10) { if (p.timer) clearTimeout(p.timer); press.current = null; }
       return;
     }
-    setOffset({ x: clientX - p.x, y: clientY - p.y });
-    // ¿Sobre qué tarjeta está el dedo? (la que se arrastra no recibe eventos)
+    setPos({ x: clientX, y: clientY });
+    // ¿Sobre qué tarjeta está el dedo? (la copia flotante no recibe eventos)
     const under = document.elementFromPoint(clientX, clientY)?.closest('[data-svc]') as HTMLElement | null;
     const target = under?.dataset.svc;
     if (target && target !== p.id) {
@@ -130,16 +127,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
         const next = [...cur];
         next.splice(from, 1);
         next.splice(to, 0, p.id);
-        // La tarjeta cambió de lugar: el desplazamiento se mide desde su nueva posición
-        const before = (document.querySelector(`[data-svc="${p.id}"]`) as HTMLElement | null)?.getBoundingClientRect();
         setOrder(next);
-        requestAnimationFrame(() => {
-          const after = (document.querySelector(`[data-svc="${p.id}"]`) as HTMLElement | null)?.getBoundingClientRect();
-          if (before && after && press.current) {
-            press.current.x += after.left - before.left;
-            press.current.y += after.top - before.top;
-          }
-        });
       }
     }
   };
@@ -154,7 +142,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
     }
     press.current = null;
     setDragId(null);
-    setOffset({ x: 0, y: 0 });
+    setGhost(null);
   };
 
   const moveRef = useRef(moveTo);
@@ -165,9 +153,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
   const q = query.toLowerCase();
   const visible = order.map(id => byId.get(id)!).filter(s => s && `${s.title} ${s.description}`.toLowerCase().includes(q));
 
-  const renderCard = (service: ServiceItem) => {
-    const dragging = dragId === service.id;
-    const content = (
+  const cardContent = (service: ServiceItem) => (
       <>
         {service.isNew && (
           <span className={`absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-full'}`}>Nuevo</span>
@@ -181,9 +167,13 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
         <span className={`text-sm font-medium ${isTech ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>{service.title}</span>
         <span className="mt-1 text-[11px] leading-snug text-text-muted">{service.description}</span>
       </>
-    );
+  );
+
+  const renderCard = (service: ServiceItem) => {
+    const dragging = dragId === service.id;
+    const content = cardContent(service);
     const cls = `relative flex flex-col justify-start p-4 glass-card select-none [-webkit-touch-callout:none] ${
-      dragging ? 'z-30 scale-105 shadow-2xl shadow-accent/30 border-accent pointer-events-none' : 'transition-all'} ${
+      dragging ? 'opacity-25 border-dashed border-accent' : 'transition-all'} ${
       isTech ? 'border-accent/20 rounded-none hover:border-accent/50' : 'hover:border-glass-border/80'} ${
       service.soon ? 'opacity-60' : ''} ${dragId && !dragging ? 'animate-[pulse_1.2s_ease-in-out_infinite]' : ''}`;
     const common = {
@@ -194,7 +184,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
       onPointerCancel: () => { if (!press.current?.started) endPress(); },
       onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
       onClickCapture: (e: React.MouseEvent) => { if (justDragged.current) { e.preventDefault(); e.stopPropagation(); } },
-      style: dragging ? { transform: `translate(${offset.x}px, ${offset.y}px) scale(1.05)`, touchAction: 'none' as const } : undefined,
+      style: dragging ? { touchAction: 'none' as const } : undefined,
       className: cls,
     };
     if (service.id === 'perfil') {
@@ -241,14 +231,24 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
 
       <div ref={gridRef} className="grid grid-cols-2 gap-3 sm:gap-4 select-none [&_*]:select-none"
            style={{ WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}>
+        {/* Siempre una sola lista con claves estables (títulos intercalados): así las tarjetas no se
+            vuelven a crear al empezar a arrastrar y la que se agarró sigue recibiendo el movimiento */}
         {custom || query || dragId
           ? visible.map(renderCard)
-          : groups.map(g => {
+          : groups.flatMap(g => {
               const items = visible.filter(s => s.group === g);
-              if (!items.length) return null;
-              return [header(g), ...items.map(renderCard)];
+              return items.length ? [header(g), ...items.map(renderCard)] : [];
             })}
       </div>
+
+      {dragId && ghost && byId.get(dragId) && typeof document !== 'undefined' && createPortal(
+        <div aria-hidden="true" data-ghost
+             className={`fixed z-[200] pointer-events-none flex flex-col justify-start p-4 glass-card border-accent shadow-2xl shadow-accent/40 ${isTech ? 'rounded-none' : 'rounded-3xl'}`}
+             style={{ left: pos.x - ghost.grabX, top: pos.y - ghost.grabY, width: ghost.w, height: ghost.h, transform: 'scale(1.05) rotate(-1.5deg)', transformOrigin: `${ghost.grabX}px ${ghost.grabY}px` }}>
+          {cardContent(byId.get(dragId)!)}
+        </div>,
+        document.body,
+      )}
     </>
   );
 }
