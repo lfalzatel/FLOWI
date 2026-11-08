@@ -6,7 +6,7 @@ import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { useTheme } from '@/components/ThemeProvider';
 
-type FilterType = 'all' | 'month' | 'week' | 'day';
+export type FilterType = 'all' | 'month' | 'week' | 'day';
 
 interface Props {
   filterType: FilterType;
@@ -14,9 +14,10 @@ interface Props {
   onChangeType: (type: FilterType) => void;
   onChangeValue: (value: string) => void;
   transactions?: Transaction[];
+  inline?: boolean; // dentro de un modal: sin quedarse pegado arriba ni márgenes de página
 }
 
-export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [] }: Props) {
+export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [], inline = false }: Props) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const { theme } = useTheme();
@@ -26,6 +27,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
   const rootRef = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
   useEffect(() => {
+    if (inline) return;
     const check = () => {
       const el = rootRef.current;
       if (!el) return;
@@ -129,8 +131,8 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
   return (
     <div
       ref={rootRef}
-      data-tour="filter"
-      className={`sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 mb-6 flex flex-col transition-[padding,background-color,gap] duration-200 ${
+      data-tour={inline ? undefined : 'filter'}
+      className={`${inline ? 'relative mb-0' : 'sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 mb-6'} flex flex-col transition-[padding,background-color,gap] duration-200 ${
         stuck
           ? `gap-1.5 py-2 bg-deep/80 backdrop-blur-xl shadow-lg shadow-black/10 border-b ${isTechTheme ? 'border-accent/20' : 'border-glass-border'}`
           : 'gap-3 py-0 border-b border-transparent'

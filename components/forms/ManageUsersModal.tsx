@@ -1,4 +1,9 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
+import { DateFilter, type FilterType } from '@/components/dashboard/DateFilter';
+import { getISOWeekString, getLocalDateString } from '@/lib/dateUtils';
+import { formatCurrency } from '@/lib/format';
+import type { Transaction } from '@/lib/firestore';
 import { useState, useEffect } from 'react';
 import { X, Shield, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
@@ -42,6 +47,12 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
     }
   };
 
+  // Movimientos y deudas del usuario abierto, para filtrar por todo / mes / semana / día como en Inicio
+  const [userTx, setUserTx] = useState<Transaction[]>([]);
+  const [userDebt, setUserDebt] = useState(0);
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterValue, setFilterValue] = useState('');
+
   const loadUserStats = async (userId: string) => {
     setUserStats(prev => ({ ...prev, loading: true, error: false }));
     try {
@@ -61,6 +72,10 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
         .filter((d: Date) => !isNaN(d.getTime()) && d.getTime() <= Date.now());
       const days = new Set(dates.map((d: Date) => d.toDateString()));
       const times = dates.map((d: Date) => d.getTime());
+      setUserTx([...gastosTx, ...ingresosTx]);
+      setUserDebt(totalDeudas);
+      setFilterType('all');
+      setFilterValue('');
       setUserStats({
         gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false,
         txCount: gastosTx.length + ingresosTx.length, txDays: days.size,
@@ -77,6 +92,18 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
     setSelectedUser(u);
     loadUserStats(u.id!); // el administrador puede leer los totales de cada usuario
   };
+
+  const periodTx = userTx.filter(t => {
+    if (filterType === 'all') return true;
+    const d = (t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any);
+    const day = getLocalDateString(d);
+    if (filterType === 'month') return day.startsWith(filterValue);
+    if (filterType === 'week') return getISOWeekString(d) === filterValue;
+    return day === filterValue;
+  });
+  const periodIngresos = periodTx.filter(t => t.type === 'ingreso').reduce((a, t) => a + t.amount, 0);
+  const periodGastos = periodTx.filter(t => t.type === 'gasto').reduce((a, t) => a + t.amount, 0);
+  const money = (n: number) => formatCurrency(Math.round(n), 'COP');
 
   const handleChangeRole = async (userId: string, newRole: string) => {
     setSavingId(userId);
@@ -187,145 +214,90 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
           </>
         ) : (
           <>
-            <div className="flex items-center gap-3 mb-6">
-              <button onClick={() => setSelectedUser(null)} className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'bg-accent/10 border border-accent/30 rounded-none text-accent' : 'bg-glass rounded-xl text-text-secondary hover:text-white'}`}>
-                {'<'}
-              </button>
-              <div>
-                <h2 className={`${isTechTheme ? 'font-mono font-bold text-accent uppercase tracking-widest text-lg' : 'font-syne font-bold text-white text-xl'}`}>
-                  {isTechTheme ? '>_ PERFIL_USUARIO' : 'Perfil del Usuario'}
-                </h2>
-              </div>
-            </div>
+            {(() => {
+              const displayName = selectedUser.name || (selectedUser.email ? selectedUser.email.split('@')[0] : 'Usuario');
+              const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+              const colors = ['bg-[#FF5B5B]/20 text-[#FF5B5B]', 'bg-[#F5A623]/20 text-[#F5A623]', 'bg-[#A855F7]/20 text-[#A855F7]', 'bg-[#00E5A0]/20 text-[#00E5A0]', 'bg-[#3B82F6]/20 text-[#3B82F6]', 'bg-[#EC4899]/20 text-[#EC4899]'];
+              const avatarColorClass = colors[displayName.length % colors.length];
+              const created = selectedUser.createdAt ? (typeof (selectedUser.createdAt as any).toDate === 'function' ? (selectedUser.createdAt as any).toDate() : selectedUser.createdAt as Date) : null;
+              const box = `p-3 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`;
+              const lbl = `text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`;
+              const val = `text-sm font-semibold ${isTechTheme ? 'font-mono' : ''}`;
+              const isMe = selectedUser.email === currentUserEmail;
+              const isAdmin = selectedUser.role === 'admin';
+              const roleChip = (on: boolean) => `px-3 py-1.5 text-xs font-semibold border transition-all active:scale-95 disabled:opacity-50 ${isTechTheme ? 'rounded-none font-mono uppercase' : 'rounded-xl'} ${
+                on ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary hover:text-text-primary'}`;
+              const fmtDay = (d?: Date | null) => d ? d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+              const last = userStats.lastTx ?? (selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00') : null);
+              const periodLabel = filterType === 'all' ? 'Todo el tiempo' : filterType === 'month' ? 'Este periodo (mes)' : filterType === 'week' ? 'Este periodo (semana)' : 'Este día';
 
-            <div className="space-y-6">
-              <div className="flex flex-col items-center">
-                {(() => {
-                  const displayName = selectedUser.name || (selectedUser.email ? selectedUser.email.split('@')[0] : 'Usuario');
-                  const initials = displayName
-                    .split(' ')
-                    .map(n => n[0])
-                    .join('')
-                    .substring(0, 2)
-                    .toUpperCase();
-                  
-                  const colors = ['bg-[#FF5B5B]/20 text-[#FF5B5B]', 'bg-[#F5A623]/20 text-[#F5A623]', 'bg-[#A855F7]/20 text-[#A855F7]', 'bg-[#00E5A0]/20 text-[#00E5A0]', 'bg-[#3B82F6]/20 text-[#3B82F6]', 'bg-[#EC4899]/20 text-[#EC4899]'];
-                  const colorIndex = displayName.length % colors.length;
-                  const avatarColorClass = colors[colorIndex];
-
-                  return (
-                    <>
-                      <div className={`relative w-20 h-20 overflow-hidden mb-3 flex items-center justify-center font-bold text-xl ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-full'} ${!selectedUser.photoURL ? avatarColorClass : ''}`}>
-                        {selectedUser.photoURL ? (
-                          <Image src={selectedUser.photoURL} alt={displayName} fill className="object-cover" />
-                        ) : (
-                          <span>{initials}</span>
-                        )}
-                      </div>
-                      <h3 className={`text-lg font-semibold ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</h3>
-                    </>
-                  );
-                })()}
-                <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{selectedUser.email}</p>
-                {selectedUser.phone && (
-                  <p className={`text-xs mt-1 font-medium ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{selectedUser.phone}</p>
-                )}
-                <p className={`text-[10px] mt-1 ${isTechTheme ? 'font-mono text-white/40' : 'text-white/40'}`}>Registrado: {selectedUser.createdAt ? (typeof (selectedUser.createdAt as any).toDate === 'function' ? (selectedUser.createdAt as any).toDate().toLocaleDateString() : (selectedUser.createdAt as Date).toLocaleDateString()) : 'N/A'}</p>
-              </div>
-
-
-        {(selectedUser?.activeDays ?? 0) > 0 && (
-          <div className={`p-4 flex items-center gap-3 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
-            <span className="text-2xl">📅</span>
-            <div className="flex-1 min-w-0">
-              <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Días usando FLOWI</p>
-              <p className={`text-lg font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{selectedUser!.activeDays} {selectedUser!.activeDays === 1 ? 'día' : 'días'}</p>
-              <p className="text-[10px] text-text-muted">
-                {selectedUser!.firstActiveDay ? `Desde el ${new Date(selectedUser!.firstActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
-                {selectedUser!.lastActiveDay ? ` · último uso: ${new Date(selectedUser!.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}
-              </p>
-            </div>
-          </div>
-        )}
-              <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
-                <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Rol del Sistema</h4>
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>Nivel de acceso</span>
-                  {selectedUser.email === currentUserEmail ? (
-                    <span className={`text-xs px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú (Administrador)</span>
-                  ) : (
-                    <select
-                      value={selectedUser.role === 'admin' ? 'admin' : 'Usuario'}
-                      onChange={(e) => handleChangeRole(selectedUser.id!, e.target.value)}
-                      disabled={savingId === selectedUser.id}
-                      className={`text-sm focus:outline-none cursor-pointer appearance-none px-3 py-1.5 ${isTechTheme ? 'font-mono uppercase tracking-widest border border-accent/30 bg-black text-accent disabled:opacity-50' : 'bg-glass border border-glass-border text-text-primary rounded-xl disabled:opacity-50'}`}
-                    >
-                      <option value="Usuario">Usuario</option>
-                      <option value="admin">Administrador</option>
-                    </select>
-                  )}
-                </div>
-              </div>
-
-              <>
-              <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
-                <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Estadísticas Financieras</h4>
-                {userStats.error ? (
-                  <p className="text-xs text-amber-500 leading-snug">No hay acceso a los montos de este usuario. Falta publicar la regla de Firestore que permite al administrador leerlos.</p>
-                ) : userStats.loading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Ingresos</p>
-                      <p className={`text-sm font-semibold text-green-400 ${isTechTheme ? 'font-mono' : ''}`}>${userStats.ingresos.toLocaleString()}</p>
+              return (
+                <div className="space-y-3">
+                  {/* Encabezado compacto: volver, foto, nombre y datos en una fila */}
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setSelectedUser(null)} aria-label="Volver a la lista"
+                            className={`shrink-0 w-8 h-8 flex items-center justify-center ${isTechTheme ? 'bg-accent/10 border border-accent/30 rounded-none text-accent' : 'bg-glass rounded-xl text-text-secondary hover:text-white'}`}>
+                      {'<'}
+                    </button>
+                    <div className={`relative w-12 h-12 shrink-0 overflow-hidden flex items-center justify-center font-bold ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-full'} ${!selectedUser.photoURL ? avatarColorClass : ''}`}>
+                      {selectedUser.photoURL ? <Image src={selectedUser.photoURL} alt={displayName} fill className="object-cover" /> : <span>{initials}</span>}
                     </div>
-                    <div>
-                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Gastos</p>
-                      <p className={`text-sm font-semibold text-red-400 ${isTechTheme ? 'font-mono' : ''}`}>${userStats.gastos.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Deudas</p>
-                      <p className={`text-sm font-semibold text-orange-400 ${isTechTheme ? 'font-mono' : ''}`}>${userStats.deudas.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Balance</p>
-                      <p className={`text-sm font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>${(userStats.ingresos - userStats.gastos - userStats.deudas).toLocaleString()}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</h3>
+                      <p className={`text-[11px] truncate ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{selectedUser.email}</p>
+                      <p className="text-[10px] text-text-muted">Registrado: {fmtDay(created)}{selectedUser.phone ? ` · ${selectedUser.phone}` : ''}</p>
                     </div>
                   </div>
-                )}
-              </div>
-              {selectedUser.email !== currentUserEmail && (
-                <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
-                  <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Actividad</h4>
-                  {(() => {
-                    const fmtDay = (d?: Date | null) => d ? d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
-                    const last = userStats.lastTx ?? (selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00') : null);
-                    const items: [string, string][] = [
-                      ['Registros', String(userStats.txCount ?? selectedUser.txCount ?? '—')],
-                      ['Días con registros', String(userStats.txDays ?? '—')],
-                      ['Primer registro', fmtDay(userStats.firstTx)],
-                      ['Último registro', fmtDay(last)],
-                    ];
-                    if (selectedUser.activeDays) items.push(['Días abriendo la app', String(selectedUser.activeDays)]);
-                    if (selectedUser.lastActiveDay) items.push(['Último uso', fmtDay(new Date(selectedUser.lastActiveDay + 'T12:00:00'))]);
-                    return (
-                      <div className="grid grid-cols-2 gap-4">
-                        {items.map(([k, v]) => (
-                          <div key={k}>
-                            <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>{k}</p>
-                            <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{userStats.loading ? '…' : v}</p>
-                          </div>
-                        ))}
+
+                  {/* Rol con botones (sin la lista blanca del sistema) */}
+                  <div className={`${box} flex items-center justify-between gap-2`}>
+                    <span className={lbl}>Rol</span>
+                    {isMe ? (
+                      <span className={`text-xs px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú (Administrador)</span>
+                    ) : (
+                      <div className="flex gap-1.5">
+                        <button type="button" disabled={savingId === selectedUser.id || !isAdmin} onClick={() => handleChangeRole(selectedUser.id!, 'Usuario')} className={roleChip(!isAdmin)}>Usuario</button>
+                        <button type="button" disabled={savingId === selectedUser.id || isAdmin} onClick={() => handleChangeRole(selectedUser.id!, 'admin')} className={roleChip(isAdmin)}>Administrador</button>
                       </div>
-                    );
-                  })()}
+                    )}
+                  </div>
+
+                  {/* Filtro igual al de Inicio */}
+                  <DateFilter inline filterType={filterType} filterValue={filterValue} transactions={userTx}
+                              onChangeType={setFilterType} onChangeValue={setFilterValue} />
+
+                  {/* Finanzas del periodo */}
+                  <div className={box}>
+                    <p className={`${lbl} mb-2`}>Finanzas · {periodLabel}</p>
+                    {userStats.error ? (
+                      <p className="text-xs text-amber-500 leading-snug">No hay acceso a los montos de este usuario. Falta publicar la regla de Firestore que permite al administrador leerlos.</p>
+                    ) : userStats.loading ? (
+                      <div className="flex justify-center py-3"><div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                        <div><p className={lbl}>Ingresos</p><p className={`${val} text-green-400`}><AnimatedNumber value={periodIngresos} format={money} /></p></div>
+                        <div><p className={lbl}>Gastos</p><p className={`${val} text-red-400`}><AnimatedNumber value={periodGastos} format={money} /></p></div>
+                        <div><p className={lbl}>Balance</p><p className={`${val} text-accent`}>{periodIngresos - periodGastos < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(periodIngresos - periodGastos)} format={money} /></p></div>
+                        <div><p className={lbl}>Deudas hoy</p><p className={`${val} text-orange-400`}><AnimatedNumber value={userDebt} format={money} /></p></div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actividad */}
+                  <div className={box}>
+                    <p className={`${lbl} mb-2`}>Actividad</p>
+                    <div className="grid grid-cols-3 gap-x-2 gap-y-2">
+                      <div><p className={lbl}>Registros</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (filterType === 'all' ? (userStats.txCount ?? '—') : periodTx.length)}</p></div>
+                      <div><p className={lbl}>Días con registros</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (userStats.txDays ?? '—')}</p></div>
+                      <div><p className={lbl}>Días en la app</p><p className={`${val} text-text-primary`}>{selectedUser.activeDays ?? '—'}</p></div>
+                      <div><p className={lbl}>Primer registro</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(userStats.firstTx)}</p></div>
+                      <div><p className={lbl}>Último registro</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(last)}</p></div>
+                      <div><p className={lbl}>Último uso</p><p className={`${val} text-text-primary text-xs`}>{selectedUser.lastActiveDay ? fmtDay(new Date(selectedUser.lastActiveDay + 'T12:00:00')) : '—'}</p></div>
+                    </div>
+                  </div>
                 </div>
-              )}
-              </>
-            </div>
+              );
+            })()}
           </>
         )}
       </div>
