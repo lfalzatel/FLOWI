@@ -38,6 +38,10 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   const isReadOnly = debtToEdit?.status === 'paid';
+  // Deuda existente: lo de todos los días (resumen y abono) arriba; editar los datos, plegado
+  const compact = !!debtToEdit && !isReadOnly;
+  const [showEdit, setShowEdit] = useState(false);
+  const editCls = compact ? `order-4 ${showEdit ? '' : 'hidden'}` : '';
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -247,8 +251,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {compact && (
+            <button type="button" onClick={() => setShowEdit(v => !v)}
+                    className="order-3 w-full flex items-center justify-between text-xs font-semibold text-accent">
+              <span>{showEdit ? 'Ocultar datos de la deuda' : 'Editar datos de la deuda (monto, tasa, cuotas, nota)'}</span>
+              <span className={`transition-transform ${showEdit ? 'rotate-180' : ''}`}>▾</span>
+            </button>
+          )}
+          <div className={`grid grid-cols-3 gap-3 ${editCls}`}>
             <div className="col-span-2">
               <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Título de la Deuda</label>
               <input
@@ -274,7 +285,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className={`grid grid-cols-3 gap-2 ${editCls}`}>
             <div className="col-span-1">
               <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`}>Monto Total</label>
               <input
@@ -325,7 +336,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
             </div>
           </div>
 
-          {!isReadOnly && (() => {
+          {!isReadOnly && <div className={editCls}>{(() => {
             const inputCls = `w-full bg-glass border py-2 px-3 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs' : 'border-glass-border rounded-xl focus:border-accent text-xs'}`;
             const labelCls = `${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`;
             const suggested = estimateInstallment(
@@ -371,14 +382,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
                 </p>
               </div>
             );
-          })()}
+          })()}</div>}
 
           {debtToEdit && ((debtToEdit.interestRate || 0) > 0 || (debtToEdit.monthlyInsurance || 0) > 0) && (() => {
             const interestData = calculateDebtInterest(debtToEdit);
             const pendingAmount = Math.max(0, debtToEdit.totalAmount - debtToEdit.paidAmount);
             const totalWithInterest = pendingAmount + interestData.accumulatedInterest;
             return (
-              <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-glass border-glass-border rounded-2xl text-xs space-y-1 text-text-secondary'}`}>
+              <div className={`${compact ? 'order-1' : ''} p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-glass border-glass-border rounded-2xl text-xs space-y-1 text-text-secondary'}`}>
                 <div className="flex justify-between items-center text-text-muted mb-2">
                   <span>RESUMEN FINANCIERO{debtToEdit.interestRate ? ` (E.A. ${debtToEdit.interestRate}%)` : ''}</span>
                   {debtToEdit.status !== 'paid' && (
@@ -421,7 +432,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
           })()}
 
           {debtToEdit && !isReadOnly && (
-            <div className={`p-4 border grid grid-cols-1 sm:grid-cols-2 gap-3.5 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
+            <div className={`order-2 p-4 border grid grid-cols-2 gap-3 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
               <div>
                 <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Registrar Abono</label>
                 <input
@@ -448,7 +459,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
             </div>
           )}
 
-          <div>
+          <div className={editCls}>
             <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Descripción (Opcional)</label>
             <textarea
               disabled={isReadOnly}
@@ -460,7 +471,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
           </div>
 
           {debtToEdit && debtToEdit.payments && debtToEdit.payments.length > 0 && (
-            <div className={`p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
+            <div className={`${compact ? 'order-5' : ''} p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
               <h4 className={`text-xs font-semibold mb-2.5 tracking-wider ${isTechTheme ? 'text-accent' : 'text-text-secondary font-syne'}`}>
                 Historial de Abonos ({debtToEdit.payments.length})
               </h4>
@@ -479,7 +490,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
             </div>
           )}
 
-          <div className="pt-2 space-y-2">
+          <div className={`${compact ? 'order-6' : ''} pt-2 space-y-2`}>
             {isReadOnly ? (
               <button
                 type="button"

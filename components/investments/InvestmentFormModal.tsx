@@ -1,7 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Trash2, Camera } from 'lucide-react';
+import { X, Trash2, Camera, ChevronDown } from 'lucide-react';
 import { getAiKey, readCdtWithAi } from '@/lib/aiAssist';
 import { BankField, BankPickerSheet } from '@/components/accounts/BankPickerSheet';
 import { useTheme } from '@/components/ThemeProvider';
@@ -41,6 +41,8 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
 
   const [bank, setBank] = useState(base?.bank || '');
   const [bankSheet, setBankSheet] = useState(false);
+  // Lo que casi nunca se toca va plegado; se abre solo si ya tiene datos
+  const [showMore, setShowMore] = useState(!!(base?.bankInterest || base?.nominalRate || base?.note || (base && base.withholdingPct !== DEFAULT_WITHHOLDING)));
   // Al renovar, por defecto los intereses se suman al capital (así lo hacen los bancos)
   const [interestMode, setInterestMode] = useState<'suma' | 'pagado'>('suma');
   const initialAmount = renewing && prev ? renewFrom!.amount + prev.netInterest : base?.amount || 0;
@@ -87,6 +89,7 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
     if (d.startDate) setStart(d.startDate);
     if (d.maturityDate) setMaturity(d.maturityDate);
     if (d.bankInterest) setBankInterest(formatAmountInput(d.bankInterest));
+    if (d.bankInterest || d.nominalRate) setShowMore(true);
     if (d.autoRenew) setAutoRenew(true);
     const missing = [!d.amount && 'monto', !d.rateEA && 'tasa E.A.', !d.startDate && 'fecha de apertura', !d.maturityDate && 'vencimiento'].filter(Boolean);
     // Si la captura dice el plazo en días, se revisa que las fechas leídas coincidan
@@ -270,11 +273,11 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
                 <input id="inv-end" type="date" value={maturity} min={start} onChange={(e) => setMaturity(e.target.value)} className={inputClass} required />
               </div>
             </div>
-            <div className="flex flex-wrap gap-1.5 -mt-3">
+            <div className="grid grid-cols-4 gap-1.5 -mt-3">
               {TERMS.map(t => {
                 const key = t.months ? addMonthsKey(start, t.months) : dayKey(new Date(parseDay(start).getTime() + (t.days || 0) * 86400000));
                 return (
-                  <button key={t.label} type="button" disabled={!start} onClick={() => setMaturity(key)} className={chipClass(maturity === key)}>{t.label}</button>
+                  <button key={t.label} type="button" disabled={!start} onClick={() => setMaturity(key)} className={`${chipClass(maturity === key)} px-0 text-center`}>{t.label}</button>
                 );
               })}
             </div>
@@ -300,37 +303,46 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
               />
             )}
 
+            <button type="button" onClick={() => setShowMore(v => !v)}
+                    className="w-full flex items-center justify-between text-xs font-semibold text-accent">
+              <span>{showMore ? 'Menos detalles' : 'Más detalles (intereses del banco, tasa nominal, retención, nota)'}</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showMore ? 'rotate-180' : ''}`} />
+            </button>
+            {showMore && (
+              <div className="space-y-5">
             <div>
-              <label htmlFor="inv-bank-interest" className={labelClass}>Intereses del periodo según el banco (opcional)</label>
-              <input id="inv-bank-interest" type="text" inputMode="numeric" placeholder="$ 0" value={bankInterest}
-                     onChange={(e) => setBankInterest(formatAmountInput(e.target.value))} className={inputClass} />
-              <p className={hint}>Si el banco te muestra la cifra exacta, ponla aquí y uso esa en vez del cálculo.</p>
-            </div>
+                  <label htmlFor="inv-bank-interest" className={labelClass}>Intereses del periodo según el banco (opcional)</label>
+                  <input id="inv-bank-interest" type="text" inputMode="numeric" placeholder="$ 0" value={bankInterest}
+                         onChange={(e) => setBankInterest(formatAmountInput(e.target.value))} className={inputClass} />
+                  <p className={hint}>Si el banco te muestra la cifra exacta, ponla aquí y uso esa en vez del cálculo.</p>
+                </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="inv-nominal" className={labelClass}>Tasa nominal (opcional)</label>
-                <input id="inv-nominal" type="text" inputMode="decimal" placeholder="9,61" value={nominal}
-                       onChange={(e) => setNominal(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="inv-nominal" className={labelClass}>Tasa nominal (opcional)</label>
+                    <input id="inv-nominal" type="text" inputMode="decimal" placeholder="9,61" value={nominal}
+                           onChange={(e) => setNominal(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="inv-wh" className={labelClass}>Retención (%)</label>
+                    <input id="inv-wh" type="text" inputMode="decimal" value={withholding}
+                           onChange={(e) => setWithholding(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={autoRenew} onChange={(e) => setAutoRenew(e.target.checked)} className="w-4 h-4 accent-[var(--accent)]" />
+                  <span className="text-sm text-text-secondary">El banco lo renueva automáticamente</span>
+                </label>
+
+                <div>
+                  <label htmlFor="inv-note" className={labelClass}>Nota (opcional)</label>
+                  <input id="inv-note" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)}
+                         placeholder="Ej: para la prima del carro" className={inputClass} />
+                  <p className={hint}>No escribas números de CDT ni de cuenta: FLOWI no los necesita.</p>
+                </div>
               </div>
-              <div>
-                <label htmlFor="inv-wh" className={labelClass}>Retención (%)</label>
-                <input id="inv-wh" type="text" inputMode="decimal" value={withholding}
-                       onChange={(e) => setWithholding(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
-              </div>
-            </div>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" checked={autoRenew} onChange={(e) => setAutoRenew(e.target.checked)} className="w-4 h-4 accent-[var(--accent)]" />
-              <span className="text-sm text-text-secondary">El banco lo renueva automáticamente</span>
-            </label>
-
-            <div>
-              <label htmlFor="inv-note" className={labelClass}>Nota (opcional)</label>
-              <input id="inv-note" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)}
-                     placeholder="Ej: para la prima del carro" className={inputClass} />
-              <p className={hint}>No escribas números de CDT ni de cuenta: FLOWI no los necesita.</p>
-            </div>
+            )}
 
             {error && <p className="text-xs text-[var(--red)] bg-red-500/10 border border-red-500/20 rounded-xl p-3">{error}</p>}
 

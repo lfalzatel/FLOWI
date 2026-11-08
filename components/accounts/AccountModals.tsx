@@ -8,7 +8,7 @@ import { Account, AccountKind, addAccount, addTransfer, updateAccount } from '@/
 import { KIND_EMOJI, KIND_LABEL, suggestMethods } from '@/lib/accounts';
 import { AccountIcon } from '@/components/accounts/AccountIcon';
 import { BankLogo, BankPickerSheet } from '@/components/accounts/BankPickerSheet';
-import { Plus } from 'lucide-react';
+import { Plus, ArrowRightLeft } from 'lucide-react';
 // Montos con miles y hasta dos decimales con coma, como en la app del banco ("1.234.567,89")
 export function formatMoneyInput(value: string | number): string {
   let raw = typeof value === 'number' ? value.toFixed(2).replace('.', ',').replace(/,00$/, '') : value;
@@ -301,19 +301,51 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
     }
   }
 
-  const picker = (value: string, set: (v: string) => void, exclude?: string) => (
-    <div className="flex flex-wrap gap-1.5">
-      {active.filter(a => a.id !== exclude).map(a => (
-        <button key={a.id} type="button" onClick={() => set(a.id!)} className={`${s.chip(value === a.id)} inline-flex items-center gap-1.5`}><AccountIcon account={a} className="w-4 h-4 text-sm flex items-center justify-center" /> {a.name}</button>
-      ))}
-    </div>
-  );
+  // Selector de cuenta compacto: un campo que abre la lista de cuentas
+  const [choosing, setChoosing] = useState<'from' | 'to' | null>(null);
+  const accField = (value: string, which: 'from' | 'to') => {
+    const acc = active.find(a => a.id === value);
+    return (
+      <button type="button" onClick={() => setChoosing(which)}
+              className={`w-full flex flex-col items-center gap-1.5 px-2 py-3 bg-glass border transition-colors ${s.isTech ? 'rounded-none border-accent/30 hover:border-accent' : 'rounded-2xl border-glass-border hover:border-accent/60'}`}>
+        {acc ? <AccountIcon account={acc} className="w-8 h-8 text-2xl flex items-center justify-center" /> : <span className="w-8 h-8 rounded-full border border-dashed border-glass-border" />}
+        <span className={`text-xs font-semibold truncate max-w-full ${acc ? 'text-text-primary' : 'text-text-muted'}`}>{acc ? acc.name : 'Elegir'}</span>
+      </button>
+    );
+  };
 
   return (
     <Shell title="Mover plata entre cuentas" onClose={onClose}
            footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar'}</button>}>
-      <div><span className={s.label}>Sale de</span>{picker(from, (v) => { setFrom(v); if (v === to) setTo(''); })}</div>
-      <div><span className={s.label}>Llega a</span>{picker(to, setTo, from)}</div>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+        <div><span className={s.label}>Sale de</span>{accField(from, 'from')}</div>
+        <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label="Intercambiar"
+                className="mb-5 p-2 rounded-full text-accent hover:bg-accent/10"><ArrowRightLeft className="w-5 h-5" /></button>
+        <div><span className={s.label}>Llega a</span>{accField(to, 'to')}</div>
+      </div>
+      {choosing && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center">
+          <div className={`absolute inset-0 ${s.theme === 'light' ? 'bg-black/20' : 'bg-black/60'}`} onClick={() => setChoosing(null)} aria-hidden="true" />
+          <div className={`relative w-full max-w-md max-h-[70dvh] overflow-y-auto p-4 border animate-fade-in-up ${s.isTech ? 'bg-deep rounded-none border-accent/50 font-mono' : 'bg-card rounded-t-[28px] sm:rounded-3xl border-glass-border'}`}>
+            <h3 className={`mb-3 px-1 ${s.isTech ? 'font-bold text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}`}>{choosing === 'from' ? '¿De dónde sale?' : '¿A dónde llega?'}</h3>
+            <div className="space-y-1.5">
+              {active.filter(a => a.id !== (choosing === 'from' ? to : from)).map(a => {
+                const on = (choosing === 'from' ? from : to) === a.id;
+                return (
+                  <button key={a.id} type="button"
+                          onClick={() => { if (choosing === 'from') { setFrom(a.id!); if (a.id === to) setTo(''); } else setTo(a.id!); setChoosing(null); }}
+                          className={`w-full flex items-center gap-3 p-3 border text-left ${s.isTech ? 'rounded-none' : 'rounded-2xl'} ${on ? 'border-accent bg-accent/10' : 'border-glass-border hover:bg-white/5'}`}>
+                    <AccountIcon account={a} className="w-7 h-7 text-xl flex items-center justify-center" />
+                    <span className="flex-1 text-sm text-text-primary">{a.name}</span>
+                    <span className="text-[11px] text-text-muted">{KIND_LABEL[a.kind]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="tr-amount" className={s.label}>Monto</label>
