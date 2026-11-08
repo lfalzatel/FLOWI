@@ -85,13 +85,6 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
           <>
           <button
             type="button"
-            onClick={() => setShowGuide(true)}
-            className={`w-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider text-xs' : 'rounded-xl'}`}
-          >
-            <PlayCircle className="w-4 h-4 text-accent" /> ¿Cómo se conecta? Ver paso a paso con voz
-          </button>
-          <button
-            type="button"
             onClick={() => startOpenRouterConnect()}
             className={`w-full py-2.5 text-sm font-bold bg-accent/15 border border-accent text-accent hover:bg-accent/25 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider' : 'rounded-xl'}`}
           >
@@ -102,6 +95,13 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
           </p>
           </>
         )}
+        <button
+          type="button"
+          onClick={() => setShowGuide(true)}
+          className={`w-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider text-xs' : 'rounded-xl'}`}
+        >
+          <PlayCircle className="w-4 h-4 text-accent" /> {connected ? 'Ver el paso a paso con voz' : '¿Cómo se conecta? Ver paso a paso con voz'}
+        </button>
         {showGuide && <AiConnectGuide onClose={() => setShowGuide(false)} />}
 
         <p className={`text-[10px] text-text-muted normal-case leading-relaxed ${mono}`}>
