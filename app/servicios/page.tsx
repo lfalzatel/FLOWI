@@ -4,6 +4,7 @@ import { Search, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRigh
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
+import { ServiceGrid, ServiceItem } from '@/components/services/ServiceGrid';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ProfileModal } from '@/components/forms/ProfileModal';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
@@ -12,134 +13,34 @@ import { speakText } from '@/lib/voiceParser';
 import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, Volume2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const SERVICES = [
-  {
-    id: 'recordatorios',
-    title: 'Recordatorios',
-    description: 'Pagos y fechas importantes para que no se te pasen',
-    icon: Bell,
-    href: '/servicios/recordatorios',
-    color: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
-    isNew: false
-  },
-  {
-    id: 'notas',
-    title: 'Notas',
-    description: 'Datos que no quieres olvidar',
-    icon: StickyNote,
-    href: '/servicios/notas',
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
-    isNew: true
-  },
-  {
-    id: 'estadisticas',
-    title: 'Estadísticas',
-    description: 'En qué se te va la plata, mes a mes',
-    icon: BarChart2,
-    href: '/servicios/estadisticas',
-    color: 'text-cyan-500',
-    bgColor: 'bg-cyan-500/10',
-    isNew: true
-  },
-  {
-    id: 'presupuestos',
-    title: 'Presupuestos',
-    description: 'Cuánto quieres gastar por categoría (50/30/20)',
-    icon: PieChart,
-    href: '/servicios/presupuestos',
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
-    isNew: true,
-    soon: false
-  },
-  {
-    id: 'metas',
-    title: 'Metas',
-    description: '¿Para qué ahorras? Viaje, moto, emergencias…',
-    icon: Target,
-    href: '/servicios/metas',
-    color: 'text-emerald-500',
-    bgColor: 'bg-emerald-500/10',
-    isNew: true,
-    soon: false
-  },
-  {
-    id: 'cuentas',
-    title: 'Cuentas y patrimonio',
-    description: 'Cuánto tienes en cada banco y en efectivo',
-    icon: Wallet,
-    href: '/servicios/cuentas',
-    color: 'text-lime-500',
-    bgColor: 'bg-lime-500/10',
-    isNew: true,
-    soon: false
-  },
-  {
-    id: 'inversiones',
-    title: 'Ahorro e inversiones',
-    description: 'Donde tu plata crece: CDT, Nu, Trii, fondos',
-    icon: Landmark,
-    href: '/servicios/inversiones',
-    color: 'text-teal-500',
-    bgColor: 'bg-teal-500/10',
-    isNew: true,
-    soon: false
-  },
-  {
-    id: 'importar',
-    title: 'Importar extracto',
-    description: 'Sube el Excel del banco y registro todo de una',
-    icon: FileSpreadsheet,
-    href: '/servicios/importar',
-    color: 'text-sky-500',
-    bgColor: 'bg-sky-500/10',
-    isNew: true,
-    soon: false
-  },
-  {
-    id: 'compartidos',
-    title: 'Gastos compartidos',
-    description: 'Divide cuentas con amigos o en pareja',
-    icon: Users,
-    href: '#',
-    color: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
-    isNew: false,
-    soon: true
-  },
-  {
-    id: 'facturas',
-    title: 'Mis facturas',
-    description: 'Tus facturas guardadas en un solo lugar',
-    icon: Receipt,
-    href: '#',
-    color: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
-    isNew: false,
-    soon: true
-  },
-  {
-    id: 'configuracion',
-    title: 'Configuración',
-    description: 'Moneda, temas, sonidos y avisos',
-    icon: Settings,
-    href: '/configuracion',
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-500/10',
-    isNew: false
-  },
-  {
-    id: 'perfil',
-    title: 'Mi perfil',
-    description: 'Tu nombre, foto y datos de la cuenta',
-    icon: User,
-    href: '#',
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-500/10',
-    isNew: false
-  }
+// Orden por defecto, por grupos: lo que más se usa arriba; lo que aún no funciona y los ajustes, al final
+const SERVICE_GROUPS = ['Tu plata', 'Entiende tus gastos', 'Herramientas', 'Próximamente', 'Tu cuenta'];
+
+const SERVICES: ServiceItem[] = [
+  { id: 'recordatorios', group: 'Tu plata', title: 'Recordatorios', description: 'Pagos y fechas importantes para que no se te pasen',
+    icon: Bell, href: '/servicios/recordatorios', color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+  { id: 'cuentas', group: 'Tu plata', title: 'Cuentas y patrimonio', description: 'Cuánto tienes en cada banco y en efectivo',
+    icon: Wallet, href: '/servicios/cuentas', color: 'text-lime-500', bgColor: 'bg-lime-500/10', isNew: true },
+  { id: 'presupuestos', group: 'Tu plata', title: 'Presupuestos', description: 'Cuánto quieres gastar por categoría (50/30/20)',
+    icon: PieChart, href: '/servicios/presupuestos', color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+  { id: 'metas', group: 'Tu plata', title: 'Metas', description: '¿Para qué ahorras? Viaje, moto, emergencias…',
+    icon: Target, href: '/servicios/metas', color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
+  { id: 'inversiones', group: 'Tu plata', title: 'Ahorro e inversiones', description: 'Donde tu plata crece: CDT, Nu, Trii, fondos',
+    icon: Landmark, href: '/servicios/inversiones', color: 'text-teal-500', bgColor: 'bg-teal-500/10', isNew: true },
+  { id: 'estadisticas', group: 'Entiende tus gastos', title: 'Estadísticas', description: 'En qué se te va la plata, mes a mes',
+    icon: BarChart2, href: '/servicios/estadisticas', color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
+  { id: 'importar', group: 'Entiende tus gastos', title: 'Importar extracto', description: 'Sube el Excel del banco y registro todo de una',
+    icon: FileSpreadsheet, href: '/servicios/importar', color: 'text-sky-500', bgColor: 'bg-sky-500/10' },
+  { id: 'notas', group: 'Herramientas', title: 'Notas', description: 'Datos que no quieres olvidar',
+    icon: StickyNote, href: '/servicios/notas', color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+  { id: 'compartidos', group: 'Próximamente', title: 'Gastos compartidos', description: 'Divide cuentas con amigos o en pareja',
+    icon: Users, href: '#', color: 'text-orange-500', bgColor: 'bg-orange-500/10', soon: true },
+  { id: 'facturas', group: 'Próximamente', title: 'Mis facturas', description: 'Tus facturas guardadas en un solo lugar',
+    icon: Receipt, href: '#', color: 'text-rose-500', bgColor: 'bg-rose-500/10', soon: true },
+  { id: 'configuracion', group: 'Tu cuenta', title: 'Configuración', description: 'Moneda, temas, sonidos y avisos',
+    icon: Settings, href: '/configuracion', color: 'text-gray-500', bgColor: 'bg-gray-500/10' },
+  { id: 'perfil', group: 'Tu cuenta', title: 'Mi perfil', description: 'Tu nombre, foto y datos de la cuenta',
+    icon: User, href: '#', color: 'text-gray-500', bgColor: 'bg-gray-500/10' },
 ];
 
 export default function ServiciosPage() {
@@ -148,9 +49,6 @@ export default function ServiciosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  const filteredServices = SERVICES.filter(s => 
-    `${s.title} ${s.description}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="relative min-h-screen flex flex-col bg-deep">
@@ -181,46 +79,8 @@ export default function ServiciosPage() {
         </h2>
       </div>
 
-      {/* Grid de Servicios */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        {filteredServices.map((service) => {
-          const content = (
-            <>
-              {service.isNew && (
-                <span className={`absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                  Nuevo
-                </span>
-              )}
-              {service.soon && (
-                <span className={`absolute top-2 right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-text-muted/20 text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                  Pronto
-                </span>
-              )}
-              <div className={`w-10 h-10 flex items-center justify-center mb-3 ${isTechTheme ? 'bg-transparent border border-accent/40' : service.bgColor + ' rounded-xl'}`}>
-                <service.icon className={`w-5 h-5 ${isTechTheme ? 'text-accent' : service.color}`} />
-              </div>
-              <span className={`text-sm font-medium ${isTechTheme ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>
-                {service.title}
-              </span>
-              <span className="mt-1 text-[11px] leading-snug text-text-muted">{service.description}</span>
-            </>
-          );
-          const classNameStr = `relative flex flex-col justify-start p-4 glass-card transition-all ${isTechTheme ? 'border-accent/20 rounded-none hover:border-accent/50' : 'hover:border-glass-border/80'} ${service.soon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`;
-
-          if (service.id === 'perfil') {
-            return (
-              <button key={service.id} onClick={() => setShowProfileModal(true)} className={classNameStr + ' text-left'}>
-                {content}
-              </button>
-            );
-          }
-          return (
-            <Link href={service.soon ? '#' : service.href} key={service.id} className={classNameStr}>
-              {content}
-            </Link>
-          );
-        })}
-      </div>
+      {/* Grid de Servicios (agrupada; se puede reordenar manteniendo presionada una tarjeta) */}
+      <ServiceGrid services={SERVICES} groups={SERVICE_GROUPS} query={searchTerm} onProfile={() => setShowProfileModal(true)} />
 
       {/* 3 Botones de prueba para ver las animaciones */}
       <div className="mt-8 space-y-2">
