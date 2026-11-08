@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { Heart, Copy, Check } from 'lucide-react';
+import { Heart, Copy, Check, CreditCard, ExternalLink } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
-import { DONATION_KEYS } from '@/lib/donations';
+import { DONATION_KEYS, WOMPI_PAYMENT_LINK } from '@/lib/donations';
 
 async function copyText(text: string): Promise<boolean> {
   try {
@@ -52,10 +52,27 @@ export function SupportProject({ isTechTheme }: { isTechTheme: boolean }) {
             <p className="text-sm font-medium text-text-primary normal-case">¿Te sirve FLOWI? Puedes apoyar el proyecto</p>
             <p className="text-[11px] text-text-muted normal-case leading-relaxed mt-0.5">
               FLOWI es gratis y sin publicidad. Si quieres ayudar a que siga creciendo, envía el aporte que quieras desde
-              Nequi, Bancolombia, BBVA o cualquier banco: en tu app elige Transferir → a una llave (Bre-B) y pega una de estas llaves.
+              con el botón de Wompi o por transferencia desde Nequi, Bancolombia, BBVA o cualquier banco (Transferir → a una llave Bre-B).
             </p>
           </div>
         </div>
+
+        <a
+          href={WOMPI_PAYMENT_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`w-full flex items-center justify-between gap-2 px-3 py-3 border border-accent/50 bg-accent/10 hover:bg-accent/20 transition-colors ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}
+        >
+          <span className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-accent" />
+            <span className={`text-sm font-semibold text-text-primary normal-case ${mono}`}>Aportar con Wompi</span>
+          </span>
+          <span className={`shrink-0 flex items-center gap-1 text-[11px] text-text-muted normal-case ${mono}`}>
+            Tarjeta, PSE o Nequi <ExternalLink className="w-3.5 h-3.5" />
+          </span>
+        </a>
+
+        <p className={`text-[11px] text-text-muted normal-case ${mono}`}>O por transferencia a una llave Bre-B:</p>
 
         <div className="space-y-3">
           {DONATION_KEYS.map(group => (
@@ -82,7 +99,7 @@ export function SupportProject({ isTechTheme }: { isTechTheme: boolean }) {
         </div>
 
         <p className={`text-[10px] text-text-muted normal-case ${mono}`}>
-          Antes de confirmar, tu banco te mostrará el nombre del titular para que verifiques. ¡Gracias por tu apoyo!
+          Con las llaves, antes de confirmar tu banco te mostrará el nombre del titular para que verifiques. ¡Gracias por tu apoyo!
         </p>
       </div>
     </section>
