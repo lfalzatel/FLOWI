@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Camera } from 'lucide-react';
+import { getAiKey, readCdtWithAi } from '@/lib/aiAssist';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useAccounts } from '@/hooks/useAccounts';
@@ -59,6 +60,36 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
   const { accounts } = useAccounts();
   const hasAccounts = accounts.some(a => !a.archived);
   const [moneyAccount, setMoneyAccount] = useState<string | null | undefined>(undefined);
+
+  // Llenar desde capturas de la app del banco (IA gratuita, la misma de los recibos)
+  const shotsRef = useRef<HTMLInputElement>(null);
+  const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
+  const [aiMsg, setAiMsg] = useState('');
+  async function readShots(files: File[]) {
+    if (!files.length) return;
+    setAiState('loading');
+    setAiMsg('');
+    const r = await readCdtWithAi(files);
+    if (!r.ok) {
+      setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
+      setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos del CDT. Prueba con capturas donde se vea el monto, la tasa y las fechas.'
+        : r.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
+        : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.');
+      return;
+    }
+    const d = r.data;
+    if (d.bank) setBank(d.bank);
+    if (d.amount) setAmount(formatAmountInput(d.amount));
+    if (d.rateEA) setRate(rateText(d.rateEA));
+    if (d.nominalRate) setNominal(rateText(d.nominalRate));
+    if (d.startDate) setStart(d.startDate);
+    if (d.maturityDate) setMaturity(d.maturityDate);
+    if (d.bankInterest) setBankInterest(formatAmountInput(d.bankInterest));
+    if (d.autoRenew) setAutoRenew(true);
+    const missing = [!d.amount && 'monto', !d.rateEA && 'tasa E.A.', !d.startDate && 'fecha de apertura', !d.maturityDate && 'vencimiento'].filter(Boolean);
+    setAiState('done');
+    setAiMsg(missing.length ? `Listo. No encontré: ${missing.join(', ')}. Complétalo y revisa todo antes de guardar.` : 'Listo. Revisa que todo esté bien antes de guardar.');
+  }
 
   const fmt = (n: number) => formatCurrency(n, currency);
   const amountN = parseAmountInput(amount);
@@ -170,6 +201,26 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
                 <p className={hint}>{interestMode === 'suma'
                   ? 'El nuevo capital incluye los intereses. Si el banco te da otra cifra exacta, cámbiala abajo.'
                   : 'Los registro como un ingreso en "Rendimientos / intereses" con fecha del vencimiento.'}</p>
+              </div>
+            )}
+
+            {!renewing && !investment && (
+              <div>
+                <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
+                       onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
+                <button type="button" disabled={aiState === 'loading'}
+                        onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
+                        className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-60 ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>
+                  <Camera className={`w-4 h-4 ${aiState === 'loading' ? 'animate-pulse' : ''}`} />
+                  {aiState === 'loading' ? 'Leyendo las capturas…' : 'Llenar desde capturas del banco'}
+                </button>
+                <p className={hint}>
+                  {aiState === 'no-key'
+                    ? <>Para leer capturas necesitas la IA gratuita. <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a>.</>
+                    : aiMsg
+                      ? <span className={aiState === 'error' ? 'text-red-400' : 'text-text-secondary'}>{aiMsg}</span>
+                      : 'Puedes elegir varias (resumen y detalle). Si quieres, recorta los números de CDT y de cuenta: no se necesitan.'}
+                </p>
               </div>
             )}
 

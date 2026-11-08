@@ -225,6 +225,13 @@ export default function DashboardPage() {
     transactions, pending: commitments.pending, today: todayBudget,
     hasGoals: goals.some(g => !isGoalDone(g)),
     notificationsOff: !demo && notificationsOff,
+    toReconcile: demo || !realMoney ? [] : realMoney.states
+      .filter(s => {
+        const last = Math.max(new Date(s.account.baseAt).getTime(), s.account.confirmedAt ? new Date(s.account.confirmedAt).getTime() : 0);
+        return Date.now() - last >= 15 * 86400000;
+      })
+      .sort((a, b) => new Date(a.account.confirmedAt || a.account.baseAt).getTime() - new Date(b.account.confirmedAt || b.account.baseAt).getTime())
+      .map(s => ({ id: s.account.id!, name: s.account.name, balance: s.balance })),
     maturing: demo ? [] : investments.filter(i => i.status === 'activo' && i.id)
       .map(i => ({ id: i.id!, bank: i.bank, amount: i.amount, daysLeft: investmentStatus(i).daysLeft })),
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,

@@ -12,7 +12,8 @@ export type NextAction =
   | { id: string; kind: 'today'; title: string; detail: string; tone: 'alert' }
   | { id: string; kind: 'add'; title: string; detail: string; tone: 'normal' }
   | { id: string; kind: 'notify'; title: string; detail: string; tone: 'normal' }
-  | { id: string; kind: 'link'; title: string; detail: string; href: string; tone: 'normal' };
+  | { id: string; kind: 'link'; title: string; detail: string; href: string; tone: 'normal' }
+  | { id: string; kind: 'reconcile'; title: string; detail: string; tone: 'normal'; accountId: string; balance: number };
 
 interface Input {
   transactions: Transaction[];
@@ -21,6 +22,8 @@ interface Input {
   hasGoals: boolean;
   notificationsOff?: boolean; // los avisos de pagos no están activos en este celular
   maturing?: { id: string; bank: string; amount: number; daysLeft: number }[]; // CDT que vencen pronto
+  // Cuentas cuyo saldo no se revisa hace 15 días o más (se pregunta si cuadra con el banco)
+  toReconcile?: { id: string; name: string; balance: number }[];
   formatMoney: (n: number) => string;
   skipped?: string[];
   now?: Date;
@@ -32,7 +35,7 @@ function toDate(v: any): Date {
   return new Date(v);
 }
 
-export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
+export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
   const out: NextAction[] = [];
   const month = getLocalMonthString(now);
   const lastMonth = getLocalMonthString(new Date(now.getFullYear(), now.getMonth() - 1, 1));
@@ -86,6 +89,16 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
       id: 'notify', kind: 'notify', tone: 'normal',
       title: 'Activa los avisos de tus pagos',
       detail: `Te avisamos de ${next.title} y tus otros pagos antes de que venzan, aunque FLOWI esté cerrada.`,
+    });
+  }
+
+  // 2c. ¿El saldo de una cuenta cuadra con el banco? (una a la vez)
+  const acc = toReconcile[0];
+  if (acc) {
+    out.push({
+      id: `reconcile:${acc.id}`, kind: 'reconcile', tone: 'normal', accountId: acc.id, balance: acc.balance,
+      title: `¿Tu ${acc.name} dice ${formatMoney(acc.balance)}?`,
+      detail: 'Revisa la app del banco: si cuadra, lo confirmo; si no, lo ajustamos en un toque.',
     });
   }
 

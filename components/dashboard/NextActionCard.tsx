@@ -11,6 +11,12 @@ import { NextAction } from '@/lib/nextAction';
 import { DailyBudget } from '@/lib/dailyBudget';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { askForNotifications } from '@/lib/notifPrompt';
+import { createPortal } from 'react-dom';
+import { useAccounts } from '@/hooks/useAccounts';
+import { AdjustBalanceModal } from '@/components/accounts/AccountModals';
+import { AccountIcon } from '@/components/accounts/AccountIcon';
+import { updateAccount } from '@/lib/firestore';
+import { formatCurrency } from '@/lib/format';
 
 // Las acciones saltadas se guardan solo en este dispositivo y solo por hoy
 const skipKey = () => `flowi_next_action_skip_${getLocalDateString()}`;
@@ -40,7 +46,10 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh }: P
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [open, setOpen] = useState(false);
+  const [adjusting, setAdjusting] = useState(false);
+  const { accounts } = useAccounts();
   const alert = action.tone === 'alert';
+  const reconcileAccount = action.kind === 'reconcile' ? accounts.find(a => a.id === action.accountId) : undefined;
 
   const body = (
     <>
@@ -102,6 +111,38 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh }: P
       )}
       {open && action.kind === 'add' && (
         <AddExpenseModal initialType="gasto" onClose={() => setOpen(false)} onSuccess={onRefresh} />
+      )}
+      {open && action.kind === 'reconcile' && reconcileAccount && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setOpen(false)} aria-hidden="true" />
+          <div className={`w-full max-w-sm relative z-10 animate-fade-in-up glass-dropdown p-6 ${isTechTheme ? 'rounded-none border border-accent/50 font-mono' : 'rounded-3xl'}`}>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="w-10 h-10 rounded-2xl bg-glass border border-glass-border flex items-center justify-center">
+                <AccountIcon account={reconcileAccount} className="w-6 h-6 text-xl flex items-center justify-center" />
+              </span>
+              <div className="min-w-0">
+                <h2 className={`font-bold ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>{reconcileAccount.name}</h2>
+                <p className="text-xs text-text-muted">Según FLOWI tienes {formatCurrency(Math.round(action.balance * 100) / 100, currency)}</p>
+              </div>
+            </div>
+            <p className="text-sm text-text-secondary mb-5">Abre la app del banco y mira el saldo. ¿Es el mismo?</p>
+            <div className="space-y-2">
+              <button type="button" onClick={async () => { await updateAccount(reconcileAccount.id!, { confirmedAt: new Date().toISOString() }); setOpen(false); }}
+                      className={`w-full py-3 font-bold ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white'}`}>
+                Sí, cuadra
+              </button>
+              <button type="button" onClick={() => { setOpen(false); setAdjusting(true); }}
+                      className={`w-full py-3 text-sm font-semibold border ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-primary'}`}>
+                No, ajustar el saldo
+              </button>
+              <button type="button" onClick={() => setOpen(false)} className="w-full py-2 text-xs text-text-muted">Ahora no</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+      {adjusting && reconcileAccount && action.kind === 'reconcile' && (
+        <AdjustBalanceModal account={reconcileAccount} current={action.balance} currency={currency} onClose={() => setAdjusting(false)} />
       )}
       {open && action.kind === 'today' && today && (
         <BalanceInfoModal kind="today" today={today} currency={currency} onClose={() => setOpen(false)} />

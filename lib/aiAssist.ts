@@ -329,3 +329,98 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
     clearTimeout(timer);
   }
 }
+
+// ── CDT desde capturas de la app del banco ────────────────────────────────
+// Lee una o varias capturas (resumen y detalle) y devuelve los datos para llenar el formulario.
+// Se pide ignorar números de CDT, de cuenta y nombres: FLOWI no los guarda.
+
+export interface CdtReading {
+  bank?: string;
+  amount?: number;
+  rateEA?: number;
+  nominalRate?: number;
+  startDate?: string;     // YYYY-MM-DD
+  maturityDate?: string;  // YYYY-MM-DD
+  bankInterest?: number;
+  autoRenew?: boolean;
+}
+
+export type CdtReadResult =
+  | { ok: true; data: CdtReading; found: number }
+  | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' };
+
+const CDT_PROMPT = `Eres un asistente que lee capturas de pantalla de la app de un banco colombiano sobre un CDT (certificado de depósito a término).
+Pueden ser varias capturas del mismo CDT. Responde SOLO un JSON con estas claves (null si no aparece):
+{"bank": nombre del banco, "amount": capital o monto invertido en pesos (número sin puntos), "rateEA": tasa efectiva anual en % (número, ej 9.9),
+ "nominalRate": tasa nominal en % si aparece, "startDate": fecha de apertura o de inicio del periodo "YYYY-MM-DD",
+ "maturityDate": fecha de vencimiento "YYYY-MM-DD", "bankInterest": intereses del periodo en pesos si aparecen, "autoRenew": true si dice que se renueva automáticamente}
+No incluyas números de CDT, de cuenta, de documento ni nombres de personas. Los montos colombianos usan punto de miles y coma decimal.`;
+
+export async function readCdtWithAi(files: File[]): Promise<CdtReadResult> {
+  const key = getAiKey();
+  if (!key) return { ok: false, reason: 'no-key' };
+  const models = await getFreeVisionModels(key).catch(() => []);
+  if (!models.length) return { ok: false, reason: 'no-model' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RECEIPT_TIMEOUT_MS * 2);
+  try {
+    const images = await Promise.all(files.slice(0, 4).map(shrinkImage));
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'FLOWI',
+      },
+      body: JSON.stringify({
+        model: models[0],
+        models,
+        temperature: 0,
+        messages: [
+          { role: 'system', content: CDT_PROMPT },
+          { role: 'user', content: [
+            { type: 'text', text: `Estas son ${images.length} captura(s) de un CDT.` },
+            ...images.map(url => ({ type: 'image_url', image_url: { url } })),
+          ] },
+        ],
+      }),
+    });
+    if (!res.ok) return { ok: false, reason: 'failed' };
+    const json = await res.json();
+    const p = extractJson(json?.choices?.[0]?.message?.content || '');
+    if (!p) return { ok: false, reason: 'unreadable' };
+
+    const num = (v: any) => {
+      if (typeof v === 'number') return Number.isFinite(v) && v > 0 ? v : undefined;
+      if (typeof v !== 'string') return undefined;
+      const n = Number(v.replace(/[^\d.,]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    };
+    const day = (v: any) => {
+      if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return undefined;
+      const [y, m, d] = v.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      return dt.getMonth() === m - 1 && y > 2000 && y < 2100 ? v : undefined;
+    };
+    const rate = (v: any) => { const n = num(v); return n !== undefined && n < 60 ? Math.round(n * 100) / 100 : undefined; };
+    const data: CdtReading = {
+      bank: typeof p.bank === 'string' && p.bank.trim() && p.bank !== 'null' ? p.bank.trim().slice(0, 30) : undefined,
+      amount: num(p.amount) ? Math.round(num(p.amount)!) : undefined,
+      rateEA: rate(p.rateEA),
+      nominalRate: rate(p.nominalRate),
+      startDate: day(p.startDate),
+      maturityDate: day(p.maturityDate),
+      bankInterest: num(p.bankInterest) ? Math.round(num(p.bankInterest)!) : undefined,
+      autoRenew: p.autoRenew === true ? true : undefined,
+    };
+    const found = Object.values(data).filter(v => v !== undefined).length;
+    if (!found) return { ok: false, reason: 'unreadable' };
+    return { ok: true, data, found };
+  } catch {
+    return { ok: false, reason: 'failed' };
+  } finally {
+    clearTimeout(timer);
+  }
+}

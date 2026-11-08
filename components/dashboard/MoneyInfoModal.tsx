@@ -8,8 +8,8 @@ import { RealMoneyInfo } from '@/hooks/useRealMoney';
 import { formatCurrency } from '@/lib/format';
 
 // Al tocar "Dinero disponible": la plata que hay en cada cuenta y el atajo para ajustarlas
-export function MoneyInfoModal({ real, pendingCommitments, currency = 'COP', onClose }: {
-  real: RealMoneyInfo; pendingCommitments: number; currency?: string; onClose: () => void;
+export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currency = 'COP', onClose }: {
+  real: RealMoneyInfo; pendingCommitments: number; monthBalance?: number; currency?: string; onClose: () => void;
 }) {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -64,6 +64,14 @@ export function MoneyInfoModal({ real, pendingCommitments, currency = 'COP', onC
             <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-text-muted">No cuentan para gastar</p>
             <ul className={`divide-y ${isTech ? 'divide-accent/15' : 'divide-glass-border'}`}>{[...saving, ...cards].map(row)}</ul>
           </>
+        )}
+
+        {monthBalance !== undefined && Math.abs(real.cash - monthBalance) >= 1000 && (
+          <p className={`mt-4 p-3 text-[11px] text-text-secondary leading-snug ${isTech ? 'rounded-none bg-white/5 border border-glass-border' : 'rounded-2xl bg-white/5 border border-glass-border'}`}>
+            Con tus registros de este mes (ingresos − gastos) te quedarían <b className="text-text-primary">{monthBalance < 0 ? '−' : ''}{f(Math.abs(monthBalance))}</b>;
+            en tus cuentas hay <b className="text-text-primary">{f(real.cash)}</b>. La diferencia ({f(Math.abs(real.cash - monthBalance))}) suele ser
+            {real.cash > monthBalance ? ' plata que ya tenías antes del mes o un ingreso sin registrar.' : ' un gasto sin registrar o plata que pasaste a una cuenta de ahorro.'}
+          </p>
         )}
 
         <p className="mt-4 text-[11px] text-text-muted leading-snug">

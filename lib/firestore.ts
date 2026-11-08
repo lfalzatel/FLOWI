@@ -585,6 +585,7 @@ export interface Account {
   baseBalance: number;       // saldo en baseAt (en crédito: negativo = lo que se debe)
   baseAt: string;            // ISO
   adjustments?: { at: string; from: number; to: number }[];
+  confirmedAt?: string;      // última vez que la persona confirmó que el saldo cuadra con el banco
   archived?: boolean;
   createdAt?: Timestamp | Date;
 }

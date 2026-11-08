@@ -196,7 +196,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
       </div>
 
       {info === 'today' && today && <BalanceInfoModal kind="today" today={today} currency={currency} onClose={() => setInfo(null)} />}
-      {showMoney && real && <MoneyInfoModal real={real} pendingCommitments={pendingCommitments} currency={currency} onClose={() => setShowMoney(false)} />}
+      {showMoney && real && <MoneyInfoModal real={real} pendingCommitments={pendingCommitments} monthBalance={periodBalance} currency={currency} onClose={() => setShowMoney(false)} />}
       {info === 'debts' && <BalanceInfoModal kind="debts" balance={balance} currency={currency} onClose={() => setInfo(null)} />}
     </div>
   );
