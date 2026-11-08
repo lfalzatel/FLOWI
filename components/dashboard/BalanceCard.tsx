@@ -6,8 +6,12 @@ import { AnimatedNumber } from './AnimatedNumber';
 import { formatCurrency } from '@/lib/format';
 import { DailyBudget } from '@/lib/dailyBudget';
 import { BalanceInfoModal } from './BalanceInfoModal';
+import { MoneyInfoModal } from './MoneyInfoModal';
+import { RealMoneyInfo } from '@/hooks/useRealMoney';
 
 interface Props {
+  real?: RealMoneyInfo | null;   // con cuentas: la plata real (solo en el mes actual)
+  pendingCommitments?: number;
   balance:       number;
   totalGastos:   number;
   totalIngresos: number;
@@ -16,7 +20,10 @@ interface Props {
   currency?:     string;
 }
 
-export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, today, currency }: Props) {
+export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos, totalDeudas, today, currency, real, pendingCommitments = 0 }: Props) {
+  // Con cuentas para gastar, el disponible es la plata que de verdad hay en ellas
+  const balance = real ? real.cash : periodBalance;
+  const [showMoney, setShowMoney] = useState(false);
   const { theme } = useTheme();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light';
@@ -49,6 +56,9 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
       {/* Main balance */}
       <div 
         id="balance-card" 
+        onClick={real ? () => setShowMoney(true) : undefined}
+        role={real ? 'button' : undefined}
+        aria-label={real ? 'Ver la plata de cada cuenta' : undefined}
         data-points-capsule="true" 
         className={`relative overflow-hidden rounded-3xl p-6 md:p-8 animate-card-mix shadow-sm transition-all duration-300 ${
           absorbingId === 'balance-card' ? 'scale-[1.03] ring-2 ring-accent shadow-[0_0_40px_rgba(0,229,160,0.6)]' : ''
@@ -77,6 +87,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
               <Wallet className="w-3.5 h-3.5 text-accent" />
             </div>
             <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Dinero disponible</span>
+            {real && <span className="text-[10px] text-text-muted">· en tus cuentas · toca para ver</span>}
           </div>
 
           <p className={`mb-3 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,44px)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,44px)]'} ${balance < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
@@ -185,6 +196,7 @@ export function BalanceCard({ balance, totalGastos, totalIngresos, totalDeudas, 
       </div>
 
       {info === 'today' && today && <BalanceInfoModal kind="today" today={today} currency={currency} onClose={() => setInfo(null)} />}
+      {showMoney && real && <MoneyInfoModal real={real} pendingCommitments={pendingCommitments} currency={currency} onClose={() => setShowMoney(false)} />}
       {info === 'debts' && <BalanceInfoModal kind="debts" balance={balance} currency={currency} onClose={() => setInfo(null)} />}
     </div>
   );

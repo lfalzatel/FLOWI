@@ -316,6 +316,8 @@ export default function DashboardPage() {
           <>
             <BalanceCard key={`${filterType}-${filterValue}`} balance={filteredBalance} totalGastos={filteredGastos} totalIngresos={filteredIngresos} totalDeudas={totalDeudas}
                          currency={profile?.currency}
+                         real={isCurrentMonthView && !demo ? realMoney : null}
+                         pendingCommitments={pendingCommitments}
                          today={isCurrentMonthView ? todayBudget : null} />
             <div data-tour="projection"><BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh}
                               pendingCommitments={commitments.loading ? 0 : commitments.pendingTotal} /></div>
