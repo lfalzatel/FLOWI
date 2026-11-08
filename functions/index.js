@@ -1,4 +1,4 @@
-// Servidor de pagos de FLOWI (Firebase Functions, Node 20).
+// Servidor de pagos de FLOWI (Firebase Functions, Node 22).
 //  - wompiFirma: la app pide pagar un plan; aquí se arma la referencia y la firma de integridad
 //    (el secreto nunca sale del servidor) y se anota el pago como pendiente.
 //  - wompiEventos: Wompi avisa el resultado del pago. Se verifica la firma del aviso con el
