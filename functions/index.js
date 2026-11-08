@@ -129,3 +129,37 @@ exports.wompiEventos = onRequest({ secrets: [WOMPI_EVENTS], region: 'us-central1
     res.status(500).send('error'); // Wompi reintenta
   }
 });
+
+// Pago por transferencia directa (Bre-B): la persona sube el comprobante (fl_manual_payments) y el
+// administrador lo aprueba o rechaza desde Planes. Al aprobar se suman los meses de Premium.
+exports.revisarPagoManual = onCall({ region: 'us-central1' }, async (req) => {
+  if (!req.auth) throw new HttpsError('unauthenticated', 'Inicia sesión.');
+  const reviewer = await db.collection('users').doc(req.auth.uid).get();
+  if (!reviewer.exists || reviewer.data().role !== 'admin') throw new HttpsError('permission-denied', 'Solo el administrador revisa pagos.');
+  const id = String(req.data?.id || '');
+  const approve = req.data?.approve === true;
+  const note = String(req.data?.note || '').slice(0, 200);
+  if (!id) throw new HttpsError('invalid-argument', 'Falta el comprobante.');
+
+  const ref = db.collection('fl_manual_payments').doc(id);
+  return db.runTransaction(async (t) => {
+    const snap = await t.get(ref);
+    if (!snap.exists) throw new HttpsError('not-found', 'No existe ese comprobante.');
+    const p = snap.data();
+    if (p.status !== 'PENDING') return { status: p.status };
+    const reviewed = { reviewedAt: admin.firestore.FieldValue.serverTimestamp(), reviewedBy: req.auth.uid, reviewNote: note };
+    if (!approve) { t.update(ref, { status: 'REJECTED', ...reviewed }); return { status: 'REJECTED' }; }
+
+    const plan = PLANS[p.plan];
+    if (!plan) throw new HttpsError('invalid-argument', 'Plan no válido.');
+    const userRef = db.collection('users').doc(p.userId);
+    const user = await t.get(userRef);
+    const now = new Date();
+    const current = user.exists && user.data().premiumUntil ? user.data().premiumUntil.toDate() : null;
+    const until = new Date(current && current > now ? current : now);
+    until.setMonth(until.getMonth() + plan.months);
+    t.set(userRef, { premiumUntil: admin.firestore.Timestamp.fromDate(until), plan: p.plan }, { merge: true });
+    t.update(ref, { status: 'APPROVED', premiumUntil: admin.firestore.Timestamp.fromDate(until), ...reviewed });
+    return { status: 'APPROVED', premiumUntil: until.toISOString() };
+  });
+});

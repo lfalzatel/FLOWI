@@ -2,7 +2,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, ChevronLeft, Crown, Loader2, Minus } from 'lucide-react';
+import { Check, ChevronLeft, Crown, Loader2, Minus, Receipt } from 'lucide-react';
+import { ManualPayModal } from '@/components/plans/ManualPayModal';
+import { ManualPaymentsReview } from '@/components/plans/ManualPaymentsReview';
+import { ManualPayment, watchMyManualPayments } from '@/lib/manualPay';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/layout/Header';
@@ -27,7 +30,12 @@ export default function PlanesPage() {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
+  const isAdmin = profile?.role === 'admin';
+  const [manualOpen, setManualOpen] = useState(false);
+  const [myManual, setMyManual] = useState<ManualPayment[]>([]);
+  useEffect(() => (user ? watchMyManualPayments(user.uid, setMyManual) : undefined), [user]);
+  const lastManual = myManual[0];
   const { premium, until } = usePlan();
   const [selected, setSelected] = useState<PlanOption['id']>('anual');
   const [paying, setPaying] = useState(false);
@@ -135,6 +143,21 @@ export default function PlanesPage() {
           {premium ? 'Renovar' : 'Pagar'} {plan.label.toLowerCase()} · {formatCurrency(plan.price, 'COP')}
         </button>
 
+        {/* Pagar por transferencia directa y enviar el comprobante */}
+        <button type="button" onClick={() => setManualOpen(true)}
+                className={`w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 ${isTech ? 'rounded-none uppercase text-xs tracking-wider' : 'rounded-2xl'}`}>
+          <Receipt className="w-4 h-4 text-accent" /> Pagar por transferencia y enviar comprobante
+        </button>
+        {lastManual && (
+          <p className={`text-xs text-center ${lastManual.status === 'APPROVED' ? 'text-emerald-400' : lastManual.status === 'REJECTED' ? 'text-red-400' : 'text-amber-400'}`}>
+            {lastManual.status === 'PENDING' && `Tu comprobante (${formatCurrency(lastManual.amount, 'COP')}) está en revisión. Te activamos Premium apenas lo confirmemos.`}
+            {lastManual.status === 'APPROVED' && '¡Tu pago por transferencia fue aprobado! Premium ya está activo.'}
+            {lastManual.status === 'REJECTED' && `No pudimos confirmar tu último comprobante.${lastManual.reviewNote ? ` ${lastManual.reviewNote}` : ''} Escríbenos por WhatsApp si ya transferiste.`}
+          </p>
+        )}
+
+        {isAdmin && <ManualPaymentsReview isTech={isTech} />}
+
         {message && (
           <p className={`text-sm text-center ${message.ok ? 'text-accent' : 'text-red-400'}`}>{message.text}</p>
         )}
@@ -145,6 +168,7 @@ export default function PlanesPage() {
         </p>
       </main>
       <BottomNav />
+      {manualOpen && <ManualPayModal plan={selected} onClose={() => setManualOpen(false)} />}
     </div>
   );
 }

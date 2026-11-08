@@ -55,6 +55,19 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── Pagos por transferencia: la persona envía su comprobante (pendiente); solo el servidor
+    // (revisarPagoManual, llamado por el administrador) lo aprueba o rechaza
+    match /fl_manual_payments/{id} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if createsOwn()
+        && request.resource.data.status == 'PENDING'
+        && request.resource.data.plan in ['mensual', 'trimestral', 'anual']
+        && request.resource.data.image is string
+        && request.resource.data.image.size() < 900000
+        && request.resource.data.keys().hasOnly(['userId', 'userName', 'userEmail', 'plan', 'amount', 'image', 'note', 'status', 'createdAt']);
+      allow update, delete: if false;
+    }
+
     // ── Datos de cada persona ─────────────────────────────────
     match /fl_expenses/{id} {
       // El administrador puede LEER (no cambiar ni borrar) para ver los totales en Gestionar usuarios
