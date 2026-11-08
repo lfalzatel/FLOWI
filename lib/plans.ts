@@ -48,6 +48,20 @@ export function premiumUntil(profile: UserProfile | null | undefined, now = new 
   return best ?? null;
 }
 
+/**
+ * Cuándo termina (o terminó) el Premium de la persona, para avisarle que renueve.
+ * null para el administrador o si nunca tuvo Premium.
+ */
+export function premiumEndInfo(profile: UserProfile | null | undefined): { until: Date; gift: boolean } | null {
+  if (!profile || profile.role === 'admin') return null;
+  const paid = toDate((profile as any).premiumUntil);
+  const created = toDate(profile.createdAt);
+  const gift = created && created < LAUNCH ? GIFT_END : null;
+  if (paid && (!gift || paid >= gift)) return { until: paid, gift: false };
+  if (gift) return { until: gift, gift: true };
+  return null;
+}
+
 export function isPremium(profile: UserProfile | null | undefined, now = new Date()): boolean {
   if (profile?.role === 'admin') return true;
   return !!premiumUntil(profile, now);

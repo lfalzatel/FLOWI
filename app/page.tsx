@@ -1,4 +1,5 @@
 'use client';
+import { premiumEndInfo } from '@/lib/plans';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X, Download } from 'lucide-react';
@@ -270,6 +271,7 @@ export default function DashboardPage() {
       reminders: myReminders.length, seenTips,
     },
     showSupport: !demo && (profile?.activeDays ?? 0) >= 5,
+    premiumEnd: demo ? null : premiumEndInfo(profile),
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
   });
 

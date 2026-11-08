@@ -223,6 +223,32 @@ async function send(uid, tokens, msg) {
   return res.successCount;
 }
 
+// Aviso para renovar Premium: 3 días antes, el día que vence y el día después (con el resumen de la mañana).
+// Mismas fechas que lib/plans.ts: quien ya usaba FLOWI antes de los planes tiene regalo hasta el 9 de diciembre.
+const PLANS_LAUNCH = new Date('2026-11-09T00:00:00-05:00');
+const GIFT_END = new Date('2026-12-09T23:59:59-05:00');
+function premiumNotice(u, todayLocal) {
+  if (u.get('role') === 'admin') return null;
+  const paid = toDate(u.get('premiumUntil'));
+  const created = toDate(u.get('createdAt'));
+  const gift = created && created < PLANS_LAUNCH ? GIFT_END : null;
+  const end = paid && (!gift || paid >= gift) ? { until: paid, gift: false } : gift ? { until: gift, gift: true } : null;
+  if (!end) return null;
+  const endLocal = toLocal(end.until);
+  const dayOf = (d) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  const left = Math.round((dayOf(endLocal) - dayOf(todayLocal)) / 86400000);
+  if (![3, 0, -1].includes(left)) return null;
+  const what = end.gift ? 'Tu mes de Premium de regalo' : 'Tu FLOWI Premium';
+  return {
+    title: left === 3 ? `⏳ ${what} vence en 3 días` : left === 0 ? `⏳ ${what} vence hoy` : `${what} terminó`,
+    body: left >= 0
+      ? 'Renuévalo para seguir sin límites. Si renuevas antes, los días se suman. Toca para ver los planes.'
+      : 'Volviste al plan gratis: tus datos siguen ahí. Toca para renovar cuando quieras.',
+    url: '/planes',
+    tag: `premium-${dayOf(endLocal)}-${left}`,
+  };
+}
+
 async function main() {
   const now = process.env.NOW ? new Date(process.env.NOW) : new Date();
   const stateRef = db.collection('push_state').doc('cron');
@@ -262,6 +288,8 @@ async function main() {
         const recap = await monthlyRecap(u.id, todayLocal);
         if (recap) sent += await send(u.id, tokens, recap);
       }
+      const renew = premiumNotice(u, todayLocal);
+      if (renew) sent += await send(u.id, tokens, renew);
     }
   }
 

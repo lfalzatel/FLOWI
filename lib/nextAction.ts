@@ -12,7 +12,7 @@ export type NextAction =
   | { id: string; kind: 'today'; title: string; detail: string; tone: 'alert' }
   | { id: string; kind: 'add'; title: string; detail: string; tone: 'normal' }
   | { id: string; kind: 'notify'; title: string; detail: string; tone: 'normal' }
-  | { id: string; kind: 'link'; title: string; detail: string; href: string; tone: 'normal' }
+  | { id: string; kind: 'link'; title: string; detail: string; href: string; tone: 'normal' | 'alert' }
   | { id: string; kind: 'reconcile'; title: string; detail: string; tone: 'normal'; accountId: string; balance: number }
   | { id: string; kind: 'support'; title: string; detail: string; tone: 'normal' };
 
@@ -31,6 +31,7 @@ interface Input {
   summary?: { month: string; name: string; hint?: string } | null; // resumen del mes pasado listo (días 1 a 10)
   discover?: { hasAccounts: boolean; hasInvestments: boolean; reminders: number; seenTips: string[] };
   showSupport?: boolean;
+  premiumEnd?: { until: Date; gift: boolean } | null; // fin del Premium (aviso para renovar)
   formatMoney: (n: number) => string;
   skipped?: string[];
   now?: Date;
@@ -42,8 +43,25 @@ function toDate(v: any): Date {
   return new Date(v);
 }
 
-export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], summary = null, discover, showSupport = false, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
+export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], summary = null, discover, showSupport = false, premiumEnd = null, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
   const out: NextAction[] = [];
+
+  // Premium por vencer (5 días antes) o recién vencido (hasta 7 días después)
+  if (premiumEnd) {
+    const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const left = Math.round((day(premiumEnd.until) - day(now)) / 86400000);
+    if (left <= 5 && left >= -7) {
+      const what = premiumEnd.gift ? 'Tu mes de Premium de regalo' : 'Tu FLOWI Premium';
+      const dateText = premiumEnd.until.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' });
+      out.push({
+        id: `premium:${getLocalDateString(premiumEnd.until)}`, kind: 'link', href: '/planes', tone: left <= 1 ? 'alert' : 'normal',
+        title: left > 1 ? `${what} vence en ${left} días` : left === 1 ? `${what} vence mañana` : left === 0 ? `${what} vence hoy` : `${what} terminó`,
+        detail: left >= 0
+          ? `Renuévalo antes del ${dateText} para seguir sin límites. Si renuevas antes, los días se suman. Toca para ver los planes.`
+          : 'Volviste al plan gratis: tus datos siguen ahí, solo no puedes agregar más de lo que permite. Toca para renovar.',
+      });
+    }
+  }
   const month = getLocalMonthString(now);
   const lastMonth = getLocalMonthString(new Date(now.getFullYear(), now.getMonth() - 1, 1));
   const todayKey = getLocalDateString(now);
@@ -180,6 +198,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     const id = a.id;
     if (id.startsWith('pay:')) return a.tone === 'alert' ? 0 : 1;
     if (id.startsWith('cdt:')) return 2;
+    if (id.startsWith('premium:')) return a.tone === 'alert' ? 0 : 2;
     if (id === 'income') return 3;
     if (id === 'today-over') return 4;
     if (id.startsWith('review:')) return 5;
