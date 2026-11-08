@@ -283,6 +283,9 @@ export interface UserProfile {
   phone?: string;
   currency?: string;
   createdAt?: Timestamp | Date;
+  activeDays?: number;
+  firstActiveDay?: string;
+  lastActiveDay?: string;
 }
 
 export async function getAllUsers() {

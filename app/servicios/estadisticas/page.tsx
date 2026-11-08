@@ -359,6 +359,23 @@ export default function EstadisticasPage() {
               </div>
             </div>
 
+            {(profile?.activeDays ?? 0) > 0 && (
+              <div className={`p-4 mb-6 flex items-center justify-between ${isTechTheme ? 'border border-accent/30 bg-accent/5' : 'glass-card rounded-3xl'}`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">📅</span>
+                  <div>
+                    <h3 className={`text-sm font-bold ${isTechTheme ? 'font-mono uppercase tracking-widest text-accent' : 'text-text-primary'}`}>Días usando FLOWI</h3>
+                    <p className="text-[11px] text-text-muted">
+                      {profile?.firstActiveDay ? `Desde el ${new Date(profile.firstActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Cada día que abres la app'}
+                    </p>
+                  </div>
+                </div>
+                <div className={`text-2xl font-black ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>
+                  <AnimatedNumber value={profile?.activeDays || 0} format={(n: number) => String(Math.round(n))} />
+                </div>
+              </div>
+            )}
+
             {/* WIDGET 1: 4 MÉTRICAS (CHIPS) */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'glass-card rounded-2xl'}`}>

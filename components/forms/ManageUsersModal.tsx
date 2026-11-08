@@ -45,7 +45,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   const loadUserStats = async (userId: string) => {
     setUserStats(prev => ({ ...prev, loading: true }));
     try {
-      const { getUserTransactions, getUserDebts } = await import('@/lib/firestore');
+      const { getUserTransactions, getUserDebts, calculateDebtInterest } = await import('@/lib/firestore');
       const [gastosTx, ingresosTx, deudas] = await Promise.all([
         getUserTransactions(userId, 'gasto'),
         getUserTransactions(userId, 'ingreso'),
@@ -53,7 +53,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
       ]);
       const totalGastos = gastosTx.reduce((acc, t) => acc + t.amount, 0);
       const totalIngresos = ingresosTx.reduce((acc, t) => acc + t.amount, 0);
-      const totalDeudas = deudas.reduce((acc, d) => acc + (d.totalAmount - d.paidAmount), 0);
+      const totalDeudas = deudas.filter(d => d.status === 'pending' && d.direction !== 'me_deben').reduce((acc, d) => acc + Math.max(0, d.totalAmount - d.paidAmount) + calculateDebtInterest(d).accumulatedInterest, 0);
       
       setUserStats({ gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false });
     } catch (error) {
@@ -154,6 +154,9 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</p>
                         <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{u.email}</p>
+                        {(u.activeDays ?? 0) > 0 && (
+                          <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent' : 'text-accent'}`}>📅 {u.activeDays} {u.activeDays === 1 ? 'día' : 'días'} de uso{u.lastActiveDay ? ` · último: ${new Date(u.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}</p>
+                        )}
                       </div>
 
                       <div className="flex-shrink-0">
@@ -219,6 +222,20 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                 <p className={`text-[10px] mt-1 ${isTechTheme ? 'font-mono text-white/40' : 'text-white/40'}`}>Registrado: {selectedUser.createdAt ? (typeof (selectedUser.createdAt as any).toDate === 'function' ? (selectedUser.createdAt as any).toDate().toLocaleDateString() : (selectedUser.createdAt as Date).toLocaleDateString()) : 'N/A'}</p>
               </div>
 
+
+        {(selectedUser?.activeDays ?? 0) > 0 && (
+          <div className={`p-4 flex items-center gap-3 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
+            <span className="text-2xl">📅</span>
+            <div className="flex-1 min-w-0">
+              <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Días usando FLOWI</p>
+              <p className={`text-lg font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{selectedUser!.activeDays} {selectedUser!.activeDays === 1 ? 'día' : 'días'}</p>
+              <p className="text-[10px] text-text-muted">
+                {selectedUser!.firstActiveDay ? `Desde el ${new Date(selectedUser!.firstActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+                {selectedUser!.lastActiveDay ? ` · último uso: ${new Date(selectedUser!.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}
+              </p>
+            </div>
+          </div>
+        )}
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
                 <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Rol del Sistema</h4>
                 <div className="flex items-center justify-between">

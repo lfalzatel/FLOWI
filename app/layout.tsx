@@ -53,6 +53,7 @@ import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
 import { ReminderWatcher } from '@/components/reminders/ReminderWatcher';
 import { NotificationPrompter } from '@/components/notifications/NotificationPrompter';
 import { UpdateWatcher } from '@/components/layout/UpdateWatcher';
+import { UsageTracker } from '@/components/layout/UsageTracker';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ReminderWatcher />
               <NotificationPrompter />
               <UpdateWatcher />
+              <UsageTracker />
             </DataProvider>
           </ThemeProvider>
         </InAppNotificationProvider>

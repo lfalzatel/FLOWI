@@ -55,7 +55,7 @@ export function ProfileModal({ onClose }: Props) {
 
   const loadUserStats = async (userId: string) => {
     try {
-      const { getUserTransactions, getUserDebts } = await import('@/lib/firestore');
+      const { getUserTransactions, getUserDebts, calculateDebtInterest } = await import('@/lib/firestore');
       const [gastosTx, ingresosTx, deudas] = await Promise.all([
         getUserTransactions(userId, 'gasto'),
         getUserTransactions(userId, 'ingreso'),
@@ -63,7 +63,7 @@ export function ProfileModal({ onClose }: Props) {
       ]);
       const totalGastos = gastosTx.reduce((acc, t) => acc + t.amount, 0);
       const totalIngresos = ingresosTx.reduce((acc, t) => acc + t.amount, 0);
-      const totalDeudas = deudas.reduce((acc, d) => acc + (d.totalAmount - d.paidAmount), 0);
+      const totalDeudas = deudas.filter(d => d.status === 'pending' && d.direction !== 'me_deben').reduce((acc, d) => acc + Math.max(0, d.totalAmount - d.paidAmount) + calculateDebtInterest(d).accumulatedInterest, 0);
       
       setUserStats({ gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false });
     } catch (error) {
@@ -238,6 +238,20 @@ export function ProfileModal({ onClose }: Props) {
           </div>
         </div>
 
+
+        {(profile?.activeDays ?? 0) > 0 && (
+          <div className={`mb-6 p-4 flex items-center gap-3 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
+            <span className="text-2xl">📅</span>
+            <div className="flex-1 min-w-0">
+              <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Días usando FLOWI</p>
+              <p className={`text-lg font-bold ${isCyberpunk ? 'font-mono text-accent' : 'text-text-primary'}`}>{profile!.activeDays} {profile!.activeDays === 1 ? 'día' : 'días'}</p>
+              <p className="text-[10px] text-text-muted">
+                {profile!.firstActiveDay ? `Desde el ${new Date(profile!.firstActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+                {profile!.lastActiveDay ? ` · último uso: ${new Date(profile!.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}
+              </p>
+            </div>
+          </div>
+        )}
         <div className={`mb-6 p-4 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
           <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isCyberpunk ? 'font-mono text-accent' : 'text-text-secondary'}`}>Estadísticas Financieras</h4>
           {userStats.loading ? (
