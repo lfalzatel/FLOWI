@@ -18,7 +18,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   
-  const [userStats, setUserStats] = useState<{gastos: number, ingresos: number, deudas: number, loading: boolean, error?: boolean}>({
+  const [userStats, setUserStats] = useState<{gastos: number, ingresos: number, deudas: number, loading: boolean, error?: boolean, txCount?: number, txDays?: number, firstTx?: Date | null, lastTx?: Date | null}>({
     gastos: 0, ingresos: 0, deudas: 0, loading: false
   });
 
@@ -55,7 +55,18 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
       const totalIngresos = ingresosTx.reduce((acc, t) => acc + t.amount, 0);
       const totalDeudas = deudas.filter(d => d.status === 'pending' && d.direction !== 'me_deben').reduce((acc, d) => acc + Math.max(0, d.totalAmount - d.paidAmount) + calculateDebtInterest(d).accumulatedInterest, 0);
       
-      setUserStats({ gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false });
+      // Actividad calculada desde sus movimientos (el administrador puede leerlos)
+      const dates = [...gastosTx, ...ingresosTx]
+        .map(t => ((t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any)))
+        .filter((d: Date) => !isNaN(d.getTime()) && d.getTime() <= Date.now());
+      const days = new Set(dates.map((d: Date) => d.toDateString()));
+      const times = dates.map((d: Date) => d.getTime());
+      setUserStats({
+        gastos: totalGastos, ingresos: totalIngresos, deudas: totalDeudas, loading: false,
+        txCount: gastosTx.length + ingresosTx.length, txDays: days.size,
+        firstTx: times.length ? new Date(Math.min(...times)) : null,
+        lastTx: times.length ? new Date(Math.max(...times)) : null,
+      });
     } catch (error) {
       console.error('Error loading stats:', error);
       setUserStats(prev => ({ ...prev, loading: false, error: true }));
@@ -289,16 +300,28 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
               {selectedUser.email !== currentUserEmail && (
                 <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
                   <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Actividad</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Registros</p>
-                      <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{selectedUser.txCount ?? '—'}</p>
-                    </div>
-                    <div>
-                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Último registro</p>
-                      <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</p>
-                    </div>
-                  </div>
+                  {(() => {
+                    const fmtDay = (d?: Date | null) => d ? d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+                    const last = userStats.lastTx ?? (selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00') : null);
+                    const items: [string, string][] = [
+                      ['Registros', String(userStats.txCount ?? selectedUser.txCount ?? '—')],
+                      ['Días con registros', String(userStats.txDays ?? '—')],
+                      ['Primer registro', fmtDay(userStats.firstTx)],
+                      ['Último registro', fmtDay(last)],
+                    ];
+                    if (selectedUser.activeDays) items.push(['Días abriendo la app', String(selectedUser.activeDays)]);
+                    if (selectedUser.lastActiveDay) items.push(['Último uso', fmtDay(new Date(selectedUser.lastActiveDay + 'T12:00:00'))]);
+                    return (
+                      <div className="grid grid-cols-2 gap-4">
+                        {items.map(([k, v]) => (
+                          <div key={k}>
+                            <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>{k}</p>
+                            <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{userStats.loading ? '…' : v}</p>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
               </>
