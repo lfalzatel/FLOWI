@@ -180,9 +180,12 @@ export function getCommitments(
     const words = tokens(r.title, r.category);
     // Con categoría, solo cuenta un pago de esa misma categoría (las palabras sueltas como el nombre de
     // la ciudad confunden: "Claro Manizales" no es "Aguas de Manizales"); sin categoría, por palabras
-    const group = r.category
-      ? groups.find(g => normalize(g.category) === normalize(r.category!))
-      : groups.find(g => matches(undefined, words, g.category, g.words));
+    // Mismo nombre que un pago fijo del mes pasado = el mismo compromiso, aunque la categoría
+    // no coincida (recordatorio "Google AI pro" en Play Store y el pago "Google AI pro" en Google)
+    const sameTitle = groups.find(g => normalize(g.title) === normalize(r.title));
+    const group = sameTitle
+      ?? (r.category ? groups.find(g => normalize(g.category) === normalize(r.category!)) : undefined)
+      ?? (r.category ? undefined : groups.find(g => matches(undefined, words, g.category, g.words)));
     dueReminders.push({ r, due, words, group });
   }
 
@@ -209,7 +212,8 @@ export function getCommitments(
       || (shared
         ? fixedThisMonth.some(t => normalize(t.category) === normalize(group!.category) && tokens(t.description).some(x => ownWords.some(w => sameWord(w, x))))
         : r.category
-          ? fixedThisMonth.some(t => normalize(t.category) === normalize(r.category!))
+          ? fixedThisMonth.some(t => normalize(t.category) === normalize(r.category!)
+              || (!!group && normalize(t.category) === normalize(group.category) && normalize(t.description || '') === normalize(r.title)))
           : paidThisMonth(undefined, words) || (group ? paidThisMonth(group.category, group.words) : false));
     if (covered) { paidCount++; continue; }
     if (skipped.includes(skipEntry(thisMonth, key))) continue;
