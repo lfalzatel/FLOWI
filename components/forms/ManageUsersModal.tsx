@@ -219,7 +219,6 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
               const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
               const colors = ['bg-[#FF5B5B]/20 text-[#FF5B5B]', 'bg-[#F5A623]/20 text-[#F5A623]', 'bg-[#A855F7]/20 text-[#A855F7]', 'bg-[#00E5A0]/20 text-[#00E5A0]', 'bg-[#3B82F6]/20 text-[#3B82F6]', 'bg-[#EC4899]/20 text-[#EC4899]'];
               const avatarColorClass = colors[displayName.length % colors.length];
-              const created = selectedUser.createdAt ? (typeof (selectedUser.createdAt as any).toDate === 'function' ? (selectedUser.createdAt as any).toDate() : selectedUser.createdAt as Date) : null;
               const box = `p-3 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`;
               const lbl = `text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`;
               const val = `text-sm font-semibold ${isTechTheme ? 'font-mono' : ''}`;
@@ -245,7 +244,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                     <div className="min-w-0 flex-1">
                       <h3 className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</h3>
                       <p className={`text-[11px] truncate ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{selectedUser.email}</p>
-                      <p className="text-[10px] text-text-muted">Registrado: {fmtDay(created)}{selectedUser.phone ? ` · ${selectedUser.phone}` : ''}</p>
+                      {selectedUser.phone && <p className="text-[10px] text-text-muted">{selectedUser.phone}</p>}
                     </div>
                   </div>
 
