@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Plus, Landmark, Pencil, CalendarClock, TrendingUp, RefreshCw, CheckCircle2, Info, PlusCircle } from 'lucide-react';
+import { ChevronLeft, Plus, Landmark, Pencil, CalendarClock, TrendingUp, RefreshCw, CheckCircle2, Info } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useInvestments } from '@/hooks/useInvestments';
@@ -249,10 +249,6 @@ export default function InversionesPage() {
                             <span>Antes de que se renueve, compara la tasa con otros bancos.</span>
                           </p>
                         )}
-                        <button onClick={() => { setAbonando(inv); setAbonoAmount(''); setAbonoAccount(undefined); }}
-                                className={`mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs font-semibold border transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase' : 'rounded-xl border-glass-border text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
-                          <PlusCircle className="w-4 h-4" /> Abonar a este CDT
-                        </button>
                       </>
                     )}
                   </article>
