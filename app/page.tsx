@@ -25,6 +25,7 @@ import { useRealMoney } from '@/hooks/useRealMoney';
 import { investmentStatus, monthSavings } from '@/lib/investments';
 import { InvestmentsSummaryCard } from '@/components/dashboard/InvestmentsSummaryCard';
 import { NetWorthCard } from '@/components/dashboard/NetWorthCard';
+import { MonthSummaryCard } from '@/components/dashboard/MonthSummaryCard';
 import { isGoalDone } from '@/lib/goals';
 import { buildDemoData } from '@/lib/demoData';
 import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
@@ -337,6 +338,7 @@ export default function DashboardPage() {
 
         {/* Meta de ahorro principal */}
         <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} demoGoals={demo?.goals} /></div>
+        {!demo && <MonthSummaryCard transactions={transactions} currency={profile?.currency} />}
         {!demo && <NetWorthCard transactions={transactions} currency={profile?.currency} />}
         {!demo && <InvestmentsSummaryCard currency={profile?.currency} />}
 

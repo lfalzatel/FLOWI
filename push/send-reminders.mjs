@@ -7,6 +7,7 @@
 //  - Pagos y fechas (mensuales y anuales): un solo resumen a las 7:00 a. m. con lo que vence
 //    hoy y mañana, sin lo ya pagado (marcado con "Ya lo pagué" o con un gasto registrado).
 //  - CDT (fl_investments): en el mismo resumen, 3 días antes, el día anterior y el día que vencen.
+//  - El día 1 a las 7:00 a. m.: resumen del mes que terminó (cuánto se gastó frente al anterior).
 //
 // Necesita el secreto FIREBASE_SERVICE_ACCOUNT_FLOWI (llave de cuenta de servicio de flowi-9af82).
 
@@ -164,6 +165,42 @@ async function morningSummary(uid, reminders, investments, todayLocal) {
   };
 }
 
+// Resumen del mes que terminó: gastos, cambio frente al anterior y la categoría que más se llevó
+async function monthlyRecap(uid, todayLocal) {
+  const y = todayLocal.getUTCFullYear(), m = todayLocal.getUTCMonth();
+  const key = (yy, mm) => { const d = new Date(Date.UTC(yy, mm, 1)); return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`; };
+  const last = key(y, m - 1), before = key(y, m - 2);
+  const snap = await db.collection('fl_expenses').where('userId', '==', uid).get();
+  let gastos = 0, prevGastos = 0, ingresos = 0;
+  const cats = new Map();
+  for (const d of snap.docs) {
+    const t = d.data();
+    const local = toLocal(toDate(t.date) || new Date(0));
+    const k = `${local.getUTCFullYear()}-${String(local.getUTCMonth() + 1).padStart(2, '0')}`;
+    if (k === last) {
+      if (t.type === 'gasto') { gastos += t.amount; cats.set(t.category, (cats.get(t.category) || 0) + t.amount); }
+      else if (t.type === 'ingreso') ingresos += t.amount;
+    } else if (k === before && t.type === 'gasto') prevGastos += t.amount;
+  }
+  if (!gastos && !ingresos) return null;
+  const money = (n) => `$${Math.round(n).toLocaleString('es-CO')}`;
+  const monthName = new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString('es-CO', { month: 'long', timeZone: 'UTC' });
+  const parts = [`Gastaste ${money(gastos)}`];
+  if (prevGastos > 0) {
+    const ch = Math.round(((gastos - prevGastos) / prevGastos) * 100);
+    if (Math.abs(ch) >= 3) parts[0] += ` (${Math.abs(ch)} % ${ch > 0 ? 'más' : 'menos'} que el mes anterior)`;
+  }
+  if (ingresos > 0) parts.push(ingresos >= gastos ? `te sobraron ${money(ingresos - gastos)}` : `gastaste ${money(gastos - ingresos)} más de lo que te ingresó`);
+  const top = Array.from(cats.entries()).sort((a, b) => b[1] - a[1])[0];
+  if (top) parts.push(`lo que más se llevó: ${top[0]}`);
+  return {
+    title: `📊 Tu resumen de ${monthName}`,
+    body: `${parts.join('; ')}. Toca para verlo completo.`,
+    url: `/servicios/resumen?mes=${last}`,
+    tag: `recap-${last}`,
+  };
+}
+
 async function send(uid, tokens, msg) {
   if (DRY_RUN) {
     console.log(`  [prueba] ${uid.slice(0, 6)}… → ${msg.title}: ${msg.body}`);
@@ -221,6 +258,10 @@ async function main() {
       const investments = invSnap.docs.map(d => d.data()).filter(i => i.status === 'activo');
       const summary = await morningSummary(u.id, reminders, investments, todayLocal);
       if (summary) sent += await send(u.id, tokens, summary);
+      if (todayLocal.getUTCDate() === 1) {
+        const recap = await monthlyRecap(u.id, todayLocal);
+        if (recap) sent += await send(u.id, tokens, recap);
+      }
     }
   }
 
