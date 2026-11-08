@@ -1,4 +1,6 @@
 'use client';
+import { CategoryIcon } from '@/components/CategoryIcon';
+import { findCatalogEntry } from '@/lib/categories';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -286,7 +288,9 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
     >
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
-          <Bell className="w-4 h-4 text-accent" />
+          {(reminder.merchant || reminder.category)
+            ? <CategoryIcon icon={findCatalogEntry(reminder.merchant || reminder.category || '')?.icon || reminder.merchant || reminder.category || ''} label={reminder.merchant || reminder.category || ''} className="w-5 h-5 text-base flex items-center justify-center" />
+            : <Bell className="w-4 h-4 text-accent" />}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">

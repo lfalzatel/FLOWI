@@ -4,6 +4,7 @@ import { CalendarClock, CheckCircle2, ChevronDown, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { findCatalogEntry } from '@/lib/categories';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
@@ -88,7 +89,7 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
                 <li key={c.key} className={`flex items-center gap-2 ${isTechTheme ? 'bg-accent/5 border border-accent/15 rounded-none' : 'bg-white/5 rounded-2xl'}`}>
                   <button type="button" onClick={() => setPaying(c)}
                           className="flex-1 min-w-0 flex items-center gap-3 p-2.5 text-left active:scale-[0.99] transition-transform">
-                    <CategoryIcon icon={c.category} label={c.category} className="w-8 h-8 text-lg flex items-center justify-center shrink-0" />
+                    <CategoryIcon icon={findCatalogEntry(c.reminder?.merchant || '')?.icon || c.category} label={c.reminder?.merchant || c.category} className="w-8 h-8 text-lg flex items-center justify-center shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium truncate ${isTechTheme ? 'text-accent font-mono' : 'text-text-primary'}`}>{c.title}</p>
                       <p className={`text-[11px] ${late ? 'text-[var(--red)] font-semibold' : soon ? 'text-orange-400 font-semibold' : 'text-text-muted'}`}>

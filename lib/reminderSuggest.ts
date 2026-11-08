@@ -1,6 +1,12 @@
 import { Transaction } from './firestore';
 import { categorizeText } from './voiceParser';
-import { normalizeText } from './categories';
+import { detectMerchantInText, normalizeText } from './categories';
+
+// Comercio que aparece en el título ("Pago Claude" → Claude), con su categoría sugerida
+export function suggestReminderMerchant(title: string): { merchant: string; category: string } | null {
+  const mer = detectMerchantInText(normalizeText(title));
+  return mer ? { merchant: mer.label, category: mer.categories[0] } : null;
+}
 
 // Categoría sugerida para un recordatorio según su título, sin IA y sin costo:
 //  1. el propio historial: gastos cuya descripción comparte palabras con el título

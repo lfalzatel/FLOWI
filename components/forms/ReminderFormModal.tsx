@@ -10,7 +10,8 @@ import { CategoryIcon } from '@/components/CategoryIcon';
 import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { useData } from '@/components/DataProvider';
-import { suggestReminderCategory } from '@/lib/reminderSuggest';
+import { suggestReminderCategory, suggestReminderMerchant } from '@/lib/reminderSuggest';
+import { findCatalogEntry, getMerchantsForCategory } from '@/lib/categories';
 import { useMemo } from 'react';
 import { speakText } from '@/lib/voiceParser';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
@@ -51,6 +52,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const [dayOfMonth, setDayOfMonth] = useState<number | ''>(initial?.dayOfMonth ?? 1);
   const [date, setDate] = useState(initial?.date || '');
   const [category, setCategory] = useState(initial?.category || '');
+  const [merchant, setMerchant] = useState(initial?.merchant || '');
   const [budgetPercent, setBudgetPercent] = useState(initial?.budgetPercent ?? 80);
   const [alerts, setAlerts] = useState<ReminderAlert[]>(initial?.alerts || []);
   // Cada cuántos meses (mensual) y un mes en que sí toca; valor aproximado del pago (opcional)
@@ -72,6 +74,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const [manageView, setManageView] = useState<'form' | 'list' | null>(null);
   const [showNote, setShowNote] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showAllMerchants, setShowAllMerchants] = useState(false);
   const { transactions } = useData();
 
   const { theme } = useTheme();
@@ -128,6 +131,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
       };
 
       if (category.trim()) data.category = category.trim();
+      data.merchant = merchant.trim() || null;
       // Creado desde un gasto: ese vencimiento ya está pagado
       if (!reminder && prefill?.paidDates?.length) data.paidDates = prefill.paidDates;
 
@@ -184,7 +188,11 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
     () => (title.trim().length >= 3 ? suggestReminderCategory(title, transactions, categoryOptions) : null),
     [title, transactions, categoryOptions],
   );
+  // Un comercio en el título ("Google AI pro", "Claude") manda sobre la categoría sugerida
+  const merchantSuggestion = useMemo(() => suggestReminderMerchant(title), [title]);
   const suggestionData = suggestion ? allCategories.find(c => c.label === suggestion) : undefined;
+  const merchantMeta = merchant ? findCatalogEntry(merchant) : undefined;
+  const merchantOptions2 = category ? getMerchantsForCategory(category).map(m => m.label) : [];
 
   // ── Estilos y piezas del formulario compacto ──
   const lbl = `block text-[11px] uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`;
@@ -221,7 +229,14 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
               <label className={lbl} htmlFor="rem-title">Título</label>
               <input id="rem-title" type="text" required placeholder="Ej: Pagar arriendo, cambio de aceite" value={title}
                      onChange={(e) => setTitle(e.target.value)} className={field} />
-              {suggestion && !category && type !== 'budget_alert' && (
+              {merchantSuggestion && !merchant && type !== 'budget_alert' ? (
+                <button type="button" onClick={() => { setCategory(merchantSuggestion.category); setMerchant(merchantSuggestion.merchant); }}
+                        className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] border border-dashed border-accent/50 text-accent ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
+                  <Sparkles className="w-3.5 h-3.5" /> ¿Es
+                  {findCatalogEntry(merchantSuggestion.merchant) && <CategoryIcon icon={findCatalogEntry(merchantSuggestion.merchant)!.icon} label={merchantSuggestion.merchant} className="w-4 h-4 text-sm flex items-center justify-center" />}
+                  <b>{merchantSuggestion.merchant}</b> ({merchantSuggestion.category})? Usar
+                </button>
+              ) : suggestion && !category && type !== 'budget_alert' && (
                 <button type="button" onClick={() => setCategory(suggestion)}
                         className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] border border-dashed border-accent/50 text-accent ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
                   <Sparkles className="w-3.5 h-3.5" /> ¿Categoría
@@ -237,9 +252,11 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                 <div className="min-w-0">
                   <span className={lbl}>Categoría</span>
                   <button type="button" onClick={() => setCatSheet(true)} className={`${field} flex items-center gap-2 text-left`}>
-                    {selectedCategoryData
-                      ? <><CategoryIcon icon={selectedCategoryData.icon} label={selectedCategoryData.label} className="w-4 h-4 text-sm flex items-center justify-center shrink-0" /><span className="truncate">{selectedCategoryData.label}</span></>
-                      : <span className="text-text-muted truncate">{category || 'Elegir'}</span>}
+                    {merchant
+                      ? <><CategoryIcon icon={merchantMeta?.icon || merchant} label={merchant} className="w-4 h-4 text-sm flex items-center justify-center shrink-0" /><span className="truncate">{merchant}</span></>
+                      : selectedCategoryData
+                        ? <><CategoryIcon icon={selectedCategoryData.icon} label={selectedCategoryData.label} className="w-4 h-4 text-sm flex items-center justify-center shrink-0" /><span className="truncate">{selectedCategoryData.label}</span></>
+                        : <span className="text-text-muted truncate">{category || 'Elegir'}</span>}
                     <ChevronDown className="w-4 h-4 ml-auto text-text-muted shrink-0" />
                   </button>
                 </div>
@@ -251,6 +268,27 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                            className={field} />
                   </div>
                 )}
+              </div>
+            )}
+
+            {type !== 'budget_alert' && category && merchantOptions2.length > 0 && (
+              <div>
+                <span className={lbl}>¿Cuál? <span className="normal-case opacity-70">(opcional)</span></span>
+                <div className="flex flex-wrap gap-1.5">
+                  {merchantOptions2.slice(0, showAllMerchants ? 60 : 8).map(mLabel => {
+                    const meta = findCatalogEntry(mLabel);
+                    return (
+                      <button key={mLabel} type="button" onClick={() => setMerchant(merchant === mLabel ? '' : mLabel)} className={`${chip(merchant === mLabel)} inline-flex items-center gap-1.5`}>
+                        {meta && <CategoryIcon icon={meta.icon} label={mLabel} className="w-4 h-4 text-sm flex items-center justify-center" />}
+                        {mLabel}
+                      </button>
+                    );
+                  })}
+                  {merchantOptions2.length > 8 && (
+                    <button type="button" onClick={() => setShowAllMerchants(v => !v)} className={chip(false)}>{showAllMerchants ? 'Menos' : `+${merchantOptions2.length - 8} más`}</button>
+                  )}
+                </div>
+                {merchant && <p className="text-[11px] text-text-muted mt-1">Busco el último pago de {merchant}, no el de toda la categoría.</p>}
               </div>
             )}
 
@@ -386,7 +424,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
           categories={expenseCategories}
           selected={category}
           recent={suggestion ? [suggestion] : []}
-          onSelect={(label) => { setCategory(label); setCatSheet(false); }}
+          onSelect={(label, merchantLabel) => { setCategory(label); setMerchant(merchantLabel || ''); setCatSheet(false); }}
           onClose={() => setCatSheet(false)}
           onCreate={() => { setCatSheet(false); setManageView('form'); }}
           onManage={() => { setCatSheet(false); setManageView('list'); }}

@@ -1,5 +1,6 @@
 import { SiNetflix, SiYoutube, SiYoutubemusic, SiSpotify, SiGoogledrive, SiGmail, SiGooglephotos } from 'react-icons/si';
 import { FcGoogle } from 'react-icons/fc';
+import { SiSteam, SiEpicgames, SiUbisoft, SiEa, SiPlaystation, SiRoblox, SiGooglegemini, SiGoogleplay, SiClaude, SiOpenai, SiCanva, SiTicketmaster } from 'react-icons/si';
 
 const LABEL_EMOJIS: Record<string, string> = {
   'arriendo': '🏢',
@@ -38,7 +39,20 @@ const LABEL_EMOJIS: Record<string, string> = {
   'viajes': '✈️',
 };
 
+// Insignia para marcas locales sin logo en la librería: "badge:#COLOR:TEXTO"
+function Badge({ spec, className }: { spec: string; className?: string }) {
+  const [, color, text = ''] = spec.split(':');
+  const size = text.length > 8 ? 5.2 : text.length > 5 ? 6.5 : 9;
+  return (
+    <svg className={className || 'w-5 h-5'} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="8" fill={color || '#64748B'} />
+      <text x="50%" y="56%" textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={size} fontWeight="bold" fontFamily="sans-serif">{text}</text>
+    </svg>
+  );
+}
+
 export function CategoryIcon({ icon, label, className }: { icon: string, label: string, className?: string }) {
+  if (icon && icon.startsWith('badge:')) return <Badge spec={icon} className={className} />;
   const cleanLabel = (label || icon || '').toLowerCase().trim();
   if (LABEL_EMOJIS[cleanLabel]) {
     return <span className={className}>{LABEL_EMOJIS[cleanLabel]}</span>;
@@ -46,6 +60,21 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
 
   const check = (str: string) => label?.toLowerCase() === str || icon === str;
   if (check('netflix')) return <SiNetflix color="#E50914" className={className || "w-5 h-5"} />;
+  const cls = className || 'w-5 h-5';
+  if (check('steam')) return <SiSteam color="#66C0F4" className={cls} />;
+  if (check('epic games')) return <SiEpicgames color="#FFFFFF" className={cls} />;
+  if (check('ubisoft') || check('ubisoft+')) return <SiUbisoft color="#0070FF" className={cls} />;
+  if (check('ea') || check('ea play')) return <SiEa color="#FF4747" className={cls} />;
+  if (check('playstation') || check('playstation plus')) return <SiPlaystation color="#2E6DB4" className={cls} />;
+  if (check('roblox')) return <SiRoblox color="#E2231A" className={cls} />;
+  if (check('gemini') || check('google ai pro')) return <SiGooglegemini color="#8E75FF" className={cls} />;
+  if (check('google play')) return <SiGoogleplay color="#01875F" className={cls} />;
+  if (check('google one')) return <FcGoogle className={cls} />;
+  if (check('claude')) return <SiClaude color="#D97757" className={cls} />;
+  if (check('chatgpt')) return <SiOpenai color="#10A37F" className={cls} />;
+  if (check('canva')) return <SiCanva color="#00C4CC" className={cls} />;
+  if (check('ticketmaster')) return <SiTicketmaster color="#026CDF" className={cls} />;
+  if (check('youtube premium')) return <SiYoutube color="#FF0000" className={cls} />;
   if (check('google')) return <FcGoogle className={className || "w-5 h-5"} />;
   if (check('youtube')) return <SiYoutube color="#FF0000" className={className || "w-5 h-5"} />;
   if (check('yt music') || check('ytmusic')) return <SiYoutubemusic color="#FF0000" className={className || "w-5 h-5"} />;

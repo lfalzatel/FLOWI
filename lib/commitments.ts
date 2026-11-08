@@ -196,8 +196,9 @@ export function getCommitments(
     // el pago del mes pasado que más se le parece, y se reconoce como pagado solo por su nombre
     const shared = !!group && dueReminders.filter(x => x.group === group).length > 1;
     const ownWords = shared ? words.filter(w => !tokens(group!.category).includes(w)) : words;
-    let amount: number | null = r.amount && r.amount > 0 ? r.amount : group ? group.amount : null;
-    if (shared && !(r.amount && r.amount > 0)) {
+    const merchantPay = r.merchant ? lastPaymentFor(r, transactions) : null;
+    let amount: number | null = r.amount && r.amount > 0 ? r.amount : merchantPay ? merchantPay.amount : group ? group.amount : null;
+    if (shared && !(r.amount && r.amount > 0) && !merchantPay) {
       const best = group!.txs.find(t => ownWords.some(w => t.words.some(x => sameWord(w, x))));
       amount = best ? best.amount : null;
     }

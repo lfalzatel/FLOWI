@@ -96,11 +96,14 @@ function isCoveredByExpense(r: Reminder, occurrence: Date, transactions: Transac
   const to = occurrence.getTime() + (after + 1) * 86400000;
   const category = normalize(r.category);
   const titleWords = words(r.title).filter(w => !words(r.category!).includes(w));
+  const merchant = r.merchant ? normalize(r.merchant) : '';
   return transactions.some(t => {
-    if (t.type !== 'gasto' || normalize(t.category || '') !== category) return false;
+    if (t.type !== 'gasto') return false;
+    const byMerchant = !!merchant && (normalize(t.merchant || '') === merchant || normalize(t.category || '') === merchant);
+    if (!byMerchant && normalize(t.category || '') !== category) return false;
     const when = toDate(t.date)?.getTime() ?? 0;
     if (when < from || when > to) return false;
-    if (!sharedCategory || !titleWords.length) return true;
+    if (byMerchant || !sharedCategory || !titleWords.length) return true;
     const desc = words(`${t.description || ''} ${t.merchant || ''}`);
     return titleWords.some(w => desc.includes(w));
   });
@@ -141,6 +144,19 @@ export function getPendingDues(reminders: Reminder[], now = new Date(), transact
 // recordatorio comparte la categoría, el gasto debe nombrarlo, como "Claro Manizales").
 // Sirve para mostrar y reservar su valor sin tener que escribirlo a mano.
 export function lastPaymentFor(r: Reminder, transactions: Transaction[], sharedCategory = false): { amount: number; date: Date } | null {
+  // Con comercio: solo pagos de ese comercio (Claude no se mezcla con ChatGPT en "Apps e IA")
+  if (r.merchant) {
+    const mer = normalize(r.merchant);
+    let hit: { amount: number; date: Date } | null = null;
+    for (const t of transactions) {
+      if (t.type !== 'gasto') continue;
+      const ok = normalize(t.merchant || '') === mer || normalize(t.category || '') === mer
+        || words(t.description || '').some(w => words(r.merchant!).includes(w));
+      const when = toDate(t.date);
+      if (ok && when && (!hit || when > hit.date)) hit = { amount: t.amount, date: when };
+    }
+    if (hit) return hit;
+  }
   if (!r.category) return null;
   const category = normalize(r.category);
   const titleWords = words(r.title).filter(w => !words(r.category!).includes(w));

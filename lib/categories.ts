@@ -182,6 +182,13 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
     ['Ciclismo', '🚲', '#0369A1'],
     ['Running', '🏃‍♂️', '#B45309'],
     ['Artículos deportivos', '🎽', '#0082C3'],
+    ['Natación', '🏊', '#0EA5E9'],
+    ['Yoga / Pilates', '🧘', '#A855F7'],
+    ['Artes marciales', '🥋', '#EF4444'],
+    ['Tenis / pádel', '🎾', '#84CC16'],
+    ['Baile', '💃', '#EC4899'],
+    ['Entrenador personal', '🏋️', '#F59E0B'],
+    ['Clases deportivas', '🏅', '#F59E0B'],
   ]),
   ...g('Negocio', [
     ['Inventario', '📦', '#8B4513'],
@@ -237,7 +244,7 @@ export const INCOME_CATEGORY_DEFS: CategoryDef[] = [
 const m = (categories: string[], items: [string, string, string][]): MerchantDef[] =>
   items.map(([label, icon, color]) => ({ label, icon, color, categories }));
 
-export const MERCHANTS: MerchantDef[] = [
+const MERCHANT_LIST: MerchantDef[] = [
   ...m(['Mercado'], [
     ['Éxito', 'exito', '#FFE800'],
     ['Carulla', 'carulla', '#005A36'],
@@ -250,6 +257,22 @@ export const MERCHANTS: MerchantDef[] = [
     ['PriceSmart', '🏬', '#0054A6'],
     ['Euro', '🏬', '#0033A0'],
     ['Surtimax', '🏬', '#E30613'],
+    ['La 80', 'badge:#E30613:LA 80', '#E30613'],
+    ['Mercaldas', 'badge:#00843D:MERCALDAS', '#00843D'],
+    ['La Canasta', 'badge:#F59E0B:CANASTA', '#F59E0B'],
+    ['Colsubsidio', 'colsubsidio', '#E30613'],
+    ['Comfandi', 'badge:#0054A6:COMFANDI', '#0054A6'],
+    ['Super Inter', 'badge:#E30613:INTER', '#E30613'],
+    ['Mercacentro', 'badge:#16A34A:MERCA', '#16A34A'],
+    ['Megatiendas', 'badge:#DC2626:MEGA', '#DC2626'],
+    ['Merkepaisa', 'badge:#EA580C:MERKE', '#EA580C'],
+    ['Consumo', 'badge:#2563EB:CONSUMO', '#2563EB'],
+    ['Mercamás', 'badge:#059669:MERCAMÁS', '#059669'],
+    ['Surtifamiliar', 'badge:#DB2777:SURTI', '#DB2777'],
+    ['Zapatoca', 'badge:#B91C1C:ZAPATOCA', '#B91C1C'],
+    ['Cooratiendas', 'badge:#047857:COORA', '#047857'],
+    ['Metro', 'badge:#F59E0B:METRO', '#F59E0B'],
+    ['Justo & Bueno', 'badge:#E11D48:J&B', '#E11D48'],
   ]),
   ...m(['Farmacia'], [
     ['Farmatodo', '💊', '#0054A6'],
@@ -362,6 +385,7 @@ export const MERCHANTS: MerchantDef[] = [
     ['Max', '📺', '#002BE7'],
     ['Prime Video', '📺', '#00A8E1'],
     ['YouTube', 'youtube', '#FF0000'],
+    ['YouTube Premium', 'youtube', '#FF0000'],
     ['Paramount+', '📺', '#0064FF'],
     ['Crunchyroll', '📺', '#F47521'],
   ]),
@@ -371,21 +395,32 @@ export const MERCHANTS: MerchantDef[] = [
     ['Apple Music', '🎵', '#FA243C'],
   ]),
   ...m(['Apps e IA'], [
-    ['Claude', '🤖', '#D97757'],
-    ['ChatGPT', '🤖', '#10A37F'],
-    ['Gemini', '🤖', '#4285F4'],
-    ['Canva', '🎨', '#00C4CC'],
+    ['Claude', 'claude', '#D97757'],
+    ['ChatGPT', 'chatgpt', '#10A37F'],
+    ['Gemini', 'gemini', '#4285F4'],
+    ['Google AI Pro', 'gemini', '#4285F4'],
+    ['Google Play', 'google play', '#01875F'],
+    ['Google', 'google', '#4285F4'],
+    ['Canva', 'canva', '#00C4CC'],
     ['Microsoft 365', '💼', '#0078D4'],
     ['Play Store', 'play_store', '#607D8B'],
   ]),
   ...m(['Nube / almacenamiento'], [
-    ['Google', 'google', '#4285F4'],
+    ['Google One', 'google one', '#4285F4'],
     ['iCloud', '☁️', '#3B82F6'],
   ]),
   ...m(['Videojuegos'], [
-    ['PlayStation', '🎮', '#003791'],
-    ['Xbox', '🎮', '#107C10'],
-    ['Steam', '🎮', '#1B2838'],
+    ['PlayStation', 'playstation', '#003791'],
+    ['PlayStation Plus', 'playstation', '#003791'],
+    ['Xbox', 'badge:#107C10:XBOX', '#107C10'],
+    ['Xbox Game Pass', 'badge:#107C10:GAME PASS', '#107C10'],
+    ['Steam', 'steam', '#1B2838'],
+    ['Epic Games', 'epic games', '#2A2A2A'],
+    ['Ubisoft+', 'ubisoft', '#0070FF'],
+    ['EA Play', 'ea', '#FF4747'],
+    ['Nintendo', 'badge:#E60012:NINTENDO', '#E60012'],
+    ['Roblox', 'roblox', '#E2231A'],
+    ['Free Fire', 'badge:#F97316:FREE FIRE', '#F97316'],
   ]),
   ...m(['Internet', 'Celular / recargas'], [
     ['Claro Hogar', 'claro_hogar', '#E11D48'],
@@ -421,11 +456,29 @@ export const MERCHANTS: MerchantDef[] = [
   ...m(['Gimnasio'], [
     ['Smart Fit', '🏋️‍♂️', '#FBBF24'],
     ['Bodytech', '🏋️‍♂️', '#E30613'],
+    ['Stark', 'badge:#111827:STARK', '#111827'],
+    ['Spinning Center', 'badge:#DC2626:SPINNING', '#DC2626'],
+    ['Hard Body', 'badge:#0F172A:HARD BODY', '#0F172A'],
+  ]),
+  ...m(['Natación', 'Gimnasio', 'Clases deportivas', 'Entretenimiento', 'Cursos en línea'], [
+    ['Comfama', 'comfama', '#FF6A00'],
+    ['Comfenalco', 'badge:#0054A6:COMFENALCO', '#0054A6'],
+    ['Confa', 'badge:#00843D:CONFA', '#00843D'],
+    ['Compensar', 'compensar', '#E30613'],
+    ['Cafam', 'badge:#E30613:CAFAM', '#E30613'],
   ]),
   ...m(['Cine'], [
     ['Cine Colombia', 'cine', '#E30613'],
     ['Cinemark', 'cine', '#E30613'],
     ['Procinal', 'cine', '#0054A6'],
+    ['Cinépolis', 'badge:#0B2D72:CINÉPOLIS', '#0B2D72'],
+    ['Royal Films', 'badge:#B91C1C:ROYAL', '#B91C1C'],
+  ]),
+  ...m(['Eventos', 'Entretenimiento'], [
+    ['Tuboleta', 'badge:#E11D48:TUBOLETA', '#E11D48'],
+    ['Eticket', 'badge:#1D4ED8:ETICKET', '#1D4ED8'],
+    ['Ticketmaster', 'ticketmaster', '#026CDF'],
+    ['Parque del Café', 'badge:#7C2D12:PARQUE', '#7C2D12'],
   ]),
   ...m(['Cuota de crédito', 'Ahorro', 'Cesantías'], [
     ['FNA', 'fna', '#003DA5'],
@@ -436,6 +489,19 @@ export const MERCHANTS: MerchantDef[] = [
     ['Colfondos', '🏦', '#00A859'],
   ]),
 ];
+
+// Un comercio que aparece en varias listas (Comfama en Salud y en Deporte) queda una sola vez,
+// con todas sus categorías; la primera sigue siendo la sugerida
+export const MERCHANTS: MerchantDef[] = (() => {
+  const byLabel = new Map<string, MerchantDef>();
+  for (const mer of MERCHANT_LIST) {
+    const prev = byLabel.get(mer.label);
+    if (prev) prev.categories = Array.from(new Set([...prev.categories, ...mer.categories]));
+    else byLabel.set(mer.label, { ...mer, categories: [...mer.categories] });
+  }
+  return Array.from(byLabel.values());
+})();
+
 
 export const PAYMENT_METHODS: PaymentMethodDef[] = [
   { label: 'Efectivo', icon: '💵', color: '#22C55E' },
@@ -503,10 +569,14 @@ export function getMerchantsForCategory(category: string): MerchantDef[] {
 // Detecta un comercio conocido dentro de un texto libre (ej. "mercado en jumbo")
 export function detectMerchantInText(text: string): MerchantDef | undefined {
   const normalized = ` ${normalizeText(text).replace(/[^a-z0-9&+ ]/g, ' ')} `;
-  return MERCHANTS.find(mer => {
+  // Si varios coinciden, gana el nombre más largo ("Google AI Pro" antes que "Google")
+  let best: MerchantDef | undefined;
+  let bestLen = 0;
+  for (const mer of MERCHANTS) {
     const name = normalizeText(mer.label).replace(/[^a-z0-9&+ ]/g, ' ').trim();
-    return name.length >= 2 && normalized.includes(` ${name} `);
-  });
+    if (name.length >= 2 && name.length > bestLen && normalized.includes(` ${name} `)) { best = mer; bestLen = name.length; }
+  }
+  return best;
 }
 
 // --- Uso frecuente (por dispositivo) para ordenar categorías y medios de pago ---

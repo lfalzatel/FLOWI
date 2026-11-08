@@ -365,6 +365,7 @@ export interface Reminder {
   everyMonths?: number;     // monthly: cada cuántos meses (1 por defecto; 3 = trimestral, p. ej. cambio de aceite)
   startMonth?: string | null; // monthly con everyMonths > 1: un mes en que sí toca (YYYY-MM)
   amount?: number | null;   // valor aproximado del pago (opcional)
+  merchant?: string | null; // comercio dentro de la categoría (Claude en "Apps e IA"): separa pagos parecidos
 }
 
 export async function getUserReminders(userId: string): Promise<Reminder[]> {
