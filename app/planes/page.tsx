@@ -15,7 +15,7 @@ const ROWS: { label: string; free: string | boolean; premium: string | boolean }
   { label: 'Gastos, ingresos y deudas', free: 'Ilimitados', premium: 'Ilimitados' },
   { label: 'Registrar hablando', free: true, premium: true },
   { label: 'Recordatorios y notas', free: 'Ilimitados', premium: 'Ilimitados' },
-  { label: 'Cuentas (Bancolombia, Nequi…)', free: `${FREE_LIMITS.accounts}`, premium: 'Ilimitadas' },
+  { label: 'Cuentas (Bancolombia, Nequi…)', free: 'Ilimitadas', premium: 'Ilimitadas' },
   { label: 'Inversiones y ahorros', free: `${FREE_LIMITS.investments}`, premium: 'Ilimitadas' },
   { label: 'Metas de ahorro', free: `${FREE_LIMITS.goals}`, premium: 'Ilimitadas' },
   { label: 'Recibos con foto', free: `${FREE_LIMITS.receiptsPerMonth} al mes`, premium: 'Ilimitados' },

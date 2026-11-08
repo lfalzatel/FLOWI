@@ -422,6 +422,25 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
             </div>
           </div>
 
+          {/* Descripción: va debajo del monto para sugerir la categoría mientras se escribe */}
+          <div>
+            <label htmlFor="tx-description" className={`${labelClass} mb-1.5 block`}>¿En qué fue? (opcional)</label>
+            <input
+              id="tx-description"
+              type="text"
+              placeholder={type === 'gasto' ? 'Ej. Mercado en Jumbo, compré mercancía…' : 'Ej. Quincena, venta de 2 blusas…'}
+              value={description}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
+              className={`w-full bg-glass border py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
+            />
+            {suggestedCat && (
+              <button type="button" onClick={() => { autoCategory.current = suggestedCat; selectCategory(suggestedCat); setSuggestedCat(null); }}
+                      className={`mt-2 text-[11px] font-semibold px-2.5 py-1 border border-accent/40 bg-accent/10 text-accent transition-all active:scale-95 ${isTechTheme ? 'rounded-none font-mono' : 'rounded-full'}`}>
+                💡 ¿Es «{suggestedCat}»? Toca para usarla
+              </button>
+            )}
+          </div>
+
           {/* Category */}
           <div>
             <div className="flex items-center justify-between mb-2 gap-2">
@@ -603,25 +622,6 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 required
               />
             </div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label htmlFor="tx-description" className={`${labelClass} mb-1.5 block`}>Descripción (Opcional)</label>
-            <input
-              id="tx-description"
-              type="text"
-              placeholder={type === 'gasto' ? 'Ej. Mercado de la semana en Jumbo' : 'Ej. Quincena de octubre'}
-              value={description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              className={`w-full bg-glass border py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
-            />
-            {suggestedCat && (
-              <button type="button" onClick={() => { autoCategory.current = suggestedCat; selectCategory(suggestedCat); setSuggestedCat(null); }}
-                      className={`mt-2 text-[11px] font-semibold px-2.5 py-1 border border-accent/40 bg-accent/10 text-accent transition-all active:scale-95 ${isTechTheme ? 'rounded-none font-mono' : 'rounded-full'}`}>
-                💡 ¿Es «{suggestedCat}»? Toca para usarla
-              </button>
-            )}
           </div>
 
           {transactionToEdit && (

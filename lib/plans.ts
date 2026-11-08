@@ -7,7 +7,7 @@ import type { UserProfile } from '@/lib/firestore';
 // Recordatorios y notas son ilimitados para todos.
 
 export const FREE_LIMITS = {
-  accounts: 2,          // p. ej. Bancolombia y Nequi
+  accounts: Infinity,   // sin límite: para llevar las cuentas completas hacen falta todas (Nequi, banco, efectivo…)
   investments: 2,       // CDT, cajitas, fondos, pensión
   goals: 2,
   receiptsPerMonth: 5,  // recibos leídos con foto
@@ -101,7 +101,7 @@ export function showLimit(kind: LimitKind) {
 }
 
 export const LIMIT_TEXT: Record<LimitKind, { title: string; text: string }> = {
-  accounts: { title: 'Ya tienes 2 cuentas', text: `El plan gratis incluye ${FREE_LIMITS.accounts} cuentas (por ejemplo Bancolombia y Nequi). Con Premium agregas todas las que quieras.` },
+  accounts: { title: 'Cuentas', text: 'Las cuentas son ilimitadas en todos los planes.' },
   investments: { title: 'Ya tienes 2 inversiones', text: `El plan gratis incluye ${FREE_LIMITS.investments} inversiones o ahorros. Con Premium agregas todos tus CDT, cajitas y fondos.` },
   goals: { title: 'Ya tienes 2 metas', text: `El plan gratis incluye ${FREE_LIMITS.goals} metas de ahorro activas. Con Premium tienes todas las que quieras.` },
   receipts: { title: 'Usaste tus 5 recibos del mes', text: `El plan gratis lee ${FREE_LIMITS.receiptsPerMonth} recibos con foto al mes; el próximo mes se renuevan. Con Premium son ilimitados.` },
