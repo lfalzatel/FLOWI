@@ -1,4 +1,5 @@
 'use client';
+import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, LabelList, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine,
@@ -270,7 +271,7 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
   const legendItem = (color: string, label: string, value?: number) => (
     <span className="flex items-center gap-1 text-[10px] text-text-secondary normal-case">
       <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: color }} />
-      {label}{value !== undefined && <strong className="text-text-primary font-semibold">{formatCompactCOP(value)}</strong>}
+      {label}{value !== undefined && <strong className="text-text-primary font-semibold"><AnimatedNumber value={value} format={formatCompactCOP} /></strong>}
     </span>
   );
 
@@ -308,7 +309,7 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
             {!isHistory && budget > 0 && (
               <span className="flex items-center gap-1 text-[10px] text-text-secondary normal-case">
                 <span className="w-3 border-t border-dashed border-text-secondary inline-block" />
-                Presupuesto <strong className="text-text-primary font-semibold">{formatCompactCOP(budget)}</strong>
+                Presupuesto <strong className="text-text-primary font-semibold"><AnimatedNumber value={budget} format={formatCompactCOP} /></strong>
               </span>
             )}
           </>
@@ -316,7 +317,7 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
           <>
             {legendItem(type === 'ingreso' ? INGRESO_COLOR : GASTO_COLOR, detailName)}
             {type !== 'ingreso' && totals.fijos > 0 && (
-              <span className="text-[10px] text-text-muted normal-case">Fijos aparte: {formatCompactCOP(totals.fijos)}</span>
+              <span className="text-[10px] text-text-muted normal-case">Fijos aparte: <AnimatedNumber value={totals.fijos} format={formatCompactCOP} /></span>
             )}
             {detail.cap !== undefined && (
               <span className="text-[10px] text-text-muted normal-case">↑ = día recortado, toca para ver</span>

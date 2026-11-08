@@ -262,11 +262,11 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                       <div className="flex items-center gap-2">
                         <div className="text-right">
                           <span className="text-xs font-bold text-text-primary">
-                            {formatCurrency(spent, currency)}
+                            <AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} />
                           </span>
                           {target > 0 && (
                             <span className="text-[10px] text-text-muted block">
-                              Meta: {formatCurrency(target, currency)}
+                              Meta: <AnimatedNumber value={target} format={(n: number) => formatCurrency(n, currency)} />
                             </span>
                           )}
                         </div>
@@ -287,12 +287,12 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                         <div className="flex justify-between items-center text-[10px]">
                           <span className={isOverBudget ? 'text-red-400 font-bold flex items-center gap-1' : 'text-text-muted'}>
                             {isOverBudget && <AlertTriangle className="w-3 h-3" />}
-                            Gastado: <strong>{percentage}%</strong>
+                            Gastado: <strong><AnimatedNumber value={percentage} format={(n: number) => `${Math.round(n)}%`} /></strong>
                           </span>
                           <span className="text-text-muted">
-                            {isOverBudget 
-                              ? `Excedido por ${formatCurrency(spent - target, currency)}` 
-                              : `Disponible: ${formatCurrency(target - spent, currency)}`}
+                            {isOverBudget
+                              ? <>Excedido por <AnimatedNumber value={spent - target} format={(n: number) => formatCurrency(n, currency)} /></>
+                              : <>Disponible: <AnimatedNumber value={target - spent} format={(n: number) => formatCurrency(n, currency)} /></>}
                           </span>
                         </div>
                       </div>
@@ -524,12 +524,12 @@ export function CategoryBudgets({ transactions, currency = 'COP', filterType = '
                           <div className="flex justify-between items-center text-[10px]">
                             <span className={isOverBudget ? 'text-red-400 font-bold flex items-center gap-1' : 'text-text-muted'}>
                               {isOverBudget && <AlertTriangle className="w-3 h-3" />}
-                              Gastado: <strong><AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} /></strong> ({percentage}%)
+                              Gastado: <strong><AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} /></strong> (<AnimatedNumber value={percentage} format={(n: number) => `${Math.round(n)}%`} />)
                             </span>
                             <span className="text-text-muted">
-                              {isOverBudget 
-                                ? `Excedido por ${formatCurrency(spent - target, currency)}` 
-                                : `Resta: ${formatCurrency(target - spent, currency)}`}
+                              {isOverBudget
+                                ? <>Excedido por <AnimatedNumber value={spent - target} format={(n: number) => formatCurrency(n, currency)} /></>
+                                : <>Resta: <AnimatedNumber value={target - spent} format={(n: number) => formatCurrency(n, currency)} /></>}
                             </span>
                           </div>
                         </div>
