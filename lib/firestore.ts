@@ -286,6 +286,8 @@ export interface UserProfile {
   activeDays?: number;
   firstActiveDay?: string;
   lastActiveDay?: string;
+  txCount?: number;
+  lastTxDay?: string;
 }
 
 export async function getAllUsers() {

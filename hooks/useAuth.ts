@@ -20,6 +20,8 @@ export interface UserProfile {
   activeDays?: number;             // días en que abrió FLOWI (ver components/layout/UsageTracker.tsx)
   firstActiveDay?: string;         // YYYY-MM-DD
   lastActiveDay?: string;          // YYYY-MM-DD
+  txCount?: number;                // cuántos movimientos tiene (para el admin, sin montos)
+  lastTxDay?: string;              // fecha del último movimiento (YYYY-MM-DD)
 }
 
 export function useAuth() {

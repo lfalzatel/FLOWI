@@ -20,6 +20,12 @@ export function UsageTracker() {
     if (done.current === today || profile.lastActiveDay === today) return;
     done.current = today;
     const ref = doc(db, 'users', user.uid);
+    let lastTx = '';
+    for (const t of transactions) {
+      const d = (t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any);
+      if (!isNaN(d.getTime())) { const k = getLocalDateString(d); if (k <= today && k > lastTx) lastTx = k; }
+    }
+    const activity = { txCount: transactions.length, ...(lastTx ? { lastTxDay: lastTx } : {}) };
 
     if (profile.activeDays === undefined) {
       const days = new Set<string>();
@@ -33,9 +39,9 @@ export function UsageTracker() {
         if (key < first) first = key;
       }
       days.add(today);
-      updateDoc(ref, { activeDays: days.size, firstActiveDay: first, lastActiveDay: today }).catch(() => {});
+      updateDoc(ref, { activeDays: days.size, firstActiveDay: first, lastActiveDay: today, ...activity }).catch(() => {});
     } else {
-      updateDoc(ref, { activeDays: increment(1), lastActiveDay: today }).catch(() => {});
+      updateDoc(ref, { activeDays: increment(1), lastActiveDay: today, ...activity }).catch(() => {});
     }
   }, [user, profile, transactions, loadingTransactions]);
 

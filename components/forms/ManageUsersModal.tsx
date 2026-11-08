@@ -64,7 +64,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
 
   const handleSelectUser = (u: UserProfile) => {
     setSelectedUser(u);
-    loadUserStats(u.id!);
+    if (u.email === currentUserEmail) loadUserStats(u.id!); // solo las finanzas propias se pueden leer
   };
 
   const handleChangeRole = async (userId: string, newRole: string) => {
@@ -155,7 +155,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                         <p className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</p>
                         <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{u.email}</p>
                         {(u.activeDays ?? 0) > 0 && (
-                          <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent' : 'text-accent'}`}>📅 {u.activeDays} {u.activeDays === 1 ? 'día' : 'días'} de uso{u.lastActiveDay ? ` · último: ${new Date(u.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}</p>
+                          <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent' : 'text-accent'}`}>📅 {u.activeDays} {u.activeDays === 1 ? 'día' : 'días'} de uso{typeof u.txCount === 'number' ? ` · ${u.txCount} registros` : ''}{u.lastActiveDay ? ` · último: ${new Date(u.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}</p>
                         )}
                       </div>
 
@@ -256,6 +256,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                 </div>
               </div>
 
+              {selectedUser.email === currentUserEmail ? (
               <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
                 <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Estadísticas Financieras</h4>
                 {userStats.loading ? (
@@ -283,7 +284,22 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                   </div>
                 )}
               </div>
-
+              ) : (
+                <div className={`p-4 ${isTechTheme ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
+                  <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Actividad</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Registros</p>
+                      <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{selectedUser.txCount ?? '—'}</p>
+                    </div>
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-wider ${isTechTheme ? 'font-mono text-white/50' : 'text-text-muted'}`}>Último registro</p>
+                      <p className={`text-sm font-semibold text-text-primary ${isTechTheme ? 'font-mono' : ''}`}>{selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-text-muted mt-3 leading-snug">Por privacidad no ves los montos de otras personas: cada quien solo ve sus propias finanzas.</p>
+                </div>
+              )}
             </div>
           </>
         )}
