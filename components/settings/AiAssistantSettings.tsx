@@ -1,10 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Sparkles, Check, Unplug } from 'lucide-react';
+import { Sparkles, Check, Unplug, ChevronDown, ChevronUp } from 'lucide-react';
 import { AI_CALLBACK_PATH, completeOpenRouterConnect, disconnectAi, getAiKey, startOpenRouterConnect } from '@/lib/aiAssist';
 
 // Tarjeta de Configuración para conectar la IA gratuita (cuenta OpenRouter del propio usuario)
-export function AiAssistantSettings({ isTechTheme }: { isTechTheme: boolean }) {
+export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { isTechTheme: boolean; open?: boolean; onToggle?: () => void }) {
   const [connected, setConnected] = useState(false);
   const [status, setStatus] = useState<'idle' | 'connecting' | 'error' | 'success'>('idle');
 
@@ -34,9 +34,17 @@ export function AiAssistantSettings({ isTechTheme }: { isTechTheme: boolean }) {
 
   return (
     <section className="space-y-3">
+      {onToggle ? (
+        <button onClick={onToggle} className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}>
+          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Asistente de voz con IA</h2>
+          {open ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+        </button>
+      ) : (
       <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>
         Asistente de voz con IA
       </h2>
+      )}
+      {(!onToggle || open) && (
       <div className={`p-4 space-y-3 ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
         <div className="flex items-start gap-3">
           <div className={`w-8 h-8 shrink-0 flex items-center justify-center ${isTechTheme ? 'border border-accent/20 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
@@ -85,6 +93,7 @@ export function AiAssistantSettings({ isTechTheme }: { isTechTheme: boolean }) {
           Privacidad: al usar la IA, la frase dictada se envía al modelo gratuito elegido por OpenRouter, que podría usarla para mejorar sus servicios. Si no la conectas, todo se procesa en tu dispositivo.
         </p>
       </div>
+      )}
     </section>
   );
 }

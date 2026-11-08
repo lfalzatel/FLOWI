@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Heart, Copy, Check } from 'lucide-react';
+import { Heart, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { DONATION_KEYS } from '@/lib/donations';
 
@@ -27,7 +27,7 @@ async function copyText(text: string): Promise<boolean> {
 }
 
 // Sección de Configuración para que quien quiera apoye el proyecto con una donación por llave Bre-B
-export function SupportProject({ isTechTheme }: { isTechTheme: boolean }) {
+export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechTheme: boolean; open?: boolean; onToggle?: () => void }) {
   const [copied, setCopied] = useState<string | null>(null);
   const mono = isTechTheme ? 'font-mono' : '';
 
@@ -40,9 +40,17 @@ export function SupportProject({ isTechTheme }: { isTechTheme: boolean }) {
 
   return (
     <section id="apoyar" className="space-y-3 scroll-mt-24">
+      {onToggle ? (
+        <button onClick={onToggle} className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}>
+          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Apoyar a FLOWI</h2>
+          {open ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
+        </button>
+      ) : (
       <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>
         Apoyar a FLOWI
       </h2>
+      )}
+      {(!onToggle || open) && (
       <div className={`p-4 space-y-4 ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
         <div className="flex items-start gap-3">
           <div className={`w-8 h-8 shrink-0 flex items-center justify-center ${isTechTheme ? 'border border-pink-500/30 rounded-none bg-pink-500/10' : 'rounded-xl bg-pink-500/15'}`}>
@@ -85,6 +93,7 @@ export function SupportProject({ isTechTheme }: { isTechTheme: boolean }) {
           Antes de confirmar, tu banco te mostrará el nombre del titular para que verifiques. ¡Gracias por tu apoyo!
         </p>
       </div>
+      )}
     </section>
   );
 }

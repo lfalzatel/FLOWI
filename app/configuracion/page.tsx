@@ -47,8 +47,18 @@ export default function ConfigPage() {
     gestion: false,
     apariencia: false,
     finanzas: false,
-    privacidad: false
+    privacidad: false,
+    ia: false,
+    apoyar: false
   });
+
+  // Desde el menú de perfil ("Apoyar a FLOWI") se llega con #apoyar: abrir esa sección
+  useEffect(() => {
+    if (window.location.hash === '#apoyar') {
+      setOpenSections(prev => ({ ...prev, apoyar: true }));
+      setTimeout(() => document.getElementById('apoyar')?.scrollIntoView({ behavior: 'smooth' }), 300);
+    }
+  }, []);
 
   const [openSoundSubSections, setOpenSoundSubSections] = useState({
     acciones: true,
@@ -811,9 +821,9 @@ export default function ConfigPage() {
           )}
         </section>
 
-        <AiAssistantSettings isTechTheme={isTechTheme} />
+        <AiAssistantSettings isTechTheme={isTechTheme} open={openSections.ia} onToggle={() => toggleSection('ia')} />
 
-        <SupportProject isTechTheme={isTechTheme} />
+        <SupportProject isTechTheme={isTechTheme} open={openSections.apoyar} onToggle={() => toggleSection('apoyar')} />
 
         {/* 4. Finanzas */}
         <section className="space-y-3">
