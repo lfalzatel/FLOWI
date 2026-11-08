@@ -120,7 +120,7 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
 
         {pending.length > 0 && (
           <p className="mt-2 text-[10px] text-text-muted leading-snug">
-            Toca uno para registrarlo como pagado. Los valores son los del mes pasado.
+            Toca uno para registrarlo como pagado. El valor es el que pusiste en el recordatorio o, si no tiene, lo que pagaste el mes pasado.
           </p>
         )}
       </div>

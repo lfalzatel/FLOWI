@@ -343,6 +343,7 @@ export interface CdtReading {
   maturityDate?: string;  // YYYY-MM-DD
   bankInterest?: number;
   autoRenew?: boolean;
+  termDays?: number;      // plazo en días según la captura (para revisar las fechas)
 }
 
 export type CdtReadResult =
@@ -353,7 +354,9 @@ const CDT_PROMPT = `Eres un asistente que lee capturas de pantalla de la app de 
 Pueden ser varias capturas del mismo CDT. Responde SOLO un JSON con estas claves (null si no aparece):
 {"bank": nombre del banco, "amount": capital o monto invertido en pesos (número sin puntos), "rateEA": tasa efectiva anual en % (número, ej 9.9),
  "nominalRate": tasa nominal en % si aparece, "startDate": fecha de apertura o de inicio del periodo "YYYY-MM-DD",
- "maturityDate": fecha de vencimiento "YYYY-MM-DD", "bankInterest": intereses del periodo en pesos si aparecen, "autoRenew": true si dice que se renueva automáticamente}
+ "maturityDate": fecha de vencimiento "YYYY-MM-DD" (cópiala tal cual aparece; no la calcules), "termDays": plazo en días si aparece (número),
+ "bankInterest": intereses del periodo en pesos si aparecen, "autoRenew": true si dice que se renueva automáticamente}
+Las fechas pueden venir como "29 ene 2027" o "29/01/2027" (día/mes/año).
 No incluyas números de CDT, de cuenta, de documento ni nombres de personas. Los montos colombianos usan punto de miles y coma decimal.`;
 
 export async function readCdtWithAi(files: File[]): Promise<CdtReadResult> {
@@ -414,6 +417,7 @@ export async function readCdtWithAi(files: File[]): Promise<CdtReadResult> {
       maturityDate: day(p.maturityDate),
       bankInterest: num(p.bankInterest) ? Math.round(num(p.bankInterest)!) : undefined,
       autoRenew: p.autoRenew === true ? true : undefined,
+      termDays: num(p.termDays) && num(p.termDays)! < 4000 ? Math.round(num(p.termDays)!) : undefined,
     };
     const found = Object.values(data).filter(v => v !== undefined).length;
     if (!found) return { ok: false, reason: 'unreadable' };

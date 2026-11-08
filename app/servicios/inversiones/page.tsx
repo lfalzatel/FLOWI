@@ -16,6 +16,8 @@ import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { InvestmentFormModal } from '@/components/investments/InvestmentFormModal';
 import { Investment, addExpense, deleteInvestment, updateInvestment } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
+import { CategoryIcon } from '@/components/CategoryIcon';
+import { findCatalogEntry } from '@/lib/categories';
 import { formatDay, investmentStatus, parseDay, portfolioSummary, whenText } from '@/lib/investments';
 
 export default function InversionesPage() {
@@ -179,7 +181,9 @@ export default function InversionesPage() {
                   <article key={inv.id} className={`${card} p-4`}>
                     <div className="flex items-start gap-3">
                       <div className={`shrink-0 w-11 h-11 flex items-center justify-center bg-glass border ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>
-                        <Landmark className="w-5 h-5 text-accent" />
+                        {findCatalogEntry(inv.bank)
+                          ? <CategoryIcon icon={findCatalogEntry(inv.bank)!.icon} label={inv.bank} className="w-6 h-6 text-xl flex items-center justify-center" />
+                          : <Landmark className="w-5 h-5 text-accent" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">

@@ -48,6 +48,11 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const [category, setCategory] = useState(initial?.category || '');
   const [budgetPercent, setBudgetPercent] = useState(initial?.budgetPercent ?? 80);
   const [alerts, setAlerts] = useState<ReminderAlert[]>(initial?.alerts || []);
+  // Cada cuántos meses (mensual) y un mes en que sí toca; valor aproximado del pago (opcional)
+  const [everyMonths, setEveryMonths] = useState<number>(initial?.everyMonths && initial.everyMonths > 1 ? initial.everyMonths : 1);
+  const thisMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const [startMonth, setStartMonth] = useState<string>(initial?.startMonth || thisMonthKey);
+  const [amountText, setAmountText] = useState(initial?.amount ? Number(initial.amount).toLocaleString('es-CO') : '');
 
   const { allCategories: categoryOptions, merchantOptions } = useCategories();
   const allCategories = [...categoryOptions, ...merchantOptions.filter(mer => !categoryOptions.some(c => c.label === mer.label))];
@@ -119,7 +124,15 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
       if ((type === 'once' || type === 'yearly') && date.trim()) data.date = date;
       if (type === 'weekly') data.dayOfWeek = dayOfWeek;
-      if (type === 'monthly') data.dayOfMonth = dayOfMonth === '' ? 1 : dayOfMonth;
+      if (type === 'monthly') {
+        data.dayOfMonth = dayOfMonth === '' ? 1 : dayOfMonth;
+        data.everyMonths = everyMonths;
+        data.startMonth = everyMonths > 1 ? startMonth : null;
+      }
+      if (type !== 'daily' && type !== 'budget_alert') {
+        const amount = Number(amountText.replace(/\D/g, ''));
+        data.amount = amount > 0 ? amount : null;
+      }
       if (type === 'budget_alert') data.budgetPercent = budgetPercent;
 
       if (reminder?.id) {
@@ -350,6 +363,38 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                   ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}
                 `}
               />
+            </div>
+          )}
+
+          {type === 'monthly' && (
+            <div>
+              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Repetir cada</label>
+              <div className="flex flex-wrap gap-1.5">
+                {[1, 2, 3, 4, 6].map(n => (
+                  <button key={n} type="button" onClick={() => setEveryMonths(n)}
+                          className={`px-3 py-2 text-xs font-semibold border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${everyMonths === n ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary'}`}>
+                    {n === 1 ? 'Mes' : `${n} meses`}
+                  </button>
+                ))}
+              </div>
+              {everyMonths > 1 && (
+                <div className="mt-3">
+                  <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>¿En qué mes toca la próxima vez?</label>
+                  <input type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value || thisMonthKey)}
+                         className={`w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}`} />
+                  <p className="text-[11px] text-text-muted mt-1">Desde ahí se repite cada {everyMonths} meses, el día {dayOfMonth || 1}.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {type !== 'daily' && type !== 'budget_alert' && (
+            <div>
+              <label className={`block text-xs uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Valor aproximado (opcional)</label>
+              <input type="text" inputMode="numeric" placeholder="$ 0" value={amountText}
+                     onChange={(e) => { const d = e.target.value.replace(/\D/g, ''); setAmountText(d ? Number(d).toLocaleString('es-CO') : ''); }}
+                     className={`w-full px-3 py-2.5 text-sm focus:outline-none bg-glass border border-glass-border text-text-primary ${isTechTheme ? 'rounded-none font-mono text-accent' : 'rounded-2xl'}`} />
+              <p className="text-[11px] text-text-muted mt-1">Lo muestro en Próximos compromisos y lo reservo en "Hoy puedes gastar" hasta que lo pagues.</p>
             </div>
           )}
 

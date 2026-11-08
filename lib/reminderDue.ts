@@ -30,10 +30,27 @@ function monthlyDate(year: number, month: number, day: number): Date {
   return new Date(year, month, Math.min(day, last)); // día 31 → último día del mes
 }
 
+// ¿Un recordatorio mensual toca en este mes? (los "cada N meses" solo en los meses que corresponden)
+export function monthlyOccursIn(r: Pick<Reminder, 'everyMonths' | 'startMonth'>, year: number, month: number): boolean {
+  const every = r.everyMonths && r.everyMonths > 1 ? r.everyMonths : 1;
+  if (every === 1 || !r.startMonth) return true;
+  const [sy, sm] = r.startMonth.split('-').map(Number);
+  const diff = (year * 12 + month) - (sy * 12 + (sm - 1));
+  return ((diff % every) + every) % every === 0;
+}
+
 // Ocurrencias cercanas: la anterior, la actual y la siguiente
 function occurrences(r: Reminder, today: Date): Date[] {
   if (r.type === 'monthly' && r.dayOfMonth) {
-    return [-1, 0, 1].map(o => monthlyDate(today.getFullYear(), today.getMonth() + o, r.dayOfMonth!));
+    const every = r.everyMonths && r.everyMonths > 1 ? r.everyMonths : 1;
+    const out: Date[] = [];
+    for (let o = -every; o <= every; o++) {
+      const ref = new Date(today.getFullYear(), today.getMonth() + o, 1);
+      if (monthlyOccursIn(r, ref.getFullYear(), ref.getMonth())) out.push(monthlyDate(ref.getFullYear(), ref.getMonth(), r.dayOfMonth!));
+    }
+    // La anterior a hoy, y las siguientes
+    const past = out.filter(d => d < today);
+    return [...past.slice(-1), ...out.filter(d => d >= today)].slice(0, 3);
   }
   if (r.type === 'weekly' && r.dayOfWeek !== undefined) {
     const base = new Date(today);

@@ -1,5 +1,5 @@
 import { Debt, Reminder, Transaction, isFixedExpenseCategory } from './firestore';
-import { dateKey, isPayable } from './reminderDue';
+import { dateKey, isPayable, monthlyOccursIn } from './reminderDue';
 
 // Próximos compromisos del mes: pagos fijos que aún no aparecen registrados este mes.
 // Salen de dos fuentes que se cruzan entre sí:
@@ -150,15 +150,22 @@ export function getCommitments(
     thisMonthWords.some(t => matches(category, words, t.category, t.words));
 
   const items: Commitment[] = [];
-  const usedGroups = new Set<string>();
   let paidCount = 0;
 
+  const usedGroups = new Set<string>();
   // 2. Recordatorios de pago con vencimiento este mes
   const dueReminders: { r: Reminder; due: Date; words: string[]; group?: Group }[] = [];
   for (const r of reminders) {
     if (!r.active || !isPayable(r)) continue;
     let due: Date | null = null;
-    if (r.type === 'monthly' && r.dayOfMonth) due = dayInMonth(year, month, r.dayOfMonth);
+    if (r.type === 'monthly' && r.dayOfMonth) {
+      if (monthlyOccursIn(r, year, month)) due = dayInMonth(year, month, r.dayOfMonth);
+      else {
+        // No toca este mes: que el pago del mes pasado tampoco aparezca como pendiente
+        const g = groups.find(x => matches(r.category, tokens(r.title, r.category), x.category, x.words));
+        if (g) usedGroups.add(g.key);
+      }
+    }
     else if (r.type === 'yearly' && r.date) {
       const [, m, d] = r.date.split('-').map(Number);
       if (m - 1 === month) due = dayInMonth(year, month, d);
@@ -179,8 +186,8 @@ export function getCommitments(
     // el pago del mes pasado que más se le parece, y se reconoce como pagado solo por su nombre
     const shared = !!group && dueReminders.filter(x => x.group === group).length > 1;
     const ownWords = shared ? words.filter(w => !tokens(group!.category).includes(w)) : words;
-    let amount: number | null = group ? group.amount : null;
-    if (shared) {
+    let amount: number | null = r.amount && r.amount > 0 ? r.amount : group ? group.amount : null;
+    if (shared && !(r.amount && r.amount > 0)) {
       const best = group!.txs.find(t => ownWords.some(w => t.words.some(x => sameWord(w, x))));
       amount = best ? best.amount : null;
     }

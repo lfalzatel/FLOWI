@@ -1,4 +1,5 @@
 'use client';
+import { monthlyOccursIn } from '@/lib/reminderDue';
 import { useEffect, useRef } from 'react';
 import { Reminder } from '@/lib/firestore';
 import { scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
@@ -33,7 +34,7 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
           let eventMatchesToday = false;
           if (r.type === 'daily') eventMatchesToday = true;
           else if (r.type === 'weekly' && r.dayOfWeek === now.getDay()) eventMatchesToday = true;
-          else if (r.type === 'monthly' && r.dayOfMonth === now.getDate()) eventMatchesToday = true;
+          else if (r.type === 'monthly' && r.dayOfMonth === now.getDate() && monthlyOccursIn(r, now.getFullYear(), now.getMonth())) eventMatchesToday = true;
           else if (r.type === 'yearly' && r.date) {
               // Cada año el mismo día y mes (un 29 de febrero se avisa el 28 en años no bisiestos).
               // Se usa la próxima fecha para que los avisos "N días antes" funcionen.

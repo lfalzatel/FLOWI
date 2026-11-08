@@ -246,7 +246,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
     once: 'Una vez',
     daily: 'Diario',
     weekly: 'Semanal',
-    monthly: 'Mensual',
+    monthly: reminder.everyMonths && reminder.everyMonths > 1 ? `Cada ${reminder.everyMonths} meses` : 'Mensual',
     yearly: 'Anual',
     budget_alert: 'Alerta presupuesto',
   }[reminder.type] ?? reminder.type;
@@ -258,7 +258,9 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
       return `cada ${dayOfWeekNames[reminder.dayOfWeek]}`;
     }
     if (reminder.type === 'monthly' && reminder.dayOfMonth !== undefined) {
-      return `el día ${reminder.dayOfMonth} del mes`;
+      return reminder.everyMonths && reminder.everyMonths > 1
+        ? `el día ${reminder.dayOfMonth}, cada ${reminder.everyMonths} meses`
+        : `el día ${reminder.dayOfMonth} del mes`;
     }
     if (reminder.type === 'yearly' && reminder.date) {
       const [, m, d] = reminder.date.split('-').map(Number);
@@ -298,7 +300,9 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
               </span>
             )}
           </div>
-          <p className="text-xs text-text-secondary mt-0.5 truncate">{reminder.description || 'Sin notas'}</p>
+          <p className="text-xs text-text-secondary mt-0.5 truncate">
+            {reminder.amount ? <b className="text-text-primary">${reminder.amount.toLocaleString('es-CO')} · </b> : null}{reminder.description || 'Sin notas'}
+          </p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {reminder.type !== 'budget_alert' && (
               <span className="text-[11px] text-text-muted flex items-center gap-1">
@@ -316,19 +320,6 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
               {reminder.sound && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">Sonido</span>}
             </div>
           </div>
-          {due && (
-            <div className={`mt-3 flex items-center justify-between gap-2 px-3 py-2 ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${due.daysLeft < 0 ? 'bg-red-500/10 border border-red-500/25' : 'bg-accent/5 border border-accent/15'}`}>
-              <span className={`text-xs font-semibold ${due.daysLeft < 0 ? 'text-red-400' : 'text-text-secondary'}`}>
-                {dueLabel(due.daysLeft)} · {due.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
-              </span>
-              <button
-                onClick={(e) => { e.stopPropagation(); onPay(due); }}
-                className={`shrink-0 px-3 py-1.5 text-[11px] font-bold ${isTechTheme ? 'rounded-none border border-accent text-accent uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
-              >
-                Ya lo pagué
-              </button>
-            </div>
-          )}
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* Toggle */}
@@ -353,6 +344,20 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
           </button>
         </div>
       </div>
+      {due && (
+        <div className={`mt-3 flex items-center justify-between gap-3 px-3 py-2.5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${due.daysLeft < 0 ? 'bg-red-500/10 border border-red-500/25' : 'bg-accent/5 border border-accent/15'}`}>
+          <span className={`text-xs font-semibold ${due.daysLeft < 0 ? 'text-red-400' : 'text-text-secondary'}`}>
+            {dueLabel(due.daysLeft)} · {due.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
+            {reminder.amount ? <span className="text-text-muted font-normal"> · ${reminder.amount.toLocaleString('es-CO')}</span> : null}
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); onPay(due); }}
+            className={`shrink-0 px-4 py-2 text-xs font-bold ${isTechTheme ? 'rounded-none border border-accent text-accent uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
+          >
+            Ya lo pagué
+          </button>
+        </div>
+      )}
     </div>
   );
 }

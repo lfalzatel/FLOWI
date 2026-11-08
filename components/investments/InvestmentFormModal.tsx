@@ -3,6 +3,8 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2, Camera } from 'lucide-react';
 import { getAiKey, readCdtWithAi } from '@/lib/aiAssist';
+import { CategoryIcon } from '@/components/CategoryIcon';
+import { findCatalogEntry } from '@/lib/categories';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useAccounts } from '@/hooks/useAccounts';
@@ -87,8 +89,19 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
     if (d.bankInterest) setBankInterest(formatAmountInput(d.bankInterest));
     if (d.autoRenew) setAutoRenew(true);
     const missing = [!d.amount && 'monto', !d.rateEA && 'tasa E.A.', !d.startDate && 'fecha de apertura', !d.maturityDate && 'vencimiento'].filter(Boolean);
-    setAiState('done');
-    setAiMsg(missing.length ? `Listo. No encontré: ${missing.join(', ')}. Complétalo y revisa todo antes de guardar.` : 'Listo. Revisa que todo esté bien antes de guardar.');
+    // Si la captura dice el plazo en días, se revisa que las fechas leídas coincidan
+    // (los bancos cuentan meses de 30 días; se acepta también el conteo real)
+    let warn = '';
+    if (d.termDays && d.startDate && d.maturityDate) {
+      const a = parseDay(d.startDate), b = parseDay(d.maturityDate);
+      const real = Math.round((b.getTime() - a.getTime()) / 86400000);
+      const banco = days360(a, b);
+      if (Math.abs(real - d.termDays) > 2 && Math.abs(banco - d.termDays) > 2) {
+        warn = ` Ojo: el banco dice ${d.termDays} días de plazo, pero las fechas que leí dan ${banco}. Revisa la fecha de vencimiento.`;
+      }
+    }
+    setAiState(warn ? 'error' : 'done');
+    setAiMsg((missing.length ? `Listo. No encontré: ${missing.join(', ')}. Complétalo y revisa todo antes de guardar.` : 'Listo. Revisa que todo esté bien antes de guardar.') + warn);
   }
 
   const fmt = (n: number) => formatCurrency(n, currency);
@@ -231,7 +244,10 @@ export function InvestmentFormModal({ investment, renewFrom, currency = 'COP', o
               {!renewing && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {BANKS.map(b => (
-                    <button key={b} type="button" onClick={() => setBank(b)} className={chipClass(bank === b)}>{b}</button>
+                    <button key={b} type="button" onClick={() => setBank(b)} className={`${chipClass(bank === b)} inline-flex items-center gap-1.5`}>
+                      {findCatalogEntry(b) && <CategoryIcon icon={findCatalogEntry(b)!.icon} label={b} className="w-4 h-4 text-sm flex items-center justify-center" />}
+                      {b}
+                    </button>
                   ))}
                 </div>
               )}

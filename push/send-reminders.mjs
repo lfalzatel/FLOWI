@@ -80,9 +80,15 @@ function upcomingDates(r, todayLocal) {
   const y = todayLocal.getUTCFullYear(), m = todayLocal.getUTCMonth();
   const occ = [];
   if (r.type === 'monthly' && r.dayOfMonth) {
+    const every = r.everyMonths > 1 ? r.everyMonths : 1;
     for (const o of [0, 1]) {
       const mm = m + o;
       const yy = y + Math.floor(mm / 12), m2 = ((mm % 12) + 12) % 12;
+      if (every > 1 && r.startMonth) {
+        const [sy, sm] = r.startMonth.split('-').map(Number);
+        const diff = (yy * 12 + m2) - (sy * 12 + sm - 1);
+        if (((diff % every) + every) % every !== 0) continue;
+      }
       occ.push([yy, m2, dayInMonth(yy, m2, r.dayOfMonth)]);
     }
   } else if (r.type === 'yearly' && r.date) {
@@ -139,7 +145,7 @@ async function morningSummary(uid, reminders, investments, todayLocal) {
           if (isCoveredByExpense(r, fromLocalParts(y, m, d), expenses, shared)) continue;
         }
       }
-      items.push({ title: r.title, daysLeft, isPayment });
+      items.push({ title: r.amount ? `${r.title} $${Number(r.amount).toLocaleString('es-CO')}` : r.title, daysLeft, isPayment });
       break;
     }
   }

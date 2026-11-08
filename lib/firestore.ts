@@ -362,6 +362,9 @@ export interface Reminder {
   date?: string; // YYYY-MM-DD: la fecha de 'once', o el día y mes que se repite cada año en 'yearly'
   alerts?: ReminderAlert[]; // Alertas múltiples relativas al tiempo principal
   paidDates?: string[];     // Vencimientos ya pagados (YYYY-MM-DD de cada ocurrencia)
+  everyMonths?: number;     // monthly: cada cuántos meses (1 por defecto; 3 = trimestral, p. ej. cambio de aceite)
+  startMonth?: string | null; // monthly con everyMonths > 1: un mes en que sí toca (YYYY-MM)
+  amount?: number | null;   // valor aproximado del pago (opcional)
 }
 
 export async function getUserReminders(userId: string): Promise<Reminder[]> {
