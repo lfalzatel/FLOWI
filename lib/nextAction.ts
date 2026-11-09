@@ -17,7 +17,7 @@ export type NextAction =
   | { id: string; kind: 'support'; title: string; detail: string; tone: 'normal' };
 
 // Ideas para descubrir funciones que la persona aún no usa (se ocultan para siempre al tocarlas)
-export const TIP_IDS = ['tip:cuentas', 'tip:inversiones', 'tip:recibo', 'tip:extracto', 'tip:recordatorios'] as const;
+export const TIP_IDS = ['tip:cuentas', 'tip:inversiones', 'tip:recibo', 'tip:extracto', 'tip:recordatorios', 'tip:hormiga'] as const;
 
 interface Input {
   transactions: Transaction[];
@@ -184,6 +184,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     if (!discover.hasInvestments) tips.push({ id: 'tip:inversiones', kind: 'link', href: '/servicios/inversiones', tone: 'normal', title: '¿Ahorras en Nu o tienes un CDT?', detail: 'Regístralo y te digo cuánto vas ganando con su tasa.' });
     tips.push({ id: 'tip:recibo', kind: 'link', href: '/?accion=foto', tone: 'normal', title: 'Registra un gasto con la foto del recibo', detail: 'Toca el botón + y elige "Foto del recibo": la IA lee el total por ti.' });
     tips.push({ id: 'tip:extracto', kind: 'link', href: '/servicios/importar', tone: 'normal', title: 'Importa el extracto de tu banco', detail: 'Sube el Excel y registro todos los movimientos de una vez.' });
+    tips.push({ id: 'tip:hormiga', kind: 'link', href: '/servicios/hormiga', tone: 'normal', title: '¿Cuánto se te va en gastos hormiga?', detail: 'Mira tus suscripciones y las compras pequeñas que se repiten, y cuánto suman al año.' });
     if (discover.reminders < 3) tips.push({ id: 'tip:recordatorios', kind: 'link', href: '/servicios/recordatorios', tone: 'normal', title: 'Crea recordatorios para tus pagos fijos', detail: 'Te aviso antes de que venzan y los reservo en lo que puedes gastar.' });
     out.push(...tips.filter(t => !discover.seenTips.includes(t.id)));
   }

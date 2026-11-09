@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Store, CalendarClock, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
+import { Bug, Store, CalendarClock, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -33,6 +33,8 @@ const SERVICES: ServiceItem[] = [
     icon: Store, href: '/servicios/negocio', color: 'text-orange-500', bgColor: 'bg-orange-500/10', isNew: true },
   { id: 'resumen', group: 'Entiende tus gastos', title: 'Resumen del mes', description: 'Qué pasó con tu plata y cómo vas frente al mes pasado',
     icon: Sparkles, href: '/servicios/resumen', color: 'text-amber-500', bgColor: 'bg-amber-500/10', isNew: true },
+  { id: 'hormiga', group: 'Entiende tus gastos', title: 'Suscripciones y gastos hormiga', description: 'Lo pequeño que se repite y cuánto suma al año',
+    icon: Bug, href: '/servicios/hormiga', color: 'text-rose-500', bgColor: 'bg-rose-500/10', isNew: true },
   { id: 'estadisticas', group: 'Entiende tus gastos', title: 'Estadísticas', description: 'En qué se te va la plata, mes a mes',
     icon: BarChart2, href: '/servicios/estadisticas', color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
   { id: 'importar', group: 'Entiende tus gastos', title: 'Importar extracto', description: 'Sube el Excel del banco y registro todo de una',
