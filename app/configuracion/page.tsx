@@ -13,6 +13,7 @@ import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoundModal';
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
 import { SupportProject } from '@/components/settings/SupportProject';
+import { AppLockSettings } from '@/components/settings/AppLockSettings';
 import { PlanCard } from '@/components/plans/PlanCard';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -50,7 +51,8 @@ export default function ConfigPage() {
     finanzas: false,
     privacidad: false,
     ia: false,
-    apoyar: false
+    apoyar: false,
+    seguridad: false
   });
 
   // Desde el menú de perfil ("Apoyar a FLOWI") se llega con #apoyar: abrir esa sección
@@ -499,6 +501,8 @@ export default function ConfigPage() {
             </div>
           )}
         </section>
+
+        <AppLockSettings isTechTheme={isTechTheme} open={openSections.seguridad} onToggle={() => toggleSection('seguridad')} />
 
         {/* 1.8 SECCIÓN DEDICADA: Sonidos y Animaciones (Organizada en Acordeones) */}
         <section className="space-y-3">

@@ -56,6 +56,7 @@ import { UpdateWatcher } from '@/components/layout/UpdateWatcher';
 import { LimitPrompter } from '@/components/plans/LimitPrompter';
 import { UsageTracker } from '@/components/layout/UsageTracker';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
+import { AppLock } from '@/components/security/AppLock';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <UpdateWatcher />
               <LimitPrompter />
               <UsageTracker />
+              <AppLock />
             </DataProvider>
           </ThemeProvider>
         </InAppNotificationProvider>
