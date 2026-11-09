@@ -159,14 +159,15 @@ export function ProfileCapsule() {
     };
   }, [open]);
 
+  // Administrador: cuántos comprobantes de transferencia esperan revisión (punto en la foto y contador)
+  const [pendingReceipts, setPendingReceipts] = useState(0);
+  useEffect(() => (profile?.role === 'admin' ? watchPendingManualPayments(l => setPendingReceipts(l.length)) : undefined), [profile?.role]);
+
   if (!user) return null;
  
   const displayName = profile?.name || user.displayName || 'Usuario';
   const photoURL = profile?.photoURL || user.photoURL || '/default-avatar.png';
   const role = profile?.role || 'Usuario';
-  // Administrador: cuántos comprobantes de transferencia esperan revisión (punto en la foto y contador)
-  const [pendingReceipts, setPendingReceipts] = useState(0);
-  useEffect(() => (profile?.role === 'admin' ? watchPendingManualPayments(l => setPendingReceipts(l.length)) : undefined), [profile?.role]);
   const email = profile?.email || user.email || '';
 
   const handleShare = () => {
