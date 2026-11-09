@@ -168,6 +168,7 @@ export default function DeudasPage() {
               {activeDebts.length > 0 && (
                 <div className="space-y-2">
                   <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>Activas ({activeDebts.length})</h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   {activeDebts.map((debt, i) => {
                     const interestData = calculateDebtInterest(debt);
                     const basePending = debt.totalAmount - debt.paidAmount;
@@ -248,6 +249,7 @@ export default function DeudasPage() {
                       </div>
                     );
                   })}
+                  </div>
                 </div>
               )}
 
@@ -255,6 +257,7 @@ export default function DeudasPage() {
               {paidDebts.length > 0 && (
                 <div className="space-y-2 pt-2">
                   <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas en este periodo ({paidDebts.length})</h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   {paidDebts.map((debt, i) => {
                     const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
                     const createdDate = debt.createdAt instanceof Date 
@@ -293,6 +296,7 @@ export default function DeudasPage() {
                       </div>
                     );
                   })}
+                  </div>
                 </div>
               )}
 

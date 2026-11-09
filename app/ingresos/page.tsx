@@ -71,7 +71,7 @@ export default function IngresosPage() {
     <div className="relative min-h-screen bg-deep flex flex-col">
       <Header />
       
-      <main className="relative flex-1 p-4 pb-24 max-w-2xl mx-auto w-full animate-fade-in-up stagger">
+      <main className="relative flex-1 p-4 pb-24 max-w-2xl lg:max-w-6xl mx-auto w-full animate-fade-in-up stagger">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>Mis Ingresos</h1>
@@ -111,40 +111,48 @@ export default function IngresosPage() {
           onChangeValue={setFilterValue} 
         />
 
-        {/* Card de Total */}
-        <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-accent/20 shadow-sm animate-card-mix">
-          {/* Decorative circles */}
-          <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
-                          bg-accent/5 blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full
-                          bg-blue-500/5 blur-xl pointer-events-none" />
+        {/* En PC: el resumen queda fijo a la izquierda y la lista ocupa la derecha */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-6 items-start">
+        <div className="min-w-0 lg:sticky lg:top-24">
+          {/* Card de Total */}
+          <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-accent/20 shadow-sm animate-card-mix">
+            {/* Decorative circles */}
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
+                            bg-accent/5 blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full
+                            bg-blue-500/5 blur-xl pointer-events-none" />
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
-                <TrendingUp className="w-3.5 h-3.5 text-accent" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
+                  <TrendingUp className="w-3.5 h-3.5 text-accent" />
+                </div>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Ingresado</span>
               </div>
-              <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Ingresado</span>
+
+              <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-accent'}`}>
+                <AnimatedNumber value={filteredTransactions.reduce((sum, e) => sum + e.amount, 0)} prefix="$" />
+              </p>
+              <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
             </div>
-
-            <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-accent'}`}>
-              <AnimatedNumber value={filteredTransactions.reduce((sum, e) => sum + e.amount, 0)} prefix="$" />
-            </p>
-            <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
           </div>
-        </div>
 
-        {/* Chart */}
-        <div className="mb-6">
-          <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} type="ingreso" />
-        </div>
+          {/* Chart */}
+          <div className="mb-6">
+            <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} type="ingreso" />
+          </div>
 
-        {/* Lista */}
-        <TransactionList 
-          transactions={filteredTransactions} 
-          onEdit={(tx) => setEditingTransaction(tx)} 
-          animationKey={`${filterType}-${filterValue}`}
-        />
+        </div>
+        <div className="min-w-0">
+          {/* Lista */}
+          <TransactionList 
+            transactions={filteredTransactions} 
+            onEdit={(tx) => setEditingTransaction(tx)} 
+            animationKey={`${filterType}-${filterValue}`}
+            columns={false}
+          />
+        </div>
+        </div>
       </main>
 
       <BottomNav onSuccess={refresh} />

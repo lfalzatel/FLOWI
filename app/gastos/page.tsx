@@ -86,7 +86,7 @@ export default function GastosPage() {
     <div className="relative min-h-screen bg-deep flex flex-col">
       <Header />
       
-      <main className="relative flex-1 p-4 pb-24 max-w-2xl mx-auto w-full animate-fade-in-up stagger">
+      <main className="relative flex-1 p-4 pb-24 max-w-2xl lg:max-w-6xl mx-auto w-full animate-fade-in-up stagger">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>Mis Gastos</h1>
@@ -125,74 +125,116 @@ export default function GastosPage() {
           onChangeValue={setFilterValue} 
         />
 
-        {/* Buscador Universal */}
-        <div className="mb-4 relative">
-          <input
-            type="text"
-            placeholder={isTechTheme ? "SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR..." : "Buscar por categoría, descripción o monto..."}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={`
-              w-full py-2.5 pl-10 pr-4 text-xs focus:outline-none transition-all
-              ${isTechTheme
-                ? 'bg-white/5 text-white placeholder-white/35 border-accent/20 rounded-none focus:border-accent font-mono'
-                : theme === 'light'
-                  ? 'bg-black/[0.04] text-black placeholder-black/40 border-black/10 rounded-2xl focus:border-accent focus:bg-white'
-                  : 'bg-white/5 text-white placeholder-white/35 border-white/5 rounded-2xl focus:border-accent/40 focus:bg-white/10'
-              }
-            `}
-          />
-          <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'light' ? 'text-black/40' : 'text-white/40'}`}>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${theme === 'light' ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+        {/* En PC: el resumen queda fijo a la izquierda y la lista ocupa la derecha */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-6 items-start">
+        <div className="min-w-0 lg:sticky lg:top-24">
+          {/* Buscador Universal */}
+          <div className="mb-4 relative lg:hidden">
+            <input
+              type="text"
+              placeholder={isTechTheme ? "SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR..." : "Buscar por categoría, descripción o monto..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`
+                w-full py-2.5 pl-10 pr-4 text-xs focus:outline-none transition-all
+                ${isTechTheme
+                  ? 'bg-white/5 text-white placeholder-white/35 border-accent/20 rounded-none focus:border-accent font-mono'
+                  : theme === 'light'
+                    ? 'bg-black/[0.04] text-black placeholder-black/40 border-black/10 rounded-2xl focus:border-accent focus:bg-white'
+                    : 'bg-white/5 text-white placeholder-white/35 border-white/5 rounded-2xl focus:border-accent/40 focus:bg-white/10'
+                }
+              `}
+            />
+            <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'light' ? 'text-black/40' : 'text-white/40'}`}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-            </button>
-          )}
-        </div>
-
-        {/* Card de Total */}
-        <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-[var(--red)]/20 shadow-sm animate-card-mix">
-          {/* Decorative circles */}
-          <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
-                          bg-red-500/5 blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full
-                          bg-blue-500/5 blur-xl pointer-events-none" />
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-xl bg-red-500/15 flex items-center justify-center">
-                <TrendingDown className="w-3.5 h-3.5 text-red-400" />
-              </div>
-              <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Gastado</span>
             </div>
-
-            <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-[var(--red)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-[var(--red)]'}`}>
-              <AnimatedNumber value={filteredTransactions.reduce((sum, e) => sum + e.amount, 0)} prefix="$" />
-            </p>
-            <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${theme === 'light' ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
-        </div>
 
-        {/* Chart */}
-        <div className="mb-6">
-          <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} type="gasto" />
-        </div>
+          {/* Card de Total */}
+          <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-[var(--red)]/20 shadow-sm animate-card-mix">
+            {/* Decorative circles */}
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
+                            bg-red-500/5 blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full
+                            bg-blue-500/5 blur-xl pointer-events-none" />
 
-        {/* Lista */}
-        <TransactionList 
-          transactions={filteredTransactions} 
-          onEdit={(tx) => setEditingTransaction(tx)} 
-          animationKey={`${filterType}-${filterValue}`}
-        />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-xl bg-red-500/15 flex items-center justify-center">
+                  <TrendingDown className="w-3.5 h-3.5 text-red-400" />
+                </div>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Gastado</span>
+              </div>
+
+              <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-[var(--red)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-[var(--red)]'}`}>
+                <AnimatedNumber value={filteredTransactions.reduce((sum, e) => sum + e.amount, 0)} prefix="$" />
+              </p>
+              <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
+            </div>
+          </div>
+
+          {/* Chart */}
+          <div className="mb-6">
+            <ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} type="gasto" />
+          </div>
+
+        </div>
+        <div className="min-w-0">
+          {/* Buscador Universal */}
+          <div className="mb-4 relative hidden lg:block">
+            <input
+              type="text"
+              placeholder={isTechTheme ? "SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR..." : "Buscar por categoría, descripción o monto..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`
+                w-full py-2.5 pl-10 pr-4 text-xs focus:outline-none transition-all
+                ${isTechTheme
+                  ? 'bg-white/5 text-white placeholder-white/35 border-accent/20 rounded-none focus:border-accent font-mono'
+                  : theme === 'light'
+                    ? 'bg-black/[0.04] text-black placeholder-black/40 border-black/10 rounded-2xl focus:border-accent focus:bg-white'
+                    : 'bg-white/5 text-white placeholder-white/35 border-white/5 rounded-2xl focus:border-accent/40 focus:bg-white/10'
+                }
+              `}
+            />
+            <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'light' ? 'text-black/40' : 'text-white/40'}`}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${theme === 'light' ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Lista */}
+          <TransactionList 
+            transactions={filteredTransactions} 
+            onEdit={(tx) => setEditingTransaction(tx)} 
+            animationKey={`${filterType}-${filterValue}`}
+            columns={false}
+          />
+        </div>
+        </div>
       </main>
 
       <BottomNav onSuccess={refresh} />

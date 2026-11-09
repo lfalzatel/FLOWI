@@ -391,7 +391,10 @@ export default function DashboardPage() {
         {/* Category Budgets (2 Acordeones Inteligentes: Categorías Principales 50/30/20 y Subcategorías) */}
         <div data-tour="budgets"><CategoryBudgets transactions={filteredTransactions} currency={profile?.currency} filterType={filterType} /></div>
 
-        {/* Recent transactions */}
+        </div>
+        </div>
+
+        {/* Transacciones: a todo el ancho, en dos columnas en PC */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className={`${isTechTheme ? 'font-mono font-bold text-base text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-base text-text-primary'}`}>
@@ -408,13 +411,12 @@ export default function DashboardPage() {
           ) : (
              <TransactionList 
                 transactions={filteredTransactions} 
-                limit={filterType === 'all' ? 5 : undefined} 
+                limit={filterType === 'all' ? 6 : undefined} 
                 onEdit={(tx) => setEditingTransaction(tx)} 
                 animationKey={`${filterType}-${filterValue}`}
+                columns
              />
           )}
-        </div>
-        </div>
         </div>
       </main>
 

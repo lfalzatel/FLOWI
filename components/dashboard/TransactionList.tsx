@@ -12,6 +12,7 @@ interface Props {
   limit?: number; 
   onEdit?: (transaction: Transaction) => void;
   animationKey?: string;
+  columns?: boolean; // en PC, dos columnas para aprovechar el ancho
 }
 
 
@@ -23,7 +24,7 @@ function fmtDate(date: Timestamp | Date) {
   return `${dateStr} • ${timeStr}`;
 }
 
-export function TransactionList({ transactions, limit, onEdit, animationKey }: Props) {
+export function TransactionList({ transactions, limit, onEdit, animationKey, columns = false }: Props) {
   const { theme } = useTheme();
   const { allCategories } = useCategories();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -45,8 +46,9 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
   }
 
   return (
-    <div key={animationKey} className="space-y-2">
-      {items.map((t, i) => {
+    <div key={animationKey} className={columns ? 'grid grid-cols-1 lg:grid-cols-2 gap-2' : 'space-y-2'}>
+      {items.map((t, idx) => {
+        const i = Math.min(idx, 12); // en listas largas, que las últimas no tarden en aparecer
         const cat = getCategoryIcon(t.category);
         const details = [t.category, t.merchant, t.paymentMethod].filter(Boolean).join(' · ');
         const displayName = t.description || t.category;
@@ -56,7 +58,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
 
         if (isCyberpunk) {
           return (
-            <div key={t.id || i}
+            <div key={t.id || idx}
                  onClick={() => onEdit && onEdit(t)}
                  className={`glass-card flex items-center justify-between p-4 rounded-none border-y border-r border-glass-border
                             hover:bg-glass-hover transition-all duration-200 animate-card-mix
@@ -84,7 +86,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey }: P
         }
 
         return (
-          <div key={t.id || i}
+          <div key={t.id || idx}
                onClick={() => onEdit && onEdit(t)}
                className={`glass-card flex items-center gap-3 p-3.5 rounded-2xl
                           hover:border-glass-strong transition-all duration-200 animate-card-mix
