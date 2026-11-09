@@ -37,12 +37,10 @@ export function detectSubscriptions(transactions: Transaction[], resolve: Resolv
     if (t.type !== 'gasto') continue;
     const date = toDate(t.date);
     if (date.getTime() < since || date > now) continue;
-    const r = resolve(t.category);
-    const merchantGroup = t.merchant ? resolve(t.merchant).group : '';
-    if (r.group !== 'Suscripciones' && merchantGroup !== 'Suscripciones') continue;
-    const name = subscriptionName(t, r.label);
-    const key = normalizeText(name);
-    const g = groups.get(key) || { name, category: t.merchant || t.category, items: [] };
+    const sub = subscriptionOf(t, resolve);
+    if (!sub) continue;
+    const { key, name } = sub;
+    const g = groups.get(key) || { name, category: sub.category, items: [] };
     g.items.push({ date, amount: t.amount });
     groups.set(key, g);
   }
@@ -90,6 +88,23 @@ const ANT_GROUPS = new Set(['Comer fuera', 'Ocio y viajes', 'Compras', 'Personal
 // Subcategorías de otros grupos que también suelen ser gasto hormiga
 const ANT_LABELS = new Set(['parqueadero', 'tienda / minimercado', 'domicilios', 'cafe y antojos', 'licores y bares', 'cigarrillos', 'lavadero', 'apuestas / loterias']);
 
+/** ¿Esta compra cuenta como gasto hormiga? (pequeña y de antojos, salidas, tienda, parqueadero…) */
+export function isAntExpense(t: Transaction, resolve: Resolver) {
+  if (t.type !== 'gasto' || t.business || t.amount <= 0 || t.amount > ANT_MAX_AMOUNT) return false;
+  const r = resolve(t.category);
+  return ANT_GROUPS.has(r.group) || ANT_LABELS.has(normalizeText(r.label));
+}
+
+/** Clave y nombre de la suscripción de un gasto, o null si no es de suscripciones. */
+export function subscriptionOf(t: Transaction, resolve: Resolver): { key: string; name: string; category: string } | null {
+  if (t.type !== 'gasto') return null;
+  const r = resolve(t.category);
+  const merchantGroup = t.merchant ? resolve(t.merchant).group : '';
+  if (r.group !== 'Suscripciones' && merchantGroup !== 'Suscripciones') return null;
+  const name = subscriptionName(t, r.label);
+  return { key: normalizeText(name), name, category: t.merchant || t.category };
+}
+
 export function detectAntExpenses(transactions: Transaction[], resolve: Resolver, now = new Date()) {
   const since = now.getTime() - ANT_WINDOW_DAYS * DAY;
   // Si la persona lleva menos de 90 días registrando, se promedia sobre lo que lleva
@@ -99,10 +114,9 @@ export function detectAntExpenses(transactions: Transaction[], resolve: Resolver
     if (t.type !== 'gasto' || t.business) continue;
     const date = toDate(t.date);
     first = Math.min(first, date.getTime());
-    if (date.getTime() < since || date > now || t.amount <= 0 || t.amount > ANT_MAX_AMOUNT) continue;
+    if (date.getTime() < since || date > now || !isAntExpense(t, resolve)) continue;
     const r = resolve(t.category);
     const key = normalizeText(r.label);
-    if (!ANT_GROUPS.has(r.group) && !ANT_LABELS.has(key)) continue;
     const g = groups.get(key) || { label: r.label, items: [] };
     g.items.push({ amount: t.amount, desc: (t.description || '').trim() });
     groups.set(key, g);
@@ -123,4 +137,87 @@ export function detectAntExpenses(transactions: Transaction[], resolve: Resolver
   list.sort((a, b) => b.monthly - a.monthly);
   const monthly = list.reduce((s, g) => s + g.monthly, 0);
   return { groups: list, monthly, yearly: monthly * 12, days: Math.round(days) };
+}
+
+// ── Por periodo (filtro Mes / Semana / Día) ─────────────────────────────
+export type PeriodAnt = { key: string; label: string; count: number; total: number; average: number; examples: string[] };
+export type PeriodSub = { key: string; name: string; category: string; total: number; count: number; lastDate: Date };
+
+/** Lo que de verdad se gastó en el periodo: gastos hormiga por subcategoría y cobros de suscripciones. */
+export function insightsInPeriod(transactions: Transaction[], resolve: Resolver, inPeriod: (d: Date) => boolean) {
+  const ants = new Map<string, { label: string; items: { amount: number; desc: string }[] }>();
+  const subs = new Map<string, PeriodSub>();
+  for (const t of transactions) {
+    if (t.type !== 'gasto') continue;
+    const date = toDate(t.date);
+    if (!inPeriod(date)) continue;
+    const sub = subscriptionOf(t, resolve);
+    if (sub) {
+      const cur = subs.get(sub.key) || { ...sub, total: 0, count: 0, lastDate: date };
+      cur.total += t.amount;
+      cur.count += 1;
+      if (date > cur.lastDate) cur.lastDate = date;
+      subs.set(sub.key, cur);
+      continue;
+    }
+    if (!isAntExpense(t, resolve)) continue;
+    const r = resolve(t.category);
+    const key = normalizeText(r.label);
+    const g = ants.get(key) || { label: r.label, items: [] };
+    g.items.push({ amount: t.amount, desc: (t.description || '').trim() });
+    ants.set(key, g);
+  }
+  const antList: PeriodAnt[] = Array.from(ants.entries()).map(([key, g]) => {
+    const total = g.items.reduce((a, i) => a + i.amount, 0);
+    const freq = new Map<string, number>();
+    g.items.forEach(i => { if (i.desc) freq.set(i.desc.toLowerCase(), (freq.get(i.desc.toLowerCase()) || 0) + 1); });
+    const examples = Array.from(freq.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([d]) => d);
+    return { key, label: g.label, count: g.items.length, total, average: total / g.items.length, examples };
+  }).sort((a, b) => b.total - a.total);
+  const subList = Array.from(subs.values()).sort((a, b) => b.total - a.total);
+  return {
+    ants: antList, antTotal: antList.reduce((a, g) => a + g.total, 0),
+    subs: subList, subTotal: subList.reduce((a, x) => a + x.total, 0),
+  };
+}
+
+// ── Historial de una subcategoría o suscripción (modal con gráfica) ────
+export type HistoryTarget = { kind: 'ant' | 'sub'; key: string; label: string; category: string };
+export type HistoryItem = { id?: string; date: Date; amount: number; description: string; small: boolean };
+export type HistoryMonth = { month: string; total: number; items: HistoryItem[] };
+
+const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+/**
+ * Todo lo gastado en esa subcategoría (no solo las compras pequeñas) o esa suscripción, mes a mes,
+ * desde el primer registro hasta el mes actual (los meses sin gasto quedan en 0).
+ */
+export function spendingHistory(transactions: Transaction[], resolve: Resolver, target: HistoryTarget, now = new Date()): HistoryMonth[] {
+  const byMonth = new Map<string, HistoryItem[]>();
+  for (const t of transactions) {
+    if (t.type !== 'gasto') continue;
+    const match = target.kind === 'sub'
+      ? subscriptionOf(t, resolve)?.key === target.key
+      : normalizeText(resolve(t.category).label) === target.key;
+    if (!match) continue;
+    const date = toDate(t.date);
+    if (date > now) continue;
+    const k = monthKey(date);
+    const list = byMonth.get(k) || [];
+    list.push({ id: t.id, date, amount: t.amount, description: (t.description || t.merchant || '').trim(), small: t.amount <= ANT_MAX_AMOUNT });
+    byMonth.set(k, list);
+  }
+  if (!byMonth.size) return [];
+  const first = Array.from(byMonth.keys()).sort()[0];
+  const out: HistoryMonth[] = [];
+  const cur = new Date(Number(first.slice(0, 4)), Number(first.slice(5, 7)) - 1, 1);
+  const end = monthKey(now);
+  for (;;) {
+    const k = monthKey(cur);
+    const items = (byMonth.get(k) || []).sort((a, b) => b.date.getTime() - a.date.getTime());
+    out.push({ month: k, total: items.reduce((a, i) => a + i.amount, 0), items });
+    if (k >= end) break;
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  return out;
 }
