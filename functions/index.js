@@ -192,3 +192,51 @@ exports.avisarComprobante = onDocumentCreated({ document: 'fl_manual_payments/{i
     if (dead.length) await a.ref.update({ pushTokens: admin.firestore.FieldValue.arrayRemove(...dead) });
   }
 });
+
+// ── Eliminar mi cuenta ────────────────────────────────────────────────
+// La persona borra su cuenta y todo lo que registró (Ley 1581: derecho a suprimir sus datos).
+// Se conserva solo el registro de los pagos (valor, plan, fecha y estado), como dice la política;
+// a los comprobantes de transferencia se les quita la imagen y los datos personales.
+const USER_COLLECTIONS = ['fl_expenses', 'fl_debts', 'fl_customCategories', 'fl_notes', 'fl_reminders',
+  'fl_goals', 'fl_investments', 'fl_accounts', 'fl_transfers'];
+
+async function deleteWhere(collection, uid) {
+  let total = 0;
+  for (;;) {
+    const snap = await db.collection(collection).where('userId', '==', uid).limit(400).get();
+    if (snap.empty) return total;
+    const batch = db.batch();
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    total += snap.size;
+  }
+}
+
+exports.eliminarMiCuenta = onCall({ region: 'us-central1', timeoutSeconds: 300 }, async (req) => {
+  if (!req.auth) throw new HttpsError('unauthenticated', 'Inicia sesión.');
+  if (req.data?.confirm !== 'ELIMINAR') throw new HttpsError('invalid-argument', 'Falta la confirmación.');
+  const uid = req.auth.uid;
+  const userRef = db.collection('users').doc(uid);
+  const user = await userRef.get();
+  if (user.exists && user.data().role === 'admin') {
+    throw new HttpsError('permission-denied', 'La cuenta de administrador no se puede eliminar desde la app.');
+  }
+
+  let removed = 0;
+  for (const c of USER_COLLECTIONS) removed += await deleteWhere(c, uid);
+
+  const manual = await db.collection('fl_manual_payments').where('userId', '==', uid).get();
+  if (!manual.empty) {
+    const batch = db.batch();
+    manual.docs.forEach((d) => batch.update(d.ref, {
+      image: admin.firestore.FieldValue.delete(), userName: admin.firestore.FieldValue.delete(),
+      userEmail: admin.firestore.FieldValue.delete(), note: admin.firestore.FieldValue.delete(), accountDeleted: true,
+    }));
+    await batch.commit();
+  }
+
+  await userRef.delete();
+  await admin.auth().deleteUser(uid).catch((e) => logger.warn('No se pudo borrar el usuario de Auth', e.code));
+  logger.info('Cuenta eliminada', { removed });
+  return { ok: true, removed };
+});

@@ -14,6 +14,7 @@ import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoun
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
 import { SupportProject } from '@/components/settings/SupportProject';
 import { AppLockSettings } from '@/components/settings/AppLockSettings';
+import { MyDataRows } from '@/components/settings/MyDataRows';
 import { PlanCard } from '@/components/plans/PlanCard';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -942,42 +943,7 @@ export default function ConfigPage() {
               </div>
               <ChevronRight className="w-4 h-4 text-text-muted" />
             </button>
-            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>
-                  <Download className="w-4 h-4 text-blue-400" />
-                </div>
-                <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'EXPORTAR_MIS_DATOS' : 'Exportar mis datos'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'DESCARGAR_CSV_O_JSON' : 'Descargar CSV o JSON'}</p>
-                </div>
-              </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
-            </div>
-            <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-orange-500/20 rounded-none bg-orange-500/5' : 'rounded-xl bg-orange-500/10'}`}>
-                  <Trash2 className="w-4 h-4 text-orange-400" />
-                </div>
-                <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-orange-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ELIMINAR_TODOS_LOS_DATOS' : 'Eliminar todos los datos'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'BORRAR_TRANSACCIONES_PERO_MANTENER_CUENTA' : 'Borrar transacciones pero mantener cuenta'}</p>
-                </div>
-              </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
-            </div>
-            <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-red-500/30 rounded-none bg-red-500/5' : 'rounded-xl bg-red-500/10'}`}>
-                  <Lock className="w-4 h-4 text-red-500" />
-                </div>
-                <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-red-400 uppercase tracking-wider' : 'text-red-400'}`}>{isTechTheme ? 'ELIMINAR_CUENTA' : 'Eliminar cuenta'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-red-400/60' : 'text-red-400/70'}`}>{isTechTheme ? 'ACCION_IRREVERSIBLE' : 'Acción irreversible'}</p>
-                </div>
-              </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-red-500/30 text-red-400 bg-red-500/5' : 'bg-red-500/20 text-red-400'}`}>Pronto</span>
-            </div>
+            <MyDataRows isTechTheme={isTechTheme} />
             </div>
           )}
         </section>
