@@ -1,14 +1,11 @@
-# Envía los recordatorios de FLOWI como notificaciones push cuando la app está cerrada.
-# Corre cada 30 minutos (GitHub puede atrasarlo unos minutos). Gratis: el repositorio es público,
-# Firebase Cloud Messaging no cobra y el proyecto está en el plan gratuito (Spark).
-name: Enviar recordatorios push
+# Prueba manual de los recordatorios push.
+# El envío real lo hace Firebase cada 5 minutos (función enviarRecordatorios en functions/index.js).
+# Ya no corre con horario aquí: GitHub atrasaba la tarea varias horas y se perdían avisos.
+name: Enviar recordatorios push (manual)
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'
   workflow_dispatch:
 
-# Si una corrida se demora, la siguiente espera en vez de enviar avisos dobles
 concurrency:
   group: push-reminders
   cancel-in-progress: false
@@ -22,15 +19,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
-          cache-dependency-path: push/package-lock.json
+          cache-dependency-path: functions/package-lock.json
 
       - run: npm ci
-        working-directory: push
+        working-directory: functions
 
       - name: Enviar los avisos que tocan
-        run: node send-reminders.mjs
-        working-directory: push
+        run: node push/send-reminders.mjs
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLOWI }}

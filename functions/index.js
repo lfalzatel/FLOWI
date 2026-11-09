@@ -6,6 +6,7 @@
 const crypto = require('crypto');
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret, defineString } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
@@ -239,4 +240,15 @@ exports.eliminarMiCuenta = onCall({ region: 'us-central1', timeoutSeconds: 300 }
   await admin.auth().deleteUser(uid).catch((e) => logger.warn('No se pudo borrar el usuario de Auth', e.code));
   logger.info('Cuenta eliminada', { removed });
   return { ok: true, removed };
+});
+
+// ── Recordatorios push ────────────────────────────────────────────────
+// Cada 5 minutos revisa qué recordatorios tocan y los envía al celular (lógica en reminders.mjs).
+// Antes lo hacía GitHub Actions, que atrasaba la tarea varias horas y se perdían avisos.
+exports.enviarRecordatorios = onSchedule({
+  schedule: 'every 5 minutes', timeZone: 'America/Bogota', region: 'us-central1',
+  timeoutSeconds: 120, retryCount: 0, maxInstances: 1,
+}, async () => {
+  const { runReminders } = await import('./reminders.mjs');
+  await runReminders();
 });
