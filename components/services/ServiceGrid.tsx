@@ -200,7 +200,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
 
   const tipSeen = profile?.servicesTipSeen;
   const header = (text: string) => (
-    <h2 key={`h-${text}`} className={`col-span-2 mt-2 first:mt-0 text-[11px] font-bold uppercase tracking-wider ${isTech ? 'text-accent/70' : 'text-text-muted'}`}>{text}</h2>
+    <h2 key={`h-${text}`} className={`col-span-full mt-2 first:mt-0 text-[11px] font-bold uppercase tracking-wider ${isTech ? 'text-accent/70' : 'text-text-muted'}`}>{text}</h2>
   );
 
   return (
@@ -229,7 +229,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
         </div>
       )}
 
-      <div ref={gridRef} className="grid grid-cols-2 gap-3 sm:gap-4 select-none [&_*]:select-none"
+      <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 select-none [&_*]:select-none"
            style={{ WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' } as React.CSSProperties}>
         {/* Siempre una sola lista con claves estables (títulos intercalados): así las tarjetas no se
             vuelven a crear al empezar a arrastrar y la que se agarró sigue recibiendo el movimiento */}

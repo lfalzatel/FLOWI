@@ -66,6 +66,12 @@ export default function DeudasPage() {
   const activeDebts = debts.filter(d => d.status !== 'paid');
   const paidDebts = debts.filter(d => d.status === 'paid' && isInPeriod(settledDate(d)));
   const hiddenPaidCount = debts.filter(d => d.status === 'paid').length - paidDebts.length;
+  const pendingOf = (d: Debt) => d.totalAmount - d.paidAmount + calculateDebtInterest(d).accumulatedInterest;
+  const owedToMe = activeDebts.filter(d => d.direction === 'me_deben').reduce((s, d) => s + pendingOf(d), 0);
+  const iOweCount = activeDebts.filter(d => (d.direction || 'debo') === 'debo').length;
+  const monthlyInstallments = activeDebts
+    .filter(d => (d.direction || 'debo') === 'debo' && d.installment)
+    .reduce((s, d) => s + (d.installment || 0) + (d.monthlyInsurance || 0), 0);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -122,6 +128,16 @@ export default function DeudasPage() {
           </div>
         </div>
 
+        <DateFilter
+          filterType={filterType}
+          filterValue={filterValue}
+          onChangeType={setFilterType}
+          onChangeValue={setFilterValue}
+        />
+
+        {/* En PC: el total queda fijo a la izquierda y la lista ocupa la derecha */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 items-start">
+        <div className="min-w-0 space-y-4 lg:sticky lg:top-24">
         {/* Premium Card for Total Debts */}
         <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-card border border-orange-500/20 shadow-sm">
           <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-orange-500/10 blur-2xl pointer-events-none" />
@@ -141,13 +157,24 @@ export default function DeudasPage() {
           </div>
         </div>
 
-        <DateFilter
-          filterType={filterType}
-          filterValue={filterValue}
-          onChangeType={setFilterType}
-          onChangeValue={setFilterValue}
-        />
+        {/* Resumen rápido */}
+        {!debtsLoading && debts.length > 0 && (
+          <div className={`grid grid-cols-3 gap-2 ${isCyberpunk ? 'font-mono' : ''}`}>
+            {[
+              { label: 'Deudas activas', value: String(iOweCount), tone: 'text-text-primary' },
+              { label: 'Cuotas al mes', value: monthlyInstallments ? fmt(monthlyInstallments) : '—', tone: 'text-orange-400' },
+              { label: 'Me deben', value: owedToMe ? fmt(owedToMe) : '—', tone: 'text-emerald-400' },
+            ].map(c => (
+              <div key={c.label} className={`glass-card p-3 ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
+                <p className="text-[10px] text-text-muted leading-tight">{c.label}</p>
+                <p className={`text-sm font-bold mt-1 truncate ${c.tone}`}>{c.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        </div>
 
+        <div className="min-w-0">
         {/* Debts List */}
         <div className="space-y-3">
           <h2 className={`${isCyberpunk ? 'font-mono font-bold text-base text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-base text-text-primary'}`}>Todas las deudas</h2>
@@ -168,7 +195,7 @@ export default function DeudasPage() {
               {activeDebts.length > 0 && (
                 <div className="space-y-2">
                   <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>Activas ({activeDebts.length})</h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                  <div className="space-y-2">
                   {activeDebts.map((debt, i) => {
                     const interestData = calculateDebtInterest(debt);
                     const basePending = debt.totalAmount - debt.paidAmount;
@@ -257,7 +284,7 @@ export default function DeudasPage() {
               {paidDebts.length > 0 && (
                 <div className="space-y-2 pt-2">
                   <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas en este periodo ({paidDebts.length})</h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                  <div className="space-y-2">
                   {paidDebts.map((debt, i) => {
                     const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
                     const createdDate = debt.createdAt instanceof Date 
@@ -307,6 +334,8 @@ export default function DeudasPage() {
               )}
             </div>
           )}
+        </div>
+        </div>
         </div>
       </main>
 

@@ -58,7 +58,7 @@ export default function ServiciosPage() {
   return (
     <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
-      <main className={`relative flex-1 pb-32 p-4 pt-6 max-w-lg mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
+      <main className={`relative flex-1 pb-32 p-4 pt-6 max-w-lg md:max-w-3xl lg:max-w-6xl mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
         <h1 className={`text-2xl font-bold mb-6 ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
           Servicios
         </h1>
