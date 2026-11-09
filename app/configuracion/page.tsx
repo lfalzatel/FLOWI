@@ -344,6 +344,9 @@ export default function ConfigPage() {
         {/* Tu plan (Gratis / Premium) con acceso a Planes */}
         <PlanCard isTechTheme={isTechTheme} />
 
+        {/* En PC, las secciones en dos columnas; en el celular, una sola en el mismo orden */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="min-w-0 space-y-6">
         {/* 1. Cuenta y Perfil */}
         <section className="space-y-3">
           <button 
@@ -785,6 +788,8 @@ export default function ConfigPage() {
           )}
         </section>
 
+        </div>
+        <div className="min-w-0 space-y-6">
         {/* 3. Apariencia */}
         <section className="space-y-3">
           <button 
@@ -976,6 +981,8 @@ export default function ConfigPage() {
             </div>
           )}
         </section>
+        </div>
+        </div>
 
       </main>
       
