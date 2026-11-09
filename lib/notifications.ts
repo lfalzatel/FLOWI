@@ -21,6 +21,8 @@ export async function scheduleNotificationViaSW(payload: {
   delayMs?: number;   // 0 = inmediato
 }) {
   if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const { pushOn } = await import('./notifPrefs');
+  if (!pushOn()) return;
   const show = async () => {
     const options: NotificationOptions = {
       body: payload.body,

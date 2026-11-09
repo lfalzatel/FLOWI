@@ -14,6 +14,9 @@ import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoun
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
 import { SupportProject } from '@/components/settings/SupportProject';
 import { AppLockSettings } from '@/components/settings/AppLockSettings';
+import { removePushToken, syncPushToken } from '@/lib/push';
+import { requestNotificationPermission } from '@/lib/notifications';
+import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
 import { MyDataRows } from '@/components/settings/MyDataRows';
 import { PlanCard } from '@/components/plans/PlanCard';
 import { db } from '@/lib/firebase';
@@ -130,7 +133,7 @@ export default function ConfigPage() {
 
   // Load from local storage
   useEffect(() => {
-    setNotificationsEnabled(localStorage.getItem('notifications_enabled') !== 'false');
+    setNotificationsEnabled(notificationsState() === 'enabled');
     setPushEnabled(localStorage.getItem('push_enabled') !== 'false');
     setInAppEnabled(localStorage.getItem('in_app_enabled') !== 'false');
     setSoundEnabled(localStorage.getItem('sound_enabled') !== 'false');
@@ -148,16 +151,32 @@ export default function ConfigPage() {
     setSoundSpeechEnabled(localStorage.getItem('sound_speech_enabled') !== 'false');
   }, []);
 
-  const toggleNotifications = () => {
-    const newState = !notificationsEnabled;
-    setNotificationsEnabled(newState);
-    localStorage.setItem('notifications_enabled', String(newState));
+  // General: igual que en el menú de perfil (pide el permiso si hace falta y registra o quita este celular)
+  const toggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      const state = notificationsState();
+      if (state === 'blocked' || state === 'ios-needs-install' || state === 'unsupported') { askForNotifications({ force: true }); return; }
+      const granted = await requestNotificationPermission();
+      if (!granted) { askForNotifications({ force: true }); return; }
+      localStorage.setItem('notifications_enabled', 'true');
+      setNotificationsEnabled(true);
+      if (user) syncPushToken(user.uid);
+    } else {
+      localStorage.setItem('notifications_enabled', 'false');
+      setNotificationsEnabled(false);
+      if (user) removePushToken(user.uid);
+    }
+    window.dispatchEvent(new CustomEvent(CHANGED_EVENT, { detail: { enabled: !notificationsEnabled } }));
   };
 
+  // Push: si se apaga, este celular deja de recibir notificaciones (con la app abierta o cerrada)
   const togglePush = () => {
     const newState = !pushEnabled;
     setPushEnabled(newState);
     localStorage.setItem('push_enabled', String(newState));
+    if (!user) return;
+    if (newState) syncPushToken(user.uid);
+    else removePushToken(user.uid);
   };
 
   const toggleInApp = () => {
@@ -434,7 +453,7 @@ export default function ConfigPage() {
                 </div>
                 <div className="text-left">
                   <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ACTIVAR_NOTIFICACIONES' : 'Activar Notificaciones'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'PERMITIR_ALERTAS_LOCALES' : 'Permitir alertas locales'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'TODOS_LOS_AVISOS_EN_ESTE_CELULAR' : 'Todos los avisos en este celular'}</p>
                 </div>
               </div>
               <button 
@@ -453,7 +472,7 @@ export default function ConfigPage() {
                 </div>
                 <div className="text-left">
                   <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'NOTIFICACION_PUSH' : 'Notificación Push'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'SEGUNDO_PLANO' : 'Segundo plano'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'EN_LA_BARRA_AUN_CON_LA_APP_CERRADA' : 'En la barra del celular, aun con FLOWI cerrada'}</p>
                 </div>
               </div>
               <button 
@@ -473,7 +492,7 @@ export default function ConfigPage() {
                 </div>
                 <div className="text-left">
                   <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'NOTIFICACION_IN_APP' : 'Notificación In-App'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'MENSAJES_TOAST' : 'Mensajes toast'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'MENSAJE_Y_CAMPANA_CON_LA_APP_ABIERTA' : 'Mensaje y campana con FLOWI abierta'}</p>
                 </div>
               </div>
               <button 

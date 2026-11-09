@@ -1,8 +1,9 @@
 // Suscripción a notificaciones push (Firebase Cloud Messaging, gratis) para avisar con la app
-// cerrada. Cada celular guarda su "token" en el perfil; la tarea programada de GitHub
-// (push/send-reminders.mjs) los usa para enviar los recordatorios.
+// cerrada. Cada celular guarda su "token" en el perfil; la función enviarRecordatorios de
+// Firebase (functions/reminders.mjs) los usa para enviar los recordatorios.
 import { arrayRemove, arrayUnion, doc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
+import { pushOn } from './notifPrefs';
 
 const TOKEN_STORAGE = 'flowi_push_token';
 const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
@@ -24,7 +25,7 @@ async function currentToken(): Promise<string | null> {
 // Registra este celular para recibir avisos (no hace nada si no hay permiso o falta la clave)
 export async function syncPushToken(uid: string): Promise<void> {
   try {
-    if (localStorage.getItem('notifications_enabled') === 'false') return;
+    if (!pushOn()) return;
     const token = await currentToken();
     if (!token || token === storedToken()) return;
     const previous = storedToken();

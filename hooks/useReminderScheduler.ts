@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { Reminder } from '@/lib/firestore';
 import { scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
+import { inAppOn } from '@/lib/notifPrefs';
 import { updateReminder } from '@/lib/firestore';
 import { dateKey } from '@/lib/reminderDue';
 
@@ -137,7 +138,7 @@ export function useReminderScheduler(reminders: Reminder[], budgetPercent: numbe
         }
 
         // 2. Notificación in-app
-        if (r.inAppEnabled) {
+        if (r.inAppEnabled && inAppOn()) {
           pushInApp({ 
             title: r.title, 
             body: r.description || 'Recordatorio de Flowi', 
