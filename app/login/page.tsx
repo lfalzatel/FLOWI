@@ -222,7 +222,10 @@ export default function LoginPage() {
           </div>
           <div className="max-w-sm mx-auto md:mx-0 space-y-2">
             <GoogleButton onClick={handleGoogleLogin} />
-            <p className="text-white/40 text-xs">Al continuar, aceptas los términos y condiciones.</p>
+            <p className="text-white/40 text-xs">
+              Al continuar, aceptas los <a href="/legal#terminos" className="underline hover:text-white/70">términos de uso</a> y
+              la <a href="/legal#privacidad" className="underline hover:text-white/70">política de privacidad</a>.
+            </p>
           </div>
           <a href="#como-funciona" className="hidden md:inline-flex items-center gap-1 text-sm text-white/50 hover:text-white">
             Mira cómo funciona <ChevronDown className="w-4 h-4" />
@@ -302,6 +305,11 @@ export default function LoginPage() {
 
       <footer className={`${section} pb-10 text-center text-xs text-white/35 space-y-1`}>
         <p>FLOWI · Tu dinero, en flujo · Hecha en Colombia</p>
+        <p>
+          <a href="/legal#privacidad" className="hover:text-white/70">Privacidad</a>
+          {' · '}
+          <a href="/legal#terminos" className="hover:text-white/70">Términos</a>
+        </p>
         <p>
           ¿Dudas o sugerencias?{' '}
           <a href="https://wa.me/573104604592" target="_blank" rel="noopener noreferrer" className="text-emerald-400/80 hover:text-emerald-300">Escríbenos por WhatsApp</a>

@@ -19,7 +19,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { CURRENCIES } from '@/lib/format';
 import { 
   ArrowLeft, Sun, Moon, Terminal, Layers, Zap, Palette,
-  User, Wallet, Bell, Shield, RefreshCw, Sparkles,
+  User, Wallet, Bell, Shield, ShieldCheck, RefreshCw, Sparkles,
   ChevronRight, ChevronDown, ChevronUp, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
   FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass
@@ -920,6 +920,19 @@ export default function ConfigPage() {
 
           {openSections.privacidad && (
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-red-500/20 rounded-none bg-deep animate-fade-in' : 'glass-card border-red-500/20 rounded-2xl animate-fade-in'}`}>
+            <button type="button" onClick={() => router.push('/legal')}
+                    className={`w-full flex items-center justify-between p-4 border-b hover:bg-white/5 transition-colors ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-emerald-500/20 rounded-none bg-emerald-500/5' : 'rounded-xl bg-emerald-500/10'}`}>
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-emerald-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'PRIVACIDAD_Y_TERMINOS' : 'Política de privacidad y términos'}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-emerald-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'COMO_CUIDAMOS_TUS_DATOS' : 'Cómo cuidamos tus datos y las reglas del plan'}</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-text-muted" />
+            </button>
             <div className={`w-full flex items-center justify-between p-4 border-b opacity-50 cursor-not-allowed ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-blue-500/20 rounded-none bg-blue-500/5' : 'rounded-xl bg-blue-500/10'}`}>

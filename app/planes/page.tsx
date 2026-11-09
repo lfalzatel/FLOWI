@@ -165,6 +165,7 @@ export default function PlanesPage() {
         <p className="text-[11px] text-text-muted text-center leading-relaxed">
           Pagas una sola vez con Nequi, PSE, Bancolombia o tarjeta a través de Wompi. No es un cobro automático:
           cuando se acerque el fin de tu plan te avisamos para renovar. FLOWI no ve ni guarda los datos de tu pago.
+          {' '}Al pagar aceptas los <Link href="/legal#terminos" className="underline hover:text-text-secondary">términos de uso</Link>.
         </p>
       </main>
       <BottomNav />
