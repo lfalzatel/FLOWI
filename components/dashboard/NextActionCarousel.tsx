@@ -76,7 +76,7 @@ export function NextActionCarousel({ actions, today, currency, onSkip, onRefresh
   return (
     <div onClickCapture={pause}>
       <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd}>
-        <div ref={trackRef} className="flex" style={{
+        <div ref={trackRef} className="flex items-start" style={{
           transform: `translateX(calc(${-index * 100}% + ${drag}px))`,
           transition: drag ? 'none' : 'transform 450ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}>
@@ -88,7 +88,7 @@ export function NextActionCarousel({ actions, today, currency, onSkip, onRefresh
           ))}
         </div>
       </div>
-      <div className="mt-2 flex justify-center gap-1.5" role="tablist" aria-label="Acciones sugeridas">
+      <div className="mt-1.5 flex justify-center gap-1.5" role="tablist"aria-label="Acciones sugeridas">
         {actions.map((a, i) => (
           <button key={a.id} type="button" role="tab" aria-selected={i === index} aria-label={`Ver ${i + 1} de ${n}`}
                   onClick={() => { pause(); setIndex(i); }}

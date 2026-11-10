@@ -60,15 +60,15 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
 
   const body = (
     <>
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${alert ? 'bg-red-500/15' : isSupport ? 'bg-pink-500/15' : 'bg-accent/20'}`}>
+      <div className={`w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center shrink-0 ${alert? 'bg-red-500/15' : isSupport ? 'bg-pink-500/15' : 'bg-accent/20'}`}>
         <Icon className={`w-5 h-5 ${alert ? 'text-red-400' : isSupport ? 'text-pink-400' : 'text-accent'}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{eyebrow}</p>
-        <p className={`text-sm font-bold ${alert ? 'text-red-400' : isTechTheme ? 'text-accent' : 'text-text-primary'} ${isTechTheme ? 'uppercase font-mono' : 'font-syne'}`}>
+        <p className="hidden md:block text-[10px] font-bold uppercase tracking-wider text-text-muted">{eyebrow}</p>
+        <p className={`text-sm font-bold line-clamp-1 md:line-clamp-none ${alert ? 'text-red-400' : isTechTheme ? 'text-accent' : 'text-text-primary'} ${isTechTheme ? 'uppercase font-mono' : 'font-syne'}`}>
           {action.title}
         </p>
-        <p className="text-xs text-text-secondary leading-snug mt-0.5">{action.detail}</p>
+        <p className="text-xs text-text-secondary leading-snug mt-0.5 line-clamp-2 md:line-clamp-none">{action.detail}</p>
       </div>
       <ChevronRight className={`w-4 h-4 shrink-0 ${alert ? 'text-red-400' : 'text-accent'}`} />
     </>
@@ -77,7 +77,7 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
   const box = `flex items-center gap-1 ${isTechTheme ? 'rounded-none border' : 'rounded-3xl border'} ${alert
     ? 'bg-red-500/5 border-red-500/30'
     : isTechTheme ? 'bg-accent/10 border-accent/40' : 'bg-gradient-to-r from-accent/15 to-accent/5 border-accent/25'}`;
-  const inner = 'flex-1 min-w-0 flex items-center gap-3 p-4 text-left';
+  const inner = 'flex-1 min-w-0 flex items-center gap-3 p-3 md:p-4 text-left';
 
   return (
     <>

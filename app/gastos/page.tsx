@@ -103,7 +103,9 @@ export default function GastosPage() {
             </button>
 
             <button
-              onClick={() => setShowAdd(true)}
+              onClick={() => (window.matchMedia('(min-width: 768px)').matches
+                ? window.dispatchEvent(new CustomEvent('flowi-open-quick-actions')) // computador: el mismo menú del + del celular
+                : setShowAdd(true))}
               className={`flex items-center gap-2 px-4 py-2.5 transition-all
                           bg-gradient-to-br from-accent to-accent-dim
                           ${theme === 'light' ? 'text-white' : 'text-black'}
