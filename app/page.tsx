@@ -45,7 +45,6 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
-import { PeriodChip } from '@/components/dashboard/PeriodChip';
 import { useTheme } from '@/components/ThemeProvider';
 
 let hasShownSplashInThisJSContext = false;
@@ -303,20 +302,14 @@ export default function DashboardPage() {
 
         {/* Greeting */}
         <div className="flex items-center justify-between gap-2">
-          {/* Celular: una sola línea. Computador: como antes, saludo arriba y nombre grande */}
           <div className="min-w-0">
-            <p className={`hidden md:block text-sm ${isTechTheme ? 'font-mono text-accent/70 tracking-wider' : 'text-text-secondary'}`}>{greeting} 👋</p>
-            <h1 className={`truncate ${isTechTheme ? 'font-mono font-bold text-lg md:text-2xl text-accent uppercase tracking-wider md:tracking-widest' : 'font-syne font-bold text-lg md:text-2xl text-accent'}`}>
-              <span className="md:hidden">{greeting}, </span>{profile?.name?.split(' ')[0] || 'Usuario'}<span className="md:hidden"> 👋</span>
+            <p className={`text-xs md:text-sm ${isTechTheme ? 'font-mono text-accent/70 tracking-wider' : 'text-text-secondary'}`}>{greeting} 👋</p>
+            <h1 className={`truncate ${isTechTheme ? 'font-mono font-bold text-xl md:text-2xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-xl md:text-2xl text-accent'}`}>
+              {profile?.name?.split(' ')[0] || 'Usuario'}
             </h1>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Celular: el periodo como un botón pequeño (el filtro completo se ve en computador) */}
-            <div className="md:hidden">
-              <PeriodChip transactions={transactions} filterType={filterType} filterValue={filterValue}
-                          onChangeType={setFilterType} onChangeValue={setFilterValue} />
-            </div>
             {/* Download Report Button */}
             <button
               onClick={() => setShowExport(true)}
@@ -354,16 +347,14 @@ export default function DashboardPage() {
                               onSkip={skipAction} onRefresh={refresh} onUsed={markTipSeen} />
         ))}
 
-        {/* Filtro completo solo en computador; en el celular está en el botón del periodo, arriba */}
-        <div className="hidden md:block">
-          <DateFilter
-            transactions={transactions}
-            filterType={filterType}
-            filterValue={filterValue}
-            onChangeType={setFilterType}
-            onChangeValue={setFilterValue}
-          />
-        </div>
+        {/* Filter */}
+        <DateFilter
+          transactions={transactions}
+          filterType={filterType}
+          filterValue={filterValue}
+          onChangeType={setFilterType}
+          onChangeValue={setFilterValue}
+        />
 
         {/* En PC dos columnas: a la izquierda las cifras del día a día, a la derecha el detalle.
             En el celular queda una sola columna en el mismo orden de siempre. */}

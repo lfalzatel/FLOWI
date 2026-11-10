@@ -15,7 +15,8 @@ export const GROUP_BUDGET_CONFIG: Record<string, { icon: string; pillar: BudgetP
   'Mercado': { icon: '🛒', pillar: 'necesidades', weight: 0.10 },
   'Transporte': { icon: '🚌', pillar: 'necesidades', weight: 0.06 },
   'Salud y cuidado': { icon: '🏥', pillar: 'necesidades', weight: 0.04 },
-  'Obligaciones': { icon: '🧾', pillar: 'necesidades', weight: 0.04 },
+  'Obligaciones': { icon: '🧾', pillar: 'necesidades', weight: 0.03 },
+  'Impuestos': { icon: '🏛️', pillar: 'necesidades', weight: 0.01 },
   'Educación': { icon: '📚', pillar: 'necesidades', weight: 0.03 },
   'Familia y mascotas': { icon: '👨‍👩‍👧', pillar: 'necesidades', weight: 0.03 },
   'Comer fuera': { icon: '🍽️', pillar: 'deseos', weight: 0.06 },
@@ -86,7 +87,8 @@ function getGroupByKeywords(text: string): string {
   if (/transporte|taxi|\bbus\b|gasolina|parqueadero|peaje|soat|moto|carro|vehiculo/.test(text)) return 'Transporte';
   if (/salud|medic|farmacia|drogueria|doctor|odontolog|\beps\b|belleza|peluquer|barber/.test(text)) return 'Salud y cuidado';
   if (/ahorro|inversion|cdt|acciones|natillera|pension voluntaria/.test(text)) return 'Ahorro e inversión';
-  if (/banco|tarjeta|credito|prestamo|cuota|impuesto|seguro|deuda|interes/.test(text)) return 'Obligaciones';
+  if (/impuesto|4x1000|\biva\b|predial/.test(text)) return 'Impuestos';
+  if (/banco|tarjeta|credito|prestamo|cuota|seguro|deuda|interes/.test(text)) return 'Obligaciones';
   if (/netflix|spotify|youtube|suscripcion|\bapps?\b/.test(text)) return 'Suscripciones';
   if (/deporte|\bgym\b|gimnasio|futbol|ciclismo|\bbici|running/.test(text)) return 'Deporte';
   if (/ropa|calzado|zapato|tecnologia|regalo/.test(text)) return 'Compras';

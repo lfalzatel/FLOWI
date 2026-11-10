@@ -29,7 +29,7 @@ export interface PaymentMethodDef {
 // dividen en obligaciones (lo que hay que pagar sí o sí) y ahorro e inversión, como en la regla
 // 50/30/20 de Elizabeth Warren. El pilar de cada subcategoría está en lib/categoryGroups.ts.
 export const EXPENSE_GROUPS = [
-  'Mercado', 'Comer fuera', 'Hogar y servicios', 'Transporte', 'Salud y cuidado', 'Obligaciones',
+  'Mercado', 'Comer fuera', 'Hogar y servicios', 'Transporte', 'Salud y cuidado', 'Obligaciones', 'Impuestos',
   'Familia y mascotas', 'Educación', 'Compras', 'Suscripciones', 'Ocio y viajes', 'Deporte',
   'Ahorro e inversión', 'Negocio', 'Otros',
 ];
@@ -164,8 +164,16 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
     ['Deudas', '🧾', '#F97316'],
     ['Intereses', '📉', '#EF4444'],
     ['Cuota de manejo', '🧾', '#64748B'],
-    ['Impuestos', '🏛️', '#EF4444'],
     ['Seguros', '🛡️', '#3B82F6'],
+  ]),
+  // En Colombia hay varios: el 4x1000 (GMF) en los movimientos del banco, el IVA, el predial…
+  ...g('Impuestos', [
+    ['4x1000', '🧾', '#64748B'],
+    ['IVA', '🧾', '#0EA5E9'],
+    ['Predial', '🏠', '#F59E0B'],
+    ['Impuesto vehicular', '🚗', '#64748B'],
+    ['Declaración de renta', '📄', '#8B5CF6'],
+    ['Impuestos', '🏛️', '#EF4444'],
   ]),
   ...g('Ahorro e inversión', [
     ['Ahorro', '🐷', '#F472B6'],
@@ -573,8 +581,7 @@ export function softHyphenate(label: string): string {
 
 // Busca icono y color para cualquier etiqueta guardada (categoría, comercio, medio de pago o antigua)
 // Nombres viejos o repetidos que son el mismo comercio ("Play Store" es la tienda Google Play)
-// "4x1000" es un impuesto (gravamen a los movimientos financieros): queda en Impuestos
-const ALIASES: Record<string, string> = { 'play store': 'Google Play', playstore: 'Google Play', '4x1000': 'Impuestos' };
+const ALIASES: Record<string, string> = { 'play store': 'Google Play', playstore: 'Google Play', gmf: '4x1000', 'cuatro por mil': '4x1000' };
 
 // Clave normalizada y unificada: "Play Store" y "Google Play" dan lo mismo
 export function aliasKey(text: string): string {
