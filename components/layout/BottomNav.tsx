@@ -15,6 +15,9 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { NoteModal } from '@/components/notes/NoteModal';
 import { InvestmentFormModal } from '@/components/investments/InvestmentFormModal';
+import { SavingsFormModal } from '@/components/investments/SavingsFormModal';
+import { InvestmentKindSheet } from '@/components/investments/InvestmentKindSheet';
+import type { InvestmentKind } from '@/lib/firestore';
 import { QuickAction, QuickActionsSheet } from '@/components/layout/QuickActionsSheet';
 
 const navItems = [
@@ -50,7 +53,8 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     else if (a === 'extracto') router.push('/servicios/importar');
     else setQuick(a);
   };
-  const closeQuick = () => setQuick(null);
+  const [investKind, setInvestKind] = useState<InvestmentKind | null>(null);
+  const closeQuick = () => { setQuick(null); setInvestKind(null); };
   useEffect(() => {
     const open = () => setShowSheet(true);
     window.addEventListener('flowi-open-quick-actions', open);
@@ -180,7 +184,10 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       {quick === 'deuda' && <AddDebtModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}
       {quick === 'recordatorio' && <ReminderFormModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}
       {quick === 'nota' && <NoteModal note={null} onClose={closeQuick} onSuccess={closeQuick} />}
-      {quick === 'cdt' && <InvestmentFormModal currency={profile?.currency || 'COP'} onClose={closeQuick} />}
+      {/* Inversión: primero se elige el tipo (CDT, ahorro con intereses, acciones y fondos o pensión) */}
+      {quick === 'inversion' && !investKind && <InvestmentKindSheet onPick={setInvestKind} onClose={closeQuick} />}
+      {quick === 'inversion' && investKind === 'cdt' && <InvestmentFormModal currency={profile?.currency || 'COP'} onClose={closeQuick} />}
+      {quick === 'inversion' && investKind && investKind !== 'cdt' && <SavingsFormModal kind={investKind} onClose={closeQuick} />}
 
       {/* Modal Tradicional o Pre-llenado por Voz */}
       {showAdd && (

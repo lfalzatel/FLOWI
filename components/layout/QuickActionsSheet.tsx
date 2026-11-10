@@ -7,7 +7,7 @@ import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, 
 import { useTheme } from '@/components/ThemeProvider';
 import { getAiKey } from '@/lib/aiAssist';
 
-export type QuickAction = 'voz' | 'gasto' | 'ingreso' | 'deuda' | 'recordatorio' | 'nota' | 'cdt' | 'extracto';
+export type QuickAction = 'voz' | 'gasto' | 'ingreso' | 'deuda' | 'recordatorio' | 'nota' | 'inversion' | 'extracto';
 
 const ACTIONS: { id: Exclude<QuickAction, 'voz'> | 'foto'; label: string; icon: any; color: string }[] = [
   { id: 'gasto',        label: 'Gasto',            icon: TrendingDown,    color: 'text-rose-400 bg-rose-500/10' },
@@ -17,7 +17,7 @@ const ACTIONS: { id: Exclude<QuickAction, 'voz'> | 'foto'; label: string; icon: 
   { id: 'deuda',        label: 'Deuda o abono',    icon: CreditCard,      color: 'text-orange-400 bg-orange-500/10' },
   { id: 'recordatorio', label: 'Recordatorio',     icon: Bell,            color: 'text-pink-400 bg-pink-500/10' },
   { id: 'nota',         label: 'Nota',             icon: StickyNote,      color: 'text-blue-400 bg-blue-500/10' },
-  { id: 'cdt',          label: 'CDT',              icon: Landmark,        color: 'text-teal-400 bg-teal-500/10' },
+  { id: 'inversion',    label: 'Inversión',        icon: Landmark,        color: 'text-teal-400 bg-teal-500/10' },
 ];
 
 interface Props {
