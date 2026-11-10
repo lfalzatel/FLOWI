@@ -18,7 +18,7 @@ import {
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
   Sun, Monitor, Terminal, Moon, Layers, Heart, Compass,
-  Crown,
+  Crown, ShieldCheck,
 } from 'lucide-react';
 
 const menuItems = [
@@ -31,6 +31,7 @@ const menuItems = [
   { icon: Crown,      label: 'Planes y Premium',  href: '/planes',        divider: false, soon: false },
   { icon: Settings,   label: 'Configuración',     href: '/configuracion', divider: false, soon: false },
   { icon: Heart,      label: 'Apoyar a FLOWI',    href: '/configuracion#apoyar', divider: false, soon: false },
+  { icon: ShieldCheck, label: 'Privacidad y términos', href: '/legal',       divider: true,  soon: false },
 ];
 
 export function ProfileCapsule() {

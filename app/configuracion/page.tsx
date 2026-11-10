@@ -972,6 +972,13 @@ export default function ConfigPage() {
         </div>
         </div>
 
+        {/* Siempre visible, sin abrir ninguna sección */}
+        <p className={`text-center text-xs pt-2 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
+          <a href="/legal#privacidad" className="underline hover:text-accent">Política de privacidad</a>
+          {' · '}
+          <a href="/legal#terminos" className="underline hover:text-accent">Términos de uso</a>
+        </p>
+
       </main>
       
       <BottomNav />
