@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isCatalogLabel } from '@/lib/categories';
 import { useAuth } from './useAuth';
 import { CustomCategory, BASE_CATEGORIES } from '@/lib/firestore';
 import { CUSTOM_GROUP, MERCHANTS, TransactionKind } from '@/lib/categories';
@@ -101,6 +102,7 @@ export function useCategories() {
   });
 
   customCategories.forEach(cat => {
+    if (isCatalogLabel(cat.label)) return;
     allCategoriesMap.set(cat.label, {
       label: cat.label,
       icon: cat.icon,

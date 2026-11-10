@@ -142,6 +142,7 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
     ['Colegio / pensión escolar', '🏫', '#8B5CF6'],
     ['Uniformes', '👔', '#6366F1'],
     ['Cuota alimentaria', '⚖️', '#64748B'],
+    ['Mesada', '💵', '#22C55E'],
     ['Ayuda familiar', '🤝', '#EC4899'],
     ['Cumpleaños', '🎂', '#EC4899'],
     ['Navidad / novenas', '🎄', '#22C55E'],
@@ -587,6 +588,12 @@ const ALIASES: Record<string, string> = { 'play store': 'Google Play', playstore
 export function aliasKey(text: string): string {
   const key = normalizeText(text);
   return ALIASES[key] ? normalizeText(ALIASES[key]) : key;
+}
+
+/** ¿El nombre ya existe en el catálogo (categoría o comercio)? Así una personalizada igual no se repite. */
+export function isCatalogLabel(label: string): boolean {
+  const key = aliasKey(label);
+  return BASE_CATEGORY_DEFS.some(c => normalizeText(c.label) === key) || MERCHANTS.some(m => normalizeText(m.label) === key);
 }
 
 export function canonicalLabel(label: string): string {

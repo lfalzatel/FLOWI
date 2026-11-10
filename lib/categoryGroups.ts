@@ -2,7 +2,7 @@
 // (los mismos que muestra el selector de categorías), para que Inicio, Presupuestos y
 // "Mis Categorías" sumen y agrupen igual.
 import {
-  CUSTOM_GROUP, EXPENSE_CATEGORY_DEFS, EXPENSE_GROUPS, INCOME_CATEGORY_DEFS, MERCHANTS, aliasKey, normalizeText
+  CUSTOM_GROUP, EXPENSE_CATEGORY_DEFS, EXPENSE_GROUPS, INCOME_CATEGORY_DEFS, MERCHANTS, aliasKey, isCatalogLabel, normalizeText
 } from '@/lib/categories';
 
 export type BudgetPillar = 'necesidades' | 'deseos' | 'ahorro';
@@ -115,7 +115,7 @@ export function createCategoryResolver(userCategories: { label: string; group?: 
     const key = aliasKey(rawLabel);
 
     const customLabel = custom.get(key);
-    if (customLabel) return { label: customLabel, group: CUSTOM_GROUP };
+    if (customLabel && !isCatalogLabel(customLabel)) return { label: customLabel, group: CUSTOM_GROUP };
 
     // Los ingresos se agrupan con los grupos de ingreso del catálogo (Trabajo, Negocio...)
     if (type === 'ingreso') {
