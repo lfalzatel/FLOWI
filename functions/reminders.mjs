@@ -108,7 +108,9 @@ function isCoveredByExpense(r, occDate, expenses, shared) {
 
 async function morningSummary(uid, reminders, investments, todayLocal) {
   const today = Date.UTC(todayLocal.getUTCFullYear(), todayLocal.getUTCMonth(), todayLocal.getUTCDate());
-  const candidates = reminders.filter(r => r.pushEnabled !== false && (r.type === 'monthly' || r.type === 'yearly'));
+  // Solo pagos (no eventos ni tareas): igual que isPaymentReminder en lib/reminderDue.ts
+  const isPayment = (r) => typeof r.isPayment === 'boolean' ? r.isPayment : ((r.amount || 0) > 0 || !!r.category || !!r.merchant);
+  const candidates = reminders.filter(r => r.pushEnabled !== false && (r.type === 'monthly' || r.type === 'yearly') && isPayment(r));
   if (!candidates.length && !investments.length) return null;
 
   let expenses = null;
