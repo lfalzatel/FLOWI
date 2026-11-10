@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useReminders } from '@/hooks/useReminders';
-import { getPendingDues, dueLabel, ReminderDue } from '@/lib/reminderDue';
+import { getPendingDues, dueLabel, eventDueLabel, isPaymentReminder, ReminderDue } from '@/lib/reminderDue';
 import { useData } from '@/components/DataProvider';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
 import { Bell, Clock, Info, MessageCircle } from 'lucide-react';
@@ -303,7 +303,7 @@ export function Header() {
                   {upcomingReminders.length > 0 && (
                     <>
                       <p className={`text-[10px] text-text-muted uppercase tracking-wider font-semibold px-2 pt-2 pb-1 ${isTechTheme ? 'font-mono' : ''}`}>
-                        Pagos pendientes
+                        Pendientes
                       </p>
                       {upcomingReminders.map((due) => {
                         const { reminder, daysLeft } = due;
@@ -317,14 +317,14 @@ export function Header() {
                           <div className="flex-1 min-w-0">
                             <p className={`text-sm font-medium text-text-primary truncate ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? `>_ ${reminder.title}` : reminder.title}</p>
                             <p className={`text-xs mt-0.5 truncate ${overdue ? 'text-red-400 font-semibold' : 'text-text-muted'} ${isTechTheme ? 'font-mono' : ''}`}>
-                              {dueLabel(daysLeft)}
+                              {isPaymentReminder(reminder) ? dueLabel(daysLeft) : eventDueLabel(daysLeft)}
                             </p>
                           </div>
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowDropdown(false); setPayingDue(due); }}
                             className={`shrink-0 px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${isTechTheme ? 'rounded-none border border-accent/50 text-accent font-mono uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
                           >
-                            Ya lo pagué
+                            {isPaymentReminder(reminder) ? 'Ya lo pagué' : 'Listo ✓'}
                           </button>
                         </div>
                         );

@@ -20,7 +20,7 @@ import { syncPushToken } from '@/lib/push';
 
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
-import { getPendingDue, dueLabel, ReminderDue, isCategoryShared, lastPaymentFor } from '@/lib/reminderDue';
+import { getPendingDue, dueLabel, eventDueLabel, isPaymentReminder, ReminderDue, isCategoryShared, lastPaymentFor } from '@/lib/reminderDue';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { speakText } from '@/lib/voiceParser';
 
@@ -356,14 +356,14 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
       {due && (
         <div className={`mt-3 flex items-center justify-between gap-3 px-3 py-2.5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${due.daysLeft < 0 ? 'bg-red-500/10 border border-red-500/25' : 'bg-accent/5 border border-accent/15'}`}>
           <span className={`text-xs font-semibold ${due.daysLeft < 0 ? 'text-red-400' : 'text-text-secondary'}`}>
-            {dueLabel(due.daysLeft)} · {due.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
+            {(isPaymentReminder(reminder) ? dueLabel : eventDueLabel)(due.daysLeft)} · {due.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
             {(reminder.amount || lastPay?.amount) ? <span className="text-text-muted font-normal"> · ${(reminder.amount || lastPay!.amount).toLocaleString('es-CO')}</span> : null}
           </span>
           <button
             onClick={(e) => { e.stopPropagation(); onPay(due); }}
             className={`shrink-0 px-4 py-2 text-xs font-bold ${isTechTheme ? 'rounded-none border border-accent text-accent uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
           >
-            Ya lo pagué
+            {isPaymentReminder(reminder) ? 'Ya lo pagué' : 'Listo ✓'}
           </button>
         </div>
       )}

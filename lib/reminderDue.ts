@@ -11,9 +11,21 @@ const UPCOMING_DAYS = 7;
 export const PAYABLE_TYPES: Reminder['type'][] = ['once', 'weekly', 'monthly', 'yearly'];
 
 // Un recordatorio anual sin categoría es una fecha (cumpleaños), no un pago
-export function isPayable(r: Reminder): boolean {
+// ¿Es un pago (dinero) o un evento/tarea (reunión, cita, llevar algo)?
+export function isPaymentReminder(r: Reminder): boolean {
+  if (typeof r.isPayment === 'boolean') return r.isPayment;
+  return (r.amount || 0) > 0 || !!r.category || !!r.merchant;
+}
+
+// Recordatorios con fecha que se pueden marcar (pagado o hecho): salen en la campana
+export function isTrackable(r: Reminder): boolean {
   if (!PAYABLE_TYPES.includes(r.type)) return false;
   return r.type !== 'yearly' || !!r.category;
+}
+
+// Solo los pagos cuentan como plata: Próximos compromisos, Hoy puedes gastar, resumen de pagos
+export function isPayable(r: Reminder): boolean {
+  return isTrackable(r) && isPaymentReminder(r);
 }
 
 export function dateKey(d: Date): string {
@@ -119,7 +131,7 @@ export interface ReminderDue {
 
 // El vencimiento pendiente más antiguo (vencido o dentro de los próximos 7 días), o null
 export function getPendingDue(r: Reminder, now = new Date(), transactions: Transaction[] = [], sharedCategory = false): ReminderDue | null {
-  if (!r.active || !isPayable(r)) return null;
+  if (!r.active || !isTrackable(r)) return null;
   const today = startOfDay(now);
   const created = toDate(r.createdAt);
   const since = created && startOfDay(created) > TRACKING_START ? startOfDay(created) : TRACKING_START;
@@ -181,6 +193,15 @@ export function isCategoryShared(r: Reminder, reminders: Reminder[]): boolean {
   if (!r.category) return false;
   const c = normalize(r.category);
   return reminders.some(o => o !== r && o.active && o.category && normalize(o.category) === c);
+}
+
+// Para eventos y tareas: "Es hoy", "Fue ayer"…
+export function eventDueLabel(daysLeft: number): string {
+  if (daysLeft < -1) return `Fue hace ${-daysLeft} días`;
+  if (daysLeft === -1) return 'Fue ayer';
+  if (daysLeft === 0) return '¡Es hoy!';
+  if (daysLeft === 1) return 'Mañana';
+  return `Faltan ${daysLeft} días`;
 }
 
 export function dueLabel(daysLeft: number): string {

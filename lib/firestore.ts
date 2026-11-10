@@ -351,6 +351,9 @@ export interface ReminderAlert {
 export interface Reminder {
   id?: string;
   userId: string;
+  // true = pago (dinero); false = evento o tarea (reunión, cita…). Si falta, se deduce:
+  // es pago si tiene valor, categoría o comercio (ver isPaymentReminder en lib/reminderDue.ts)
+  isPayment?: boolean;
   title: string;               // "Pagar arriendo"
   description?: string;        // nota opcional
   category?: string;           // mismo tipo que Transaction.category

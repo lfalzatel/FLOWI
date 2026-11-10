@@ -60,6 +60,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const thisMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   const [startMonth, setStartMonth] = useState<string>(initial?.startMonth || thisMonthKey);
   const [amountText, setAmountText] = useState(initial?.amount ? Number(initial.amount).toLocaleString('es-CO') : '');
+  // ¿Es un pago o un evento/tarea? undefined = se deduce (valor, categoría o comercio)
+  const [paymentChoice, setPaymentChoice] = useState<boolean | undefined>(initial?.isPayment);
 
   const { allCategories: categoryOptions, merchantOptions, expenseCategories } = useCategories();
   const allCategories = [...categoryOptions, ...merchantOptions.filter(mer => !categoryOptions.some(c => c.label === mer.label))];
@@ -131,6 +133,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
       };
 
       if (category.trim()) data.category = category.trim();
+      if (paymentChoice !== undefined) data.isPayment = paymentChoice;
       data.merchant = merchant.trim() || null;
       // Creado desde un gasto: ese vencimiento ya está pagado
       if (!reminder && prefill?.paidDates?.length) data.paidDates = prefill.paidDates;
@@ -182,6 +185,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
     setAlerts(alerts.map(a => a.id === id ? { ...a, [field]: value } : a));
   };
 
+  const isPaymentNow = paymentChoice ?? (Number(amountText.replace(/\D/g, '')) > 0 || !!category || !!merchant);
   const selectedCategoryData = allCategories.find(c => c.label === category);
   // Sugerencia de categoría según el título (historial propio y reglas del dictado), sin IA
   const suggestion = useMemo(
@@ -246,8 +250,24 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
               )}
             </div>
 
+            {/* ¿Es un pago? (si no, es un evento o tarea: reunión, cita, llevar algo) */}
+            {type !== 'budget_alert' && type !== 'daily' && (
+              <button type="button" onClick={() => setPaymentChoice(!isPaymentNow)}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 border text-left ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-xl border-glass-border'}`}>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-text-primary">¿Es un pago?</span>
+                  <span className="block text-[11px] text-text-muted">
+                    {isPaymentNow ? 'Cuenta en tus compromisos y te pregunto "Ya lo pagué"' : 'Evento o tarea: te aviso y lo marcas como "Listo"'}
+                  </span>
+                </span>
+                <span className={`w-11 h-6 shrink-0 rounded-full relative transition-colors ${isPaymentNow ? 'bg-accent' : 'bg-gray-600'}`}>
+                  <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${isPaymentNow ? 'translate-x-5' : ''}`} />
+                </span>
+              </button>
+            )}
+
             {/* Categoría | Valor */}
-            {type !== 'budget_alert' && (
+            {type !== 'budget_alert' && isPaymentNow && (
               <div className={`grid gap-2 ${hasAmount ? 'grid-cols-[1.3fr_1fr]' : 'grid-cols-1'}`}>
                 <div className="min-w-0">
                   <span className={lbl}>Categoría</span>
@@ -271,7 +291,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
               </div>
             )}
 
-            {type !== 'budget_alert' && category && merchantOptions2.length > 0 && (
+            {type !== 'budget_alert' && isPaymentNow && category && merchantOptions2.length > 0 && (
               <div>
                 <span className={lbl}>¿Cuál? <span className="normal-case opacity-70">(opcional)</span></span>
                 <div className="flex flex-wrap gap-1.5">
