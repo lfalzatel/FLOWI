@@ -45,9 +45,9 @@ export function QuickActionsSheet({ onClose, onAction, onReceipt }: Props) {
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className={`fixed inset-0 z-[90] flex items-end justify-center ${isTechTheme ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label="¿Qué quieres registrar?">
+    <div className={`fixed inset-0 z-[90] flex items-end md:items-center justify-center md:p-4 ${isTechTheme ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label="¿Qué quieres registrar?">
       <div className={`absolute inset-0 ${isLight ? 'bg-black/20' : 'bg-black/50'}`} onClick={onClose} aria-hidden="true" />
-      <div className={`relative w-full max-w-md glass-dropdown p-5 pb-8 animate-fade-in-up ${isTechTheme ? 'rounded-none border-t border-accent/50' : 'rounded-t-[32px]'}`}>
+      <div className={`relative w-full max-w-md glass-dropdown p-5 pb-8 animate-fade-in-up ${isTechTheme ? 'rounded-none border-t md:border border-accent/50' : 'rounded-t-[32px] md:rounded-[32px]'}`}>
         <div className={`mx-auto mb-4 h-1 w-10 bg-white/20 ${isTechTheme ? 'hidden' : 'rounded-full'}`} />
         <div className="flex items-center justify-between mb-4">
           <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase tracking-wide' : 'font-syne text-text-primary'}`}>¿Qué quieres registrar?</h2>
