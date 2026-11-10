@@ -57,9 +57,15 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const closeQuick = () => { setQuick(null); setInvestKind(null); };
   useEffect(() => {
     const open = () => setShowSheet(true);
+    // Desde el formulario de gasto/ingreso: "Dictar" o "Desde foto o pantallazo"
+    const voice = (e: Event) => openVoice((e as CustomEvent<{ file?: File | 'no-key' }>).detail?.file ?? null);
     window.addEventListener('flowi-open-quick-actions', open);
-    return () => window.removeEventListener('flowi-open-quick-actions', open);
-  }, []);
+    window.addEventListener('flowi-open-voice', voice);
+    return () => {
+      window.removeEventListener('flowi-open-quick-actions', open);
+      window.removeEventListener('flowi-open-voice', voice);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';

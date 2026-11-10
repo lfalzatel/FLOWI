@@ -2,7 +2,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
-import { X, LayoutGrid, Plus, BellPlus } from 'lucide-react';
+import { X, LayoutGrid, Plus, BellPlus, Mic, Camera } from 'lucide-react';
+import { getAiKey } from '@/lib/aiAssist';
+import { receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories, CategoryOption } from '@/hooks/useCategories';
 import { useData } from '@/components/DataProvider';
@@ -46,7 +48,9 @@ const VISIBLE_MERCHANTS = 8;
 const VISIBLE_PAYMENTS = 4;
 
 export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initialType = 'gasto', initialVoiceParsed, initialBusiness = false }: AddExpenseModalProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const { canAdd } = usePlan();
+  const shotRef = useRef<HTMLInputElement>(null);
   const { expenseCategories, incomeCategories } = useCategories();
   const { transactions } = useData();
 
@@ -388,6 +392,35 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
           {/* Campos con scroll; el botón de guardar queda fijo abajo */}
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 pb-5 space-y-5">
+          {/* Atajos: dictarlo o leerlo de una foto o pantallazo (recibo, comprobante de Nequi o del banco) */}
+          {!transactionToEdit && !initialVoiceParsed && (
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button"
+                      onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice')); }}
+                      className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
+                <Mic className="w-4 h-4" /> Dictar
+              </button>
+              <button type="button"
+                      onClick={() => {
+                        if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
+                        // El selector se abre dentro del mismo toque, para que el celular lo permita
+                        if (getAiKey()) shotRef.current?.click();
+                        else { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: 'no-key' } })); }
+                      }}
+                      className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
+                <Camera className="w-4 h-4" /> Foto o pantallazo
+              </button>
+              <input ref={shotRef} type="file" accept="image/*" className="hidden"
+                     onChange={(e) => {
+                       const f = e.target.files?.[0];
+                       e.target.value = '';
+                       if (!f) return;
+                       onClose();
+                       window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: f } }));
+                     }} />
+            </div>
+          )}
+
           {/* Type Toggle */}
           <div className={`flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-glass border border-glass-border rounded-xl'}`}>
             {(['gasto', 'ingreso'] as const).map(option => (
