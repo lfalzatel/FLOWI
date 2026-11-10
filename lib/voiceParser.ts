@@ -151,7 +151,13 @@ function readNumberWords(words: string[], start: number): { value: number; used:
   return { value: total + current, used: read };
 }
 
+// "4x1000" (o "cuatro por mil") es el nombre de un impuesto, no un monto: se cambia por una
+// palabra sin números para que no se lea como $1.000, y se devuelve en la descripción
+const FOUR_PER_THOUSAND_RE = /\b4\s*x\s*1\.?000\b|\bcuatro\s+por\s+mil\b/gi;
+const FOUR_PER_THOUSAND_TOKEN = 'cuatroxmil';
+
 export function wordsToDigits(text: string): string {
+  text = text.replace(FOUR_PER_THOUSAND_RE, FOUR_PER_THOUSAND_TOKEN);
   const parts = text.split(/(\s+)/);
   const words: string[] = [];
   const wordIdx: number[] = [];
@@ -314,7 +320,7 @@ const EXPENSE_KEYWORDS: [RegExp, string][] = [
   [/\b(?:unas|manicure|pedicure)\b/, 'Uñas'],
   [/\b(?:tarjeta\s+de\s+credito|tarjeta)\b/, 'Tarjeta de crédito'],
   [/\b(?:cuota|credito|prestamo|deuda)\b/, 'Cuota de crédito'],
-  [/\b(?:impuestos?|predial)\b/, 'Impuestos'],
+  [/\b(?:impuestos?|predial|gmf|cuatroxmil)\b|4\s*x\s*1000|cuatro\s+por\s+mil/, 'Impuestos'],
   [/\b(?:regalos?)\b/, 'Regalos'],
   [/\b(?:cine|pelicula)\b/, 'Cine'],
   [/\b(?:concierto|boletas?|evento)\b/, 'Eventos'],
@@ -404,7 +410,7 @@ function cleanDescription(text: string): string {
     .filter(Boolean);
   while (words.length && LEADING_FILLERS.has(wordKey(words[0]))) words.shift();
   while (words.length && TRAILING_FILLERS.has(wordKey(words[words.length - 1]))) words.pop();
-  const result = words.join(' ').trim();
+  const result = words.join(' ').trim().replace(/cuatroxmil/gi, '4x1000');
   return result ? result.charAt(0).toUpperCase() + result.slice(1) : '';
 }
 

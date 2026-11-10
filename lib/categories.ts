@@ -62,6 +62,7 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
   ...g('Hogar y servicios', [
     ['Arriendo', '🏢', '#F59E0B'],
     ['Administración', '🔑', '#8B5CF6'],
+    ['Servicios públicos', '🏙️', '#0EA5E9'], // una sola factura con varios servicios (EPM: agua, luz, aseo)
     ['Luz', '💡', '#F5A623'],
     ['Agua', '💧', '#3B82F6'],
     ['Gas natural', '🔥', '#EF4444'],
@@ -163,7 +164,6 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
     ['Deudas', '🧾', '#F97316'],
     ['Intereses', '📉', '#EF4444'],
     ['Cuota de manejo', '🧾', '#64748B'],
-    ['4x1000', '🧾', '#64748B'],
     ['Impuestos', '🏛️', '#EF4444'],
     ['Seguros', '🛡️', '#3B82F6'],
   ]),
@@ -440,11 +440,14 @@ const MERCHANT_LIST: MerchantDef[] = [
     ['WOM', '📡', '#7C3AED'],
     ['ETB', '📡', '#0054A6'],
   ]),
-  ...m(['Luz', 'Agua', 'Gas natural'], [
-    // Dos empresas distintas con la misma sigla: EPM es Empresas Públicas de Medellín;
-    // en Manizales es Empresas Públicas de Manizales (se separan para no confundir los pagos)
+  // Empresas de servicios públicos: con una factura se pagan varios servicios (agua, luz, aseo…).
+  // Dos empresas distintas con la misma sigla: EPM es Empresas Públicas de Medellín;
+  // en Manizales es Empresas Públicas de Manizales (se separan para no confundir los pagos)
+  ...m(['Servicios públicos', 'Luz', 'Agua', 'Gas natural'], [
     ['EPM', 'epm', '#00A859'],
     ['EPM Manizales', 'badge:#0E7490:EP MZL', '#0E7490'],
+  ]),
+  ...m(['Luz', 'Agua', 'Gas natural'], [
     ['Enel', '⚡', '#0555FA'],
     ['Celsia', '⚡', '#E30613'],
     ['Air-e', '⚡', '#0054A6'],
@@ -570,7 +573,8 @@ export function softHyphenate(label: string): string {
 
 // Busca icono y color para cualquier etiqueta guardada (categoría, comercio, medio de pago o antigua)
 // Nombres viejos o repetidos que son el mismo comercio ("Play Store" es la tienda Google Play)
-const ALIASES: Record<string, string> = { 'play store': 'Google Play', playstore: 'Google Play' };
+// "4x1000" es un impuesto (gravamen a los movimientos financieros): queda en Impuestos
+const ALIASES: Record<string, string> = { 'play store': 'Google Play', playstore: 'Google Play', '4x1000': 'Impuestos' };
 
 // Clave normalizada y unificada: "Play Store" y "Google Play" dan lo mismo
 export function aliasKey(text: string): string {

@@ -390,5 +390,35 @@
         "command": "navigate"
       }
     ]
+  },
+  {
+    "frase": "pagué el 4x1000 de 6 mil",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 6000,
+        "category": "Impuestos"
+      }
+    ]
+  },
+  {
+    "frase": "pago tarjeta y 4x1000 5020",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 5020,
+        "category": "Tarjeta de crédito"
+      }
+    ]
+  },
+  {
+    "frase": "pagué epm 120 mil",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 120000,
+        "merchant": "EPM"
+      }
+    ]
   }
 ]
