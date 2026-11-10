@@ -22,10 +22,23 @@ export interface Commitment {
   daysLeft: number;          // negativo = ya pasó la fecha
 }
 
+// Compromiso del mes que ya quedó cubierto (para la lista "Ya pagados")
+export interface PaidCommitment {
+  key: string;
+  title: string;
+  category: string;
+  dueDate: Date;
+  amount: number | null;     // lo que se pagó (o el valor esperado si se marcó a mano)
+  paidAt: Date | null;       // cuándo se registró el pago (null = marcado con "Ya lo pagué")
+  how: 'registrado' | 'marcado' | 'abono';
+}
+
 export interface CommitmentsSummary {
   pending: Commitment[];
   pendingTotal: number;      // suma de los que tienen valor conocido
   paidCount: number;         // compromisos de este mes que ya están cubiertos
+  paid: PaidCommitment[];
+  month: string;             // YYYY-MM del cálculo
 }
 
 // Palabras que no ayudan a reconocer un pago ("Admin septiembre" vs "Administración noviembre")
@@ -149,12 +162,18 @@ export function getCommitments(
     return a.some(x => wordsB.some(y => sameWord(x, y)));
   };
 
-  const thisMonthWords = fixedThisMonth.map(t => ({ category: t.category, words: tokens(t.category, t.description) }));
-  const paidThisMonth = (category: string | undefined, words: string[]) =>
-    thisMonthWords.some(t => matches(category, words, t.category, t.words));
+  const thisMonthWords = fixedThisMonth.map(t => ({ tx: t, category: t.category, words: tokens(t.category, t.description) }));
+  const findPaidThisMonth = (category: string | undefined, words: string[]) =>
+    thisMonthWords.find(t => matches(category, words, t.category, t.words))?.tx;
+  const paidThisMonth = (category: string | undefined, words: string[]) => !!findPaidThisMonth(category, words);
 
   const items: Commitment[] = [];
+  const paid: PaidCommitment[] = [];
   let paidCount = 0;
+  const addPaid = (p: Omit<PaidCommitment, 'paidAt' | 'amount' | 'how'>, tx: Transaction | undefined, expected: number | null) => {
+    paidCount++;
+    paid.push({ ...p, amount: tx ? tx.amount : expected, paidAt: tx ? toDate(tx.date) : null, how: tx ? 'registrado' : 'marcado' });
+  };
 
   const usedGroups = new Set<string>();
   // 2. Recordatorios de pago con vencimiento este mes
@@ -211,12 +230,12 @@ export function getCommitments(
       amount = best ? best.amount : null;
     }
 
+    const key = r.id ? `r:${r.id}` : `t:${normalize(r.title)}`;
     if (amount === null) {
       const sharedCat = reminders.some(o => o !== r && o.active && o.category && r.category && normalize(o.category) === normalize(r.category));
       amount = lastPaymentFor(r, transactions, sharedCat)?.amount ?? null;
     }
 
-    const key = r.id ? `r:${r.id}` : `t:${normalize(r.title)}`;
     // Varios recordatorios del mismo comercio (EPM: "Luz Manizales" y "EPM APTO 101"): un pago solo
     // cubre el recordatorio cuyo nombre se le parece, no todos los de ese comercio
     const sameMerchant = r.merchant
@@ -227,17 +246,25 @@ export function getCommitments(
     const isThisOne = (t: Transaction) => sameMerchant.length === 0
       || normalize(t.description || '') === normalize(r.title)
       || tokens(t.description).some(x => ownTitleWords.some(w => sameWord(w, x)));
-    const merchantPaid = (t: Transaction) => !!r.merchant && isThisOne(t) && (
+    // Un pago de otra categoría que tiene su propio recordatorio (Agua → "Aguas de Manizales")
+    // no cubre este recordatorio aunque sea del mismo comercio (EPM Manizales cobra varias cosas)
+    const belongsToOther = (t: Transaction) => !!r.category && !!t.category
+      && normalize(t.category) !== normalize(r.category)
+      && reminders.some(o => o !== r && o.active && isPayable(o) && !!o.category && normalize(o.category) === normalize(t.category));
+    const merchantPaid = (t: Transaction) => !!r.merchant && isThisOne(t) && !belongsToOther(t) && (
       normalize(t.merchant || '') === normalize(r.merchant) || normalize(t.category) === normalize(r.merchant)
       || (!!group && normalize(t.category) === normalize(group.category) && normalize(t.description || '') === normalize(group.title)));
-    const covered = (r.paidDates || []).includes(dateKey(due))
-      || (r.merchant ? fixedThisMonth.some(merchantPaid) : shared
-        ? fixedThisMonth.some(t => normalize(t.category) === normalize(group!.category) && tokens(t.description).some(x => ownWords.some(w => sameWord(w, x))))
-        : r.category
-          ? fixedThisMonth.some(t => normalize(t.category) === normalize(r.category!)
-              || (!!group && normalize(t.category) === normalize(group.category) && normalize(t.description || '') === normalize(r.title)))
-          : paidThisMonth(undefined, words) || (group ? paidThisMonth(group.category, group.words) : false));
-    if (covered) { paidCount++; continue; }
+    const marked = (r.paidDates || []).includes(dateKey(due));
+    const coveringTx = r.merchant ? fixedThisMonth.find(merchantPaid) : shared
+      ? fixedThisMonth.find(t => normalize(t.category) === normalize(group!.category) && tokens(t.description).some(x => ownWords.some(w => sameWord(w, x))))
+      : r.category
+        ? fixedThisMonth.find(t => normalize(t.category) === normalize(r.category!)
+            || (!!group && normalize(t.category) === normalize(group.category) && normalize(t.description || '') === normalize(r.title)))
+        : findPaidThisMonth(undefined, words) || (group ? findPaidThisMonth(group.category, group.words) : undefined);
+    if (marked || coveringTx) {
+      addPaid({ key, title: r.title, category: r.category || group?.category || '', dueDate: due }, marked ? undefined : coveringTx, amount);
+      continue;
+    }
     if (skipped.includes(skipEntry(thisMonth, key))) continue;
 
     items.push({
@@ -250,8 +277,9 @@ export function getCommitments(
   // 3. Pagos fijos del mes pasado sin recordatorio
   for (const g of groups) {
     if (usedGroups.has(g.key)) continue;
-    if (paidThisMonth(g.category, g.words)) { paidCount++; continue; }
     const key = `c:${g.key}`;
+    const paidTx = findPaidThisMonth(g.category, g.words);
+    if (paidTx) { addPaid({ key, title: g.title, category: g.category, dueDate: dayInMonth(year, month, g.day) }, paidTx, g.amount); continue; }
     if (skipped.includes(skipEntry(thisMonth, key))) continue;
     const due = dayInMonth(year, month, g.day);
     items.push({
@@ -268,8 +296,12 @@ export function getCommitments(
     // La primera cuota se paga al mes siguiente de tomar el crédito
     if (!isNaN(start.getTime()) && due.getTime() - start.getTime() < 20 * 86400000) continue;
     const key = `d:${d.id}`;
-    const paidNow = (d.payments || []).some(p => monthKey(toDate(p.date)) === thisMonth);
-    if (paidNow) { paidCount++; continue; }
+    const payNow = (d.payments || []).find(p => monthKey(toDate(p.date)) === thisMonth);
+    if (payNow) {
+      paidCount++;
+      paid.push({ key, title: `Cuota ${d.title}`, category: 'Deudas', dueDate: due, amount: (payNow as any).amount ?? d.installment, paidAt: toDate(payNow.date), how: 'abono' });
+      continue;
+    }
     if (skipped.includes(skipEntry(thisMonth, key))) continue;
     items.push({
       key, title: `Cuota ${d.title}`, category: 'Deudas', dueDate: due, amount: d.installment, debt: d, exactDate: true,
@@ -282,7 +314,22 @@ export function getCommitments(
     pending: items,
     pendingTotal: items.reduce((s, c) => s + (c.amount || 0), 0),
     paidCount,
+    paid: paid.sort((a, b) => (b.paidAt?.getTime() ?? b.dueDate.getTime()) - (a.paidAt?.getTime() ?? a.dueDate.getTime())),
+    month: thisMonth,
   };
+}
+
+/**
+ * Compromisos de cualquier mes (YYYY-MM): el actual con la fecha de hoy; un mes pasado como
+ * quedó al final de ese mes; un mes futuro como se ve el primer día (con los pagos de este mes).
+ */
+export function getCommitmentsForMonth(
+  month: string, transactions: Transaction[], reminders: Reminder[], skipped: string[] = [], debts: Debt[] = [], now = new Date(),
+): CommitmentsSummary {
+  const [y, m] = month.split('-').map(Number);
+  const current = monthKey(now);
+  const ref = month === current ? now : month < current ? new Date(y, m, 0, 23, 59) : new Date(y, m - 1, 1, 0, 1);
+  return getCommitments(transactions, reminders, skipped, ref, debts);
 }
 
 export function commitmentWhen(c: Commitment): string {

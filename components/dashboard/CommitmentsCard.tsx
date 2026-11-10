@@ -35,14 +35,15 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
   if (!pending.length && !paidCount) return null;
 
   const card = isTechTheme ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
-  const monthName = new Date().toLocaleDateString('es-CO', { month: 'long' });
+  const monthRef = summary.month ? new Date(Number(summary.month.slice(0, 4)), Number(summary.month.slice(5, 7)) - 1, 1) : new Date();
+  const monthName = monthRef.toLocaleDateString('es-CO', { month: 'long' });
   const shown = expanded ? pending : pending.slice(0, VISIBLE);
 
   async function skip(c: Commitment) {
     if (!user || skipping) return;
     setSkipping(c.key);
     try {
-      await skipCommitment(user.uid, skipEntry(monthKey(new Date()), c.key));
+      await skipCommitment(user.uid, skipEntry(summary.month || monthKey(new Date()), c.key));
     } catch (err) {
       console.error('Error skipping commitment:', err);
     } finally {
