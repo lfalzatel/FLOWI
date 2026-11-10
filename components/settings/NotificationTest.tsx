@@ -67,6 +67,9 @@ export function NotificationTest({ isTechTheme }: { isTechTheme: boolean }) {
         <div className={`rounded-xl p-3 text-xs space-y-1.5 ${text.ok ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
           <p className={text.ok ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'}>{text.msg}</p>
           {text.tips?.map(t => <p key={t} className="text-text-secondary">• {t}</p>)}
+          {result?.step === 'server' && result.details && (
+            <p className="text-[10px] text-text-muted font-mono break-words pt-1 border-t border-white/10">Detalles: {result.details}</p>
+          )}
           {result?.step === 'permission' && result.state !== 'unsupported' && (
             <button type="button" onClick={() => askForNotifications({ force: true })} className="text-accent underline">Cómo activarlas</button>
           )}

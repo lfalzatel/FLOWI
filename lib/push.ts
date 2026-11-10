@@ -82,7 +82,7 @@ export async function removePushToken(uid: string): Promise<void> {
 export type PushTestResult =
   | { step: 'permission'; state: string }
   | { step: 'no-token' }
-  | { step: 'server'; ok: boolean; reason?: string; registered: number; received?: boolean; keyBefore?: 'ok' | 'mismatch' | 'none' };
+  | { step: 'server'; ok: boolean; reason?: string; registered: number; received?: boolean; keyBefore?: 'ok' | 'mismatch' | 'none'; details?: string };
 
 /**
  * Prueba de notificaciones de este celular: 1) aviso local (¿el celular las muestra?) y
@@ -128,7 +128,18 @@ export async function testPush(uid: string): Promise<PushTestResult> {
       received = !!(await lastPush());
     }
   }
-  return { step: 'server', ...res, received: !!received, keyBefore };
+  // Detalles técnicos para revisar dónde se pierde el aviso
+  let details = '';
+  try {
+    const sub = await registration.pushManager.getSubscription();
+    const host = sub ? new URL(sub.endpoint).host : 'sin suscripción';
+    const ua = navigator.userAgent;
+    const browser = /SamsungBrowser\/([\d.]+)/.exec(ua)?.[0] || /Edg\/([\d.]+)/.exec(ua)?.[0] || /Chrome\/([\d]+)/.exec(ua)?.[0] || /Firefox\/([\d]+)/.exec(ua)?.[0] || 'otro';
+    const standalone = window.matchMedia?.('(display-mode: standalone)').matches ? 'app instalada' : 'navegador';
+    const sw = (registration.active?.scriptURL || '').split('/').pop() || 'sin SW';
+    details = `${browser} · ${standalone} · avisos: ${host} · clave antes: ${keyBefore} · SW: ${sw} · servidor: ${res.ok ? 'aceptó' : res.reason} · celular: ${received ? 'recibió' : 'no recibió'}`;
+  } catch { /* nada */ }
+  return { step: 'server', ...res, received: !!received, keyBefore, details };
 }
 
 // Último aviso del servidor que recibió el service worker (lo guarda en worker/index.js)
