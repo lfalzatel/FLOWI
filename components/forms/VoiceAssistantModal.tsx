@@ -477,7 +477,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             type: tx.type,
             category: tx.category,
             description: tx.description,
-            date: tx.date ? new Date(`${tx.date}T12:00:00`) : new Date(),
+            date: tx.time
+              ? new Date(`${tx.date || new Date().toLocaleDateString('en-CA')}T${tx.time}:00`)
+              : !tx.date || tx.date === new Date().toLocaleDateString('en-CA') ? new Date() : new Date(`${tx.date}T12:00:00`),
             isFixed: tx.isFixed,
             ...(tx.merchant ? { merchant: tx.merchant } : {}),
           });

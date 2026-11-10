@@ -252,11 +252,12 @@ async function shrinkImage(file: File): Promise<string> {
 
 function receiptPrompt(customLabels: string[]) {
   return `Lees fotos de recibos, facturas y tiquetes de compra de Colombia.
-Responde SOLO con un JSON: {"total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","category":"...","description":"texto corto de lo que se compró"}
+Responde SOLO con un JSON: {"total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró"}
 Reglas:
 - "total" es el TOTAL A PAGAR del recibo (no el subtotal, ni el IVA, ni el cambio, ni lo recibido en efectivo).
 - En Colombia el punto separa miles: "$45.900" = 45900 y "1.250.000" = 1250000. Si hay centavos con coma, ignóralos.
 - "date" es la fecha de la compra impresa en el recibo; null si no se ve.
+- "time" es la hora de la compra impresa en el recibo (ej "14:35"); null si no se ve.
 - category debe ser exactamente una de: ${[...EXPENSE_LABELS, ...customLabels].join(', ')}.
 - Si la foto no es un recibo o no se puede leer el total, responde {"total":null}.`;
 }
@@ -318,6 +319,14 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
         if (recent(when)) { date = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`; break; }
       }
     }
+    // Hora del recibo (solo si es válida y, si la compra es de hoy, no está en el futuro)
+    let time: string | undefined;
+    const tm = typeof parsed.time === 'string' ? parsed.time.match(/^(\d{1,2}):(\d{2})/) : null;
+    if (tm && Number(tm[1]) < 24 && Number(tm[2]) < 60) {
+      const hhmm = `${tm[1].padStart(2, '0')}:${tm[2]}`;
+      const day = date || new Date().toLocaleDateString('en-CA');
+      if (new Date(`${day}T${hhmm}:00`) <= new Date()) time = hhmm;
+    }
     return {
       ok: true,
       result: {
@@ -326,6 +335,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
         isFixed: isFixedExpenseCategory(category), rawText: 'Recibo',
         ...(merchant ? { merchant } : {}),
         ...(date ? { date } : {}),
+        ...(time ? { time } : {}),
       },
     };
   } catch {
