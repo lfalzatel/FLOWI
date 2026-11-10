@@ -538,7 +538,7 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
   }
 
   // Si icon es una palabra larga de texto (ej. "Arriendo") y no un icono/emoji, usar emoji predeterminado para evitar superposiciones
-  const isEmojiOrShort = !icon || icon.length <= 4 || !/[a-zA-Z]{3,}/.test(icon);
+  const isEmojiOrShort = !icon || !/[a-zA-Z0-9]{2,}/.test(icon);
   const displayIcon = isEmojiOrShort ? icon : '📝';
 
   return <span className={className}>{displayIcon}</span>;

@@ -60,7 +60,7 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
 
   const body = (
     <>
-      <div className={`w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center shrink-0 ${alert? 'bg-red-500/15' : isSupport ? 'bg-pink-500/15' : 'bg-accent/20'}`}>
+      <div className={`w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center shrink-0 ${alert ? 'bg-red-500/15' : isSupport ? 'bg-pink-500/15' : 'bg-accent/20'}`}>
         <Icon className={`w-5 h-5 ${alert ? 'text-red-400' : isSupport ? 'text-pink-400' : 'text-accent'}`} />
       </div>
       <div className="flex-1 min-w-0">

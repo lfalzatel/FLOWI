@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/format';
 import { AlertCircle, CheckCircle2, Calculator, Calendar, X, Wallet, Info } from 'lucide-react';
 import { Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
+import { findCatalogEntry } from '@/lib/categories';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { getDailyBudget } from '@/lib/dailyBudget';
@@ -359,7 +360,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <CategoryIcon icon={tx.category} label={tx.category} className="w-8 h-8 text-xl flex items-center justify-center flex-shrink-0" />
+                          <CategoryIcon icon={(findCatalogEntry(tx.merchant || '') || findCatalogEntry(tx.category))?.icon || '🧾'} label={tx.category} className="w-8 h-8 text-xl flex items-center justify-center flex-shrink-0" />
                           <div>
                             <p className={`text-xs font-bold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tx.category}</p>
                             <p className={`text-[10px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
@@ -429,7 +430,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <CategoryIcon icon={tx.category} label={tx.category} className="w-6 h-6 text-base flex items-center justify-center flex-shrink-0" />
+                            <CategoryIcon icon={(findCatalogEntry(tx.merchant || '') || findCatalogEntry(tx.category))?.icon || '🧾'} label={tx.category} className="w-6 h-6 text-base flex items-center justify-center flex-shrink-0" />
                             <div>
                               <p className={`text-xs font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tx.category}</p>
                               <p className={`text-[10px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>

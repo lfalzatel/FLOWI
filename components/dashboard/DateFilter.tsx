@@ -15,9 +15,10 @@ interface Props {
   onChangeValue: (value: string) => void;
   transactions?: Transaction[];
   inline?: boolean; // dentro de un modal: sin quedarse pegado arriba ni márgenes de página
+  tight?: boolean;  // Inicio en el celular: más pegado a lo de arriba y lo de abajo
 }
 
-export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [], inline = false }: Props) {
+export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [], inline = false, tight = false }: Props) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const { theme } = useTheme();
@@ -132,10 +133,10 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
     <div
       ref={rootRef}
       data-tour={inline ? undefined : 'filter'}
-      className={`${inline ? 'relative mb-0' : 'sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 mb-2 md:mb-6 md:flex-rowmd:items-center md:justify-center'} flex flex-col transition-[padding,background-color,gap] duration-200 ${
+      className={`${inline ? 'relative mb-0' : `sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 ${tight ? 'max-md:!mt-2 max-md:!-mb-2' : 'mb-2'} md:mb-6 md:flex-row md:items-center md:justify-center`} flex flex-col transition-[padding,background-color,gap] duration-200 ${
         stuck
           ? `gap-1.5 py-2 bg-deep/80 backdrop-blur-xl shadow-lg shadow-black/10 border-b ${isTechTheme ? 'border-accent/20' : 'border-glass-border'}`
-          : 'gap-3 py-0 border-b border-transparent'
+          : 'gap-1.5 md:gap-3 py-0 border-b border-transparent'
       }`}
     >
       {/* Pestañas superiores */}
@@ -158,7 +159,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
                   handleTypeChange(type);
                 }
               }}
-              className={`flex-1 py-1.5 md:py-2 text-[11px] font-bold tracking-wide transition-all${isTechTheme ? 'font-mono uppercase rounded-none tracking-widest' : 'rounded-[24px]'} ${
+              className={`flex-1 py-1.5 md:py-2 text-[11px] font-bold tracking-wide transition-all ${isTechTheme ? 'font-mono uppercase rounded-none tracking-widest' : 'rounded-[24px]'} ${
                 filterType === type 
                   ? `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` 
                   : 'text-accent hover:opacity-80'
@@ -172,7 +173,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
 
       {/* Navegador inferior (oculto si es Todo) */}
       {filterType !== 'all' && (
-        <div className={`flex items-center justify-between px-4 bg-card w-full max-w-sm mx-auto border border-glass-border shadow-sm transition-all ${stuck ? 'py-1.5' : `py-2 mt-1.5 ${inline ? '' : 'md:mt-0 md:py-2'}`}${inline ? '' : 'md:mx-0 md:max-w-xs'} ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-full'}`}>
+        <div className={`flex items-center justify-between px-4 bg-card w-full max-w-sm mx-auto border border-glass-border shadow-sm transition-all ${stuck ? 'py-1.5' : `py-1.5 ${inline ? 'mt-1.5' : 'md:mt-0 md:py-2'}`} ${inline ? '' : 'md:mx-0 md:max-w-xs'} ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-full'}`}>
           <button 
             onClick={handlePrev}
             className={`p-1 hover:bg-glass-hover active:scale-95 transition-all text-text-secondary ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}

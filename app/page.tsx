@@ -348,7 +348,7 @@ export default function DashboardPage() {
         ))}
 
         {/* Filter */}
-        <DateFilter
+        <DateFilter tight
           transactions={transactions}
           filterType={filterType}
           filterValue={filterValue}

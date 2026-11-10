@@ -88,7 +88,7 @@ export function NextActionCarousel({ actions, today, currency, onSkip, onRefresh
           ))}
         </div>
       </div>
-      <div className="mt-1.5 flex justify-center gap-1.5" role="tablist"aria-label="Acciones sugeridas">
+      <div className="mt-1.5 flex justify-center gap-1.5" role="tablist" aria-label="Acciones sugeridas">
         {actions.map((a, i) => (
           <button key={a.id} type="button" role="tab" aria-selected={i === index} aria-label={`Ver ${i + 1} de ${n}`}
                   onClick={() => { pause(); setIndex(i); }}
