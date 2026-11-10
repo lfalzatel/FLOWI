@@ -1,4 +1,5 @@
 'use client';
+import { usePlayStore } from '@/hooks/usePlayStore';
 import { useState } from 'react';
 import { Heart, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
@@ -31,6 +32,7 @@ async function copyText(text: string): Promise<boolean> {
 export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechTheme: boolean; open?: boolean; onToggle?: () => void }) {
   const [copied, setCopied] = useState<string | null>(null);
   const mono = isTechTheme ? 'font-mono' : '';
+  const playStore = usePlayStore();
 
   const handleCopy = async (key: string) => {
     if (await copyText(key)) {
@@ -38,6 +40,8 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
       setTimeout(() => setCopied(prev => (prev === key ? null : prev)), 2000);
     }
   };
+
+  if (playStore) return null;
 
   return (
     <section id="apoyar" className="space-y-3 scroll-mt-24">

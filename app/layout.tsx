@@ -57,6 +57,7 @@ import { LimitPrompter } from '@/components/plans/LimitPrompter';
 import { UsageTracker } from '@/components/layout/UsageTracker';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 import { AppLock } from '@/components/security/AppLock';
+import { PlayStoreDetector } from '@/components/layout/PlayStoreDetector';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -81,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <LimitPrompter />
               <UsageTracker />
               <AppLock />
+              <PlayStoreDetector />
             </DataProvider>
           </ThemeProvider>
         </InAppNotificationProvider>

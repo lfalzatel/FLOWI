@@ -1,4 +1,5 @@
 'use client';
+import { usePlayStore } from '@/hooks/usePlayStore';
 import Link from 'next/link';
 import { ChevronRight, Crown } from 'lucide-react';
 import { usePlan } from '@/lib/plans';
@@ -6,6 +7,7 @@ import { usePlan } from '@/lib/plans';
 // "Tu plan" con acceso a Planes (Configuración y Apoyar a FLOWI)
 export function PlanCard({ isTechTheme }: { isTechTheme: boolean }) {
   const { premium, until } = usePlan();
+  const playStore = usePlayStore();
   const untilText = until ? until.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
   return (
     <Link href="/planes"
@@ -19,8 +21,8 @@ export function PlanCard({ isTechTheme }: { isTechTheme: boolean }) {
         </span>
         <span className="block text-[11px] text-text-muted normal-case leading-snug">
           {premium
-            ? (untilText ? `Activo hasta el ${untilText}. Toca para renovar o ver tu plan.` : 'Activo.')
-            : 'Pásate a Premium desde $4.167 al mes: inversiones, metas y recibos sin límite.'}
+            ? (untilText ? `Activo hasta el ${untilText}.${playStore ? '' : ' Toca para renovar o ver tu plan.'}` : 'Activo.')
+            : playStore ? 'Mira qué incluye cada plan.' : 'Pásate a Premium desde $4.167 al mes: inversiones, metas y recibos sin límite.'}
         </span>
       </span>
       <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />

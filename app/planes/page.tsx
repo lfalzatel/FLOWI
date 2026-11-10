@@ -1,4 +1,5 @@
 'use client';
+import { usePlayStore } from '@/hooks/usePlayStore';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -32,6 +33,7 @@ export default function PlanesPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
   const isAdmin = profile?.role === 'admin';
+  const playStore = usePlayStore();
   const [manualOpen, setManualOpen] = useState(false);
   const [myManual, setMyManual] = useState<ManualPayment[]>([]);
   useEffect(() => (user ? watchMyManualPayments(user.uid, setMyManual) : undefined), [user]);
@@ -121,6 +123,13 @@ export default function PlanesPage() {
           ))}
         </div>
 
+        {playStore && (
+          <p className={`text-xs text-center text-text-secondary leading-relaxed p-3 border border-glass-border ${isTech ? 'rounded-none' : 'rounded-2xl'}`}>
+            En la app de Play Store todavía no se puede adquirir Premium. Si ya lo tienes, sigue activo en todos tus dispositivos.
+          </p>
+        )}
+
+        {!playStore && (<>
         {/* Planes de pago */}
         <div className="grid grid-cols-3 gap-2">
           {PLANS.map(p => {
@@ -167,6 +176,7 @@ export default function PlanesPage() {
           cuando se acerque el fin de tu plan te avisamos para renovar. FLOWI no ve ni guarda los datos de tu pago.
           {' '}Al pagar aceptas los <Link href="/legal#terminos" className="underline hover:text-text-secondary">términos de uso</Link>.
         </p>
+        </>)}
       </main>
       <BottomNav />
       {manualOpen && <ManualPayModal plan={selected} onClose={() => setManualOpen(false)} />}

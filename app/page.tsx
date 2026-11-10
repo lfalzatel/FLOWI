@@ -1,4 +1,5 @@
 'use client';
+import { usePlayStore } from '@/hooks/usePlayStore';
 import { premiumEndInfo } from '@/lib/plans';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -73,6 +74,7 @@ export default function DashboardPage() {
     try { localStorage.setItem('flowi_seen_tips', JSON.stringify(next)); } catch { /* sin almacenamiento */ }
   };
   const [showAdd, setShowAdd] = useState(false);
+  const playStore = usePlayStore();
   const [showExport, setShowExport] = useState(false);
   const [showTourOffer, setShowTourOffer] = useState(false);
   const [tourVoice, setTourVoice] = useState<boolean | null>(null); // null = recorrido cerrado
@@ -275,8 +277,8 @@ export default function DashboardPage() {
       hasAccounts: myAccounts.some(a => !a.archived), hasInvestments: investments.some(i => i.status === 'activo'),
       reminders: myReminders.length, seenTips,
     },
-    showSupport: !demo && (profile?.activeDays ?? 0) >= 5,
-    premiumEnd: demo ? null : premiumEndInfo(profile),
+    showSupport: !demo && !playStore && (profile?.activeDays ?? 0) >= 5,
+    premiumEnd: demo || playStore ? null : premiumEndInfo(profile),
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
   });
 

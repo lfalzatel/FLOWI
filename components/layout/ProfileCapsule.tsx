@@ -1,4 +1,5 @@
 'use client';
+import { usePlayStore } from '@/hooks/usePlayStore';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
@@ -37,6 +38,7 @@ const menuItems = [
 export function ProfileCapsule() {
   const { user, profile } = useAuth();
   const { theme, setTheme, allowedThemes } = useTheme();
+  const playStore = usePlayStore();
   const [open, setOpen]   = useState(false);
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -310,7 +312,7 @@ export function ProfileCapsule() {
 
           {/* Menu items */}
           <div className="p-1.5">
-            {menuItems.map((item, i) => (
+            {menuItems.filter(item => !(playStore && item.href === '/configuracion#apoyar')).map((item, i) => (
               <div key={i}>
                 {item.divider && <div className="my-1 border-t border-glass-border" />}
                 {item.label === 'Instalar app' ? (
