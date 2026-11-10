@@ -306,12 +306,17 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
 
     const category = matchCategory(parsed.category, 'gasto', customLabels);
     const merchant = typeof parsed.merchant === 'string' && parsed.merchant.trim() && parsed.merchant !== 'null' ? parsed.merchant.trim().slice(0, 60) : undefined;
-    // La fecha del recibo solo se usa si es válida y no está en el futuro
+    // La fecha del recibo solo se usa si es reciente (la IA a veces lee mal el año: "10/11/25" → 2025).
+    // Si el día y el mes sirven con el año actual, se corrige el año; si no, queda la fecha de hoy.
     let date: string | undefined;
     if (typeof parsed.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parsed.date)) {
-      const [y, m, d] = parsed.date.split('-').map(Number);
-      const when = new Date(y, m - 1, d);
-      if (when.getMonth() === m - 1 && when <= new Date() && Date.now() - when.getTime() < 400 * 86400000) date = parsed.date;
+      const [, m, d] = parsed.date.split('-').map(Number);
+      const now = new Date();
+      const recent = (dt: Date) => dt.getMonth() === m - 1 && dt <= now && now.getTime() - dt.getTime() <= 45 * 86400000;
+      for (const y of [Number(parsed.date.slice(0, 4)), now.getFullYear(), now.getFullYear() - 1]) {
+        const when = new Date(y, m - 1, d, 12);
+        if (recent(when)) { date = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`; break; }
+      }
     }
     return {
       ok: true,

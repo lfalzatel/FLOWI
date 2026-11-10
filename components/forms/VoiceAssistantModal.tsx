@@ -1,7 +1,9 @@
 'use client';
 
 import { updateUserProfile } from '@/lib/firestore';
-import { monthKeyNow, receiptsUsed, showLimit, usePlan } from '@/lib/plans';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { FREE_LIMITS, isPremium, monthKeyNow, receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
@@ -59,9 +61,19 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [receiptStatus, setReceiptStatus] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
   const [receiptError, setReceiptError] = useState('');
 
+  // Perfil al día (al abrir con una foto, el de useAuth puede no haber cargado todavía)
+  const freshProfile = async () => {
+    if (profile) return { uid: user?.uid || auth.currentUser?.uid, p: profile };
+    const uid = auth.currentUser?.uid;
+    if (!uid) return { uid: undefined, p: null };
+    const snap = await getDoc(doc(db, 'users', uid)).catch(() => null);
+    return { uid, p: (snap?.data() as any) || null };
+  };
+
   const handleReceiptFile = async (file: File | undefined) => {
     if (!file) return;
-    if (!canAdd('receipts', receiptsUsed(profile))) { showLimit('receipts'); return; }
+    const me = await freshProfile();
+    if (!isPremium(me.p) && receiptsUsed(me.p) >= FREE_LIMITS.receiptsPerMonth) { showLimit('receipts'); return; }
     stopListening();
     setErrorMsg(null);
     setTranscript('');
@@ -72,7 +84,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     if (read.ok) {
       setParsedResults([read.result]);
       setReceiptStatus('done');
-      if (user) updateUserProfile(user.uid, { receiptUsage: { month: monthKeyNow(), count: receiptsUsed(profile) + 1 } }).catch(() => {});
+      if (me.uid) updateUserProfile(me.uid, { receiptUsage: { month: monthKeyNow(), count: receiptsUsed(me.p) + 1 } }).catch(() => {});
       return;
     }
     setReceiptStatus(read.reason === 'no-key' ? 'no-key' : 'error');
