@@ -82,17 +82,49 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
         )}
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
-              <Wallet className="w-3.5 h-3.5 text-accent" />
+          {/* Las dos cifras más importantes, juntas al abrir la app */}
+          <div className={today ? 'grid grid-cols-2 gap-3' : ''}>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 shrink-0 rounded-xl bg-accent/15 flex items-center justify-center">
+                  <Wallet className="w-3.5 h-3.5 text-accent" />
+                </div>
+                <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Dinero disponible</span>
+                {real && !today && <span className="text-[10px] text-text-muted">· en tus cuentas · toca para ver</span>}
+              </div>
+              <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold tracking-wider' : 'font-syne font-bold'} ${today ? 'text-[clamp(16px,5vw,30px)]' : 'text-[clamp(24px,8vw,44px)]'} ${balance < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
+                <AnimatedNumber value={balance} delay={0.05} />
+              </p>
+              <p className={`text-[10px] mb-3 ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
+                {real ? (today ? 'En tus cuentas · toca para ver' : 'Lo que tienes hoy') : 'Ingresos − gastos del periodo'}
+              </p>
             </div>
-            <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>Dinero disponible</span>
-            {real && <span className="text-[10px] text-text-muted">· en tus cuentas · toca para ver</span>}
-          </div>
 
-          <p className={`mb-3 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,44px)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,44px)]'} ${balance < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
-            <AnimatedNumber value={balance} delay={0.05} />
-          </p>
+            {today && (
+              <button type="button" data-tour="today"
+                      onClick={(e) => { e.stopPropagation(); setInfo('today'); }}
+                      className={`min-w-0 text-left pl-3 border-l ${isLight ? 'border-black/10' : 'border-white/10'} active:scale-[0.98] transition-transform`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 shrink-0 rounded-xl bg-accent/15 flex items-center justify-center">
+                    <CalendarCheck className="w-3.5 h-3.5 text-accent" />
+                  </div>
+                  <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>
+                    {today.remainingToday < 0 ? 'Hoy te pasaste' : 'Hoy puedes gastar'}
+                  </span>
+                </div>
+                <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono tracking-wider' : 'font-syne'} font-bold text-[clamp(16px,5vw,30px)] ${today.remainingToday < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
+                  <AnimatedNumber value={Math.abs(today.remainingToday)} delay={0.1} />
+                </p>
+                <p className={`text-[10px] mb-3 leading-tight ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
+                  {!today.hasBase
+                    ? 'Registra tus ingresos del mes'
+                    : today.spentToday > 0
+                      ? `Llevas ${formatCurrency(today.spentToday, currency)} de ${formatCurrency(today.todayAllowance, currency)}`
+                      : `Cuota de hoy · quedan ${today.daysLeft} días`}
+                </p>
+              </button>
+            )}
+          </div>
 
           {/* Balance Neto con deudas incluidas */}
           <div className="pt-2 border-t border-white/5 flex items-center justify-between">
@@ -152,7 +184,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
           onClick={() => setInfo('debts')}
           data-tour="debts"
           id="total-deudas-card" 
-          className={`glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 ${today ? '' : 'col-span-2'} animate-card-mix transition-all duration-300 ${
+          className={`glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 col-span-2 animate-card-mix transition-all duration-300 ${
             absorbingId === 'total-deudas-card' ? 'scale-105 border-yellow-500/80 shadow-[0_0_35px_rgba(245,158,11,0.7)]' : ''
           }`} 
           style={{ animationDelay: '0.35s' }}
@@ -169,30 +201,6 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
           <p className={`text-[10px] mt-0.5 ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Toca para ver el detalle</p>
         </button>
 
-        {/* Hoy puedes gastar (se repite con más detalle en Control y Proyección) */}
-        {today && (
-          <button type="button" onClick={() => setInfo('today')} data-tour="today"
-                  className="glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 transition-all duration-300 animate-card-mix" style={{ animationDelay: '0.45s' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">
-                <CalendarCheck className="w-3 h-3 text-accent" />
-              </div>
-              <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>
-                {today.remainingToday < 0 ? 'Hoy te pasaste' : 'Hoy puedes gastar'}
-              </span>
-            </div>
-            <p className={`${isCyberpunk ? 'font-mono tracking-wider' : 'font-syne'} font-bold text-[clamp(12px,5vw,18px)] ${today.remainingToday < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
-              <AnimatedNumber value={Math.abs(today.remainingToday)} delay={0.45} />
-            </p>
-            <p className={`text-[10px] mt-0.5 leading-tight ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
-              {!today.hasBase
-                ? 'Registra tus ingresos del mes'
-                : today.spentToday > 0
-                  ? `Llevas ${formatCurrency(today.spentToday, currency)} de ${formatCurrency(today.todayAllowance, currency)}`
-                  : `Cuota de hoy · quedan ${today.daysLeft} días`}
-            </p>
-          </button>
-        )}
       </div>
 
       {info === 'today' && today && <BalanceInfoModal kind="today" today={today} currency={currency} onClose={() => setInfo(null)} />}
