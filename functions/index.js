@@ -252,3 +252,31 @@ exports.enviarRecordatorios = onSchedule({
   const { runReminders } = await import('./reminders.mjs');
   await runReminders();
 });
+
+// ── Notificación de prueba ────────────────────────────────────────────
+// Desde Configuración: envía un aviso real a ESTE celular (el token que manda la app, que debe
+// estar registrado en el perfil) y dice si Google lo aceptó. Sirve para saber si el problema
+// está en el servidor o en los permisos del celular.
+exports.probarNotificacion = onCall({ region: 'us-central1' }, async (req) => {
+  if (!req.auth) throw new HttpsError('unauthenticated', 'Inicia sesión.');
+  const userRef = db.collection('users').doc(req.auth.uid);
+  const user = await userRef.get();
+  const tokens = (user.exists && user.data().pushTokens) || [];
+  const token = String(req.data?.token || '');
+  if (!token) throw new HttpsError('invalid-argument', 'Falta el identificador de este celular.');
+  if (!tokens.includes(token)) return { ok: false, reason: 'not-registered', registered: tokens.length };
+  try {
+    await admin.messaging().send({
+      token,
+      data: { title: 'Prueba de FLOWI ✓', body: 'Si ves esto, las notificaciones con la app cerrada funcionan.', url: '/configuracion', tag: `test-${Date.now()}` },
+      webpush: { headers: { Urgency: 'high', TTL: '600' } },
+    });
+    return { ok: true, registered: tokens.length };
+  } catch (e) {
+    const code = e.code || 'error';
+    if (/registration-token-not-registered|invalid-registration-token|invalid-argument/.test(code)) {
+      await userRef.update({ pushTokens: admin.firestore.FieldValue.arrayRemove(token) });
+    }
+    return { ok: false, reason: code, registered: tokens.length };
+  }
+});

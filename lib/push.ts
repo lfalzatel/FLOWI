@@ -12,7 +12,7 @@ function storedToken(): string | null {
   try { return localStorage.getItem(TOKEN_STORAGE); } catch { return null; }
 }
 
-async function currentToken(): Promise<string | null> {
+export async function currentToken(): Promise<string | null> {
   if (!VAPID_KEY || typeof window === 'undefined') return null;
   if (!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return null;
   const { isSupported, getMessaging, getToken } = await import('firebase/messaging');
@@ -51,4 +51,40 @@ export async function removePushToken(uid: string): Promise<void> {
   } finally {
     try { localStorage.removeItem(TOKEN_STORAGE); } catch {}
   }
+}
+
+export type PushTestResult =
+  | { step: 'permission'; state: string }
+  | { step: 'no-token' }
+  | { step: 'server'; ok: boolean; reason?: string; registered: number };
+
+/**
+ * Prueba de notificaciones de este celular: 1) aviso local (¿el celular las muestra?) y
+ * 2) aviso real desde el servidor de Firebase a este celular (¿llegan con la app cerrada?).
+ */
+export async function testPush(uid: string): Promise<PushTestResult> {
+  if (typeof window === 'undefined' || !('Notification' in window)) return { step: 'permission', state: 'unsupported' };
+  if (Notification.permission !== 'granted') return { step: 'permission', state: Notification.permission };
+  // 1. Aviso local inmediato
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.showNotification('Prueba 1 de 2: aviso del celular', {
+      body: 'Este lo muestra el celular directamente.', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', tag: 'flowi-test-local',
+    });
+  } catch { /* se informa con el paso del servidor */ }
+  // 2. Aviso desde el servidor
+  await syncPushToken(uid);
+  const token = await currentToken().catch(() => null);
+  if (!token) return { step: 'no-token' };
+  const { getFunctions, httpsCallable } = await import('firebase/functions');
+  const { app } = await import('./firebase');
+  const fn = httpsCallable<{ token: string }, { ok: boolean; reason?: string; registered: number }>(getFunctions(app, 'us-central1'), 'probarNotificacion');
+  // Si el token cambió, se vuelve a registrar antes de probar
+  let res = (await fn({ token })).data;
+  if (!res.ok && res.reason === 'not-registered') {
+    try { localStorage.removeItem(TOKEN_STORAGE); } catch {}
+    await syncPushToken(uid);
+    res = (await fn({ token })).data;
+  }
+  return { step: 'server', ...res };
 }

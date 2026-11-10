@@ -18,6 +18,7 @@ import { removePushToken, syncPushToken } from '@/lib/push';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
 import { MyDataRows } from '@/components/settings/MyDataRows';
+import { NotificationTest } from '@/components/settings/NotificationTest';
 import { PlanCard } from '@/components/plans/PlanCard';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -503,6 +504,8 @@ export default function ConfigPage() {
                 <div className={`absolute top-1 left-1 w-4 h-4 rounded-full transition-transform ${inAppEnabled ? 'translate-x-6 bg-white' : 'translate-x-0 bg-gray-300'}`} />
               </button>
             </div>
+
+            <NotificationTest isTechTheme={isTechTheme} />
 
             {/* Tono de Alerta de Notificación (Abre Modal) */}
             <button 
