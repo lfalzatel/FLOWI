@@ -12,14 +12,40 @@ function storedToken(): string | null {
   try { return localStorage.getItem(TOKEN_STORAGE); } catch { return null; }
 }
 
-export async function currentToken(): Promise<string | null> {
+const toB64Url = (buf: ArrayBuffer) => {
+  let s = '';
+  new Uint8Array(buf).forEach(b => { s += String.fromCharCode(b); });
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+/**
+ * ¿La suscripción push de este celular está hecha con la clave de FLOWI? Firebase reutiliza la
+ * suscripción que encuentre aunque sea de otra clave; en ese caso Google acepta los avisos pero el
+ * celular los descarta en silencio. 'none' = no hay suscripción todavía.
+ */
+async function subscriptionKeyState(registration: ServiceWorkerRegistration): Promise<'ok' | 'mismatch' | 'none'> {
+  const sub = await registration.pushManager.getSubscription();
+  if (!sub) return 'none';
+  const key = sub.options?.applicationServerKey;
+  if (!key) return 'ok'; // el navegador no lo informa: se deja como está
+  return toB64Url(key) === VAPID_KEY!.replace(/=+$/, '') ? 'ok' : 'mismatch';
+}
+
+export async function currentToken(opts: { fresh?: boolean } = {}): Promise<string | null> {
   if (!VAPID_KEY || typeof window === 'undefined') return null;
   if (!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return null;
-  const { isSupported, getMessaging, getToken } = await import('firebase/messaging');
+  const { isSupported, getMessaging, getToken, deleteToken } = await import('firebase/messaging');
   if (!(await isSupported())) return null;
   const { app } = await import('./firebase');
   const registration = await navigator.serviceWorker.ready;
-  return getToken(getMessaging(app), { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+  const messaging = getMessaging(app);
+  if (opts.fresh || (await subscriptionKeyState(registration)) === 'mismatch') {
+    // Suscripción vieja o hecha con otra clave: se borra y se crea una nueva
+    await deleteToken(messaging).catch(() => {});
+    const old = await registration.pushManager.getSubscription();
+    if (old) await old.unsubscribe().catch(() => {});
+  }
+  return getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
 }
 
 // Registra este celular para recibir avisos (no hace nada si no hay permiso o falta la clave)
@@ -56,7 +82,7 @@ export async function removePushToken(uid: string): Promise<void> {
 export type PushTestResult =
   | { step: 'permission'; state: string }
   | { step: 'no-token' }
-  | { step: 'server'; ok: boolean; reason?: string; registered: number };
+  | { step: 'server'; ok: boolean; reason?: string; registered: number; received?: boolean; keyBefore?: 'ok' | 'mismatch' | 'none' };
 
 /**
  * Prueba de notificaciones de este celular: 1) aviso local (¿el celular las muestra?) y
@@ -72,10 +98,18 @@ export async function testPush(uid: string): Promise<PushTestResult> {
       body: 'Este lo muestra el celular directamente.', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', tag: 'flowi-test-local',
     });
   } catch { /* se informa con el paso del servidor */ }
-  // 2. Aviso desde el servidor
-  await syncPushToken(uid);
-  const token = await currentToken().catch(() => null);
+  // 2. Aviso desde el servidor, con una suscripción nueva (por si la anterior quedó dañada)
+  const registration = await navigator.serviceWorker.ready;
+  const keyBefore = await subscriptionKeyState(registration).catch(() => 'none' as const);
+  const previous = storedToken();
+  const token = await currentToken({ fresh: true }).catch(() => null);
   if (!token) return { step: 'no-token' };
+  try {
+    await setDoc(doc(db, 'users', uid), { pushTokens: arrayUnion(token) }, { merge: true });
+    if (previous && previous !== token) await setDoc(doc(db, 'users', uid), { pushTokens: arrayRemove(previous) }, { merge: true });
+    localStorage.setItem(TOKEN_STORAGE, token);
+  } catch { /* se intenta igual */ }
+  await clearLastPush();
   const { getFunctions, httpsCallable } = await import('firebase/functions');
   const { app } = await import('./firebase');
   const fn = httpsCallable<{ token: string }, { ok: boolean; reason?: string; registered: number }>(getFunctions(app, 'us-central1'), 'probarNotificacion');
@@ -86,5 +120,25 @@ export async function testPush(uid: string): Promise<PushTestResult> {
     await syncPushToken(uid);
     res = (await fn({ token })).data;
   }
-  return { step: 'server', ...res };
+  // 3. ¿El celular recibió el aviso del servidor? (el service worker lo anota al llegar)
+  let received: boolean | null = null;
+  if (res.ok) {
+    for (let i = 0; i < 12 && !received; i++) {
+      await new Promise(r => setTimeout(r, 1000));
+      received = !!(await lastPush());
+    }
+  }
+  return { step: 'server', ...res, received: !!received, keyBefore };
+}
+
+// Último aviso del servidor que recibió el service worker (lo guarda en worker/index.js)
+const DIAG_CACHE = 'flowi-diag';
+async function lastPush(): Promise<{ at: number; tag: string } | null> {
+  try {
+    const res = await (await caches.open(DIAG_CACHE)).match('/__last-push');
+    return res ? await res.json() : null;
+  } catch { return null; }
+}
+async function clearLastPush() {
+  try { await (await caches.open(DIAG_CACHE)).delete('/__last-push'); } catch { /* nada */ }
 }

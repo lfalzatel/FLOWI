@@ -30,17 +30,28 @@ export function NotificationTest({ isTechTheme }: { isTechTheme: boolean }) {
   } else if (result?.step === 'no-token') {
     text = { ok: false, msg: 'No se pudo registrar este celular para recibir avisos con la app cerrada.', tips: ['Revisa que "Notificación Push" esté encendida.', 'Abre FLOWI con internet y vuelve a probar.'] };
   } else if (result?.step === 'server') {
-    text = result.ok
-      ? {
-          ok: true,
-          msg: 'Listo: enviamos 2 avisos de prueba. Deberías ver "Prueba 1 de 2" ya y "Prueba de FLOWI ✓" en unos segundos.',
-          tips: [
-            'Si no ves ninguno: revisa que el celular no esté en "No molestar" y que FLOWI (o Chrome) tenga permitidas las notificaciones en los ajustes de Android.',
-            'Si ves solo el 1: quita a FLOWI y a Chrome del ahorro de batería (Ajustes → Batería → Sin restricciones).',
-            'La prueba 2 llega por el mismo camino que los recordatorios con la app cerrada: si esa te llega, los recordatorios también.',
-          ],
-        }
-      : { ok: false, msg: `El servidor no pudo enviar el aviso (${result.reason}).`, tips: ['Cierra y abre FLOWI y vuelve a probar.'] };
+    const renewed = result.keyBefore === 'mismatch'
+      ? ['Tu celular tenía una suscripción de avisos hecha con otra clave (por eso no te llegaban). Ya la renové.'] : [];
+    if (!result.ok) {
+      text = { ok: false, msg: `El servidor no pudo enviar el aviso (${result.reason}).`, tips: ['Cierra y abre FLOWI y vuelve a probar.'] };
+    } else if (result.received) {
+      text = {
+        ok: true,
+        msg: '¡Funciona! El aviso del servidor llegó a este celular. Deberías ver "Prueba de FLOWI ✓". Los recordatorios te llegarán aun con la app cerrada.',
+        tips: [...renewed, 'Si no lo ves en la barra, revisa en los ajustes de Android que las notificaciones de FLOWI no estén silenciadas.'],
+      };
+    } else {
+      text = {
+        ok: false,
+        msg: 'Google aceptó el aviso, pero no llegó a este celular en 12 segundos.',
+        tips: [
+          ...renewed,
+          'Espera un minuto: a veces llega tarde. Si aparece "Prueba de FLOWI ✓", ya funciona.',
+          'Quita a FLOWI y a Chrome del ahorro de batería (Ajustes → Aplicaciones → Chrome → Batería → Sin restricciones) y desactiva el ahorro de datos.',
+          'Vuelve a tocar el botón: cada prueba renueva la suscripción de este celular.',
+        ],
+      };
+    }
   } else if (result?.step === 'error') {
     text = { ok: false, msg: 'No se pudo hacer la prueba. Revisa tu conexión e intenta de nuevo.' };
   }

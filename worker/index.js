@@ -6,10 +6,13 @@ self.addEventListener('push', (event) => {
   let payload = {};
   try { payload = event.data ? event.data.json() : {}; } catch (e) { payload = {}; }
   // FCM manda los datos dentro de "data"; también se aceptan en la raíz
-  const data = payload.data || payload;
+  const data = payload.data || payload.notification || payload;
   const title = data.title || 'FLOWI';
-  event.waitUntil(
-    self.registration.showNotification(title, {
+  // Para la prueba de Configuración: deja anotado que el aviso del servidor sí llegó
+  const note = caches.open('flowi-diag')
+    .then(c => c.put('/__last-push', new Response(JSON.stringify({ at: Date.now(), tag: data.tag || '' }))))
+    .catch(() => {});
+  event.waitUntil(Promise.all([note, self.registration.showNotification(title, {
       body: data.body || '',
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
@@ -17,7 +20,7 @@ self.addEventListener('push', (event) => {
       renotify: true,
       vibrate: [200, 100, 200],
       data: { url: data.url || '/' },
-    })
+    })])
   );
 });
 
