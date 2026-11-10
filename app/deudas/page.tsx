@@ -139,8 +139,10 @@ export default function DeudasPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 items-start">
         <div className="min-w-0 space-y-4 lg:sticky lg:top-24">
         {/* Premium Card for Total Debts */}
-        <div className="relative overflow-hidden rounded-3xl p-6 md:p-8 bg-card border border-orange-500/20 shadow-sm">
+        <div className={`relative overflow-hidden p-6 md:p-8 bg-card border border-orange-500/40 shadow-sm animate-card-mix ${isCyberpunk ? '' : 'rounded-3xl'}`}
+             style={{...(isCyberpunk ? { borderRadius: 0, clipPath: 'polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)' } : {})}}>
           <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-orange-500/10 blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-blue-500/5 blur-xl pointer-events-none" />
           
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">

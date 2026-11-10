@@ -117,7 +117,8 @@ export default function IngresosPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-6 items-start">
         <div className="min-w-0 lg:sticky lg:top-24">
           {/* Card de Total */}
-          <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-accent/20 shadow-sm animate-card-mix">
+          <div key={`${filterType}-${filterValue}`} className={`relative overflow-hidden p-6 mb-6 bg-card border border-accent/40 shadow-sm animate-card-mix ${isTechTheme ? '' : 'rounded-3xl'}`}
+               style={{...(isTechTheme ? { borderRadius: 0, clipPath: 'polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)' } : {})}}>
             {/* Decorative circles */}
             <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
                             bg-accent/5 blur-2xl pointer-events-none" />

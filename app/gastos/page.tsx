@@ -165,7 +165,8 @@ export default function GastosPage() {
           </div>
 
           {/* Card de Total */}
-          <div key={`${filterType}-${filterValue}`} className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-card border border-[var(--red)]/20 shadow-sm animate-card-mix">
+          <div key={`${filterType}-${filterValue}`} className={`relative overflow-hidden p-6 mb-6 bg-card border border-red-500/40 shadow-sm animate-card-mix ${isTechTheme ? '' : 'rounded-3xl'}`}
+               style={{...(isTechTheme ? { borderRadius: 0, clipPath: 'polygon(0 20px, 20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)' } : {})}}>
             {/* Decorative circles */}
             <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full
                             bg-red-500/5 blur-2xl pointer-events-none" />
