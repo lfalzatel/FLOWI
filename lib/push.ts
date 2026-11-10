@@ -4,6 +4,7 @@
 import { arrayRemove, arrayUnion, doc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { pushOn } from './notifPrefs';
+import { ensureMainServiceWorker } from './swCleanup';
 
 const TOKEN_STORAGE = 'flowi_push_token';
 const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
@@ -37,7 +38,9 @@ export async function currentToken(opts: { fresh?: boolean } = {}): Promise<stri
   const { isSupported, getMessaging, getToken, deleteToken } = await import('firebase/messaging');
   if (!(await isSupported())) return null;
   const { app } = await import('./firebase');
-  const registration = await navigator.serviceWorker.ready;
+  // Siempre con el service worker actual (/sw.js): uno viejo no muestra los avisos del servidor
+  const main = await ensureMainServiceWorker();
+  const registration = main?.registration || await navigator.serviceWorker.ready;
   const messaging = getMessaging(app);
   if (opts.fresh || (await subscriptionKeyState(registration)) === 'mismatch') {
     // Suscripción vieja o hecha con otra clave: se borra y se crea una nueva
@@ -93,13 +96,13 @@ export async function testPush(uid: string): Promise<PushTestResult> {
   if (Notification.permission !== 'granted') return { step: 'permission', state: Notification.permission };
   // 1. Aviso local inmediato
   try {
-    const reg = await navigator.serviceWorker.ready;
+    const reg = (await ensureMainServiceWorker())?.registration || await navigator.serviceWorker.ready;
     await reg.showNotification('Prueba 1 de 2: aviso del celular', {
       body: 'Este lo muestra el celular directamente.', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', tag: 'flowi-test-local',
     });
   } catch { /* se informa con el paso del servidor */ }
   // 2. Aviso desde el servidor, con una suscripción nueva (por si la anterior quedó dañada)
-  const registration = await navigator.serviceWorker.ready;
+  const registration = (await ensureMainServiceWorker())?.registration || await navigator.serviceWorker.ready;
   const keyBefore = await subscriptionKeyState(registration).catch(() => 'none' as const);
   const previous = storedToken();
   const token = await currentToken({ fresh: true }).catch(() => null);
