@@ -263,6 +263,11 @@ export default function DashboardPage() {
       })
       .sort((a, b) => new Date(a.account.confirmedAt || a.account.baseAt).getTime() - new Date(b.account.confirmedAt || b.account.baseAt).getTime())
       .map(s => ({ id: s.account.id!, name: s.account.name, balance: s.balance })),
+    staleFunds: demo ? [] : investments
+      .filter(i => i.status === 'activo' && i.id && (i.kind === 'fondo' || i.kind === 'pension'))
+      .map(i => ({ id: i.id!, name: i.note || i.symbol || i.bank, days: Math.floor((Date.now() - new Date(i.valueAt || i.startDate).getTime()) / 86400000) }))
+      .filter(f => f.days >= 30)
+      .sort((a, b) => b.days - a.days),
     maturing: demo ? [] : investments.filter(i => i.status === 'activo' && i.id && (i.kind || 'cdt') === 'cdt')
       .map(i => ({ id: i.id!, bank: i.bank, amount: i.amount, daysLeft: investmentStatus(i).daysLeft })),
     summary: monthRecap,

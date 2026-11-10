@@ -544,6 +544,12 @@ export interface Investment {
   bank: string;                // entidad o plataforma
   currentValue?: number | null; // fondo/pensión: valor actual que la persona actualiza
   valueAt?: string | null;      // cuándo se actualizó ese valor
+  // Solo fondos y acciones (kind 'fondo'): no tienen tasa fija, su valor sube y baja
+  assetType?: 'fondo' | 'acciones' | null;
+  symbol?: string | null;       // acciones: símbolo (CELSIA, ECOPETROL, VOO…)
+  units?: number | null;        // acciones: número de acciones
+  dividends?: number | null;    // acciones: dividendos recibidos en total
+  yearReturn?: number | null;   // fondos: rentabilidad del último año en % (solo de referencia, no se usa para calcular)
   amount: number;              // capital
   rateEA: number;              // tasa efectiva anual, en %
   nominalRate?: number | null; // tasa nominal que muestra el banco (opcional)

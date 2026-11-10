@@ -222,7 +222,7 @@ export default function InversionesPage() {
                   const loss = v.earned < 0;
                   return (
                     <article key={inv.id} className={`${card} p-4`}>
-                      {header(<>{KIND_INFO[k].short}{inv.note ? ` · ${inv.bank}` : ''}</>, k === 'ahorro' && inv.rateEA ? `${String(inv.rateEA).replace('.', ',')}% E.A.` : undefined)}
+                      {header(<>{k === 'fondo' && inv.assetType === 'acciones' ? 'Acciones' : KIND_INFO[k].short}{inv.note ? ` · ${inv.bank}` : ''}</>, k === 'ahorro' && inv.rateEA ? `${String(inv.rateEA).replace('.', ',')}% E.A.` : undefined)}
                       <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
                         <div>
                           <p className="text-text-muted">{k === 'ahorro' ? 'Saldo hoy (aprox.)' : 'Vale hoy'}</p>
@@ -239,6 +239,19 @@ export default function InversionesPage() {
                           {k === 'ahorro' && <p className="text-[10px] text-text-muted">desde el {formatDay(inv.startDate)}</p>}
                         </div>
                       </div>
+                      {k === 'fondo' && (inv.symbol || inv.units || inv.dividends || inv.yearReturn) && (
+                        <p className="mt-2 text-[11px] text-text-secondary">
+                          {[
+                            inv.symbol && `${inv.symbol}`,
+                            inv.units && `${String(inv.units).replace('.', ',')} ${inv.units === 1 ? 'acción' : 'acciones'}`,
+                            inv.dividends && `dividendos recibidos ${fmt(inv.dividends)}`,
+                            inv.yearReturn && `rentabilidad último año ${String(inv.yearReturn).replace('.', ',')}% (referencia)`,
+                          ].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
+                      {k !== 'ahorro' && inv.valueAt && Date.now() - new Date(inv.valueAt).getTime() > 30 * 86400000 && (
+                        <p className="mt-2 text-[11px] text-amber-500">Hace más de un mes no actualizas el valor: toca "Actualizar valor" con lo que dice la app.</p>
+                      )}
                       <div className="mt-3 grid grid-cols-3 gap-2">
                         <button onClick={() => { setMoving({ inv, mode: 'deposito' }); setMoveAmount(''); setMoveAccount(undefined); }} className={ghost}><ArrowDownToLine className="w-3.5 h-3.5" /> Depositar</button>
                         <button onClick={() => { setMoving({ inv, mode: 'retiro' }); setMoveAmount(''); setMoveAccount(undefined); }} className={ghost}><ArrowUpFromLine className="w-3.5 h-3.5" /> Retirar</button>

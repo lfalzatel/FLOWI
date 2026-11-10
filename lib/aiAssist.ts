@@ -450,6 +450,81 @@ const SAVINGS_KIND_TEXT: Record<string, string> = {
   pension: 'un fondo de pensión voluntaria u obligatoria (Porvenir, Protección, Colfondos, Skandia)',
 };
 
+// ── Fondos y acciones (Trii, tyba…): una captura puede traer varias inversiones ──
+export interface FundReading {
+  name?: string;        // "Acciones Dinámico", "CELSIA"
+  bank?: string;        // plataforma
+  assetType?: 'fondo' | 'acciones';
+  invested?: number;    // lo depositado / total invertido
+  value?: number;       // lo que vale hoy
+  symbol?: string;
+  units?: number;       // número de acciones
+  dividends?: number;
+  yearReturn?: number;  // rentabilidad último año en %
+}
+export type FundsReadResult =
+  | { ok: true; items: FundReading[] }
+  | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' };
+
+export async function readFundsWithAi(files: File[]): Promise<FundsReadResult> {
+  const key = getAiKey();
+  if (!key) return { ok: false, reason: 'no-key' };
+  const models = await getFreeVisionModels(key).catch(() => []);
+  if (!models.length) return { ok: false, reason: 'no-model' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RECEIPT_TIMEOUT_MS * 2);
+  const prompt = `Lees capturas de apps de inversión colombianas (Trii, tyba, fiduciarias, bancos) con fondos de inversión, acciones o ETF.
+Una captura puede mostrar VARIAS inversiones (un portafolio): devuelve una por cada fondo o acción que aparezca.
+Responde SOLO un JSON: {"items": [{"name": nombre del fondo o de la acción, "bank": app o entidad, "assetType": "fondo" o "acciones",
+ "invested": lo depositado o total invertido en pesos, "value": lo que vale hoy en pesos, "symbol": símbolo si es acción (ej CELSIA),
+ "units": número de acciones si aparece, "dividends": dividendos recibidos en pesos si aparecen, "yearReturn": rentabilidad del último año en % si aparece}]}
+Usa null si un dato no aparece. Si solo se ve la ganancia y el valor, invested = valor − ganancia.
+No incluyas números de cuenta, de documento ni nombres de personas. Los montos colombianos usan punto de miles y coma decimal.`;
+  try {
+    const images = await Promise.all(files.slice(0, 4).map(shrinkImage));
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'HTTP-Referer': window.location.origin, 'X-Title': 'FLOWI' },
+      body: JSON.stringify({
+        model: models[0], models, temperature: 0,
+        messages: [
+          { role: 'system', content: prompt },
+          { role: 'user', content: [{ type: 'text', text: `Estas son ${images.length} captura(s).` }, ...images.map(url => ({ type: 'image_url', image_url: { url } }))] },
+        ],
+      }),
+    });
+    if (!res.ok) return { ok: false, reason: 'failed' };
+    const json = await res.json();
+    const p = extractJson(json?.choices?.[0]?.message?.content || '');
+    const list: any[] = Array.isArray(p?.items) ? p.items : Array.isArray(p) ? p : p ? [p] : [];
+    const num = (v: any) => {
+      if (typeof v === 'number') return Number.isFinite(v) && v > 0 ? v : undefined;
+      if (typeof v !== 'string') return undefined;
+      const n = Number(v.replace(/[^\d.,]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    };
+    const str = (v: any, max = 40) => (typeof v === 'string' && v.trim() && v !== 'null' ? v.trim().slice(0, max) : undefined);
+    const items: FundReading[] = list.slice(0, 6).map(x => {
+      const invested = num(x?.invested), value = num(x?.value), units = num(x?.units), yr = num(x?.yearReturn);
+      return {
+        name: str(x?.name), bank: str(x?.bank, 30),
+        assetType: x?.assetType === 'acciones' || num(x?.units) || str(x?.symbol, 12) ? 'acciones' : 'fondo',
+        invested: invested ? Math.round(invested) : undefined, value: value ? Math.round(value) : undefined,
+        symbol: str(x?.symbol, 12)?.toUpperCase(), units: units ? Math.round(units * 10000) / 10000 : undefined,
+        dividends: num(x?.dividends) ? Math.round(num(x?.dividends)!) : undefined,
+        yearReturn: yr !== undefined && yr < 200 ? Math.round(yr * 100) / 100 : undefined,
+      } as FundReading;
+    }).filter(i => i.value || i.invested);
+    if (!items.length) return { ok: false, reason: 'unreadable' };
+    return { ok: true, items };
+  } catch {
+    return { ok: false, reason: 'failed' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function readSavingsWithAi(files: File[], kind: string): Promise<SavingsReadResult> {
   const key = getAiKey();
   if (!key) return { ok: false, reason: 'no-key' };

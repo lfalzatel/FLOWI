@@ -28,6 +28,7 @@ interface Input {
   maturing?: { id: string; bank: string; amount: number; daysLeft: number }[]; // CDT que vencen pronto
   // Cuentas cuyo saldo no se revisa hace 15 días o más (se pregunta si cuadra con el banco)
   toReconcile?: { id: string; name: string; balance: number }[];
+  staleFunds?: { id: string; name: string; days: number }[]; // fondos, acciones o pensión con valor viejo
   summary?: { month: string; name: string; hint?: string } | null; // resumen del mes pasado listo (días 1 a 10)
   discover?: { hasAccounts: boolean; hasInvestments: boolean; reminders: number; seenTips: string[] };
   showSupport?: boolean;
@@ -43,7 +44,7 @@ function toDate(v: any): Date {
   return new Date(v);
 }
 
-export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], summary = null, discover, showSupport = false, premiumEnd = null, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
+export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], staleFunds = [], summary = null, discover, showSupport = false, premiumEnd = null, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
   const out: NextAction[] = [];
 
   // Premium por vencer (5 días antes) o recién vencido (hasta 7 días después)
@@ -127,6 +128,16 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     });
   }
 
+  // 2d. Fondos y acciones no crecen con una tasa: hay que anotar su valor de vez en cuando
+  const fund = staleFunds[0];
+  if (fund) {
+    out.push({
+      id: `fund:${fund.id}:${Math.floor(fund.days / 30)}`, kind: 'link', href: '/servicios/inversiones', tone: 'normal',
+      title: `¿Cuánto vale hoy ${fund.name}?`,
+      detail: `Hace ${fund.days} días no lo actualizas. Mira la app y anótalo para ver tu ganancia real.`,
+    });
+  }
+
   // 3. Hoy ya se pasó de la cuota
   if (today && today.hasBase && today.remainingToday < 0 && today.tomorrowAllowance !== null) {
     out.push({
@@ -204,6 +215,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     if (id === 'today-over') return 4;
     if (id.startsWith('review:')) return 5;
     if (id.startsWith('reconcile:')) return 6;
+    if (id.startsWith('fund:')) return 7;
     if (id === 'notify') return 7;
     if (id.startsWith('goal-')) return 8;
     if (id === 'add-today') return 9;
