@@ -5,6 +5,8 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2, Camera, ChevronDown } from 'lucide-react';
 import { getAiKey, readCdtWithAi } from '@/lib/aiAssist';
+import { DictateButton } from '@/components/forms/DictateButton';
+import { parseInvestmentSpeech } from '@/lib/formDictation';
 import { BankField, BankPickerSheet } from '@/components/accounts/BankPickerSheet';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
@@ -78,6 +80,18 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
   const shotsRef = useRef<HTMLInputElement>(null);
   const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
   const [aiMsg, setAiMsg] = useState('');
+  // Dictado: "CDT de 5 millones en Bancolombia al 11 % a 6 meses"
+  const applySpeech = (text: string) => {
+    const list = (xs: unknown[]) => { const f = xs.filter((x): x is string => typeof x === 'string' && !!x); return f.length ? `Llené: ${f.join(', ')}. Revisa antes de guardar.` : 'No entendí los datos. Prueba con el ejemplo o escríbelos.'; };
+    const d = parseInvestmentSpeech(text);
+    if (d.bank) setBank(d.bank);
+    if (d.amount) setAmount(formatAmountInput(d.amount));
+    if (d.rateEA) setRate(rateText(d.rateEA));
+    if (d.startDate) setStart(d.startDate);
+    if (d.maturityDate) setMaturity(d.maturityDate);
+    return list([d.bank && `banco (${d.bank})`, d.amount && 'monto', d.rateEA && 'tasa', d.startDate && 'apertura', d.maturityDate && 'vencimiento']);
+  };
+
   async function readShots(files: File[]) {
     if (!files.length) return;
     setAiState('loading');
@@ -227,6 +241,11 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                   ? 'El nuevo capital incluye los intereses. Si el banco te da otra cifra exacta, cámbiala abajo.'
                   : 'Los registro como un ingreso en "Rendimientos / intereses" con fecha del vencimiento.'}</p>
               </div>
+            )}
+
+            {!renewing && !investment && (
+              <DictateButton isTech={isTechTheme} onText={applySpeech} label="Dictar el CDT"
+                             example='"CDT de 5 millones en Bancolombia al 11 % a 6 meses"' />
             )}
 
             {!renewing && !investment && (

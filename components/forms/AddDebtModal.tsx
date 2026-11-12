@@ -11,6 +11,8 @@ import { getLocalDateString } from '@/lib/dateUtils';
 import { getAiKey, insuranceRateFromAccrued, readDebtWithAi } from '@/lib/aiAssist';
 import { ReadingTips } from '@/components/forms/ReadingTips';
 import { useDebts } from '@/hooks/useDebts';
+import { DictateButton } from '@/components/forms/DictateButton';
+import { parseDebtSpeech } from '@/lib/formDictation';
 
 interface Props {
   onClose: () => void;
@@ -142,6 +144,32 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
     if (!description) setDescription(`Con la plata de mi crédito ${d.title}`);
     setShowCopy(false);
     setAiMsg('');
+  };
+
+  // Dictado: "Crediágil de 700 mil al 28,17 a 60 meses, pago los 15" o "le presté 500 mil a Claudia"
+  const applySpeech = (text: string) => {
+    const list = (xs: unknown[]) => { const f = xs.filter((x): x is string => typeof x === 'string' && !!x); return f.length ? `Llené: ${f.join(', ')}. Revisa antes de guardar.` : 'No entendí los datos. Prueba con el ejemplo o escríbelos.'; };
+    const d = parseDebtSpeech(text);
+    const k = d.kind || kind;
+    if (d.kind) pickKind(d.kind);
+    if (d.title) setTitle(d.title);
+    if (d.amount) setTotalAmount(String(d.amount));
+    if (d.date) setDebtDate(d.date);
+    if (d.rate) { setInterestRate(String(d.rate)); setRateUnit(d.rateUnit || (k === 'banco' ? 'ea' : 'mensual')); }
+    if (d.termMonths) setTermMonths(String(d.termMonths));
+    if (d.paymentDay) setPaymentDay(String(d.paymentDay));
+    if (d.installment) setInstallment(String(d.installment));
+    if (d.insurance) { setInsuranceMode('va'); setInsurance(String(d.insurance)); setShowInsurance(true); }
+    if (d.paid) {
+      if (k === 'banco' && d.amount) setCapitalNow(String(Math.max(0, d.amount - d.paid)));
+      else setPaidAmount(String(d.paid));
+    }
+    if (k !== 'banco' && (d.termMonths || d.paymentDay || d.installment)) setShowPlan(true);
+    return list([
+      d.kind && KINDS.find(x => x.id === d.kind)?.label.toLowerCase(), d.title && `"${d.title}"`, d.amount && 'monto',
+      d.date && 'fecha', d.rate && 'tasa', d.termMonths && 'plazo', d.paymentDay && 'día de pago',
+      d.installment && 'cuota', d.insurance && 'seguro', d.paid && 'lo pagado',
+    ]);
   };
 
   const pickKind = (k: Kind) => {
@@ -432,6 +460,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
                 );
               })}
             </div>
+          )}
+
+          {/* Dictar la deuda completa */}
+          {!debtToEdit && !isReadOnly && (
+            <DictateButton isTech={isTechTheme} onText={applySpeech} label="Dictar la deuda"
+                           example={kind === 'banco' ? '"Crediágil de 700 mil al 28,17 a 60 meses, pago los 15, desembolso el 5 de noviembre"'
+                             : kind === 'preste' ? '"Le presté 500 mil a Claudia al 2 % mensual"' : '"Mi hermana me prestó un millón ayer"'} />
           )}
 
           {/* Prestaste la plata de un crédito tuyo: copiar sus condiciones */}

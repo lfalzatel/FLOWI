@@ -5,6 +5,8 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2, Camera, Info } from 'lucide-react';
 import { FundReading, getAiKey, readFundsWithAi, readSavingsWithAi } from '@/lib/aiAssist';
+import { DictateButton } from '@/components/forms/DictateButton';
+import { parseInvestmentSpeech } from '@/lib/formDictation';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useAccounts } from '@/hooks/useAccounts';
@@ -73,6 +75,17 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
   const shotsRef = useRef<HTMLInputElement>(null);
   const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
   const [aiMsg, setAiMsg] = useState('');
+  // Dictado: "Cajita de Nu con 2 millones al 9 %" o "fondo en Skandia, invertí 3 millones y ya tiene 3,4"
+  const applySpeech = (text: string) => {
+    const list = (xs: unknown[]) => { const f = xs.filter((x): x is string => typeof x === 'string' && !!x); return f.length ? `Llené: ${f.join(', ')}. Revisa antes de guardar.` : 'No entendí los datos. Prueba con el ejemplo o escríbelos.'; };
+    const d = parseInvestmentSpeech(text);
+    if (d.bank) setBank(d.bank);
+    if (d.amount) setAmount(formatMoneyInput(d.amount));
+    if (d.current) setCurrent(formatMoneyInput(d.current));
+    if (d.rateEA) setRate(String(d.rateEA).replace('.', ','));
+    return list([d.bank && `entidad (${d.bank})`, d.amount && 'monto', d.current && 'saldo actual', d.rateEA && 'tasa']);
+  };
+
   async function readShots(files: File[]) {
     if (!files.length) return;
     setAiState('loading');
@@ -230,6 +243,10 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-5">
+          {!investment && (
+            <DictateButton isTech={isTech} onText={applySpeech}
+                           example={isFund ? '"Fondo en Skandia, invertí 3 millones y ya tiene 3,4 millones"' : isSavings ? '"Cajita de Nu con 2 millones al 9 %"' : '"Pensión en Porvenir con 15 millones"'} />
+          )}
           {!investment && (
             <div>
               <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
