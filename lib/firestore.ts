@@ -115,6 +115,8 @@ export interface Debt {
   paymentDay?: number | null;       // día del mes en que se paga la cuota (opcional)
   // "debo" = yo le debo a alguien (por defecto); "me_deben" = alguien me debe a mí
   direction?: 'debo' | 'me_deben';
+  // Crédito de un banco (con tasa, seguro y cuotas) o préstamo entre personas
+  debtKind?: 'banco' | 'persona';
   payments?: Array<{
     id: string;
     amount: number;
@@ -194,9 +196,10 @@ export async function deleteDebt(id: string) {
 // lo que se debe hoy = totalAmount − paidAmount + accumulatedInterest.
 export function calculateDebtInterest(debt: Debt, now = new Date()): {
   accumulatedInterest: number; interest: number; insurance: number; currentTotal: number; principalLeft: number;
+  pendingInterest: number; pendingInsurance: number;
 } {
   const base = Math.max(0, debt.totalAmount - debt.paidAmount);
-  const defaultResult = { accumulatedInterest: 0, interest: 0, insurance: 0, currentTotal: base, principalLeft: base };
+  const defaultResult = { accumulatedInterest: 0, interest: 0, insurance: 0, currentTotal: base, principalLeft: base, pendingInterest: 0, pendingInsurance: 0 };
   const rate = debt.interestRate && debt.interestRate > 0 ? debt.interestRate : 0;
   const insuranceMonthly = debt.monthlyInsurance && debt.monthlyInsurance > 0 ? debt.monthlyInsurance : 0;
   const insurancePct = !insuranceMonthly && debt.insuranceRate && debt.insuranceRate > 0 ? debt.insuranceRate : 0;
@@ -221,7 +224,9 @@ export function calculateDebtInterest(debt: Debt, now = new Date()): {
   const logged = Array.from(paymentsByDay.values()).reduce((s, n) => s + n, 0);
   let principal = Math.max(0, debt.totalAmount - Math.max(0, debt.paidAmount - logged));
 
-  let interest = 0, insurance = 0, owedCharges = 0;
+  // Lo pendiente se lleva por separado (como lo muestra el banco); cada abono paga primero el seguro,
+  // luego los intereses y al final el capital
+  let interest = 0, insurance = 0, owedCharges = 0, owedIns = 0, owedInt = 0;
   const day = new Date(createdDate.getTime());
   day.setHours(0, 0, 0, 0);
   const target = new Date(now.getTime());
@@ -234,11 +239,16 @@ export function calculateDebtInterest(debt: Debt, now = new Date()): {
     interest += i;
     insurance += ins;
     owedCharges += i + ins;
+    owedIns += ins;
+    owedInt += i;
     day.setDate(day.getDate() + 1);
     const paid = paymentsByDay.get(day.toLocaleDateString('sv-SE')) || 0;
     if (paid > 0) {
       const toCharges = Math.min(paid, owedCharges);
       owedCharges -= toCharges;
+      const toIns = Math.min(toCharges, owedIns);
+      owedIns -= toIns;
+      owedInt = Math.max(0, owedInt - (toCharges - toIns));
       principal = Math.max(0, principal - (paid - toCharges));
     }
   }
@@ -249,6 +259,8 @@ export function calculateDebtInterest(debt: Debt, now = new Date()): {
   return {
     accumulatedInterest, interest, insurance,
     principalLeft: Math.floor(principal),
+    pendingInterest: Math.floor(owedInt),
+    pendingInsurance: Math.floor(owedIns),
     currentTotal: Math.max(0, debt.totalAmount - debt.paidAmount + accumulatedInterest),
   };
 }

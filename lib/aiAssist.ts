@@ -493,6 +493,118 @@ export async function readCdtWithAi(files: File[]): Promise<CdtReadResult> {
 }
 
 
+// ── Créditos desde capturas de la app del banco ───────────────────────────
+// Lee lo que el banco muestra de un crédito (Crediágil, libre inversión…) para llenar la deuda.
+
+export interface DebtReading {
+  title?: string;             // nombre del producto ("Crediágil")
+  amount?: number;            // valor desembolsado
+  disbursementDate?: string;  // YYYY-MM-DD
+  rateEA?: number;
+  termMonths?: number;
+  paymentDay?: number;        // día del mes del próximo pago
+  installment?: number;       // cuota mensual si aparece
+  capitalNow?: number;        // capital vigente (lo que falta de capital)
+  interestNow?: number;       // intereses corrientes causados
+  insuranceAccrued?: number;  // seguro causado a la fecha
+  insuranceMonthly?: number;  // seguro mensual si aparece como parte de la cuota
+}
+export type DebtReadResult =
+  | { ok: true; data: DebtReading; found: number }
+  | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' };
+
+const DEBT_PROMPT = `Eres un asistente que lee capturas de pantalla de la app de un banco colombiano sobre un CRÉDITO (préstamo de consumo, libre inversión, Crediágil, etc.).
+Pueden ser varias capturas del mismo crédito. Responde SOLO un JSON con estas claves (null si no aparece):
+{"title": nombre del producto o tipo de crédito (ej "Crediágil"), "amount": valor desembolsado o monto del crédito en pesos,
+ "disbursementDate": fecha de desembolso "YYYY-MM-DD", "rateEA": tasa efectiva anual en % (número, ej 28.17),
+ "termMonths": plazo en meses (número), "nextPaymentDate": fecha del próximo pago "YYYY-MM-DD",
+ "installment": valor de la cuota mensual si aparece, "capitalNow": capital vigente o saldo de capital,
+ "interestNow": intereses corrientes, "insuranceAccrued": valor del seguro de vida deudor que aparece en el detalle,
+ "insuranceMonthly": seguro mensual solo si aparece explícitamente como parte de la cuota mensual}
+Las fechas pueden venir como "5 Nov 2026" o "05/11/2026" (día/mes/año).
+No incluyas números de crédito, de cuenta, de documento ni nombres de personas. Los montos colombianos usan punto de miles y coma decimal ("$ 700.000,00" = 700000).`;
+
+export async function readDebtWithAi(files: File[]): Promise<DebtReadResult> {
+  const key = getAiKey();
+  if (!key) return { ok: false, reason: 'no-key' };
+  const models = await getFreeVisionModels(key).catch(() => []);
+  if (!models.length) return { ok: false, reason: 'no-model' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RECEIPT_TIMEOUT_MS * 2);
+  try {
+    const images = await Promise.all(files.slice(0, 4).map(shrinkImage));
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'HTTP-Referer': window.location.origin, 'X-Title': 'FLOWI' },
+      body: JSON.stringify({
+        model: models[0], models, temperature: 0,
+        messages: [
+          { role: 'system', content: DEBT_PROMPT },
+          { role: 'user', content: [
+            { type: 'text', text: `Estas son ${images.length} captura(s) de un crédito.` },
+            ...images.map(url => ({ type: 'image_url', image_url: { url } })),
+          ] },
+        ],
+      }),
+    });
+    if (!res.ok) return { ok: false, reason: 'failed' };
+    const json = await res.json();
+    const p = extractJson(json?.choices?.[0]?.message?.content || '');
+    if (!p) return { ok: false, reason: 'unreadable' };
+    const num = (v: any) => {
+      if (typeof v === 'number') return Number.isFinite(v) && v > 0 ? v : undefined;
+      if (typeof v !== 'string') return undefined;
+      const n = Number(v.replace(/[^\d.,]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    };
+    const day = (v: any) => {
+      if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return undefined;
+      const [y, m, d] = v.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      return dt.getMonth() === m - 1 && y > 2000 && y < 2100 ? v : undefined;
+    };
+    const money = (v: any) => (num(v) ? Math.round(num(v)!) : undefined);
+    const rate = num(p.rateEA);
+    const term = num(p.termMonths);
+    const next = day(p.nextPaymentDate);
+    const data: DebtReading = {
+      title: typeof p.title === 'string' && p.title.trim() && p.title !== 'null' ? p.title.trim().slice(0, 40) : undefined,
+      amount: money(p.amount),
+      disbursementDate: day(p.disbursementDate),
+      rateEA: rate !== undefined && rate < 200 ? Math.round(rate * 100) / 100 : undefined,
+      termMonths: term !== undefined && term <= 360 ? Math.round(term) : undefined,
+      paymentDay: next ? Number(next.slice(8, 10)) : undefined,
+      installment: money(p.installment),
+      capitalNow: money(p.capitalNow),
+      interestNow: money(p.interestNow),
+      insuranceAccrued: money(p.insuranceAccrued),
+      insuranceMonthly: money(p.insuranceMonthly),
+    };
+    const found = Object.values(data).filter(v => v !== undefined).length;
+    if (!found) return { ok: false, reason: 'unreadable' };
+    return { ok: true, data, found };
+  } catch {
+    return { ok: false, reason: 'failed' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Seguro de vida deudor como % mensual del saldo, a partir de lo que el banco ya cobró:
+ * ej. $233 en 7 días sobre $700.000 → 0,143 % mensual. null si no hay datos suficientes.
+ */
+export function insuranceRateFromAccrued(accrued: number, capital: number, fromDate: string, now = new Date()): number | null {
+  const [y, m, d] = fromDate.split('-').map(Number);
+  const start = new Date(y, m - 1, d);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const days = Math.round((today.getTime() - start.getTime()) / 86400000);
+  if (days < 1 || capital <= 0 || accrued <= 0) return null;
+  const pct = (accrued / days) * 30 / capital * 100;
+  return pct > 0 && pct < 5 ? Math.round(pct * 1000) / 1000 : null;
+}
+
 // ── Cajitas, fondos y pensión desde capturas ──────────────────────────────
 // Lee el saldo o valor de la inversión, lo invertido (si aparece) y la tasa E.A.
 

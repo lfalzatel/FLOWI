@@ -54,6 +54,7 @@ import { ReminderWatcher } from '@/components/reminders/ReminderWatcher';
 import { NotificationPrompter } from '@/components/notifications/NotificationPrompter';
 import { UpdateWatcher } from '@/components/layout/UpdateWatcher';
 import { LimitPrompter } from '@/components/plans/LimitPrompter';
+import { PremiumCelebration } from '@/components/plans/PremiumCelebration';
 import { UsageTracker } from '@/components/layout/UsageTracker';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 import { AppLock } from '@/components/security/AppLock';
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <NotificationPrompter />
               <UpdateWatcher />
               <LimitPrompter />
+              <PremiumCelebration />
               <UsageTracker />
               <AppLock />
               <PlayStoreDetector />

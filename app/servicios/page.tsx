@@ -9,8 +9,9 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { ProfileModal } from '@/components/forms/ProfileModal';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
+import { triggerPremiumCelebration } from '@/components/plans/PremiumCelebration';
 import { speakText } from '@/lib/voiceParser';
-import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, Volume2 } from 'lucide-react';
+import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, Volume2, Crown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 // Orden por defecto, por grupos: lo que más se usa arriba; lo que aún no funciona y los ajustes, al final
@@ -77,7 +78,7 @@ export default function ServiciosPage() {
             Probar Animaciones & Sonidos Web Audio
           </span>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
           <button
             onClick={() => triggerPowerAnimation(50000, 'ingreso')}
             className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
@@ -141,6 +142,19 @@ export default function ServiciosPage() {
             <Sparkles className="w-4 h-4 mb-1" />
             <span className="text-[10px] font-extrabold uppercase">Confeti</span>
             <span className="text-[9px] opacity-80">Celebración</span>
+          </button>
+
+          <button
+            onClick={() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); triggerPremiumCelebration(d); }}
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
+              isTechTheme
+                ? 'border border-yellow-400/40 bg-yellow-400/10 text-yellow-300 hover:bg-yellow-400/20'
+                : 'bg-yellow-400/10 border border-yellow-400/40 text-yellow-600 rounded-2xl hover:bg-yellow-400/20'
+            }`}
+          >
+            <Crown className="w-4 h-4 mb-1" />
+            <span className="text-[10px] font-extrabold uppercase">Premium</span>
+            <span className="text-[9px] opacity-80">Bienvenida</span>
           </button>
 
           <button
