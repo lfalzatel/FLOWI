@@ -20,14 +20,23 @@ const ACTIONS: { id: Exclude<QuickAction, 'voz'> | 'foto'; label: string; icon: 
   { id: 'inversion',    label: 'Inversión',        icon: Landmark,        color: 'text-teal-400 bg-teal-500/10' },
 ];
 
+// Lo que se destaca arriba según la página donde está la persona
+const FEATURED = {
+  gasto:   { id: 'gasto' as const,   label: 'Nuevo gasto',          sub: 'Valor, categoría y listo', icon: TrendingDown, cls: 'bg-rose-500/15 border-rose-500/40 text-rose-400', say: '"Almuerzo 20 mil y tinto 3 mil"' },
+  ingreso: { id: 'ingreso' as const, label: 'Nuevo ingreso',        sub: 'Sueldo, venta, pago que te hicieron', icon: TrendingUp, cls: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400', say: '"Me pagaron 500 mil"' },
+  deuda:   { id: 'deuda' as const,   label: 'Nueva deuda o abono',  sub: 'Lo que debes o lo que te deben', icon: CreditCard, cls: 'bg-orange-500/15 border-orange-500/40 text-orange-400', say: '"Le presté 100 mil a Juan"' },
+};
+
 interface Props {
+  context?: 'gasto' | 'ingreso' | 'deuda' | null;
   onClose: () => void;
   onAction: (action: QuickAction) => void;
   onReceipt: (file: File | 'no-key') => void;
 }
 
 // Menú del botón flotante: hablar arriba (lo más rápido) y debajo todo lo que se puede registrar
-export function QuickActionsSheet({ onClose, onAction, onReceipt }: Props) {
+export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt }: Props) {
+  const featured = context ? FEATURED[context] : null;
   const { profile } = useAuth();
   const { canAdd } = usePlan();
   const { theme } = useTheme();
@@ -56,12 +65,25 @@ export function QuickActionsSheet({ onClose, onAction, onReceipt }: Props) {
           </button>
         </div>
 
+        {featured && (
+          <button type="button" onClick={() => onAction(featured.id)}
+                  className={`w-full flex items-center gap-3 p-4 mb-2 text-left border transition-all active:scale-[0.98] ${featured.cls} ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
+            <span className={`w-11 h-11 flex items-center justify-center bg-current/10 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}><featured.icon className="w-6 h-6 stroke-[2.5]" /></span>
+            <span className="flex-1 min-w-0">
+              <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{featured.label}</span>
+              <span className="block text-xs text-text-secondary">{featured.sub}</span>
+            </span>
+          </button>
+        )}
+
         <button type="button" onClick={() => onAction('voz')} data-tour="quick-voice"
-                className={`w-full flex items-center gap-3 p-4 mb-4 text-left transition-all active:scale-[0.98] bg-gradient-to-br from-accent to-accent-dim shadow-lg shadow-accent/25 ${isLight ? 'text-white' : 'text-black'} ${isTechTheme ? 'rounded-none border-2 border-black' : 'rounded-2xl'}`}>
-          <span className={`w-11 h-11 flex items-center justify-center bg-black/10 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}><Mic className="w-6 h-6 stroke-[2.5]" /></span>
+                className={`w-full flex items-center gap-3 text-left transition-all active:scale-[0.98] ${featured
+                  ? `p-3 mb-4 border border-accent/40 text-text-primary hover:bg-accent/10 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`
+                  : `p-4 mb-4 bg-gradient-to-br from-accent to-accent-dim shadow-lg shadow-accent/25 ${isLight ? 'text-white' : 'text-black'} ${isTechTheme ? 'rounded-none border-2 border-black' : 'rounded-2xl'}`}`}>
+          <span className={`flex items-center justify-center ${featured ? 'w-9 h-9 bg-accent/15 text-accent' : 'w-11 h-11 bg-black/10'} ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}><Mic className={`${featured ? 'w-5 h-5' : 'w-6 h-6'} stroke-[2.5]`} /></span>
           <span className="flex-1 min-w-0">
-            <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>Hablar</span>
-            <span className="block text-xs opacity-80">"Gasté 20 mil en almuerzo" · varias cosas a la vez</span>
+            <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{featured ? 'Dictarlo' : 'Hablar'}</span>
+            <span className={`block text-xs ${featured ? 'text-text-secondary' : 'opacity-80'}`}>{featured ? featured.say : '"Gasté 20 mil en almuerzo"'} · varias cosas a la vez</span>
           </span>
         </button>
 
@@ -69,7 +91,7 @@ export function QuickActionsSheet({ onClose, onAction, onReceipt }: Props) {
                onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onReceipt(f); }} />
 
         <div className="grid grid-cols-4 gap-2">
-          {ACTIONS.map(a => (
+          {ACTIONS.filter(a => a.id !== featured?.id).map(a => (
             <button key={a.id} type="button"
                     onClick={() => {
                       if (a.id === 'foto') {

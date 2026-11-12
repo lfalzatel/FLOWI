@@ -31,9 +31,11 @@ interface VoiceAssistantModalProps {
   onSuccessBulk?: () => void;
   // Desde el menú del botón flotante: abrir directo con la foto de un recibo (sin saludo ni micrófono)
   receipt?: File | 'no-key' | null;
+  // Página desde donde se abrió: cambia el saludo, el ejemplo y lo que se asume si no se dice
+  context?: 'gasto' | 'ingreso' | 'deuda' | null;
 }
 
-export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk, receipt = null }: VoiceAssistantModalProps) {
+export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk, receipt = null, context = null }: VoiceAssistantModalProps) {
   const router = useRouter();
   const { theme } = useTheme();
   const { user, profile } = useAuth();
@@ -254,7 +256,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
   useEffect(() => {
     const locale = detectUserLocaleAndCurrency(profile?.currency);
-    const greetingText = "¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.";
+    const greetingText = context === 'gasto' ? '¿Qué gasto quieres registrar?'
+      : context === 'ingreso' ? '¿Qué ingreso quieres registrar?'
+      : context === 'deuda' ? '¿Qué deuda o abono quieres registrar?'
+      : "¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.";
     
     if (receipt === 'no-key') setReceiptStatus('no-key');
     else if (receipt) handleReceiptFile(receipt);
@@ -417,7 +422,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
       }
 
-      const results = parseMultiVoiceTransaction(text, allCategories);
+      const results = parseMultiVoiceTransaction(text, allCategories, context === 'ingreso' ? 'ingreso' : 'gasto');
       setParsedResults(results);
 
       const requestId = ++aiRequestRef.current;
@@ -716,7 +721,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         <div className="my-2 min-h-[2.5rem] flex flex-col items-center justify-center">
           {isListening ? (
             <span className={`text-xs font-bold animate-pulse ${isTechTheme ? 'text-accent' : 'text-accent'}`}>
-              🎙️ Escuchando... Di "Estadísticas" o "Gasté 9000 en cerveza"
+              🎙️ Escuchando... {context === 'ingreso' ? 'Di "Me pagaron 500 mil"' : context === 'deuda' ? 'Di "Le presté 100 mil a Juan"' : context === 'gasto' ? 'Di "Almuerzo 20 mil y tinto 3 mil"' : 'Di "Estadísticas" o "Gasté 9000 en cerveza"'}
             </span>
           ) : transcript ? (
             <span className={`text-xs font-medium italic max-w-xs ${isTechTheme ? 'text-accent/90' : 'text-text-primary'}`}>

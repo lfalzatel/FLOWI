@@ -30,6 +30,9 @@ const navItems = [
 
 export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const pathname        = usePathname();
+  // En Gastos, Ingresos y Deudas el botón + destaca lo de esa página (y el dictado lo entiende)
+  const pageContext: 'gasto' | 'ingreso' | 'deuda' | null =
+    pathname === '/gastos' ? 'gasto' : pathname === '/ingresos' ? 'ingreso' : pathname === '/deudas' ? 'deuda' : null;
   const [showAdd, setShowAdd] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
   const [parsedVoiceData, setParsedVoiceData] = useState<ParsedVoiceResult | null>(null);
@@ -166,6 +169,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       {showVoice && (
         <VoiceAssistantModal
           receipt={receipt}
+          context={pageContext}
           onClose={() => { setShowVoice(false); setReceipt(null); }}
           onSuccessBulk={onSuccess}
           onSelectParsed={(result) => {
@@ -183,6 +187,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
       {showSheet && (
         <QuickActionsSheet
+          context={pageContext}
           onClose={() => setShowSheet(false)}
           onAction={onQuickAction}
           onReceipt={(file) => { setShowSheet(false); openVoice(file); }}

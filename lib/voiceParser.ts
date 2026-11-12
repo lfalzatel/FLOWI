@@ -801,7 +801,7 @@ export function parseVoiceTransaction(text: string, customCategories: VoiceCateg
  * Parser de frases compuestas: cada monto con su concepto es un movimiento, y cada uno conserva su
  * tipo (gasto, ingreso o deuda). Solo se suma en un único movimiento si se dice "en total".
  */
-export function parseMultiVoiceTransaction(text: string, customCategories: VoiceCategory[] = []): ParsedVoiceItem[] {
+export function parseMultiVoiceTransaction(text: string, customCategories: VoiceCategory[] = [], defaultType: 'gasto' | 'ingreso' = 'gasto'): ParsedVoiceItem[] {
   const clean = text.trim();
   if (!clean) return [];
 
@@ -823,13 +823,13 @@ export function parseMultiVoiceTransaction(text: string, customCategories: Voice
         if (m.isMoney) textWithoutOthers = textWithoutOthers.slice(0, m.start) + ' ' + textWithoutOthers.slice(m.end);
       });
       const cleaned = textWithoutOthers.replace(TOTAL_MARKER_RE, ' ');
-      return [buildTransaction(cleaned, findMoney(cleaned), { type: 'gasto' }, customCategories, text)];
+      return [buildTransaction(cleaned, findMoney(cleaned), { type: defaultType }, customCategories, text)];
     }
   }
 
   const segments = splitIntoSegments(working);
   const results: ParsedVoiceItem[] = [];
-  let inherited: { type: TxType; direction?: 'debo' | 'me_deben' } = { type: 'gasto' };
+  let inherited: { type: TxType; direction?: 'debo' | 'me_deben' } = { type: defaultType };
 
   for (const seg of segments) {
     const tx = buildTransaction(seg.text, seg.money, inherited, customCategories, text);
@@ -838,7 +838,7 @@ export function parseMultiVoiceTransaction(text: string, customCategories: Voice
   }
 
   if (results.length === 0) {
-    results.push(buildTransaction(working, findMoney(working), { type: 'gasto' }, customCategories, text));
+    results.push(buildTransaction(working, findMoney(working), { type: defaultType }, customCategories, text));
   }
   return results;
 }
