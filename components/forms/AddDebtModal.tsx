@@ -29,6 +29,10 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
   const [termMonths, setTermMonths] = useState('');
   const [paymentDay, setPaymentDay] = useState('');
   const [showPlan, setShowPlan] = useState(false);
+  // Yo debo (le debo a alguien o al banco) / Me deben (yo presté la plata)
+  const [direction, setDirection] = useState<'debo' | 'me_deben'>('debo');
+  // Seguro: valor fijo en pesos al mes, o % mensual del saldo
+  const [insuranceMode, setInsuranceMode] = useState<'fijo' | 'pct'>('fijo');
   const [abonoDate, setAbonoDate] = useState(getLocalDateString());
   const [debtDate, setDebtDate] = useState(getLocalDateString());
   const [loading, setLoading] = useState(false);
@@ -57,11 +61,18 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
       setPaidAmount(debtToEdit.paidAmount.toString());
       setInterestRate(debtToEdit.interestRate ? debtToEdit.interestRate.toString() : '');
       setDescription(debtToEdit.description || '');
-      setInsurance(debtToEdit.monthlyInsurance ? String(debtToEdit.monthlyInsurance) : '');
+      setDirection(debtToEdit.direction || 'debo');
+      if (!debtToEdit.monthlyInsurance && debtToEdit.insuranceRate) {
+        setInsuranceMode('pct');
+        setInsurance(String(debtToEdit.insuranceRate));
+      } else {
+        setInsuranceMode('fijo');
+        setInsurance(debtToEdit.monthlyInsurance ? String(debtToEdit.monthlyInsurance) : '');
+      }
       setInstallment(debtToEdit.installment ? String(debtToEdit.installment) : '');
       setTermMonths(debtToEdit.termMonths ? String(debtToEdit.termMonths) : '');
       setPaymentDay(debtToEdit.paymentDay ? String(debtToEdit.paymentDay) : '');
-      setShowPlan(!!(debtToEdit.monthlyInsurance || debtToEdit.installment || debtToEdit.paymentDay));
+      setShowPlan(!!(debtToEdit.monthlyInsurance || debtToEdit.insuranceRate || debtToEdit.installment || debtToEdit.paymentDay));
       if (debtToEdit.createdAt) {
         const d = debtToEdit.createdAt instanceof Date ? debtToEdit.createdAt : new Date();
         setDebtDate(getLocalDateString(d));
@@ -83,8 +94,12 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
       let paid = parseFloat(paidAmount) || 0;
       const rate = interestRate ? parseFloat(interestRate) : 0;
       const day = Math.min(31, Math.max(0, parseInt(paymentDay) || 0));
+      const owedToMe = direction === 'me_deben';
       const plan = {
-        monthlyInsurance: parseInt(insurance) || null,
+        direction,
+        // Entre personas no hay seguro de banco
+        monthlyInsurance: !owedToMe && insuranceMode === 'fijo' ? (parseInt(insurance) || null) : null,
+        insuranceRate: !owedToMe && insuranceMode === 'pct' ? (parseFloat(insurance.replace(',', '.')) || null) : null,
         installment: parseInt(installment) || null,
         termMonths: parseInt(termMonths) || null,
         paymentDay: day || null,
@@ -123,7 +138,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
           id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
           amount: abonoAmount,
           date: finalDate,
-          description: `Abono a: ${title}`,
+          description: owedToMe ? `Abono de: ${title}` : `Abono a: ${title}`,
         };
 
         const status = paid >= total + owedExtra ? 'paid' : 'pending';
@@ -134,10 +149,10 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
 
         await addExpense({
           userId: user.uid,
-          type: 'gasto',
-          category: 'Deudas',
+          type: owedToMe ? 'ingreso' : 'gasto',
+          category: owedToMe ? 'Préstamo devuelto' : 'Deudas',
           amount: abonoAmount,
-          description: `Abono a: ${title}`,
+          description: newPayment.description,
           date: finalDate,
         });
 
@@ -259,9 +274,27 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
               <span className={`transition-transform ${showEdit ? 'rotate-180' : ''}`}>▾</span>
             </button>
           )}
+          {!isReadOnly && (
+            <div className={`grid grid-cols-2 gap-1 p-1 border ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-xl'} ${editCls}`} role="radiogroup" aria-label="Tipo de deuda">
+              {([['debo', 'Yo debo'], ['me_deben', 'Me deben']] as const).map(([v, l]) => (
+                <button key={v} type="button" role="radio" aria-checked={direction === v} onClick={() => setDirection(v)}
+                        className={`py-2 text-xs font-bold transition-colors ${isTechTheme ? 'rounded-none' : 'rounded-lg'} ${direction === v
+                          ? (v === 'me_deben' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-accent/15 text-accent')
+                          : 'text-text-secondary hover:bg-white/5'}`}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          )}
+          {!isReadOnly && !debtToEdit && (
+            <p className="-mt-2 text-[10px] text-text-muted leading-snug">
+              {direction === 'me_deben' ? 'Prestaste plata: lo que te paguen entra como ingreso.' : 'Un crédito del banco o plata que te prestaron: los abonos salen como gasto.'}
+            </p>
+          )}
+
           <div className={`grid grid-cols-3 gap-3 ${editCls}`}>
-            <div className="col-span-2">
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Título de la Deuda</label>
+            <div className={compact ? 'col-span-3' : 'col-span-2'}>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{direction === 'me_deben' ? '¿A quién le prestaste?' : 'Título de la Deuda'}</label>
               <input
                 type="text"
                 required
@@ -269,21 +302,40 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className={`w-full bg-glass border py-2.5 px-4 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent text-sm'}`}
-                placeholder="Ej. Préstamo de Juan..."
+                placeholder={direction === 'me_deben' ? 'Ej. Préstamo a Claudia' : 'Ej. Crediágil, préstamo de Juan...'}
               />
             </div>
-            <div className="col-span-1">
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Fecha</label>
+            {!compact && (
+              <div className="col-span-1">
+                <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block truncate`} title="Día en que se entregó la plata">Desembolso</label>
+                <input
+                  type="date"
+                  required
+                  disabled={isReadOnly}
+                  value={debtDate}
+                  onChange={(e) => setDebtDate(e.target.value)}
+                  className={`w-full bg-glass border py-2.5 px-3 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs [color-scheme:dark]' : `border-glass-border rounded-xl focus:border-accent text-xs ${theme === 'light' ? '[color-scheme:light]' : '[color-scheme:dark]'}`}`}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Al editar, la fecha del desembolso queda siempre a la vista (de ella dependen intereses, seguro y la primera cuota) */}
+          {compact && (
+            <div className="order-2 flex items-center justify-between gap-3">
+              <label htmlFor="debt-date" className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium`}>
+                Fecha del desembolso
+              </label>
               <input
+                id="debt-date"
                 type="date"
                 required
-                disabled={isReadOnly}
                 value={debtDate}
                 onChange={(e) => setDebtDate(e.target.value)}
-                className={`w-full bg-glass border py-2.5 px-3 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-xs [color-scheme:dark]' : `border-glass-border rounded-xl focus:border-accent text-xs ${theme === 'light' ? '[color-scheme:light]' : '[color-scheme:dark]'}`}`}
+                className={`bg-glass border py-1.5 px-3 text-text-primary focus:outline-none text-xs ${theme === 'light' && !isTechTheme ? '[color-scheme:light]' : '[color-scheme:dark]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
               />
             </div>
-          </div>
+          )}
 
           <div className={`grid grid-cols-3 gap-2 ${editCls}`}>
             <div className="col-span-1">
@@ -304,7 +356,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
             </div>
 
             <div className="col-span-1">
-              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`}>Monto Pagado</label>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[10px] font-medium mb-1 block truncate`}>{direction === 'me_deben' ? 'Ya te pagó' : 'Monto Pagado'}</label>
               <input
                 type="text"
                 disabled={isReadOnly || !!debtToEdit}
@@ -343,18 +395,22 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
               Math.max(0, (parseFloat(totalAmount) || 0) - (parseFloat(paidAmount) || 0)),
               parseFloat(interestRate) || 0, parseInt(termMonths) || 0,
             );
-            const ins = parseInt(insurance) || 0;
+            const owedToMe = direction === 'me_deben';
+            const saldo = Math.max(0, (parseFloat(totalAmount) || 0) - (parseFloat(paidAmount) || 0));
+            const ins = owedToMe ? 0 : insuranceMode === 'pct'
+              ? Math.round((saldo * (parseFloat(insurance.replace(',', '.')) || 0)) / 100)
+              : (parseInt(insurance) || 0);
             if (!showPlan) {
               return (
                 <button type="button" onClick={() => setShowPlan(true)} className="text-xs text-accent font-semibold">
-                  + Cuotas, seguro y día de pago (créditos de banco)
+                  {owedToMe ? '+ Cuotas y día de pago (si te paga por cuotas)' : '+ Cuotas, seguro y día de pago (créditos de banco)'}
                 </button>
               );
             }
             return (
               <div className={`p-3 border space-y-3 ${isTechTheme ? 'border-accent/20 rounded-none' : 'border-glass-border rounded-2xl'}`}>
                 <p className={`text-[11px] font-semibold ${isTechTheme ? 'text-accent' : 'text-text-secondary'}`}>Crédito con cuotas (opcional)</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className={`grid gap-2 ${owedToMe ? 'grid-cols-2' : 'grid-cols-3'}`}>
                   <div>
                     <label className={labelCls}>Plazo (meses)</label>
                     <input type="text" inputMode="numeric" value={termMonths} onChange={(e) => setTermMonths(e.target.value.replace(/[^0-9]/g, ''))} className={inputCls} placeholder="60" />
@@ -363,11 +419,35 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
                     <label className={labelCls}>Día de pago</label>
                     <input type="text" inputMode="numeric" value={paymentDay} onChange={(e) => setPaymentDay(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))} className={inputCls} placeholder="15" />
                   </div>
-                  <div>
-                    <label className={labelCls} title="Seguro de vida deudor que cobra el banco cada mes">Seguro / mes</label>
-                    <input type="text" inputMode="numeric" value={insurance} onChange={(e) => setInsurance(e.target.value.replace(/[^0-9]/g, ''))} className={inputCls} placeholder="Opcional" />
-                  </div>
+                  {!owedToMe && (
+                    <div>
+                      <label className={labelCls} title="Seguro de vida deudor que cobra el banco cada mes">Seguro / mes</label>
+                      <input type="text" inputMode="decimal" value={insurance}
+                             onChange={(e) => setInsurance(insuranceMode === 'pct'
+                               ? e.target.value.replace(/[^0-9.,]/g, '').slice(0, 5)
+                               : e.target.value.replace(/[^0-9]/g, ''))}
+                             className={inputCls} placeholder={insuranceMode === 'pct' ? '0,1' : 'Opcional'} />
+                    </div>
+                  )}
                 </div>
+                {!owedToMe && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-text-muted">El seguro es:</span>
+                      {([['fijo', 'Valor fijo $'], ['pct', '% del saldo']] as const).map(([v, l]) => (
+                        <button key={v} type="button" onClick={() => { setInsuranceMode(v); setInsurance(''); }}
+                                className={`px-2 py-0.5 text-[10px] font-semibold border ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${insuranceMode === v ? 'border-accent bg-accent/15 text-accent' : 'border-glass-border text-text-secondary'}`}>
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-text-muted leading-snug">
+                      {insuranceMode === 'pct'
+                        ? `El seguro de vida deudor suele ser un % mensual de lo que debes (mira tu extracto). Baja a medida que pagas.${ins ? ` Este mes: unos $${ins.toLocaleString('es-CO')}.` : ''}`
+                        : 'El valor en pesos que te cobra el banco cada mes por el seguro (sale en el extracto).'}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <label className={labelCls}>Cuota mensual</label>
                   <input type="text" inputMode="numeric" value={installment} onChange={(e) => setInstallment(e.target.value.replace(/[^0-9]/g, ''))} className={inputCls} placeholder="La que te informó el banco" />
@@ -378,13 +458,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
                   )}
                 </div>
                 <p className="text-[10px] text-text-muted leading-snug">
-                  Con el día de pago, la cuota aparece en Próximos compromisos y se descuenta de lo que puedes gastar hasta que registres el abono.
+                  {owedToMe
+                    ? 'Solo para que veas en cuántas cuotas te va a pagar. Cada abono que te haga entra como ingreso.'
+                    : 'Con el día de pago, la cuota aparece en Próximos compromisos y se descuenta de lo que puedes gastar hasta que registres el abono.'}
                 </p>
               </div>
             );
           })()}</div>}
 
-          {debtToEdit && ((debtToEdit.interestRate || 0) > 0 || (debtToEdit.monthlyInsurance || 0) > 0) && (() => {
+          {debtToEdit && ((debtToEdit.interestRate || 0) > 0 || (debtToEdit.monthlyInsurance || 0) > 0 || (debtToEdit.insuranceRate || 0) > 0) && (() => {
             const interestData = calculateDebtInterest(debtToEdit);
             const pendingAmount = Math.max(0, debtToEdit.totalAmount - debtToEdit.paidAmount);
             const totalWithInterest = pendingAmount + interestData.accumulatedInterest;
@@ -434,7 +516,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
           {debtToEdit && !isReadOnly && (
             <div className={`order-2 p-4 border grid grid-cols-2 gap-3 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
               <div>
-                <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Registrar Abono</label>
+                <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{direction === 'me_deben' ? 'Abono recibido' : 'Registrar Abono'}</label>
                 <input
                   type="text"
                   value={abono}

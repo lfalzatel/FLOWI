@@ -3,7 +3,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebts } from '@/hooks/useDebts';
-import { calculateDebtInterest, deleteDebt, nextDebtPaymentDate, updateDebt, type Debt } from '@/lib/firestore';
+import { calculateDebtInterest, deleteDebt, monthlyInsuranceOf, nextDebtPaymentDate, updateDebt, type Debt } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -71,7 +71,7 @@ export default function DeudasPage() {
   const iOweCount = activeDebts.filter(d => (d.direction || 'debo') === 'debo').length;
   const monthlyInstallments = activeDebts
     .filter(d => (d.direction || 'debo') === 'debo' && d.installment)
-    .reduce((s, d) => s + (d.installment || 0) + (d.monthlyInsurance || 0), 0);
+    .reduce((s, d) => s + (d.installment || 0) + monthlyInsuranceOf(d), 0);
 
   useEffect(() => {
     if (!authLoading && !user) {

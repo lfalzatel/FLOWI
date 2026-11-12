@@ -252,6 +252,7 @@ export const INCOME_CATEGORY_DEFS: CategoryDef[] = [
     ['Natillera recibida', '🫙', '#10B981'],
     ['Regalo recibido', '🎁', '#EC4899'],
     ['Préstamo recibido', '🤲', '#F59E0B'],
+    ['Préstamo devuelto', '💸', '#059669'],
     ['Premio / lotería', '🍀', '#22C55E'],
     ['Otros ingresos', '➕', '#6B7280'],
   ]),

@@ -108,7 +108,8 @@ export interface Debt {
   createdAt?: Timestamp | Date;
   description?: string;
   interestRate?: number; // Tasa efectiva anual (E.A. %) opcional
-  monthlyInsurance?: number | null; // seguro que cobra el banco cada mes (opcional)
+  monthlyInsurance?: number | null; // seguro que cobra el banco cada mes, valor fijo (opcional)
+  insuranceRate?: number | null;    // o seguro como % mensual del saldo (ej. 0.1 = 0,1 % al mes)
   installment?: number | null;      // cuota fija mensual (opcional)
   termMonths?: number | null;       // plazo en meses (opcional)
   paymentDay?: number | null;       // día del mes en que se paga la cuota (opcional)
@@ -198,7 +199,8 @@ export function calculateDebtInterest(debt: Debt, now = new Date()): {
   const defaultResult = { accumulatedInterest: 0, interest: 0, insurance: 0, currentTotal: base, principalLeft: base };
   const rate = debt.interestRate && debt.interestRate > 0 ? debt.interestRate : 0;
   const insuranceMonthly = debt.monthlyInsurance && debt.monthlyInsurance > 0 ? debt.monthlyInsurance : 0;
-  if (!rate && !insuranceMonthly) return defaultResult;
+  const insurancePct = !insuranceMonthly && debt.insuranceRate && debt.insuranceRate > 0 ? debt.insuranceRate : 0;
+  if (!rate && !insuranceMonthly && !insurancePct) return defaultResult;
 
   const createdDate = debt.createdAt instanceof Date
     ? debt.createdAt
@@ -227,7 +229,8 @@ export function calculateDebtInterest(debt: Debt, now = new Date()): {
 
   while (day.getTime() < target.getTime()) {
     const i = principal * dailyRate;
-    const ins = principal > 0 ? dailyInsurance : 0;
+    // % del saldo: baja a medida que se paga el capital
+    const ins = principal > 0 ? (insurancePct ? (principal * insurancePct) / 100 / 30 : dailyInsurance) : 0;
     interest += i;
     insurance += ins;
     owedCharges += i + ins;
@@ -248,6 +251,15 @@ export function calculateDebtInterest(debt: Debt, now = new Date()): {
     principalLeft: Math.floor(principal),
     currentTotal: Math.max(0, debt.totalAmount - debt.paidAmount + accumulatedInterest),
   };
+}
+
+// Seguro de este mes en pesos (valor fijo, o el % sobre lo que falta de capital)
+export function monthlyInsuranceOf(debt: Debt): number {
+  if (debt.monthlyInsurance && debt.monthlyInsurance > 0) return debt.monthlyInsurance;
+  if (debt.insuranceRate && debt.insuranceRate > 0) {
+    return Math.round((calculateDebtInterest(debt).principalLeft * debt.insuranceRate) / 100);
+  }
+  return 0;
 }
 
 // Cuota fija mensual (sistema francés) para un crédito: capital, tasa E.A. y plazo en meses
