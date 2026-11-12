@@ -54,7 +54,12 @@ export function ReadingOverlay({ isTech, title, label, onCancel }: { isTech: boo
 export function ReadingTips({ isTech, label = 'Leyendo el recibo…' }: { isTech: boolean; label?: string }) {
   const [i, setI] = useState(() => Math.floor(Math.random() * TIPS.length));
   const [dir, setDir] = useState<1 | -1>(1);
-  const [seconds, setSeconds] = useState(0);
+  // Avance estimado: la IA no dice cuánto lleva, así que se estima con lo que se demoraron las
+  // últimas lecturas de este tipo en este celular (se llena rápido al inicio y luego más despacio, sin llegar sola al 100 %)
+  const timeKey = `flowi_read_ms_${label}`;
+  const expected = useRef(12000);
+  const startedAt = useRef(Date.now());
+  const [elapsed, setElapsed] = useState(0);
   // Si la persona usa las flechas, las tarjetas dejan de pasar solas un rato para que alcance a leer
   const pausedUntil = useRef(0);
   useEffect(() => {
@@ -63,24 +68,41 @@ export function ReadingTips({ isTech, label = 'Leyendo el recibo…' }: { isTech
       setDir(1);
       setI(n => (n + 1) % TIPS.length);
     }, 4000);
-    const s = setInterval(() => setSeconds(n => n + 1), 1000);
-    return () => { clearInterval(t); clearInterval(s); };
-  }, []);
+    try { const v = Number(localStorage.getItem(timeKey)); if (v > 2000 && v < 90000) expected.current = v; } catch { /* nada */ }
+    startedAt.current = Date.now();
+    const s = setInterval(() => setElapsed(Date.now() - startedAt.current), 200);
+    return () => {
+      clearInterval(t); clearInterval(s);
+      // Se aprende el tiempo real (promedio que pesa más lo reciente)
+      const took = Date.now() - startedAt.current;
+      if (took > 2000 && took < 90000) {
+        try { localStorage.setItem(timeKey, String(Math.round(expected.current * 0.6 + took * 0.4))); } catch { /* nada */ }
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const go = (d: 1 | -1) => {
     pausedUntil.current = Date.now() + 10000;
     setDir(d);
     setI(n => (n + d + TIPS.length) % TIPS.length);
   };
   const tip = TIPS[i];
+  const pct = Math.min(95, Math.round(95 * (1 - Math.exp(-2.3 * elapsed / expected.current))));
+  const slow = elapsed > expected.current * 2.5 ? ' Está tardando más de lo normal…' : elapsed > expected.current * 1.3 ? ' Ya casi…' : '';
   const arrow = `shrink-0 w-8 h-8 flex items-center justify-center text-text-secondary hover:text-accent hover:bg-accent/10 transition-colors ${isTech ? 'rounded-none' : 'rounded-full'}`;
   return (
     <div className="w-full space-y-3 my-2" role="status" aria-live="polite">
       <div className="space-y-1.5">
-        <p className="text-xs font-semibold text-accent text-center normal-case">
-          {label}{seconds >= 12 ? ' Ya casi…' : ''}
-        </p>
-        <div className={`h-1.5 w-full overflow-hidden bg-glass ${isTech ? 'rounded-none' : 'rounded-full'}`}>
-          <div className={`h-full w-1/3 bg-accent ${isTech ? '' : 'rounded-full'}`} style={{ animation: 'flowi-reading 1.4s ease-in-out infinite' }} />
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-xs font-semibold text-accent text-left normal-case">{label}{slow}</p>
+          <span className="text-[11px] font-bold text-accent tabular-nums shrink-0">≈ {pct} %</span>
+        </div>
+        {/* La barra crece con el avance y por dentro sigue pasando un brillo: avanza y sigue trabajando */}
+        <div className={`h-2 w-full overflow-hidden bg-glass ${isTech ? 'rounded-none' : 'rounded-full'}`}>
+          <div className={`relative h-full overflow-hidden bg-gradient-to-r from-accent-dim to-accent ${isTech ? '' : 'rounded-full'}`}
+               style={{ width: `${Math.max(6, pct)}%`, transition: 'width .4s ease-out' }}>
+            <div className="absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+                 style={{ animation: 'flowi-reading 1.3s ease-in-out infinite' }} />
+          </div>
         </div>
       </div>
       <div className={`flex items-center gap-1 p-2 border border-accent/20 bg-accent/5 ${isTech ? 'rounded-none' : 'rounded-2xl'}`}>
