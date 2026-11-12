@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 import { X, Trash2, Camera, Info } from 'lucide-react';
 import { FundReading, getAiKey, readFundsWithAi, readSavingsWithAi } from '@/lib/aiAssist';
 import { DictateButton } from '@/components/forms/DictateButton';
-import { ReadingTips } from '@/components/forms/ReadingTips';
+import { ReadingOverlay } from '@/components/forms/ReadingTips';
 import { parseInvestmentSpeech } from '@/lib/formDictation';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
@@ -87,13 +87,16 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
     return list([d.bank && `entidad (${d.bank})`, d.amount && 'monto', d.current && 'saldo actual', d.rateEA && 'tasa']);
   };
 
+  const readId = useRef(0); // al cancelar la lectura, la respuesta que llegue después se ignora
   async function readShots(files: File[]) {
     if (!files.length) return;
     setAiState('loading');
     setAiMsg('');
     setFound([]);
+    const id = ++readId.current;
     if (isFund) {
       const rf = await readFundsWithAi(files);
+      if (id !== readId.current) return;
       if (!rf.ok) {
         setAiState(rf.reason === 'no-key' ? 'no-key' : 'error');
         setAiMsg(rf.reason === 'unreadable' ? 'No pude leer los datos. Prueba con la captura donde se vea lo que vale hoy y lo depositado.'
@@ -113,6 +116,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       return;
     }
     const r = await readSavingsWithAi(files, kind);
+    if (id !== readId.current) return;
     if (!r.ok) {
       setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
       setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos. Prueba con una captura donde se vea el saldo y, si la hay, la tasa.'
@@ -252,7 +256,11 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             <div>
               <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                      onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
-              {aiState === 'loading' ? <ReadingTips isTech={isTech} label="Leyendo las capturas…" /> : (
+              {aiState === 'loading' && (
+                <ReadingOverlay isTech={isTech} title={`Leyendo ${info.short.toLowerCase()}`} label="Leyendo las capturas…"
+                                onCancel={() => { readId.current++; setAiState('idle'); }} />
+              )}
+              {(
               <button type="button"
                       onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
                       className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>

@@ -9,7 +9,7 @@ import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { getAiKey, insuranceRateFromAccrued, readDebtWithAi } from '@/lib/aiAssist';
-import { ReadingTips } from '@/components/forms/ReadingTips';
+import { ReadingOverlay } from '@/components/forms/ReadingTips';
 import { useDebts } from '@/hooks/useDebts';
 import { DictateButton } from '@/components/forms/DictateButton';
 import { parseDebtSpeech } from '@/lib/formDictation';
@@ -80,6 +80,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
   const shotsRef = useRef<HTMLInputElement>(null);
   const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
   const [aiMsg, setAiMsg] = useState('');
+  const readId = useRef(0); // al cancelar la lectura, la respuesta que llegue después se ignora
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -188,7 +189,9 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
     if (!files.length) return;
     setAiState('loading');
     setAiMsg('');
+    const id = ++readId.current;
     const r = await readDebtWithAi(files);
+    if (id !== readId.current) return;
     if (!r.ok) {
       setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
       setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos del crédito. Prueba con capturas donde se vean el valor desembolsado, la tasa y las fechas.'
@@ -508,9 +511,11 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             <div>
               <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                      onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
-              {aiState === 'loading' ? (
-                <ReadingTips isTech={isTechTheme} label="Leyendo las capturas del crédito…" />
-              ) : (
+              {aiState === 'loading' && (
+                <ReadingOverlay isTech={isTechTheme} title="Leyendo el crédito" label="Leyendo las capturas del banco…"
+                                onCancel={() => { readId.current++; setAiState('idle'); }} />
+              )}
+              {(
                 <button type="button"
                         onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
                         className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>

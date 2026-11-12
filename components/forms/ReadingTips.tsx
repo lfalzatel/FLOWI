@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 // Mientras la IA lee un recibo o unas capturas (puede tardar unos segundos): una barra animada y
@@ -23,6 +24,32 @@ const TIPS: { title: string; text: string }[] = [
   { title: 'Bloqueo con huella', text: 'En Configuración → Seguridad proteges FLOWI con PIN o huella.' },
   { title: 'Temas', text: 'Cambia los colores de FLOWI desde tu perfil: claro, oscuro y otros estilos.' },
 ];
+
+/**
+ * Pantalla limpia mientras se leen capturas: tapa el formulario con solo el título, la barra y las
+ * tarjetas; al terminar desaparece y queda el formulario ya lleno.
+ */
+export function ReadingOverlay({ isTech, title, label, onCancel }: { isTech: boolean; title: string; label: string; onCancel?: () => void }) {
+  if (typeof document === 'undefined') return null;
+  return createPortal(
+    <div className={`fixed inset-0 z-[150] flex items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" aria-hidden="true" />
+      <div className={`relative w-full max-w-md p-6 glass-dropdown animate-fade-in-up flex flex-col items-center text-center ${isTech ? 'rounded-none border border-accent uppercase' : 'rounded-3xl shadow-2xl'}`}>
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles className="w-5 h-5 text-accent animate-pulse" />
+          <h2 className={`font-bold text-lg ${isTech ? 'text-accent' : 'text-text-primary font-syne'}`}>{title}</h2>
+        </div>
+        <ReadingTips isTech={isTech} label={label} />
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="mt-1 text-xs text-text-muted hover:text-text-primary underline normal-case">
+            Cancelar y llenarlo a mano
+          </button>
+        )}
+      </div>
+    </div>,
+    document.body,
+  );
+}
 
 export function ReadingTips({ isTech, label = 'Leyendo el recibo…' }: { isTech: boolean; label?: string }) {
   const [i, setI] = useState(() => Math.floor(Math.random() * TIPS.length));

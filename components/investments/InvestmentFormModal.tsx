@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 import { X, Trash2, Camera, ChevronDown } from 'lucide-react';
 import { getAiKey, readCdtWithAi } from '@/lib/aiAssist';
 import { DictateButton } from '@/components/forms/DictateButton';
-import { ReadingTips } from '@/components/forms/ReadingTips';
+import { ReadingOverlay } from '@/components/forms/ReadingTips';
 import { parseInvestmentSpeech } from '@/lib/formDictation';
 import { BankField, BankPickerSheet } from '@/components/accounts/BankPickerSheet';
 import { useTheme } from '@/components/ThemeProvider';
@@ -81,6 +81,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
   const shotsRef = useRef<HTMLInputElement>(null);
   const [aiState, setAiState] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error' | 'loan'>('idle');
   const lastShots = useRef<File[]>([]);
+  const readId = useRef(0); // al cancelar la lectura, la respuesta que llegue después se ignora
   const [aiMsg, setAiMsg] = useState('');
   // Dictado: "CDT de 5 millones en Bancolombia al 11 % a 6 meses"
   const applySpeech = (text: string) => {
@@ -99,7 +100,9 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
     setAiState('loading');
     setAiMsg('');
     lastShots.current = files;
+    const id = ++readId.current;
     const r = await readCdtWithAi(files);
+    if (id !== readId.current) return;
     if (r.ok && r.data.isLoan) {
       setAiState('loan');
       setAiMsg('Estas capturas son de un crédito (dicen desembolso, cuota o seguro de vida deudor), no de un CDT. Un crédito es una deuda: ahí sí se registran el seguro y los intereses que cobra el banco.');
@@ -260,7 +263,11 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
               <div>
                 <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                        onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
-                {aiState === 'loading' ? <ReadingTips isTech={isTechTheme} label="Leyendo las capturas del CDT…" /> : (
+                {aiState === 'loading' && (
+                  <ReadingOverlay isTech={isTechTheme} title="Leyendo el CDT" label="Leyendo las capturas del banco…"
+                                  onCancel={() => { readId.current++; setAiState('idle'); }} />
+                )}
+                {(
                 <button type="button"
                         onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
                         className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-60 ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>
