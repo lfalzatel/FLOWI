@@ -57,12 +57,15 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     else setQuick(a);
   };
   const [investKind, setInvestKind] = useState<InvestmentKind | null>(null);
-  const closeQuick = () => { setQuick(null); setInvestKind(null); };
+  const [debtFiles, setDebtFiles] = useState<File[] | null>(null);
+  const closeQuick = () => { setQuick(null); setInvestKind(null); setDebtFiles(null); };
   useEffect(() => {
     const open = () => setShowSheet(true);
     // Desde el formulario de gasto/ingreso: "Dictar" o "Desde foto o pantallazo"
     const voice = (e: Event) => openVoice((e as CustomEvent<{ file?: File | 'no-key' }>).detail?.file ?? null);
     const dictate = () => { setShowVoice(false); setReceipt(null); setTimeout(() => openVoice(null), 80); };
+    const debtShots = (e: Event) => { setDebtFiles((e as CustomEvent<{ files?: File[] }>).detail?.files || null); setShowSheet(false); setQuick('deuda'); };
+    window.addEventListener('flowi-open-debt', debtShots);
     const manual = () => { setShowVoice(false); setReceipt(null); setParsedVoiceData(null); setShowSheet(false); setShowAdd(true); };
     window.addEventListener('flowi-open-quick-actions', open);
     window.addEventListener('flowi-open-voice', voice);
@@ -73,6 +76,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       window.removeEventListener('flowi-open-voice', voice);
       window.removeEventListener('flowi-dictate', dictate);
       window.removeEventListener('flowi-open-add', manual);
+      window.removeEventListener('flowi-open-debt', debtShots);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -198,7 +202,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       {(quick === 'gasto' || quick === 'ingreso') && (
         <AddExpenseModal initialType={quick} onClose={closeQuick} onSuccess={onSuccess} />
       )}
-      {quick === 'deuda' && <AddDebtModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}
+      {quick === 'deuda' && <AddDebtModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} initialShots={debtFiles} />}
       {quick === 'recordatorio' && <ReminderFormModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}
       {quick === 'nota' && <NoteModal note={null} onClose={closeQuick} onSuccess={closeQuick} />}
       {/* Inversión: primero se elige el tipo (CDT, ahorro con intereses, acciones y fondos o pensión) */}

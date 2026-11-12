@@ -19,6 +19,7 @@ interface Props {
   onSuccess: () => void;
   debtToEdit?: Debt | null;
   initialAbono?: number | null; // al venir desde "Próximos compromisos": la cuota del mes
+  initialShots?: File[] | null;  // capturas de un crédito que se subieron en otro formulario (ej. el del CDT)
 }
 
 // Tres casos, cada uno con sus propios datos:
@@ -46,7 +47,7 @@ function kindOf(d: Debt): Kind {
   return d.monthlyInsurance || d.insuranceRate || d.installment || d.termMonths ? 'banco' : 'persona';
 }
 
-export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: Props) {
+export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, initialShots }: Props) {
   const { user } = useAuth();
   const [kind, setKind] = useState<Kind>('banco');
   const [title, setTitle] = useState('');
@@ -96,6 +97,11 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
+
+  // Capturas que llegaron de otro formulario: se leen de una vez como crédito de banco
+  useEffect(() => {
+    if (initialShots?.length && !debtToEdit) { setKind('banco'); readShots(initialShots); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!debtToEdit) return;

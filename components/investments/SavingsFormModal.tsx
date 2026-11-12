@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { X, Trash2, Camera, Info } from 'lucide-react';
 import { FundReading, getAiKey, readFundsWithAi, readSavingsWithAi } from '@/lib/aiAssist';
 import { DictateButton } from '@/components/forms/DictateButton';
+import { ReadingTips } from '@/components/forms/ReadingTips';
 import { parseInvestmentSpeech } from '@/lib/formDictation';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
@@ -251,12 +252,14 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             <div>
               <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                      onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
-              <button type="button" disabled={aiState === 'loading'}
+              {aiState === 'loading' ? <ReadingTips isTech={isTech} label="Leyendo las capturas…" /> : (
+              <button type="button"
                       onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
                       className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>
-                <Camera className={`w-4 h-4 ${aiState === 'loading' ? 'animate-pulse' : ''}`} />
-                {aiState === 'loading' ? 'Leyendo las capturas…' : 'Llenar desde captura de la app'}
+                <Camera className="w-4 h-4" />
+                Llenar desde captura de la app
               </button>
+              )}
               <p className={hint}>
                 {aiState === 'no-key'
                   ? <>Para leer capturas necesitas la IA gratuita (gratis siempre). <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a>.</>

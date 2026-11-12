@@ -1,4 +1,5 @@
 'use client';
+import { ReadingTips } from '@/components/forms/ReadingTips';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -149,6 +150,7 @@ export default function ImportarPage() {
             {reading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             {reading ? 'Leyendo…' : fileName ? 'Elegir otro archivo' : 'Elegir archivo'}
           </button>
+          {reading && <ReadingTips isTech={isTechTheme} label="Leyendo tus movimientos…" />}
           {fileName && <p className="text-[11px] text-text-muted truncate">Archivo: {fileName}</p>}
           <details className="text-xs text-text-secondary">
             <summary className="cursor-pointer text-accent font-semibold">¿Dónde descargo mis movimientos?</summary>

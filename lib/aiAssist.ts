@@ -407,6 +407,7 @@ export interface CdtReading {
   bankInterest?: number;
   autoRenew?: boolean;
   termDays?: number;      // plazo en días según la captura (para revisar las fechas)
+  isLoan?: boolean;       // las capturas son de un crédito (préstamo), no de un CDT
 }
 
 export type CdtReadResult =
@@ -418,7 +419,8 @@ Pueden ser varias capturas del mismo CDT. Responde SOLO un JSON con estas claves
 {"bank": nombre del banco, "amount": capital o monto invertido en pesos (número sin puntos), "rateEA": tasa efectiva anual en % (número, ej 9.9),
  "nominalRate": tasa nominal en % si aparece, "startDate": fecha de apertura o de inicio del periodo "YYYY-MM-DD",
  "maturityDate": fecha de vencimiento "YYYY-MM-DD" (cópiala tal cual aparece; no la calcules), "termDays": plazo en días si aparece (número),
- "bankInterest": intereses del periodo en pesos si aparecen, "autoRenew": true si dice que se renueva automáticamente}
+ "bankInterest": intereses del periodo en pesos si aparecen, "autoRenew": true si dice que se renueva automáticamente,
+ "isLoan": true si las capturas NO son de un CDT sino de un CRÉDITO o préstamo (dicen desembolso, cuota, seguro de vida deudor, deuda a la fecha, capital vigente, crédito de consumo)}
 Las fechas pueden venir como "29 ene 2027" o "29/01/2027" (día/mes/año).
 No incluyas números de CDT, de cuenta, de documento ni nombres de personas. Los montos colombianos usan punto de miles y coma decimal.`;
 
@@ -483,6 +485,9 @@ export async function readCdtWithAi(files: File[]): Promise<CdtReadResult> {
       termDays: num(p.termDays) && num(p.termDays)! < 4000 ? Math.round(num(p.termDays)!) : undefined,
     };
     const found = Object.values(data).filter(v => v !== undefined).length;
+    // Si es un crédito, se avisa en vez de llenar el CDT con datos que no son
+    const loanWords = /desembolso|seguro de vida|deuda a la fecha|capital vigente|cr[eé]dito de consumo|cuota/i.test(JSON.stringify(p));
+    if (p.isLoan === true || (loanWords && !data.maturityDate)) return { ok: true, data: { ...data, isLoan: true }, found };
     if (!found) return { ok: false, reason: 'unreadable' };
     return { ok: true, data, found };
   } catch {
