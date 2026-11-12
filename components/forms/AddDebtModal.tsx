@@ -10,6 +10,7 @@ import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { getAiKey, insuranceRateFromAccrued, readDebtWithAi } from '@/lib/aiAssist';
 import { ReadingTips } from '@/components/forms/ReadingTips';
+import { useDebts } from '@/hooks/useDebts';
 
 interface Props {
   onClose: () => void;
@@ -56,7 +57,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
   const [description, setDescription] = useState('');
   const [abono, setAbono] = useState(initialAbono ? String(initialAbono) : '');
   const [insurance, setInsurance] = useState('');
-  const [insuranceMode, setInsuranceMode] = useState<'fijo' | 'pct'>('pct');
+  // Seguro: % mensual del saldo, valor fijo al mes, o "lo que va hoy" (FLOWI saca el % solo)
+  const [insuranceMode, setInsuranceMode] = useState<'fijo' | 'pct' | 'va'>('va');
+  // Entre personas el seguro va plegado (la mayoría no tiene); se abre si es la misma de un crédito
+  const [showInsurance, setShowInsurance] = useState(false);
+  const [showCopy, setShowCopy] = useState(false);
+  const { debts } = useDebts();
+  const myCredits = debts.filter(d => d.id !== debtToEdit?.id && d.status !== 'paid' && (d.direction || 'debo') === 'debo' && d.totalAmount > 0);
   const [installment, setInstallment] = useState('');
   const [termMonths, setTermMonths] = useState('');
   const [paymentDay, setPaymentDay] = useState('');
@@ -102,10 +109,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
     if (!debtToEdit.monthlyInsurance && debtToEdit.insuranceRate) {
       setInsuranceMode('pct');
       setInsurance(String(debtToEdit.insuranceRate));
+    } else if (debtToEdit.monthlyInsurance) {
+      setInsuranceMode('fijo');
+      setInsurance(String(debtToEdit.monthlyInsurance));
     } else {
-      setInsuranceMode(debtToEdit.monthlyInsurance ? 'fijo' : 'pct');
-      setInsurance(debtToEdit.monthlyInsurance ? String(debtToEdit.monthlyInsurance) : '');
+      setInsuranceMode('va');
+      setInsurance('');
     }
+    setShowInsurance(!!(debtToEdit.monthlyInsurance || debtToEdit.insuranceRate));
     setInstallment(debtToEdit.installment ? String(debtToEdit.installment) : '');
     setTermMonths(debtToEdit.termMonths ? String(debtToEdit.termMonths) : '');
     setPaymentDay(debtToEdit.paymentDay ? String(debtToEdit.paymentDay) : '');
@@ -115,6 +126,23 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
       setDebtDate(getLocalDateString(d));
     }
   }, [debtToEdit]);
+
+  const copyFrom = (d: Debt) => {
+    const created = d.createdAt instanceof Date ? d.createdAt : null;
+    setTotalAmount(String(d.totalAmount));
+    if (created) setDebtDate(getLocalDateString(created));
+    setRateUnit('ea');
+    setInterestRate(d.interestRate ? String(d.interestRate) : '');
+    setTermMonths(d.termMonths ? String(d.termMonths) : '');
+    setPaymentDay(d.paymentDay ? String(d.paymentDay) : '');
+    setInstallment(d.installment ? String(d.installment) : '');
+    if (d.insuranceRate) { setInsuranceMode('pct'); setInsurance(String(d.insuranceRate)); setShowInsurance(true); }
+    else if (d.monthlyInsurance) { setInsuranceMode('fijo'); setInsurance(String(d.monthlyInsurance)); setShowInsurance(true); }
+    if (d.installment || d.paymentDay || d.termMonths) setShowPlan(true);
+    if (!description) setDescription(`Con la plata de mi crédito ${d.title}`);
+    setShowCopy(false);
+    setAiMsg('');
+  };
 
   const pickKind = (k: Kind) => {
     setKind(k);
@@ -135,9 +163,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
       return;
     }
     const d = r.data;
-    setKind('banco');
     setRateUnit('ea');
-    if (d.title) setTitle(d.title);
+    if (d.title && kind === 'banco') setTitle(d.title);
     if (d.amount) setTotalAmount(String(d.amount));
     if (d.disbursementDate) setDebtDate(d.disbursementDate);
     if (d.rateEA) setInterestRate(String(d.rateEA));
@@ -154,13 +181,27 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
     if (pct) {
       setInsuranceMode('pct');
       setInsurance(String(pct));
+      setShowInsurance(true);
       insMsg = ` El seguro sale en ${pct.toLocaleString('es-CO')} % mensual del saldo.`;
     } else if (d.insuranceMonthly) {
       setInsuranceMode('fijo');
       setInsurance(String(d.insuranceMonthly));
+      setShowInsurance(true);
     }
+    if (kind !== 'banco' && (d.installment || d.paymentDay || d.termMonths)) setShowPlan(true);
     setAiState('done');
     setAiMsg(`Listo: llené ${r.found} datos.${insMsg} Revísalos antes de guardar.`);
+  }
+
+  // Capital sobre el que se cobra el seguro y % que sale de "lo que va hoy"
+  const capitalBase = () => {
+    const total = parseFloat(totalAmount) || 0;
+    if (!debtToEdit && isBank) { const cap = parseFloat(capitalNow); return cap > 0 && cap < total ? cap : total; }
+    return Math.max(0, total - (parseFloat(paidAmount) || 0));
+  };
+  function insuranceFromAccruedNow(): number | null {
+    const accrued = parseFloat(insurance.replace(/\./g, '').replace(',', '.'));
+    return accrued > 0 ? insuranceRateFromAccrued(accrued, capitalBase(), debtDate) : null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,12 +221,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
       const typed = interestRate ? parseFloat(interestRate) : 0;
       const rate = typed > 0 ? round2(rateUnit === 'mensual' ? toEA(typed) : typed) : 0;
       const day = Math.min(31, Math.max(0, parseInt(paymentDay) || 0));
+      const withIns = isBank || showInsurance;
+      const insPct = insuranceMode === 'pct' ? (parseFloat(insurance.replace(',', '.')) || null)
+        : insuranceMode === 'va' ? insuranceFromAccruedNow() : null;
       const plan = {
         direction: (owedToMe ? 'me_deben' : 'debo') as 'debo' | 'me_deben',
         debtKind: (isBank ? 'banco' : 'persona') as 'banco' | 'persona',
-        // El seguro de vida deudor es de los créditos de banco
-        monthlyInsurance: isBank && insuranceMode === 'fijo' ? (parseInt(insurance) || null) : null,
-        insuranceRate: isBank && insuranceMode === 'pct' ? (parseFloat(insurance.replace(',', '.')) || null) : null,
+        monthlyInsurance: withIns && insuranceMode === 'fijo' ? (parseInt(insurance) || null) : null,
+        insuranceRate: withIns ? insPct : null,
         installment: parseInt(installment) || null,
         termMonths: parseInt(termMonths) || null,
         paymentDay: day || null,
@@ -293,10 +336,44 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
     : (parseFloat(paidAmount) || 0)));
   const typedRate = parseFloat(interestRate) || 0;
   const rateEA = rateUnit === 'mensual' ? toEA(typedRate) : typedRate;
-  const insMonth = !isBank ? 0 : insuranceMode === 'pct'
-    ? Math.round((saldo * (parseFloat(insurance.replace(',', '.')) || 0)) / 100)
-    : (parseInt(insurance) || 0);
+  const vaPct = insuranceMode === 'va' ? insuranceFromAccruedNow() : null;
+  const insMonth = !(isBank || showInsurance) ? 0 : insuranceMode === 'fijo'
+    ? (parseInt(insurance) || 0)
+    : Math.round((saldo * ((insuranceMode === 'pct' ? parseFloat(insurance.replace(',', '.')) : vaPct) || 0)) / 100);
   const suggested = estimateInstallment(saldo, rateEA, parseInt(termMonths) || 0);
+
+  // Seguro de vida deudor: en un crédito de banco siempre; entre personas, si es la misma de un crédito
+  const insuranceBlock = (
+    <div>
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <label className={`${labelCls} !mb-0`} title="Seguro de vida deudor que cobra el banco">Seguro de vida deudor</label>
+        {!isBank && (
+          <button type="button" onClick={() => { setShowInsurance(false); setInsurance(''); }} className="text-[10px] text-text-muted underline">Quitar</button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1 mb-1.5">
+        <button type="button" onClick={() => { setInsuranceMode('va'); setInsurance(''); }} className={chip(insuranceMode === 'va')}>Lo que va hoy $</button>
+        <button type="button" onClick={() => { setInsuranceMode('pct'); setInsurance(''); }} className={chip(insuranceMode === 'pct')}>% del saldo</button>
+        <button type="button" onClick={() => { setInsuranceMode('fijo'); setInsurance(''); }} className={chip(insuranceMode === 'fijo')}>Valor fijo al mes</button>
+      </div>
+      <input type="text" inputMode="decimal" value={insurance}
+             onChange={(e) => setInsurance(insuranceMode === 'pct' ? e.target.value.replace(/[^0-9.,]/g, '').slice(0, 6) : onlyNum(e.target.value))}
+             className={inputCls}
+             placeholder={insuranceMode === 'va' ? 'Ej. 233 (lo que muestra el banco hoy)' : insuranceMode === 'pct' ? 'Ej. 0,143 (% mensual)' : 'Valor al mes, ej. 1000'} />
+      <p className={hint}>
+        {insuranceMode === 'va'
+          ? (vaPct
+              ? `Eso es un ${vaPct.toLocaleString('es-CO')} % mensual del saldo: unos ${fmt(insMonth)} al mes, y baja a medida que se paga.`
+              : 'Escribe el seguro que el banco muestra hasta hoy; con la fecha de desembolso saco el % solo.')
+          : insuranceMode === 'pct'
+            ? `Un % mensual de lo que se debe; baja a medida que se paga.${insMonth ? ` Este mes: unos ${fmt(insMonth)}.` : ''}`
+            : 'El valor en pesos que cobra el banco cada mes por el seguro.'}
+      </p>
+      {insuranceMode === 'va' && debtDate === getLocalDateString() && (
+        <p className={`${hint} text-amber-400`}>Pon primero la fecha de desembolso: con la de hoy no se puede calcular.</p>
+      )}
+    </div>
+  );
 
   const who = kind === 'banco' ? 'Nombre del crédito' : kind === 'persona' ? '¿Quién te prestó?' : '¿A quién le prestaste?';
   const whoPh = kind === 'banco' ? 'Ej. Crediágil, Libre inversión' : kind === 'persona' ? 'Ej. Mi hermana Laura' : 'Ej. Claudia';
@@ -357,8 +434,36 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
             </div>
           )}
 
-          {/* Crédito nuevo de banco: llenar con pantallazos de la app del banco */}
-          {isBank && !debtToEdit && !isReadOnly && (
+          {/* Prestaste la plata de un crédito tuyo: copiar sus condiciones */}
+          {owedToMe && !debtToEdit && myCredits.length > 0 && (
+            <div>
+              <button type="button" onClick={() => setShowCopy(v => !v)}
+                      className={`w-full flex items-center justify-between gap-2 py-2.5 px-3 text-sm font-semibold border transition-all ${isTechTheme ? 'rounded-none border-emerald-500/40 text-emerald-400 uppercase text-xs' : 'rounded-xl border-emerald-500/40 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10'}`}>
+                <span className="flex items-center gap-2"><Landmark className="w-4 h-4" /> Es la misma de uno de mis créditos</span>
+                <span className={`transition-transform ${showCopy ? 'rotate-180' : ''}`}>▾</span>
+              </button>
+              {showCopy && (
+                <div className="mt-2 space-y-1.5">
+                  {myCredits.map(d => (
+                    <button key={d.id} type="button" onClick={() => copyFrom(d)}
+                            className={`w-full flex items-center justify-between gap-2 p-2.5 text-left border border-glass-border hover:bg-white/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-text-primary truncate normal-case">{d.title}</span>
+                        <span className="block text-[10px] text-text-muted normal-case">
+                          {d.interestRate ? `${d.interestRate}% E.A.` : 'Sin interés'}{d.insuranceRate || d.monthlyInsurance ? ' · con seguro' : ''}{d.termMonths ? ` · ${d.termMonths} meses` : ''}
+                        </span>
+                      </span>
+                      <span className="text-sm font-bold text-text-primary shrink-0">{fmt(d.totalAmount)}</span>
+                    </button>
+                  ))}
+                  <p className={hint}>Copio monto, fecha, tasa, plazo, día de pago y seguro. Así las dos deudas avanzan iguales.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Deuda nueva: llenar con pantallazos de la app del banco (también si la plata salió de un crédito) */}
+          {!debtToEdit && !isReadOnly && (
             <div>
               <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                      onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
@@ -377,7 +482,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
                     ? <>Para leer capturas necesitas la IA gratuita. <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a>.</>
                     : aiMsg
                       ? <span className={aiState === 'error' ? 'text-red-400' : 'text-text-secondary'}>{aiMsg}</span>
-                      : 'Puedes elegir varias (detalle, tasa, desembolso). Los números del crédito no se necesitan.'}
+                      : isBank ? 'Puedes elegir varias (detalle, tasa, desembolso). Los números del crédito no se necesitan.'
+                        : 'Si la plata salió de un crédito, sube los pantallazos de ese crédito y queda igual, con el seguro.'}
                 </p>
               )}
             </div>
@@ -469,23 +575,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
                 )}
               </div>
 
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <label className={`${labelCls} !mb-0`} title="Seguro de vida deudor que cobra el banco">Seguro de vida deudor</label>
-                  <div className="flex gap-1 shrink-0">
-                    <button type="button" onClick={() => { setInsuranceMode('pct'); setInsurance(''); }} className={chip(insuranceMode === 'pct')}>% del saldo</button>
-                    <button type="button" onClick={() => { setInsuranceMode('fijo'); setInsurance(''); }} className={chip(insuranceMode === 'fijo')}>Valor fijo $</button>
-                  </div>
-                </div>
-                <input type="text" inputMode="decimal" value={insurance}
-                       onChange={(e) => setInsurance(insuranceMode === 'pct' ? e.target.value.replace(/[^0-9.,]/g, '').slice(0, 6) : onlyNum(e.target.value))}
-                       className={inputCls} placeholder={insuranceMode === 'pct' ? 'Ej. 0,143 (% mensual)' : 'Valor al mes, ej. 1000'} />
-                <p className={hint}>
-                  {insuranceMode === 'pct'
-                    ? `Casi siempre es un % mensual de lo que debes y baja a medida que pagas.${insMonth ? ` Este mes: unos ${fmt(insMonth)}.` : ' Con los pantallazos lo calculo solo.'}`
-                    : 'El valor en pesos que te cobra el banco cada mes por el seguro.'}
-                </p>
-              </div>
+              {insuranceBlock}
 
               {!debtToEdit && (
                 <div>
@@ -502,6 +592,17 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono }: P
               <p className="text-[10px] text-text-muted leading-snug normal-case">
                 Con el día de pago, la cuota aparece en Próximos compromisos y se descuenta de lo que puedes gastar hasta que registres el abono.
               </p>
+            </div>
+          )}
+
+          {/* Entre personas: seguro (plegado) */}
+          {!isBank && !isReadOnly && (
+            <div className={editCls}>
+              {showInsurance ? insuranceBlock : (
+                <button type="button" onClick={() => setShowInsurance(true)} className="text-xs text-accent font-semibold">
+                  + Tiene seguro (como un crédito de banco)
+                </button>
+              )}
             </div>
           )}
 
