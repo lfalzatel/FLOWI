@@ -1,5 +1,7 @@
 'use client';
 
+import { useAccounts } from '@/hooks/useAccounts';
+import { ReadingTips } from '@/components/forms/ReadingTips';
 import { updateUserProfile } from '@/lib/firestore';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -34,6 +36,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const router = useRouter();
   const { theme } = useTheme();
   const { user, profile } = useAuth();
+  // Opciones de "¿Con qué pagaste?": las cuentas de la persona; si no tiene, las más comunes
+  const { accounts } = useAccounts();
+  const activeAccounts = accounts.filter(a => !a.archived);
+  const payOptions = activeAccounts.length
+    ? Array.from(new Set(activeAccounts.map(a => a.methods?.[0] || a.name))).slice(0, 8)
+    : ['Efectivo', 'Nequi', 'Bancolombia', 'Daviplata', 'Tarjeta de crédito'];
+  const mainAccountName = activeAccounts.find(a => a.isDefault)?.name;
   const { canAdd } = usePlan();
   const { allCategories } = useCategories();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -482,6 +491,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               : !tx.date || tx.date === new Date().toLocaleDateString('en-CA') ? new Date() : new Date(`${tx.date}T12:00:00`),
             isFixed: tx.isFixed,
             ...(tx.merchant ? { merchant: tx.merchant } : {}),
+            ...(tx.paymentMethod ? { paymentMethod: tx.paymentMethod } : {}),
           });
         }
       }
@@ -644,6 +654,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           <Camera className={`w-4 h-4 text-accent ${receiptStatus === 'loading' ? 'animate-pulse' : ''}`} />
           {receiptStatus === 'loading' ? 'Leyendo el recibo…' : 'Registrar con foto del recibo'}
         </button>
+        {receiptStatus === 'loading' && <ReadingTips isTech={isTechTheme} />}
         {receiptStatus === 'no-key' && (
           <p className="text-[11px] text-text-muted max-w-xs mb-1 normal-case">
             Para leer recibos necesitas la IA gratuita.{' '}
@@ -945,6 +956,27 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           <p className="text-[10px] text-text-muted normal-case">
                             Fecha del recibo: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
+                        )}
+                        {(res.type === 'gasto' || res.type === 'ingreso') && (
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+                              {res.type === 'gasto' ? '¿Con qué pagaste?' : '¿Dónde lo recibiste?'} <span className="normal-case font-normal">(opcional)</span>
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {payOptions.map(m => {
+                                const on = (res as any).paymentMethod === m;
+                                return (
+                                  <button key={m} type="button" onClick={() => handleUpdateItem(idx, 'paymentMethod', on ? undefined : m)}
+                                          className={`px-2.5 py-1 text-[11px] font-semibold border transition-colors normal-case ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${on ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-text-secondary hover:bg-white/5'}`}>
+                                    {m}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {!(res as any).paymentMethod && mainAccountName && (
+                              <p className="text-[10px] text-text-muted normal-case">Si no eliges, va a tu cuenta principal ({mainAccountName}).</p>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

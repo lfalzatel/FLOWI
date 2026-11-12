@@ -308,8 +308,9 @@ body {
 .stagger > *:nth-child(4) { animation-delay: 0.20s; }
 .stagger > *:nth-child(5) { animation-delay: 0.25s; }
 
+/* Pantallas angostas: los nombres se quedan (sin ellos no se sabe qué es cada botón), solo más pequeños */
 @media (max-width: 360px) {
-  .nav-label { display: none; }
+  .nav-label { font-size: 7px; letter-spacing: 0; padding-left: 0; padding-right: 0; }
 }
 
 

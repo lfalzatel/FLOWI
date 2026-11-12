@@ -411,12 +411,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 <Camera className="w-4 h-4" /> Foto o pantallazo
               </button>
               <input ref={shotRef} type="file" accept="image/*" className="hidden"
-                     onChange={(e) => {
+                     onChange={async (e) => {
                        const f = e.target.files?.[0];
-                       e.target.value = '';
                        if (!f) return;
+                       let copy: File = f;
+                       try { copy = new File([await f.arrayBuffer()], f.name || 'recibo.jpg', { type: f.type || 'image/jpeg' }); } catch { /* se usa la original */ }
+                       e.target.value = '';
                        onClose();
-                       window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: f } }));
+                       window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: copy } }));
                      }} />
             </div>
           )}

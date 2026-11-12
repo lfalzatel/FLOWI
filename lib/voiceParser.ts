@@ -17,6 +17,7 @@ export interface ParsedVoiceResult {
   // Fecha del movimiento (YYYY-MM-DD) cuando se conoce, p. ej. la del recibo; si falta, es hoy
   date?: string;
   time?: string;   // HH:MM (hora impresa en el recibo)
+  paymentMethod?: string; // con qué se pagó o dónde se recibió (Nequi, Efectivo…)
 }
 
 export interface ParsedVoiceCommand {
