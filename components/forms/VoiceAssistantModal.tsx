@@ -5,7 +5,8 @@ import { ReadingTips } from '@/components/forms/ReadingTips';
 import { updateUserProfile } from '@/lib/firestore';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { FREE_LIMITS, isPremium, monthKeyNow, receiptsUsed, showLimit, usePlan } from '@/lib/plans';
+import { dayKeyNow, isPremium, receiptsDailyLimit, receiptsUsed, showLimit, usePlan } from '@/lib/plans';
+import { applyVoiceCorrection } from '@/lib/voiceCorrection';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
@@ -18,7 +19,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
 import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle } from '@/lib/voiceParser';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
-import { getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi } from '@/lib/aiAssist';
+import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi } from '@/lib/aiAssist';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
@@ -42,7 +43,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const payOptions = activeAccounts.length
     ? Array.from(new Set(activeAccounts.map(a => a.methods?.[0] || a.name))).slice(0, 8)
     : ['Efectivo', 'Nequi', 'Bancolombia', 'Daviplata', 'Tarjeta de crédito'];
-  const mainAccountName = activeAccounts.find(a => a.isDefault)?.name;
+  // La cuenta principal queda marcada por defecto; la persona la cambia si pagó con otra
+  const mainAcc = activeAccounts.find(a => a.isDefault);
+  const mainPay = mainAcc ? (mainAcc.methods?.[0] || mainAcc.name) : undefined;
   const { canAdd } = usePlan();
   const { allCategories } = useCategories();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -69,6 +72,16 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const receiptInputRef = useRef<HTMLInputElement>(null);
   const [receiptStatus, setReceiptStatus] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
   const [receiptError, setReceiptError] = useState('');
+  // Recibos que le quedan hoy (plan gratis); null = no mostrar
+  const [receiptsLeft, setReceiptsLeft] = useState<number | null>(null);
+  // "Otra foto" sobre un recibo ya leído no gasta otro recibo (hasta 3 veces por apertura)
+  const retakeNextRef = useRef(false);
+  const freeRetakesRef = useRef(0);
+  // Corregir por voz la transacción en pantalla
+  const correctingRef = useRef(false);
+  const [correcting, setCorrecting] = useState<'idle' | 'listening' | 'ai'>('idle');
+  const [flashKeys, setFlashKeys] = useState<string[]>([]);
+  const parsedRef = useRef<ParsedVoiceItem[]>([]);
 
   // Perfil al día (al abrir con una foto, el de useAuth puede no haber cargado todavía)
   const freshProfile = async () => {
@@ -79,13 +92,19 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     return { uid, p: (snap?.data() as any) || null };
   };
 
-  const handleReceiptFile = async (file: File | undefined) => {
+  const handleReceiptFile = async (file: File | undefined, retake = false) => {
     if (!file) return;
     const me = await freshProfile();
-    if (!isPremium(me.p) && receiptsUsed(me.p) >= FREE_LIMITS.receiptsPerMonth) { showLimit('receipts'); return; }
+    const free = retake && freeRetakesRef.current < 3;
+    const used = receiptsUsed(me.p);
+    const limit = receiptsDailyLimit(me.p);
+    if (!free && used >= limit) { showLimit('receipts'); return; }
     stopListening();
+    correctingRef.current = false;
+    setCorrecting('idle');
     setErrorMsg(null);
     setTranscript('');
+    setParsedResults([]);
     setReceiptStatus('loading');
     aiRequestRef.current++; // descarta respuestas de IA de un dictado anterior
     setAiStatus('idle');
@@ -93,7 +112,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     if (read.ok) {
       setParsedResults([read.result]);
       setReceiptStatus('done');
-      if (me.uid) updateUserProfile(me.uid, { receiptUsage: { month: monthKeyNow(), count: receiptsUsed(me.p) + 1 } }).catch(() => {});
+      if (free) freeRetakesRef.current++;
+      else if (me.uid) updateUserProfile(me.uid, { receiptUsage: { day: dayKeyNow(), count: used + 1 } }).catch(() => {});
+      const nowUsed = free ? used : used + 1;
+      setReceiptsLeft(isPremium(me.p) ? null : Math.max(0, limit - nowUsed));
       return;
     }
     setReceiptStatus(read.reason === 'no-key' ? 'no-key' : 'error');
@@ -113,9 +135,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
     setTranscript('');
     processedTranscriptRef.current = null;
-    setReceiptStatus('idle');
-    if (!pendingAction) {
-      setParsedResults([]);
+    if (!correctingRef.current) {
+      setReceiptStatus('idle');
+      if (!pendingAction) setParsedResults([]);
     }
     setEditingIdx(null);
     setErrorMsg(null);
@@ -182,6 +204,42 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     }
   };
 
+  const isTx = (r: ParsedVoiceItem | undefined) => !!r && (!('kind' in r) || r.kind === 'transaction');
+  const flash = (keys: string[]) => {
+    setFlashKeys(keys);
+    setTimeout(() => setFlashKeys([]), 2500);
+  };
+  const startCorrection = () => {
+    correctingRef.current = true;
+    setCorrecting('listening');
+    startListening();
+  };
+  const applyCorrection = (text: string) => {
+    const idx = parsedRef.current.findIndex(isTx);
+    if (idx < 0) { setCorrecting('idle'); return; }
+    const cur = parsedRef.current[idx] as ParsedVoiceResult;
+    const replace = (item: ParsedVoiceResult, keys: string[]) => {
+      setParsedResults(prev => prev.map((r, i) => (i === idx ? ({ ...item, _payDefaulted: true } as any) : r)));
+      flash(keys);
+    };
+    const { item, changed } = applyVoiceCorrection(cur, text, allCategories, payOptions);
+    if (changed.length) { replace(item, changed); setCorrecting('idle'); return; }
+    if (!getAiKey()) {
+      setErrorMsg('No entendí qué cambiar. Prueba: "eran 25 mil", "ponlo en Nequi" o "fue ayer".');
+      setCorrecting('idle');
+      return;
+    }
+    setCorrecting('ai');
+    correctWithAi(cur, text, allCategories, payOptions)
+      .then(out => {
+        const keys = out ? (['amount', 'category', 'description', 'date', 'paymentMethod', 'type'] as const).filter(k => (out as any)[k] !== (cur as any)[k]) : [];
+        if (out && keys.length) replace(out, [...keys]);
+        else setErrorMsg('No entendí qué cambiar. Prueba: "eran 25 mil", "ponlo en Nequi" o "fue ayer".');
+      })
+      .catch(() => setErrorMsg('La IA no respondió. Corrige el dato tocándolo.'))
+      .finally(() => setCorrecting('idle'));
+  };
+
   const stopListening = () => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try { window.speechSynthesis.cancel(); } catch (e) {}
@@ -225,6 +283,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       const text = transcript.trim();
       if (processedTranscriptRef.current === text) return;
       processedTranscriptRef.current = text;
+
+      if (correctingRef.current) {
+        correctingRef.current = false;
+        applyCorrection(text);
+        return;
+      }
 
       // Si había un estado conversacional pendiente (creación de recordatorio, nota, ingreso o gasto):
       if (pendingAction) {
@@ -399,6 +463,22 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     }
   }, [isListening, transcript, allCategories, profile, pendingAction]);
 
+  parsedRef.current = parsedResults;
+
+  useEffect(() => {
+    if (!isListening && correctingRef.current && !transcript.trim()) {
+      correctingRef.current = false;
+      setCorrecting('idle');
+    }
+  }, [isListening]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!mainPay) return;
+    const needs = (r: ParsedVoiceItem) => isTx(r) && ['gasto', 'ingreso'].includes((r as any).type) && !(r as any)._payDefaulted;
+    if (!parsedResults.some(needs)) return;
+    setParsedResults(prev => prev.map(r => (needs(r) ? ({ ...r, paymentMethod: (r as any).paymentMethod || mainPay, _payDefaulted: true } as any) : r)));
+  }, [parsedResults, mainPay]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleRemoveResult = (index: number) => {
     setParsedResults(prev => prev.filter((_, i) => i !== index));
     if (editingIdx === index) setEditingIdx(null);
@@ -539,6 +619,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
   if (typeof document === 'undefined') return null;
 
+  const reviewing = parsedResults.length > 0 || receiptStatus === 'loading';
+  const canCorrect = parsedResults.length === 1 && isTx(parsedResults[0]) && !pendingAction;
+  const hl = (k: string) => (flashKeys.includes(k) ? 'ring-2 ring-accent shadow-[0_0_12px_var(--accent)]' : '');
+
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono text-sm' : ''}`}>
       {/* Backdrop */}
@@ -594,6 +678,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           </h2>
         </div>
 
+        {/* Selector de foto (sirve para la primera foto y para "Otra foto") */}
+        <input ref={receiptInputRef} type="file" accept="image/*" className="hidden"
+               onChange={(e) => { const retake = retakeNextRef.current; retakeNextRef.current = false; handleReceiptFile(e.target.files?.[0], retake); e.target.value = ''; }} />
+
+        {!reviewing && (<>
         <p className={`text-xs max-w-xs mb-4 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
           Dicta transacciones, comandos como "abrir estadísticas" o crea notas y recordatorios. También puedes registrar un gasto con la foto del recibo.
         </p>
@@ -635,25 +724,49 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             </span>
           ) : (
             <span className={`text-xs font-semibold ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-              Toca el botón de micrófono amarillo para hablar
+              Toca el micrófono para hablar
             </span>
           )}
         </div>
 
         {/* Gasto por foto del recibo */}
-        <input ref={receiptInputRef} type="file" accept="image/*" className="hidden"
-               onChange={(e) => { handleReceiptFile(e.target.files?.[0]); e.target.value = ''; }} />
         <button
           type="button"
           onClick={() => getAiKey() ? receiptInputRef.current?.click() : setReceiptStatus('no-key')}
-          disabled={receiptStatus === 'loading'}
-          className={`mb-1 px-4 py-2 text-xs font-semibold flex items-center gap-2 border transition-colors disabled:opacity-60 ${
+          className={`mb-1 px-4 py-2 text-xs font-semibold flex items-center gap-2 border transition-colors ${
             isTechTheme ? 'rounded-none border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase' : 'rounded-xl border-glass-border text-text-primary hover:bg-white/10'
           }`}
         >
-          <Camera className={`w-4 h-4 text-accent ${receiptStatus === 'loading' ? 'animate-pulse' : ''}`} />
-          {receiptStatus === 'loading' ? 'Leyendo el recibo…' : 'Registrar con foto del recibo'}
+          <Camera className="w-4 h-4 text-accent" />
+          Registrar con foto del recibo
         </button>
+        </>)}
+
+        {/* Revisando un resultado: lo importante son los datos; corregir con la voz u otra foto sin salir */}
+        {reviewing && receiptStatus !== 'loading' && (
+          <div className="w-full mb-1 mt-1 space-y-1.5">
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" disabled={correcting === 'ai'}
+                      onClick={isListening ? stopListening : (canCorrect ? startCorrection : startListening)}
+                      className={`py-2.5 px-2 text-xs font-semibold flex items-center justify-center gap-1.5 border transition-colors disabled:opacity-60 ${isListening ? 'border-red-500/60 bg-red-500/15 text-red-400' : isTechTheme ? 'border-accent/40 text-accent hover:bg-accent/10' : 'border-glass-border text-text-primary hover:bg-white/10'} ${isTechTheme ? 'rounded-none font-mono uppercase' : 'rounded-xl'}`}>
+                {isListening ? <MicOff className="w-4 h-4 animate-pulse" /> : correcting === 'ai' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4 text-accent" />}
+                {isListening ? 'Escuchando…' : correcting === 'ai' ? 'Corrigiendo…' : canCorrect ? 'Corregir con la voz' : 'Dictar de nuevo'}
+              </button>
+              <button type="button"
+                      onClick={() => { if (!getAiKey()) { setReceiptStatus('no-key'); return; } retakeNextRef.current = receiptStatus === 'done'; receiptInputRef.current?.click(); }}
+                      className={`py-2.5 px-2 text-xs font-semibold flex items-center justify-center gap-1.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase' : 'rounded-xl border-glass-border text-text-primary hover:bg-white/10'}`}>
+                <Camera className="w-4 h-4 text-accent" />
+                {receiptStatus === 'done' ? 'Otra foto' : 'Usar foto'}
+              </button>
+            </div>
+            {isListening && correctingRef.current && (
+              <p className="text-[10px] text-accent normal-case text-center">Di qué cambiar: "eran 25 mil", "ponlo en Nequi", "fue ayer"…</p>
+            )}
+            {!isListening && transcript && correcting !== 'listening' && (
+              <p className="text-[10px] text-text-muted normal-case italic text-center truncate">"{transcript}"</p>
+            )}
+          </div>
+        )}
         {receiptStatus === 'loading' && <ReadingTips isTech={isTechTheme} />}
         {receiptStatus === 'no-key' && (
           <p className="text-[11px] text-text-muted max-w-xs mb-1 normal-case">
@@ -675,7 +788,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
         {/* Vista previa de los Datos Parseados */}
         {parsedResults.length > 0 && (
-          <div className="w-full my-3 space-y-2 max-h-56 overflow-y-auto scrollbar-hide pr-1">
+          <div className={`w-full my-3 space-y-2 overflow-y-auto scrollbar-hide pr-1 ${reviewing ? 'max-h-[58vh]' : 'max-h-56'}`}>
             {aiStatus !== 'idle' && (
               <p className={`text-[10px] px-1 flex items-center gap-1.5 normal-case ${aiStatus === 'failed' ? 'text-text-muted' : 'text-accent'}`}>
                 <Sparkles className={`w-3 h-3 ${aiStatus === 'loading' ? 'animate-pulse' : ''}`} />
@@ -686,7 +799,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             )}
             {receiptStatus === 'done' && aiStatus === 'idle' && (
               <p className="text-[10px] px-1 flex items-center gap-1.5 normal-case text-accent">
-                <Camera className="w-3 h-3" /> Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.
+                <Camera className="w-3 h-3 shrink-0" />
+                <span>
+                  Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.
+                  {receiptsLeft !== null && (receiptsLeft === 0
+                    ? ' Este era tu último recibo de hoy; mañana se renuevan.'
+                    : ` Te ${receiptsLeft === 1 ? 'queda 1 recibo' : `quedan ${receiptsLeft} recibos`} hoy.`)}
+                </span>
               </p>
             )}
             {parsedResults.length > 1 && (
@@ -911,7 +1030,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 value={res.amount || ''}
                                 onFocus={() => stopListening()}
                                 onChange={(e) => handleUpdateItem(idx, 'amount', parseFloat(e.target.value) || 0)}
-                                className={`w-full pl-6 pr-2 py-1.5 text-xs font-extrabold focus:outline-none focus:border-accent ${
+                                className={`w-full pl-6 pr-2 py-1.5 text-xs font-extrabold focus:outline-none focus:border-accent transition-shadow ${hl('amount')} ${
                                   isTechTheme ? 'rounded-none bg-black/60 border border-accent/40 text-accent font-mono' : 'rounded-xl bg-black/40 border border-white/20 text-accent'
                                 }`}
                               />
@@ -926,7 +1045,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 stopListening();
                                 setShowCategoryPickerIdx(idx);
                               }}
-                              className={`w-full flex items-center justify-between p-1.5 text-xs border truncate active:scale-95 transition-all ${
+                              className={`w-full flex items-center justify-between p-1.5 text-xs border truncate active:scale-95 transition-all ${hl('category')} ${
                                 isTechTheme ? 'rounded-none bg-black/60 border-accent/40 text-accent font-mono' : 'rounded-xl bg-black/40 border border-white/20 text-text-primary'
                               }`}
                             >
@@ -947,22 +1066,22 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             onFocus={() => stopListening()}
                             onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
                             placeholder="Escribe la descripción..."
-                            className={`w-full px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-accent ${
+                            className={`w-full px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-accent transition-shadow ${hl('description')} ${
                               isTechTheme ? 'rounded-none bg-black/60 border border-accent/40 text-accent font-mono' : 'rounded-xl bg-black/40 border border-white/20 text-text-primary'
                             }`}
                           />
                         </div>
                         {res.date && (
-                          <p className="text-[10px] text-text-muted normal-case">
-                            Fecha del recibo: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          <p className={`text-[10px] text-text-muted normal-case px-1 -mx-1 ${hl('date')}`}>
+                            {receiptStatus === 'done' ? 'Fecha del recibo' : 'Fecha'}: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
                         )}
                         {(res.type === 'gasto' || res.type === 'ingreso') && (
                           <div className="space-y-1">
                             <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-                              {res.type === 'gasto' ? '¿Con qué pagaste?' : '¿Dónde lo recibiste?'} <span className="normal-case font-normal">(opcional)</span>
+                              {res.type === 'gasto' ? '¿Con qué pagaste?' : '¿Dónde lo recibiste?'}
                             </span>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className={`flex flex-wrap gap-1.5 p-0.5 -m-0.5 ${hl('paymentMethod')}`}>
                               {payOptions.map(m => {
                                 const on = (res as any).paymentMethod === m;
                                 return (
@@ -973,9 +1092,6 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 );
                               })}
                             </div>
-                            {!(res as any).paymentMethod && mainAccountName && (
-                              <p className="text-[10px] text-text-muted normal-case">Si no eliges, va a tu cuenta principal ({mainAccountName}).</p>
-                            )}
                           </div>
                         )}
                       </div>

@@ -22,7 +22,7 @@ const ROWS: { label: string; free: string | boolean; premium: string | boolean }
   { label: 'Cuentas (Bancolombia, Nequi…)', free: 'Ilimitadas', premium: 'Ilimitadas' },
   { label: 'Inversiones y ahorros', free: `${FREE_LIMITS.investments}`, premium: 'Ilimitadas' },
   { label: 'Metas de ahorro', free: `${FREE_LIMITS.goals}`, premium: 'Ilimitadas' },
-  { label: 'Recibos con foto', free: `${FREE_LIMITS.receiptsPerMonth} al mes`, premium: 'Ilimitados' },
+  { label: 'Recibos con foto', free: `${FREE_LIMITS.receiptsPerDay} al día`, premium: 'Ilimitados' },
   { label: 'Mi negocio (ventas y ganancia)', free: 'Mes actual', premium: 'Completo' },
   { label: 'Sin publicidad', free: true, premium: true },
 ];

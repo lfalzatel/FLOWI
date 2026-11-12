@@ -59,11 +59,17 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     const open = () => setShowSheet(true);
     // Desde el formulario de gasto/ingreso: "Dictar" o "Desde foto o pantallazo"
     const voice = (e: Event) => openVoice((e as CustomEvent<{ file?: File | 'no-key' }>).detail?.file ?? null);
+    const dictate = () => { setShowVoice(false); setReceipt(null); setTimeout(() => openVoice(null), 80); };
+    const manual = () => { setShowVoice(false); setReceipt(null); setParsedVoiceData(null); setShowSheet(false); setShowAdd(true); };
     window.addEventListener('flowi-open-quick-actions', open);
     window.addEventListener('flowi-open-voice', voice);
+    window.addEventListener('flowi-dictate', dictate);
+    window.addEventListener('flowi-open-add', manual);
     return () => {
       window.removeEventListener('flowi-open-quick-actions', open);
       window.removeEventListener('flowi-open-voice', voice);
+      window.removeEventListener('flowi-dictate', dictate);
+      window.removeEventListener('flowi-open-add', manual);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

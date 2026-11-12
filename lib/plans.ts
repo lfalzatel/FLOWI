@@ -10,8 +10,10 @@ export const FREE_LIMITS = {
   accounts: Infinity,   // sin límite: para llevar las cuentas completas hacen falta todas (Nequi, banco, efectivo…)
   investments: 2,       // CDT, cajitas, fondos, pensión
   goals: 2,
-  receiptsPerMonth: 5,  // recibos leídos con foto
+  receiptsPerDay: 3,    // recibos leídos con foto, por día (se renuevan a medianoche)
 };
+// Premium: ilimitado en la práctica; el tope solo frena abusos o errores
+export const PREMIUM_RECEIPTS_PER_DAY = 30;
 export type LimitKind = 'accounts' | 'investments' | 'goals' | 'receipts';
 
 export interface PlanOption {
@@ -67,14 +69,20 @@ export function isPremium(profile: UserProfile | null | undefined, now = new Dat
   return !!premiumUntil(profile, now);
 }
 
-export function monthKeyNow(d = new Date()) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+/** Fecha de hoy en este dispositivo (AAAA-MM-DD): el conteo de recibos se renueva a medianoche. */
+export function dayKeyNow(d = new Date()) {
+  return d.toLocaleDateString('en-CA');
 }
 
-/** Recibos leídos este mes (se guarda en el perfil como receiptUsage: { month, count }). */
+/** Recibos leídos hoy (se guarda en el perfil como receiptUsage: { day, count }). */
 export function receiptsUsed(profile: UserProfile | null | undefined): number {
   const u = (profile as any)?.receiptUsage;
-  return u && u.month === monthKeyNow() ? Number(u.count) || 0 : 0;
+  return u && u.day === dayKeyNow() ? Number(u.count) || 0 : 0;
+}
+
+/** Cuántos recibos puede leer al día según su plan. */
+export function receiptsDailyLimit(profile: UserProfile | null | undefined): number {
+  return isPremium(profile) ? PREMIUM_RECEIPTS_PER_DAY : FREE_LIMITS.receiptsPerDay;
 }
 
 export function usePlan() {
@@ -85,8 +93,9 @@ export function usePlan() {
     until: premiumUntil(profile),
     /** true si todavía puede agregar uno más de este tipo */
     canAdd: (kind: LimitKind, current: number) => {
+      if (kind === 'receipts') return current < (premium ? PREMIUM_RECEIPTS_PER_DAY : FREE_LIMITS.receiptsPerDay);
       if (premium) return true;
-      const max = kind === 'receipts' ? FREE_LIMITS.receiptsPerMonth : FREE_LIMITS[kind];
+      const max = FREE_LIMITS[kind];
       return current < max;
     },
   };
@@ -118,5 +127,5 @@ export const LIMIT_TEXT: Record<LimitKind, { title: string; text: string }> = {
   accounts: { title: 'Cuentas', text: 'Las cuentas son ilimitadas en todos los planes.' },
   investments: { title: 'Ya tienes 2 inversiones', text: `El plan gratis incluye ${FREE_LIMITS.investments} inversiones o ahorros. Con Premium agregas todos tus CDT, cajitas y fondos.` },
   goals: { title: 'Ya tienes 2 metas', text: `El plan gratis incluye ${FREE_LIMITS.goals} metas de ahorro activas. Con Premium tienes todas las que quieras.` },
-  receipts: { title: 'Usaste tus 5 recibos del mes', text: `El plan gratis lee ${FREE_LIMITS.receiptsPerMonth} recibos con foto al mes; el próximo mes se renuevan. Con Premium son ilimitados.` },
+  receipts: { title: `Ya leíste tus ${FREE_LIMITS.receiptsPerDay} recibos de hoy 📸`, text: 'Mañana se renuevan. Mientras tanto, puedes registrar este gasto dictándolo o escribiéndolo; eso no tiene límite.' },
 };

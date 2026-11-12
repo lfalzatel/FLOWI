@@ -110,7 +110,7 @@ const TERMS: Block[] = [
         'Gastos, ingresos, deudas, cuentas, recordatorios y notas: ilimitados.',
         `Inversiones y ahorros activos: ${FREE_LIMITS.investments}.`,
         `Metas activas: ${FREE_LIMITS.goals}.`,
-        `Recibos leídos con foto: ${FREE_LIMITS.receiptsPerMonth} al mes.`,
+        `Recibos leídos con foto: ${FREE_LIMITS.receiptsPerDay} al día.`,
         'Mi negocio: solo el mes actual.',
       ],
       'Si algún día cambiamos estos límites te avisaremos antes, y nunca borraremos lo que ya registraste.',

@@ -197,6 +197,54 @@ export async function improveWithAi(text: string, categories: { label: string; i
   }
 }
 
+// Corregir una transacción ya armada con lo que la persona dijo ("cámbialo a…"); null si falla
+export async function correctWithAi(
+  current: ParsedVoiceResult, instruction: string, categories: { label: string; isCustom?: boolean }[], payOptions: string[],
+): Promise<ParsedVoiceResult | null> {
+  const key = getAiKey();
+  if (!key) return null;
+  const models = await getFreeModels(key);
+  if (!models.length) return null;
+  const customLabels = categories.filter(c => c.isCustom).map(c => c.label);
+  const type = current.type === 'ingreso' ? 'ingreso' : 'gasto';
+  const options = type === 'ingreso' ? INCOME_LABELS : [...EXPENSE_LABELS, ...customLabels];
+  const system = `Corriges un movimiento de dinero según lo que dice la persona (español de Colombia).
+Responde SOLO con el JSON corregido, mismas claves: {"type":"gasto"|"ingreso","amount":numero,"category":"...","description":"...","date":"AAAA-MM-DD","paymentMethod":"..."|null}
+Cambia solo lo que la persona pide; lo demás queda igual. Hoy es ${new Date().toLocaleDateString('en-CA')}.
+category debe ser exactamente una de: ${options.join(', ')}.
+paymentMethod debe ser una de: ${payOptions.join(', ')} (o null).`;
+  const now = { type: current.type, amount: current.amount, category: current.category, description: current.description, date: current.date || new Date().toLocaleDateString('en-CA'), paymentMethod: current.paymentMethod || null };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST', signal: controller.signal,
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'HTTP-Referer': window.location.origin, 'X-Title': 'FLOWI' },
+      body: JSON.stringify({
+        model: models[0], models, temperature: 0,
+        messages: [{ role: 'system', content: system }, { role: 'user', content: `Movimiento: ${JSON.stringify(now)}\nLa persona dice: "${instruction}"` }],
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const j = extractJson(data?.choices?.[0]?.message?.content || '');
+    if (!j) return null;
+    const newType: 'gasto' | 'ingreso' = j.type === 'ingreso' ? 'ingreso' : j.type === 'gasto' ? 'gasto' : type;
+    const amount = Number(j.amount);
+    const out: ParsedVoiceResult = { ...current, type: newType };
+    if (Number.isFinite(amount) && amount > 0) out.amount = Math.round(amount);
+    if (typeof j.category === 'string') out.category = matchCategory(j.category, newType, customLabels);
+    if (typeof j.description === 'string' && j.description.trim()) out.description = j.description.trim().slice(0, 80);
+    if (typeof j.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(j.date) && j.date !== now.date) { out.date = j.date; out.time = undefined; }
+    if (typeof j.paymentMethod === 'string' && payOptions.includes(j.paymentMethod)) out.paymentMethod = j.paymentMethod;
+    return out;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // ── Gasto por foto del recibo ─────────────────────────────────────────────
 // La foto se reduce en el dispositivo y se envía solo al modelo gratuito para leerla; FLOWI no la guarda.
 
