@@ -1,6 +1,8 @@
 'use client';
 
 import { useAccounts } from '@/hooks/useAccounts';
+import { useData } from '@/components/DataProvider';
+import { normalizeText } from '@/lib/categories';
 import { ReadingTips } from '@/components/forms/ReadingTips';
 import { updateUserProfile } from '@/lib/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -49,6 +51,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const mainAcc = activeAccounts.find(a => a.isDefault);
   const mainPay = mainAcc ? (mainAcc.methods?.[0] || mainAcc.name) : undefined;
   const { canAdd } = usePlan();
+  const { transactions } = useData();
+  // Captura de movimientos del banco (varios a la vez) en vez de un recibo
+  const [readKind, setReadKind] = useState<'recibo' | 'movimientos'>('recibo');
   const { allCategories } = useCategories();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
@@ -112,7 +117,21 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     setAiStatus('idle');
     const read = await readReceiptWithAi(file, allCategories);
     if (read.ok) {
-      setParsedResults([read.result]);
+      // Movimientos del banco: la cuenta del pantallazo queda marcada y se avisa lo que ya estaba registrado
+      const bankKey = read.bank ? normalizeText(read.bank) : '';
+      const bankPay = bankKey ? payOptions.find(o => { const k = normalizeText(o); return k.includes(bankKey) || bankKey.includes(k); }) : undefined;
+      const toDay = (v: any) => (v?.toDate ? v.toDate() : new Date(v)).toLocaleDateString('en-CA');
+      const items = read.results.map(r => {
+        const day = r.date || new Date().toLocaleDateString('en-CA');
+        const dup = transactions.find(t => t.type === r.type && Math.round(t.amount) === r.amount && toDay(t.date) === day);
+        return {
+          ...r,
+          ...(bankPay ? { paymentMethod: bankPay, _payDefaulted: true } : {}),
+          ...(dup ? { _dup: new Date(`${day}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }) } : {}),
+        } as any;
+      });
+      setReadKind(read.results.length > 1 || read.result.rawText === 'Movimientos del banco' ? 'movimientos' : 'recibo');
+      setParsedResults(items);
       setReceiptStatus('done');
       if (free) freeRetakesRef.current++;
       else if (me.uid) updateUserProfile(me.uid, { receiptUsage: { day: dayKeyNow(), count: used + 1 } }).catch(() => {});
@@ -806,7 +825,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               <p className="text-[10px] px-1 flex items-center gap-1.5 normal-case text-accent">
                 <Camera className="w-3 h-3 shrink-0" />
                 <span>
-                  Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.
+                  {readKind === 'movimientos'
+                    ? `Leí ${parsedResults.length} movimiento${parsedResults.length === 1 ? '' : 's'} de tu banco. Revisa y borra los que no quieras; la foto no se guarda.`
+                    : 'Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.'}
                   {receiptsLeft !== null && (receiptsLeft === 0
                     ? ' Este era tu último recibo de hoy; mañana se renuevan.'
                     : ` Te ${receiptsLeft === 1 ? 'queda 1 recibo' : `quedan ${receiptsLeft} recibos`} hoy.`)}
@@ -994,6 +1015,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     <div>
                       <div className="flex flex-col items-start gap-1 mb-2 pr-8">
                         <span className="text-[9px] text-amber-300 font-medium leading-tight">
+                          {(res as any)._dup && (
+                            <span className="block text-amber-400 font-semibold mb-0.5">⚠ Parece que ya lo registraste el {(res as any)._dup}. Bórralo con 🗑 si es el mismo.</span>
+                          )}
                           💡 Toca para convertir a {res.type === 'gasto' ? 'Ingreso 🟢' : 'Gasto 🔴'}
                         </span>
                         <div className="flex items-center gap-2">
@@ -1078,7 +1102,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                         </div>
                         {res.date && (
                           <p className={`text-[10px] text-text-muted normal-case px-1 -mx-1 ${hl('date')}`}>
-                            {receiptStatus === 'done' ? 'Fecha del recibo' : 'Fecha'}: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            {receiptStatus === 'done' && readKind === 'recibo' ? 'Fecha del recibo' : 'Fecha'}: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
                         )}
                         {(res.type === 'gasto' || res.type === 'ingreso') && (

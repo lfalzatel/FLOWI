@@ -299,19 +299,38 @@ async function shrinkImage(file: File): Promise<string> {
 }
 
 function receiptPrompt(customLabels: string[]) {
-  return `Lees fotos de recibos, facturas y tiquetes de compra de Colombia.
-Responde SOLO con un JSON: {"total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró"}
+  return `Lees fotos de Colombia de dos tipos:
+(A) un recibo, factura o tiquete de compra, o
+(B) una captura de la app de un banco o billetera (Bancolombia, Nequi, Daviplata, BBVA...) con una LISTA DE MOVIMIENTOS.
+Responde SOLO con un JSON.
+Si es (A): {"kind":"recibo","total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró"}
+Si es (B): {"kind":"movimientos","bank":"banco o billetera o null","movimientos":[{"type":"ingreso"|"gasto","amount":numero_en_pesos,"date":"YYYY-MM-DD o null","description":"texto corto y claro (ej. Transferencia de Luis Felipe, Cuota de manejo tarjeta débito)","category":"..."}]}
 Reglas:
-- "total" es el TOTAL A PAGAR del recibo (no el subtotal, ni el IVA, ni el cambio, ni lo recibido en efectivo).
+- En (A), "total" es el TOTAL A PAGAR (no el subtotal, ni el IVA, ni el cambio).
+- En (B), cada movimiento es una fila: los valores en verde o con "+" son ingresos; en rojo o con "-" son gastos. No incluyas el saldo disponible.
 - En Colombia el punto separa miles: "$45.900" = 45900 y "1.250.000" = 1250000. Si hay centavos con coma, ignóralos.
-- "date" es la fecha de la compra impresa en el recibo; null si no se ve.
-- "time" es la hora de la compra impresa en el recibo (ej "14:35"); null si no se ve.
-- category debe ser exactamente una de: ${[...EXPENSE_LABELS, ...customLabels].join(', ')}.
-- Si la foto no es un recibo o no se puede leer el total, responde {"total":null}.`;
+- category de un gasto debe ser exactamente una de: ${[...EXPENSE_LABELS, ...customLabels].join(', ')}.
+- category de un ingreso debe ser exactamente una de: ${INCOME_LABELS.join(', ')}.
+- No incluyas números de cuenta ni de tarjeta.
+- Si no es ninguno de los dos o no se pueden leer los valores, responde {"total":null}.`;
+}
+
+// Fecha leída de una foto: solo si es reciente (la IA a veces lee mal el año: "10/11/25" → 2025).
+// Si el día y el mes sirven con el año actual, se corrige el año; si no, queda sin fecha (hoy).
+function recentDate(v: unknown): string | undefined {
+  if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return undefined;
+  const [, m, d] = v.split('-').map(Number);
+  const now = new Date();
+  const recent = (dt: Date) => dt.getMonth() === m - 1 && dt <= now && now.getTime() - dt.getTime() <= 45 * 86400000;
+  for (const y of [Number(v.slice(0, 4)), now.getFullYear(), now.getFullYear() - 1]) {
+    const when = new Date(y, m - 1, d, 12);
+    if (recent(when)) return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  return undefined;
 }
 
 export type ReceiptReadResult =
-  | { ok: true; result: ParsedVoiceResult }
+  | { ok: true; result: ParsedVoiceResult; results: ParsedVoiceResult[]; bank?: string }
   | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' };
 
 export async function readReceiptWithAi(file: File, categories: { label: string; isCustom?: boolean }[]): Promise<ReceiptReadResult> {
@@ -341,7 +360,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
         messages: [
           { role: 'system', content: receiptPrompt(customLabels) },
           { role: 'user', content: [
-            { type: 'text', text: 'Lee este recibo.' },
+            { type: 'text', text: 'Lee esta foto (recibo o movimientos del banco).' },
             { type: 'image_url', image_url: { url: image } },
           ] },
         ],
@@ -350,23 +369,35 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
     if (!res.ok) return { ok: false, reason: 'failed' };
     const data = await res.json();
     const parsed = extractJson(data?.choices?.[0]?.message?.content || '');
-    const total = Number(parsed?.total);
-    if (!parsed || !Number.isFinite(total) || total <= 0) return { ok: false, reason: 'unreadable' };
+    if (!parsed) return { ok: false, reason: 'unreadable' };
 
+    // (B) Captura de movimientos del banco: un movimiento por fila
+    if (Array.isArray(parsed.movimientos) && parsed.movimientos.length) {
+      const bank = typeof parsed.bank === 'string' && parsed.bank.trim() && parsed.bank !== 'null' ? parsed.bank.trim().slice(0, 30) : undefined;
+      const results: ParsedVoiceResult[] = [];
+      for (const mv of parsed.movimientos.slice(0, 20)) {
+        const amount = Math.abs(Number(mv?.amount));
+        if (!Number.isFinite(amount) || amount <= 0) continue;
+        const type: 'gasto' | 'ingreso' = mv?.type === 'ingreso' ? 'ingreso' : 'gasto';
+        const category = matchCategory(mv?.category, type, customLabels);
+        const date = recentDate(mv?.date);
+        results.push({
+          kind: 'transaction', type, amount: Math.round(amount), category,
+          description: String(mv?.description || category).slice(0, 80),
+          isFixed: type === 'gasto' && isFixedExpenseCategory(category), rawText: 'Movimientos del banco',
+          ...(date ? { date } : {}),
+        });
+      }
+      if (!results.length) return { ok: false, reason: 'unreadable' };
+      return { ok: true, result: results[0], results, bank };
+    }
+
+    // (A) Recibo de compra
+    const total = Number(parsed?.total);
+    if (!Number.isFinite(total) || total <= 0) return { ok: false, reason: 'unreadable' };
     const category = matchCategory(parsed.category, 'gasto', customLabels);
     const merchant = typeof parsed.merchant === 'string' && parsed.merchant.trim() && parsed.merchant !== 'null' ? parsed.merchant.trim().slice(0, 60) : undefined;
-    // La fecha del recibo solo se usa si es reciente (la IA a veces lee mal el año: "10/11/25" → 2025).
-    // Si el día y el mes sirven con el año actual, se corrige el año; si no, queda la fecha de hoy.
-    let date: string | undefined;
-    if (typeof parsed.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parsed.date)) {
-      const [, m, d] = parsed.date.split('-').map(Number);
-      const now = new Date();
-      const recent = (dt: Date) => dt.getMonth() === m - 1 && dt <= now && now.getTime() - dt.getTime() <= 45 * 86400000;
-      for (const y of [Number(parsed.date.slice(0, 4)), now.getFullYear(), now.getFullYear() - 1]) {
-        const when = new Date(y, m - 1, d, 12);
-        if (recent(when)) { date = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`; break; }
-      }
-    }
+    const date = recentDate(parsed.date);
     // Hora del recibo (solo si es válida y, si la compra es de hoy, no está en el futuro)
     let time: string | undefined;
     const tm = typeof parsed.time === 'string' ? parsed.time.match(/^(\d{1,2}):(\d{2})/) : null;
@@ -375,17 +406,15 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
       const day = date || new Date().toLocaleDateString('en-CA');
       if (new Date(`${day}T${hhmm}:00`) <= new Date()) time = hhmm;
     }
-    return {
-      ok: true,
-      result: {
-        kind: 'transaction', type: 'gasto', amount: Math.round(total), category,
-        description: String(parsed.description || merchant || category).slice(0, 80),
-        isFixed: isFixedExpenseCategory(category), rawText: 'Recibo',
-        ...(merchant ? { merchant } : {}),
-        ...(date ? { date } : {}),
-        ...(time ? { time } : {}),
-      },
+    const result: ParsedVoiceResult = {
+      kind: 'transaction', type: 'gasto', amount: Math.round(total), category,
+      description: String(parsed.description || merchant || category).slice(0, 80),
+      isFixed: isFixedExpenseCategory(category), rawText: 'Recibo',
+      ...(merchant ? { merchant } : {}),
+      ...(date ? { date } : {}),
+      ...(time ? { time } : {}),
     };
+    return { ok: true, result, results: [result] };
   } catch {
     return { ok: false, reason: 'failed' };
   } finally {
