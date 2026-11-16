@@ -14,7 +14,7 @@ const js = ts.transpileModule(fs.readFileSync(path.join(root, 'lib/receiptItems.
 }).outputText;
 const out = path.join(outDir, 'receiptItems.mjs');
 fs.writeFileSync(out, js);
-const { sanitizeReceiptItems, itemsCheck, formatQty } = await import(pathToFileURL(out).href);
+const { sanitizeReceiptItems, itemsCheck, formatQty, groupByCategory, splitTotal } = await import(pathToFileURL(out).href);
 
 let fails = 0;
 const check = (name, cond) => { if (!cond) fails++; console.log(`${cond ? '✓' : '✗'} ${name}`); };
@@ -55,6 +55,19 @@ check('descarta "null" y sin valor', messy.length === 2);
 check('cantidad 0 pasa a 1 y acepta claves en español', messy[1]?.name === 'Pan' && messy[1].qty === 1 && messy[1].total === 1200);
 check('no es lista → vacío', sanitizeReceiptItems(null).length === 0);
 check('formato de cantidad', formatQty(items[1]) === '0,845 kg');
+
+// Repartir por categoría
+const mix = sanitizeReceiptItems([
+  { name: 'Huevos', qty: 1, total: 16050, category: 'Mercado' },
+  { name: 'Cerveza', qty: 6, price: 3250, total: 19500, category: 'Licores y Bares' },
+  { name: 'Arroz', qty: 1, total: 4450 },
+]);
+const groups = groupByCategory(mix, 'Mercado');
+check('2 grupos, Mercado primero', groups.length === 2 && groups[0].category === 'Mercado' && groups[0].sum === 20500);
+const parts = splitTotal(groups, 39500);
+check('partes suman el total exacto', parts[0] + parts[1] === 39500);
+const disc = splitTotal(groups, 38000);
+check('descuento repartido en proporción', disc[0] + disc[1] === 38000 && disc[1] === Math.round(38000 * 19500 / 40000));
 
 fs.rmSync(outDir, { recursive: true, force: true });
 console.log(fails ? `\n${fails} fallaron` : '\nTodas pasaron');

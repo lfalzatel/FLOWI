@@ -1,6 +1,8 @@
 'use client';
 
-import { ReceiptItemsList } from '@/components/forms/ReceiptItemsList';
+import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
+import { groupByCategory, splitTotal } from '@/lib/receiptItems';
+import { isFixedExpenseCategory } from '@/lib/firestore';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useData } from '@/components/DataProvider';
 import { normalizeText } from '@/lib/categories';
@@ -144,7 +146,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     setReceiptError(
       read.reason === 'unreadable' ? 'No pude leer el total en la foto. Prueba con más luz, el recibo derecho y completo en la imagen.'
       : read.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
-      : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'
+      : read.reason === 'timeout' ? 'La IA gratuita está lenta ahora y no alcanzó a leerlo. Inténtalo otra vez en un momento, o díctalo.'
+      : read.reason === 'busy' ? 'La IA gratuita está ocupada en este momento. Inténtalo en un minuto, o díctalo.'
+      : 'No pude conectar con la IA. Revisa tu conexión e inténtalo de nuevo.'
     );
   };
 
@@ -584,6 +588,32 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             paidAmount: 0,
             status: 'pending',
           });
+        } else if (tx.type === 'gasto' && tx.items?.length && (tx as any)._split !== false
+                   && groupByCategory(tx.items, tx.category).length > 1) {
+          // Compra repartida: un gasto por categoría, con sus productos, que juntos suman lo pagado
+          const groups = groupByCategory(tx.items, tx.category);
+          const amounts = splitTotal(groups, tx.amount);
+          const receiptId = `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+          const when = tx.time
+            ? new Date(`${tx.date || new Date().toLocaleDateString('en-CA')}T${tx.time}:00`)
+            : !tx.date || tx.date === new Date().toLocaleDateString('en-CA') ? new Date() : new Date(`${tx.date}T12:00:00`);
+          const base = (tx.merchant || tx.description || 'Compra').slice(0, 40);
+          for (let g = 0; g < groups.length; g++) {
+            const names = groups[g].items.slice(0, 2).map(i => i.name.toLowerCase().replace(/^\w/, c => c.toUpperCase())).join(', ');
+            await addExpense({
+              userId: user.uid,
+              amount: amounts[g],
+              type: 'gasto',
+              category: groups[g].category,
+              description: `${base}: ${names}${groups[g].items.length > 2 ? '…' : ''}`.slice(0, 80),
+              date: new Date(when.getTime() + g * 1000), // mismo momento, en orden
+              isFixed: isFixedExpenseCategory(groups[g].category),
+              ...(tx.merchant ? { merchant: tx.merchant } : {}),
+              ...(tx.paymentMethod ? { paymentMethod: tx.paymentMethod } : {}),
+              items: groups[g].items,
+              receiptId,
+            });
+          }
         } else {
           await addExpense({
             userId: user.uid,
@@ -1108,7 +1138,17 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           </p>
                         )}
                         {res.type === 'gasto' && res.items?.length ? (
-                          <ReceiptItemsList items={res.items} total={res.amount} isTech={isTechTheme} />
+                          <div className="space-y-2">
+                            <ReceiptItemsList items={res.items} total={res.amount} isTech={isTechTheme}
+                                              fallbackCategory={res.category}
+                                              categories={allCategories.filter(c => !c.type || c.type === 'gasto')}
+                                              onChange={(next) => handleUpdateItem(idx, 'items', next)}
+                                              onUseSum={(s) => handleUpdateItem(idx, 'amount', s)} />
+                            <ItemsByCategory items={res.items} total={res.amount || 0} fallbackCategory={res.category} isTech={isTechTheme}
+                                             split={(res as any)._split !== false}
+                                             onSplit={(v) => handleUpdateItem(idx, '_split', v)}
+                                             amounts={splitTotal(groupByCategory(res.items, res.category), res.amount || 0)} />
+                          </div>
                         ) : null}
                         {(res.type === 'gasto' || res.type === 'ingreso') && (
                           <div className="space-y-1">

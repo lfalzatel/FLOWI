@@ -11,6 +11,8 @@ const VERIFIER_STORAGE = 'flowi_openrouter_verifier';
 const MODELS_CACHE = 'flowi_openrouter_free_models';
 const VISION_MODELS_CACHE = 'flowi_openrouter_free_vision_models';
 const RECEIPT_TIMEOUT_MS = 40_000;
+// Un recibo con todos sus productos es una respuesta larga: los modelos gratuitos pueden tardar más
+const RECEIPT_ITEMS_TIMEOUT_MS = 80_000;
 const MODELS_CACHE_MS = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 15_000;
 
@@ -304,11 +306,11 @@ function receiptPrompt(customLabels: string[]) {
 (A) un recibo, factura o tiquete de compra, o
 (B) una captura de la app de un banco o billetera (Bancolombia, Nequi, Daviplata, BBVA...) con una LISTA DE MOVIMIENTOS.
 Responde SOLO con un JSON.
-Si es (A): {"kind":"recibo","total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró","items":[{"name":"producto como aparece","qty":cantidad,"unit":"kg o null","price":precio_unitario,"total":total_del_renglon}]}
+Si es (A): {"kind":"recibo","total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró","items":[{"name":"producto como aparece","qty":cantidad,"unit":"kg o null","price":precio_unitario,"total":total_del_renglon,"category":"..."}]}
 Si es (B): {"kind":"movimientos","bank":"banco o billetera o null","movimientos":[{"type":"ingreso"|"gasto","amount":numero_en_pesos,"date":"YYYY-MM-DD o null","description":"texto corto y claro (ej. Transferencia de Luis Felipe, Cuota de manejo tarjeta débito)","category":"..."}]}
 Reglas:
 - En (A), "total" es el TOTAL A PAGAR (no el subtotal, ni el IVA, ni el cambio).
-- En (A), "items" son TODOS los productos del recibo, uno por renglón y en el mismo orden, aunque se repitan. "qty" puede tener decimales (0.845 kg). "total" del renglón es lo que costó ese renglón. No incluyas subtotales, IVA, cambio ni medios de pago. Si el recibo no detalla productos, usa "items":[].
+- En (A), "items" son TODOS los productos del recibo, uno por renglón y en el mismo orden, aunque se repitan. "qty" puede tener decimales (0.845 kg). "total" del renglón es lo que costó ese renglón. No incluyas subtotales, IVA, cambio ni medios de pago. Si el recibo no detalla productos, usa "items":[]. "category" de cada producto es la categoría de gasto que le corresponde a ESE producto (ej. huevos → Mercado, cerveza → Licores y Bares, jabón → Aseo si existe) de la misma lista de categorías.
 - En (B), cada movimiento es una fila: los valores en verde o con "+" son ingresos; en rojo o con "-" son gastos. No incluyas el saldo disponible.
 - En Colombia el punto separa miles: "$45.900" = 45900 y "1.250.000" = 1250000. Si hay centavos con coma, ignóralos.
 - category de un gasto debe ser exactamente una de: ${[...EXPENSE_LABELS, ...customLabels].join(', ')}.
@@ -333,7 +335,7 @@ function recentDate(v: unknown): string | undefined {
 
 export type ReceiptReadResult =
   | { ok: true; result: ParsedVoiceResult; results: ParsedVoiceResult[]; bank?: string }
-  | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' };
+  | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' | 'timeout' | 'busy' };
 
 export async function readReceiptWithAi(file: File, categories: { label: string; isCustom?: boolean }[]): Promise<ReceiptReadResult> {
   const key = getAiKey();
@@ -343,7 +345,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
   const customLabels = categories.filter(c => c.isCustom).map(c => c.label);
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), RECEIPT_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), RECEIPT_ITEMS_TIMEOUT_MS);
   try {
     const image = await shrinkImage(file);
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -368,7 +370,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
         ],
       }),
     });
-    if (!res.ok) return { ok: false, reason: 'failed' };
+    if (!res.ok) return { ok: false, reason: res.status === 429 || res.status >= 500 ? 'busy' : 'failed' };
     const data = await res.json();
     const parsed = extractJson(data?.choices?.[0]?.message?.content || '');
     if (!parsed) return { ok: false, reason: 'unreadable' };
@@ -400,7 +402,10 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
     const category = matchCategory(parsed.category, 'gasto', customLabels);
     const merchant = typeof parsed.merchant === 'string' && parsed.merchant.trim() && parsed.merchant !== 'null' ? parsed.merchant.trim().slice(0, 60) : undefined;
     const date = recentDate(parsed.date);
-    const items = sanitizeReceiptItems(parsed.items);
+    // Cada producto con una categoría válida; si la IA no la dio, la del recibo
+    const items = sanitizeReceiptItems(parsed.items).map(it => ({
+      ...it, category: it.category ? matchCategory(it.category, 'gasto', customLabels) : category,
+    })).map(it => (it.category === 'Otros' && category !== 'Otros' ? { ...it, category } : it));
     // Hora del recibo (solo si es válida y, si la compra es de hoy, no está en el futuro)
     let time: string | undefined;
     const tm = typeof parsed.time === 'string' ? parsed.time.match(/^(\d{1,2}):(\d{2})/) : null;
@@ -419,8 +424,8 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
       ...(items.length ? { items } : {}),
     };
     return { ok: true, result, results: [result] };
-  } catch {
-    return { ok: false, reason: 'failed' };
+  } catch (e) {
+    return { ok: false, reason: controller.signal.aborted ? 'timeout' : 'failed' };
   } finally {
     clearTimeout(timer);
   }

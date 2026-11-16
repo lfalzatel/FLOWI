@@ -30,6 +30,7 @@ import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 import { ParsedVoiceResult } from '@/lib/voiceParser';
 import { ReceiptItemsList } from '@/components/forms/ReceiptItemsList';
+import type { ReceiptItem } from '@/lib/receiptItems';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -60,6 +61,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [description, setDescription] = useState(initialVoiceParsed?.description || '');
   const [category, setCategory] = useState(initialVoiceParsed?.category || '');
   const [merchant, setMerchant] = useState('');
+  const [items, setItems] = useState<ReceiptItem[] | undefined>(undefined); // productos del recibo (si se escaneó)
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isFixed, setIsFixed] = useState(initialVoiceParsed?.isFixed || false);
   // Modo negocio: se marca solo con categorías de negocio (Venta, Inventario…) y se puede cambiar
@@ -241,6 +243,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       setDescription(transactionToEdit.description || '');
       setCategory(transactionToEdit.category);
       setMerchant(transactionToEdit.merchant || '');
+      setItems(transactionToEdit.items);
       setPaymentMethod(transactionToEdit.paymentMethod || '');
       if (transactionToEdit.isFixed !== undefined) {
         setIsFixed(transactionToEdit.isFixed);
@@ -288,6 +291,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         ...extras,
         ...(type === 'gasto' ? { isFixed } : {}),
         business: isBusiness,
+        ...(items ? { items } : {}),
       };
 
       recordUsage(usageBucket, finalCategory);
@@ -478,9 +482,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 💡 ¿Es «{suggestedCat}»? Toca para usarla
               </button>
             )}
-            {transactionToEdit?.items?.length ? (
+            {items?.length ? (
               <div className="mt-2">
-                <ReceiptItemsList items={transactionToEdit.items} total={Number(amount) || transactionToEdit.amount} isTech={isTechTheme} />
+                <ReceiptItemsList items={items} total={Number(amount) || 0} isTech={isTechTheme}
+                                  onChange={setItems} onUseSum={(s) => setAmount(String(s))} />
               </div>
             ) : null}
           </div>

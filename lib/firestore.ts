@@ -17,6 +17,7 @@ export interface Transaction {
   accountId?: string | null; // cuenta exacta (gana sobre el medio de pago); ver lib/accounts.ts
   business?: boolean;        // "Es del negocio" (Modo negocio); si falta, se deduce de la categoría (lib/business.ts)
   items?: ReceiptItem[];     // productos del recibo escaneado (lib/receiptItems.ts)
+  receiptId?: string;        // mismo valor en las partes de una compra repartida por categoría
 }
 
 export interface CustomCategory {
