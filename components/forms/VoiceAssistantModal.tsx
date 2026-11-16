@@ -590,7 +590,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             paidAmount: 0,
             status: 'pending',
           });
-        } else if (tx.type === 'gasto' && tx.items?.length && (tx as any)._split !== false
+        } else if (tx.type === 'gasto' && tx.items?.length && (tx as any)._split === true
                    && groupByCategory(tx.items, tx.category).length > 1) {
           // Compra repartida: un gasto por categoría, con sus productos, que juntos suman lo pagado
           const groups = groupByCategory(tx.items, tx.category);
@@ -1154,7 +1154,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                               onUseSum={(s) => handleUpdateItem(idx, 'amount', s)}
                                               onAddToTotal={(v) => handleUpdateItem(idx, 'amount', (res.amount || 0) + v)} />
                             <ItemsByCategory items={res.items} total={res.amount || 0} fallbackCategory={res.category} isTech={isTechTheme}
-                                             split={(res as any)._split !== false}
+                                             split={false}
                                              onSplit={(v) => handleUpdateItem(idx, '_split', v)}
                                              categories={allCategories}
                                              amounts={splitTotal(groupByCategory(res.items, res.category), res.amount || 0)} />

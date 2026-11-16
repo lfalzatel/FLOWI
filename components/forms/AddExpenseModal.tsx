@@ -67,7 +67,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [merchant, setMerchant] = useState('');
   const [items, setItems] = useState<ReceiptItem[] | undefined>(undefined); // productos de la compra (undefined = sin lista)
   const [autoSum, setAutoSum] = useState(false); // el monto sigue a la suma de los productos
-  const [split, setSplit] = useState(true);      // compra con varias categorías: un gasto por categoría
+  const [split, setSplit] = useState(false);     // un recibo es una sola compra: no se reparte en varios gastos
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isFixed, setIsFixed] = useState(initialVoiceParsed?.isFixed || false);
   // Modo negocio: se marca solo con categorías de negocio (Venta, Inventario…) y se puede cambiar

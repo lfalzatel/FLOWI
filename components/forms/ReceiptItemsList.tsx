@@ -289,13 +289,7 @@ export function ItemsByCategory({ items, total, fallbackCategory, isTech, split,
           </li>
         ))}
       </ul>
-      <label className="flex items-start gap-2 pt-1 cursor-pointer">
-        <input type="checkbox" checked={split} onChange={e => onSplit(e.target.checked)} className="mt-0.5 accent-[var(--accent,#10b981)]" />
-        <span className="text-[11px] text-text-secondary leading-snug">
-          Guardar separado por categoría ({groups.length} gastos que suman {money(total)}). Así tus informes muestran cuánto fue a cada cosa.
-        </span>
-      </label>
-      {!split && <p className="text-[10px] text-text-muted">Se guardará como un solo gasto en «{fallbackCategory}».</p>}
+      <p className="text-[10px] text-text-muted leading-snug">Se guarda como un solo gasto (en «{fallbackCategory}»); cada producto conserva su categoría.</p>
     </div>
   );
 }
