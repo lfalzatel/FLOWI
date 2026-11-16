@@ -182,7 +182,8 @@ export function insightsInPeriod(transactions: Transaction[], resolve: Resolver,
 }
 
 // ── Historial de una subcategoría o suscripción (modal con gráfica) ────
-export type HistoryTarget = { kind: 'ant' | 'sub'; key: string; label: string; category: string };
+// note: la cifra que mostraba la tarjeta de gastos hormiga ("$ 211.867 al mes"), para explicarla en el detalle
+export type HistoryTarget = { kind: 'ant' | 'sub'; key: string; label: string; category: string; note?: string };
 export type HistoryItem = { id?: string; date: Date; amount: number; description: string; small: boolean };
 export type HistoryMonth = { month: string; total: number; items: HistoryItem[] };
 

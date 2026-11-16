@@ -3,6 +3,7 @@
 import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
 import { groupByCategory, splitTotal } from '@/lib/receiptItems';
 import { suggestItemCategory } from '@/lib/txSuggest';
+import { findRepeatedPayment, repeatedPaymentText } from '@/lib/repeatedPayment';
 import { isFixedExpenseCategory } from '@/lib/firestore';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useData } from '@/components/DataProvider';
@@ -1051,6 +1052,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           {(res as any)._dup && (
                             <span className="block text-amber-400 font-semibold mb-0.5">⚠ Parece que ya lo registraste el {(res as any)._dup}. Bórralo con 🗑 si es el mismo.</span>
                           )}
+                          {!(res as any)._dup && (() => {
+                            const prev = findRepeatedPayment({ type: res.type, category: res.category, merchant: res.merchant, isFixed: res.isFixed,
+                              date: res.date ? new Date(`${res.date}T12:00:00`) : new Date() }, transactions);
+                            return prev ? <span className="block text-amber-400 font-semibold mb-0.5">⚠ {repeatedPaymentText(prev)} ¿Es otro pago? Si no, bórralo con 🗑.</span> : null;
+                          })()}
                           💡 Toca para convertir a {res.type === 'gasto' ? 'Ingreso 🟢' : 'Gasto 🔴'}
                         </span>
                         <div className="flex items-center gap-2">

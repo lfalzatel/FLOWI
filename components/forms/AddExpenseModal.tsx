@@ -33,6 +33,7 @@ import { ReceiptItemsList } from '@/components/forms/ReceiptItemsList';
 import { ReceiptItem, itemsSum, itemsCheck, groupByCategory, splitTotal, partDescription, cleanItems } from '@/lib/receiptItems';
 import { ItemsByCategory } from '@/components/forms/ReceiptItemsList';
 import { suggestItemCategory } from '@/lib/txSuggest';
+import { findRepeatedPayment, repeatedPaymentText } from '@/lib/repeatedPayment';
 import { ReceiptText } from 'lucide-react';
 
 interface AddExpenseModalProps {
@@ -86,6 +87,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
 
   // ConfirmDialog states
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  // Pago fijo que ya se registró este mes (agua, luz, arriendo…): se pregunta antes de guardarlo otra vez
+  const [repeatWarn, setRepeatWarn] = useState<string | null>(null);
+  const repeatOk = useRef(false);
   const [showConfirmConvert, setShowConfirmConvert] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
@@ -279,6 +283,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !amount) return;
+    if (!transactionToEdit && !repeatOk.current) {
+      const prev = findRepeatedPayment({ type, category: category.trim() || 'Otros', merchant, date: new Date(`${date}T12:00:00`), isFixed }, transactions);
+      if (prev) { setRepeatWarn(repeatedPaymentText(prev)); return; }
+    }
+    repeatOk.current = false;
 
     setLoading(true);
     try {
@@ -819,6 +828,16 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         title="Pasar a Deuda"
         message="¿Estás seguro de que quieres convertir este gasto en una deuda activa? Se creará una deuda pendiente y se eliminará este gasto."
         confirmText="Convertir"
+      />
+
+      <ConfirmDialog
+        isOpen={!!repeatWarn}
+        onCancel={() => setRepeatWarn(null)}
+        onConfirm={() => { repeatOk.current = true; setRepeatWarn(null); handleSubmit({ preventDefault() {} } as React.FormEvent); }}
+        title="¿Ya lo pagaste?"
+        message={`${repeatWarn || ''} ¿Es otro pago distinto y quieres registrarlo de nuevo?`}
+        confirmText="Sí, es otro pago"
+        cancelText="No, ya estaba"
       />
 
       {/* Recordatorio a partir del gasto: mismo nombre y categoría, el mismo día de cada mes */}

@@ -90,7 +90,7 @@ export default function HormigaPage() {
     const c = icon(label);
     return (
       <li key={key}>
-        <button type="button" onClick={() => setTarget({ kind: 'ant', key, label, category: label })} className={`${row} flex-col !items-stretch !gap-1.5`}>
+        <button type="button" onClick={() => setTarget({ kind: 'ant', key, label, category: label, note: unit ? `${fmt(amount)} ${unit} (promedio de los últimos ${ant.days} días)` : `${fmt(amount)} en este periodo` })} className={`${row} flex-col !items-stretch !gap-1.5`}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c.color}18` }}>
               <CategoryIcon icon={c.icon} label={c.label} className="w-5 h-5 text-lg" />

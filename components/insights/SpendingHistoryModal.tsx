@@ -7,7 +7,7 @@ import type { Transaction } from '@/lib/firestore';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { findCatalogEntry } from '@/lib/categories';
 import { formatCompactCOP } from '@/lib/chartFormat';
-import { HistoryTarget, spendingHistory } from '@/lib/spendingInsights';
+import { ANT_MAX_AMOUNT, HistoryTarget, spendingHistory } from '@/lib/spendingInsights';
 
 type Resolver = (raw: string, type?: 'gasto' | 'ingreso') => { label: string; group: string };
 const RANGES = [{ n: 3, label: '3 meses' }, { n: 6, label: '6 meses' }, { n: 12, label: '12 meses' }, { n: 0, label: 'Todo' }];
@@ -28,7 +28,14 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
   onClose: () => void;
   onEdit?: (t: Transaction) => void;
 }) {
-  const all = useMemo(() => spendingHistory(transactions, resolve, target), [transactions, resolve, target]);
+  // En gastos hormiga solo cuentan las compras pequeñas: por defecto se ve igual que la tarjeta, y se puede ver todo
+  const isAnt = target.kind === 'ant';
+  const [onlySmall, setOnlySmall] = useState(isAnt);
+  const all = useMemo(() => {
+    const h = spendingHistory(transactions, resolve, target);
+    if (!onlySmall) return h;
+    return h.map(m => { const items = m.items.filter(i => i.small); return { ...m, items, total: items.reduce((a, i) => a + i.amount, 0) }; });
+  }, [transactions, resolve, target, onlySmall]);
   const [range, setRange] = useState(6);
   const [selected, setSelected] = useState<string | null>(null);
   const monthRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -81,6 +88,24 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
             <p className="text-sm text-text-secondary py-6 text-center">Todavía no hay gastos registrados aquí.</p>
           ) : (
             <>
+              {isAnt && (
+                <div className={`p-3 border border-amber-500/30 bg-amber-500/5 space-y-2 ${box}`}>
+                  <p className="text-[11px] text-text-secondary leading-snug">
+                    {onlySmall
+                      ? <>Como en <b>Gastos hormiga</b>: solo compras de {fmt(ANT_MAX_AMOUNT)} o menos.{target.note ? <> Allá ves {target.note}.</> : null}</>
+                      : <>Todas tus compras de {target.label.toLowerCase()}, también las grandes. Gastos hormiga solo cuenta las de {fmt(ANT_MAX_AMOUNT)} o menos.</>}
+                  </p>
+                  <div className="flex gap-1.5">
+                    {[{ v: true, l: 'Compras pequeñas' }, { v: false, l: 'Todas las compras' }].map(o => (
+                      <button key={o.l} type="button" onClick={() => { setOnlySmall(o.v); setSelected(null); }}
+                              className={`flex-1 py-1.5 text-[11px] font-semibold border transition-colors ${box} ${onlySmall === o.v ? 'border-amber-500 bg-amber-500/15 text-amber-400' : 'border-glass-border text-text-secondary hover:bg-glass'}`}>
+                        {o.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Datos rápidos */}
               <div className="grid grid-cols-3 gap-2">
                 <div className={`glass-card p-3 ${box}`}>
