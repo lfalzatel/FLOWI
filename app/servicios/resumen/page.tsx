@@ -2,7 +2,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, BarChart2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, Download } from 'lucide-react';
+import { MonthStats, WeeklyMap } from '@/components/insights/MonthStats';
+import { ExportReportModal } from '@/components/forms/ExportReportModal';
+import { expandByItems } from '@/lib/receiptItems';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/components/DataProvider';
@@ -38,6 +41,13 @@ export default function ResumenPage() {
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 
   const s = useMemo(() => buildMonthSummary(transactions, month, resolve, fmt), [transactions, month, resolve, currency]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Para las estadísticas: cada producto de un recibo cuenta en su categoría
+  const statsTx = useMemo(() => expandByItems(transactions), [transactions]);
+  const [showExport, setShowExport] = useState(false);
+  const monthTx = useMemo(() => transactions.filter(t => {
+    const d = (t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === month;
+  }), [transactions, month]);
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
   const isCurrent = month === thisMonth;
   const maxCat = s.categories[0]?.amount || 1;
@@ -51,7 +61,11 @@ export default function ResumenPage() {
           <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Resumen del mes</h1>
+          <h1 className={`flex-1 min-w-0 text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Resumen y estadísticas</h1>
+          <button type="button" onClick={() => setShowExport(true)} aria-label="Exportar el mes"
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold ${isTech ? 'bg-accent/10 text-accent border border-accent/30 rounded-none uppercase' : 'bg-accent/10 text-accent rounded-full hover:bg-accent/20'}`}>
+            <Download className="w-4 h-4" /> Exportar
+          </button>
         </div>
 
         {/* Selector de mes */}
@@ -63,6 +77,9 @@ export default function ResumenPage() {
           </div>
           <button onClick={() => setMonth(shiftMonth(month, 1))} disabled={isCurrent} aria-label="Mes siguiente" className="p-2 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronRight className="w-5 h-5" /></button>
         </div>
+
+        {/* Mapa semanal, justo debajo del mes */}
+        {!loadingTransactions && <WeeklyMap transactions={statsTx} month={month} isTech={isTech} fmt={fmt} />}
 
         {loadingTransactions ? (
           <div className="flex justify-center py-12"><div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" /></div>
@@ -160,18 +177,15 @@ export default function ResumenPage() {
           </>
         )}
 
-        {/* Estadísticas: ahora se llega desde aquí (una sola tarjeta en Servicios) */}
-        <Link href="/servicios/estadisticas" className={`${card} flex items-center gap-3 p-4 hover:border-accent/50 transition-colors`}>
-          <div className={`w-10 h-10 flex items-center justify-center shrink-0 bg-cyan-500/10 ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
-            <BarChart2 className="w-5 h-5 text-cyan-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className={`text-sm font-bold ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>Ver estadísticas detalladas</p>
-            <p className="text-[11px] text-text-muted">En qué se te va la plata, mes a mes, con gráficas y filtros</p>
-          </div>
-          <ChevronRight className="w-5 h-5 text-text-muted shrink-0" />
-        </Link>
+        {/* Estadísticas del mes, ya desplegadas */}
+        {!loadingTransactions && (
+          <MonthStats transactions={statsTx} month={month} resolve={resolve} isTech={isTech} fmt={fmt}
+                      activeDays={profile?.activeDays} firstActiveDay={profile?.firstActiveDay} />
+        )}
       </main>
+      {showExport && (
+        <ExportReportModal onClose={() => setShowExport(false)} title="Resumen del mes" transactions={monthTx} filterType="month" filterValue={month} />
+      )}
       <BottomNav />
     </div>
   );
