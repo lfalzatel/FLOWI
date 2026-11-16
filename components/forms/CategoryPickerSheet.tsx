@@ -16,8 +16,8 @@ interface Props {
   recent: string[];
   onSelect: (category: string, merchant?: string) => void;
   onClose: () => void;
-  onCreate: () => void;
-  onManage: () => void;
+  onCreate?: () => void; // sin esto no se muestran los botones de crear y gestionar
+  onManage?: () => void;
 }
 
 const RECENT_GROUP = 'Recientes';
@@ -229,9 +229,9 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
             totalResults === 0 ? (
               <div className="text-center py-12 px-6">
                 <p className="text-sm text-text-secondary mb-4">No hay categorías con “{query}”.</p>
-                <button type="button" onClick={onCreate} className="text-sm font-semibold text-accent">
+                {onCreate && <button type="button" onClick={onCreate} className="text-sm font-semibold text-accent">
                   + Crear categoría “{query}”
-                </button>
+                </button>}
               </div>
             ) : (
               <>
@@ -268,14 +268,14 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
         </div>
 
         {/* Pie */}
-        <div className="flex border-t border-glass-border">
+        {onCreate && onManage && <div className="flex border-t border-glass-border">
           <button type="button" onClick={onCreate} className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-accent hover:bg-glass">
             <Plus className="w-4 h-4" /> Crear categoría
           </button>
           <button type="button" onClick={onManage} className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-medium text-text-secondary hover:bg-glass border-l border-glass-border">
             <Settings2 className="w-4 h-4" /> Gestionar
           </button>
-        </div>
+        </div>}
       </div>
       </div>
     </div>,

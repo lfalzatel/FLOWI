@@ -85,3 +85,21 @@ export function splitTotal(groups: ItemGroup[], total: number): number[] {
   parts[0] += Math.round(total) - parts.reduce((s, p) => s + p, 0);
   return parts;
 }
+
+/** Nombre corto de una categoría para el chip de cada producto ("Licores y Bares" → "Licores"). */
+export function shortCategory(label: string) {
+  if (label.length <= 10) return label;
+  const first = label.split(/[\s/]+/)[0];
+  return first.length >= 3 ? first : label.slice(0, 10);
+}
+
+/** Descripción de una parte de una compra repartida: "Supermercado: Huevos, Arroz…" */
+export function partDescription(base: string, g: ItemGroup) {
+  const names = g.items.slice(0, 2).map(i => i.name.toLowerCase().replace(/^./, c => c.toUpperCase())).join(', ');
+  // Si la descripción ya era de una parte ("Compra: Huevos…"), se usa solo lo de antes de los dos puntos
+  const head = (base.split(':')[0] || base).trim() || 'Compra';
+  return `${head.slice(0, 40)}: ${names}${g.items.length > 2 ? '…' : ''}`.slice(0, 80);
+}
+
+/** Producto válido para guardar (con nombre y valor). */
+export const cleanItems = (items: ReceiptItem[]) => items.filter(i => i.name.trim() && i.total > 0).map(i => ({ ...i, name: i.name.trim() }));

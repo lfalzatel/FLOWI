@@ -14,7 +14,7 @@ const js = ts.transpileModule(fs.readFileSync(path.join(root, 'lib/receiptItems.
 }).outputText;
 const out = path.join(outDir, 'receiptItems.mjs');
 fs.writeFileSync(out, js);
-const { sanitizeReceiptItems, itemsCheck, formatQty, groupByCategory, splitTotal } = await import(pathToFileURL(out).href);
+const { sanitizeReceiptItems, itemsCheck, formatQty, groupByCategory, splitTotal, partDescription } = await import(pathToFileURL(out).href);
 
 let fails = 0;
 const check = (name, cond) => { if (!cond) fails++; console.log(`${cond ? '✓' : '✗'} ${name}`); };
@@ -68,6 +68,8 @@ const parts = splitTotal(groups, 39500);
 check('partes suman el total exacto', parts[0] + parts[1] === 39500);
 const disc = splitTotal(groups, 38000);
 check('descuento repartido en proporción', disc[0] + disc[1] === 38000 && disc[1] === Math.round(38000 * 19500 / 40000));
+
+check('descripción de parte sin anidar', partDescription('Compra: Huevos aa 30, Jabón…', groups[1]) === 'Compra: Cerveza');
 
 fs.rmSync(outDir, { recursive: true, force: true });
 console.log(fails ? `\n${fails} fallaron` : '\nTodas pasaron');

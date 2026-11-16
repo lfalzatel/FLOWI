@@ -2,6 +2,7 @@
 
 import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
 import { groupByCategory, splitTotal } from '@/lib/receiptItems';
+import { suggestItemCategory } from '@/lib/txSuggest';
 import { isFixedExpenseCategory } from '@/lib/firestore';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useData } from '@/components/DataProvider';
@@ -1142,11 +1143,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             <ReceiptItemsList items={res.items} total={res.amount} isTech={isTechTheme}
                                               fallbackCategory={res.category}
                                               categories={allCategories.filter(c => !c.type || c.type === 'gasto')}
+                                              suggest={(n) => suggestItemCategory(n, transactions, allCategories.filter(c => !c.type || c.type === 'gasto'))}
                                               onChange={(next) => handleUpdateItem(idx, 'items', next)}
                                               onUseSum={(s) => handleUpdateItem(idx, 'amount', s)} />
                             <ItemsByCategory items={res.items} total={res.amount || 0} fallbackCategory={res.category} isTech={isTechTheme}
                                              split={(res as any)._split !== false}
                                              onSplit={(v) => handleUpdateItem(idx, '_split', v)}
+                                             categories={allCategories}
                                              amounts={splitTotal(groupByCategory(res.items, res.category), res.amount || 0)} />
                           </div>
                         ) : null}

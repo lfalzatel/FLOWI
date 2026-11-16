@@ -30,7 +30,10 @@ import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 import { ParsedVoiceResult } from '@/lib/voiceParser';
 import { ReceiptItemsList } from '@/components/forms/ReceiptItemsList';
-import type { ReceiptItem } from '@/lib/receiptItems';
+import { ReceiptItem, itemsSum, itemsCheck, groupByCategory, splitTotal, partDescription, cleanItems } from '@/lib/receiptItems';
+import { ItemsByCategory } from '@/components/forms/ReceiptItemsList';
+import { suggestItemCategory } from '@/lib/txSuggest';
+import { ReceiptText } from 'lucide-react';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -61,7 +64,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
   const [description, setDescription] = useState(initialVoiceParsed?.description || '');
   const [category, setCategory] = useState(initialVoiceParsed?.category || '');
   const [merchant, setMerchant] = useState('');
-  const [items, setItems] = useState<ReceiptItem[] | undefined>(undefined); // productos del recibo (si se escaneó)
+  const [items, setItems] = useState<ReceiptItem[] | undefined>(undefined); // productos de la compra (undefined = sin lista)
+  const [autoSum, setAutoSum] = useState(false); // el monto sigue a la suma de los productos
+  const [split, setSplit] = useState(true);      // compra con varias categorías: un gasto por categoría
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isFixed, setIsFixed] = useState(initialVoiceParsed?.isFixed || false);
   // Modo negocio: se marca solo con categorías de negocio (Venta, Inventario…) y se puede cambiar
@@ -173,6 +178,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
     return labels;
   }, [paymentMethod, usageVersion, accountMethods.join('|')]);
 
+  // Productos: si el monto se suma solo, sigue a la suma
+  const changeItems = (next: ReceiptItem[]) => {
+    setItems(next);
+    if (autoSum) { const t = itemsSum(next); setAmount(t ? String(t) : ''); }
+  };
+  const mixed = type === 'gasto' && !!items && groupByCategory(cleanItems(items), category || 'Otros').length > 1;
+  const hideCategory = mixed && split;
+
   const selectCategory = (label: string, merchantLabel?: string) => {
     if (label !== category) {
       setMerchant(merchantLabel || '');
@@ -181,6 +194,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       setMerchant(merchantLabel);
     }
     setCategory(label);
+    // Los productos que seguían la categoría del gasto se van con ella; los que se cambiaron a mano, no
+    if (items?.length) setItems(items.map(it => (!it.category || it.category === category ? { ...it, category: label } : it)));
     if (type === 'gasto') setIsFixed(isFixedExpenseCategory(label));
     setIsBusiness(initialBusiness || isBusinessCategory(label, type));
   };
@@ -244,6 +259,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       setCategory(transactionToEdit.category);
       setMerchant(transactionToEdit.merchant || '');
       setItems(transactionToEdit.items);
+      setAutoSum(!!transactionToEdit.items?.length && itemsCheck(transactionToEdit.items, transactionToEdit.amount).ok);
       setPaymentMethod(transactionToEdit.paymentMethod || '');
       if (transactionToEdit.isFixed !== undefined) {
         setIsFixed(transactionToEdit.isFixed);
@@ -291,7 +307,6 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
         ...extras,
         ...(type === 'gasto' ? { isFixed } : {}),
         business: isBusiness,
-        ...(items ? { items } : {}),
       };
 
       recordUsage(usageBucket, finalCategory);
@@ -304,10 +319,33 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
       triggerPowerAnimation(numericAmount, transactionToEdit?.id ? 'edicion' : type);
       onClose();
 
-      if (transactionToEdit?.id) {
-        await updateExpense(transactionToEdit.id, data);
+      const saved = type === 'gasto' && items ? cleanItems(items) : [];
+      const groups = saved.length ? groupByCategory(saved, finalCategory) : [];
+      if (groups.length > 1 && split) {
+        // Compra repartida: un gasto por categoría, con sus productos, que juntos suman lo pagado
+        const amounts = splitTotal(groups, numericAmount);
+        const receiptId = transactionToEdit?.receiptId || `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+        const parts = groups.map((g, i) => ({
+          ...data,
+          amount: amounts[i],
+          category: g.category,
+          description: partDescription(description.trim() || finalMerchant || 'Compra', g),
+          date: new Date(finalDate.getTime() + i * 1000),
+          isFixed: isFixedExpenseCategory(g.category),
+          business: isBusinessCategory(g.category, 'gasto'),
+          items: g.items,
+          receiptId,
+        }));
+        if (transactionToEdit?.id) {
+          await updateExpense(transactionToEdit.id, parts[0]);
+          for (const p of parts.slice(1)) await addExpense(p);
+        } else {
+          for (const p of parts) await addExpense(p);
+        }
+      } else if (transactionToEdit?.id) {
+        await updateExpense(transactionToEdit.id, { ...data, ...(items ? { items: saved } : {}) });
       } else {
-        await addExpense(data);
+        await addExpense({ ...data, ...(saved.length ? { items: saved } : {}) });
       }
 
       onSuccess?.();
@@ -458,6 +496,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                   const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
                   if (val.split('.').length > 2) return;
                   setAmount(val);
+                  if (items?.length) setAutoSum(false); // escrito a mano: ya no se suma solo
                 }}
                 className={`w-full bg-glass border py-3 pl-10 pr-4 text-3xl font-bold text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
                 required
@@ -482,16 +521,30 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 💡 ¿Es «{suggestedCat}»? Toca para usarla
               </button>
             )}
-            {items?.length ? (
-              <div className="mt-2">
-                <ReceiptItemsList items={items} total={Number(amount) || 0} isTech={isTechTheme}
-                                  onChange={setItems} onUseSum={(s) => setAmount(String(s))} />
+            {type === 'gasto' && (items ? (
+              <div className="mt-2 space-y-2">
+                <ReceiptItemsList items={items} total={Number(amount) || 0} isTech={isTechTheme} defaultOpen={!items.length}
+                                  autoSum={autoSum}
+                                  categories={typedCategories} recent={recentCategories} fallbackCategory={category || 'Otros'}
+                                  suggest={(n) => suggestItemCategory(n, transactions, typedCategories)}
+                                  onChange={changeItems}
+                                  onUseSum={(s) => { setAmount(String(s)); setAutoSum(true); }} />
+                {mixed && (
+                  <ItemsByCategory items={cleanItems(items)} total={Number(amount) || 0} fallbackCategory={category || 'Otros'} isTech={isTechTheme}
+                                   categories={typedCategories} split={split} onSplit={setSplit}
+                                   amounts={splitTotal(groupByCategory(cleanItems(items), category || 'Otros'), Number(amount) || 0)} />
+                )}
               </div>
-            ) : null}
+            ) : (
+              <button type="button" onClick={() => { setItems([]); setAutoSum(!amount || Number(amount) === 0); }}
+                      className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
+                <ReceiptText className="w-4 h-4" /> Agregar productos (opcional)
+              </button>
+            ))}
           </div>
 
-          {/* Category */}
-          <div>
+          {/* Category: con productos de varias categorías la reemplaza el resumen "De esta compra" */}
+          {!hideCategory && <div>
             <div className="flex items-center justify-between mb-2 gap-2">
               <span className={labelClass}>Categoría</span>
 
@@ -561,10 +614,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 <span className="text-[10.5px] leading-tight text-accent font-semibold normal-case">Ver todas</span>
               </button>
             </div>
-          </div>
+          </div>}
 
           {/* Merchant */}
-          {type === 'gasto' && category && (
+          {type === 'gasto' && category && !hideCategory && (
             <div>
               <span className={`${labelClass} mb-2 block`}>¿Dónde? <span className="opacity-70">(opcional)</span></span>
               <div className="flex flex-wrap gap-1.5">
