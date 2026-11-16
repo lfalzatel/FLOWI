@@ -1,6 +1,6 @@
 'use client';
 import { useTheme } from '@/components/ThemeProvider';
-import { Bug, Store, CalendarClock, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet, ShoppingBasket } from 'lucide-react';
+import { Bug, Store, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, BarChart2, FileSpreadsheet, Landmark, Wallet, ShoppingBasket } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -15,15 +15,17 @@ import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, Volume2, Crown }
 import confetti from 'canvas-confetti';
 
 // Orden por defecto, por grupos: lo que más se usa arriba; lo que aún no funciona y los ajustes, al final
-const SERVICE_GROUPS = ['Tu plata', 'Entiende tus gastos', 'Herramientas', 'Próximamente', 'Tu cuenta'];
+const SERVICE_GROUPS = ['Lo más usado', 'Tu plata', 'Entiende tus gastos', 'Herramientas', 'Próximamente', 'Tu cuenta'];
 
 const SERVICES: ServiceItem[] = [
-  { id: 'recordatorios', group: 'Tu plata', title: 'Recordatorios', description: 'Pagos y fechas importantes para que no se te pasen',
-    icon: Bell, href: '/servicios/recordatorios', color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
-  { id: 'compromisos', group: 'Tu plata', title: 'Próximos compromisos', description: 'Los pagos fijos que te faltan este mes',
-    icon: CalendarClock, href: '/servicios/compromisos', color: 'text-orange-500', bgColor: 'bg-orange-500/10', isNew: true },
-  { id: 'cuentas', group: 'Tu plata', title: 'Cuentas y patrimonio', description: 'Cuánto tienes en cada banco y en efectivo',
+  { id: 'cuentas', group: 'Lo más usado', title: 'Cuentas y patrimonio', description: 'Cuánto tienes en cada banco y en efectivo',
     icon: Wallet, href: '/servicios/cuentas', color: 'text-lime-500', bgColor: 'bg-lime-500/10', isNew: true },
+  { id: 'hormiga', group: 'Lo más usado', title: 'Suscripciones y gastos hormiga', description: 'Lo pequeño que se repite y cuánto suma al año',
+    icon: Bug, href: '/servicios/hormiga', color: 'text-rose-500', bgColor: 'bg-rose-500/10', isNew: true },
+  { id: 'recordatorios', group: 'Lo más usado', title: 'Recordatorios', description: 'Citas, fechas importantes y tus pagos del mes',
+    icon: Bell, href: '/servicios/recordatorios', color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+  { id: 'resumen', group: 'Lo más usado', title: 'Resumen del mes', description: 'Qué pasó con tu plata y cómo vas frente al mes pasado',
+    icon: Sparkles, href: '/servicios/resumen', color: 'text-amber-500', bgColor: 'bg-amber-500/10', isNew: true },
   { id: 'presupuestos', group: 'Tu plata', title: 'Presupuestos', description: 'Cuánto quieres gastar por categoría (50/30/20)',
     icon: PieChart, href: '/servicios/presupuestos', color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
   { id: 'metas', group: 'Tu plata', title: 'Metas', description: '¿Para qué ahorras? Viaje, moto, emergencias…',
@@ -32,15 +34,11 @@ const SERVICES: ServiceItem[] = [
     icon: Landmark, href: '/servicios/inversiones', color: 'text-teal-500', bgColor: 'bg-teal-500/10', isNew: true },
   { id: 'negocio', group: 'Tu plata', title: 'Mi negocio', description: 'Tus ventas, costos y ganancia aparte de tu plata personal',
     icon: Store, href: '/servicios/negocio', color: 'text-orange-500', bgColor: 'bg-orange-500/10', isNew: true },
-  { id: 'resumen', group: 'Entiende tus gastos', title: 'Resumen del mes', description: 'Qué pasó con tu plata y cómo vas frente al mes pasado',
-    icon: Sparkles, href: '/servicios/resumen', color: 'text-amber-500', bgColor: 'bg-amber-500/10', isNew: true },
-  { id: 'hormiga', group: 'Entiende tus gastos', title: 'Suscripciones y gastos hormiga', description: 'Lo pequeño que se repite y cuánto suma al año',
-    icon: Bug, href: '/servicios/hormiga', color: 'text-rose-500', bgColor: 'bg-rose-500/10', isNew: true },
   { id: 'productos', group: 'Entiende tus gastos', title: '¿Cuánto gasto en…?', description: 'Huevos, cerveza, gasolina: cuánto se te va y si subió el precio',
     icon: ShoppingBasket, href: '/servicios/productos', color: 'text-lime-500', bgColor: 'bg-lime-500/10', isNew: true },
   { id: 'estadisticas', group: 'Entiende tus gastos', title: 'Estadísticas', description: 'En qué se te va la plata, mes a mes',
     icon: BarChart2, href: '/servicios/estadisticas', color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
-  { id: 'importar', group: 'Entiende tus gastos', title: 'Importar extracto', description: 'Sube el Excel del banco y registro todo de una',
+  { id: 'importar', group: 'Herramientas', title: 'Importar extracto', description: 'Sube el Excel del banco y registro todo de una',
     icon: FileSpreadsheet, href: '/servicios/importar', color: 'text-sky-500', bgColor: 'bg-sky-500/10' },
   { id: 'notas', group: 'Herramientas', title: 'Notas', description: 'Datos que no quieres olvidar',
     icon: StickyNote, href: '/servicios/notas', color: 'text-blue-500', bgColor: 'bg-blue-500/10' },

@@ -23,6 +23,7 @@ import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
 import { getPendingDue, dueLabel, eventDueLabel, isPaymentReminder, ReminderDue, isCategoryShared, lastPaymentFor } from '@/lib/reminderDue';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { speakText } from '@/lib/voiceParser';
+import { CommitmentsView } from '@/components/payments/CommitmentsView';
 
 export default function RecordatoriosPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -38,6 +39,11 @@ export default function RecordatoriosPage() {
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [deletingReminderId, setDeletingReminderId] = useState<string | null>(null);
   const [payingDue, setPayingDue] = useState<ReminderDue | null>(null);
+  // Pestañas: todos los recordatorios (pagos, citas, fechas) o los pagos fijos del mes
+  const [tab, setTab] = useState<'recordatorios' | 'pagos'>('recordatorios');
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'pagos') setTab('pagos');
+  }, []);
 
   // Cargar porcentaje de presupuesto
   const { gastosEsteMes } = useExpenses();
@@ -118,7 +124,7 @@ export default function RecordatoriosPage() {
     <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
       
-      <main className="relative flex-1 max-w-2xl mx-auto w-full p-4 pb-24 space-y-6 animate-fade-in-up">
+      <main className="relative flex-1 max-w-2xl lg:max-w-6xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up">
         {/* Header de página */}
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0 flex items-center gap-3">
@@ -130,7 +136,7 @@ export default function RecordatoriosPage() {
                 Recordatorios
               </h1>
               <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>
-                Control y alertas de tus pagos recurrentes
+                Citas, fechas importantes y tus pagos del mes
               </p>
             </div>
           </div>
@@ -148,6 +154,7 @@ export default function RecordatoriosPage() {
             )}
             <button
               onClick={() => { setEditingReminder(null); setShowForm(true); }}
+              aria-label="Nuevo recordatorio" title="Nuevo recordatorio"
               className={`flex items-center justify-center w-10 h-10 bg-gradient-to-br from-accent to-accent-dim
                           ${theme === 'light' ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
@@ -159,8 +166,21 @@ export default function RecordatoriosPage() {
           </div>
         </div>
 
+        {/* Pestañas */}
+        <div role="tablist" className={`grid grid-cols-2 p-1 bg-glass border border-glass-border ${isTechTheme ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
+          {([['recordatorios', `Recordatorios${reminders.length ? ` (${reminders.length})` : ''}`], ['pagos', 'Pagos del mes']] as const).map(([k, label]) => (
+            <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
+                    className={`py-2 text-sm font-semibold transition-colors ${isTechTheme ? 'rounded-none uppercase text-xs' : 'rounded-xl'} ${
+                      tab === k ? (isTechTheme ? 'bg-accent/15 text-accent border border-accent/50' : 'bg-accent text-black') : 'text-text-secondary hover:text-text-primary'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'pagos' && <CommitmentsView onOpenReminders={() => setTab('recordatorios')} />}
+
         {/* Banner de permiso si no está concedido */}
-        {!permissionGranted && (
+        {tab === 'recordatorios' && !permissionGranted && (
           <div className={`glass-card p-4 flex gap-3 border ${isTechTheme ? 'border-yellow-500/30 rounded-none' : 'border-yellow-500/10 rounded-2xl'}`}>
             <Bell className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
@@ -179,7 +199,7 @@ export default function RecordatoriosPage() {
         )}
 
         {/* Listado */}
-        {remindersLoading ? (
+        {tab !== 'recordatorios' ? null : remindersLoading ? (
           <div className="space-y-2">
             {[1, 2, 3].map(i => (
               <div key={i} className={`glass-card h-20 animate-pulse ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`} />
