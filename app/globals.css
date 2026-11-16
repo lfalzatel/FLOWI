@@ -356,3 +356,9 @@ body {
   .flow-lines-pulse, .flow-lines-coin, .flow-lines-drift { animation: none; }
   .flow-lines-coin { display: none; }
 }
+
+/* Presupuestos en el modo tech: tarjetas sin esquinas redondeadas (las pastillas y barras, rounded-full, se quedan) */
+[data-theme='cyberpunk'] .square-corners :is(.rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
+[data-theme='cyberpunk'] .square-corners :is(.rounded-t-md, .rounded-t-lg, .rounded-t-xl) {
+  border-radius: 0 !important;
+}

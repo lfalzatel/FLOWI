@@ -41,8 +41,16 @@ export function matchesProduct(text: string, query: string) {
   return q.every(w => t.some(x => x.startsWith(w)));
 }
 
+/** ¿El nombre empieza por lo buscado? ("Huevos AA 30" sí; "Cebolla huevo blanca" no) */
+export function startsWithQuery(text: string, query: string) {
+  const q = words(query).filter(w => w.length >= 2);
+  const t = words(text);
+  return !!q.length && !!t.length && t[0].startsWith(q[0]);
+}
+
 export function productSpend(transactions: Transaction[], query: string, now = new Date()): ProductSpend {
   const purchases: ProductPurchase[] = [];
+  const leadOnly = transactions.some(t => t.type === 'gasto' && t.items?.some(it => matchesProduct(it.name, query) && startsWithQuery(it.name, query)));
   for (const t of transactions) {
     if (t.type !== 'gasto') continue;
     const date = toDate(t.date);
@@ -50,6 +58,7 @@ export function productSpend(transactions: Transaction[], query: string, now = n
     if (t.items?.length) {
       for (const it of t.items) {
         if (!matchesProduct(it.name, query)) continue;
+        if (leadOnly && !startsWithQuery(it.name, query)) continue;
         purchases.push({
           txId: t.id, date, name: it.name, qty: it.qty, unit: it.unit, total: it.total,
           unitPrice: it.price || (it.qty ? Math.round(it.total / it.qty) : undefined),

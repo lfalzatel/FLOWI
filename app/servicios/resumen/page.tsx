@@ -48,7 +48,8 @@ export default function ResumenPage() {
     const d = (t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === month;
   }), [transactions, month]);
-  const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
+  // Mismas tarjetas que Inicio: en el modo tech, glass-card trae las esquinas cortadas y el cambio de color al tocar
+  const card = isTech ? 'glass-card' : 'glass-card rounded-3xl';
   const isCurrent = month === thisMonth;
   const maxCat = s.categories[0]?.amount || 1;
   const pillarTotal = s.pillars.necesidades + s.pillars.deseos + s.pillars.ahorro || 1;

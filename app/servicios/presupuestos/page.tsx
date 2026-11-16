@@ -183,7 +183,7 @@ export default function PresupuestosPage() {
   }, [globalRemaining, remainingDays]);
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-deep">
+    <div className="square-corners relative min-h-screen flex flex-col bg-deep">
       <Header />
 
       <main className={`relative flex-1 max-w-3xl mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-32 ${isTechTheme ? 'font-mono' : ''}`}>

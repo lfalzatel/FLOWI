@@ -16,7 +16,7 @@ const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).pad
 
 export function useStatsLook(isTech: boolean) {
   return {
-    card: isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl',
+    card: isTech ? 'glass-card' : 'glass-card rounded-3xl',
     title: `flex items-center gap-2 text-sm font-bold ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`,
     select: `text-[10px] font-bold px-1.5 py-1 outline-none ${isTech ? 'bg-[#051114] text-accent font-mono border border-accent/30 uppercase' : 'bg-card border border-glass-border rounded-lg text-text-secondary'}`,
   };

@@ -12,6 +12,8 @@ import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { formatCurrency } from '@/lib/format';
 import type { Transaction } from '@/lib/firestore';
 import { frequentProducts, productSpend } from '@/lib/productSpend';
+import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
+import { getDateFromISOWeek, getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 
 const monthShort = (k: string) => {
   const s = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1).toLocaleDateString('es-CO', { month: 'short' }).replace('.', '');
@@ -33,8 +35,36 @@ export default function ProductosPage() {
   const suggestions = useMemo(() => frequentProducts(transactions), [transactions]);
   const q = query.trim();
   const data = useMemo(() => (q.length >= 2 ? productSpend(transactions, q) : null), [transactions, q]);
-  const recentMonths = data ? data.months.slice(-6) : [];
-  const maxMonth = Math.max(1, ...recentMonths.map(m => m.total));
+  // Filtro de fechas, igual que en Gastos y Gastos hormiga: la gráfica y la lista se ajustan al periodo
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterValue, setFilterValue] = useState(getLocalMonthString());
+  const view = useMemo(() => {
+    if (!data) return null;
+    const inPeriod = (d: Date) => {
+      if (filterType === 'all') return true;
+      const s = getLocalDateString(d);
+      if (filterType === 'month') return s.startsWith(filterValue);
+      if (filterType === 'week') return getISOWeekString(d) === filterValue;
+      return s === filterValue;
+    };
+    const purchases = data.purchases.filter(p => inPeriod(p.date));
+    const total = purchases.reduce((a, p) => a + p.total, 0);
+    // Barras: meses (todo), semanas del mes, días de la semana; en un solo día no hay gráfica
+    let bars: { key: string; label: string; total: number }[] = [];
+    if (filterType === 'all') bars = data.months.slice(-6).map(m => ({ key: m.month, label: monthShort(m.month), total: m.total }));
+    else if (filterType === 'month') {
+      const [y, m] = filterValue.split('-').map(Number);
+      const weeks = Math.ceil(new Date(y, m, 0).getDate() / 7);
+      bars = Array.from({ length: weeks }, (_, i) => ({ key: `s${i}`, label: `Sem ${i + 1}`, total: 0 }));
+      purchases.forEach(p => { bars[Math.min(weeks - 1, Math.floor((p.date.getDate() - 1) / 7))].total += p.total; });
+    } else if (filterType === 'week') {
+      const start = getDateFromISOWeek(filterValue);
+      bars = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'].map((l, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return { key: l, label: `${l} ${d.getDate()}`, total: 0 }; });
+      purchases.forEach(p => { bars[(p.date.getDay() + 6) % 7].total += p.total; });
+    }
+    return { purchases, total, bars, max: Math.max(1, ...bars.map(b => b.total)) };
+  }, [data, filterType, filterValue]);
+  const chartTitle = filterType === 'all' ? 'Por mes' : filterType === 'month' ? 'Por semana del mes' : 'Por día';
   const withItems = transactions.some(t => t.items?.length);
 
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
@@ -94,21 +124,38 @@ export default function ProductosPage() {
           <p className="text-sm text-text-secondary text-center py-8">No encontré compras de «{q}». Prueba con otra palabra, por ejemplo solo «huevo» o la marca.</p>
         )}
 
-        {data && data.purchases.length > 0 && (
+        {data && data.purchases.length > 0 && view && (
           <div className="space-y-4">
+            <DateFilter transactions={transactions} filterType={filterType} filterValue={filterValue}
+                        onChangeType={setFilterType} onChangeValue={setFilterValue} />
             <div className="grid grid-cols-3 gap-2">
-              <div className={card}>
-                <p className="text-[10px] text-text-muted">Este mes</p>
-                <p className="text-sm font-bold text-text-primary truncate">{fmt(data.thisMonth)}</p>
-              </div>
-              <div className={card}>
-                <p className="text-[10px] text-text-muted">Promedio al mes</p>
-                <p className="text-sm font-bold text-text-primary truncate">{fmt(data.monthlyAverage)}</p>
-              </div>
+              {filterType === 'all' ? (
+                <>
+                  <div className={card}>
+                    <p className="text-[10px] text-text-muted">Este mes</p>
+                    <p className="text-sm font-bold text-text-primary truncate">{fmt(data.thisMonth)}</p>
+                  </div>
+                  <div className={card}>
+                    <p className="text-[10px] text-text-muted">Promedio al mes</p>
+                    <p className="text-sm font-bold text-text-primary truncate">{fmt(data.monthlyAverage)}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={card}>
+                    <p className="text-[10px] text-text-muted">En este periodo</p>
+                    <p className="text-sm font-bold text-text-primary truncate">{fmt(view.total)}</p>
+                  </div>
+                  <div className={card}>
+                    <p className="text-[10px] text-text-muted">Por compra</p>
+                    <p className="text-sm font-bold text-text-primary truncate">{view.purchases.length ? fmt(view.total / view.purchases.length) : '—'}</p>
+                  </div>
+                </>
+              )}
               <div className={card}>
                 <p className="text-[10px] text-text-muted">Compras</p>
-                <p className="text-sm font-bold text-text-primary truncate">{data.purchases.length}</p>
-                <p className="text-[10px] text-text-muted truncate">{fmt(data.total)} en total</p>
+                <p className="text-sm font-bold text-text-primary truncate">{view.purchases.length}</p>
+                <p className="text-[10px] text-text-muted truncate">{fmt(view.total)} en total</p>
               </div>
             </div>
 
@@ -132,25 +179,30 @@ export default function ProductosPage() {
               </div>
             )}
 
-            {/* Últimos meses */}
-            <div className={card}>
-              <p className="text-[10px] text-text-muted mb-2">Por mes</p>
-              <div className="flex items-end gap-2 h-28">
-                {recentMonths.map(m => (
-                  <div key={m.month} className="flex-1 flex flex-col items-center justify-end gap-1 h-full">
-                    <span className="text-[9px] text-text-muted tabular-nums">{m.total ? fmt(m.total).replace(/\s/g, '') : ''}</span>
-                    <div className={`w-full bg-accent/70 ${isTech ? '' : 'rounded-t-md'}`} style={{ height: `${Math.max(m.total ? 4 : 1, (m.total / maxMonth) * 80)}%`, opacity: m.total ? 1 : 0.25 }} />
-                    <span className="text-[10px] text-text-muted">{monthShort(m.month)}</span>
-                  </div>
-                ))}
+            {/* Gráfica según el periodo */}
+            {view.bars.length > 0 && (
+              <div className={card}>
+                <p className="text-[10px] text-text-muted mb-2">{chartTitle}</p>
+                <div className="flex items-end gap-1.5 h-28">
+                  {view.bars.map(m => (
+                    <div key={m.key} className="flex-1 min-w-0 flex flex-col items-center justify-end gap-1 h-full">
+                      <span className="text-[9px] text-text-muted tabular-nums truncate max-w-full">{m.total ? fmt(m.total).replace(/\s/g, '') : ''}</span>
+                      <div className={`w-full bg-accent/70 ${isTech ? '' : 'rounded-t-md'}`} style={{ height: `${Math.max(m.total ? 4 : 1, (m.total / view.max) * 80)}%`, opacity: m.total ? 1 : 0.25 }} />
+                      <span className="text-[10px] text-text-muted truncate max-w-full">{m.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+            {!view.purchases.length && (
+              <p className="text-sm text-text-secondary text-center py-4">No compraste «{q}» en este periodo.</p>
+            )}
 
             {/* Compras */}
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-2">Cada compra</p>
               <ul className={`glass-card divide-y divide-glass-border ${box}`}>
-                {data.purchases.slice(0, 60).map((p, i) => {
+                {view.purchases.slice(0, 60).map((p, i) => {
                   const tx = p.txId ? transactions.find(t => t.id === p.txId) : undefined;
                   return (
                     <li key={i}>
@@ -170,7 +222,7 @@ export default function ProductosPage() {
                   );
                 })}
               </ul>
-              {data.purchases.some(p => !p.fromItems) && (
+              {view.purchases.some(p => !p.fromItems) && (
                 <p className="mt-2 text-[10px] text-text-muted">«Gasto completo» es un gasto sin productos cuya descripción dice «{q}»: se cuenta todo su valor.</p>
               )}
             </div>

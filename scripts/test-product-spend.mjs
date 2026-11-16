@@ -31,6 +31,9 @@ check('3 compras (2 de recibos + 1 por descripción)', r.purchases.length === 3)
 check('este mes 24.050', r.thisMonth === 24050);
 check('meses oct y nov', r.months.length === 2 && r.months[0].total === 15000);
 check('precio subió 7 %', Math.round(r.priceChange * 100) === 7 && r.lastPrice.price === 16050);
+const tx2 = [...tx, { id: 'e', type: 'gasto', amount: 3348, category: 'Mercado', date: new Date(2026, 10, 16), items: [{ name: 'CEBOLLA HUEVO BLANCA', qty: 1, total: 3348 }] }];
+check('no cuenta "cebolla huevo" cuando hay huevos de verdad', productSpend(tx2, 'huevos', now).purchases.length === 3);
+check('si solo hay "cebolla huevo", sí la encuentra', productSpend(tx2.slice(4), 'huevo', now).purchases.length === 1);
 check('productos frecuentes', frequentProducts(tx)[0] === 'Huevos');
 fs.rmSync(outDir, { recursive: true, force: true });
 console.log(fails ? `\n${fails} fallaron` : '\nTodas pasaron');
