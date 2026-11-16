@@ -1,5 +1,6 @@
 'use client';
 
+import { ReceiptItemsList } from '@/components/forms/ReceiptItemsList';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useData } from '@/components/DataProvider';
 import { normalizeText } from '@/lib/categories';
@@ -596,6 +597,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             isFixed: tx.isFixed,
             ...(tx.merchant ? { merchant: tx.merchant } : {}),
             ...(tx.paymentMethod ? { paymentMethod: tx.paymentMethod } : {}),
+            ...(tx.type === 'gasto' && tx.items?.length ? { items: tx.items } : {}),
           });
         }
       }
@@ -1105,6 +1107,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             {receiptStatus === 'done' && readKind === 'recibo' ? 'Fecha del recibo' : 'Fecha'}: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
                         )}
+                        {res.type === 'gasto' && res.items?.length ? (
+                          <ReceiptItemsList items={res.items} total={res.amount} isTech={isTechTheme} />
+                        ) : null}
                         {(res.type === 'gasto' || res.type === 'ingreso') && (
                           <div className="space-y-1">
                             <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">

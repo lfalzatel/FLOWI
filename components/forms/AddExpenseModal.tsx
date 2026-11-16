@@ -29,6 +29,7 @@ import { dateKey } from '@/lib/reminderDue';
 import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 
 import { ParsedVoiceResult } from '@/lib/voiceParser';
+import { ReceiptItemsList } from '@/components/forms/ReceiptItemsList';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -477,6 +478,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                 💡 ¿Es «{suggestedCat}»? Toca para usarla
               </button>
             )}
+            {transactionToEdit?.items?.length ? (
+              <div className="mt-2">
+                <ReceiptItemsList items={transactionToEdit.items} total={Number(amount) || transactionToEdit.amount} isTech={isTechTheme} />
+              </div>
+            ) : null}
           </div>
 
           {/* Category */}

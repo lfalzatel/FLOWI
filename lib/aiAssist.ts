@@ -1,6 +1,7 @@
 // IA opcional para el asistente de voz usando la cuenta GRATUITA de OpenRouter de cada usuario.
 // El usuario conecta su cuenta con un botón (OAuth PKCE); la clave que entrega OpenRouter se guarda
 // solo en este dispositivo y nunca pasa por nuestro servidor. Solo se usan modelos gratuitos.
+import { sanitizeReceiptItems } from '@/lib/receiptItems';
 import { BASE_CATEGORY_DEFS, normalizeText } from './categories';
 import { isFixedExpenseCategory } from './firestore';
 import type { ParsedVoiceItem, ParsedVoiceResult } from './voiceParser';
@@ -303,10 +304,11 @@ function receiptPrompt(customLabels: string[]) {
 (A) un recibo, factura o tiquete de compra, o
 (B) una captura de la app de un banco o billetera (Bancolombia, Nequi, Daviplata, BBVA...) con una LISTA DE MOVIMIENTOS.
 Responde SOLO con un JSON.
-Si es (A): {"kind":"recibo","total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró"}
+Si es (A): {"kind":"recibo","total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró","items":[{"name":"producto como aparece","qty":cantidad,"unit":"kg o null","price":precio_unitario,"total":total_del_renglon}]}
 Si es (B): {"kind":"movimientos","bank":"banco o billetera o null","movimientos":[{"type":"ingreso"|"gasto","amount":numero_en_pesos,"date":"YYYY-MM-DD o null","description":"texto corto y claro (ej. Transferencia de Luis Felipe, Cuota de manejo tarjeta débito)","category":"..."}]}
 Reglas:
 - En (A), "total" es el TOTAL A PAGAR (no el subtotal, ni el IVA, ni el cambio).
+- En (A), "items" son TODOS los productos del recibo, uno por renglón y en el mismo orden, aunque se repitan. "qty" puede tener decimales (0.845 kg). "total" del renglón es lo que costó ese renglón. No incluyas subtotales, IVA, cambio ni medios de pago. Si el recibo no detalla productos, usa "items":[].
 - En (B), cada movimiento es una fila: los valores en verde o con "+" son ingresos; en rojo o con "-" son gastos. No incluyas el saldo disponible.
 - En Colombia el punto separa miles: "$45.900" = 45900 y "1.250.000" = 1250000. Si hay centavos con coma, ignóralos.
 - category de un gasto debe ser exactamente una de: ${[...EXPENSE_LABELS, ...customLabels].join(', ')}.
@@ -398,6 +400,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
     const category = matchCategory(parsed.category, 'gasto', customLabels);
     const merchant = typeof parsed.merchant === 'string' && parsed.merchant.trim() && parsed.merchant !== 'null' ? parsed.merchant.trim().slice(0, 60) : undefined;
     const date = recentDate(parsed.date);
+    const items = sanitizeReceiptItems(parsed.items);
     // Hora del recibo (solo si es válida y, si la compra es de hoy, no está en el futuro)
     let time: string | undefined;
     const tm = typeof parsed.time === 'string' ? parsed.time.match(/^(\d{1,2}):(\d{2})/) : null;
@@ -413,6 +416,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
       ...(merchant ? { merchant } : {}),
       ...(date ? { date } : {}),
       ...(time ? { time } : {}),
+      ...(items.length ? { items } : {}),
     };
     return { ok: true, result, results: [result] };
   } catch {

@@ -1,4 +1,5 @@
 import { db } from './firebase';
+import type { ReceiptItem } from '@/lib/receiptItems';
 import { BASE_CATEGORY_DEFS, EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS } from './categories';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc, arrayUnion, orderBy } from 'firebase/firestore';
 
@@ -15,6 +16,7 @@ export interface Transaction {
   paymentMethod?: string | null;
   accountId?: string | null; // cuenta exacta (gana sobre el medio de pago); ver lib/accounts.ts
   business?: boolean;        // "Es del negocio" (Modo negocio); si falta, se deduce de la categoría (lib/business.ts)
+  items?: ReceiptItem[];     // productos del recibo escaneado (lib/receiptItems.ts)
 }
 
 export interface CustomCategory {

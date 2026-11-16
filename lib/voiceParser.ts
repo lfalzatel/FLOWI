@@ -1,3 +1,4 @@
+import type { ReceiptItem } from '@/lib/receiptItems';
 import { isFixedExpenseCategory } from './firestore';
 import { detectMerchantInText, normalizeText } from './categories';
 
@@ -18,6 +19,7 @@ export interface ParsedVoiceResult {
   date?: string;
   time?: string;   // HH:MM (hora impresa en el recibo)
   paymentMethod?: string; // con qué se pagó o dónde se recibió (Nequi, Efectivo…)
+  items?: ReceiptItem[];  // productos del recibo (cuando se leyó una foto)
 }
 
 export interface ParsedVoiceCommand {
