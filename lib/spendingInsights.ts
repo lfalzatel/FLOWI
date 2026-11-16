@@ -1,6 +1,7 @@
 // Suscripciones y gastos hormiga: lo pequeño que se repite y, sumado, se lleva una buena parte del mes.
 import type { Transaction } from '@/lib/firestore';
 import { normalizeText } from '@/lib/categories';
+import { expandByItems } from '@/lib/receiptItems';
 
 type Resolver = (raw: string, type?: 'gasto' | 'ingreso') => { label: string; group: string };
 
@@ -105,7 +106,8 @@ export function subscriptionOf(t: Transaction, resolve: Resolver): { key: string
   return { key: normalizeText(name), name, category: t.merchant || t.category };
 }
 
-export function detectAntExpenses(transactions: Transaction[], resolve: Resolver, now = new Date()) {
+export function detectAntExpenses(rawTransactions: Transaction[], resolve: Resolver, now = new Date()) {
+  const transactions = expandByItems(rawTransactions); // cada producto de un recibo cuenta en su categoría
   const since = now.getTime() - ANT_WINDOW_DAYS * DAY;
   // Si la persona lleva menos de 90 días registrando, se promedia sobre lo que lleva
   let first = now.getTime();
@@ -144,7 +146,8 @@ export type PeriodAnt = { key: string; label: string; count: number; total: numb
 export type PeriodSub = { key: string; name: string; category: string; total: number; count: number; lastDate: Date };
 
 /** Lo que de verdad se gastó en el periodo: gastos hormiga por subcategoría y cobros de suscripciones. */
-export function insightsInPeriod(transactions: Transaction[], resolve: Resolver, inPeriod: (d: Date) => boolean) {
+export function insightsInPeriod(rawTransactions: Transaction[], resolve: Resolver, inPeriod: (d: Date) => boolean) {
+  const transactions = expandByItems(rawTransactions);
   const ants = new Map<string, { label: string; items: { amount: number; desc: string }[] }>();
   const subs = new Map<string, PeriodSub>();
   for (const t of transactions) {
@@ -193,7 +196,8 @@ const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).pad
  * Todo lo gastado en esa subcategoría (no solo las compras pequeñas) o esa suscripción, mes a mes,
  * desde el primer registro hasta el mes actual (los meses sin gasto quedan en 0).
  */
-export function spendingHistory(transactions: Transaction[], resolve: Resolver, target: HistoryTarget, now = new Date()): HistoryMonth[] {
+export function spendingHistory(rawTransactions: Transaction[], resolve: Resolver, target: HistoryTarget, now = new Date()): HistoryMonth[] {
+  const transactions = expandByItems(rawTransactions);
   const byMonth = new Map<string, HistoryItem[]>();
   for (const t of transactions) {
     if (t.type !== 'gasto') continue;

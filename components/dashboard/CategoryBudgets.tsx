@@ -1,5 +1,6 @@
 'use client';
 
+import { expandByItems } from '@/lib/receiptItems';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect, useMemo } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -33,7 +34,9 @@ interface CategoryBudgetsProps {
   filterType?: string;
 }
 
-export function CategoryBudgets({ transactions, currency = 'COP', filterType = 'month' }: CategoryBudgetsProps) {
+export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP', filterType = 'month' }: CategoryBudgetsProps) {
+  // Un recibo con productos de varias categorías cuenta cada parte en su categoría
+  const transactions = useMemo(() => expandByItems(rawTransactions), [rawTransactions]);
   const { theme } = useTheme();
   const { user, profile } = useAuth();
   const { allCategories } = useCategories();

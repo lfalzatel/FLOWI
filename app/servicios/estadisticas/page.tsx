@@ -1,7 +1,8 @@
 'use client';
 
+import { expandByItems } from '@/lib/receiptItems';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { TrendingUp, Calendar, PieChart, Loader2, BarChart2, Flame, ArrowLeft, Download } from 'lucide-react';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
@@ -27,6 +28,7 @@ export default function EstadisticasPage() {
 
   const [loading, setLoading] = useState(true);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const rawRef = useRef<Transaction[]>([]); // sin repartir, para exportar
 
   // Filtros
   const [periodFilter, setPeriodFilter] = useState<'this_month' | 'last_month' | 'last_3m' | 'last_6m' | 'this_year' | 'all'>('this_month');
@@ -49,7 +51,9 @@ export default function EstadisticasPage() {
         setLoading(true);
         // Traemos TODAS las transacciones
         const txs = await getUserTransactions(user.uid);
-        setAllTransactions(txs);
+        rawRef.current = txs;
+        // Un recibo con productos de varias categorías cuenta cada parte en su categoría
+        setAllTransactions(expandByItems(txs));
       } catch (error) {
         console.error("Error cargando estadísticas", error);
       } finally {
@@ -575,7 +579,7 @@ export default function EstadisticasPage() {
         <ExportReportModal
           onClose={() => setShowExport(false)}
           title={`Reporte de Analítica`}
-          transactions={allTransactions}
+          transactions={rawRef.current}
           filterType="all"
           filterValue=""
         />

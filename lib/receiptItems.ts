@@ -103,3 +103,31 @@ export function partDescription(base: string, g: ItemGroup) {
 
 /** Producto válido para guardar (con nombre y valor). */
 export const cleanItems = (items: ReceiptItem[]) => items.filter(i => i.name.trim() && i.total > 0).map(i => ({ ...i, name: i.name.trim() }));
+
+/**
+ * Para los informes: un gasto con productos de varias categorías se cuenta como una parte por categoría
+ * (el total se reparte en proporción a lo que suma cada una). Es solo para calcular: no se guarda.
+ * Cada parte lleva `_partOf` con el id del gasto real, para que al tocarla se edite el gasto completo.
+ */
+export function expandByItems<T extends { id?: string; type: string; category: string; amount: number; items?: ReceiptItem[]; merchant?: string | null; isFixed?: boolean }>(transactions: T[]): T[] {
+  const out: T[] = [];
+  for (const t of transactions) {
+    if (t.type !== 'gasto' || !t.items?.length || (t as any)._partOf) { out.push(t); continue; }
+    const groups = groupByCategory(t.items, t.category);
+    if (groups.length === 1 && groups[0].category === t.category) { out.push(t); continue; }
+    const amounts = splitTotal(groups, t.amount);
+    groups.forEach((g, i) => {
+      const main = g.category === t.category;
+      out.push({
+        ...t,
+        category: g.category,
+        amount: amounts[i],
+        items: g.items,
+        merchant: main ? t.merchant : null,
+        isFixed: main ? t.isFixed : false,
+        _partOf: t.id,
+      } as T);
+    });
+  }
+  return out;
+}

@@ -14,7 +14,7 @@ const js = ts.transpileModule(fs.readFileSync(path.join(root, 'lib/receiptItems.
 }).outputText;
 const out = path.join(outDir, 'receiptItems.mjs');
 fs.writeFileSync(out, js);
-const { sanitizeReceiptItems, itemsCheck, formatQty, groupByCategory, splitTotal, partDescription } = await import(pathToFileURL(out).href);
+const { sanitizeReceiptItems, itemsCheck, formatQty, groupByCategory, splitTotal, partDescription, expandByItems } = await import(pathToFileURL(out).href);
 
 let fails = 0;
 const check = (name, cond) => { if (!cond) fails++; console.log(`${cond ? '✓' : '✗'} ${name}`); };
@@ -70,6 +70,15 @@ const disc = splitTotal(groups, 38000);
 check('descuento repartido en proporción', disc[0] + disc[1] === 38000 && disc[1] === Math.round(38000 * 19500 / 40000));
 
 check('descripción de parte sin anidar', partDescription('Compra: Huevos aa 30, Jabón…', groups[1]) === 'Compra: Cerveza');
+
+// Informes: un recibo de 2 categorías se cuenta en 2 partes que suman el total
+const tx = { id: 'x', type: 'gasto', category: 'Mercado', amount: 85850, merchant: 'Super', isFixed: false, items: [
+  { name: 'Huevos', qty: 1, total: 41700, category: 'Mercado' }, { name: 'Cebolla', qty: 1, total: 44150, category: 'Verduras y Frutas' }] };
+const xparts = expandByItems([tx, { id: 'y', type: 'gasto', category: 'Agua', amount: 9000 }]);
+check("recibo mixto → 2 partes + gasto normal", xparts.length === 3);
+check("partes suman el total y apuntan al gasto", xparts[0].amount + xparts[1].amount === 85850 && xparts.every(p => p.id !== 'x' || p._partOf === 'x'));
+check('Verduras con su valor y sin comercio', xparts.find(p => p.category === "Verduras y Frutas").amount === 44150 && xparts.find(p => p.category === "Verduras y Frutas").merchant === null);
+check('aplicar dos veces no cambia nada', expandByItems(xparts).length === 3);
 
 fs.rmSync(outDir, { recursive: true, force: true });
 console.log(fails ? `\n${fails} fallaron` : '\nTodas pasaron');

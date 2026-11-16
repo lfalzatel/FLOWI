@@ -1,4 +1,5 @@
 import { Transaction, isFixedExpenseCategory } from './firestore';
+import { expandByItems } from './receiptItems';
 import { BudgetPillar, pillarOf } from './categoryGroups';
 import { getLocalDateString, getLocalMonthString } from './dateUtils';
 
@@ -68,8 +69,10 @@ export function shiftMonth(month: string, delta: number): string {
 }
 
 export function buildMonthSummary(
-  transactions: Transaction[], month: string, resolve: Resolver, fmt: (n: number) => string, now = new Date(),
+  rawTransactions: Transaction[], month: string, resolve: Resolver, fmt: (n: number) => string, now = new Date(),
 ): MonthSummary {
+  // Un recibo con productos de varias categorías cuenta cada parte en su categoría
+  const transactions = expandByItems(rawTransactions);
   const prevMonth = shiftMonth(month, -1);
   const cur: Transaction[] = [], prev: Transaction[] = [];
   for (const t of transactions) {
@@ -107,7 +110,9 @@ export function buildMonthSummary(
       spendDays.add(getLocalDateString(toDate(t.date)));
       if (t.amount < SMALL) { smallCount++; smallTotal += t.amount; }
     }
-    if (!biggest || t.amount > biggest.amount) biggest = t;
+    // El gasto más grande es la compra completa, no una parte de un recibo
+    const real = t._partOf ? rawTransactions.find(r => r.id === t._partOf) || t : t;
+    if (!biggest || real.amount > biggest.amount) biggest = real;
   }
 
   const [y, m] = month.split('-').map(Number);

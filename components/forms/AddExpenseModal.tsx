@@ -53,7 +53,10 @@ function toTimeString(d: Date): string {
 const VISIBLE_MERCHANTS = 8;
 const VISIBLE_PAYMENTS = 4;
 
-export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initialType = 'gasto', initialVoiceParsed, initialBusiness = false }: AddExpenseModalProps) {
+export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTarget, initialType = 'gasto', initialVoiceParsed, initialBusiness = false }: AddExpenseModalProps) {
+  // Desde un informe puede llegar una parte de un recibo (expandByItems): se edita el gasto completo
+  const { transactions: allTx } = useData();
+  const transactionToEdit = editTarget?._partOf ? allTx.find(t => t.id === editTarget._partOf) || editTarget : editTarget;
   const { user, profile } = useAuth();
   const { canAdd } = usePlan();
   const shotRef = useRef<HTMLInputElement>(null);

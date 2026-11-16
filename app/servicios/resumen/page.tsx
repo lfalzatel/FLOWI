@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, BarChart2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/components/DataProvider';
@@ -159,6 +159,18 @@ export default function ResumenPage() {
             </section>
           </>
         )}
+
+        {/* Estadísticas: ahora se llega desde aquí (una sola tarjeta en Servicios) */}
+        <Link href="/servicios/estadisticas" className={`${card} flex items-center gap-3 p-4 hover:border-accent/50 transition-colors`}>
+          <div className={`w-10 h-10 flex items-center justify-center shrink-0 bg-cyan-500/10 ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
+            <BarChart2 className="w-5 h-5 text-cyan-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`text-sm font-bold ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>Ver estadísticas detalladas</p>
+            <p className="text-[11px] text-text-muted">En qué se te va la plata, mes a mes, con gráficas y filtros</p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-text-muted shrink-0" />
+        </Link>
       </main>
       <BottomNav />
     </div>

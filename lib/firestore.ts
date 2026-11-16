@@ -18,6 +18,7 @@ export interface Transaction {
   business?: boolean;        // "Es del negocio" (Modo negocio); si falta, se deduce de la categoría (lib/business.ts)
   items?: ReceiptItem[];     // productos del recibo escaneado (lib/receiptItems.ts)
   receiptId?: string;        // mismo valor en las partes de una compra repartida por categoría
+  _partOf?: string;          // solo en informes (expandByItems): parte por categoría del gasto con este id; no se guarda
 }
 
 export interface CustomCategory {

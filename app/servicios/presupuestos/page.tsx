@@ -1,5 +1,6 @@
 'use client';
 
+import { expandByItems } from '@/lib/receiptItems';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -52,7 +53,8 @@ export default function PresupuestosPage() {
       try {
         setLoading(true);
         const txs = await getUserTransactions(user.uid);
-        setAllTransactions(txs);
+        // Un recibo con productos de varias categorías cuenta cada parte en su categoría
+        setAllTransactions(expandByItems(txs));
       } catch (error) {
         console.error("Error cargando transacciones para presupuestos:", error);
       } finally {
