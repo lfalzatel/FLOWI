@@ -1151,7 +1151,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                               categories={allCategories.filter(c => !c.type || c.type === 'gasto')}
                                               suggest={(n) => suggestItemCategory(n, transactions, allCategories.filter(c => !c.type || c.type === 'gasto'))}
                                               onChange={(next) => handleUpdateItem(idx, 'items', next)}
-                                              onUseSum={(s) => handleUpdateItem(idx, 'amount', s)} />
+                                              onUseSum={(s) => handleUpdateItem(idx, 'amount', s)}
+                                              onAddToTotal={(v) => handleUpdateItem(idx, 'amount', (res.amount || 0) + v)} />
                             <ItemsByCategory items={res.items} total={res.amount || 0} fallbackCategory={res.category} isTech={isTechTheme}
                                              split={(res as any)._split !== false}
                                              onSplit={(v) => handleUpdateItem(idx, '_split', v)}

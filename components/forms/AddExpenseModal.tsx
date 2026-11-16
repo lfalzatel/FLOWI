@@ -537,7 +537,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit, initial
                                   categories={typedCategories} recent={recentCategories} fallbackCategory={category || 'Otros'}
                                   suggest={(n) => suggestItemCategory(n, transactions, typedCategories)}
                                   onChange={changeItems}
-                                  onUseSum={(s) => { setAmount(String(s)); setAutoSum(true); }} />
+                                  onUseSum={(s) => { setAmount(String(s)); setAutoSum(true); }}
+                                  onAddToTotal={(v) => setAmount(String((Number(amount) || 0) + v))} />
                 {mixed && (
                   <ItemsByCategory items={cleanItems(items)} total={Number(amount) || 0} fallbackCategory={category || 'Otros'} isTech={isTechTheme}
                                    categories={typedCategories} split={split} onSplit={setSplit}

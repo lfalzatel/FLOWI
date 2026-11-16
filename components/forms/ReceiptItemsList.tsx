@@ -17,7 +17,7 @@ const pesosText = (n?: number) => (n ? n.toLocaleString('es-CO') : '');
  * `autoSum`: el monto sigue a la suma (gasto escrito a mano), así que no hay aviso de "no cuadra".
  */
 export function ReceiptItemsList({
-  items, total, isTech, defaultOpen = false, onChange, categories, recent = [], fallbackCategory, onUseSum, suggest, autoSum = false,
+  items, total, isTech, defaultOpen = false, onChange, categories, recent = [], fallbackCategory, onUseSum, suggest, autoSum = false, onAddToTotal,
 }: {
   items: ReceiptItem[];
   total: number | null | undefined;
@@ -30,6 +30,7 @@ export function ReceiptItemsList({
   onUseSum?: (sum: number) => void;
   suggest?: (name: string) => string | null;
   autoSum?: boolean;
+  onAddToTotal?: (amount: number) => void; // sumar el producto nuevo al total del gasto (otro recibo de la misma compra)
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [editing, setEditing] = useState<number | null>(null);
@@ -39,6 +40,11 @@ export function ReceiptItemsList({
   const [draft, setDraft] = useState({ name: '', qty: '1', price: '' });
   const [draftCat, setDraftCat] = useState<string | null>(null); // elegida a mano para el nuevo
   const nameRef = useRef<HTMLInputElement>(null);
+  // La fila para agregar está escondida detrás de un botón (abierta de una vez si la lista está vacía)
+  const [adding, setAdding] = useState(!items?.length);
+  // ¿El producto nuevo se suma al total? Si la suma ya cuadra, lo nuevo es algo extra (otro recibo): sí.
+  // Si no cuadra, lo más probable es que sea un renglón que la IA no leyó y ya está en el total: no.
+  const [addToTotal, setAddToTotal] = useState<boolean | null>(null);
 
   const editable = !!onChange;
   const fallback = fallbackCategory || 'Otros';
@@ -50,6 +56,8 @@ export function ReceiptItemsList({
   if (!items?.length && !editable) return null;
   const { sum, diff, ok } = itemsCheck(items || [], total);
   const fine = autoSum || ok;
+  const canAddToTotal = !!onAddToTotal && !autoSum;
+  const sumIt = addToTotal ?? (ok || !items?.length);
 
   const update = (k: number, patch: Partial<ReceiptItem>) => {
     onChange?.(items.map((it, i) => {
@@ -66,7 +74,9 @@ export function ReceiptItemsList({
     const qty = toNum(draft.qty) > 0 ? Math.round(toNum(draft.qty) * 1000) / 1000 : 1;
     const price = toPesos(draft.price);
     if (!name || !price) { nameRef.current?.focus(); return; }
-    onChange?.([...(items || []), { name: name.slice(0, 50), qty, price, total: Math.round(qty * price), category: newCat }]);
+    const lineTotal = Math.round(qty * price);
+    onChange?.([...(items || []), { name: name.slice(0, 50), qty, price, total: lineTotal, category: newCat }]);
+    if (canAddToTotal && sumIt) onAddToTotal?.(lineTotal);
     setDraft({ name: '', qty: '1', price: '' });
     setDraftCat(null);
     nameRef.current?.focus();
@@ -110,7 +120,7 @@ export function ReceiptItemsList({
               Toca un producto para corregirlo{showChips ? ', o su categoría para cambiarla' : ''}.
             </p>
           )}
-          <ul className="divide-y divide-white/5 max-h-72 overflow-y-auto overscroll-contain">
+          <ul className="divide-y divide-white/5 max-h-72 overflow-y-auto overflow-x-hidden overscroll-contain">
             {items.map((it, k) => (
               <li key={k} className="py-1.5">
                 {editing === k && editable ? (
@@ -164,27 +174,33 @@ export function ReceiptItemsList({
             ))}
           </ul>
 
-          {/* Fila rápida: nombre, cantidad y precio; Enter o ✓ agrega y deja listo el siguiente */}
-          {editable && (
+          {/* Agregar: escondido detrás de un botón; al abrirlo, nombre arriba y cantidad, precio y ＋ abajo */}
+          {editable && !adding && (
+            <button type="button" onClick={() => { setAdding(true); setTimeout(() => nameRef.current?.focus(), 50); }}
+                    className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-accent">
+              <Plus className="w-3.5 h-3.5" /> Agregar producto
+            </button>
+          )}
+          {editable && adding && (
             <div className={`mt-1.5 p-2 border border-dashed border-accent/40 space-y-1.5 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
+              <div>
+                <label className={lbl}>Producto</label>
+                <input ref={nameRef} className={field} placeholder="Ej. Arroz Diana" value={draft.name} enterKeyHint="next"
+                       onChange={e => { setDraft(d => ({ ...d, name: e.target.value })); setDraftCat(null); }} onKeyDown={onEnter} />
+              </div>
               <div className="flex items-end gap-1.5">
-                <div className="flex-1 min-w-0">
-                  <label className={lbl}>Producto</label>
-                  <input ref={nameRef} className={field} placeholder="Ej. Arroz Diana" value={draft.name} enterKeyHint="next"
-                         onChange={e => { setDraft(d => ({ ...d, name: e.target.value })); setDraftCat(null); }} onKeyDown={onEnter} />
-                </div>
-                <div className="w-12 shrink-0">
+                <div className="w-16 shrink-0">
                   <label className={lbl}>Cant.</label>
                   <input className={field} inputMode="decimal" value={draft.qty} onChange={e => setDraft(d => ({ ...d, qty: e.target.value }))} onKeyDown={onEnter} />
                 </div>
-                <div className="w-20 shrink-0">
+                <div className="flex-1 min-w-0">
                   <label className={lbl}>Precio c/u</label>
                   <input className={field} inputMode="numeric" placeholder="$" value={draft.price ? toPesos(draft.price).toLocaleString('es-CO') : ''} enterKeyHint="done"
                          onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} onKeyDown={onEnter} />
                 </div>
                 <button type="button" onClick={addDraft} aria-label="Agregar producto"
-                        className={`shrink-0 w-8 h-8 flex items-center justify-center bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
-                  <Plus className="w-4 h-4" />
+                        className={`shrink-0 h-[30px] px-3 flex items-center gap-1 text-[11px] font-bold bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
+                  <Plus className="w-3.5 h-3.5" /> Agregar
                 </button>
               </div>
               {showChips && draft.name.trim().length >= 3 && (
@@ -194,6 +210,21 @@ export function ReceiptItemsList({
                   {chip(newCat, () => setPickerFor(-1), 'Cambiar categoría')}
                   <span className="truncate">toca para cambiarla</span>
                 </div>
+              )}
+              {canAddToTotal && (
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={sumIt} onChange={e => setAddToTotal(e.target.checked)} className="mt-0.5 accent-[var(--accent,#10b981)]" />
+                  <span className="text-[10px] text-text-secondary leading-snug">
+                    <b className="text-text-primary">Sumar al total del gasto</b> — márcalo si es de otro recibo de la misma compra.
+                    Déjalo sin marcar si la IA no leyó este producto y ya está en el total.
+                  </span>
+                </label>
+              )}
+              {items.length > 0 && (
+                <button type="button" onClick={() => { setAdding(false); setDraft({ name: '', qty: '1', price: '' }); setDraftCat(null); }}
+                        className="text-[10px] text-text-muted underline">
+                  Cerrar
+                </button>
               )}
             </div>
           )}
