@@ -1139,11 +1139,31 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             }`}
                           />
                         </div>
-                        {res.date && (
-                          <p className={`text-[10px] text-text-muted normal-case px-1 -mx-1 ${hl('date')}`}>
-                            {receiptStatus === 'done' && readKind === 'recibo' ? 'Fecha del recibo' : 'Fecha'}: {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </p>
-                        )}
+                        {/* Fecha: si no es de hoy se destaca (si no, el gasto "desaparece" de la lista de hoy) y se puede cambiar */}
+                        {res.date && res.date !== new Date().toLocaleDateString('en-CA') ? (() => {
+                          const today = new Date().toLocaleDateString('en-CA');
+                          const days = Math.round((new Date(`${today}T12:00:00`).getTime() - new Date(`${res.date}T12:00:00`).getTime()) / 86400000);
+                          return (
+                            <div className={`p-2 border border-amber-400/50 bg-amber-400/10 normal-case space-y-1.5 ${hl('date')} ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                              <p className="text-[11px] text-amber-300 font-semibold leading-snug">
+                                📅 Se guardará con fecha del {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', ...(res.date.slice(0, 4) !== today.slice(0, 4) ? { year: 'numeric' } : {}) })}
+                                {days > 0 ? ` (hace ${days} ${days === 1 ? 'día' : 'días'})` : ''}{receiptStatus === 'done' && readKind === 'recibo' ? ', la que dice el recibo.' : '.'}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <input type="date" value={res.date} max={today}
+                                       onChange={(e) => { if (e.target.value) { handleUpdateItem(idx, 'date', e.target.value); handleUpdateItem(idx, 'time', undefined); } }}
+                                       aria-label="Cambiar la fecha"
+                                       className={`flex-1 min-w-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
+                                <button type="button" onClick={() => { handleUpdateItem(idx, 'date', undefined); handleUpdateItem(idx, 'time', undefined); }}
+                                        className={`shrink-0 px-2.5 py-1 text-[11px] font-bold border border-amber-400/60 text-amber-300 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
+                                  Usar hoy
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })() : res.date ? (
+                          <p className={`text-[10px] text-text-muted normal-case px-1 -mx-1 ${hl('date')}`}>Fecha: hoy</p>
+                        ) : null}
                         {res.type === 'gasto' && res.items?.length ? (
                           <div className="space-y-2">
                             <ReceiptItemsList items={res.items} total={res.amount} isTech={isTechTheme}
