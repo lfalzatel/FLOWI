@@ -160,7 +160,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
   };
 
   return (
-    <div className={`p-5 glass-dropdown mb-6 ${isTechTheme ? 'rounded-none border border-accent/40 font-mono' : 'rounded-3xl'}`}>
+    <div className={`p-5 mb-6 ${theme === 'cyberpunk' ? 'glass-card font-mono' : isTechTheme ? 'glass-dropdown rounded-none border border-accent/40 font-mono' : 'glass-dropdown rounded-3xl'}`}>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-accent animate-pulse" />

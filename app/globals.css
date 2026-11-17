@@ -357,8 +357,9 @@ body {
   .flow-lines-coin { display: none; }
 }
 
-/* Presupuestos en el modo tech: tarjetas sin esquinas redondeadas (las pastillas y barras, rounded-full, se quedan) */
-[data-theme='cyberpunk'] .square-corners :is(.rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
-[data-theme='cyberpunk'] .square-corners :is(.rounded-t-md, .rounded-t-lg, .rounded-t-xl) {
+/* Tema verde (cyberpunk): nada con esquinas redondeadas en toda la app, igual que sus tarjetas.
+   Solo se quedan redondas las pastillas, los puntos y las barras (rounded-full). */
+[data-theme='cyberpunk'] :is(.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
+[data-theme='cyberpunk'] :is(.rounded-t-md, .rounded-t-lg, .rounded-t-xl, .rounded-t-2xl, .rounded-t-3xl, .rounded-b-xl, .rounded-b-2xl) {
   border-radius: 0 !important;
 }
