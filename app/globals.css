@@ -206,7 +206,14 @@ body {
   border-radius: 20px;
   transition: background 0.2s, border-color 0.2s;
 }
-.glass-card:hover {
+/* Se ilumina solo al seleccionarla: al pasar el mouse en el PC, mientras se toca en el celular */
+@media (hover: hover) {
+  .glass-card:hover {
+    background: var(--glass-hover);
+    border-color: var(--glass-strong);
+  }
+}
+.glass-card:active {
   background: var(--glass-hover);
   border-color: var(--glass-strong);
 }

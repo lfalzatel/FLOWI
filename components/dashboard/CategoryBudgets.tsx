@@ -42,6 +42,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
   const { allCategories } = useCategories();
   const resolveCategory = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+  const isCyber = theme === 'cyberpunk'; // tema verde: tarjetas de Inicio (esquinas abiertas, sin fondo encendido)
 
   const globalBudget = profile?.budget || 0;
 
@@ -179,14 +180,14 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
         {/* ========================================================= */}
         {/* ACORDEÓN 1: CATEGORÍAS PRINCIPALES (DESPLEGADO POR DEFECTO) */}
         {/* ========================================================= */}
-        <div className={`border overflow-hidden transition-all ${
-          isTechTheme ? 'border-accent/30 bg-black/60' : 'glass-card rounded-2xl'
+        <div className={`overflow-hidden transition-all ${
+          isCyber ? 'glass-card' : isTechTheme ? 'border border-accent/30 bg-black/60' : 'border glass-card rounded-2xl'
         }`}>
           <button
             type="button"
             onClick={() => setOpenMainAccordion(!openMainAccordion)}
             className={`w-full flex items-center justify-between p-4 text-left select-none transition-colors ${
-              openMainAccordion ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
+              openMainAccordion ? (isCyber ? 'border-b border-accent/20' : 'bg-white/5 border-b border-white/10') : 'hover:bg-white/[0.02]'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -242,7 +243,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                 const detail = groupDetails[mainCatName];
 
                 return (
-                  <div key={mainCatName} className={`rounded-2xl border transition-all ${config.bg}`}>
+                  <div key={mainCatName} className={`transition-all ${isCyber ? 'glass-card' : `rounded-2xl border ${config.bg}`}`}>
                     <button
                       type="button"
                       onClick={() => toggleGroup(mainCatName)}
@@ -381,14 +382,14 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
         {/* ========================================================= */}
         {/* ACORDEÓN 2: TODAS LAS SUBCATEGORÍAS (COLAPSADO POR DEFECTO) */}
         {/* ========================================================= */}
-        <div className={`border overflow-hidden transition-all ${
-          isTechTheme ? 'border-accent/30 bg-black/60' : 'glass-card rounded-2xl'
+        <div className={`overflow-hidden transition-all ${
+          isCyber ? 'glass-card' : isTechTheme ? 'border border-accent/30 bg-black/60' : 'border glass-card rounded-2xl'
         }`}>
           <button
             type="button"
             onClick={() => setOpenSubAccordion(!openSubAccordion)}
             className={`w-full flex items-center justify-between p-4 text-left select-none transition-colors ${
-              openSubAccordion ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
+              openSubAccordion ? (isCyber ? 'border-b border-accent/20' : 'bg-white/5 border-b border-white/10') : 'hover:bg-white/[0.02]'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -460,7 +461,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                     <div 
                       key={subcatName}
                       className={`p-3 rounded-2xl transition-all ${
-                        isTechTheme ? 'bg-black/40 border border-accent/20' : 'bg-white/5 border border-white/10'
+                        isCyber ? 'glass-card' : isTechTheme ? 'bg-black/40 border border-accent/20' : 'bg-white/5 border border-white/10'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">

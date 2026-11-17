@@ -31,6 +31,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   const { theme } = useTheme();
   const { profile } = useAuth();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+  const isCyber = theme === 'cyberpunk'; // tema verde: tarjetas de Inicio (esquinas abiertas, sin fondo encendido)
 
   const [activeModal, setActiveModal] = useState<'fijos' | 'disponible' | 'diario' | null>(null);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
@@ -154,8 +155,10 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             type="button"
             onClick={() => setActiveModal('fijos')}
             className={`p-3 rounded-2xl text-left transition-all active:scale-[0.97] hover:border-orange-500/50 group ${
-              isTechTheme 
-                ? 'bg-accent/5 border border-accent/20 hover:bg-accent/10' 
+              isCyber
+                ? 'glass-card'
+                : isTechTheme
+                ? 'bg-accent/5 border border-accent/20 hover:bg-accent/10'
                 : 'bg-white/5 border border-white/10 hover:bg-white/10 shadow-sm'
             }`}
           >
@@ -184,8 +187,10 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             type="button"
             onClick={() => setActiveModal('disponible')}
             className={`p-3 rounded-2xl text-left transition-all active:scale-[0.97] hover:border-emerald-500/50 group ${
-              isTechTheme 
-                ? 'bg-accent/5 border border-accent/20 hover:bg-accent/10' 
+              isCyber
+                ? 'glass-card'
+                : isTechTheme
+                ? 'bg-accent/5 border border-accent/20 hover:bg-accent/10'
                 : 'bg-white/5 border border-white/10 hover:bg-white/10 shadow-sm'
             }`}
           >
@@ -216,8 +221,10 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             type="button"
             onClick={() => setActiveModal('diario')}
             className={`p-3 rounded-2xl text-left transition-all active:scale-[0.97] hover:border-accent group ${
-              isTechTheme 
-                ? 'bg-accent/10 border border-accent/40 hover:bg-accent/20' 
+              isCyber
+                ? 'glass-card'
+                : isTechTheme
+                ? 'bg-accent/10 border border-accent/40 hover:bg-accent/20'
                 : 'bg-accent/10 border border-accent/20 hover:bg-accent/20 shadow-sm'
             }`}
           >
@@ -243,7 +250,9 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
 
         {/* Banner Explicativo / Alerta */}
         <div className={`p-3.5 rounded-2xl flex items-start gap-2.5 ${
-          isWarning 
+          isCyber
+            ? `glass-card ${isWarning ? 'text-red-400' : baseLimit === 0 ? 'text-blue-400' : 'text-emerald-400'}`
+            : isWarning 
             ? 'bg-red-500/10 border border-red-500/20 text-red-400' 
             : baseLimit === 0 
               ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400' 

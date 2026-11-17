@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // hover: solo en equipos con mouse; en el celular el resaltado se quedaba pegado después de tocar
+  future: { hoverOnlyWhenSupported: true },
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
