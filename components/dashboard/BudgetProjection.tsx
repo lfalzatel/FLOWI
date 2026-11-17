@@ -31,7 +31,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   const { theme } = useTheme();
   const { profile } = useAuth();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const isCyber = theme === 'cyberpunk'; // tema verde: tarjetas de Inicio (esquinas abiertas, sin fondo encendido)
+  const isCyber = isTechTheme; // temas tech (verde y kilo): tarjetas de Inicio (esquinas abiertas, sin fondo encendido)
 
   const [activeModal, setActiveModal] = useState<'fijos' | 'disponible' | 'diario' | null>(null);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
@@ -107,7 +107,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
     <>
       {/* Un solo componente para Inicio y Presupuestos; en el tema verde usa la misma tarjeta que el resto de Inicio (esquinas abiertas) */}
       <div className={`mt-4 p-5 animate-fade-in-up transition-all ${
-        theme === 'cyberpunk'
+        isTechTheme
           ? 'glass-card font-mono'
           : isTechTheme
           ? 'border border-accent/30 rounded-none bg-black/40 font-mono' 

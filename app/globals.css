@@ -244,7 +244,9 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-[data-theme='cyberpunk'] .glass-card {
+/* Tarjetas tech (verde y kilo): esquinas abiertas en diagonal */
+[data-theme='cyberpunk'] .glass-card,
+[data-theme='kiloCode'] .glass-card {
   border-radius: 0;
   clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
   backdrop-filter: none;
@@ -364,9 +366,11 @@ body {
   .flow-lines-coin { display: none; }
 }
 
-/* Tema verde (cyberpunk): nada con esquinas redondeadas en toda la app, igual que sus tarjetas.
+/* Temas tech (verde y kilo): nada con esquinas redondeadas en toda la app, igual que sus tarjetas.
    Solo se quedan redondas las pastillas, los puntos y las barras (rounded-full). */
 [data-theme='cyberpunk'] :is(.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
-[data-theme='cyberpunk'] :is(.rounded-t-md, .rounded-t-lg, .rounded-t-xl, .rounded-t-2xl, .rounded-t-3xl, .rounded-b-xl, .rounded-b-2xl) {
+[data-theme='cyberpunk'] :is(.rounded-t-md, .rounded-t-lg, .rounded-t-xl, .rounded-t-2xl, .rounded-t-3xl, .rounded-b-xl, .rounded-b-2xl),
+[data-theme='kiloCode'] :is(.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl),
+[data-theme='kiloCode'] :is(.rounded-t-md, .rounded-t-lg, .rounded-t-xl, .rounded-t-2xl, .rounded-t-3xl, .rounded-b-xl, .rounded-b-2xl) {
   border-radius: 0 !important;
 }

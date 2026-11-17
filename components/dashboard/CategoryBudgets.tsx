@@ -42,7 +42,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
   const { allCategories } = useCategories();
   const resolveCategory = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const isCyber = theme === 'cyberpunk'; // tema verde: tarjetas de Inicio (esquinas abiertas, sin fondo encendido)
+  const isCyber = isTechTheme; // temas tech (verde y kilo): tarjetas de Inicio (esquinas abiertas, sin fondo encendido)
 
   const globalBudget = profile?.budget || 0;
 
@@ -161,7 +161,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
   };
 
   return (
-    <div className={`p-5 mb-6 ${theme === 'cyberpunk' ? 'glass-card font-mono' : isTechTheme ? 'glass-dropdown rounded-none border border-accent/40 font-mono' : 'glass-dropdown rounded-3xl'}`}>
+    <div className={`p-5 mb-6 ${isTechTheme ? 'glass-card font-mono' : isTechTheme ? 'glass-dropdown rounded-none border border-accent/40 font-mono' : 'glass-dropdown rounded-3xl'}`}>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-accent animate-pulse" />
