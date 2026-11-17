@@ -450,5 +450,48 @@
         "category": "4x1000"
       }
     ]
+  },
+  {
+    "frase": "pagué 8 mil en uber moto",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 8000,
+        "category": "Moto (plataformas)",
+        "merchant": "Uber Moto"
+      }
+    ]
+  },
+  {
+    "frase": "15 mil en un uber",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 15000,
+        "category": "Taxi / plataformas",
+        "merchant": "Uber"
+      }
+    ]
+  },
+  {
+    "frase": "6 mil en didi moto",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 6000,
+        "category": "Moto (plataformas)",
+        "merchant": "DiDi Moto"
+      }
+    ]
+  },
+  {
+    "frase": "4 mil en tembici",
+    "espera": [
+      {
+        "type": "gasto",
+        "amount": 4000,
+        "category": "Bicicleta / patineta"
+      }
+    ]
   }
 ]

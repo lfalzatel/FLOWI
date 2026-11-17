@@ -83,6 +83,8 @@ export const EXPENSE_CATEGORY_DEFS: CategoryDef[] = [
   ...g('Transporte', [
     ['Transporte', '🚌', '#F5A623'],
     ['Taxi / plataformas', '🚕', '#FBBF24'],
+    ['Moto (plataformas)', '🏍️', '#F59E0B'],
+    ['Bicicleta / patineta', '🚲', '#22C55E'],
     ['Bus intermunicipal', '🚍', '#0EA5E9'],
     ['Gasolina', '⛽', '#EF4444'],
     ['Parqueadero', 'parqueadero', '#1E3A8A'],
@@ -319,17 +321,36 @@ const MERCHANT_LIST: MerchantDef[] = [
   ...m(['Domicilios', 'Mercado'], [
     ['Rappi', 'rappi', '#FF441F'],
   ]),
+  // Apps de transporte en Colombia: en carro (taxi y particular) y en moto
   ...m(['Taxi / plataformas'], [
     ['Uber', 'uber', '#000000'],
     ['DiDi', '🚕', '#F97316'],
     ['InDrive', '🚕', '#22C55E'],
     ['Cabify', '🚕', '#7C3AED'],
+    ['Taxis Libres', '🚖', '#FACC15'],
+    ['Taxi en la calle', '🚖', '#FBBF24'],
+  ]),
+  ...m(['Moto (plataformas)', 'Taxi / plataformas'], [
+    ['Uber Moto', 'uber', '#000000'],
+    ['DiDi Moto', '🏍️', '#F97316'],
+    ['InDrive Moto', '🏍️', '#22C55E'],
     ['Picap', '🏍️', '#F59E0B'],
+    ['Mototaxi', '🏍️', '#F59E0B'],
+  ]),
+  ...m(['Bicicleta / patineta'], [
+    ['Tembici', '🚲', '#FF6B00'],
+    ['Patineta eléctrica', '🛴', '#22C55E'],
   ]),
   ...m(['Transporte'], [
     ['TransMilenio', '🚌', '#E30613'],
+    ['SITP', '🚌', '#0054A6'],
     ['Metro de Medellín', '🚇', '#0054A6'],
     ['MIO Cali', '🚌', '#0054A6'],
+    ['Megabús Pereira', '🚌', '#00A859'],
+    ['Metrolínea', '🚌', '#E30613'],
+    ['Transcaribe', '🚌', '#0EA5E9'],
+    ['Cable Aéreo Manizales', '🚡', '#0072BC'],
+    ['Buseta', '🚌', '#F5A623'],
   ]),
   ...m(['Gasolina'], [
     ['Terpel', '⛽', '#E30613'],
