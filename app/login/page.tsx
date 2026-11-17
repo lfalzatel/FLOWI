@@ -313,6 +313,8 @@ export default function LoginPage() {
         <p>
           ¿Dudas o sugerencias?{' '}
           <a href="https://wa.me/573104604592" target="_blank" rel="noopener noreferrer" className="text-emerald-400/80 hover:text-emerald-300">Escríbenos por WhatsApp</a>
+          {' o a '}
+          <a href="mailto:soporteflowiapp@gmail.com" className="text-emerald-400/80 hover:text-emerald-300">soporteflowiapp@gmail.com</a>
         </p>
       </footer>
     </div>

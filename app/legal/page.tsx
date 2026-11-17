@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/format';
 
 const UPDATED = '9 de noviembre de 2026';
 const WHATSAPP = 'https://wa.me/573104604592';
+const EMAIL = 'soporteflowiapp@gmail.com';
 
 type Block = { title: string; body: (string | string[])[] };
 
@@ -17,7 +18,7 @@ const PRIVACY: Block[] = [
     title: '1. Quién trata tus datos',
     body: [
       'FLOWI es una aplicación de finanzas personales hecha en Colombia por un desarrollador independiente, que es el responsable del tratamiento de tus datos.',
-      'Para cualquier consulta, reclamo o solicitud sobre tus datos escríbenos por WhatsApp al +57 310 460 4592 (también desde el botón de WhatsApp en la parte de arriba de la app).',
+      'Para cualquier consulta, reclamo o solicitud sobre tus datos escríbenos al correo ' + EMAIL + ' o por WhatsApp al +57 310 460 4592 (también desde el botón de WhatsApp en la parte de arriba de la app).',
     ],
   },
   {
@@ -63,7 +64,7 @@ const PRIVACY: Block[] = [
         'Revocar la autorización y pedir que borremos tus datos.',
         'Presentar quejas ante la Superintendencia de Industria y Comercio (SIC) si consideras que no se respetaron tus derechos.',
       ],
-      'Escríbenos por WhatsApp. Respondemos las consultas en máximo 10 días hábiles y los reclamos en máximo 15 días hábiles, como indica la ley.',
+      'Escríbenos al correo ' + EMAIL + ' o por WhatsApp. Respondemos las consultas en máximo 10 días hábiles y los reclamos en máximo 15 días hábiles, como indica la ley.',
     ],
   },
   {
@@ -134,7 +135,7 @@ const TERMS: Block[] = [
   },
   {
     title: '6. Devoluciones',
-    body: ['Si pagaste por error, se te cobró dos veces o el pago no activó Premium, escríbenos por WhatsApp dentro de los 5 días hábiles siguientes al pago. Revisamos tu caso y, si corresponde, te devolvemos el dinero por el mismo medio o por transferencia. Esto no limita los derechos que te da el Estatuto del Consumidor (Ley 1480 de 2011).'],
+    body: ['Si pagaste por error, se te cobró dos veces o el pago no activó Premium, escríbenos al correo ' + EMAIL + ' o por WhatsApp dentro de los 5 días hábiles siguientes al pago. Revisamos tu caso y, si corresponde, te devolvemos el dinero por el mismo medio o por transferencia. Esto no limita los derechos que te da el Estatuto del Consumidor (Ley 1480 de 2011).'],
   },
   {
     title: '7. Asistente con IA',
@@ -221,6 +222,8 @@ export default function LegalPage() {
           <p>
             ¿Preguntas sobre tus datos o tu plan?{' '}
             <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="text-emerald-400/80 hover:text-emerald-300">Escríbenos por WhatsApp</a>
+            {' o al correo '}
+            <a href={`mailto:${EMAIL}`} className="text-emerald-400/80 hover:text-emerald-300">{EMAIL}</a>
           </p>
           <p><Link href="/" className="hover:text-white/70">Volver a FLOWI</Link></p>
         </footer>

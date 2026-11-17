@@ -49,7 +49,7 @@ export function UpdateWatcher() {
     // Centrado con flex (no con translate): la animación de entrada usa transform y movía el aviso
     // media pantalla a la derecha, dejando el botón "Actualizar" fuera de la pantalla
     <div className="fixed inset-x-0 bottom-28 md:bottom-6 z-[120] flex justify-center px-4 pointer-events-none">
-      <div className="pointer-events-auto w-full max-w-[380px] animate-fade-in-up glass-dropdown bg-deep/95 rounded-2xl border border-accent/40 p-3 flex items-center gap-3 shadow-xl">
+      <div className="pointer-events-auto w-full max-w-[380px] animate-fade-in-up glass-dropdown bg-[color-mix(in_srgb,var(--bg-deep)_95%,transparent)] rounded-2xl border border-accent/40 p-3 flex items-center gap-3 shadow-xl">
         <RefreshCw className="w-5 h-5 text-accent shrink-0" />
         <p className="flex-1 min-w-0 text-xs text-text-secondary">Hay una versión nueva de FLOWI.</p>
         <button type="button" onClick={() => window.location.reload()}

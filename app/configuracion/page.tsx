@@ -977,6 +977,9 @@ export default function ConfigPage() {
           <a href="/legal#privacidad" className="underline hover:text-accent">Política de privacidad</a>
           {' · '}
           <a href="/legal#terminos" className="underline hover:text-accent">Términos de uso</a>
+          <br />
+          {'Soporte: '}
+          <a href="mailto:soporteflowiapp@gmail.com" className="underline hover:text-accent">soporteflowiapp@gmail.com</a>
         </p>
 
       </main>

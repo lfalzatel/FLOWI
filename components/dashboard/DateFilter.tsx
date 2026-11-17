@@ -135,7 +135,9 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
       data-tour={inline ? undefined : 'filter'}
       className={`${inline ? 'relative mb-0' : `sticky top-[var(--header-h,64px)] z-40 -mx-4 px-4 ${tight ? 'max-md:!mt-2 max-md:!-mb-2' : 'mb-2'} md:mb-6 md:flex-row md:items-center md:justify-center`} flex flex-col transition-[padding,background-color,gap] duration-200 ${
         stuck
-          ? `gap-1.5 py-2 bg-deep/80 backdrop-blur-xl shadow-lg shadow-black/10 border-b ${isTechTheme ? 'border-accent/20' : 'border-glass-border'}`
+          // Fondo casi sólido del tema: "bg-deep/80" no funciona con colores por variable y quedaba transparente
+          // (se veían la leyenda de la gráfica y las cifras detrás de las pestañas)
+          ? `gap-1.5 py-2 bg-[color-mix(in_srgb,var(--bg-deep)_94%,transparent)] backdrop-blur-xl shadow-lg shadow-black/10 border-b ${isTechTheme ? 'border-accent/20' : 'border-glass-border'}`
           : 'gap-1.5 md:gap-3 py-0 border-b border-transparent'
       }`}
     >

@@ -129,7 +129,7 @@ export function Header() {
       {/* Background that appears on scroll */}
       <div 
         className={`absolute inset-0 transition-opacity duration-300 -z-10 pointer-events-none ${
-          scrolled ? 'opacity-100 bg-deep/75 backdrop-blur-2xl border-b border-glass-border shadow-xl shadow-black/10' : 'opacity-0'
+          scrolled ? 'opacity-100 bg-[color-mix(in_srgb,var(--bg-deep)_88%,transparent)] backdrop-blur-2xl border-b border-glass-border shadow-xl shadow-black/10' : 'opacity-0'
         }`}
       />
       

@@ -69,7 +69,7 @@ export function WelcomeTour() {
           p-5 shadow-2xl transition-all duration-300
           ${isTechTheme 
             ? 'bg-black border-2 border-accent rounded-none shadow-[0_0_30px_rgba(0,229,160,0.15)]' 
-            : 'glass-card rounded-2xl border border-glass-border bg-deep/90 backdrop-blur-xl'
+            : 'glass-card rounded-2xl border border-glass-border bg-[color-mix(in_srgb,var(--bg-deep)_90%,transparent)] backdrop-blur-xl'
           }
         `}>
           <div className="flex items-start gap-3 mb-3">
