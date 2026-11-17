@@ -108,7 +108,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
       {/* Un solo componente para Inicio y Presupuestos; en el tema verde usa la misma tarjeta que el resto de Inicio (esquinas abiertas) */}
       <div className={`mt-4 p-5 animate-fade-in-up transition-all ${
         isTechTheme
-          ? 'glass-card font-mono'
+          ? 'glass-card glass-static font-mono'
           : isTechTheme
           ? 'border border-accent/30 rounded-none bg-black/40 font-mono' 
           : 'glass-card rounded-3xl shadow-sm border border-glass-border'

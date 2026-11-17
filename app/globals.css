@@ -217,6 +217,12 @@ body {
   background: var(--glass-hover);
   border-color: var(--glass-strong);
 }
+/* Contenedores grandes que solo agrupan tarjetas: no se iluminan (se veía todo saturado) */
+.glass-card.glass-static:hover,
+.glass-card.glass-static:active {
+  background: var(--glass);
+  border-color: var(--glass-border);
+}
 
 .glass-dropdown {
   background: rgba(255, 255, 255, 0.06);
