@@ -457,6 +457,10 @@ const MERCHANT_LIST: MerchantDef[] = [
     ['EPM', 'epm', '#00A859'],
     ['EPM Manizales', 'badge:#0E7490:EP MZL', '#0E7490'],
   ]),
+  // Empresas de acueducto: el agua de la ciudad tiene su propia empresa
+  ...m(['Agua', 'Servicios públicos'], [
+    ['Aguas de Manizales', 'aguas_manizales', '#0072BC'],
+  ]),
   ...m(['Luz', 'Agua', 'Gas natural'], [
     ['Enel', '⚡', '#0555FA'],
     ['Celsia', '⚡', '#E30613'],

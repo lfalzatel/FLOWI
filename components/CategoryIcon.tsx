@@ -300,6 +300,18 @@ export function CategoryIcon({ icon, label, className }: { icon: string, label: 
     );
   }
 
+  if (check('aguas_manizales') || check('aguas de manizales')) {
+    return (
+      <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Aguas de Manizales">
+        <rect width="40" height="40" rx="8" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="1" />
+        {/* Gota azul con una ola clara: acueducto de Manizales */}
+        <path d="M20 5C20 5 11 15 11 21.5C11 26.5 15 30 20 30C25 30 29 26.5 29 21.5C29 15 20 5 20 5Z" fill="#0072BC" />
+        <path d="M13.5 22.5C16 20.8 18 20.8 20 22.3C22 23.8 24.2 23.8 26.5 22.2C26.2 26 23.4 28.2 20 28.2C16.6 28.2 13.9 26 13.5 22.5Z" fill="#38BDF8" />
+        <text x="50%" y="92%" textAnchor="middle" fill="#0072BC" fontSize="5.2" fontWeight="bold" fontFamily="sans-serif" letterSpacing="0.2">AGUAS MZL</text>
+      </svg>
+    );
+  }
+
   if (check('efigas')) {
     return (
       <svg className={className || "w-5 h-5"} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

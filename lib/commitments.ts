@@ -31,6 +31,8 @@ export interface PaidCommitment {
   amount: number | null;     // lo que se pagó (o el valor esperado si se marcó a mano)
   paidAt: Date | null;       // cuándo se registró el pago (null = marcado con "Ya lo pagué")
   how: 'registrado' | 'marcado' | 'abono';
+  // Todos los pagos de este compromiso en el mes, cuando hay más de uno (p. ej. el agua pagada dos veces por error)
+  repeats?: { amount: number; date: Date; description?: string }[];
 }
 
 export interface CommitmentsSummary {
@@ -307,6 +309,19 @@ export function getCommitments(
       key, title: `Cuota ${d.title}`, category: 'Deudas', dueDate: due, amount: d.installment, debt: d, exactDate: true,
       daysLeft: Math.round((due.getTime() - today.getTime()) / 86400000),
     });
+  }
+
+  // Pagos repetidos: el mismo pago fijo (misma categoría y, si lo hay, mismo comercio) registrado más de una vez este mes
+  for (const p of paid) {
+    if (p.how === 'abono') continue;
+    // Si hay dos compromisos de la misma categoría (dos facturas de luz de dos casas), no es un pago repetido
+    if (paid.filter(x => normalize(x.category) === normalize(p.category)).length > 1) continue;
+    const same = fixedThisMonth.filter(t => t.type === 'gasto' && normalize(t.category) === normalize(p.category));
+    if (same.length < 2) continue;
+    const main = (p.paidAt && same.find(t => toDate(t.date).getTime() === p.paidAt!.getTime())) || same[0];
+    const all = same.filter(t => t === main || !main.merchant || !t.merchant || normalize(t.merchant) === normalize(main.merchant))
+      .sort((a, b) => toDate(a.date).getTime() - toDate(b.date).getTime());
+    if (all.length > 1) p.repeats = all.map(t => ({ amount: t.amount, date: toDate(t.date), description: t.description }));
   }
 
   items.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());

@@ -78,6 +78,11 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-text-primary truncate">{p.title}</p>
           <p className="text-[11px] text-text-muted truncate">{when}{p.how === 'abono' ? ' · abono a la deuda' : ''}</p>
+          {p.repeats?.length ? (
+            <p className="text-[11px] text-amber-400 font-semibold leading-snug whitespace-normal">
+              ⚠ Pagado {p.repeats.length} veces este mes: {p.repeats.map(r => `${fmt(r.amount)} el ${r.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}`).join(' y ')}. Si fue un error, pide el reembolso o borra el que sobra en Gastos.
+            </p>
+          ) : null}
         </div>
         <div className="text-right shrink-0">
           <p className="text-sm font-bold text-emerald-500">{p.amount ? fmt(p.amount) : '—'}</p>
