@@ -6,6 +6,7 @@ import { AnimatedNumber } from './AnimatedNumber';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { useCategories } from '@/hooks/useCategories';
 import { findCatalogEntry } from '@/lib/categories';
+import { groupByCategory } from '@/lib/receiptItems';
 
 interface Props { 
   transactions: Transaction[]; 
@@ -52,6 +53,12 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
         const cat = getCategoryIcon(t.category);
         const details = [t.category, t.merchant, t.paymentMethod].filter(Boolean).join(' · ');
         const displayName = t.description || t.category;
+        // Compras con productos adentro (recibo o gasto manual con productos): cuántos y en cuántas categorías
+        const prodCount = t.items?.length ?? 0;
+        const catCount = prodCount ? groupByCategory(t.items!, t.category).length : 0;
+        const itemsNote = prodCount
+          ? `🧾 ${prodCount} ${prodCount === 1 ? 'producto' : 'productos'}${catCount > 1 ? ` · ${catCount} categorías` : ''}`
+          : '';
         const displayLabel = isCyberpunk 
           ? `>_ ${displayName.toUpperCase().replace(/\s+/g, '_')}` 
           : displayName;
@@ -75,6 +82,9 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
                   <p className="text-[9px] text-accent/60 font-mono mt-0.5 uppercase tracking-wider truncate">
                     {details.replace(/\s+/g, '_')} // {fmtDate(t.date as Timestamp)}
                   </p>
+                  {itemsNote && (
+                    <p className="text-[9px] text-accent/80 font-mono mt-0.5 uppercase tracking-wider truncate">{itemsNote}</p>
+                  )}
                 </div>
               </div>
               <p className={`text-[13px] font-bold flex-shrink-0 font-mono tracking-widest ml-4
@@ -103,6 +113,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
                 {displayLabel}
               </p>
               <p className="text-[11px] text-text-secondary mt-0.5 truncate">{details} • {fmtDate(t.date as Timestamp)}</p>
+              {itemsNote && <p className="text-[11px] text-accent mt-0.5 truncate">{itemsNote}</p>}
             </div>
             {/* Amount */}
             <p className={`text-[13px] font-bold flex-shrink-0
