@@ -1,6 +1,7 @@
 import { Account, AccountKind, Debt, Investment, InvestmentFunding, Transaction, Transfer, calculateDebtInterest } from './firestore';
 import { investmentValue } from './investments';
 import { normalizeText } from './categories';
+import { moneyMoves } from './shared';
 
 // Saldos de cuentas y patrimonio neto.
 //
@@ -59,11 +60,12 @@ export function accountStates(accounts: Account[], transactions: Transaction[], 
     const id = accountFor(t, accounts);
     const st = id ? states.get(id) : undefined;
     if (!st) continue;
-    const date = toDate(t.date);
-    if (date.getTime() < new Date(st.account.baseAt).getTime()) continue;
-    const amount = t.type === 'ingreso' ? t.amount : -t.amount;
-    st.balance += amount;
-    st.movements.push({ kind: 'tx', date, amount, label: t.description?.trim() || t.category, tx: t });
+    // Un gasto compartido mueve la plata real: el total si pagaste tú, y lo que te devuelven o pagas después
+    for (const m of moneyMoves(t)) {
+      if (m.date.getTime() < new Date(st.account.baseAt).getTime()) continue;
+      st.balance += m.amount;
+      st.movements.push({ kind: 'tx', date: m.date, amount: m.amount, label: m.label, tx: t });
+    }
   }
   for (const tr of transfers) {
     const date = new Date(tr.date);

@@ -7,6 +7,9 @@ import { CategoryIcon } from '@/components/CategoryIcon';
 import { useCategories } from '@/hooks/useCategories';
 import { findCatalogEntry } from '@/lib/categories';
 import { groupByCategory } from '@/lib/receiptItems';
+import { pendingFromMe, pendingToMe } from '@/lib/shared';
+import { formatCurrency } from '@/lib/format';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Props { 
   transactions: Transaction[]; 
@@ -28,6 +31,8 @@ function fmtDate(date: Timestamp | Date) {
 export function TransactionList({ transactions, limit, onEdit, animationKey, columns = false }: Props) {
   const { theme } = useTheme();
   const { allCategories } = useCategories();
+  const { profile } = useAuth();
+  const money = (n: number) => formatCurrency(Math.round(n), profile?.currency || 'COP');
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const items = limit ? transactions.slice(0, limit) : transactions;
 
@@ -59,6 +64,11 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
         const itemsNote = prodCount
           ? `🧾 ${prodCount} ${prodCount === 1 ? 'producto' : 'productos'}${catCount > 1 ? ` · ${catCount} categorías` : ''}`
           : '';
+        // Gasto compartido: lo que falta por cobrar o por pagar
+        const sh = t.type === 'gasto' ? t.shared : null;
+        const sharedNote = !sh ? '' : sh.paidByMe
+          ? (pendingToMe(sh) ? `👥 Te deben ${money(pendingToMe(sh))}` : '👥 Compartido · ya te pagaron')
+          : (pendingFromMe(sh) ? `👥 Le debes a ${sh.people[0]?.name}` : `👥 Pagó ${sh.people[0]?.name} · ya le pagaste`);
         const displayLabel = isCyberpunk 
           ? `>_ ${displayName.toUpperCase().replace(/\s+/g, '_')}` 
           : displayName;
@@ -84,6 +94,9 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
                   </p>
                   {itemsNote && (
                     <p className="text-[9px] text-accent/80 font-mono mt-0.5 uppercase tracking-wider truncate">{itemsNote}</p>
+                  )}
+                  {sharedNote && (
+                    <p className="text-[9px] text-accent/80 font-mono mt-0.5 uppercase tracking-wider truncate">{sharedNote}</p>
                   )}
                 </div>
               </div>
@@ -114,6 +127,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
               </p>
               <p className="text-[11px] text-text-secondary mt-0.5 truncate">{details} • {fmtDate(t.date as Timestamp)}</p>
               {itemsNote && <p className="text-[11px] text-accent mt-0.5 truncate">{itemsNote}</p>}
+              {sharedNote && <p className="text-[11px] text-accent mt-0.5 truncate">{sharedNote}</p>}
             </div>
             {/* Amount */}
             <p className={`text-[13px] font-bold flex-shrink-0

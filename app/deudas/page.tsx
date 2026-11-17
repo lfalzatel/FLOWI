@@ -14,6 +14,10 @@ import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
+import Link from 'next/link';
+import { Users, ChevronRight } from 'lucide-react';
+import { useData } from '@/components/DataProvider';
+import { sharedBalances } from '@/lib/shared';
 
 const toDate = (value: any): Date | null => {
   if (!value) return null;
@@ -36,6 +40,11 @@ export default function DeudasPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { debts, loading: debtsLoading, refresh } = useDebts();
   const router = useRouter();
+  // Gastos compartidos pendientes (viven en los gastos; aquí solo se resumen y se enlazan)
+  const { transactions } = useData();
+  const sharedPending = sharedBalances(transactions).reduce(
+    (acc, b) => ({ toMe: acc.toMe + b.owesMe, fromMe: acc.fromMe + b.iOwe, people: acc.people + (b.owesMe || b.iOwe ? 1 : 0) }),
+    { toMe: 0, fromMe: 0, people: 0 });
   
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -173,6 +182,24 @@ export default function DeudasPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Gastos compartidos: lo que te deben (o debes) de cuentas divididas */}
+        {sharedPending.people > 0 && (
+          <Link href="/servicios/compartidos"
+                className={`glass-card flex items-center gap-3 p-3 ${isCyberpunk ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
+            <div className={`w-9 h-9 flex items-center justify-center shrink-0 ${isCyberpunk ? 'rounded-none border border-orange-500/30' : 'rounded-xl bg-orange-500/15'}`}>
+              <Users className="w-4 h-4 text-orange-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-text-primary">Gastos compartidos</p>
+              <p className="text-[11px] text-text-muted truncate">
+                {[sharedPending.toMe ? `Te deben ${fmt(sharedPending.toMe)}` : '', sharedPending.fromMe ? `Debes ${fmt(sharedPending.fromMe)}` : ''].filter(Boolean).join(' · ')}
+                {' · '}{sharedPending.people} {sharedPending.people === 1 ? 'persona' : 'personas'}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />
+          </Link>
         )}
         </div>
 

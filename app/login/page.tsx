@@ -117,6 +117,11 @@ export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
   const [isSplashDone, setIsSplashDone] = useState(false);
   const [authDoneUrl, setAuthDoneUrl] = useState<string | null>(null);
+  const takeNext = () => {
+    const n = sessionStorage.getItem('login_next');
+    sessionStorage.removeItem('login_next');
+    return n && n.startsWith('/compartido') ? n : null;
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -128,11 +133,14 @@ export default function LoginPage() {
       import('@/lib/auth').then(({ signOut }) => signOut().catch(console.error));
       return;
     }
+    // Volver a donde venía tras entrar (solo páginas propias, p. ej. el enlace de un gasto compartido)
+    const next = params.get('next');
+    if (next && next.startsWith('/compartido')) sessionStorage.setItem('login_next', next);
     // Quien ya tiene la sesión abierta va directo a su inicio
     let unsubscribe: (() => void) | undefined;
     Promise.all([import('firebase/auth'), import('@/lib/firebase')]).then(([{ onAuthStateChanged }, { auth }]) => {
       unsubscribe = onAuthStateChanged(auth, (u) => {
-        if (u && !sessionStorage.getItem('login_in_progress')) router.replace('/');
+        if (u && !sessionStorage.getItem('login_in_progress')) router.replace(takeNext() || '/');
       });
     });
     return () => unsubscribe?.();
@@ -176,7 +184,7 @@ export default function LoginPage() {
 
       const { processGoogleUser } = await import('@/lib/auth');
       const { isNewUser } = await processGoogleUser(result.user);
-      setAuthDoneUrl(isNewUser ? '/?newuser=true' : '/?login=true');
+      setAuthDoneUrl(takeNext() || (isNewUser ? '/?newuser=true' : '/?login=true'));
     } catch (error) {
       console.error('Error logging in:', error);
       // En algunos celulares la ventana de Google responde con error aunque la sesión sí quedó
@@ -186,7 +194,7 @@ export default function LoginPage() {
         if (auth.currentUser) {
           const { processGoogleUser } = await import('@/lib/auth');
           const { isNewUser } = await processGoogleUser(auth.currentUser);
-          setAuthDoneUrl(isNewUser ? '/?newuser=true' : '/?login=true');
+          setAuthDoneUrl(takeNext() || (isNewUser ? '/?newuser=true' : '/?login=true'));
           return;
         }
       } catch (e) {

@@ -1,5 +1,6 @@
 import { db } from './firebase';
 import type { ReceiptItem } from '@/lib/receiptItems';
+import type { SharedInfo } from '@/lib/shared';
 import { BASE_CATEGORY_DEFS, EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS } from './categories';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc, arrayUnion, orderBy } from 'firebase/firestore';
 
@@ -18,6 +19,7 @@ export interface Transaction {
   business?: boolean;        // "Es del negocio" (Modo negocio); si falta, se deduce de la categoría (lib/business.ts)
   items?: ReceiptItem[];     // productos del recibo escaneado (lib/receiptItems.ts)
   receiptId?: string;        // mismo valor en las partes de una compra repartida por categoría
+  shared?: SharedInfo | null; // gasto compartido: amount es TU parte (lib/shared.ts)
   _partOf?: string;          // solo en informes (expandByItems): parte por categoría del gasto con este id; no se guarda
 }
 

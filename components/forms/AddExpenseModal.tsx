@@ -34,7 +34,10 @@ import { ReceiptItem, itemsSum, itemsCheck, groupByCategory, splitTotal, partDes
 import { ItemsByCategory } from '@/components/forms/ReceiptItemsList';
 import { suggestItemCategory } from '@/lib/txSuggest';
 import { findRepeatedPayment, repeatedPaymentText } from '@/lib/repeatedPayment';
-import { ReceiptText } from 'lucide-react';
+import { ReceiptText, Users } from 'lucide-react';
+import { SharedExpenseEditor, SharedDraft, emptySharedDraft, draftAmounts } from '@/components/forms/SharedExpenseEditor';
+import { SharedInfo, equalShares, knownPeople, personKey } from '@/lib/shared';
+import { formatCurrency } from '@/lib/format';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -43,6 +46,8 @@ interface AddExpenseModalProps {
   initialType?: 'gasto' | 'ingreso';
   initialVoiceParsed?: ParsedVoiceResult;
   initialBusiness?: boolean; // abrir ya marcado como del negocio (desde Mi negocio)
+  initialShared?: boolean;   // abrir ya con "Gasto compartido" (desde Cuentas compartidas)
+  initialValues?: { amount?: number; description?: string; category?: string; date?: string }; // p. ej. desde un enlace compartido
 }
 
 const QUICK_SLOTS = 7;
@@ -53,7 +58,7 @@ function toTimeString(d: Date): string {
 const VISIBLE_MERCHANTS = 8;
 const VISIBLE_PAYMENTS = 4;
 
-export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTarget, initialType = 'gasto', initialVoiceParsed, initialBusiness = false }: AddExpenseModalProps) {
+export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTarget, initialType = 'gasto', initialVoiceParsed, initialBusiness = false, initialShared = false, initialValues }: AddExpenseModalProps) {
   // Desde un informe puede llegar una parte de un recibo (expandByItems): se edita el gasto completo
   const { transactions: allTx } = useData();
   const transactionToEdit = editTarget?._partOf ? allTx.find(t => t.id === editTarget._partOf) || editTarget : editTarget;
@@ -64,9 +69,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const { transactions } = useData();
 
   const [type, setType] = useState<'gasto' | 'ingreso'>(initialVoiceParsed?.type === 'ingreso' ? 'ingreso' : initialType);
-  const [amount, setAmount] = useState(initialVoiceParsed?.amount ? initialVoiceParsed.amount.toString() : '');
-  const [description, setDescription] = useState(initialVoiceParsed?.description || '');
-  const [category, setCategory] = useState(initialVoiceParsed?.category || '');
+  const [amount, setAmount] = useState(initialVoiceParsed?.amount ? initialVoiceParsed.amount.toString() : initialValues?.amount ? String(initialValues.amount) : '');
+  const [description, setDescription] = useState(initialVoiceParsed?.description || initialValues?.description || '');
+  const [category, setCategory] = useState(initialVoiceParsed?.category || initialValues?.category || '');
+  // Gasto compartido (null = no se compartió)
+  const [shared, setShared] = useState<SharedDraft | null>(initialShared ? emptySharedDraft() : null);
   const [merchant, setMerchant] = useState('');
   const [items, setItems] = useState<ReceiptItem[] | undefined>(undefined); // productos de la compra (undefined = sin lista)
   const [autoSum, setAutoSum] = useState(false); // el monto sigue a la suma de los productos
@@ -76,7 +83,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   // Modo negocio: se marca solo con categorías de negocio (Venta, Inventario…) y se puede cambiar
   const [isBusiness, setIsBusiness] = useState(() => initialBusiness ||
     (initialVoiceParsed?.category ? isBusinessCategory(initialVoiceParsed.category, initialVoiceParsed.type === 'ingreso' ? 'ingreso' : initialType) : false));
-  const [date, setDate] = useState(getLocalDateString());
+  const [date, setDate] = useState(initialValues?.date || getLocalDateString());
   // Hora local "HH:MM"; por defecto la actual y editable para gastos pasados o futuros
   const [time, setTime] = useState(() => toTimeString(new Date()));
   const [loading, setLoading] = useState(false);
@@ -266,6 +273,16 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       setCategory(transactionToEdit.category);
       setMerchant(transactionToEdit.merchant || '');
       setItems(transactionToEdit.items);
+      const sh = transactionToEdit.type === 'gasto' ? transactionToEdit.shared : null;
+      if (sh) {
+        // Si pagaste tú, en Monto va el total; tu parte se calcula
+        setAmount(String(sh.paidByMe ? sh.total : transactionToEdit.amount));
+        const eq = equalShares(sh.total, sh.people.length);
+        const equal = sh.paidByMe && sh.people.every((p, i) => p.amount === eq[i]);
+        setShared({ paidByMe: sh.paidByMe, equal, people: sh.people.map(p => ({ name: p.name, amount: String(p.amount), settledAt: p.settledAt ?? null })) });
+      } else {
+        setShared(null);
+      }
       setAutoSum(!!transactionToEdit.items?.length && itemsCheck(transactionToEdit.items, transactionToEdit.amount).ok);
       setPaymentMethod(transactionToEdit.paymentMethod || '');
       if (transactionToEdit.isFixed !== undefined) {
@@ -283,6 +300,24 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     }
   }, [transactionToEdit]);
 
+  const fmt = (n: number) => formatCurrency(Math.round(n), profile?.currency || 'COP');
+  const peopleNames = useMemo(() => knownPeople(transactions), [transactions]);
+  // Lo que se guarda del compartido (solo personas con nombre) y tu parte
+  const { sharedInfo, sharedMine } = useMemo((): { sharedInfo: SharedInfo | null; sharedMine: number } => {
+    const total = Math.round(Number(amount) || 0);
+    if (type !== 'gasto' || !shared || !total) return { sharedInfo: null, sharedMine: total };
+    const amounts = draftAmounts(shared, total);
+    const people = shared.people
+      .map((p, i) => ({ name: p.name.trim(), amount: amounts[i] || 0, settledAt: p.settledAt ?? null }))
+      .filter(p => p.name && personKey(p.name));
+    if (!people.length) return { sharedInfo: null, sharedMine: total };
+    if (!shared.paidByMe) {
+      return { sharedInfo: { total, paidByMe: false, people: [{ ...people[0], amount: total }] }, sharedMine: total };
+    }
+    const others = people.reduce((s, p) => s + p.amount, 0);
+    return { sharedInfo: { total, paidByMe: true, people }, sharedMine: total - others };
+  }, [type, shared, amount]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !amount) return;
@@ -291,6 +326,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       if (prev) { setRepeatWarn(repeatedPaymentText(prev)); return; }
     }
     repeatOk.current = false;
+    if (sharedInfo && sharedMine < 0) return;
 
     setLoading(true);
     try {
@@ -312,20 +348,22 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       const data = {
         userId: user.uid,
         type,
-        amount: parseFloat(amount),
+        amount: sharedInfo ? sharedMine : parseFloat(amount),
         description,
         category: finalCategory,
         date: finalDate,
         ...extras,
         ...(type === 'gasto' ? { isFixed } : {}),
         business: isBusiness,
+        // Al editar se envía null para quitar un compartido anterior
+        ...(sharedInfo ? { shared: sharedInfo } : transactionToEdit?.shared ? { shared: null } : {}),
       };
 
       recordUsage(usageBucket, finalCategory);
       if (finalMerchant) recordUsage(`merchant-${finalCategory}`, finalMerchant);
       if (paymentMethod) recordUsage('payment', paymentMethod);
 
-      const numericAmount = parseFloat(amount);
+      const numericAmount = data.amount;
 
       // ⚡ Respuesta optimista inmediata a 0ms
       triggerPowerAnimation(numericAmount, transactionToEdit?.id ? 'edicion' : type);
@@ -333,7 +371,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
       const saved = type === 'gasto' && items ? cleanItems(items) : [];
       const groups = saved.length ? groupByCategory(saved, finalCategory) : [];
-      if (groups.length > 1 && split) {
+      if (groups.length > 1 && split && !sharedInfo) {
         // Compra repartida: un gasto por categoría, con sus productos, que juntos suman lo pagado
         const amounts = splitTotal(groups, numericAmount);
         const receiptId = transactionToEdit?.receiptId || `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -495,7 +533,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
           {/* Amount */}
           <div>
-            <label htmlFor="tx-amount" className={`${labelClass} mb-1.5 block`}>Monto</label>
+            <label htmlFor="tx-amount" className={`${labelClass} mb-1.5 block`}>{shared ? (shared.paidByMe ? 'Total que pagaste' : 'Tu parte') : 'Monto'}</label>
             <div className="relative">
               <span className={`absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold ${isTechTheme ? 'text-accent/70' : 'text-text-secondary'}`}>$</span>
               <input
@@ -552,6 +590,17 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               <button type="button" onClick={() => { setItems([]); setAutoSum(!amount || Number(amount) === 0); }}
                       className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
                 <ReceiptText className="w-4 h-4" /> Agregar productos (opcional)
+              </button>
+            ))}
+            {type === 'gasto' && (shared ? (
+              <div className="mt-2">
+                <SharedExpenseEditor draft={shared} total={Number(amount) || 0} knownNames={peopleNames} isTech={isTechTheme}
+                                     fmt={fmt} onChange={setShared} onRemove={() => setShared(null)} />
+              </div>
+            ) : (
+              <button type="button" onClick={() => setShared(emptySharedDraft())}
+                      className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
+                <Users className="w-4 h-4" /> Compartir este gasto (opcional)
               </button>
             ))}
           </div>
@@ -779,7 +828,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             <button
               type="submit"
-              disabled={loading || !amount}
+              disabled={loading || !amount || (!!sharedInfo && sharedMine < 0)}
               className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent text-white hover:bg-accent/90`}`}
             >
               {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : (type === 'gasto' ? 'Añadir gasto' : 'Añadir ingreso')}
