@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 import { Transaction, isFixedExpenseCategory } from './firestore';
 import { getLocalMonthString } from './dateUtils';
 
@@ -33,7 +34,7 @@ export function previousMonth(now = new Date()): string {
 
 export function monthLabel(month: string): string {
   const [y, m] = month.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('es-CO', { month: 'long' });
+  return new Date(y, m - 1, 1).toLocaleDateString(currentLocale(), { month: 'long' });
 }
 
 export function getMonthReview(transactions: Transaction[], month: string): MonthReview {

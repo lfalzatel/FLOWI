@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
@@ -92,7 +93,7 @@ export function PremiumCelebration() {
   }, [profile]);
 
   if (!open || typeof document === 'undefined') return null;
-  const untilText = open.until?.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+  const untilText = open.until?.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 
   return createPortal(
     <div className={`fixed inset-0 z-[100000] flex items-center justify-center p-6 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label="Ya eres Premium">

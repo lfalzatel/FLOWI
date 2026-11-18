@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ChevronRight, Sparkles, X, Heart, Lightbulb, BarChart3 } from 'lucide-react';
@@ -55,7 +56,7 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
   const isSupport = action.kind === 'support';
   const isReview = action.id.startsWith('review:');
   const Icon = isSupport ? Heart : isTip ? Lightbulb : isReview ? BarChart3 : Sparkles;
-  const eyebrow = isSupport ? 'Apoya a FLOWI' : isTip ? 'Descubre FLOWI' : isReview ? 'Resumen del mes' : 'Tu siguiente acción';
+  const eyebrow = isSupport ? tr('Apoya a FLOWI') : isTip ? tr('Descubre FLOWI') : isReview ? tr('Resumen del mes') : tr('Tu siguiente acción');
   const reconcileAccount = action.kind === 'reconcile' ? accounts.find(a => a.id === action.accountId) : undefined;
 
   const body = (
@@ -90,7 +91,7 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
                     if (action.href.startsWith('/?accion=')) { e.preventDefault(); window.dispatchEvent(new CustomEvent('flowi-open-quick-actions')); }
                   }}>{body}</Link>
           : <button type="button" onClick={() => (action.kind === 'notify' ? askForNotifications({ force: true }) : setOpen(true))} className={inner}>{body}</button>}
-        <button type="button" onClick={onSkip} title="Saltar por hoy" aria-label="Saltar esta sugerencia por hoy"
+        <button type="button" onClick={onSkip} title={tr('Saltar por hoy')} aria-label={tr('Saltar esta sugerencia por hoy')}
                 className="p-2 mr-2 text-text-muted hover:text-text-primary shrink-0">
           <X className="w-4 h-4" />
         </button>
@@ -137,17 +138,17 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
                 <p className="text-xs text-text-muted">Según FLOWI tienes {formatCurrency(Math.round(action.balance * 100) / 100, currency)}</p>
               </div>
             </div>
-            <p className="text-sm text-text-secondary mb-5">Abre la app del banco y mira el saldo. ¿Es el mismo?</p>
+            <p className="text-sm text-text-secondary mb-5">{tr('Abre la app del banco y mira el saldo. ¿Es el mismo?')}</p>
             <div className="space-y-2">
               <button type="button" onClick={async () => { await updateAccount(reconcileAccount.id!, { confirmedAt: new Date().toISOString() }); setOpen(false); }}
                       className={`w-full py-3 font-bold ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white'}`}>
-                Sí, cuadra
+                {tr('Sí, cuadra')}
               </button>
               <button type="button" onClick={() => { setOpen(false); setAdjusting(true); }}
                       className={`w-full py-3 text-sm font-semibold border ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-primary'}`}>
-                No, ajustar el saldo
+                {tr('No, ajustar el saldo')}
               </button>
-              <button type="button" onClick={() => setOpen(false)} className="w-full py-2 text-xs text-text-muted">Ahora no</button>
+              <button type="button" onClick={() => setOpen(false)} className="w-full py-2 text-xs text-text-muted">{tr('Ahora no')}</button>
             </div>
           </div>
         </div>,

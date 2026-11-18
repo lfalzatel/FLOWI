@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -59,7 +60,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const [everyMonths, setEveryMonths] = useState<number>(initial?.everyMonths && initial.everyMonths > 1 ? initial.everyMonths : 1);
   const thisMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   const [startMonth, setStartMonth] = useState<string>(initial?.startMonth || thisMonthKey);
-  const [amountText, setAmountText] = useState(initial?.amount ? Number(initial.amount).toLocaleString('es-CO') : '');
+  const [amountText, setAmountText] = useState(initial?.amount ? Number(initial.amount).toLocaleString(currentLocale()) : '');
   // ¿Es un pago o un evento/tarea? undefined = se deduce (valor, categoría o comercio)
   const [paymentChoice, setPaymentChoice] = useState<boolean | undefined>(initial?.isPayment);
 
@@ -284,7 +285,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                   <div className="min-w-0">
                     <label className={lbl} htmlFor="rem-amount">Valor</label>
                     <input id="rem-amount" type="text" inputMode="numeric" placeholder="Opcional" value={amountText}
-                           onChange={(e) => { const d = e.target.value.replace(/\D/g, ''); setAmountText(d ? Number(d).toLocaleString('es-CO') : ''); }}
+                           onChange={(e) => { const d = e.target.value.replace(/\D/g, ''); setAmountText(d ? Number(d).toLocaleString(currentLocale()) : ''); }}
                            className={field} />
                   </div>
                 )}

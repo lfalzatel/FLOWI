@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import Link from 'next/link';
 import { ChevronRight, Crown } from 'lucide-react';
@@ -8,7 +9,7 @@ import { usePlan } from '@/lib/plans';
 export function PlanCard({ isTechTheme }: { isTechTheme: boolean }) {
   const { premium, until } = usePlan();
   const playStore = usePlayStore();
-  const untilText = until ? until.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+  const untilText = until ? until.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long', year: 'numeric' }) : null;
   return (
     <Link href="/planes"
           className={`flex items-center gap-3 p-4 border transition-colors hover:border-amber-400/60 ${isTechTheme ? 'rounded-none border-amber-400/30 bg-amber-400/5 font-mono' : 'rounded-2xl border-amber-400/30 bg-amber-400/5'}`}>

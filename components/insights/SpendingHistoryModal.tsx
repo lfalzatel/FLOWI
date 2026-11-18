@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -14,7 +15,7 @@ const RANGES = [{ n: 3, label: '3 meses' }, { n: 6, label: '6 meses' }, { n: 12,
 
 const monthName = (k: string, long = false) => {
   const d = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1);
-  const s = d.toLocaleDateString('es-CO', long ? { month: 'long', year: 'numeric' } : { month: 'short' }).replace('.', '');
+  const s = d.toLocaleDateString(currentLocale(), long ? { month: 'long', year: 'numeric' } : { month: 'short' }).replace('.', '');
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
@@ -187,7 +188,7 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
                           <div className="min-w-0">
                             <p className="text-[13px] text-text-primary truncate">{it.description || target.label}</p>
                             <p className="text-[10px] text-text-muted">
-                              {it.date.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' })}
+                              {it.date.toLocaleDateString(currentLocale(), { weekday: 'short', day: 'numeric', month: 'short' })}
                               {target.kind === 'ant' && !it.small ? ' · compra grande' : ''}
                             </p>
                           </div>

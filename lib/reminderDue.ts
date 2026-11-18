@@ -1,3 +1,4 @@
+import { tr } from '@/lib/i18n';
 import { Reminder, Transaction } from './firestore';
 import { aliasKey } from './categories';
 
@@ -197,17 +198,17 @@ export function isCategoryShared(r: Reminder, reminders: Reminder[]): boolean {
 
 // Para eventos y tareas: "Es hoy", "Fue ayer"…
 export function eventDueLabel(daysLeft: number): string {
-  if (daysLeft < -1) return `Fue hace ${-daysLeft} días`;
-  if (daysLeft === -1) return 'Fue ayer';
-  if (daysLeft === 0) return '¡Es hoy!';
-  if (daysLeft === 1) return 'Mañana';
-  return `Faltan ${daysLeft} días`;
+  if (daysLeft < -1) return tr('Fue hace {n} días', { n: -daysLeft });
+  if (daysLeft === -1) return tr('Fue ayer');
+  if (daysLeft === 0) return tr('¡Es hoy!');
+  if (daysLeft === 1) return tr('Mañana');
+  return tr('Faltan {n} días', { n: daysLeft });
 }
 
 export function dueLabel(daysLeft: number): string {
-  if (daysLeft < -1) return `Vencido hace ${-daysLeft} días`;
-  if (daysLeft === -1) return 'Venció ayer';
-  if (daysLeft === 0) return '¡Vence hoy!';
-  if (daysLeft === 1) return 'Mañana';
-  return `Faltan ${daysLeft} días`;
+  if (daysLeft < -1) return tr('Vencido hace {n} días', { n: -daysLeft });
+  if (daysLeft === -1) return tr('Venció ayer');
+  if (daysLeft === 0) return tr('¡Vence hoy!');
+  if (daysLeft === 1) return tr('Mañana');
+  return tr('Faltan {n} días', { n: daysLeft });
 }

@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -184,7 +185,7 @@ export default function CuentasPage() {
                         <ul className="space-y-1.5">
                           {shown.map((m, i) => (
                             <li key={i} className="flex items-center gap-2 text-xs">
-                              <span className="w-14 shrink-0 text-text-muted">{m.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</span>
+                              <span className="w-14 shrink-0 text-text-muted">{m.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}</span>
                               <span className="flex-1 min-w-0 truncate text-text-secondary">{m.label}</span>
                               {m.kind === 'base'
                                 ? <span className="text-text-muted"><AnimatedNumber value={m.amount} format={fmt} /></span>

@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useTheme } from '@/components/ThemeProvider';
 import { Bug, Store, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, FileSpreadsheet, Landmark, Wallet, ShoppingBasket } from 'lucide-react';
 import Link from 'next/link';
@@ -61,7 +62,7 @@ export default function ServiciosPage() {
       <Header />
       <main className={`relative flex-1 pb-32 p-4 pt-6 max-w-lg md:max-w-3xl lg:max-w-6xl mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
         <h1 className={`text-2xl font-bold mb-6 ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
-          Servicios
+          {tr('Servicios')}
         </h1>
 
 

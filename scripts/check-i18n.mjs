@@ -23,8 +23,8 @@ const walk = (dir) => {
 const missing = [];
 for (const f of files) {
   const s = fs.readFileSync(f, 'utf8');
-  if (!/\buseT\b|\btranslate\(/.test(s) || f.endsWith('i18n.tsx')) continue;
-  for (const m of s.matchAll(/\bt\('((?:[^'\\]|\\.)*)'/g)) {
+  if (!/\buseT\b|\btranslate\(|\btr\(/.test(s) || f.endsWith('i18n.tsx')) continue;
+  for (const m of s.matchAll(/\b(?:t|tr)\('((?:[^'\\]|\\.)*)'/g)) {
     const k = unq(m[1]);
     if (!keys.has(k)) missing.push(`${path.relative(root, f)}: ${k}`);
   }

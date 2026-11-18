@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -18,7 +19,7 @@ import type { Transaction } from '@/lib/firestore';
 
 const toDate = (d: Transaction['date']) => (d instanceof Date ? d : d.toDate());
 const monthTitle = (d: Date) => {
-  const s = d.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+  const s = d.toLocaleDateString(currentLocale(), { month: 'long', year: 'numeric' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
@@ -100,7 +101,7 @@ export default function RecibosPage() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-text-primary truncate">{t.merchant || t.description || t.category}</p>
                           <p className="text-[11px] text-text-muted truncate">
-                            {d.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' })} · {t.items!.length} productos
+                            {d.toLocaleDateString(currentLocale(), { weekday: 'short', day: 'numeric', month: 'short' })} · {t.items!.length} productos
                             {groups.length > 1 ? ` · ${groups.length} categorías` : ''}{t.paymentMethod ? ` · ${t.paymentMethod}` : ''}
                           </p>
                         </div>

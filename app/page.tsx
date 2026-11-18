@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import { premiumEndInfo } from '@/lib/plans';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -202,14 +203,14 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-deep text-text-primary">
-        <p className="text-text-muted text-sm mb-2">Redirigiendo al login...</p>
+        <p className="text-text-muted text-sm mb-2">{tr('Redirigiendo al login...')}</p>
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   const hour    = new Date().getHours();
-  const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
+  const greeting = hour < 12 ? tr('Buenos días') : hour < 18 ? tr('Buenas tardes') : tr('Buenas noches');
 
   const filteredTransactions = transactions.filter(t => {
     if (filterType === 'all') {
@@ -291,7 +292,7 @@ export default function DashboardPage() {
         {showNewUserMsg && (
           <div className={`p-4 mb-2 animate-slide-down flex justify-between items-start ${isTechTheme ? 'bg-accent/10 border border-accent rounded-none' : 'glass-card'}`}>
             <div>
-               <h3 className={`font-bold mb-1 ${isTechTheme ? 'text-accent font-mono uppercase tracking-widest text-sm' : 'text-text-primary'}`}>¡Bienvenido a Flowi!</h3>
+               <h3 className={`font-bold mb-1 ${isTechTheme ? 'text-accent font-mono uppercase tracking-widest text-sm' : 'text-text-primary'}`}>{tr('¡Bienvenido a Flowi!')}</h3>
                <p className={`text-sm ${isTechTheme ? 'text-accent/80 font-mono' : 'text-text-secondary'}`}>
                  El modo por defecto es <b>Cyberpunk</b>. Puedes cambiar el diseño y los colores de la aplicación en cualquier momento tocando tu foto de perfil (arriba a la derecha).
                </p>
@@ -320,8 +321,8 @@ export default function DashboardPage() {
                   ? 'rounded-none border-accent/30 hover:border-accent text-accent font-mono uppercase' 
                   : 'rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-text-primary'
               }`}
-              title="Descargar Reportes en PDF o Excel"
-              aria-label="Descargar reportes"
+              title={tr('Descargar Reportes en PDF o Excel')}
+              aria-label={tr('Descargar reportes')}
             >
               <Download className="w-3.5 h-3.5 text-accent" />
               <span className="hidden md:inline">Reportes</span>
@@ -335,7 +336,7 @@ export default function DashboardPage() {
                          ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
             >
               <Plus className="w-4 h-4" />
-              Nueva transacción
+              {tr('Nueva transacción')}
             </button>
           </div>
         </div>
@@ -406,9 +407,9 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className={`${isTechTheme ? 'font-mono font-bold text-base text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-base text-text-primary'}`}>
-              {filterType === 'all' ? 'Últimas transacciones' : 'Transacciones'}
+              {filterType === 'all' ? tr('Últimas transacciones') : 'Transacciones'}
             </h2>
-            <a href="/gastos" className={`text-xs ${isTechTheme ? 'font-mono text-accent uppercase hover:text-accent/80 transition-colors' : 'text-accent hover:underline'}`}>Ver todo</a>
+            <a href="/gastos" className={`text-xs ${isTechTheme ? 'font-mono text-accent uppercase hover:text-accent/80 transition-colors' : 'text-accent hover:underline'}`}>{tr('Ver todo')}</a>
           </div>
           {loading ? (
             <div className="space-y-2">

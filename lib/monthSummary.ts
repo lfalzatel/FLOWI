@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 import { Transaction, isFixedExpenseCategory } from './firestore';
 import { expandByItems } from './receiptItems';
 import { BudgetPillar, pillarOf } from './categoryGroups';
@@ -60,7 +61,7 @@ const isFixedTx = (t: Transaction) => (t.isFixed !== undefined ? t.isFixed : isF
 
 export function monthNameOf(month: string): string {
   const [y, m] = month.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('es-CO', { month: 'long' });
+  return new Date(y, m - 1, 1).toLocaleDateString(currentLocale(), { month: 'long' });
 }
 
 export function shiftMonth(month: string, delta: number): string {

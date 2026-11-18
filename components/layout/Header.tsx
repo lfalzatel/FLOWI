@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ProfileCapsule } from './ProfileCapsule';
@@ -218,7 +219,7 @@ export function Header() {
                 ${isTechTheme ? 'font-mono uppercase text-[11px]' : 'font-syne'}
               `}
             >
-              {isTechTheme ? item.techLabel : item.label}
+              {isTechTheme ? tr(item.techLabel) : tr(item.label)}
             </Link>
           );
         })}
@@ -233,7 +234,7 @@ export function Header() {
           rel="noopener noreferrer"
           className="relative w-9 h-9 rounded-xl bg-glass border border-glass-border
                      flex items-center justify-center hover:bg-[#25D366]/20 transition-colors group"
-          title="Soporte y Sugerencias"
+          title={tr('Soporte y Sugerencias')}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -275,14 +276,14 @@ export function Header() {
           {showDropdown && (
             <div id="notif-dropdown" className={`fixed sm:absolute right-4 left-4 sm:left-auto sm:right-0 top-20 sm:top-12 w-auto sm:w-80 max-h-[400px] overflow-y-auto glass-dropdown shadow-2xl p-2 z-[100] animate-fade-in-up ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-2xl border border-glass-border/50'}`}>
               <div className="p-2 pb-3 mb-2 border-b border-glass-border/50 flex justify-between items-center">
-                <span className={`font-semibold text-text-primary ${isTechTheme ? 'font-mono text-sm' : ''}`}>Notificaciones</span>
-                <Link href="/servicios/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>Ver ajustes</Link>
+                <span className={`font-semibold text-text-primary ${isTechTheme ? 'font-mono text-sm' : ''}`}>{tr('Notificaciones')}</span>
+                <Link href="/servicios/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>{tr('Ver ajustes')}</Link>
               </div>
 
               {notifications.length === 0 && upcomingReminders.length === 0 ? (
                 <div className="py-6 text-center">
                   <Bell className="w-8 h-8 text-text-muted/30 mx-auto mb-2" />
-                  <p className={`text-text-secondary text-sm ${isTechTheme ? 'font-mono' : ''}`}>Al día. Nada por aquí.</p>
+                  <p className={`text-text-secondary text-sm ${isTechTheme ? 'font-mono' : ''}`}>{tr('Al día. Nada por aquí.')}</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -303,7 +304,7 @@ export function Header() {
                   {upcomingReminders.length > 0 && (
                     <>
                       <p className={`text-[10px] text-text-muted uppercase tracking-wider font-semibold px-2 pt-2 pb-1 ${isTechTheme ? 'font-mono' : ''}`}>
-                        Pendientes
+                        {tr('Pendientes')}
                       </p>
                       {upcomingReminders.map((due) => {
                         const { reminder, daysLeft } = due;
@@ -324,7 +325,7 @@ export function Header() {
                             onClick={(e) => { e.stopPropagation(); setShowDropdown(false); setPayingDue(due); }}
                             className={`shrink-0 px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${isTechTheme ? 'rounded-none border border-accent/50 text-accent font-mono uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
                           >
-                            {isPaymentReminder(reminder) ? 'Ya lo pagué' : 'Listo ✓'}
+                            {isPaymentReminder(reminder) ? tr('Ya lo pagué') : tr('Listo ✓')}
                           </button>
                         </div>
                         );
@@ -402,7 +403,7 @@ export function Header() {
               className={`text-xs mt-2 tracking-widest ${isTechTheme ? 'font-mono' : ''}`}
               style={{ color: '#A1A1AA' }}
             >
-              Tu dinero, en flujo.
+              {tr('Tu dinero, en flujo.')}
             </p>
           </div>
         </div>,

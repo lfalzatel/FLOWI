@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Users, Check } from 'lucide-react';
@@ -23,7 +24,7 @@ export default function CompartidoPage() {
 
   const fmt = (n: number) => formatCurrency(n, 'COP');
   const total = data?.i.reduce((s, x) => s + x.a, 0) ?? 0;
-  const when = (x: ShareLinkItem) => new Date(`${x.f}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+  const when = (x: ShareLinkItem) => new Date(`${x.f}T12:00:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
   const here = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/compartido';
 
   return (

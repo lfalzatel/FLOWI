@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState } from 'react';
 import { CalendarClock, CheckCircle2, ChevronDown, X } from 'lucide-react';
@@ -36,7 +37,7 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
 
   const card = isTechTheme ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
   const monthRef = summary.month ? new Date(Number(summary.month.slice(0, 4)), Number(summary.month.slice(5, 7)) - 1, 1) : new Date();
-  const monthName = monthRef.toLocaleDateString('es-CO', { month: 'long' });
+  const monthName = monthRef.toLocaleDateString(currentLocale(), { month: 'long' });
   const shown = expanded ? pending : pending.slice(0, VISIBLE);
 
   async function skip(c: Commitment) {
@@ -61,7 +62,7 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
             </div>
             <div className="min-w-0">
               <h3 className={`text-sm font-bold ${isTechTheme ? 'text-accent uppercase font-mono tracking-wide' : 'font-syne text-text-primary'}`}>
-                Próximos compromisos
+                {tr('Próximos compromisos')}
               </h3>
               <p className="text-xs text-text-muted">
                 {pending.length
@@ -73,7 +74,7 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
           {pendingTotal > 0 && (
             <div className="text-right shrink-0">
               <p className={`text-base font-bold text-orange-400 ${isTechTheme ? 'font-mono' : 'font-syne'}`}><AnimatedNumber value={pendingTotal} format={(n: number) => formatCurrency(n, currency)} /></p>
-              <p className="text-[10px] text-text-muted">por pagar</p>
+              <p className="text-[10px] text-text-muted">{tr('por pagar')}</p>
             </div>
           )}
         </div>
@@ -99,11 +100,11 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
                       </p>
                     </div>
                     <span className={`text-sm font-semibold shrink-0 ${c.amount ? 'text-text-primary' : 'text-text-muted'}`}>
-                      {c.amount ? formatCurrency(c.amount, currency) : 'Sin valor'}
+                      {c.amount ? formatCurrency(c.amount, currency) : tr('Sin valor')}
                     </span>
                   </button>
                   <button type="button" onClick={() => skip(c)} disabled={skipping === c.key}
-                          title="No aplica este mes" aria-label={`Omitir ${c.title} este mes`}
+                          title={tr('No aplica este mes')} aria-label={`Omitir ${c.title} este mes`}
                           className="p-2 mr-1 text-text-muted hover:text-text-primary disabled:opacity-40 shrink-0">
                     <X className="w-4 h-4" />
                   </button>
@@ -116,14 +117,14 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
         {pending.length > VISIBLE && (
           <button type="button" onClick={() => setExpanded(e => !e)}
                   className="mt-2 w-full flex items-center justify-center gap-1 text-xs font-semibold text-accent py-1.5">
-            {expanded ? 'Ver menos' : `Ver todos (${pending.length})`}
+            {expanded ? tr('Ver menos') : `Ver todos (${pending.length})`}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
           </button>
         )}
 
         {pending.length > 0 && (
           <p className="mt-2 text-[10px] text-text-muted leading-snug">
-            Toca uno para registrarlo como pagado. El valor es el que pusiste en el recordatorio o, si no tiene, lo que pagaste el mes pasado.
+            {tr('Toca uno para registrarlo como pagado. El valor es el que pusiste en el recordatorio o, si no tiene, lo que pagaste el mes pasado.')}
           </p>
         )}
       </div>

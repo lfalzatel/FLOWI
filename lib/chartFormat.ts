@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 // Formatos de dinero para gráficas: corto en los ejes ("$1,5M", "$500 mil") y completo en los detalles
 
 export function formatCompactCOP(value: number): string {
@@ -12,7 +13,7 @@ export function formatCompactCOP(value: number): string {
 }
 
 export function formatFullCOP(value: number): string {
-  return `$${Math.round(value).toLocaleString('es-CO')}`;
+  return `$${Math.round(value).toLocaleString(currentLocale())}`;
 }
 
 // Redondea hacia arriba a un número "bonito" (1, 2, 2.5 o 5 × 10^k) para topes de eje

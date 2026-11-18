@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 // Tus datos: descargarlos (JSON completo y CSV de movimientos), borrar lo registrado o eliminar la cuenta.
 import { collection, deleteField, doc, getDoc, getDocs, query, Timestamp, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -76,7 +77,7 @@ export async function exportCsv(uid: string) {
   };
   const header = ['Fecha', 'Tipo', 'Categoría', 'Descripción', 'Monto', 'Comercio', 'Medio de pago', 'Negocio'];
   const lines = rows.map((t: any) => [
-    t.date ? new Date(t.date).toLocaleString('es-CO') : '', t.type === 'ingreso' ? 'Ingreso' : 'Gasto', t.category,
+    t.date ? new Date(t.date).toLocaleString(currentLocale()) : '', t.type === 'ingreso' ? 'Ingreso' : 'Gasto', t.category,
     t.description, t.amount, t.merchant, t.paymentMethod, t.business ? 'Sí' : '',
   ].map(cell).join(';'));
   // ";" y BOM para que Excel en español lo abra bien con tildes

@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { TransactionList } from '@/components/dashboard/TransactionList';
@@ -74,15 +75,15 @@ export default function IngresosPage() {
       <main className="relative flex-1 p-4 pb-24 max-w-2xl lg:max-w-6xl mx-auto w-full animate-fade-in-up stagger">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>Mis Ingresos</h1>
-            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>Historial completo de tus entradas</p>
+            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'text-3xl font-syne font-bold text-text-primary'}`}>{tr('Mis Ingresos')}</h1>
+            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>{tr('Historial completo de tus entradas')}</p>
           </div>
           <div className="flex items-center gap-2">
             {/* Download Report Button */}
             <button
               onClick={() => setShowExport(true)}
               className={`w-9 h-9 flex items-center justify-center border transition-all ${isTechTheme ? 'rounded-none border-accent/30 hover:border-accent text-accent' : 'rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary'}`}
-              title="Descargar Reporte"
+              title={tr('Descargar Reporte')}
             >
               <Download className="w-4 h-4" />
             </button>
@@ -99,7 +100,7 @@ export default function IngresosPage() {
                           ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Nueva transacción</span>
+              <span className="hidden sm:inline">{tr('Nueva transacción')}</span>
             </button>
           </div>
         </div>
@@ -130,13 +131,13 @@ export default function IngresosPage() {
                 <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center">
                   <TrendingUp className="w-3.5 h-3.5 text-accent" />
                 </div>
-                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Ingresado</span>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>{tr('Total Ingresado')}</span>
               </div>
 
               <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-accent'}`}>
                 <AnimatedNumber value={filteredTransactions.reduce((sum, e) => sum + e.amount, 0)} prefix="$" />
               </p>
-              <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? 'Total' : filterType === 'month' ? 'Este mes' : 'Este día'}</p>
+              <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? tr('Total') : filterType === 'month' ? tr('Este mes') : tr('Este día')}</p>
             </div>
           </div>
 

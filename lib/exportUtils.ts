@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 import { Transaction } from './firestore';
 import { formatCurrency } from './format';
 
@@ -69,11 +70,11 @@ export function printMonthlyReportPDF(
     let dateStr = '';
     if (t.date) {
       if (t.date instanceof Date) {
-        dateStr = t.date.toLocaleDateString('es-CO');
+        dateStr = t.date.toLocaleDateString(currentLocale());
       } else if (typeof t.date === 'string') {
         dateStr = t.date;
       } else if ((t.date as any).toDate) {
-        dateStr = (t.date as any).toDate().toLocaleDateString('es-CO');
+        dateStr = (t.date as any).toDate().toLocaleDateString(currentLocale());
       }
     }
     return `

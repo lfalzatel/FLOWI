@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -28,12 +29,12 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
     <Link href="/servicios/cuentas" className={`${card} flex items-center gap-3 p-4 hover:-translate-y-0.5 transition-transform`}>
       <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center shrink-0"><Wallet className="w-5 h-5 text-accent" /></div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] text-text-muted">Tu patrimonio neto</p>
+        <p className="text-[11px] text-text-muted">{tr('Tu patrimonio neto')}</p>
         <p className={`text-sm font-bold ${worth.total < 0 ? 'text-[var(--red)]' : isTech ? 'text-accent' : 'text-text-primary'} ${isTech ? 'uppercase font-mono' : 'font-syne'}`}>
           {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
         </p>
         <p className="text-[11px] text-text-muted truncate">
-          Cuentas {fmt(worth.accounts)}{worth.investments ? ` · CDT ${fmt(worth.investments)}` : ''}{worth.liabilities ? ` · debes ${fmt(worth.liabilities)}` : ''}
+          Cuentas {fmt(worth.accounts)}{worth.investments ? ` · CDT ${fmt(worth.investments)}` : ''}{worth.liabilities ? ` · ${tr('debes {m}', { m: fmt(worth.liabilities) })}` : ''}
         </p>
       </div>
       <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />

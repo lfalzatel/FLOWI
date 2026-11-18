@@ -1,3 +1,4 @@
+import { currentLocale, tr } from '@/lib/i18n';
 export function getISOWeekString(date: Date) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
@@ -23,12 +24,12 @@ export function getDateFromISOWeek(weekStr: string): Date {
 }
 
 export function formatFilterText(type: string, value: string): string {
-  if (type === 'all') return 'Historico Completo';
+  if (type === 'all') return tr('Histórico completo');
   
   if (type === 'month') {
     const [y, m] = value.split('-');
     const date = new Date(parseInt(y), parseInt(m) - 1, 1);
-    return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase());
+    return date.toLocaleDateString(currentLocale(), { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase());
   }
   
   if (type === 'week') {
@@ -36,13 +37,13 @@ export function formatFilterText(type: string, value: string): string {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     
-    const startMonth = startOfWeek.toLocaleDateString('es-ES', { month: 'short' });
-    const endMonth = endOfWeek.toLocaleDateString('es-ES', { month: 'short' });
+    const startMonth = startOfWeek.toLocaleDateString(currentLocale(), { month: 'short' });
+    const endMonth = endOfWeek.toLocaleDateString(currentLocale(), { month: 'short' });
     
     if (startMonth === endMonth) {
-      return `${startOfWeek.getDate()} al ${endOfWeek.getDate()} de ${startMonth.replace(/^\w/, c => c.toUpperCase())}`;
+      return tr('{a} al {b} de {m}', { a: startOfWeek.getDate(), b: endOfWeek.getDate(), m: startMonth.replace(/^\w/, c => c.toUpperCase()) });
     } else {
-      return `${startOfWeek.getDate()} ${startMonth} al ${endOfWeek.getDate()} ${endMonth}`;
+      return tr('{a} {ma} al {b} {mb}', { a: startOfWeek.getDate(), ma: startMonth, b: endOfWeek.getDate(), mb: endMonth });
     }
   }
   
@@ -55,11 +56,11 @@ export function formatFilterText(type: string, value: string): string {
     dateZero.setHours(0,0,0,0);
     
     const diff = (today.getTime() - dateZero.getTime()) / 86400000;
-    if (diff === 0) return 'Hoy';
-    if (diff === 1) return 'Ayer';
-    if (diff === -1) return 'Mañana';
+    if (diff === 0) return tr('Hoy');
+    if (diff === 1) return tr('Ayer');
+    if (diff === -1) return tr('Mañana');
     
-    return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/^\w/, c => c.toUpperCase());
+    return date.toLocaleDateString(currentLocale(), { weekday: 'short', day: 'numeric', month: 'short' }).replace(/^\w/, c => c.toUpperCase());
   }
   
   return value;

@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 
 import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
 import { groupByCategory, splitTotal } from '@/lib/receiptItems';
@@ -132,7 +133,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         return {
           ...r,
           ...(bankPay ? { paymentMethod: bankPay, _payDefaulted: true } : {}),
-          ...(dup ? { _dup: new Date(`${day}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }) } : {}),
+          ...(dup ? { _dup: new Date(`${day}T12:00:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' }) } : {}),
         } as any;
       });
       setReadKind(read.results.length > 1 || read.result.rawText === 'Movimientos del banco' ? 'movimientos' : 'recibo');
@@ -1146,7 +1147,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           return (
                             <div className={`p-2 border border-amber-400/50 bg-amber-400/10 normal-case space-y-1.5 ${hl('date')} ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
                               <p className="text-[11px] text-amber-300 font-semibold leading-snug">
-                                📅 Se guardará con fecha del {new Date(`${res.date}T12:00:00`).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', ...(res.date.slice(0, 4) !== today.slice(0, 4) ? { year: 'numeric' } : {}) })}
+                                📅 Se guardará con fecha del {new Date(`${res.date}T12:00:00`).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long', ...(res.date.slice(0, 4) !== today.slice(0, 4) ? { year: 'numeric' } : {}) })}
                                 {days > 0 ? ` (hace ${days} ${days === 1 ? 'día' : 'días'})` : ''}{receiptStatus === 'done' && readKind === 'recibo' ? ', la que dice el recibo.' : '.'}
                               </p>
                               <div className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale, tr } from '@/lib/i18n';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
@@ -111,15 +112,15 @@ export default function DeudasPage() {
         {/* Header section */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={`${isCyberpunk ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>Deudas</h1>
-            <p className={`mt-1 ${isCyberpunk ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>Historial y control de préstamos</p>
+            <h1 className={`${isCyberpunk ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>{tr('Deudas')}</h1>
+            <p className={`mt-1 ${isCyberpunk ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>{tr('Historial y control de préstamos')}</p>
           </div>
           <div className="flex items-center gap-2">
             {/* Download Report Button */}
             <button
               onClick={() => setShowExport(true)}
               className={`w-9 h-9 flex items-center justify-center border transition-all ${isCyberpunk ? 'rounded-none border-accent/30 hover:border-accent text-accent' : 'rounded-xl border-white/5 bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary'}`}
-              title="Descargar Reporte"
+              title={tr('Descargar Reporte')}
             >
               <Download className="w-4 h-4" />
             </button>
@@ -158,13 +159,13 @@ export default function DeudasPage() {
               <div className="w-7 h-7 rounded-xl bg-orange-500/15 flex items-center justify-center">
                 <CreditCard className="w-3.5 h-3.5 text-orange-400" />
               </div>
-              <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-orange-400/70 tracking-wide uppercase' : 'text-text-secondary'}`}>Total Pendiente</span>
+              <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-orange-400/70 tracking-wide uppercase' : 'text-text-secondary'}`}>{tr('Total Pendiente')}</span>
             </div>
 
             <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-orange-400 tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-orange-400'}`}>
               <AnimatedNumber value={totalDeudasConInteres} prefix="$" />
             </p>
-            <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>Suma de todas tus deudas activas</p>
+            <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>{tr('Suma de todas tus deudas activas')}</p>
           </div>
         </div>
 
@@ -172,9 +173,9 @@ export default function DeudasPage() {
         {!debtsLoading && debts.length > 0 && (
           <div className={`grid grid-cols-3 gap-2 ${isCyberpunk ? 'font-mono' : ''}`}>
             {[
-              { label: 'Deudas activas', value: String(iOweCount), tone: 'text-text-primary' },
-              { label: 'Cuotas al mes', value: monthlyInstallments ? fmt(monthlyInstallments) : '—', tone: 'text-orange-400' },
-              { label: 'Me deben', value: owedToMe ? fmt(owedToMe) : '—', tone: 'text-emerald-400' },
+              { label: tr('Deudas activas'), value: String(iOweCount), tone: 'text-text-primary' },
+              { label: tr('Cuotas al mes'), value: monthlyInstallments ? fmt(monthlyInstallments) : '—', tone: 'text-orange-400' },
+              { label: tr('Me deben'), value: owedToMe ? fmt(owedToMe) : '—', tone: 'text-emerald-400' },
             ].map(c => (
               <div key={c.label} className={`glass-card p-3 ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
                 <p className="text-[10px] text-text-muted leading-tight">{c.label}</p>
@@ -192,10 +193,10 @@ export default function DeudasPage() {
               <Users className="w-4 h-4 text-orange-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-text-primary">Gastos compartidos</p>
+              <p className="text-sm font-semibold text-text-primary">{tr('Gastos compartidos')}</p>
               <p className="text-[11px] text-text-muted truncate">
-                {[sharedPending.toMe ? `Te deben ${fmt(sharedPending.toMe)}` : '', sharedPending.fromMe ? `Debes ${fmt(sharedPending.fromMe)}` : ''].filter(Boolean).join(' · ')}
-                {' · '}{sharedPending.people} {sharedPending.people === 1 ? 'persona' : 'personas'}
+                {[sharedPending.toMe ? tr('Te deben {m}', { m: fmt(sharedPending.toMe) }) : '', sharedPending.fromMe ? tr('Debes {m}', { m: fmt(sharedPending.fromMe) }) : ''].filter(Boolean).join(' · ')}
+                {' · '}{sharedPending.people === 1 ? tr('1 persona') : tr('{n} personas', { n: sharedPending.people })}
               </p>
             </div>
             <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />
@@ -206,7 +207,7 @@ export default function DeudasPage() {
         <div className="min-w-0">
         {/* Debts List */}
         <div className="space-y-3">
-          <h2 className={`${isCyberpunk ? 'font-mono font-bold text-base text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-base text-text-primary'}`}>Todas las deudas</h2>
+          <h2 className={`${isCyberpunk ? 'font-mono font-bold text-base text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-base text-text-primary'}`}>{tr('Todas las deudas')}</h2>
           
           {debtsLoading ? (
             <div className="space-y-2">
@@ -216,7 +217,7 @@ export default function DeudasPage() {
             </div>
           ) : debts.length === 0 ? (
             <div className="glass-card rounded-2xl p-6 text-center text-text-muted text-sm">
-              No tienes deudas registradas. ¡Buen trabajo!
+              {tr('No tienes deudas registradas. ¡Buen trabajo!')}
             </div>
           ) : (
             <div className="space-y-6">
@@ -236,7 +237,7 @@ export default function DeudasPage() {
                       : (debt.createdAt && 'toDate' in (debt.createdAt as any) 
                           ? (debt.createdAt as any).toDate() 
                           : new Date());
-                    const dateStr = createdDate.toLocaleDateString('es-CO', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const dateStr = createdDate.toLocaleDateString(currentLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 
                     return (
                       <div
@@ -258,11 +259,11 @@ export default function DeudasPage() {
                                 <Calendar className="w-3 h-3" /> {dateStr}
                               </span>
                               <span className="flex items-center gap-0.5 text-[10px] text-orange-400 font-medium bg-orange-400/10 px-1.5 py-0.5 rounded">
-                                <Clock className="w-3 h-3" /> Pendiente
+                                <Clock className="w-3 h-3" /> {tr('Pendiente')}
                               </span>
                               {debt.direction === 'me_deben' && (
                                 <span className="text-[10px] text-emerald-400 font-medium bg-emerald-400/10 px-1.5 py-0.5 rounded">
-                                  Me deben
+                                  {tr('Me deben')}
                                 </span>
                               )}
                               {debt.interestRate ? (
@@ -272,7 +273,7 @@ export default function DeudasPage() {
                               ) : null}
                               {debt.installment && nextDebtPaymentDate(debt) ? (
                                 <span className="text-[10px] text-text-secondary font-medium bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">
-                                  Cuota {fmt(debt.installment)} · {nextDebtPaymentDate(debt)!.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
+                                  {tr('Cuota')} {fmt(debt.installment)} · {nextDebtPaymentDate(debt)!.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}
                                 </span>
                               ) : null}
                             </div>
@@ -283,10 +284,10 @@ export default function DeudasPage() {
                             </p>
                             {interestData.accumulatedInterest > 0 ? (
                               <p className="text-[10px] text-red-400 font-mono font-medium">
-                                +${interestData.accumulatedInterest.toLocaleString('es-MX', { maximumFractionDigits: 0 })} Int.
+                                +${interestData.accumulatedInterest.toLocaleString(currentLocale(), { maximumFractionDigits: 0 })} Int.
                               </p>
                             ) : (
-                              <p className="text-[10px] text-text-muted">Total: {fmt(debt.totalAmount)}</p>
+                              <p className="text-[10px] text-text-muted">{tr('Total')}: {fmt(debt.totalAmount)}</p>
                             )}
                           </div>
                         </div>
@@ -299,7 +300,7 @@ export default function DeudasPage() {
                           />
                         </div>
                         <div className="flex justify-between mt-1">
-                          <span className="text-[9px] text-text-muted">Pagado: {fmt(debt.paidAmount)}</span>
+                          <span className="text-[9px] text-text-muted">{tr('Pagado')}: {fmt(debt.paidAmount)}</span>
                           <span className="text-[9px] text-text-muted">{Math.round(progress)}%</span>
                         </div>
                       </div>
@@ -312,7 +313,7 @@ export default function DeudasPage() {
               {/* Historial de Deudas Liquidadas */}
               {paidDebts.length > 0 && (
                 <div className="space-y-2 pt-2">
-                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>Liquidadas en este periodo ({paidDebts.length})</h3>
+                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-accent' : 'text-text-muted'}`}>{tr('Liquidadas en este periodo')} ({paidDebts.length})</h3>
                   <div className="space-y-2">
                   {paidDebts.map((debt, i) => {
                     const displayLabel = isCyberpunk ? debt.title.toUpperCase().replace(/\s+/g, '_') : debt.title;
@@ -321,7 +322,7 @@ export default function DeudasPage() {
                       : (debt.createdAt && 'toDate' in (debt.createdAt as any) 
                           ? (debt.createdAt as any).toDate() 
                           : new Date());
-                    const dateStr = createdDate.toLocaleDateString('es-CO', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const dateStr = createdDate.toLocaleDateString(currentLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 
                     return (
                       <div
@@ -344,9 +345,9 @@ export default function DeudasPage() {
                           </div>
                           <div className="text-right">
                             <p className={`text-accent font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
-                              ${debt.totalAmount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                              ${debt.totalAmount.toLocaleString(currentLocale(), { minimumFractionDigits: 2 })}
                             </p>
-                            <p className="text-[10px] text-text-muted">Saldado completo</p>
+                            <p className="text-[10px] text-text-muted">{tr('Saldado completo')}</p>
                           </div>
                         </div>
                       </div>
@@ -385,7 +386,7 @@ export default function DeudasPage() {
       {showExport && (
         <ExportReportModal
           onClose={() => setShowExport(false)}
-          title="Deudas"
+          title={tr('Deudas')}
           debts={debts}
           filterType="all"
           filterValue="all"

@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -72,7 +73,7 @@ export function ProfileCapsule() {
         setNotificationsActive(true);
         if (user) syncPushToken(user.uid);
         // Confirmación visible: notificación en la barra y el mensaje "¡Listo!"
-        scheduleNotificationViaSW({ title: 'Notificaciones activadas ✓', body: 'Te avisaremos tus pagos y recordatorios, incluso con FLOWI cerrada.', tag: 'flowi-notif-on' });
+        scheduleNotificationViaSW({ title: tr('Notificaciones activadas ✓'), body: tr('Te avisaremos tus pagos y recordatorios, incluso con FLOWI cerrada.'), tag: 'flowi-notif-on' });
         setOpen(false);
         window.dispatchEvent(new CustomEvent(CHANGED_EVENT, { detail: { enabled: true } }));
       } else {
@@ -185,7 +186,7 @@ export function ProfileCapsule() {
       }).catch(() => {});
     } else if (typeof navigator !== 'undefined') {
       navigator.clipboard.writeText(`${shareMessage}\n${shareUrl}`);
-      alert('¡Mensaje y enlace de FLOWI copiados al portapapeles!');
+      alert(tr('¡Mensaje y enlace de FLOWI copiados al portapapeles!'));
     }
   };
 
@@ -215,7 +216,7 @@ export function ProfileCapsule() {
         </div>
         {pendingReceipts > 0 && (
           <span className="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-amber-400 text-black text-[10px] font-bold z-10"
-                title="Comprobantes por revisar">{pendingReceipts}</span>
+                title={tr('Comprobantes por revisar')}>{pendingReceipts}</span>
         )}
 
         {/* Name + role */}
@@ -302,7 +303,7 @@ export function ProfileCapsule() {
                       }`}
                     >
                       {icon}
-                      <span className="text-[9px] font-semibold">{label}</span>
+                      <span className="text-[9px] font-semibold">{tr(label)}</span>
                     </button>
                   );
                 })}
@@ -341,7 +342,7 @@ export function ProfileCapsule() {
                       <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                         <item.icon className="w-3.5 h-3.5 text-accent" />
                       </div>
-                      <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : 'text-accent font-medium'}`}>{isTechTheme ? '>_ INSTALAR_APP' : item.label}</span>
+                      <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : 'text-accent font-medium'}`}>{isTechTheme ? tr('>_ INSTALAR_APP') : tr(item.label)}</span>
                     </button>
                   )
                 ) : item.label === 'Compartir app' ? (
@@ -352,7 +353,7 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
                   </button>
                 ) : item.label === 'Ver tutorial' ? (
                   <button
@@ -367,7 +368,7 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
                   </button>
                 ) : item.label === 'Mi perfil' ? (
                   <button
@@ -377,13 +378,13 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
                   </button>
                 ) : item.soon ? (
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      alert('¡Próximamente!');
+                      alert(tr('¡Próximamente!'));
                       setOpen(false);
                     }}
                     className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-glass transition-colors"
@@ -392,7 +393,7 @@ export function ProfileCapsule() {
                       <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                         <item.icon className="w-3.5 h-3.5" />
                       </div>
-                      <span className={`text-sm opacity-70 ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                      <span className={`text-sm opacity-70 ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
                     </div>
                     <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider">Pronto</span>
                   </button>
@@ -405,7 +406,7 @@ export function ProfileCapsule() {
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${notificationsActive ? 'bg-accent/25 text-accent' : 'bg-glass-strong'}`}>
                         <item.icon className="w-3.5 h-3.5" />
                       </div>
-                      <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                      <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
                     </div>
                     <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${notificationsActive ? 'bg-accent' : 'bg-glass-strong border border-glass-border'}`}>
                       <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transform duration-200 ${notificationsActive ? 'translate-x-3.5' : 'translate-x-0'}`} />
@@ -420,7 +421,7 @@ export function ProfileCapsule() {
                     <div className="w-7 h-7 rounded-lg bg-glass-strong flex items-center justify-center">
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{item.label}</span>
+                    <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
                     {item.href === '/planes' && pendingReceipts > 0 && (
                       <span className="ml-auto px-1.5 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-bold">{pendingReceipts} por revisar</span>
                     )}
@@ -435,7 +436,7 @@ export function ProfileCapsule() {
             {knownAccounts.length > 0 && (
               <div className="mb-2">
                 <p className={`px-2 py-1.5 text-[10px] uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>
-                  {isTechTheme ? '>_ OTRAS_CUENTAS' : 'Otras Cuentas'}
+                  {isTechTheme ? tr('>_ OTRAS_CUENTAS') : tr('Otras Cuentas')}
                 </p>
                 {knownAccounts.map((acc, idx) => (
                   <button 
@@ -467,7 +468,7 @@ export function ProfileCapsule() {
                 <span className="text-lg leading-none">+</span>
               </div>
               <span className={`text-sm ${isTechTheme ? 'font-mono tracking-widest uppercase' : ''}`}>
-                {isTechTheme ? '>_ ANADIR_CUENTA' : 'Añadir Cuenta'}
+                {isTechTheme ? tr('>_ ANADIR_CUENTA') : tr('Añadir Cuenta')}
               </span>
             </button>
           </div>
@@ -482,7 +483,7 @@ export function ProfileCapsule() {
                 <LogOut className="w-3.5 h-3.5" />
               </div>
               <span className={`text-sm ${isTechTheme ? 'font-mono font-bold tracking-widest uppercase' : ''}`}>
-                {isTechTheme ? '>_ CERRAR_SESION' : 'Cerrar sesión'}
+                {isTechTheme ? tr('>_ CERRAR_SESION') : tr('Cerrar sesión')}
               </span>
             </button>
           </div>
@@ -535,10 +536,10 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
         {/* Cabecera */}
         <div className={`p-5 border-b border-glass-border ${isTechTheme ? 'bg-black' : 'bg-gradient-to-r from-[var(--accent-glow)] to-transparent'}`}>
           <h3 className={`text-lg font-bold ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : 'text-text-primary font-syne'}`}>
-            {isTechTheme ? '>_ INSTALAR_FLOWI' : 'Instalar aplicación'}
+            {isTechTheme ? tr('>_ INSTALAR_FLOWI') : tr('Instalar aplicación')}
           </h3>
           <p className={`text-xs mt-1 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-secondary'}`}>
-            Disfruta de la experiencia completa en pantalla de inicio.
+            {tr('Disfruta de la experiencia completa en pantalla de inicio.')}
           </p>
         </div>
 
@@ -605,7 +606,7 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">3</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Confirma la instalación en el cuadro emergente y se creará un acceso directo en tu menú de aplicaciones.
+                  {tr('Confirma la instalación en el cuadro emergente y se creará un acceso directo en tu menú de aplicaciones.')}
                 </p>
               </div>
             </div>
@@ -641,7 +642,7 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               }
             `}
           >
-            {isTechTheme ? 'CERRAR_MENU.SYS' : '¡Entendido!'}
+            {isTechTheme ? 'CERRAR_MENU.SYS' : tr('¡Entendido!')}
           </button>
         </div>
       </div>

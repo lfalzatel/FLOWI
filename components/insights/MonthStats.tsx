@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 // Estadísticas del Resumen del mes: mapa semanal, racha, distribución por categoría e histórico.
 // Todo sigue al mes elegido arriba y usa el mismo estilo de tarjeta que el resto del resumen.
 import { useEffect, useMemo, useState } from 'react';
@@ -46,7 +47,7 @@ export function WeeklyMap({ transactions, month, isTech, fmt }: { transactions: 
       days[(d.getDay() + 6) % 7].total += t.amount;
     });
     const max = Math.max(0, ...days.map(d => d.total));
-    const short = (d: Date) => `${d.getDate()} ${d.toLocaleString('es-CO', { month: 'short' }).replace('.', '')}`;
+    const short = (d: Date) => `${d.getDate()} ${d.toLocaleString(currentLocale(), { month: 'short' }).replace('.', '')}`;
     return { days, max, total: days.reduce((s, d) => s + d.total, 0), label: `${short(start)} – ${short(end)}`, isNow: monthKey(now) === month && weeksAgo === 0 };
   }, [transactions, month, weeksAgo]);
 
@@ -72,7 +73,7 @@ export function WeeklyMap({ transactions, month, isTech, fmt }: { transactions: 
           <div key={d.day} className="flex flex-col items-center gap-1.5">
             <span className="text-[10px] font-semibold uppercase text-text-muted">{d.day}</span>
             <div className={`w-full aspect-square flex items-center justify-center transition-all duration-300 ${isTech ? 'rounded-none' : 'rounded-lg'} ${color(d.total)}`}
-                 title={`${d.date.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' })}: ${fmt(d.total)}`}>
+                 title={`${d.date.toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'short' })}: ${fmt(d.total)}`}>
               {d.total > 0 && <span className="text-[9px] font-bold">{d.total >= 1000 ? `${Math.round(d.total / 1000)}k` : d.total}</span>}
             </div>
             <span className="text-[9px] text-text-muted">{d.date.getDate()}</span>
@@ -125,7 +126,7 @@ export function MonthStats({ transactions, month, resolve, isTech, fmt, activeDa
     const y = Number(month.slice(0, 4)), m = Number(month.slice(5, 7)) - 1;
     const rows = Array.from({ length: 6 }, (_, i) => {
       const d = new Date(y, m - 5 + i, 1);
-      return { key: monthKey(d), monthStr: d.toLocaleString('es-CO', { month: 'short' }).replace('.', ''), ingreso: 0, gasto: 0 };
+      return { key: monthKey(d), monthStr: d.toLocaleString(currentLocale(), { month: 'short' }).replace('.', ''), ingreso: 0, gasto: 0 };
     });
     const byKey = new Map(rows.map(r => [r.key, r]));
     transactions.forEach(t => {
@@ -150,7 +151,7 @@ export function MonthStats({ transactions, month, resolve, isTech, fmt, activeDa
             <h2 className={look.title}>📅 Días con FLOWI</h2>
             <p className={`mt-1 text-2xl font-black text-text-primary ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={activeDays || 0} format={(n: number) => String(Math.round(n))} /></p>
             <p className="text-[10px] text-text-muted leading-snug">
-              {firstActiveDay ? `Desde el ${new Date(firstActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Cada día que abres la app'}
+              {firstActiveDay ? `Desde el ${new Date(firstActiveDay + 'T12:00:00').toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Cada día que abres la app'}
             </p>
           </div>
         )}

@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { usePlanGate } from '@/lib/plans';
 import { useGoals } from '@/hooks/useGoals';
 import { useState } from 'react';
@@ -15,7 +16,7 @@ import { formatCurrency } from '@/lib/format';
 // Montos con separador de miles mientras se escribe ("1.500.000")
 export const formatAmountInput = (value: number | string) => {
   const digits = String(value).replace(/\D/g, '');
-  return digits ? Number(digits).toLocaleString('es-CO') : '';
+  return digits ? Number(digits).toLocaleString(currentLocale()) : '';
 };
 export const parseAmountInput = (value: string) => Number(value.replace(/\D/g, '')) || 0;
 

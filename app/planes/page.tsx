@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -101,7 +102,7 @@ export default function PlanesPage() {
             <div>
               <p className="text-sm font-bold text-text-primary">Tienes FLOWI Premium</p>
               <p className="text-xs text-text-muted">
-                {until ? `Activo hasta el ${until.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}. Puedes renovar antes y se suma a tu tiempo.` : 'Activo.'}
+                {until ? `Activo hasta el ${until.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long', year: 'numeric' })}. Puedes renovar antes y se suma a tu tiempo.` : 'Activo.'}
               </p>
             </div>
           </div>

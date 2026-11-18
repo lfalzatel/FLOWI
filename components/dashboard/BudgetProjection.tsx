@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect } from 'react';
@@ -100,7 +101,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
 
   const formatDateLabel = (tDate: any) => {
     const d = tDate instanceof Date ? tDate : (tDate && typeof tDate.toDate === 'function') ? tDate.toDate() : new Date(tDate);
-    return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
+    return d.toLocaleDateString(currentLocale(), { day: '2-digit', month: 'short' });
   };
 
   return (

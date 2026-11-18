@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -23,7 +24,7 @@ import {
   ANT_MAX_AMOUNT, HistoryTarget, detectAntExpenses, detectSubscriptions, insightsInPeriod, subscriptionsMonthly,
 } from '@/lib/spendingInsights';
 
-const shortDate = (d: Date) => d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+const shortDate = (d: Date) => d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
 
 export default function HormigaPage() {
   const { theme } = useTheme();

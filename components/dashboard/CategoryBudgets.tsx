@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 
 import { expandByItems } from '@/lib/receiptItems';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
@@ -25,7 +26,7 @@ const VISIBLE_TRANSACTIONS = 8;
 const toDate = (value: Transaction['date']) => (value instanceof Timestamp ? value.toDate() : new Date(value as any));
 
 function formatShortDate(d: Date) {
-  return `${d.getDate()} ${d.toLocaleDateString('es-CO', { month: 'short' }).replace('.', '')}`;
+  return `${d.getDate()} ${d.toLocaleDateString(currentLocale(), { month: 'short' }).replace('.', '')}`;
 }
 
 interface CategoryBudgetsProps {

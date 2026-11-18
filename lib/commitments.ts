@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 import { Debt, Reminder, Transaction, isFixedExpenseCategory } from './firestore';
 import { dateKey, isPayable, lastPaymentFor, monthlyOccursIn } from './reminderDue';
 import { aliasKey } from './categories';
@@ -348,7 +349,7 @@ export function getCommitmentsForMonth(
 }
 
 export function commitmentWhen(c: Commitment): string {
-  const day = c.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }).replace('.', '');
+  const day = c.dueDate.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' }).replace('.', '');
   if (!c.exactDate) return c.daysLeft < 0 ? `Lo sueles pagar el ${c.dueDate.getDate()}` : `Hacia el ${day}`;
   if (c.daysLeft < -1) return `Venció hace ${-c.daysLeft} días`;
   if (c.daysLeft === -1) return 'Venció ayer';

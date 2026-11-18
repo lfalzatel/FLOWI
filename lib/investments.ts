@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 import { Investment, InvestmentFunding, InvestmentKind } from './firestore';
 
 // Cálculos de "Mis inversiones" (CDT).
@@ -188,7 +189,7 @@ export function investmentValue(inv: Investment, now = new Date()): InvestmentVa
 }
 
 export function formatDay(s: string): string {
-  return parseDay(s).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+  return parseDay(s).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export function whenText(daysLeft: number): string {

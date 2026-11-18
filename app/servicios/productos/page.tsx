@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,10 +17,10 @@ import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
 import { getDateFromISOWeek, getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 
 const monthShort = (k: string) => {
-  const s = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1).toLocaleDateString('es-CO', { month: 'short' }).replace('.', '');
+  const s = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1).toLocaleDateString(currentLocale(), { month: 'short' }).replace('.', '');
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
-const dayShort = (d: Date) => d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }).replace('.', '');
+const dayShort = (d: Date) => d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' }).replace('.', '');
 
 export default function ProductosPage() {
   const { theme } = useTheme();
@@ -211,7 +212,7 @@ export default function ProductosPage() {
                           <p className="text-sm text-text-primary truncate">{p.name}</p>
                           <p className="text-[11px] text-text-muted truncate">
                             {dayShort(p.date)}{p.merchant ? ` · ${p.merchant}` : ''}
-                            {p.qty && p.qty !== 1 ? ` · ${p.qty.toLocaleString('es-CO', { maximumFractionDigits: 3 })}${p.unit ? ` ${p.unit}` : ''}` : ''}
+                            {p.qty && p.qty !== 1 ? ` · ${p.qty.toLocaleString(currentLocale(), { maximumFractionDigits: 3 })}${p.unit ? ` ${p.unit}` : ''}` : ''}
                             {p.unitPrice && p.qty && p.qty !== 1 ? ` × ${fmt(p.unitPrice)}` : ''}
                             {!p.fromItems ? ' · gasto completo' : ''}
                           </p>

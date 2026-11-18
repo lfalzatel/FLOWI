@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useState } from 'react';
 import { ChevronDown, ArrowDownToLine, ArrowUpFromLine, Scale, Sparkles, RefreshCw } from 'lucide-react';
 import type { Account, Investment } from '@/lib/firestore';
@@ -51,7 +52,7 @@ export function InvestmentMovements({ inv, accounts, fmt, isTech }: {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-text-primary">{m.label}</p>
                   <p className="text-[10px] text-text-muted truncate">
-                    {d.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}
+                    {d.toLocaleDateString(currentLocale(), { weekday: 'short', day: 'numeric', month: 'short', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}
                     {extra ? ` · ${extra}` : ''}
                   </p>
                 </div>

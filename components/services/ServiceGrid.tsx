@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
@@ -151,21 +152,21 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
   endRef.current = endPress;
 
   const q = query.toLowerCase();
-  const visible = order.map(id => byId.get(id)!).filter(s => s && `${s.title} ${s.description}`.toLowerCase().includes(q));
+  const visible = order.map(id => byId.get(id)!).filter(s => s && `${s.title} ${s.description} ${tr(s.title)} ${tr(s.description)}`.toLowerCase().includes(q));
 
   const cardContent = (service: ServiceItem) => (
       <>
         {service.isNew && (
-          <span className={`absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-full'}`}>Nuevo</span>
+          <span className={`absolute top-2 right-2 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Nuevo')}</span>
         )}
         {service.soon && (
-          <span className={`absolute top-2 right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-text-muted/20 text-text-secondary ${isTech ? 'rounded-none' : 'rounded-full'}`}>Pronto</span>
+          <span className={`absolute top-2 right-2 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider bg-text-muted/20 text-text-secondary ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Pronto')}</span>
         )}
         <div className={`w-10 h-10 flex items-center justify-center mb-3 ${isTech ? 'bg-transparent border border-accent/40' : service.bgColor + ' rounded-xl'}`}>
           <service.icon className={`w-5 h-5 ${isTech ? 'text-accent' : service.color}`} />
         </div>
-        <span className={`text-sm font-medium ${isTech ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>{service.title}</span>
-        <span className="mt-1 text-[11px] leading-snug text-text-muted">{service.description}</span>
+        <span className={`text-sm font-medium ${isTech ? 'text-accent/90' : 'text-text-primary'} leading-tight`}>{tr(service.title)}</span>
+        <span className="mt-1 text-[11px] leading-snug text-text-muted">{tr(service.description)}</span>
       </>
   );
 
@@ -200,7 +201,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
 
   const tipSeen = profile?.servicesTipSeen;
   const header = (text: string) => (
-    <h2 key={`h-${text}`} className={`col-span-full mt-2 first:mt-0 text-[11px] font-bold uppercase tracking-wider ${isTech ? 'text-accent/70' : 'text-text-muted'}`}>{text}</h2>
+    <h2 key={`h-${text}`} className={`col-span-full mt-2 first:mt-0 text-[11px] font-bold uppercase tracking-wider ${isTech ? 'text-accent/70' : 'text-text-muted'}`}>{tr(text)}</h2>
   );
 
   return (
@@ -209,13 +210,13 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
         <div className={`mb-4 p-4 border flex items-start gap-3 ${isTech ? 'rounded-none border-accent/40 bg-accent/5' : 'rounded-2xl border-accent/30 bg-accent/10'}`}>
           <Hand className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className={`text-sm font-semibold ${isTech ? 'text-accent' : 'text-text-primary'}`}>Organiza las tarjetas a tu gusto</p>
+            <p className={`text-sm font-semibold ${isTech ? 'text-accent' : 'text-text-primary'}`}>{tr('Organiza las tarjetas a tu gusto')}</p>
             <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
-              Mantén presionada una tarjeta hasta que se levante y arrástrala a donde quieras; las demás se corren. Tu orden queda guardado en tu cuenta.
+              {tr('Mantén presionada una tarjeta hasta que se levante y arrástrala a donde quieras; las demás se corren. Tu orden queda guardado en tu cuenta.')}
             </p>
             <button type="button" onClick={() => user && updateDoc(doc(db, 'users', user.uid), { servicesTipSeen: true }).catch(() => {})}
                     className={`mt-2 px-4 py-1.5 text-xs font-bold ${isTech ? 'rounded-none border border-accent text-accent' : 'rounded-lg bg-accent text-black'}`}>
-              Entendido
+              {tr('Entendido')}
             </button>
           </div>
         </div>
@@ -224,7 +225,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
       {custom && !query && (
         <div className="mb-3 flex justify-end">
           <button type="button" onClick={() => saveOrder(null)} className="inline-flex items-center gap-1 text-[11px] text-text-muted hover:text-accent">
-            <RotateCcw className="w-3 h-3" /> Volver al orden original
+            <RotateCcw className="w-3 h-3" /> {tr('Volver al orden original')}
           </button>
         </div>
       )}

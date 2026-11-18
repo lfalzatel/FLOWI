@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { getISOWeekString, formatFilterText, navigateFilter, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
@@ -167,7 +168,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
                   : 'text-accent hover:opacity-80'
               }`}
             >
-              {type === 'all' ? 'TODO' : type === 'month' ? 'MES' : type === 'week' ? 'SEMANA' : 'DÍA'}
+              {type === 'all' ? tr('TODO') : type === 'month' ? tr('MES') : type === 'week' ? tr('SEMANA') : tr('DÍA')}
             </button>
           ))}
         </div>
@@ -208,7 +209,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
               <ChevronLeft className="w-5 h-5" />
             </button>
             <h4 className="font-bold text-sm text-text-primary capitalize">
-              {calendarMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+              {calendarMonth.toLocaleDateString(currentLocale(), { month: 'long', year: 'numeric' })}
             </h4>
             <div className="flex items-center gap-1">
               <button onClick={handleCalendarNextMonth} className="p-2 rounded-full hover:bg-glass-hover text-text-primary">

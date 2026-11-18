@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, Share2, FileSpreadsheet, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
@@ -54,7 +55,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     }
     
     // Obtener fecha y hora en formato legible (ej. 27/06/2026 18:45)
-    return d.toLocaleDateString('es-CO') + ' ' + d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString(currentLocale()) + ' ' + d.toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' });
   };
 
   // Obtener el periodo del reporte legible
@@ -64,7 +65,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       // Formato YYYY-MM -> Nombre de mes y año
       const [year, month] = filterValue.split('-');
       const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const monthName = date.toLocaleDateString('es-CO', { month: 'long' });
+      const monthName = date.toLocaleDateString(currentLocale(), { month: 'long' });
       return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${year}`;
     }
     if (filterType === 'week') {
@@ -88,7 +89,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           const ISOweekEnd = new Date(ISOweekStart);
           ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
           
-          return `Semana: del ${ISOweekStart.toLocaleDateString('es-CO')} al ${ISOweekEnd.toLocaleDateString('es-CO')}`;
+          return `Semana: del ${ISOweekStart.toLocaleDateString(currentLocale())} al ${ISOweekEnd.toLocaleDateString(currentLocale())}`;
         }
       } catch (e) {
         console.error("Error al calcular fechas de la semana:", e);
@@ -107,7 +108,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
   // Función para exportar a CSV/Excel (Estructura de Reporte Financiero Completo)
   const exportToCSV = () => {
     let csv = "\uFEFF"; // BOM para asegurar codificación UTF-8 correcta en Excel
-    const dateStr = new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date().toLocaleDateString(currentLocale()) + ' ' + new Date().toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' });
     
     // Encabezado Corporativo
     csv += "FLOWI — Tu dinero en flujo\n";
@@ -162,7 +163,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const dateStr = new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date().toLocaleDateString(currentLocale()) + ' ' + new Date().toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' });
     let rowsHTML = '';
     let summaryHTML = '';
 
@@ -299,7 +300,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
   // Obtener el contenido del CSV para compartir como archivo real
   const getCSVString = () => {
     let csv = "";
-    const dateStr = new Date().toLocaleDateString('es-CO') + ' ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date().toLocaleDateString(currentLocale()) + ' ' + new Date().toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' });
     csv += "FLOWI — Tu dinero en flujo\n";
     csv += `Reporte de:;${title}\n`;
     csv += `Periodo del reporte:;${getPeriodString()}\n`;
@@ -415,7 +416,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         doc.setTextColor(107, 114, 128);
         doc.setFont('helvetica', 'normal');
         doc.text(`Periodo: ${getPeriodString()}`, 130, 25);
-        doc.text(`Fecha y hora de consulta: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`, 130, 30);
+        doc.text(`Fecha y hora de consulta: ${new Date().toLocaleDateString(currentLocale())} ${new Date().toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' })}`, 130, 30);
         
         doc.line(14, 35, 196, 35);
 
@@ -623,7 +624,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                   <div className="text-right">
                     <span className="text-[10px] text-slate-800 font-extrabold block">Reporte de {title}</span>
                     <p className="text-[7px] text-slate-400 font-semibold">Periodo: {getPeriodString()}</p>
-                    <p className="text-[7px] text-slate-400 font-medium">Fecha y hora de consulta: {new Date().toLocaleDateString('es-CO')} {new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-[7px] text-slate-400 font-medium">Fecha y hora de consulta: {new Date().toLocaleDateString(currentLocale())} {new Date().toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>
 

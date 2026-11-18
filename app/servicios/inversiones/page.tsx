@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -231,7 +232,7 @@ export default function InversionesPage() {
                         <div>
                           <p className="text-text-muted">{k === 'ahorro' ? 'Saldo hoy (aprox.)' : 'Vale hoy'}</p>
                           <p className="font-bold text-base text-text-primary"><AnimatedNumber value={v.value} format={fmt} /></p>
-                          {k !== 'ahorro' && inv.valueAt && <p className="text-[10px] text-text-muted">actualizado el {new Date(inv.valueAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</p>}
+                          {k !== 'ahorro' && inv.valueAt && <p className="text-[10px] text-text-muted">actualizado el {new Date(inv.valueAt).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}</p>}
                         </div>
                         <div>
                           <p className="text-text-muted">{k === 'ahorro' ? 'Intereses ganados' : loss ? 'Pérdida' : 'Ganancia'}</p>

@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -37,7 +38,7 @@ const KINDS: { id: Kind; label: string; sub: string; icon: any }[] = [
 const toEA = (monthly: number) => (Math.pow(1 + monthly / 100, 12) - 1) * 100;
 const toMonthly = (ea: number) => (Math.pow(1 + ea / 100, 1 / 12) - 1) * 100;
 const round2 = (n: number) => Math.round(n * 100) / 100;
-const fmt = (n: number) => `$${Math.round(n).toLocaleString('es-CO')}`;
+const fmt = (n: number) => `$${Math.round(n).toLocaleString(currentLocale())}`;
 const onlyNum = (v: string) => v.replace(/[^0-9]/g, '');
 const decimal = (v: string) => { const x = v.replace(/[^0-9.,]/g, '').replace(',', '.'); return x.split('.').length > 2 ? null : x; };
 
@@ -219,7 +220,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
       setInsuranceMode('pct');
       setInsurance(String(pct));
       setShowInsurance(true);
-      insMsg = ` El seguro sale en ${pct.toLocaleString('es-CO')} % mensual del saldo.`;
+      insMsg = ` El seguro sale en ${pct.toLocaleString(currentLocale())} % mensual del saldo.`;
     } else if (d.insuranceMonthly) {
       setInsuranceMode('fijo');
       setInsurance(String(d.insuranceMonthly));
@@ -353,8 +354,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
 
   const formatPaymentDate = (date: any) => {
     const d = date instanceof Date ? date : new Date(date);
-    const dateStr = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-    const timeStr = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const dateStr = d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
+    const timeStr = d.toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit', hour12: true });
     return `${dateStr} • ${timeStr}`;
   };
 
@@ -400,7 +401,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
       <p className={hint}>
         {insuranceMode === 'va'
           ? (vaPct
-              ? `Eso es un ${vaPct.toLocaleString('es-CO')} % mensual del saldo: unos ${fmt(insMonth)} al mes, y baja a medida que se paga.`
+              ? `Eso es un ${vaPct.toLocaleString(currentLocale())} % mensual del saldo: unos ${fmt(insMonth)} al mes, y baja a medida que se paga.`
               : 'Escribe el seguro que el banco muestra hasta hoy; con la fecha de desembolso saco el % solo.')
           : insuranceMode === 'pct'
             ? `Un % mensual de lo que se debe; baja a medida que se paga.${insMonth ? ` Este mes: unos ${fmt(insMonth)}.` : ''}`
@@ -574,7 +575,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 </div>
               )}
               {!isBank && rateUnit === 'mensual' && typedRate > 0 && (
-                <p className={hint}>Equivale a {round2(toEA(typedRate)).toLocaleString('es-CO')} % E.A.</p>
+                <p className={hint}>Equivale a {round2(toEA(typedRate)).toLocaleString(currentLocale())} % E.A.</p>
               )}
             </div>
             {isBank ? (
@@ -725,7 +726,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                   <div className={`${row} pt-1`}>
                     <span>Próximo pago</span>
                     <span className="text-text-primary">
-                      {next.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {next.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' })}
                       {debtToEdit.installment ? ` · ${fmt(debtToEdit.installment)}` : ''}
                     </span>
                   </div>

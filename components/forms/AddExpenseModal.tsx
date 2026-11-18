@@ -41,7 +41,7 @@ import { formatCurrency, hasCents, roundMoney } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { CalendarDays, ChevronDown } from 'lucide-react';
-import { useT } from '@/lib/i18n';
+import { useT, currentLocale, tr } from '@/lib/i18n';
 import { SaleCostsEditor, SaleCostDraft, costLabel } from '@/components/forms/SaleCostsEditor';
 
 interface AddExpenseModalProps {
@@ -751,7 +751,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             {suggestedCat && (
               <button type="button" onClick={() => { autoCategory.current = suggestedCat; selectCategory(suggestedCat); setSuggestedCat(null); }}
                       className={`mt-2 text-[11px] font-semibold px-2.5 py-1 border border-accent/40 bg-accent/10 text-accent transition-all active:scale-95 ${isTechTheme ? 'rounded-none font-mono' : 'rounded-full'}`}>
-                💡 {t('¿Es «{cat}»? Toca para usarla', { cat: suggestedCat })}
+                💡 {t('¿Es «{cat}»? Toca para usarla', { cat: tr(suggestedCat) })}
               </button>
             )}
             {type === 'gasto' && (items ? (
@@ -848,7 +848,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                       <CategoryIcon icon={cat.icon} label={cat.label} className="w-5 h-5 flex items-center justify-center" />
                     </span>
                     <span className={`text-[10.5px] leading-tight text-center line-clamp-2 w-full break-words normal-case ${active ? 'text-accent font-semibold' : 'text-text-primary'}`}>
-                      {softHyphenate(cat.label)}
+                      {softHyphenate(tr(cat.label))}
                     </span>
                   </button>
                 );
@@ -1096,7 +1096,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             // Este gasto ya es el pago de ese mes: el recordatorio no debe salir como pendiente
             paidDates: [dateKey(transactionToEdit.date instanceof Date ? transactionToEdit.date : transactionToEdit.date.toDate())],
             time: '08:00',
-            description: `Último pago: $${Number(amount || 0).toLocaleString('es-CO')}`,
+            description: `Último pago: $${Number(amount || 0).toLocaleString(currentLocale())}`,
           }}
           onClose={() => setShowReminder(false)}
           onSuccess={() => setShowReminder(false)}

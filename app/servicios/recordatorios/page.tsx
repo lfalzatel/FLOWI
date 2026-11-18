@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { findCatalogEntry } from '@/lib/categories';
 import { useState, useEffect } from 'react';
@@ -288,7 +289,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
     }
     if (reminder.type === 'yearly' && reminder.date) {
       const [, m, d] = reminder.date.split('-').map(Number);
-      return `cada año el ${new Date(2000, m - 1, d).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}`;
+      return `cada año el ${new Date(2000, m - 1, d).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long' })}`;
     }
     if (reminder.type === 'budget_alert' && reminder.budgetPercent !== undefined) {
       return `al consumir el ${reminder.budgetPercent}%`;
@@ -328,8 +329,8 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
           </div>
           <p className="text-xs text-text-secondary mt-0.5 truncate">
             {reminder.amount
-              ? <b className="text-text-primary">${reminder.amount.toLocaleString('es-CO')} · </b>
-              : lastPay ? <b className="text-text-primary">${lastPay.amount.toLocaleString('es-CO')} <span className="font-normal text-text-muted">(último pago, {lastPay.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })})</span> · </b> : null}
+              ? <b className="text-text-primary">${reminder.amount.toLocaleString(currentLocale())} · </b>
+              : lastPay ? <b className="text-text-primary">${lastPay.amount.toLocaleString(currentLocale())} <span className="font-normal text-text-muted">(último pago, {lastPay.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })})</span> · </b> : null}
             {reminder.description || 'Sin notas'}
           </p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
@@ -376,8 +377,8 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
       {due && (
         <div className={`mt-3 flex items-center justify-between gap-3 px-3 py-2.5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${due.daysLeft < 0 ? 'bg-red-500/10 border border-red-500/25' : 'bg-accent/5 border border-accent/15'}`}>
           <span className={`text-xs font-semibold ${due.daysLeft < 0 ? 'text-red-400' : 'text-text-secondary'}`}>
-            {(isPaymentReminder(reminder) ? dueLabel : eventDueLabel)(due.daysLeft)} · {due.dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
-            {(reminder.amount || lastPay?.amount) ? <span className="text-text-muted font-normal"> · ${(reminder.amount || lastPay!.amount).toLocaleString('es-CO')}</span> : null}
+            {(isPaymentReminder(reminder) ? dueLabel : eventDueLabel)(due.daysLeft)} · {due.dueDate.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}
+            {(reminder.amount || lastPay?.amount) ? <span className="text-text-muted font-normal"> · ${(reminder.amount || lastPay!.amount).toLocaleString(currentLocale())}</span> : null}
           </span>
           <button
             onClick={(e) => { e.stopPropagation(); onPay(due); }}

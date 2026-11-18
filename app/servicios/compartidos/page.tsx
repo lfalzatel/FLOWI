@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -96,7 +97,7 @@ export default function CompartidosPage() {
                   <button type="button" onClick={() => setEditing(e.tx)} className="flex-1 min-w-0 text-left">
                     <p className={`text-xs truncate ${e.settled ? 'text-text-muted line-through' : 'text-text-primary'}`}>{e.tx.description?.trim() || e.tx.category}</p>
                     <p className="text-[10px] text-text-muted">
-                      {e.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })} · {e.toMe ? 'pagaste tú' : `pagó ${b.name.split(/\s+/)[0]}`}
+                      {e.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {e.toMe ? 'pagaste tú' : `pagó ${b.name.split(/\s+/)[0]}`}
                     </p>
                   </button>
                   <span className={`text-xs font-semibold tabular-nums ${e.settled ? 'text-text-muted' : e.toMe ? 'text-accent' : 'text-[var(--red)]'}`}>

@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { DateFilter, type FilterType } from '@/components/dashboard/DateFilter';
 import { getISOWeekString, getLocalDateString } from '@/lib/dateUtils';
@@ -194,7 +195,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                         <p className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</p>
                         <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{u.email}</p>
                         {(u.activeDays ?? 0) > 0 && (
-                          <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent' : 'text-accent'}`}>📅 {u.activeDays} {u.activeDays === 1 ? 'día' : 'días'} de uso{typeof u.txCount === 'number' ? ` · ${u.txCount} registros` : ''}{u.lastActiveDay ? ` · último: ${new Date(u.lastActiveDay + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}</p>
+                          <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent' : 'text-accent'}`}>📅 {u.activeDays} {u.activeDays === 1 ? 'día' : 'días'} de uso{typeof u.txCount === 'number' ? ` · ${u.txCount} registros` : ''}{u.lastActiveDay ? ` · último: ${new Date(u.lastActiveDay + 'T12:00:00').toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}` : ''}</p>
                         )}
                       </div>
 
@@ -227,7 +228,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
               const isAdmin = selectedUser.role === 'admin';
               const roleChip = (on: boolean) => `px-3 py-1.5 text-xs font-semibold border transition-all active:scale-95 disabled:opacity-50 ${isTechTheme ? 'rounded-none font-mono uppercase' : 'rounded-xl'} ${
                 on ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary hover:text-text-primary'}`;
-              const fmtDay = (d?: Date | null) => d ? d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+              const fmtDay = (d?: Date | null) => d ? d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
               const last = userStats.lastTx ?? (selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00') : null);
               const periodLabel = filterType === 'all' ? 'Todo el tiempo' : filterType === 'month' ? 'Este periodo (mes)' : filterType === 'week' ? 'Este periodo (semana)' : 'Este día';
 

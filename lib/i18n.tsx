@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { EN } from '@/lib/i18n-en';
 
 // Idioma de la app. FLOWI está escrito en español; en inglés se busca cada frase en lib/i18n-en.ts.
@@ -27,6 +27,15 @@ export function translate(lang: Lang, es: string, vars?: Vars): string {
   return fill(lang === 'en' ? EN[es] ?? es : es, vars);
 }
 
+// Idioma actual para tr(): sirve en cualquier parte (listas, funciones, textos armados fuera de una pantalla)
+// porque al cambiar de idioma toda la app se vuelve a dibujar (ver LanguageProvider).
+let current: Lang = 'es';
+export const currentLang = () => current;
+export const currentLocale = () => (current === 'en' ? 'en-US' : 'es-CO');
+export function tr(es: string, vars?: Vars): string {
+  return translate(current, es, vars);
+}
+
 interface LangCtx {
   lang: Lang;
   locale: string;                      // para fechas y números: es-CO / en-US
@@ -50,7 +59,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     lang, setLang, locale: lang === 'en' ? 'en-US' : 'es-CO',
     t: (es, vars) => translate(lang, es, vars),
   }), [lang, setLang]);
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  current = lang;
+  // key: al cambiar de idioma se vuelve a dibujar todo, así cada tr() toma el idioma nuevo
+  return <Ctx.Provider value={value}><Fragment key={lang}>{children}</Fragment></Ctx.Provider>;
 }
 
 export const useT = () => useContext(Ctx);

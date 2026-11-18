@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 import { Goal, GoalPriority, Transaction } from './firestore';
 
 // Cálculos de Metas de ahorro: capacidad real de ahorro, reparto por prioridad y fecha estimada.
@@ -106,7 +107,7 @@ export function projectGoal(goal: Goal, monthlyShare: number, now = new Date()):
 }
 
 export function formatMonthYear(d: Date): string {
-  return d.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+  return d.toLocaleDateString(currentLocale(), { month: 'long', year: 'numeric' });
 }
 
 export function formatMonthsText(months: number): string {

@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import Link from 'next/link';
 import { ChevronRight, Target } from 'lucide-react';
@@ -28,9 +29,9 @@ export function GoalsSummaryCard({ currency = 'COP', demoGoals }: { currency?: s
         <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center shrink-0"><Target className="w-5 h-5 text-accent" /></div>
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-semibold ${isTechTheme ? 'text-accent uppercase font-mono' : 'text-text-primary'}`}>
-            {goals.length ? '¡Cumpliste tus metas! ¿Vamos por otra?' : '¿Para qué estás ahorrando?'}
+            {goals.length ? tr('¡Cumpliste tus metas! ¿Vamos por otra?') : tr('¿Para qué estás ahorrando?')}
           </p>
-          <p className="text-xs text-text-muted">Crea una meta y te digo cuándo la lograrías.</p>
+          <p className="text-xs text-text-muted">{tr('Crea una meta y te digo cuándo la lograrías.')}</p>
         </div>
         <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />
       </Link>

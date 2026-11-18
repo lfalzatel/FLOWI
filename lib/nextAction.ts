@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 import { Transaction } from './firestore';
 import { Commitment } from './commitments';
 import { DailyBudget } from './dailyBudget';
@@ -53,7 +54,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     const left = Math.round((day(premiumEnd.until) - day(now)) / 86400000);
     if (left <= 5 && left >= -7) {
       const what = premiumEnd.gift ? 'Tu mes de Premium de regalo' : 'Tu FLOWI Premium';
-      const dateText = premiumEnd.until.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' });
+      const dateText = premiumEnd.until.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long' });
       out.push({
         id: `premium:${getLocalDateString(premiumEnd.until)}`, kind: 'link', href: '/planes', tone: left <= 1 ? 'alert' : 'normal',
         title: left > 1 ? `${what} vence en ${left} días` : left === 1 ? `${what} vence mañana` : left === 0 ? `${what} vence hoy` : `${what} terminó`,
@@ -66,7 +67,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   const month = getLocalMonthString(now);
   const lastMonth = getLocalMonthString(new Date(now.getFullYear(), now.getMonth() - 1, 1));
   const todayKey = getLocalDateString(now);
-  const monthName = now.toLocaleDateString('es-CO', { month: 'long' });
+  const monthName = now.toLocaleDateString(currentLocale(), { month: 'long' });
 
   // 1. Pagos vencidos o que vencen hoy/mañana (con fecha de recordatorio)
   for (const c of pending) {

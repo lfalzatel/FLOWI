@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -96,7 +97,7 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
           {over
             ? `Tu cuota de hoy era ${f(today.todayAllowance)} y llevas ${f(today.spentToday)}. Lo que te pasaste se descuenta de los próximos días.`
             : today.mode === 'cuentas' && today.nextIncome
-              ? `Es lo que puedes gastar hoy sin quedarte corto antes de tu próximo ingreso (${today.nextIncome.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}).`
+              ? `Es lo que puedes gastar hoy sin quedarte corto antes de tu próximo ingreso (${today.nextIncome.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long' })}).`
               : `Es lo que puedes gastar hoy sin quedarte corto antes de fin de mes.`}
         </p>
       </div>
@@ -125,7 +126,7 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
           <>
             <Row label={`Repartido en ${today.daysLeft - 1} días`}
                  hint={today.mode === 'cuentas' && today.nextIncome
-                   ? `Desde mañana hasta tu próximo ingreso (${today.nextIncome.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}), según cuándo te llegó el último`
+                   ? `Desde mañana hasta tu próximo ingreso (${today.nextIncome.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}), según cuándo te llegó el último`
                    : 'Los días que faltan del mes, desde mañana'}
                  value={`÷ ${today.daysLeft - 1}`} />
             <Row label="Desde mañana puedes gastar" value={`${f(today.tomorrowAllowance)} / día`} strong />

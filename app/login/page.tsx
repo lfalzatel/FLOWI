@@ -28,7 +28,7 @@ const STEPS = [
 ];
 
 const FAQ = [
-  { q: '¿Cuánto cuesta?', a: 'Nada. FLOWI es gratis y no tiene anuncios.' },
+  { q: '¿Cuánto cuesta?', a: 'Usarla es gratis y no tiene anuncios. Si quieres más (metas e inversiones sin límite y más recibos al día), hay un plan Premium desde $5.000 al mes, sin cobros automáticos.' },
   { q: '¿Tengo que conectar mi cuenta del banco?', a: 'No. Tú decides qué anotar. Si quieres, puedes subir el extracto que descargas de tu banco, pero FLOWI nunca entra a tu banco.' },
   { q: '¿Quién puede ver mis datos?', a: 'Solo tú. Cada cuenta ve únicamente sus propios movimientos.' },
   { q: '¿Funciona en mi celular?', a: 'Sí, en Android y iPhone desde el navegador. La puedes instalar como app desde el menú del navegador ("Agregar a la pantalla de inicio").' },

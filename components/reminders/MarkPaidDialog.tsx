@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CalendarCheck, CheckCircle2, Receipt, Trash2, X } from 'lucide-react';
@@ -80,7 +81,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
     );
   }
 
-  const dueText = dueDate.toLocaleDateString('es-CO', { day: 'numeric', month: 'long' });
+  const dueText = dueDate.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long' });
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>

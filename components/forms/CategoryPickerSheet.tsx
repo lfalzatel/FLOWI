@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Plus, Settings2, Check } from 'lucide-react';
@@ -73,7 +74,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
   const searchResults = useMemo(() => {
     const q = normalizeText(query);
     if (!q) return null;
-    const cats = categories.filter(c => normalizeText(c.label).includes(q));
+    const cats = categories.filter(c => normalizeText(c.label).includes(q) || normalizeText(tr(c.label)).includes(q));
     // Al buscar un comercio ("jumbo") se ofrece su categoría con el comercio ya elegido
     const merchants = type === 'gasto'
       ? MERCHANTS.filter(mer => normalizeText(mer.label).includes(q))
@@ -135,9 +136,9 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
           <CategoryIcon icon={cat.icon} label={merchant || cat.label} className="w-6 h-6 flex items-center justify-center" />
         </span>
         <span className="text-[11px] leading-tight text-center text-text-primary line-clamp-2 break-words w-full">
-          {softHyphenate(merchant || cat.label)}
+          {softHyphenate(merchant || tr(cat.label))}
         </span>
-        {merchant && <span className="text-[10px] leading-none text-text-muted truncate w-full text-center">{cat.label}</span>}
+        {merchant && <span className="text-[10px] leading-none text-text-muted truncate w-full text-center">{tr(cat.label)}</span>}
         {isSelected && (
           <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-accent flex items-center justify-center">
             <Check className="w-3 h-3 text-white" />
@@ -170,7 +171,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
           <div className="w-10 h-1.5 rounded-full bg-text-muted mx-auto mb-3 sm:hidden" />
           <div className="flex items-center justify-between">
             <h3 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase tracking-wide' : 'font-syne text-text-primary'}`}>
-              {type === 'gasto' ? 'Categoría del gasto' : 'Categoría del ingreso'}
+              {type === 'gasto' ? tr('Categoría del gasto') : tr('Categoría del ingreso')}
             </h3>
             <button type="button" onClick={onClose} aria-label="Cerrar" className="p-2 -mr-2 text-text-secondary hover:text-text-primary">
               <X className="w-5 h-5" />
@@ -188,7 +189,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
               ref={searchRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={type === 'gasto' ? 'Busca "mercado", "jumbo", "luz"…' : 'Busca "sueldo", "prima"…'}
+              placeholder={type === 'gasto' ? tr('Busca "mercado", "jumbo", "luz"…') : tr('Busca "sueldo", "prima"…')}
               className={`w-full bg-glass border py-2.5 pl-9 pr-9 text-sm text-text-primary placeholder-text-muted focus:outline-none ${
                 isTechTheme ? 'border-accent/30 rounded-none focus:border-accent' : 'border-glass-border rounded-xl focus:border-accent'
               }`}
@@ -217,7 +218,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
                     : 'border-glass-border text-text-secondary hover:text-text-primary'
                 }`}
               >
-                {group}
+                {tr(group)}
               </button>
             ))}
           </div>
@@ -228,9 +229,9 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
           {searchResults ? (
             totalResults === 0 ? (
               <div className="text-center py-12 px-6">
-                <p className="text-sm text-text-secondary mb-4">No hay categorías con “{query}”.</p>
+                <p className="text-sm text-text-secondary mb-4">{tr('No hay categorías con “{q}”.', { q: query })}</p>
                 {onCreate && <button type="button" onClick={onCreate} className="text-sm font-semibold text-accent">
-                  + Crear categoría “{query}”
+                  + {tr('Crear categoría “{q}”', { q: query })}
                 </button>}
               </div>
             ) : (
@@ -242,7 +243,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
                 )}
                 {searchResults.merchants.length > 0 && (
                   <>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted px-1 mt-4 mb-1">Comercios</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted px-1 mt-4 mb-1">{tr('Comercios')}</p>
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
                       {searchResults.merchants.map(({ merchant, category }) => {
                         const cat = categories.find(c => c.label === category)!;
@@ -257,7 +258,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
             sections.map(({ group, items }) => (
               <section key={group} ref={el => { sectionRefs.current[group] = el; }} className="mb-2">
                 <p className={`sticky top-0 z-10 ${surface} text-[11px] font-semibold uppercase tracking-wider text-text-muted px-1 py-2`}>
-                  {group}
+                  {tr(group)}
                 </p>
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
                   {items.map(cat => tile(cat, undefined, `${group}-${cat.label}`))}

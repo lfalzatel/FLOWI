@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale, tr } from '@/lib/i18n';
 import { Transaction } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { useTheme } from '@/components/ThemeProvider';
@@ -23,8 +24,8 @@ interface Props {
 
 function fmtDate(date: Timestamp | Date) {
   const d = date instanceof Timestamp ? date.toDate() : date;
-  const dateStr = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-  const timeStr = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const dateStr = d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
+  const timeStr = d.toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit', hour12: true });
   return `${dateStr} • ${timeStr}`;
 }
 
@@ -46,7 +47,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
     return (
       <div key={animationKey} className={`glass-card p-8 text-center ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
         <p className="text-3xl mb-2">💸</p>
-        <p className={`text-sm ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-widest' : 'text-text-muted'}`}>Sin transacciones aún</p>
+        <p className={`text-sm ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-widest' : 'text-text-muted'}`}>{tr('Sin transacciones aún')}</p>
       </div>
     );
   }
@@ -56,19 +57,19 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
       {items.map((t, idx) => {
         const i = Math.min(idx, 12); // en listas largas, que las últimas no tarden en aparecer
         const cat = getCategoryIcon(t.category);
-        const details = [t.category, t.merchant, t.paymentMethod].filter(Boolean).join(' · ');
-        const displayName = t.description || t.category;
+        const details = [tr(t.category), t.merchant, t.paymentMethod].filter(Boolean).join(' · ');
+        const displayName = t.description || tr(t.category);
         // Compras con productos adentro (recibo o gasto manual con productos): cuántos y en cuántas categorías
         const prodCount = t.items?.length ?? 0;
         const catCount = prodCount ? groupByCategory(t.items!, t.category).length : 0;
         const itemsNote = prodCount
-          ? `🧾 ${prodCount} ${prodCount === 1 ? 'producto' : 'productos'}${catCount > 1 ? ` · ${catCount} categorías` : ''}`
+          ? `🧾 ${prodCount === 1 ? tr('1 producto') : tr('{n} productos', { n: prodCount })}${catCount > 1 ? ` · ${tr('{n} categorías', { n: catCount })}` : ''}`
           : '';
         // Gasto compartido: lo que falta por cobrar o por pagar
         const sh = t.type === 'gasto' ? t.shared : null;
         const sharedNote = !sh ? '' : sh.paidByMe
-          ? (pendingToMe(sh) ? `👥 Te deben ${money(pendingToMe(sh))}` : '👥 Compartido · ya te pagaron')
-          : (pendingFromMe(sh) ? `👥 Le debes a ${sh.people[0]?.name}` : `👥 Pagó ${sh.people[0]?.name} · ya le pagaste`);
+          ? (pendingToMe(sh) ? `👥 ${tr('Te deben {m}', { m: money(pendingToMe(sh)) })}` : `👥 ${tr('Compartido · ya te pagaron')}`)
+          : (pendingFromMe(sh) ? `👥 ${tr('Le debes a {p}', { p: sh.people[0]?.name ?? '' })}` : `👥 ${tr('Pagó {p} · ya le pagaste', { p: sh.people[0]?.name ?? '' })}`);
         const displayLabel = isCyberpunk 
           ? `>_ ${displayName.toUpperCase().replace(/\s+/g, '_')}` 
           : displayName;

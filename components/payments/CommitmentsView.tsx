@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useMemo, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -15,7 +16,7 @@ import { CommitmentsSummary, PaidCommitment, getCommitmentsForMonth, monthKey } 
 import { getDateFromISOWeek, getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 
 const monthTitle = (k: string) => {
-  const s = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+  const s = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1).toLocaleDateString(currentLocale(), { month: 'long', year: 'numeric' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 const shiftMonth = (k: string, n: number) => monthKey(new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1 + n, 1));
@@ -59,7 +60,7 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
     }
     const m = filterValue.slice(0, 7);
     const inDay = (d: Date) => getLocalDateString(d) === filterValue;
-    return [{ title: new Date(`${filterValue}T12:00:00`).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' }), summary: keep(calc(m), inDay) }];
+    return [{ title: new Date(`${filterValue}T12:00:00`).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long' }), summary: keep(calc(m), inDay) }];
   }, [transactions, reminders, skips, debts, filterType, filterValue]);
 
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
@@ -68,7 +69,7 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
   const paidRow = (p: PaidCommitment) => {
     const c = findCatalogEntry(p.category) || { label: p.category, icon: '🧾', color: '#10B981' };
     const when = p.paidAt
-      ? `Pagado el ${p.paidAt.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}`
+      ? `Pagado el ${p.paidAt.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}`
       : 'Marcado con "Ya lo pagué"';
     return (
       <li key={p.key} className="flex items-center gap-3 py-2">
@@ -80,7 +81,7 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
           <p className="text-[11px] text-text-muted truncate">{when}{p.how === 'abono' ? ' · abono a la deuda' : ''}</p>
           {p.repeats?.length ? (
             <p className="text-[11px] text-amber-400 font-semibold leading-snug whitespace-normal">
-              ⚠ Pagado {p.repeats.length} veces este mes: {p.repeats.map(r => `${fmt(r.amount)} el ${r.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}`).join(' y ')}. Si fue un error, pide el reembolso o borra el que sobra en Gastos.
+              ⚠ Pagado {p.repeats.length} veces este mes: {p.repeats.map(r => `${fmt(r.amount)} el ${r.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}`).join(' y ')}. Si fue un error, pide el reembolso o borra el que sobra en Gastos.
             </p>
           ) : null}
         </div>

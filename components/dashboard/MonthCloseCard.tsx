@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
@@ -78,7 +79,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
   const [error, setError] = useState('');
   const [savedNote, setSavedNote] = useState('');
   const f = (n: number) => formatCurrency(n, currency);
-  const nextLabel = new Date().toLocaleDateString('es-CO', { month: 'long' });
+  const nextLabel = new Date().toLocaleDateString(currentLocale(), { month: 'long' });
   const surplus = review.result > 0;
 
   useEffect(() => {

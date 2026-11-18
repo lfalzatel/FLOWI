@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { usePlanGate } from '@/lib/plans';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -18,7 +19,7 @@ export function formatMoneyInput(value: string | number): string {
   if (typeof value === 'string' && !raw.includes(',') && raw.endsWith('.')) raw = `${raw.slice(0, -1)},`;
   const [intPart, ...rest] = raw.replace(/[^\d,]/g, '').split(',');
   const digits = intPart.replace(/^0+(?=\d)/, '');
-  const int = digits ? Number(digits).toLocaleString('es-CO') : (rest.length ? '0' : '');
+  const int = digits ? Number(digits).toLocaleString(currentLocale()) : (rest.length ? '0' : '');
   return rest.length ? `${int},${rest.join('').slice(0, 2)}` : int;
 }
 export function parseMoneyInput(value: string): number {

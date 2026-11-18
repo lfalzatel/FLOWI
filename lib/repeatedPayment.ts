@@ -1,3 +1,4 @@
+import { currentLocale } from '@/lib/i18n';
 // Aviso de pago repetido: un gasto fijo (agua, luz, arriendo, Netflix…) que ya se registró este mes.
 // Evita pagar o registrar dos veces lo mismo. Solo aplica a pagos fijos, para no molestar con el mercado o el tinto.
 import { Transaction, isFixedExpenseCategory } from './firestore';
@@ -26,6 +27,6 @@ export function findRepeatedPayment(
 /** "Ya registraste Agua (Aguas de Manizales) este mes: $ 85.000 el 3 de nov." */
 export function repeatedPaymentText(t: Transaction) {
   const name = t.merchant ? `${t.category} (${t.merchant})` : t.category;
-  const day = toDate(t.date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }).replace('.', '');
-  return `Ya registraste ${name} este mes: $ ${Math.round(t.amount).toLocaleString('es-CO')} el ${day}.`;
+  const day = toDate(t.date).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' }).replace('.', '');
+  return `Ya registraste ${name} este mes: $ ${Math.round(t.amount).toLocaleString(currentLocale())} el ${day}.`;
 }

@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { Check, Loader2, X } from 'lucide-react';
 import { ManualPayment, reviewManualPayment, watchPendingManualPayments } from '@/lib/manualPay';
@@ -20,7 +21,7 @@ export function ManualPaymentsReview({ isTech }: { isTech: boolean }) {
     setMsg('');
     try {
       const r = await reviewManualPayment(p.id, approve);
-      setMsg(approve ? `Premium activado para ${p.userName || p.userEmail}${r.premiumUntil ? ` hasta el ${new Date(r.premiumUntil).toLocaleDateString('es-CO')}` : ''}.` : 'Comprobante rechazado.');
+      setMsg(approve ? `Premium activado para ${p.userName || p.userEmail}${r.premiumUntil ? ` hasta el ${new Date(r.premiumUntil).toLocaleDateString(currentLocale())}` : ''}.` : 'Comprobante rechazado.');
     } catch (e: any) {
       console.error('Revisar pago:', e);
       setMsg('No se pudo guardar la revisión. Intenta de nuevo.');
@@ -50,7 +51,7 @@ export function ManualPaymentsReview({ isTech }: { isTech: boolean }) {
               <p className="text-sm font-semibold text-text-primary truncate">{p.userName || 'Sin nombre'}</p>
               <p className="text-[11px] text-text-muted truncate">{p.userEmail}</p>
               <p className="text-xs text-text-secondary">{plan?.label} · <b>{formatCurrency(p.amount, 'COP')}</b></p>
-              {p.createdAt && <p className="text-[10px] text-text-muted">{p.createdAt.toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>}
+              {p.createdAt && <p className="text-[10px] text-text-muted">{p.createdAt.toLocaleString(currentLocale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>}
               {p.note && <p className="text-[11px] text-text-secondary italic">“{p.note}”</p>}
               <div className="flex gap-2 pt-1">
                 <button type="button" disabled={busy === p.id} onClick={() => review(p, true)}

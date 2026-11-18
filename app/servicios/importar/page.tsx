@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { ReadingOverlay } from '@/components/forms/ReadingTips';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -229,7 +230,7 @@ export default function ImportarPage() {
                         </button>
                       </div>
                       <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[11px] text-text-muted shrink-0">{new Date(`${r.date}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: '2-digit' })}</span>
+                        <span className="text-[11px] text-text-muted shrink-0">{new Date(`${r.date}T12:00:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: '2-digit' })}</span>
                         <select className={`${select} !py-1 !text-[11px]`} value={r.category} onChange={(e) => update(r.id, { category: e.target.value })} aria-label="Categoría">
                           {!(r.type === 'gasto' ? expenseCategories : incomeCategories).some(c => c.label === r.category) && <option value={r.category}>{r.category}</option>}
                           {(r.type === 'gasto' ? expenseCategories : incomeCategories).map(c => <option key={c.label} value={c.label}>{c.label}</option>)}

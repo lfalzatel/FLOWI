@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -45,7 +46,7 @@ function toDate(value: Transaction['date']): Date {
   return new Date(value as any);
 }
 
-const weekLabel = (d: Date) => `${d.toLocaleDateString('es-ES', { weekday: 'short' })} ${d.getDate()}`;
+const weekLabel = (d: Date) => `${d.toLocaleDateString(currentLocale(), { weekday: 'short' })} ${d.getDate()}`;
 const monthKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}`;
 
 function bucketKeyOf(d: Date, filterType: string): string {
@@ -82,7 +83,7 @@ function buildBuckets(transactions: Transaction[], filterType: string, filterVal
       const cursor = new Date(dates[0].getFullYear(), dates[0].getMonth(), 1);
       const last = dates[dates.length - 1];
       while (cursor <= last) {
-        seed(monthKey(cursor), cursor.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }), new Date(cursor));
+        seed(monthKey(cursor), cursor.toLocaleDateString(currentLocale(), { month: 'short', year: '2-digit' }), new Date(cursor));
         cursor.setMonth(cursor.getMonth() + 1);
       }
     }
@@ -239,12 +240,12 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
 
   const titleMap = {
     'all': 'Historial',
-    'month': 'Este mes',
-    'week': 'Esta semana',
+    'month': tr('Este mes'),
+    'week': tr('Esta semana'),
     'day': 'Hoy'
   };
-  const detailLabel = filterType === 'day' ? 'Por hora' : 'Por día';
-  const detailName = type === 'ingreso' ? 'Ingresos' : 'Gastos variables';
+  const detailLabel = filterType === 'day' ? tr('Por hora') : tr('Por día');
+  const detailName = type === 'ingreso' ? 'Ingresos' : tr('Gastos variables');
 
   const xAxisConfig = {
     'day': { angle: -90, height: 40, interval: 1 },
@@ -317,10 +318,10 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
           <>
             {legendItem(type === 'ingreso' ? INGRESO_COLOR : GASTO_COLOR, detailName)}
             {type !== 'ingreso' && totals.fijos > 0 && (
-              <span className="text-[10px] text-text-muted normal-case">Fijos aparte: <AnimatedNumber value={totals.fijos} format={formatCompactCOP} /></span>
+              <span className="text-[10px] text-text-muted normal-case">{tr('Fijos aparte:')} <AnimatedNumber value={totals.fijos} format={formatCompactCOP} /></span>
             )}
             {detail.cap !== undefined && (
-              <span className="text-[10px] text-text-muted normal-case">↑ = día recortado, toca para ver</span>
+              <span className="text-[10px] text-text-muted normal-case">{tr('↑ = día recortado, toca para ver')}</span>
             )}
           </>
         )}

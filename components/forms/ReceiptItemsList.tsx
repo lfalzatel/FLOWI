@@ -1,4 +1,5 @@
 'use client';
+import { currentLocale } from '@/lib/i18n';
 import { useMemo, useRef, useState } from 'react';
 import { ChevronDown, ReceiptText, Plus, Trash2, Check, Lightbulb } from 'lucide-react';
 import { ReceiptItem, itemsCheck, formatQty, groupByCategory, shortCategory } from '@/lib/receiptItems';
@@ -6,10 +7,10 @@ import { CategoryIcon } from '@/components/CategoryIcon';
 import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
 import type { CategoryOption } from '@/hooks/useCategories';
 
-const money = (n: number) => `$ ${Math.round(n).toLocaleString('es-CO')}`;
+const money = (n: number) => `$ ${Math.round(n).toLocaleString(currentLocale())}`;
 const toNum = (v: string) => Number(String(v).replace(/[^\d,.]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
 const toPesos = (v: string) => Math.round(Number(String(v).replace(/[^\d]/g, '')) || 0);
-const pesosText = (n?: number) => (n ? n.toLocaleString('es-CO') : '');
+const pesosText = (n?: number) => (n ? n.toLocaleString(currentLocale()) : '');
 
 /**
  * Productos de una compra. Con `onChange` se pueden corregir (tocando el producto), cambiar de
@@ -195,7 +196,7 @@ export function ReceiptItemsList({
                 </div>
                 <div className="flex-1 min-w-0">
                   <label className={lbl}>Precio c/u</label>
-                  <input className={field} inputMode="numeric" placeholder="$" value={draft.price ? toPesos(draft.price).toLocaleString('es-CO') : ''} enterKeyHint="done"
+                  <input className={field} inputMode="numeric" placeholder="$" value={draft.price ? toPesos(draft.price).toLocaleString(currentLocale()) : ''} enterKeyHint="done"
                          onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} onKeyDown={onEnter} />
                 </div>
                 <button type="button" onClick={addDraft} aria-label="Agregar producto"
