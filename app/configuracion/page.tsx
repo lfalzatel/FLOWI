@@ -28,12 +28,13 @@ import {
   User, Wallet, Bell, Shield, ShieldCheck, RefreshCw, Sparkles,
   ChevronRight, ChevronDown, ChevronUp, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
-  FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass
-} from 'lucide-react';
+  FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass, Languages } from 'lucide-react';
+import { useT } from '@/lib/i18n';
 
 export default function ConfigPage() {
   const router = useRouter();
   const { theme, setTheme, allowedThemes, setAllowedThemes } = useTheme();
+  const { t, lang, setLang } = useT();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const { user, profile, loading: authLoading } = useAuth();
   
@@ -839,6 +840,27 @@ export default function ConfigPage() {
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
+
+            {/* Idioma: rotulado en los dos idiomas para que se encuentre aunque la app esté en el otro */}
+            <div className={`w-full flex items-center justify-between gap-3 p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={`w-8 h-8 shrink-0 flex items-center justify-center ${isTechTheme ? 'border border-sky-500/30 rounded-none bg-sky-500/5' : 'rounded-xl bg-sky-500/10'}`}>
+                  <Languages className="w-4 h-4 text-sky-400" />
+                </div>
+                <div className="text-left min-w-0">
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>Idioma · Language</p>
+                  <p className={`text-[10px] normal-case ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{t('Se guarda en este celular')}</p>
+                </div>
+              </div>
+              <div className="flex shrink-0 gap-1">
+                {([['es', 'Español'], ['en', 'English']] as const).map(([code, name]) => (
+                  <button key={code} type="button" onClick={() => setLang(code)} aria-pressed={lang === code}
+                          className={`px-2.5 py-1.5 text-xs font-semibold border normal-case ${isTechTheme ? 'rounded-none' : 'rounded-lg'} ${lang === code ? 'border-accent bg-accent/15 text-accent' : 'border-glass-border text-text-secondary'}`}>
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Tamaño de texto */}
             <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">

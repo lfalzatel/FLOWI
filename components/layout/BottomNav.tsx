@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -245,6 +246,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 }
 
 function NavItem({ icon: Icon, label, href, id, active, isTechTheme, isLight }: any) {
+  const { t } = useT();
   return (
     <Link 
       id={id}
@@ -257,7 +259,7 @@ function NavItem({ icon: Icon, label, href, id, active, isTechTheme, isLight }: 
                   }`}
     >
       <Icon className={`w-[18px] h-[18px] relative z-10 ${active ? 'animate-[micro-bounce_0.4s_infinite_alternate] [animation-delay:0.45s]' : ''}`} />
-      <span className={`text-[8px] relative z-10 leading-none nav-label text-center max-w-full overflow-hidden text-ellipsis whitespace-nowrap px-0.5 ${isTechTheme ? 'font-mono font-bold uppercase tracking-wide' : 'font-medium'}`}>{label}</span>
+      <span className={`text-[8px] relative z-10 leading-none nav-label text-center max-w-full overflow-hidden text-ellipsis whitespace-nowrap px-0.5 ${isTechTheme ? 'font-mono font-bold uppercase tracking-wide' : 'font-medium'}`}>{t(label)}</span>
     </Link>
   );
 }

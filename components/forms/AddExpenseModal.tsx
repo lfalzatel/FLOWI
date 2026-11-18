@@ -41,6 +41,7 @@ import { formatCurrency, hasCents, roundMoney } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { CalendarDays, ChevronDown } from 'lucide-react';
+import { useT } from '@/lib/i18n';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -136,6 +137,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const [categoriesInitialView, setCategoriesInitialView] = useState<'list' | 'form'>('list');
 
   const { theme } = useTheme();
+  const { t, locale } = useT();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
@@ -569,7 +571,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           >
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
           <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent tracking-wide' : 'font-syne font-bold text-xl text-text-primary'}`}>
-            {transactionToEdit ? 'Editar Transacción' : 'Nueva Transacción'}
+            {transactionToEdit ? t('Editar Transacción') : t('Nueva Transacción')}
           </h2>
           <button type="button" onClick={onClose} aria-label="Cerrar" className={`p-1 -mr-1 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
             <X className="w-5 h-5" />
@@ -591,18 +593,18 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   className={`flex-1 py-1.5 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === option ? `bg-accent ${isTechTheme ? 'text-deep' : 'text-white'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={!!transactionToEdit}
                 >
-                  {option === 'gasto' ? 'Gasto' : 'Ingreso'}
+                  {option === 'gasto' ? t('Gasto') : t('Ingreso')}
                 </button>
               ))}
             </div>
             {!transactionToEdit && !initialVoiceParsed && (
               <>
-                <button type="button" aria-label="Dictar" title="Dictar"
+                <button type="button" aria-label={t('Dictar')} title={t('Dictar')}
                         onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice')); }}
                         className={`w-12 shrink-0 flex flex-col items-center justify-center gap-0.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
-                  <Mic className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">Voz</span>
+                  <Mic className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">{t('Voz')}</span>
                 </button>
-                <button type="button" aria-label="Foto o pantallazo" title="Foto o pantallazo"
+                <button type="button" aria-label={t('Foto o pantallazo')} title={t('Foto o pantallazo')}
                         onClick={() => {
                           if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
                           // El selector se abre dentro del mismo toque, para que el celular lo permita
@@ -610,7 +612,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                           else { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: 'no-key' } })); }
                         }}
                         className={`w-12 shrink-0 flex flex-col items-center justify-center gap-0.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
-                  <Camera className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">Foto</span>
+                  <Camera className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">{t('Foto')}</span>
                 </button>
                 <input ref={shotRef} type="file" accept="image/*" className="hidden"
                        onChange={async (e) => {
@@ -633,9 +635,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             const [yy, mm, dd] = date.split('-').map(Number);
             const [hh, mi] = (time || '12:00').split(':').map(Number);
             const when = new Date(yy, mm - 1, dd, hh, mi);
-            const full = when.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).replace(',', '');
-            const dayText = isToday ? `Hoy, ${full}` : date === yesterday ? `Ayer, ${full}` : full;
-            const timeText = when.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', hour12: true });
+            const full = when.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).replace(',', '');
+            const dayText = isToday ? `${t('Hoy')}, ${full}` : date === yesterday ? `${t('Ayer')}, ${full}` : full;
+            const timeText = when.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit', hour12: true });
             const odd = !isToday && !transactionToEdit;
             return (
               <div className="space-y-2 -mt-2">
@@ -648,7 +650,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 {showDate && (
                   <div className="space-y-2">
                     <div className="flex gap-1.5">
-                      {[{ l: 'Hoy', d: getLocalDateString() }, { l: 'Ayer', d: yesterday }].map(o => (
+                      {[{ l: t('Hoy'), d: getLocalDateString() }, { l: t('Ayer'), d: yesterday }].map(o => (
                         <button key={o.l} type="button" onClick={() => { setDate(o.d); setShowDate(false); }} className={`${chipClass(date === o.d)} normal-case`}>{o.l}</button>
                       ))}
                     </div>
@@ -667,7 +669,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           {/* Amount */}
           <div ref={amountRef}>
             <div className="mb-1.5 flex items-baseline justify-between gap-2">
-              <label htmlFor="tx-amount" className={labelClass}>{shared ? (shared.paidByMe ? 'Total que pagaste' : 'Tu parte') : 'Monto'}</label>
+              <label htmlFor="tx-amount" className={labelClass}>{shared ? (shared.paidByMe ? t('Total que pagaste') : t('Tu parte')) : t('Monto')}</label>
               {amountHasOp && (
                 <span className="text-base font-bold text-accent normal-case tabular-nums">= {evalAmount(amount) !== null ? fmt(evalAmount(amount)!) : '…'}</span>
               )}
@@ -699,7 +701,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
           {/* Descripción: va debajo del monto para sugerir la categoría mientras se escribe */}
           <div>
-            <label htmlFor="tx-description" className={`${labelClass} mb-1.5 block`}>¿En qué fue? (opcional)</label>
+            <label htmlFor="tx-description" className={`${labelClass} mb-1.5 block`}>{t('¿En qué fue? (opcional)')}</label>
             <input
               id="tx-description"
               ref={descRef}
@@ -708,7 +710,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               onFocus={() => { if (step === 'amount' || step === 'category') setStep('description'); }}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (inFlow) { descRef.current?.blur(); goStep(category ? 'payment' : 'category'); } } }}
               type="text"
-              placeholder={type === 'gasto' ? 'Ej. Mercado en Jumbo, compré mercancía…' : 'Ej. Quincena, venta de 2 blusas…'}
+              placeholder={type === 'gasto' ? t('Ej. Mercado en Jumbo, compré mercancía…') : t('Ej. Quincena, venta de 2 blusas…')}
               value={description}
               onChange={(e) => handleDescriptionChange(e.target.value)}
               className={`w-full bg-glass border py-3 px-4 text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
@@ -716,7 +718,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             {suggestedCat && (
               <button type="button" onClick={() => { autoCategory.current = suggestedCat; selectCategory(suggestedCat); setSuggestedCat(null); }}
                       className={`mt-2 text-[11px] font-semibold px-2.5 py-1 border border-accent/40 bg-accent/10 text-accent transition-all active:scale-95 ${isTechTheme ? 'rounded-none font-mono' : 'rounded-full'}`}>
-                💡 ¿Es «{suggestedCat}»? Toca para usarla
+                💡 {t('¿Es «{cat}»? Toca para usarla', { cat: suggestedCat })}
               </button>
             )}
             {type === 'gasto' && (items ? (
@@ -737,7 +739,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             ) : (
               <button type="button" onClick={() => { setItems([]); setAutoSum(!amountNum); }}
                       className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
-                <ReceiptText className="w-4 h-4" /> Agregar productos (opcional)
+                <ReceiptText className="w-4 h-4" /> {t('Agregar productos (opcional)')}
               </button>
             ))}
             {type === 'gasto' && (shared ? (
@@ -748,7 +750,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             ) : (
               <button type="button" onClick={() => setShared(emptySharedDraft())}
                       className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
-                <Users className="w-4 h-4" /> Compartir este gasto (opcional)
+                <Users className="w-4 h-4" /> {t('Compartir este gasto (opcional)')}
               </button>
             ))}
           </div>
@@ -756,7 +758,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           {/* Category: con productos de varias categorías la reemplaza el resumen "De esta compra" */}
           {!hideCategory && <div ref={categoryRef} className={`scroll-mt-2 ${step === 'category' ? 'outline outline-1 outline-accent/60 outline-offset-4' : ''}`}>
             <div className="flex items-center justify-between mb-2 gap-2">
-              <span className={labelClass}>Categoría{(step === 'category' || step === 'description') && <span className="ml-1 text-accent normal-case">· elige una</span>}</span>
+              <span className={labelClass}>{t('Categoría')}{(step === 'category' || step === 'description') && <span className="ml-1 text-accent normal-case">· {t('elige una')}</span>}</span>
 
               <div className="flex items-center gap-1.5 flex-wrap justify-end">
               <button
@@ -769,8 +771,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 }`}
                 title="Separar este movimiento como de tu negocio (Mi negocio en Servicios)"
               >
-                <span>🏪 Negocio:</span>
-                <span className={isBusiness ? 'font-black underline' : ''}>{isBusiness ? 'Sí' : 'No'}</span>
+                <span>🏪 {t('Negocio')}:</span>
+                <span className={isBusiness ? 'font-black underline' : ''}>{isBusiness ? t('Sí') : t('No')}</span>
               </button>
 
               {type === 'gasto' && (
@@ -784,8 +786,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   }`}
                   title="Cambiar entre Gasto Fijo o Variable"
                 >
-                  <span>📌 Gasto Fijo:</span>
-                  <span className={isFixed ? 'font-black underline' : ''}>{isFixed ? 'Sí' : 'No'}</span>
+                  <span>📌 {t('Gasto Fijo')}:</span>
+                  <span className={isFixed ? 'font-black underline' : ''}>{isFixed ? t('Sí') : t('No')}</span>
                 </button>
               )}
               </div>
@@ -821,7 +823,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 <span className="w-9 h-9 flex items-center justify-center text-accent">
                   <LayoutGrid className="w-5 h-5" />
                 </span>
-                <span className="text-[10.5px] leading-tight text-accent font-semibold normal-case">Ver todas</span>
+                <span className="text-[10.5px] leading-tight text-accent font-semibold normal-case">{t('Ver todas')}</span>
               </button>
             </div>
           </div>}
@@ -829,7 +831,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           {/* Merchant */}
           {type === 'gasto' && category && !hideCategory && (
             <div>
-              <span className={`${labelClass} mb-2 block`}>¿Dónde? <span className="opacity-70">(opcional)</span></span>
+              <span className={`${labelClass} mb-2 block`}>{t('¿Dónde?')} <span className="opacity-70">{t('(opcional)')}</span></span>
               <div className="flex flex-wrap gap-1.5">
                 {visibleMerchants.map(label => {
                   const meta = findCatalogEntry(label);
@@ -842,7 +844,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 })}
                 {merchantSuggestions.length > VISIBLE_MERCHANTS && (
                   <button type="button" onClick={() => setShowAllMerchants(!showAllMerchants)} className={`${chipClass(false)} normal-case`}>
-                    {showAllMerchants ? 'Menos' : `+${merchantSuggestions.length - VISIBLE_MERCHANTS} más`}
+                    {showAllMerchants ? t('Menos') : t('+{n} más', { n: merchantSuggestions.length - VISIBLE_MERCHANTS })}
                   </button>
                 )}
                 {isTypingMerchant ? (
@@ -852,12 +854,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                     onChange={(e) => setMerchantDraft(e.target.value)}
                     onBlur={commitMerchantDraft}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitMerchantDraft(); } }}
-                    placeholder="Nombre del lugar"
+                    placeholder={t('Nombre del lugar')}
                     className={`px-3 py-1.5 text-xs bg-glass border border-accent text-text-primary focus:outline-none w-36 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}
                   />
                 ) : (
                   <button type="button" onClick={() => setIsTypingMerchant(true)} className={`${chipClass(false)} normal-case border-dashed`}>
-                    <Plus className="w-3.5 h-3.5" /> Otro
+                    <Plus className="w-3.5 h-3.5" /> {t('Otro')}
                   </button>
                 )}
               </div>
@@ -868,7 +870,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           <div ref={paymentRef} className={`scroll-mt-2 ${step === 'payment' ? 'outline outline-1 outline-accent/60 outline-offset-4' : ''}`}>
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className={labelClass}>
-                {type === 'gasto' ? 'Pagaste con' : 'Lo recibiste en'} <span className="opacity-70">(opcional)</span>
+                {type === 'gasto' ? t('Pagaste con') : t('Lo recibiste en')} <span className="opacity-70">{t('(opcional)')}</span>
               </span>
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -882,10 +884,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 );
               })}
               <button type="button" onClick={() => setShowAllPayments(true)} className={`${chipClass(false)} normal-case`}>
-                Más…
+                {t('Más…')}
               </button>
               {showAllPayments && (
-                <BankPickerSheet title={type === 'gasto' ? '¿Con qué pagaste?' : '¿Dónde lo recibiste?'}
+                <BankPickerSheet title={type === 'gasto' ? t('¿Con qué pagaste?') : t('¿Dónde lo recibiste?')}
                                  selected={paymentMethod ? [paymentMethod] : []} favorites={accountMethods}
                                  onChange={(v) => choosePayment(v[0] || '')} onClose={() => setShowAllPayments(false)} />
               )}
@@ -893,13 +895,13 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             {activeAccounts.length > 0 && (
               paymentMethod && !accountOfMethod ? (
                 <div className="mt-2 flex items-center gap-2 text-[11px] text-text-secondary normal-case">
-                  <span className="flex-1">Aún no tienes una cuenta para {paymentMethod}{mainAccount ? `; iría a ${mainAccount.name}` : ''}.</span>
-                  <button type="button" onClick={() => setCreatingAccount(true)} className="shrink-0 font-semibold text-accent">Crear cuenta</button>
+                  <span className="flex-1">{t('Aún no tienes una cuenta para {m}', { m: paymentMethod })}{mainAccount ? t('; iría a {a}', { a: mainAccount.name }) : ''}.</span>
+                  <button type="button" onClick={() => setCreatingAccount(true)} className="shrink-0 font-semibold text-accent">{t('Crear cuenta')}</button>
                 </div>
               ) : (accountOfMethod || mainAccount) ? (
                 <p className="mt-2 text-[11px] text-text-muted normal-case">
-                  {type === 'gasto' ? 'Se descuenta de' : 'Se suma a'} <b className="text-text-secondary">{(accountOfMethod || mainAccount)!.name}</b>
-                  {!paymentMethod ? ' (tu cuenta principal)' : ''}.
+                  {type === 'gasto' ? t('Se descuenta de') : t('Se suma a')} <b className="text-text-secondary">{(accountOfMethod || mainAccount)!.name}</b>
+                  {!paymentMethod ? ` ${t('(tu cuenta principal)')}` : ''}.
                 </p>
               ) : null
             )}
@@ -920,7 +922,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 disabled={loading}
                 className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs'}`}
               >
-                Eliminar
+                {t('Eliminar')}
               </button>
 
               {type === 'gasto' && (
@@ -930,7 +932,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   disabled={loading}
                   className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-blue-500/10 border border-blue-500/50 text-blue-400 hover:bg-blue-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-xs'}`}
                 >
-                  Pasar a Deuda
+                  {t('Pasar a Deuda')}
                 </button>
               )}
             </div>
@@ -943,7 +945,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               disabled={loading}
               className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/10 border border-accent/50 text-accent hover:bg-accent/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-accent/10 text-accent hover:bg-accent/20 text-xs'}`}
             >
-              <BellPlus className="w-4 h-4" /> Recordarme este pago
+              <BellPlus className="w-4 h-4" /> {t('Recordarme este pago')}
             </button>
           )}
           {/* Espacio para que el paso que toca pueda subir hasta arriba (dentro del scroll: no estira el formulario) */}
@@ -954,11 +956,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           {showFooter && <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             {needsCategory && (
               <div className="mb-2 flex items-center justify-between gap-2 text-[11px] normal-case">
-                <span className="text-amber-300">Elige una categoría arriba o escribe en qué fue.</span>
+                <span className="text-amber-300">{t('Elige una categoría arriba o escribe en qué fue.')}</span>
                 <button type="submit" disabled={loading || !(amountNum > 0)}
                         onClick={() => { noCategoryOk.current = true; }}
                         className="shrink-0 font-semibold text-text-secondary underline disabled:opacity-50">
-                  Guardar sin categoría
+                  {t('Guardar sin categoría')}
                 </button>
               </div>
             )}
@@ -968,20 +970,20 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 disabled={loading || !(amountNum > 0) || needsCategory || (!!sharedInfo && sharedMine < 0)}
                 className={`flex-1 py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent text-white hover:bg-accent/90`}`}
               >
-                {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : (type === 'gasto' ? 'Añadir gasto' : 'Añadir ingreso')}
+                {loading ? t('Guardando...') : transactionToEdit ? t('Guardar Cambios') : (type === 'gasto' ? t('Añadir gasto') : t('Añadir ingreso'))}
               </button>
               {!transactionToEdit && (
                 // Guarda y deja el formulario listo para el siguiente (mismo tipo, fecha y forma de pago)
                 <button type="submit" onClick={() => { againRef.current = true; }}
                         disabled={loading || !(amountNum > 0) || needsCategory || (!!sharedInfo && sharedMine < 0)}
                         className={`shrink-0 px-3 py-3.5 text-xs font-bold border transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none border-accent/50 text-accent uppercase' : 'rounded-xl border-accent/40 text-accent'}`}>
-                  Guardar y otro
+                  {t('Guardar y otro')}
                 </button>
               )}
             </div>
           </div>}
           {step === 'amount' && (
-            <AmountKeypad value={amount} isTech={isTechTheme} decimals={cents}
+            <AmountKeypad value={amount} isTech={isTechTheme} decimals={cents} nextLabel={t('Siguiente')}
                           onChange={(v) => { setAmount(v); if (items?.length) setAutoSum(false); }}
                           onNext={afterAmount} />
           )}

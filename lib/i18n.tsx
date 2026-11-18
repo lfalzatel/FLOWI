@@ -1,0 +1,56 @@
+'use client';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { EN } from '@/lib/i18n-en';
+
+// Idioma de la app. FLOWI está escrito en español; en inglés se busca cada frase en lib/i18n-en.ts.
+// Lo que aún no esté traducido se ve en español (nunca un texto vacío ni una clave rara).
+//  - La primera vez se usa el idioma del celular: español si es "es-…", inglés en cualquier otro.
+//  - Si la persona lo cambia en Configuración, se recuerda en este celular.
+
+export type Lang = 'es' | 'en';
+const KEY = 'flowi-lang';
+
+export function detectLang(): Lang {
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved === 'es' || saved === 'en') return saved;
+  } catch { /* sin almacenamiento: se detecta */ }
+  const nav = typeof navigator !== 'undefined' ? (navigator.languages?.[0] || navigator.language || 'es') : 'es';
+  return nav.toLowerCase().startsWith('es') ? 'es' : 'en';
+}
+
+type Vars = Record<string, string | number>;
+const fill = (s: string, vars?: Vars) => (vars ? s.replace(/\{(\w+)\}/g, (_, k) => (k in vars ? String(vars[k]) : `{${k}}`)) : s);
+
+/** Traduce una frase en español al idioma pedido. Acepta {variables}: t('Hola {nombre}', { nombre }). */
+export function translate(lang: Lang, es: string, vars?: Vars): string {
+  return fill(lang === 'en' ? EN[es] ?? es : es, vars);
+}
+
+interface LangCtx {
+  lang: Lang;
+  locale: string;                      // para fechas y números: es-CO / en-US
+  setLang: (l: Lang) => void;
+  t: (es: string, vars?: Vars) => string;
+}
+
+const Ctx = createContext<LangCtx>({
+  lang: 'es', locale: 'es-CO', setLang: () => {}, t: (es, vars) => fill(es, vars),
+});
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [lang, setLangState] = useState<Lang>('es');
+  useEffect(() => { setLangState(detectLang()); }, []);
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+  const setLang = useCallback((l: Lang) => {
+    setLangState(l);
+    try { localStorage.setItem(KEY, l); } catch { /* se usa solo en esta sesión */ }
+  }, []);
+  const value = useMemo<LangCtx>(() => ({
+    lang, setLang, locale: lang === 'en' ? 'en-US' : 'es-CO',
+    t: (es, vars) => translate(lang, es, vars),
+  }), [lang, setLang]);
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+export const useT = () => useContext(Ctx);

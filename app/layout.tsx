@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { LanguageProvider } from '@/lib/i18n';
 
 
 export const metadata: Metadata = {
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="bg-deep text-text-primary antialiased">
+        <LanguageProvider>
         <InAppNotificationProvider>
           <ThemeProvider>
             <DataProvider>
@@ -88,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </DataProvider>
           </ThemeProvider>
         </InAppNotificationProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { FlowLines } from '@/components/FlowLines';
+import { useT } from '@/lib/i18n';
 
 // Página de entrada (landing): explica qué hace FLOWI y deja entrar con Google.
 // Todas las pantallas mandan aquí a quien no ha iniciado sesión.
@@ -55,49 +56,51 @@ function Logo({ size = 'w-40 h-40' }: { size?: string }) {
 }
 
 function GoogleButton({ onClick }: { onClick: () => void }) {
+  const { t } = useT();
   return (
     <button
       onClick={onClick}
       className="w-full flex items-center justify-center gap-3 bg-white text-black font-semibold py-3.5 px-4 rounded-xl hover:bg-white/90 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/10"
     >
       <img src="https://www.google.com/favicon.ico" alt="" className="w-5 h-5" />
-      Entrar con Google
+      {t('Entrar con Google')}
     </button>
   );
 }
 
 // Vista de ejemplo de la app (cifras inventadas, no son datos de nadie)
 function AppPreview() {
+  const { t } = useT();
   return (
     <div className="relative mx-auto w-full max-w-[300px] rounded-[2.2rem] border border-white/10 bg-[#0A1222] p-3 shadow-2xl shadow-emerald-500/10" aria-hidden="true">
       <div className="mx-auto mb-3 h-1.5 w-16 rounded-full bg-white/10" />
       <div className="space-y-2.5">
         <div className="rounded-2xl bg-gradient-to-br from-[#0D2E1F] via-[#0A1929] to-[#150D2E] border border-white/5 p-4">
-          <p className="text-[10px] text-white/50 flex items-center gap-1.5"><Wallet className="w-3 h-3 text-emerald-400" /> Dinero disponible</p>
+          <p className="text-[10px] text-white/50 flex items-center gap-1.5"><Wallet className="w-3 h-3 text-emerald-400" /> {t('Dinero disponible')}</p>
           <p className="text-2xl font-bold text-emerald-400 font-syne">$ 2.179.000</p>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
           <div className="rounded-2xl bg-white/5 border border-white/5 p-3">
-            <p className="text-[9px] text-white/50">Gastos</p>
+            <p className="text-[9px] text-white/50">{t('Gastos')}</p>
             <p className="text-sm font-bold text-rose-400">$ 1.321.000</p>
           </div>
           <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-3">
-            <p className="text-[9px] text-emerald-300/80">Hoy puedes gastar</p>
+            <p className="text-[9px] text-emerald-300/80">{t('Hoy puedes gastar')}</p>
             <p className="text-sm font-bold text-emerald-400">$ 64.378</p>
           </div>
         </div>
         <div className="rounded-2xl bg-white/5 border border-white/5 p-3">
-          <p className="text-[10px] font-bold text-white/70 mb-2">Próximos compromisos</p>
-          {[['Internet hogar', 'Vence mañana', '$ 89.900'], ['Netflix', 'Hacia el 20', '$ 38.900']].map(([t, w, v]) => (
-            <div key={t} className="flex items-center justify-between py-1">
-              <div><p className="text-[11px] text-white/90">{t}</p><p className="text-[9px] text-orange-300/80">{w}</p></div>
+          <p className="text-[10px] font-bold text-white/70 mb-2">{t('Próximos compromisos')}</p>
+          {[['Internet hogar', 'Vence mañana', '$ 89.900'], ['Netflix', 'Hacia el 20', '$ 38.900']].map(([name, w, v]) => (
+            <div key={name} className="flex items-center justify-between py-1">
+              <div><p className="text-[11px] text-white/90">{t(name)}</p><p className="text-[9px] text-orange-300/80">{t(w)}</p></div>
               <p className="text-[11px] font-semibold text-white/80">{v}</p>
             </div>
           ))}
         </div>
         <div className="rounded-2xl bg-white/5 border border-white/5 p-3">
           <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[11px] text-white/90">🛡️ Fondo de emergencia</p>
+            <p className="text-[11px] text-white/90">🛡️ {t('Fondo de emergencia')}</p>
             <p className="text-[10px] font-bold text-emerald-400">30%</p>
           </div>
           <div className="h-1.5 rounded-full bg-white/10 overflow-hidden"><div className="h-full w-[30%] rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400" /></div>
@@ -112,6 +115,7 @@ function AppPreview() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useT();
   const [showSplash, setShowSplash] = useState(false);
   const [mode, setMode] = useState<'login' | 'logout'>('login');
   const [mounted, setMounted] = useState(false);
@@ -219,24 +223,24 @@ export default function LoginPage() {
           <Logo size="w-28 h-28 md:mx-0" />
           <div className="space-y-3">
             <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
-              <Sparkles className="w-3 h-3" /> Gratis · Hecha en Colombia
+              <Sparkles className="w-3 h-3" /> {t('Gratis · Hecha en Colombia')}
             </p>
             <h1 className="text-4xl md:text-5xl font-bold font-syne leading-tight">
-              Tu plata clara, <span className="text-emerald-400">todos los días</span>.
+              {t('Tu plata clara,')} <span className="text-emerald-400">{t('todos los días')}</span>.
             </h1>
             <p className="text-white/65 text-base md:text-lg max-w-md mx-auto md:mx-0">
-              Anota tus gastos con la voz, mira cuánto puedes gastar hoy y llega a fin de mes sin sustos.
+              {t('Anota tus gastos con la voz, mira cuánto puedes gastar hoy y llega a fin de mes sin sustos.')}
             </p>
           </div>
           <div className="max-w-sm mx-auto md:mx-0 space-y-2">
             <GoogleButton onClick={handleGoogleLogin} />
             <p className="text-white/40 text-xs">
-              Al continuar, aceptas los <a href="/legal#terminos" className="underline hover:text-white/70">términos de uso</a> y
-              la <a href="/legal#privacidad" className="underline hover:text-white/70">política de privacidad</a>.
+              {t('Al continuar, aceptas los')} <a href="/legal#terminos" className="underline hover:text-white/70">{t('términos de uso')}</a> {t('y la')}{' '}
+              <a href="/legal#privacidad" className="underline hover:text-white/70">{t('política de privacidad')}</a>.
             </p>
           </div>
           <a href="#como-funciona" className="hidden md:inline-flex items-center gap-1 text-sm text-white/50 hover:text-white">
-            Mira cómo funciona <ChevronDown className="w-4 h-4" />
+            {t('Mira cómo funciona')} <ChevronDown className="w-4 h-4" />
           </a>
         </div>
         <AppPreview />
@@ -244,16 +248,16 @@ export default function LoginPage() {
 
       {/* Funciones */}
       <section className={`${section} py-12`}>
-        <h2 className="text-2xl md:text-3xl font-bold font-syne text-center mb-2">Todo lo que necesitas para ordenar tu plata</h2>
-        <p className="text-white/55 text-center mb-8 max-w-xl mx-auto">Sin hojas de cálculo ni cuentas complicadas: FLOWI hace las sumas y te dice qué hacer.</p>
+        <h2 className="text-2xl md:text-3xl font-bold font-syne text-center mb-2">{t('Todo lo que necesitas para ordenar tu plata')}</h2>
+        <p className="text-white/55 text-center mb-8 max-w-xl mx-auto">{t('Sin hojas de cálculo ni cuentas complicadas: FLOWI hace las sumas y te dice qué hacer.')}</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {FEATURES.map(({ icon: Icon, title, text }) => (
             <div key={title} className="rounded-3xl bg-[#0D1527] border border-white/5 p-5 hover:border-emerald-500/30 transition-colors">
               <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 flex items-center justify-center mb-3">
                 <Icon className="w-5 h-5 text-emerald-400" />
               </div>
-              <h3 className="font-semibold mb-1">{title}</h3>
-              <p className="text-sm text-white/60 leading-relaxed">{text}</p>
+              <h3 className="font-semibold mb-1">{t(title)}</h3>
+              <p className="text-sm text-white/60 leading-relaxed">{t(text)}</p>
             </div>
           ))}
         </div>
@@ -261,13 +265,13 @@ export default function LoginPage() {
 
       {/* Cómo funciona */}
       <section id="como-funciona" className={`${section} py-12 scroll-mt-6`}>
-        <h2 className="text-2xl md:text-3xl font-bold font-syne text-center mb-8">Empieza en un minuto</h2>
+        <h2 className="text-2xl md:text-3xl font-bold font-syne text-center mb-8">{t('Empieza en un minuto')}</h2>
         <ol className="grid md:grid-cols-3 gap-4">
           {STEPS.map((s, i) => (
             <li key={s.title} className="rounded-3xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/15 p-5">
               <span className="w-8 h-8 rounded-full bg-emerald-400 text-black font-bold flex items-center justify-center mb-3">{i + 1}</span>
-              <h3 className="font-semibold mb-1">{s.title}</h3>
-              <p className="text-sm text-white/60">{s.text}</p>
+              <h3 className="font-semibold mb-1">{t(s.title)}</h3>
+              <p className="text-sm text-white/60">{t(s.text)}</p>
             </li>
           ))}
         </ol>
@@ -277,26 +281,26 @@ export default function LoginPage() {
       <section className={`${section} py-12 grid md:grid-cols-2 gap-4`}>
         <div className="rounded-3xl bg-[#0D1527] border border-white/5 p-6">
           <ShieldCheck className="w-7 h-7 text-emerald-400 mb-3" />
-          <h3 className="text-lg font-semibold mb-1">Tus datos son solo tuyos</h3>
-          <p className="text-sm text-white/60 leading-relaxed">Cada cuenta ve únicamente sus propios movimientos. No pedimos la clave de tu banco y la IA opcional guarda su clave solo en tu celular.</p>
+          <h3 className="text-lg font-semibold mb-1">{t('Tus datos son solo tuyos')}</h3>
+          <p className="text-sm text-white/60 leading-relaxed">{t('Cada cuenta ve únicamente sus propios movimientos. No pedimos la clave de tu banco y la IA opcional guarda su clave solo en tu celular.')}</p>
         </div>
         <div className="rounded-3xl bg-[#0D1527] border border-white/5 p-6">
           <Smartphone className="w-7 h-7 text-emerald-400 mb-3" />
-          <h3 className="text-lg font-semibold mb-1">Como una app, sin descargar nada</h3>
-          <p className="text-sm text-white/60 leading-relaxed">Funciona en Android, iPhone y computador. Instálala en tu pantalla de inicio y recibe recordatorios de tus pagos.</p>
+          <h3 className="text-lg font-semibold mb-1">{t('Como una app, sin descargar nada')}</h3>
+          <p className="text-sm text-white/60 leading-relaxed">{t('Funciona en Android, iPhone y computador. Instálala en tu pantalla de inicio y recibe recordatorios de tus pagos.')}</p>
         </div>
       </section>
 
       {/* Preguntas frecuentes */}
       <section className={`${section} py-12 max-w-3xl`}>
-        <h2 className="text-2xl md:text-3xl font-bold font-syne text-center mb-6">Preguntas frecuentes</h2>
+        <h2 className="text-2xl md:text-3xl font-bold font-syne text-center mb-6">{t('Preguntas frecuentes')}</h2>
         <div className="space-y-2">
           {FAQ.map(({ q, a }) => (
             <details key={q} className="group rounded-2xl bg-[#0D1527] border border-white/5 px-5 py-4">
               <summary className="cursor-pointer list-none flex items-center justify-between gap-3 font-medium">
-                {q} <ChevronDown className="w-4 h-4 text-white/40 transition-transform group-open:rotate-180 shrink-0" />
+                {t(q)} <ChevronDown className="w-4 h-4 text-white/40 transition-transform group-open:rotate-180 shrink-0" />
               </summary>
-              <p className="mt-2 text-sm text-white/60 leading-relaxed">{a}</p>
+              <p className="mt-2 text-sm text-white/60 leading-relaxed">{t(a)}</p>
             </details>
           ))}
         </div>
@@ -305,23 +309,23 @@ export default function LoginPage() {
       {/* Cierre */}
       <section className={`${section} py-14`}>
         <div className="rounded-[2rem] bg-gradient-to-br from-emerald-500/15 via-[#0D1527] to-violet-500/10 border border-emerald-500/20 p-8 text-center max-w-xl mx-auto space-y-4">
-          <h2 className="text-2xl font-bold font-syne">Empieza hoy, es gratis</h2>
-          <p className="text-white/60 text-sm">En un minuto sabes cuánto puedes gastar hoy.</p>
+          <h2 className="text-2xl font-bold font-syne">{t('Empieza hoy, es gratis')}</h2>
+          <p className="text-white/60 text-sm">{t('En un minuto sabes cuánto puedes gastar hoy.')}</p>
           <div className="max-w-sm mx-auto"><GoogleButton onClick={handleGoogleLogin} /></div>
         </div>
       </section>
 
       <footer className={`${section} pb-10 text-center text-xs text-white/35 space-y-1`}>
-        <p>FLOWI · Tu dinero, en flujo · Hecha en Colombia</p>
+        <p>FLOWI · {t('Tu dinero, en flujo')} · {t('Hecha en Colombia')}</p>
         <p>
-          <a href="/legal#privacidad" className="hover:text-white/70">Privacidad</a>
+          <a href="/legal#privacidad" className="hover:text-white/70">{t('Privacidad')}</a>
           {' · '}
-          <a href="/legal#terminos" className="hover:text-white/70">Términos</a>
+          <a href="/legal#terminos" className="hover:text-white/70">{t('Términos')}</a>
         </p>
         <p>
-          ¿Dudas o sugerencias?{' '}
-          <a href="https://wa.me/573104604592" target="_blank" rel="noopener noreferrer" className="text-emerald-400/80 hover:text-emerald-300">Escríbenos por WhatsApp</a>
-          {' o a '}
+          {t('¿Dudas o sugerencias?')}{' '}
+          <a href="https://wa.me/573104604592" target="_blank" rel="noopener noreferrer" className="text-emerald-400/80 hover:text-emerald-300">{t('Escríbenos por WhatsApp')}</a>
+          {` ${t('o a')} `}
           <a href="mailto:soporteflowiapp@gmail.com" className="text-emerald-400/80 hover:text-emerald-300">soporteflowiapp@gmail.com</a>
         </p>
       </footer>
