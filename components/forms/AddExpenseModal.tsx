@@ -88,11 +88,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     (initialVoiceParsed?.category ? isBusinessCategory(initialVoiceParsed.category, initialVoiceParsed.type === 'ingreso' ? 'ingreso' : initialType) : false));
   const [date, setDate] = useState(initialValues?.date || getLocalDateString());
   const [showDate, setShowDate] = useState(false);
-  // Registro rápido en el celular: monto (teclado propio) → categoría → con qué pagaste → en qué fue.
-  // Cada paso lleva la pantalla a lo que toca; "Añadir" se puede tocar en cualquier momento.
+  // Registro rápido en el celular: monto (teclado propio) → en qué fue (opcional) → categoría → con qué pagaste.
+  // Cada paso lleva la pantalla a lo que toca. "Añadir" aparece al llegar a la forma de pago (ya con categoría),
+  // para que no se guarden gastos sin categoría por tocarlo antes de tiempo.
   const [isTouch] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches);
   const prefilled = !!(editTarget || initialVoiceParsed?.amount || initialValues?.amount);
-  type Step = 'amount' | 'category' | 'payment' | null;
+  type Step = 'amount' | 'description' | 'category' | 'payment' | null;
   const [step, setStep] = useState<Step>(() => (isTouch && !prefilled ? 'amount' : null));
   const amountRef = useRef<HTMLDivElement>(null);
   const categoryRef = useRef<HTMLDivElement>(null);
@@ -342,22 +343,28 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const amountHasOp = hasOperator(amount);
   // Lleva a la vista la parte del formulario que toca (debajo queda el teclado o la lista)
   const reveal = (el: HTMLElement | null, block: ScrollLogicalPosition = 'start') => {
-    setTimeout(() => el?.scrollIntoView({ behavior: 'smooth', block }), 60);
+    // Dos veces: al tocar y cuando ya abrió el teclado del celular (que achica la pantalla)
+    setTimeout(() => el?.scrollIntoView({ block }), 60);
+    setTimeout(() => el?.scrollIntoView({ block }), 400);
   };
   const goStep = (next: Step) => {
     setStep(next);
     if (next === 'amount') reveal(amountRef.current, 'nearest');
     if (next === 'category') reveal(categoryRef.current);
-    if (next === 'payment') reveal(paymentRef.current);
+    if (next === 'payment') { (document.activeElement as HTMLElement | null)?.blur?.(); reveal(paymentRef.current, 'end'); }
   };
-  // Después del monto: la categoría (si no se puede elegir aquí, la forma de pago)
-  const afterAmount = () => goStep(hideCategory ? 'payment' : 'category');
-  // Después de la forma de pago: escribir en qué fue (el foco va dentro del mismo toque para que salga el teclado)
-  const toDescription = () => {
-    setStep(null);
+  // Después del monto: "¿En qué fue?" arriba con el teclado abierto (el foco va dentro del mismo toque).
+  // Debajo quedan las categorías: escribir es opcional, se puede tocar una categoría de una vez.
+  const afterAmount = () => {
+    setStep('description');
     descRef.current?.focus({ preventScroll: true });
-    reveal(descRef.current, 'center');
+    reveal(descRef.current?.parentElement || null, 'start');
   };
+  // Elegir categoría dentro del registro rápido: se cierra el teclado y pasa a la forma de pago
+  const afterCategory = () => { if (step && step !== 'payment') goStep('payment'); };
+  const inFlow = step !== null;
+  const showFooter = !inFlow || step === 'payment' || (hideCategory && step !== 'amount');
+  const needsCategory = !transactionToEdit && !hideCategory && !category.trim();
   const peopleNames = useMemo(() => knownPeople(transactions), [transactions]);
   // Lo que se guarda del compartido (solo personas con nombre) y tu parte
   const { sharedInfo, sharedMine } = useMemo((): { sharedInfo: SharedInfo | null; sharedMine: number } => {
@@ -386,7 +393,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !(amountNum > 0)) return;
+    if (!user || !(amountNum > 0) || needsCategory) return;
     // "Guardar y otro" se recuerda si antes sale el aviso de pago repetido
     if (!transactionToEdit && !repeatOk.current) {
       const prev = findRepeatedPayment({ type, category: category.trim() || 'Otros', merchant, date: new Date(`${date}T12:00:00`), isFixed }, transactions);
@@ -554,7 +561,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
         <form onSubmit={handleSubmit} autoComplete="off" className="flex-1 min-h-0 flex flex-col">
           {/* Campos con scroll; el botón de guardar queda fijo abajo */}
-          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 pb-5 space-y-5">
+          {/* En el registro guiado sobra espacio abajo, para que el paso que toca pueda quedar arriba de todo */}
+          <div ref={scrollRef} className={`flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 space-y-5 ${inFlow && step !== 'payment' ? 'pb-[60vh]' : 'pb-5'}`}>
           {/* Atajos: dictarlo o leerlo de una foto o pantallazo (recibo, comprobante de Nequi o del banco) */}
           {!transactionToEdit && !initialVoiceParsed && (
             <div className="grid grid-cols-2 gap-2">
@@ -608,8 +616,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             const [yy, mm, dd] = date.split('-').map(Number);
             const [hh, mi] = (time || '12:00').split(':').map(Number);
             const when = new Date(yy, mm - 1, dd, hh, mi);
-            const dayText = isToday ? 'Hoy' : date === yesterday ? 'Ayer'
-              : when.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', ...(yy !== new Date().getFullYear() ? { year: 'numeric' } : {}) });
+            const full = when.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+            const dayText = isToday ? `Hoy, ${full}` : date === yesterday ? `Ayer, ${full}` : full;
             const timeText = when.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', hour12: true });
             const odd = !isToday && !transactionToEdit;
             return (
@@ -623,13 +631,13 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   <div className="space-y-2">
                     <div className="flex gap-1.5">
                       {[{ l: 'Hoy', d: getLocalDateString() }, { l: 'Ayer', d: yesterday }].map(o => (
-                        <button key={o.l} type="button" onClick={() => setDate(o.d)} className={`${chipClass(date === o.d)} normal-case`}>{o.l}</button>
+                        <button key={o.l} type="button" onClick={() => { setDate(o.d); setShowDate(false); }} className={`${chipClass(date === o.d)} normal-case`}>{o.l}</button>
                       ))}
                     </div>
                     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-                      <input id="tx-date" type="date" aria-label="Fecha" value={date} onChange={(e) => setDate(e.target.value)} required
+                      <input id="tx-date" type="date" aria-label="Fecha" value={date} onChange={(e) => { setDate(e.target.value); if (e.target.value) setShowDate(false); }} required
                              className={`w-full bg-glass border py-2.5 px-3 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
-                      <input id="tx-time" type="time" aria-label="Hora" value={time} onChange={(e) => setTime(e.target.value)} required
+                      <input id="tx-time" type="time" aria-label="Hora" value={time} onChange={(e) => setTime(e.target.value)} onBlur={() => setShowDate(false)} required
                              className={`w-[8.5rem] bg-glass border py-2.5 px-2.5 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
                     </div>
                   </div>
@@ -676,7 +684,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               ref={descRef}
               autoComplete="off"
               enterKeyHint="done"
-              onFocus={() => { setStep(null); reveal(descRef.current, 'center'); }}
+              onFocus={() => { if (step === 'amount' || step === 'category') setStep('description'); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (inFlow) { descRef.current?.blur(); goStep(category ? 'payment' : 'category'); } } }}
               type="text"
               placeholder={type === 'gasto' ? 'Ej. Mercado en Jumbo, compré mercancía…' : 'Ej. Quincena, venta de 2 blusas…'}
               value={description}
@@ -726,7 +735,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           {/* Category: con productos de varias categorías la reemplaza el resumen "De esta compra" */}
           {!hideCategory && <div ref={categoryRef} className={`scroll-mt-2 ${step === 'category' ? 'outline outline-1 outline-accent/60 outline-offset-4' : ''}`}>
             <div className="flex items-center justify-between mb-2 gap-2">
-              <span className={labelClass}>Categoría{step === 'category' && <span className="ml-1 text-accent normal-case">· elige una</span>}</span>
+              <span className={labelClass}>Categoría{(step === 'category' || step === 'description') && <span className="ml-1 text-accent normal-case">· elige una</span>}</span>
 
               <div className="flex items-center gap-1.5 flex-wrap justify-end">
               <button
@@ -768,7 +777,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   <button
                     key={cat.label}
                     type="button"
-                    onClick={() => { selectCategory(cat.label); if (step === 'amount' || step === 'category') goStep('payment'); }}
+                    onClick={() => { selectCategory(cat.label); afterCategory(); }}
                     aria-pressed={active}
                     className={`flex flex-col items-center gap-1 px-1 py-2 border transition-all active:scale-95 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'} ${
                       active ? 'border-accent bg-accent/10' : 'border-glass-border hover:bg-glass'
@@ -840,15 +849,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               <span className={labelClass}>
                 {type === 'gasto' ? 'Pagaste con' : 'Lo recibiste en'} <span className="opacity-70">(opcional)</span>
               </span>
-              {step === 'payment' && (
-                <button type="button" onClick={toDescription} className="text-[11px] font-semibold text-accent normal-case">Siguiente →</button>
-              )}
             </div>
             <div className="flex flex-wrap gap-1.5">
               {visiblePayments.map(label => {
                 const meta = findCatalogEntry(label);
                 return (
-                  <button key={label} type="button" onClick={() => { choosePayment(paymentMethod === label ? '' : label); if (step === 'payment' && paymentMethod !== label) toDescription(); }} className={`${chipClass(paymentMethod === label)} normal-case`}>
+                  <button key={label} type="button" onClick={() => choosePayment(paymentMethod === label ? '' : label)} className={`${chipClass(paymentMethod === label)} normal-case`}>
                     {meta && <CategoryIcon icon={meta.icon} label={label} className="w-4 h-4 text-sm flex items-center justify-center" />}
                     {label}
                   </button>
@@ -922,11 +928,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           </div>
 
           {/* Submit siempre visible, con fondo sólido para que no se transparente la barra inferior de la app */}
-          <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
+          {showFooter && <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
+            {needsCategory && <p className="mb-2 text-[11px] text-amber-300 normal-case text-center">Elige una categoría para guardarlo.</p>}
             <div className="flex gap-2">
               <button
                 type="submit"
-                disabled={loading || !(amountNum > 0) || (!!sharedInfo && sharedMine < 0)}
+                disabled={loading || !(amountNum > 0) || needsCategory || (!!sharedInfo && sharedMine < 0)}
                 className={`flex-1 py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent text-white hover:bg-accent/90`}`}
               >
                 {loading ? 'Guardando...' : transactionToEdit ? 'Guardar Cambios' : (type === 'gasto' ? 'Añadir gasto' : 'Añadir ingreso')}
@@ -934,13 +941,13 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               {!transactionToEdit && (
                 // Guarda y deja el formulario listo para el siguiente (mismo tipo, fecha y forma de pago)
                 <button type="submit" onClick={() => { againRef.current = true; }}
-                        disabled={loading || !(amountNum > 0) || (!!sharedInfo && sharedMine < 0)}
+                        disabled={loading || !(amountNum > 0) || needsCategory || (!!sharedInfo && sharedMine < 0)}
                         className={`shrink-0 px-3 py-3.5 text-xs font-bold border transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none border-accent/50 text-accent uppercase' : 'rounded-xl border-accent/40 text-accent'}`}>
                   Guardar y otro
                 </button>
               )}
             </div>
-          </div>
+          </div>}
           {step === 'amount' && (
             <AmountKeypad value={amount} isTech={isTechTheme}
                           onChange={(v) => { setAmount(v); if (items?.length) setAutoSum(false); }}
@@ -961,7 +968,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           onSelect={(label, merchantLabel) => {
             selectCategory(label, merchantLabel);
             setIsPickerOpen(false);
-            if (step === 'amount' || step === 'category') goStep('payment');
+            afterCategory();
           }}
           onClose={() => setIsPickerOpen(false)}
           onCreate={() => {

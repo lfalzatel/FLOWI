@@ -11,7 +11,8 @@ export function cleanExpr(raw: string): string {
   // Un solo punto por número
   return s.split(/([+\-×÷])/).map(part => {
     if (/^[+\-×÷]$/.test(part)) return part;
-    const [a, ...rest] = part.split('.');
+    const [raw0, ...rest] = part.split('.');
+    const a = raw0.replace(/^0+(?=\d)/, ''); // sin ceros a la izquierda: "02000" → "2000"
     return rest.length ? `${a}.${rest.join('')}` : a;
   }).join('');
 }
