@@ -373,8 +373,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   // Elegir categoría dentro del registro rápido: se cierra el teclado y pasa a la forma de pago
   const afterCategory = () => { if (step && step !== 'payment') goStep('payment'); };
   const inFlow = step !== null;
-  const showFooter = !inFlow || step === 'payment' || (hideCategory && step !== 'amount');
+  // Pasado el monto, el pie siempre está: con categoría (elegida o sugerida al escribir) se guarda de una vez;
+  // sin categoría, "Añadir" espera y se ofrece "Guardar sin categoría" (queda en Otros) para quien no quiere categorizar
+  const showFooter = !inFlow || step !== 'amount';
   const needsCategory = !transactionToEdit && !hideCategory && !category.trim();
+  const noCategoryOk = useRef(false);
   const peopleNames = useMemo(() => knownPeople(transactions), [transactions]);
   // Lo que se guarda del compartido (solo personas con nombre) y tu parte
   const { sharedInfo, sharedMine } = useMemo((): { sharedInfo: SharedInfo | null; sharedMine: number } => {
@@ -396,6 +399,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     setAmount(''); setDescription(''); setCategory(''); setMerchant(''); setItems(undefined); setAutoSum(false);
     setShared(null); setSuggestedCat(null); setIsFixed(false); setIsBusiness(initialBusiness);
     autoCategory.current = '';
+    noCategoryOk.current = false;
     if (date === getLocalDateString()) setTime(toTimeString(new Date()));
     setStep(isTouch ? 'amount' : null);
     scrollRef.current?.scrollTo({ top: 0 });
@@ -403,7 +407,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !(amountNum > 0) || needsCategory) return;
+    if (!user || !(amountNum > 0)) return;
+    if (needsCategory && !noCategoryOk.current) return;
     // "Guardar y otro" se recuerda si antes sale el aviso de pago repetido
     if (!transactionToEdit && !repeatOk.current) {
       const prev = findRepeatedPayment({ type, category: category.trim() || 'Otros', merchant, date: new Date(`${date}T12:00:00`), isFixed }, transactions);
@@ -945,7 +950,16 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
           {/* Submit siempre visible, con fondo sólido para que no se transparente la barra inferior de la app */}
           {showFooter && <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
-            {needsCategory && <p className="mb-2 text-[11px] text-amber-300 normal-case text-center">Elige una categoría para guardarlo.</p>}
+            {needsCategory && (
+              <div className="mb-2 flex items-center justify-between gap-2 text-[11px] normal-case">
+                <span className="text-amber-300">Elige una categoría arriba o escribe en qué fue.</span>
+                <button type="submit" disabled={loading || !(amountNum > 0)}
+                        onClick={() => { noCategoryOk.current = true; }}
+                        className="shrink-0 font-semibold text-text-secondary underline disabled:opacity-50">
+                  Guardar sin categoría
+                </button>
+              </div>
+            )}
             <div className="flex gap-2">
               <button
                 type="submit"

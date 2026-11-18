@@ -75,7 +75,9 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
   // ¿De qué cuenta sale la plata? (undefined = aún no elige; null = ya estaba ahorrada, no descontar)
   const { accounts } = useAccounts();
   const hasAccounts = accounts.some(a => !a.archived);
-  const [moneyAccount, setMoneyAccount] = useState<string | null | undefined>(undefined);
+  // Al editar se puede corregir de dónde salió la plata al abrir el CDT
+  const opening = !renewFrom ? investment?.fundings?.find(f => f.kind === 'apertura') : undefined;
+  const [moneyAccount, setMoneyAccount] = useState<string | null | undefined>(opening ? (opening.accountId ?? null) : undefined);
 
   // Llenar desde capturas de la app del banco (IA gratuita, la misma de los recibos)
   const shotsRef = useRef<HTMLInputElement>(null);
@@ -150,7 +152,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
   const renewBase = renewFrom && prev ? renewFrom.amount + (interestMode === 'suma' ? prev.netInterest : 0) : 0;
   const extra = renewing ? amountN - renewBase : 0;
   const needsAccount = hasAccounts && (
-    (!renewing && !investment) || (renewing && (Math.abs(extra) >= 1 || (interestMode === 'pagado' && (prev?.netInterest || 0) > 0)))
+    (!renewing && (!investment || !!opening)) || (renewing && (Math.abs(extra) >= 1 || (interestMode === 'pagado' && (prev?.netInterest || 0) > 0)))
   );
   const canSave = bank.trim().length > 0 && amountN > 0 && rateN > 0 && days > 0 && !loading && (!needsAccount || moneyAccount !== undefined);
   const movedAt = () => {
@@ -198,7 +200,11 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
           });
         }
       } else if (investment?.id) {
-        await updateInvestment(investment.id, data);
+        const fixFrom = opening && (moneyAccount ?? null) !== (opening.accountId ?? null);
+        await updateInvestment(investment.id, {
+          ...data,
+          ...(fixFrom ? { fundings: (investment.fundings || []).map(f => (f === opening ? { ...f, accountId: moneyAccount ?? null } : f)) } : {}),
+        });
       } else {
         await addInvestment({
           userId: user.uid, kind: 'cdt', status: 'activo', closedAt: null, history: [], ...data,
@@ -354,8 +360,9 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                   ? extra >= 1 ? `¿De qué cuenta sale lo que agregas (${fmt(extra)})?`
                     : extra <= -1 ? `¿A qué cuenta llega lo que retiras (${fmt(-extra)})?`
                     : '¿A qué cuenta te pagaron los intereses?'
-                  : '¿De dónde sale la plata?'}
-                noneLabel={renewing ? 'No moverla de mis cuentas' : 'Ya la tenía ahorrada'}
+                  : investment ? '¿De dónde salió la plata al abrirlo?' : '¿De dónde sale la plata?'}
+                noneLabel={renewing ? 'No moverla de mis cuentas' : 'No descontar (ya estaba ahorrada)'}
+                autoMain={!investment || renewing}
                 hint={renewing ? undefined : 'Si sale de una cuenta, la descuento de su saldo y de lo que puedes gastar este mes (cuenta como ahorro, no como gasto).'}
               />
             )}

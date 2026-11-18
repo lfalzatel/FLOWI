@@ -64,12 +64,14 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
   const [amount, setAmount] = useState(investment ? formatMoneyInput(investment.amount) : '');
   const [current, setCurrent] = useState(investment?.currentValue ? formatMoneyInput(investment.currentValue) : '');
   const [rate, setRate] = useState(investment?.rateEA ? String(investment.rateEA).replace('.', ',') : '');
-  const [from, setFrom] = useState<string | null | undefined>(undefined);
+  // De dónde salió la plata al abrirlo; al editar se puede corregir (p. ej. si se marcó "no descontar" por error)
+  const opening = investment?.fundings?.find(f => f.kind === 'apertura');
+  const [from, setFrom] = useState<string | null | undefined>(investment ? (opening?.accountId ?? null) : undefined);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const amountN = parseMoneyInput(amount);
-  const needsFrom = !investment && hasAccounts;
+  const needsFrom = (!investment || !!opening) && hasAccounts;
   const canSave = bank.trim().length > 0 && amountN > 0 && (!isSavings || parseRate(rate) > 0) && (!needsFrom || from !== undefined) && !saving;
 
   // Llenar desde capturas de la app (IA gratuita, la misma de los recibos y los CDT)
@@ -213,7 +215,11 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
     };
     try {
       if (investment?.id) {
-        await updateInvestment(investment.id, base);
+        const fixFrom = opening && (from ?? null) !== (opening.accountId ?? null);
+        await updateInvestment(investment.id, {
+          ...base,
+          ...(fixFrom ? { fundings: (investment.fundings || []).map(f => (f === opening ? { ...f, accountId: from ?? null } : f)) } : {}),
+        });
       } else {
         await addInvestment({
           userId: user.uid, kind, status: 'activo', closedAt: null, history: [], payouts: [],
@@ -386,11 +392,23 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             </div>
           )}
 
-          {needsFrom && (
-            <AccountPicker accounts={accounts} value={from} onChange={setFrom} label="¿De dónde sale la plata?" noneLabel="Ya la tenía ahí"
-                           hint="Si sale de una cuenta, la descuento de su saldo y de lo que puedes gastar este mes (es ahorro, no gasto)." />
+          {(needsFrom || (!investment && !hasAccounts)) && (
+            <AccountPicker accounts={accounts} value={from} onChange={setFrom}
+                           label={investment ? '¿De dónde salió la plata al abrirlo?' : '¿De dónde sale la plata?'}
+                           noneLabel="No descontar (ya estaba ahorrada)"
+                           autoMain={!investment}
+                           emptyHint="Aún no tienes cuentas en FLOWI, así que no la descuento de ninguna. Créalas en Servicios → Cuentas y patrimonio."
+                           hint="La descuento del saldo de esa cuenta y de lo que puedes gastar este mes. No cuenta como gasto: es plata que sigue siendo tuya, solo cambia de bolsillo." />
           )}
 
+          {investment && opening && (() => {
+            const acc = accounts.find(a => a.id === from);
+            return acc && opening.at < acc.baseAt ? (
+              <p className="text-[11px] text-amber-300/90 leading-snug -mt-2">
+                El saldo de {acc.name} lo registraste después de abrir esto, así que ya lo incluye: no lo descuento otra vez.
+              </p>
+            ) : null;
+          })()}
           {error && <p className="text-xs text-[var(--red)]">{error}</p>}
           {investment && onDelete && (
             <button type="button" onClick={() => onDelete(investment)}
