@@ -37,7 +37,7 @@ import { findRepeatedPayment, repeatedPaymentText } from '@/lib/repeatedPayment'
 import { ReceiptText, Users } from 'lucide-react';
 import { SharedExpenseEditor, SharedDraft, emptySharedDraft, draftAmounts } from '@/components/forms/SharedExpenseEditor';
 import { SharedInfo, equalShares, knownPeople, personKey } from '@/lib/shared';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, hasCents, roundMoney } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { CalendarDays, ChevronDown } from 'lucide-react';
@@ -340,8 +340,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     }
   }, [transactionToEdit]);
 
-  const fmt = (n: number) => formatCurrency(Math.round(n), profile?.currency || 'COP');
-  const amountNum = evalAmount(amount) ?? 0;
+  const fmt = (n: number) => formatCurrency(n, profile?.currency || 'COP');
+  const currency = profile?.currency || 'COP';
+  const cents = hasCents(currency);
+  const amountNum = roundMoney(evalAmount(amount) ?? 0, currency);
   const amountHasOp = hasOperator(amount);
   // El número se achica cuando la cuenta es larga, para que quepa completa
   const amountLen = displayExpr(amount).length;
@@ -381,9 +383,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const peopleNames = useMemo(() => knownPeople(transactions), [transactions]);
   // Lo que se guarda del compartido (solo personas con nombre) y tu parte
   const { sharedInfo, sharedMine } = useMemo((): { sharedInfo: SharedInfo | null; sharedMine: number } => {
-    const total = Math.round(amountNum);
+    const total = amountNum;
     if (type !== 'gasto' || !shared || !total) return { sharedInfo: null, sharedMine: total };
-    const amounts = draftAmounts(shared, total);
+    const amounts = draftAmounts(shared, total, cents);
     const people = shared.people
       .map((p, i) => ({ name: p.name.trim(), amount: amounts[i] || 0, settledAt: p.settledAt ?? null }))
       .filter(p => p.name && personKey(p.name));
@@ -392,8 +394,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       return { sharedInfo: { total, paidByMe: false, people: [{ ...people[0], amount: total }] }, sharedMine: total };
     }
     const others = people.reduce((s, p) => s + p.amount, 0);
-    return { sharedInfo: { total, paidByMe: true, people }, sharedMine: total - others };
-  }, [type, shared, amountNum]);
+    return { sharedInfo: { total, paidByMe: true, people }, sharedMine: roundMoney(total - others, currency) };
+  }, [type, shared, amountNum, cents, currency]);
 
   const resetForNext = () => {
     setAmount(''); setDescription(''); setCategory(''); setMerchant(''); setItems(undefined); setAutoSum(false);
@@ -741,7 +743,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             {type === 'gasto' && (shared ? (
               <div className="mt-2">
                 <SharedExpenseEditor draft={shared} total={amountNum} knownNames={peopleNames} isTech={isTechTheme}
-                                     fmt={fmt} onChange={setShared} onRemove={() => setShared(null)} />
+                                     fmt={fmt} cents={cents} onChange={setShared} onRemove={() => setShared(null)} />
               </div>
             ) : (
               <button type="button" onClick={() => setShared(emptySharedDraft())}
@@ -979,7 +981,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             </div>
           </div>}
           {step === 'amount' && (
-            <AmountKeypad value={amount} isTech={isTechTheme}
+            <AmountKeypad value={amount} isTech={isTechTheme} decimals={cents}
                           onChange={(v) => { setAmount(v); if (items?.length) setAutoSum(false); }}
                           onNext={afterAmount} />
           )}

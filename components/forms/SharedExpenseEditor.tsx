@@ -13,10 +13,11 @@ export interface SharedDraft {
 export const emptySharedDraft = (): SharedDraft => ({ paidByMe: true, equal: true, people: [{ name: '', amount: '' }] });
 
 /** Montos de cada persona según el borrador y el total escrito. */
-export function draftAmounts(d: SharedDraft, total: number): number[] {
-  if (!d.paidByMe) return [Math.round(total)];
-  if (d.equal) return equalShares(Math.round(total), d.people.length);
-  return d.people.map(p => Math.round(Number(p.amount) || 0));
+export function draftAmounts(d: SharedDraft, total: number, cents = false): number[] {
+  const r = (n: number) => (cents ? Math.round(n * 100) / 100 : Math.round(n));
+  if (!d.paidByMe) return [r(total)];
+  if (d.equal) return equalShares(r(total), d.people.length, cents);
+  return d.people.map(p => r(Number(String(p.amount).replace(',', '.')) || 0));
 }
 
 interface Props {
@@ -25,15 +26,17 @@ interface Props {
   knownNames: string[];
   isTech: boolean;
   fmt: (n: number) => string;
+  cents?: boolean;           // la moneda usa centavos (euro, dólar…)
   onChange: (d: SharedDraft) => void;
   onRemove: () => void;
 }
 
-export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, onChange, onRemove }: Props) {
+export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cents = false, onChange, onRemove }: Props) {
   const [focusIdx, setFocusIdx] = useState<number | null>(null);
-  const amounts = draftAmounts(draft, total);
-  const others = amounts.reduce((s, a) => s + a, 0);
-  const mine = draft.paidByMe ? Math.round(total) - others : Math.round(total);
+  const r = (n: number) => (cents ? Math.round(n * 100) / 100 : Math.round(n));
+  const amounts = draftAmounts(draft, total, cents);
+  const others = r(amounts.reduce((s, a) => s + a, 0));
+  const mine = r(draft.paidByMe ? total - others : total);
   const box = isTech ? 'rounded-none' : 'rounded-xl';
   const chip = isTech ? 'rounded-none font-mono' : 'rounded-full';
   const input = `bg-glass border py-2 px-3 text-sm text-text-primary placeholder-text-muted focus:outline-none ${isTech ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-lg focus:border-accent'}`;
@@ -106,7 +109,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, onC
                 <span className="w-24 text-right text-sm font-semibold text-text-secondary shrink-0">{fmt(amounts[i] || 0)}</span>
               ) : (
                 <input value={p.amount} inputMode="decimal" placeholder="0"
-                       onChange={e => setPerson(i, { amount: e.target.value.replace(/[^0-9]/g, '') })}
+                       onChange={e => setPerson(i, { amount: e.target.value.replace(cents ? /[^0-9.,]/g : /[^0-9]/g, '') })}
                        className={`${input} w-24 text-right shrink-0`} aria-label={`Monto de ${p.name || `la persona ${i + 1}`}`} />
               ))}
               {draft.paidByMe && draft.people.length > 1 && (

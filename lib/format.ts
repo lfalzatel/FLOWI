@@ -13,12 +13,25 @@ export const CURRENCIES = [
   { code: 'AUD', name: 'Dólar Australiano', locale: 'en-AU' },
 ];
 
+// Monedas que en la práctica no usan centavos (en Colombia nadie escribe 0,25 pesos)
+const NO_CENTS = new Set(['COP', 'CLP', 'JPY', 'PYG', 'KRW', 'VND']);
+
+/** ¿Esta moneda usa centavos? (euro y dólar sí: "gasté 0,25 €") */
+export function hasCents(currencyCode: string = 'COP'): boolean {
+  return !NO_CENTS.has(currencyCode);
+}
+
+/** Redondea a lo que maneja la moneda: pesos enteros, o centavos. */
+export function roundMoney(amount: number, currencyCode: string = 'COP'): number {
+  return hasCents(currencyCode) ? Math.round(amount * 100) / 100 : Math.round(amount);
+}
+
 export function formatCurrency(amount: number, currencyCode: string = 'COP'): string {
   const currencyInfo = CURRENCIES.find(c => c.code === currencyCode) || CURRENCIES[0];
-  
+
   return new Intl.NumberFormat(currencyInfo.locale, {
     style: 'currency',
     currency: currencyInfo.code,
-    maximumFractionDigits: currencyInfo.code === 'COP' || currencyInfo.code === 'CLP' || currencyInfo.code === 'JPY' ? 0 : 2
+    maximumFractionDigits: hasCents(currencyInfo.code) ? 2 : 0,
   }).format(amount);
 }

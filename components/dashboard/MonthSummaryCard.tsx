@@ -16,7 +16,7 @@ export function MonthSummaryCard({ transactions, currency = 'COP' }: { transacti
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
   const { allCategories } = useCategories();
   const month = shiftMonth(getLocalMonthString(), -1);
-  const s = useMemo(() => buildMonthSummary(transactions, month, createCategoryResolver(allCategories), (n) => formatCurrency(Math.round(n), currency)),
+  const s = useMemo(() => buildMonthSummary(transactions, month, createCategoryResolver(allCategories), (n) => formatCurrency(n, currency)),
     [transactions, month, allCategories, currency]);
   if (new Date().getDate() > 10 || !s.hasData) return null;
   const first = s.insights[0];

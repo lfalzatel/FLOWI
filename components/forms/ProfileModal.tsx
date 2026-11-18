@@ -93,7 +93,7 @@ export function ProfileModal({ onClose }: Props) {
   });
   const periodIngresos = periodTx.filter(t => t.type === 'ingreso').reduce((a, t) => a + t.amount, 0);
   const periodGastos = periodTx.filter(t => t.type === 'gasto').reduce((a, t) => a + t.amount, 0);
-  const money = (n: number) => formatCurrency(Math.round(n), 'COP');
+  const money = (n: number) => formatCurrency(n, 'COP');
 
   // Racha: días seguidos con al menos un registro (igual que en Estadísticas)
   const streak = (() => {

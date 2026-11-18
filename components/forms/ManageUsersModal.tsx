@@ -104,7 +104,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   const periodIngresos = periodTx.filter(t => t.type === 'ingreso').reduce((a, t) => a + t.amount, 0);
   const periodGastos = periodTx.filter(t => t.type === 'gasto').reduce((a, t) => a + t.amount, 0);
   const periodDays = new Set(periodTx.map(t => getLocalDateString((t.date as any)?.toDate ? (t.date as any).toDate() : new Date(t.date as any)))).size;
-  const money = (n: number) => formatCurrency(Math.round(n), 'COP');
+  const money = (n: number) => formatCurrency(n, 'COP');
 
   const handleChangeRole = async (userId: string, newRole: string) => {
     setSavingId(userId);

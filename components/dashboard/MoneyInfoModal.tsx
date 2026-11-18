@@ -14,7 +14,7 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
 }) {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
-  const f = (n: number) => formatCurrency(Math.round(n), currency);
+  const f = (n: number) => formatCurrency(n, currency);
   const spend = real.states.filter(s => s.account.kind !== 'credito' && s.account.purpose !== 'ahorro');
   const saving = real.states.filter(s => s.account.kind !== 'credito' && s.account.purpose === 'ahorro');
   const cards = real.states.filter(s => s.account.kind === 'credito');

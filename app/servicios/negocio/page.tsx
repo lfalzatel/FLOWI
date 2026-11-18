@@ -28,7 +28,7 @@ export default function NegocioPage() {
   const { transactions, loadingTransactions } = useData();
   const { premium } = usePlan();
   const currency = profile?.currency || 'COP';
-  const fmt = (n: number) => formatCurrency(Math.round(n), currency);
+  const fmt = (n: number) => formatCurrency(n, currency);
 
   const thisMonth = getLocalMonthString();
   const [month, setMonth] = useState(thisMonth);

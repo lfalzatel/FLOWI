@@ -58,7 +58,7 @@ export default function InversionesPage() {
   const hasCdt = summary.active.some(i => kindOf(i) === 'cdt');
 
   const card = isTechTheme ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
-  const fmt = (n: number) => formatCurrency(Math.round(n), currency);
+  const fmt = (n: number) => formatCurrency(n, currency);
   const primaryBtn = `flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`;
   const ghost = `flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold border transition-all active:scale-95 ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-secondary hover:text-text-primary hover:bg-glass'}`;
   const openEdit = (inv: Investment) => { setEditing(inv); setNewKind(null); };

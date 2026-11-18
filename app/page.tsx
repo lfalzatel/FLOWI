@@ -249,7 +249,7 @@ export default function DashboardPage() {
   // (sin useMemo: este cálculo va después de los return tempranos de la página)
   const monthRecap = (() => {
     if (demo || new Date().getDate() > 10) return null;
-    const s = buildMonthSummary(transactions, lastMonth, createCategoryResolver(myCategories), (n) => formatCurrency(Math.round(n), profile?.currency));
+    const s = buildMonthSummary(transactions, lastMonth, createCategoryResolver(myCategories), (n) => formatCurrency(n, profile?.currency));
     if (!s.hasData) return null;
     return { month: lastMonth, name: s.monthName, hint: s.insights[0] ? `${s.insights[0].emoji} ${s.insights[0].text}` : undefined };
   })();

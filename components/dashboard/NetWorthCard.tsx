@@ -21,7 +21,7 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
   const states = useMemo(() => accountStates(accounts, transactions, transfers, investments), [accounts, transactions, transfers, investments]);
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
   if (loading || error || !states.length) return null;
-  const fmt = (n: number) => formatCurrency(Math.round(n), currency);
+  const fmt = (n: number) => formatCurrency(n, currency);
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
 
   return (

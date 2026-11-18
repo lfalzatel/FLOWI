@@ -30,7 +30,7 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
   const { debts } = useDebts();
   const skips = profile?.commitmentSkips;
   const currency = profile?.currency || 'COP';
-  const fmt = (n: number) => formatCurrency(Math.round(n), currency);
+  const fmt = (n: number) => formatCurrency(n, currency);
 
   const [filterType, setFilterType] = useState<FilterType>('month');
   const [filterValue, setFilterValue] = useState(getLocalMonthString());

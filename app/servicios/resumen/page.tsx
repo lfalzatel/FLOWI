@@ -29,7 +29,7 @@ export default function ResumenPage() {
   const { allCategories } = useCategories();
   const resolve = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
   const currency = profile?.currency || 'COP';
-  const fmt = (n: number) => formatCurrency(Math.round(n), currency);
+  const fmt = (n: number) => formatCurrency(n, currency);
 
   // Por defecto el mes pasado (el resumen "cerrado"); se puede ir a cualquier mes
   const thisMonth = getLocalMonthString();

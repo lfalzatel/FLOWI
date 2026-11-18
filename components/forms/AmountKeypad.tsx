@@ -10,18 +10,19 @@ interface Props {
   onChange: (v: string) => void;
   onNext: () => void;
   nextLabel?: string;
+  decimals?: boolean; // la moneda usa centavos: muestra la tecla decimal
 }
 
-const KEYS = [
+const KEYS = (decimals: boolean) => [
   ['7', '8', '9', '÷'],
   ['4', '5', '6', '×'],
   ['1', '2', '3', '-'],
-  ['.', '0', '000', '+'],
+  [decimals ? '.' : '00', '0', '000', '+'],
 ];
 
-export function AmountKeypad({ value, isTech, onChange, onNext, nextLabel = 'Siguiente' }: Props) {
+export function AmountKeypad({ value, isTech, onChange, onNext, nextLabel = 'Siguiente', decimals = false }: Props) {
   const press = (k: string) => {
-    if (k === '000' && (!value || /[+\-×÷]$/.test(value))) return; // no empezar un número con 000
+    if ((k === '000' || k === '00') && (!value || /[+\-×÷]$/.test(value))) return; // no empezar un número con ceros
     onChange(cleanExpr(value + k));
   };
   const solve = () => {
@@ -41,10 +42,10 @@ export function AmountKeypad({ value, isTech, onChange, onNext, nextLabel = 'Sig
     <div className={`shrink-0 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] border-t ${isTech ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}
          role="group" aria-label="Teclado del monto">
       <div className="grid grid-cols-4 gap-1.5">
-        {KEYS.flat().map(k => (
+        {KEYS(decimals).flat().map(k => (
           <button key={k} type="button" onClick={() => press(k)} className={/[+\-×÷]/.test(k) ? op : num}
-                  aria-label={k === '-' ? 'menos' : k === '+' ? 'más' : k === '×' ? 'por' : k === '÷' ? 'dividido' : k === '.' ? 'punto decimal' : k}>
-            {k === '-' ? '−' : k}
+                  aria-label={k === '-' ? 'menos' : k === '+' ? 'más' : k === '×' ? 'por' : k === '÷' ? 'dividido' : k === '.' ? 'coma decimal' : k}>
+            {k === '-' ? '−' : k === '.' ? ',' : k}
           </button>
         ))}
         <button type="button" onClick={() => onChange('')} className={`${num} text-sm`} aria-label="Borrar todo">C</button>

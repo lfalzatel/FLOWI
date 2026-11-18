@@ -32,9 +32,10 @@ const toDate = (d: TxLike['date']) => (d instanceof Date ? d : d.toDate());
 export const personKey = (name: string) => normalizeText(name.trim());
 
 /** Reparte en partes iguales entre las otras personas y tú, en pesos enteros. Devuelve lo de cada otra persona. */
-export function equalShares(total: number, others: number): number[] {
+export function equalShares(total: number, others: number, cents = false): number[] {
   if (others <= 0 || total <= 0) return Array(Math.max(others, 0)).fill(0);
-  const each = Math.floor(total / (others + 1));
+  const unit = cents ? 100 : 1;
+  const each = Math.floor((total * unit) / (others + 1)) / unit;
   return Array(others).fill(each);
 }
 
@@ -166,7 +167,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padSt
 export function shareLink(data: ShareLinkData, base = APP_URL): string {
   const compact: ShareLinkData = {
     ...(data.p ? { p: data.p.slice(0, 40) } : {}),
-    i: data.i.slice(0, 10).map(x => ({ d: x.d.slice(0, 60), a: Math.round(x.a), c: x.c.slice(0, 40), f: x.f })),
+    i: data.i.slice(0, 10).map(x => ({ d: x.d.slice(0, 60), a: Math.round(x.a * 100) / 100, c: x.c.slice(0, 40), f: x.f })),
   };
   return `${base}/compartido?g=${toBase64Url(JSON.stringify(compact))}`;
 }
@@ -181,7 +182,7 @@ export function readShareLink(g: string | null): ShareLinkData | null {
       const a = Number(x?.a);
       const f = typeof x?.f === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x.f) ? x.f : '';
       if (!Number.isFinite(a) || a <= 0 || a > 1e10 || !f) return [];
-      return [{ d: String(x.d ?? '').slice(0, 60), a: Math.round(a), c: String(x.c ?? '').slice(0, 40), f }];
+      return [{ d: String(x.d ?? '').slice(0, 60), a: Math.round(a * 100) / 100, c: String(x.c ?? '').slice(0, 40), f }];
     });
     if (!items.length) return null;
     return { ...(typeof raw.p === 'string' && raw.p.trim() ? { p: raw.p.trim().slice(0, 40) } : {}), i: items };

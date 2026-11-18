@@ -34,7 +34,7 @@ export default function HormigaPage() {
   const { allCategories } = useCategories();
   const resolve = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
   const currency = profile?.currency || 'COP';
-  const fmt = (n: number) => formatCurrency(Math.round(n), currency);
+  const fmt = (n: number) => formatCurrency(n, currency);
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 
   // "Todo" muestra el promedio al mes; Mes / Semana / Día, lo que de verdad se gastó en ese periodo
