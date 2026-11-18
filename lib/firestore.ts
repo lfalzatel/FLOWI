@@ -600,6 +600,8 @@ export interface Investment {
   fundings?: InvestmentFunding[];
   // Plata que volvió a una cuenta (al pagarlo o al retirar parte al renovar)
   payouts?: InvestmentFunding[];
+  // Ajustes de saldo hechos a mano (ahorros) o de valor (fondos), para el historial
+  adjustments?: { at: string; from: number; to: number }[];
   createdAt?: Timestamp | Date;
 }
 

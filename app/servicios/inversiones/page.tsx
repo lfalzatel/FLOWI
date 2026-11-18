@@ -16,6 +16,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { InvestmentFormModal } from '@/components/investments/InvestmentFormModal';
+import { InvestmentMovements } from '@/components/investments/InvestmentMovements';
 import { SavingsFormModal } from '@/components/investments/SavingsFormModal';
 import { InvestmentKindSheet, KIND_ICON } from '@/components/investments/InvestmentKindSheet';
 import { Investment, InvestmentKind, addExpense, deleteInvestment, updateInvestment } from '@/lib/firestore';
@@ -101,8 +102,10 @@ export default function InversionesPage() {
       const v = investmentValue(inv, now);
       if (mode === 'ajuste') {
         // Ahorro: el saldo real de hoy pasa a ser la nueva base. Fondos: nuevo valor actual.
-        if (k === 'ahorro') await updateInvestment(id, { amount: value, startDate: dayKey(now) });
-        else await updateInvestment(id, { currentValue: value, valueAt: now.toISOString() });
+        // Queda en el historial: de cuánto a cuánto
+        const adjustments = [...(inv.adjustments || []), { at: now.toISOString(), from: Math.round(v.value * 100) / 100, to: value }];
+        if (k === 'ahorro') await updateInvestment(id, { amount: value, startDate: dayKey(now), adjustments });
+        else await updateInvestment(id, { currentValue: value, valueAt: now.toISOString(), adjustments });
       } else {
         const entry = { at: now.toISOString(), amount: value, accountId: moveAccount ?? null, kind: mode };
         const data: Partial<Investment> = mode === 'deposito'
@@ -260,6 +263,7 @@ export default function InversionesPage() {
                           {k === 'ahorro' ? <><Scale className="w-3.5 h-3.5" /> Ajustar</> : <><RefreshCw className="w-3.5 h-3.5" /> Valor</>}
                         </button>
                       </div>
+                      <InvestmentMovements inv={inv} accounts={accounts} fmt={fmt} isTech={isTechTheme} />
                     </article>
                   );
                 }
@@ -318,6 +322,7 @@ export default function InversionesPage() {
                         <span>Antes de que se renueve, compara la tasa con otros bancos.</span>
                       </p>
                     ) : null}
+                    <InvestmentMovements inv={inv} accounts={accounts} fmt={fmt} isTech={isTechTheme} />
                   </article>
                 );
               })}
