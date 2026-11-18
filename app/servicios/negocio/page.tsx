@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Crown, Lock, Plus, TrendingDown, TrendingUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Crown, Lock, Plus, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/components/DataProvider';
@@ -11,7 +11,9 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { TransactionList } from '@/components/dashboard/TransactionList';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
-import { businessMonth, isBusinessTx } from '@/lib/business';
+import { businessMoneyByAccount, businessMonth, isBusinessTx, salesWithCosts } from '@/lib/business';
+import { useAccounts } from '@/hooks/useAccounts';
+import { costLabel } from '@/components/forms/SaleCostsEditor';
 import { monthNameOf, shiftMonth } from '@/lib/monthSummary';
 import { getLocalMonthString } from '@/lib/dateUtils';
 import { formatCurrency } from '@/lib/format';
@@ -39,6 +41,14 @@ export default function NegocioPage() {
   const m = useMemo(() => businessMonth(transactions, month), [transactions, month]);
   const prev = useMemo(() => businessMonth(transactions, shiftMonth(month, -1)), [transactions, month]);
   const hasAny = useMemo(() => transactions.some(isBusinessTx), [transactions]);
+  // Cada venta con sus costos y lo que dejó; y cuánta plata del negocio hay en cada cuenta
+  const sales = useMemo(() => salesWithCosts(m.items, transactions), [m.items, transactions]);
+  const { accounts } = useAccounts();
+  const bizByAccount = useMemo(() => {
+    const map = businessMoneyByAccount(accounts, transactions);
+    return accounts.filter(a => !a.archived && a.id && Math.round(map.get(a.id) || 0) !== 0)
+      .map(a => ({ name: a.name, amount: map.get(a.id!) || 0 }));
+  }, [accounts, transactions]);
 
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
   const isCurrent = month === thisMonth;
@@ -108,6 +118,49 @@ export default function NegocioPage() {
                 <Plus className="w-4 h-4" /> Registrar costo
               </button>
             </div>
+
+            {/* Lo que dejó cada venta (producto, envío y demás costos que se le pusieron) */}
+            {sales.length > 0 && (
+              <section className={`${card} p-5`}>
+                <h2 className={`text-sm font-bold mb-1 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>Lo que te dejó cada venta</h2>
+                <p className="text-[11px] text-text-muted mb-3">Al registrar una venta, agrégale el costo del producto y el envío para ver cuánto te quedó.</p>
+                <ul className="divide-y divide-glass-border">
+                  {sales.map(({ sale, costs, costTotal, profit }) => (
+                    <li key={sale.id} className="py-2.5">
+                      <button type="button" onClick={() => setEditing(sale)} className="w-full text-left">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <p className="text-sm text-text-primary truncate">{sale.description?.trim() || sale.category}</p>
+                          <p className={`text-sm font-bold tabular-nums shrink-0 ${profit >= 0 ? 'text-accent' : 'text-red-400'}`}>
+                            {costs.length ? `${profit < 0 ? '−' : ''}${fmt(Math.abs(profit))}` : fmt(sale.amount)}
+                          </p>
+                        </div>
+                        <p className="text-[11px] text-text-muted">
+                          {costs.length
+                            ? <>Vendiste {fmt(sale.amount)} · {costs.map(c => `${costLabel(c.category)} ${fmt(c.amount)}`).join(' · ')} → {profit >= 0 ? 'te quedó' : 'perdiste'}</>
+                            : <>Vendiste {fmt(sale.amount)} · <span className="text-amber-400">sin costos: toca para agregarlos</span></>}
+                        </p>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* La plata del negocio dentro de cada cuenta (el resto del saldo es personal) */}
+            {bizByAccount.length > 0 && (
+              <section className={`${card} p-5`}>
+                <h2 className={`text-sm font-bold mb-1 flex items-center gap-1.5 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}><Wallet className="w-4 h-4" /> Plata del negocio en tus cuentas</h2>
+                <p className="text-[11px] text-text-muted mb-3">Ventas menos costos que entraron o salieron por cada cuenta. El resto del saldo es tuyo (sueldo y demás).</p>
+                <ul className="space-y-1.5">
+                  {bizByAccount.map(a => (
+                    <li key={a.name} className="flex justify-between text-sm">
+                      <span className="text-text-secondary">{a.name}</span>
+                      <b className={a.amount >= 0 ? 'text-accent' : 'text-red-400'}>{a.amount < 0 ? '−' : ''}{fmt(Math.abs(a.amount))}</b>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {!hasAny && (
               <section className={`${card} p-5 text-sm text-text-secondary leading-relaxed space-y-2`}>

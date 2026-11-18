@@ -42,6 +42,7 @@ import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { CalendarDays, ChevronDown } from 'lucide-react';
 import { useT } from '@/lib/i18n';
+import { SaleCostsEditor, SaleCostDraft, costLabel } from '@/components/forms/SaleCostsEditor';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -76,6 +77,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const [amount, setAmount] = useState(initialVoiceParsed?.amount ? initialVoiceParsed.amount.toString() : initialValues?.amount ? String(initialValues.amount) : '');
   const [description, setDescription] = useState(initialVoiceParsed?.description || initialValues?.description || '');
   const [category, setCategory] = useState(initialVoiceParsed?.category || initialValues?.category || '');
+  // Mi negocio: costos de esta venta (producto, envío…); se guardan como gastos del negocio unidos a la venta
+  const [saleCosts, setSaleCosts] = useState<SaleCostDraft[]>([]);
   // Gasto compartido (null = no se compartió)
   const [shared, setShared] = useState<SharedDraft | null>(initialShared ? emptySharedDraft() : null);
   const [merchant, setMerchant] = useState('');
@@ -315,6 +318,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       setCategory(transactionToEdit.category);
       setMerchant(transactionToEdit.merchant || '');
       setItems(transactionToEdit.items);
+      const sid = transactionToEdit.type === 'ingreso' ? transactionToEdit.saleId : undefined;
+      setSaleCosts(sid ? allTx.filter(x => x.type === 'gasto' && x.saleId === sid && x.id)
+        .map(x => ({ id: x.id, category: x.category, amount: String(x.amount) })) : []);
       const sh = transactionToEdit.type === 'gasto' ? transactionToEdit.shared : null;
       if (sh) {
         // Si pagaste tú, en Monto va el total; tu parte se calcula
@@ -404,6 +410,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     setShared(null); setSuggestedCat(null); setIsFixed(false); setIsBusiness(initialBusiness);
     autoCategory.current = '';
     noCategoryOk.current = false;
+    setSaleCosts([]);
     if (date === getLocalDateString()) setTime(toTimeString(new Date()));
     setStep(isTouch ? 'amount' : null);
     scrollRef.current?.scrollTo({ top: 0 });
@@ -487,10 +494,33 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         } else {
           for (const p of parts) await addExpense(p);
         }
-      } else if (transactionToEdit?.id) {
-        await updateExpense(transactionToEdit.id, { ...data, ...(items ? { items: saved } : {}) });
       } else {
-        await addExpense({ ...data, ...(saved.length ? { items: saved } : {}) });
+        // Venta del negocio con costos: todos llevan el mismo saleId
+        const parseCost = (v: string) => Number(v.replace(/\./g, '').replace(',', '.')) || 0;
+        const costRows = type === 'ingreso' && isBusiness ? saleCosts.filter(c => parseCost(c.amount) > 0) : [];
+        const prevCostIds = type === 'ingreso' && transactionToEdit?.saleId
+          ? transactions.filter(x => x.type === 'gasto' && x.saleId === transactionToEdit.saleId && x.id).map(x => x.id!) : [];
+        const saleId = costRows.length || prevCostIds.length
+          ? transactionToEdit?.saleId || `v${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}` : undefined;
+        const withSale = saleId ? { saleId } : {};
+        if (transactionToEdit?.id) {
+          await updateExpense(transactionToEdit.id, { ...data, ...withSale, ...(items ? { items: saved } : {}) });
+        } else {
+          await addExpense({ ...data, ...withSale, ...(saved.length ? { items: saved } : {}) });
+        }
+        if (saleId) {
+          const what = description.trim() || finalCategory;
+          for (const c of costRows) {
+            const cost = {
+              userId: user.uid, type: 'gasto' as const, amount: parseCost(c.amount), category: c.category,
+              description: `${costLabel(c.category)} · ${what}`, date: finalDate, business: true, isFixed: false, saleId,
+              ...(paymentMethod ? { paymentMethod } : {}),
+            };
+            if (c.id) await updateExpense(c.id, cost); else await addExpense(cost);
+          }
+          // Costos que se quitaron de la venta
+          for (const id of prevCostIds) if (!costRows.some(c => c.id === id)) await deleteExpense(id);
+        }
       }
 
       onSuccess?.();
@@ -513,6 +543,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       onClose();
 
       await deleteExpense(transactionToEdit.id);
+      if (transactionToEdit.type === 'ingreso' && transactionToEdit.saleId) {
+        for (const x of transactions) if (x.type === 'gasto' && x.saleId === transactionToEdit.saleId && x.id) await deleteExpense(x.id);
+      }
       onSuccess?.();
     } catch (error) {
       console.error('Error deleting transaction:', error);
@@ -753,6 +786,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 <Users className="w-4 h-4" /> {t('Compartir este gasto (opcional)')}
               </button>
             ))}
+            {type === 'ingreso' && isBusiness && (
+              <div className="mt-2">
+                <SaleCostsEditor costs={saleCosts} saleAmount={amountNum} isTech={isTechTheme} fmt={fmt} onChange={setSaleCosts} />
+              </div>
+            )}
           </div>
 
           {/* Category: con productos de varias categorías la reemplaza el resumen "De esta compra" */}

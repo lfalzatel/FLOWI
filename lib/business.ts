@@ -1,5 +1,6 @@
 import { EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS, normalizeText } from './categories';
-import type { Transaction } from './firestore';
+import type { Account, Transaction } from './firestore';
+import { accountFor } from './accounts';
 
 // Modo negocio: separa la plata de un negocio (ventas de ropa, zapatos, catálogo…) de la personal.
 // Un movimiento es del negocio si se marcó con "Es del negocio" (Transaction.business) o, si no
@@ -49,4 +50,57 @@ export function businessMonth(transactions: Transaction[], month: string): Busin
     byCategory: Array.from(cats.values()).sort((a, b) => b.amount - a.amount),
     items,
   };
+}
+
+// ── Ganancia por venta ──────────────────────────────────────────────────────────────
+// Una venta (ingreso del negocio) puede llevar sus costos: el producto, el envío, la comisión…
+// Se guardan como gastos del negocio con el mismo saleId, así todo lo demás (saldos, totales) cuadra solo.
+
+/** Costos que se le pueden poner a una venta, con la categoría del negocio a la que van. */
+export const SALE_COST_KINDS = [
+  { label: 'Producto', category: 'Inventario' },
+  { label: 'Envío', category: 'Envíos a clientes' },
+  { label: 'Comisión', category: 'Comisiones y plataformas' },
+  { label: 'Empaque', category: 'Empaques' },
+] as const;
+
+export interface SaleSummary {
+  sale: Transaction;
+  costs: Transaction[];
+  costTotal: number;
+  profit: number;   // lo que te quedó de esa venta
+}
+
+/** Ventas del mes con sus costos y lo que dejó cada una (las que no tienen costos quedan con ganancia = venta). */
+export function salesWithCosts(items: Transaction[], all: Transaction[]): SaleSummary[] {
+  const bySale = new Map<string, Transaction[]>();
+  for (const t of all) {
+    if (t.type !== 'gasto' || !t.saleId) continue;
+    bySale.set(t.saleId, [...(bySale.get(t.saleId) || []), t]);
+  }
+  return items
+    .filter(t => t.type === 'ingreso')
+    .map(sale => {
+      const costs = sale.saleId ? bySale.get(sale.saleId) || [] : [];
+      const costTotal = costs.reduce((s, c) => s + c.amount, 0);
+      return { sale, costs, costTotal, profit: sale.amount - costTotal };
+    });
+}
+
+// ── La plata del negocio dentro de cada cuenta ─────────────────────────────────────
+// Lo que entró por ventas menos lo que salió en costos, por la cuenta donde se movió (desde que se
+// registró el saldo de esa cuenta). El resto del saldo es plata personal (sueldo, etc.).
+
+export function businessMoneyByAccount(accounts: Account[], transactions: Transaction[]): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const t of transactions) {
+    if (!isBusinessTx(t)) continue;
+    const id = accountFor(t, accounts);
+    const acc = id ? accounts.find(a => a.id === id) : undefined;
+    if (!acc) continue;
+    const d = toDate(t.date);
+    if (d.getTime() < new Date(acc.baseAt).getTime()) continue;
+    out.set(id!, (out.get(id!) || 0) + (t.type === 'ingreso' ? t.amount : -t.amount));
+  }
+  return out;
 }

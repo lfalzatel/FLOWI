@@ -17,6 +17,7 @@ import { AccountFormModal, AdjustBalanceModal, TransferModal } from '@/component
 import { AccountIcon } from '@/components/accounts/AccountIcon';
 import { Account, deleteAccount, deleteTransfer } from '@/lib/firestore';
 import { AccountState, KIND_LABEL, accountStates, netWorth } from '@/lib/accounts';
+import { businessMoneyByAccount } from '@/lib/business';
 import { formatCurrency } from '@/lib/format';
 
 export default function CuentasPage() {
@@ -51,6 +52,8 @@ export default function CuentasPage() {
   }, [authLoading, user, router]);
 
   const states = useMemo(() => accountStates(accounts, transactions, transfers, investments), [accounts, transactions, transfers, investments]);
+  // Parte del saldo que es plata del negocio (ventas − costos por esa cuenta); el resto es personal
+  const bizMap = useMemo(() => businessMoneyByAccount(accounts, transactions), [accounts, transactions]);
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
 
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
@@ -159,6 +162,12 @@ export default function CuentasPage() {
                           {a.isDefault && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-accent/15 text-accent ${isTech ? 'rounded-none' : 'rounded-full'}`}>Principal</span>}
                         </div>
                         <p className="text-[11px] text-text-muted truncate">{KIND_LABEL[a.kind]}{a.methods.length ? ` · ${a.methods.join(', ')}` : ''}</p>
+                        {Math.round(bizMap.get(a.id!) || 0) !== 0 && !credit && (
+                          <p className="text-[11px] truncate">
+                            <span className="text-orange-400">🏪 Negocio {fmt(bizMap.get(a.id!) || 0)}</span>
+                            <span className="text-text-muted"> · tuyo {fmt(st.balance - (bizMap.get(a.id!) || 0))}</span>
+                          </p>
+                        )}
                       </div>
                       <div className="text-right shrink-0">
                         <p className={`font-bold ${st.balance < 0 ? 'text-red-400' : 'text-text-primary'} ${isTech ? '' : 'font-syne'}`}>
