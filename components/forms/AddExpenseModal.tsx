@@ -40,7 +40,7 @@ import { SharedInfo, equalShares, knownPeople, personKey } from '@/lib/shared';
 import { formatCurrency } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, ChevronDown } from 'lucide-react';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -103,11 +103,13 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const againRef = useRef(false);
   const paymentTouched = useRef(!!editTarget);
   // Alto visible real: con el teclado del celular abierto, el formulario se acorta para que "Añadir" no quede debajo
-  const [vv, setVv] = useState<{ h: number; top: number } | null>(null);
+  // Alto del teclado del celular (0 si está cerrado): el formulario se sube esa cantidad
+  const [kb, setKb] = useState(0);
   useEffect(() => {
     const v = window.visualViewport;
     if (!v) return;
-    const on = () => setVv(Math.abs(v.height - window.innerHeight) > 80 ? { h: v.height, top: v.offsetTop } : null);
+    // Solo cuenta cuando la parte visible es MÁS PEQUEÑA que la pantalla (teclado abierto); otras diferencias se ignoran
+    const on = () => { const k = window.innerHeight - v.height - v.offsetTop; setKb(k > 80 ? Math.round(k) : 0); };
     v.addEventListener('resize', on);
     v.addEventListener('scroll', on);
     return () => { v.removeEventListener('resize', on); v.removeEventListener('scroll', on); };
@@ -341,6 +343,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const fmt = (n: number) => formatCurrency(Math.round(n), profile?.currency || 'COP');
   const amountNum = evalAmount(amount) ?? 0;
   const amountHasOp = hasOperator(amount);
+  // El número se achica cuando la cuenta es larga, para que quepa completa
+  const amountLen = displayExpr(amount).length;
+  const amountSize = amountLen > 26 ? 'text-base' : amountLen > 20 ? 'text-lg' : amountLen > 14 ? 'text-xl' : amountLen > 10 ? 'text-2xl' : 'text-3xl';
+  // Si aun así no cabe, se muestra el final (lo último que se escribió)
+  useEffect(() => {
+    const el = document.getElementById('tx-amount') as HTMLInputElement | null;
+    if (el && el.scrollWidth > el.clientWidth) el.scrollLeft = el.scrollWidth;
+  }, [amount]);
   // Lleva a la vista la parte del formulario que toca (debajo queda el teclado o la lista)
   const reveal = (el: HTMLElement | null, block: ScrollLogicalPosition = 'start') => {
     // Dos veces: al tocar y cuando ya abrió el teclado del celular (que achica la pantalla)
@@ -542,12 +552,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   return (
     <>
       {createPortal(
-        <div className={`fixed inset-x-0 top-0 ${vv ? '' : 'bottom-0'} z-[100] flex items-end sm:items-center justify-center sm:p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}
-             style={vv ? { height: vv.h, top: vv.top } : undefined}>
+        <div className={`fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}
+             style={kb ? { bottom: kb } : undefined}>
           <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
           <div
             // dvh = alto visible real en el celular (sin la barra del navegador), para que no se desborde
-            className={`w-full max-w-md relative z-10 animate-fade-in-up ${vv ? 'max-h-full' : 'max-h-[92dvh]'} sm:max-h-[90vh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}
+            className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[min(92dvh,100%)] sm:max-h-[90vh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}
             onClick={(e) => e.stopPropagation()}
           >
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
@@ -562,51 +572,51 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         <form onSubmit={handleSubmit} autoComplete="off" className="flex-1 min-h-0 flex flex-col">
           {/* Campos con scroll; el botón de guardar queda fijo abajo */}
           {/* En el registro guiado sobra espacio abajo, para que el paso que toca pueda quedar arriba de todo */}
-          <div ref={scrollRef} className={`flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 space-y-5 ${inFlow && step !== 'payment' ? 'pb-[60vh]' : 'pb-5'}`}>
-          {/* Atajos: dictarlo o leerlo de una foto o pantallazo (recibo, comprobante de Nequi o del banco) */}
-          {!transactionToEdit && !initialVoiceParsed && (
-            <div className="grid grid-cols-2 gap-2">
-              <button type="button"
-                      onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice')); }}
-                      className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
-                <Mic className="w-4 h-4" /> Dictar
-              </button>
-              <button type="button"
-                      onClick={() => {
-                        if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
-                        // El selector se abre dentro del mismo toque, para que el celular lo permita
-                        if (getAiKey()) shotRef.current?.click();
-                        else { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: 'no-key' } })); }
-                      }}
-                      className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
-                <Camera className="w-4 h-4" /> Foto o pantallazo
-              </button>
-              <input ref={shotRef} type="file" accept="image/*" className="hidden"
-                     onChange={async (e) => {
-                       const f = e.target.files?.[0];
-                       if (!f) return;
-                       let copy: File = f;
-                       try { copy = new File([await f.arrayBuffer()], f.name || 'recibo.jpg', { type: f.type || 'image/jpeg' }); } catch { /* se usa la original */ }
-                       e.target.value = '';
-                       onClose();
-                       window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: copy } }));
-                     }} />
+          <div ref={scrollRef} className={`flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 space-y-4 pb-5`}>
+          {/* Una sola fila: Gasto/Ingreso y, al lado, los atajos de voz y foto (recibo, comprobante de Nequi o del banco) */}
+          <div className="flex gap-2 items-stretch">
+            <div className={`flex-1 flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-glass border border-glass-border rounded-xl'}`}>
+              {(['gasto', 'ingreso'] as const).map(option => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => switchType(option)}
+                  className={`flex-1 py-1.5 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === option ? `bg-accent ${isTechTheme ? 'text-deep' : 'text-white'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!!transactionToEdit}
+                >
+                  {option === 'gasto' ? 'Gasto' : 'Ingreso'}
+                </button>
+              ))}
             </div>
-          )}
-
-          {/* Type Toggle */}
-          <div className={`flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-glass border border-glass-border rounded-xl'}`}>
-            {(['gasto', 'ingreso'] as const).map(option => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => switchType(option)}
-                className={`flex-1 py-2 text-sm font-bold tracking-wide transition-all ${isTechTheme ? 'rounded-none border border-transparent uppercase' : 'rounded-lg'} ${type === option ? `bg-accent ${isTechTheme ? 'text-deep' : 'text-white'} shadow-md ${isTechTheme ? 'border border-accent' : ''}` : (isTechTheme ? 'text-accent hover:opacity-80' : 'text-text-secondary')} ${transactionToEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={!!transactionToEdit}
-              >
-                {option === 'gasto' ? 'Gasto' : 'Ingreso'}
-              </button>
-            ))}
+            {!transactionToEdit && !initialVoiceParsed && (
+              <>
+                <button type="button" aria-label="Dictar" title="Dictar"
+                        onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice')); }}
+                        className={`w-12 shrink-0 flex flex-col items-center justify-center gap-0.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
+                  <Mic className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">Voz</span>
+                </button>
+                <button type="button" aria-label="Foto o pantallazo" title="Foto o pantallazo"
+                        onClick={() => {
+                          if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
+                          // El selector se abre dentro del mismo toque, para que el celular lo permita
+                          if (getAiKey()) shotRef.current?.click();
+                          else { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: 'no-key' } })); }
+                        }}
+                        className={`w-12 shrink-0 flex flex-col items-center justify-center gap-0.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
+                  <Camera className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">Foto</span>
+                </button>
+                <input ref={shotRef} type="file" accept="image/*" className="hidden"
+                       onChange={async (e) => {
+                         const f = e.target.files?.[0];
+                         if (!f) return;
+                         let copy: File = f;
+                         try { copy = new File([await f.arrayBuffer()], f.name || 'recibo.jpg', { type: f.type || 'image/jpeg' }); } catch { /* se usa la original */ }
+                         e.target.value = '';
+                         onClose();
+                         window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: copy } }));
+                       }} />
+              </>
+            )}
           </div>
 
           {/* Fecha y hora: una línea arriba; se resalta si no es hoy para que no se guarde en otro día sin querer */}
@@ -616,16 +626,17 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             const [yy, mm, dd] = date.split('-').map(Number);
             const [hh, mi] = (time || '12:00').split(':').map(Number);
             const when = new Date(yy, mm - 1, dd, hh, mi);
-            const full = when.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+            const full = when.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).replace(',', '');
             const dayText = isToday ? `Hoy, ${full}` : date === yesterday ? `Ayer, ${full}` : full;
             const timeText = when.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', hour12: true });
             const odd = !isToday && !transactionToEdit;
             return (
-              <div className="space-y-2">
+              <div className="space-y-2 -mt-2">
                 <button type="button" onClick={() => setShowDate(v => !v)} aria-expanded={showDate}
-                        className={`flex items-center gap-2 text-xs font-semibold normal-case px-3 py-1.5 border ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${odd ? 'border-amber-400/60 bg-amber-400/10 text-amber-300' : 'border-glass-border text-text-secondary'}`}>
-                  <CalendarDays className="w-3.5 h-3.5" /> {dayText} · {timeText}
-                  <span className="opacity-60">&nbsp;· cambiar</span>
+                        className={`max-w-full flex items-center gap-2 whitespace-nowrap text-xs font-semibold normal-case px-3 py-1.5 border ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${odd ? 'border-amber-400/60 bg-amber-400/10 text-amber-300' : 'border-glass-border text-text-secondary'}`}>
+                  <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{dayText} · {timeText}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 shrink-0 opacity-60 transition-transform ${showDate ? 'rotate-180' : ''}`} />
                 </button>
                 {showDate && (
                   <div className="space-y-2">
@@ -648,7 +659,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
           {/* Amount */}
           <div ref={amountRef}>
-            <label htmlFor="tx-amount" className={`${labelClass} mb-1.5 block`}>{shared ? (shared.paidByMe ? 'Total que pagaste' : 'Tu parte') : 'Monto'}</label>
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
+              <label htmlFor="tx-amount" className={labelClass}>{shared ? (shared.paidByMe ? 'Total que pagaste' : 'Tu parte') : 'Monto'}</label>
+              {amountHasOp && (
+                <span className="text-base font-bold text-accent normal-case tabular-nums">= {evalAmount(amount) !== null ? fmt(evalAmount(amount)!) : '…'}</span>
+              )}
+            </div>
             <div className="relative">
               <span className={`absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold ${isTechTheme ? 'text-accent/70' : 'text-text-secondary'}`}>$</span>
               <input
@@ -668,12 +684,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   if (items?.length) setAutoSum(false); // escrito a mano: ya no se suma solo
                 }}
                 onBlur={() => { if (!isTouch && amountHasOp && evalAmount(amount) !== null) setAmount(String(evalAmount(amount))); }}
-                className={`w-full bg-glass border py-3 pl-10 pr-4 text-3xl font-bold text-text-primary placeholder-text-muted focus:outline-none ${step === 'amount' ? 'border-accent' : ''} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
+                className={`w-full bg-glass border py-2.5 pl-10 pr-4 font-bold ${amountSize} text-text-primary placeholder-text-muted focus:outline-none ${step === 'amount' ? 'border-accent' : ''} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`}
               />
             </div>
-            {amountHasOp && (
-              <p className="mt-1.5 text-sm font-semibold text-accent normal-case">= {evalAmount(amount) !== null ? fmt(evalAmount(amount)!) : '…'}</p>
-            )}
+
           </div>
 
           {/* Descripción: va debajo del monto para sugerir la categoría mientras se escribe */}
@@ -925,6 +939,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               <BellPlus className="w-4 h-4" /> Recordarme este pago
             </button>
           )}
+          {/* Espacio para que el paso que toca pueda subir hasta arriba (dentro del scroll: no estira el formulario) */}
+          {inFlow && step !== 'payment' && <div aria-hidden="true" className="h-[60vh] !mt-0" />}
           </div>
 
           {/* Submit siempre visible, con fondo sólido para que no se transparente la barra inferior de la app */}
