@@ -12,7 +12,7 @@ const MODELS_CACHE = 'flowi_openrouter_free_models';
 const VISION_MODELS_CACHE = 'flowi_openrouter_free_vision_models';
 const RECEIPT_TIMEOUT_MS = 40_000;
 // Un recibo con todos sus productos es una respuesta larga: los modelos gratuitos pueden tardar más
-const RECEIPT_ITEMS_TIMEOUT_MS = 80_000;
+const RECEIPT_ITEMS_TIMEOUT_MS = 120_000; // recibos largos (20+ productos) tardan más
 const MODELS_CACHE_MS = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 15_000;
 
@@ -280,6 +280,46 @@ async function getFreeVisionModels(key: string): Promise<string[]> {
   return models;
 }
 
+// Prepara la foto del recibo para la IA. Antes se reducía a 1280 px por el lado largo y un recibo largo y
+// angosto quedaba con letras ilegibles. Ahora:
+//  - se limita por cantidad de píxeles (≈2,4 MP), no por el lado largo, para conservar el ancho;
+//  - un recibo muy largo (más de 2,2 veces más alto que ancho) se parte en tramos que se superponen un
+//    poco, y se mandan juntos en el mismo mensaje, de arriba hacia abajo.
+const MAX_PIXELS = 2_400_000;
+async function receiptImages(file: File): Promise<string[]> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    const W = img.width, H = img.height;
+    const draw = (sy: number, sh: number) => {
+      const scale = Math.min(1, Math.sqrt(MAX_PIXELS / (W * sh)), 2400 / Math.max(W, sh));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(W * scale);
+      canvas.height = Math.round(sh * scale);
+      canvas.getContext('2d')!.drawImage(img, 0, sy, W, sh, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.85);
+    };
+    if (H / W <= 2.2) return [draw(0, H)];
+    const parts = Math.min(4, Math.ceil(H / (W * 1.6)));
+    const overlap = Math.round(H * 0.04);
+    const step = Math.ceil(H / parts);
+    const out: string[] = [];
+    for (let k = 0; k < parts; k++) {
+      const sy = Math.max(0, k * step - overlap);
+      const end = Math.min(H, (k + 1) * step + overlap);
+      out.push(draw(sy, end - sy));
+    }
+    return out;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 // Reduce la foto (máx. 1280 px, JPEG) para que viaje rápido incluso con datos móviles
 async function shrinkImage(file: File): Promise<string> {
   const url = URL.createObjectURL(file);
@@ -312,7 +352,8 @@ Reglas:
 - En (A), "total" es el TOTAL A PAGAR (no el subtotal, ni el IVA, ni el cambio).
 - En (A), "items" son TODOS los productos del recibo, uno por renglón y en el mismo orden, aunque se repitan. "qty" puede tener decimales (0.845 kg). "total" del renglón es lo que costó ese renglón. No incluyas subtotales, IVA, cambio ni medios de pago. Si el recibo no detalla productos, usa "items":[]. "category" de cada producto es la categoría de gasto que le corresponde a ESE producto (ej. huevos → Mercado, cerveza → Licores y Bares, jabón → Aseo si existe) de la misma lista de categorías.
 - En (B), cada movimiento es una fila: los valores en verde o con "+" son ingresos; en rojo o con "-" son gastos. No incluyas el saldo disponible.
-- En Colombia el punto separa miles: "$45.900" = 45900 y "1.250.000" = 1250000. Si hay centavos con coma, ignóralos.
+- Separadores de miles: casi siempre en Colombia el punto separa miles ("$45.900" = 45900, "1.250.000" = 1250000). Pero muchas cajas registradoras imprimen al estilo inglés: coma para miles y punto para decimales ("10,450.00" = 10450, "$225,040" = 225040, "3,350.16" = 3350). Mira cómo están escritos los precios del recibo y usa la misma regla en todo el recibo. En pesos colombianos los totales casi nunca tienen centavos: si un total te queda con decimales (225.04), seguramente la coma era de miles.
+- Si un renglón trae cantidad, unidad, precio unitario y total (ej. "0.690 KG  6,450.00  EX  4,450"), el total del renglón es el ÚLTIMO número; las letras como EX, 01, P son códigos de impuesto, no valores.
 - category de un gasto debe ser exactamente una de: ${[...EXPENSE_LABELS, ...customLabels].join(', ')}.
 - category de un ingreso debe ser exactamente una de: ${INCOME_LABELS.join(', ')}.
 - No incluyas números de cuenta ni de tarjeta.
@@ -347,7 +388,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), RECEIPT_ITEMS_TIMEOUT_MS);
   try {
-    const image = await shrinkImage(file);
+    const images = await receiptImages(file);
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       signal: controller.signal,
@@ -364,8 +405,10 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
         messages: [
           { role: 'system', content: receiptPrompt(customLabels) },
           { role: 'user', content: [
-            { type: 'text', text: 'Lee esta foto (recibo o movimientos del banco).' },
-            { type: 'image_url', image_url: { url: image } },
+            { type: 'text', text: images.length > 1
+              ? `Lee este recibo. Son ${images.length} partes de la MISMA foto, en orden de arriba hacia abajo, y se superponen un poco: no repitas los renglones que aparecen en dos partes (guíate por el número de renglón si lo tiene).`
+              : 'Lee esta foto (recibo o movimientos del banco).' },
+            ...images.map(url => ({ type: 'image_url', image_url: { url } })),
           ] },
         ],
       }),
@@ -397,8 +440,12 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
     }
 
     // (A) Recibo de compra
-    const total = Number(parsed?.total);
+    let total = Number(parsed?.total);
     if (!Number.isFinite(total) || total <= 0) return { ok: false, reason: 'unreadable' };
+    // "225,040" leído como 225.04: si la suma de productos es ~1000 veces el total, la coma era de miles
+    const rawItems = Array.isArray(parsed.items) ? parsed.items : [];
+    const itemsTotal = rawItems.reduce((acc: number, it: any) => acc + (Number(it?.total) || 0), 0);
+    if (total < 1000 && itemsTotal > 0 && Math.abs(itemsTotal / (total * 1000) - 1) < 0.05) total = Math.round(total * 1000);
     const category = matchCategory(parsed.category, 'gasto', customLabels);
     const merchant = typeof parsed.merchant === 'string' && parsed.merchant.trim() && parsed.merchant !== 'null' ? parsed.merchant.trim().slice(0, 60) : undefined;
     const date = recentDate(parsed.date);
