@@ -5,7 +5,7 @@
 //    secreto de eventos y, si el pago quedó APROBADO por el valor exacto, se activa Premium.
 const crypto = require('crypto');
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
-const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret, defineString } = require('firebase-functions/params');
 const logger = require('firebase-functions/logger');
@@ -194,6 +194,47 @@ exports.avisarComprobante = onDocumentCreated({ document: 'fl_manual_payments/{i
   }
 });
 
+// ── Amigos: aviso al celular ─────────────────────────────────────────
+// Envía una notificación push a una persona (a todos sus celulares con FLOWI) y limpia los que ya no sirven.
+async function pushTo(uid, data) {
+  const ref = db.collection('users').doc(uid);
+  const user = await ref.get();
+  const tokens = ((user.exists && user.get('pushTokens')) || []).filter(Boolean);
+  if (!tokens.length) return;
+  const res = await admin.messaging().sendEachForMulticast({ tokens, data, webpush: { headers: { Urgency: 'high', TTL: '86400' } } });
+  const dead = tokens.filter((_, i) => {
+    const code = res.responses[i].error?.code || '';
+    return code.includes('registration-token-not-registered') || code.includes('invalid-registration-token');
+  });
+  if (dead.length) await ref.update({ pushTokens: admin.firestore.FieldValue.arrayRemove(...dead) });
+}
+const firstName = (n) => String(n || 'Alguien').trim().split(/\s+/)[0];
+
+// Alguien te envió una solicitud de amistad
+exports.avisarSolicitudAmistad = onDocumentCreated({ document: 'fl_friend_requests/{id}', region: 'us-central1' }, async (event) => {
+  const r = event.data?.data();
+  if (!r || r.status !== 'pending' || !r.to) return;
+  await pushTo(r.to, {
+    title: `👋 ${firstName(r.fromName)} quiere ser tu amigo`,
+    body: 'Acepta la solicitud en FLOWI para compartir gastos.',
+    url: '/amigos',
+    tag: `amistad-${event.params.id}`,
+  });
+});
+
+// Aceptaron tu solicitud
+exports.avisarAmistadAceptada = onDocumentUpdated({ document: 'fl_friend_requests/{id}', region: 'us-central1' }, async (event) => {
+  const before = event.data?.before.data();
+  const after = event.data?.after.data();
+  if (!before || !after || before.status === 'accepted' || after.status !== 'accepted') return;
+  await pushTo(after.from, {
+    title: `🤝 ${firstName(after.toName)} aceptó tu solicitud`,
+    body: 'Ya son amigos en FLOWI.',
+    url: '/amigos',
+    tag: `amistad-ok-${event.params.id}`,
+  });
+});
+
 // ── Eliminar mi cuenta ────────────────────────────────────────────────
 // La persona borra su cuenta y todo lo que registró (Ley 1581: derecho a suprimir sus datos).
 // Se conserva solo el registro de los pagos (valor, plan, fecha y estado), como dice la política;
@@ -234,6 +275,18 @@ exports.eliminarMiCuenta = onCall({ region: 'us-central1', timeoutSeconds: 300 }
       userEmail: admin.firestore.FieldValue.delete(), note: admin.firestore.FieldValue.delete(), accountDeleted: true,
     }));
     await batch.commit();
+  }
+
+  // Amigos: perfil público, buscador y solicitudes donde está la persona
+  await db.collection('fl_profiles').doc(uid).delete().catch(() => {});
+  await db.collection('fl_directory').doc(uid).delete().catch(() => {});
+  for (;;) {
+    const reqs = await db.collection('fl_friend_requests').where('users', 'array-contains', uid).limit(400).get();
+    if (reqs.empty) break;
+    const batch = db.batch();
+    reqs.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    removed += reqs.size;
   }
 
   await userRef.delete();

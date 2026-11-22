@@ -39,6 +39,7 @@ import { SharedExpenseEditor, SharedDraft, emptySharedDraft, draftAmounts } from
 import { SharedInfo, equalShares, knownPeople, personKey } from '@/lib/shared';
 import { formatCurrency, hasCents, roundMoney } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
+import { useFriends } from '@/components/FriendsProvider';
 import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { CalendarDays, ChevronDown } from 'lucide-react';
 import { useT, currentLocale, tr } from '@/lib/i18n';
@@ -394,7 +395,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const showFooter = !inFlow || step !== 'amount';
   const needsCategory = !transactionToEdit && !hideCategory && !category.trim();
   const noCategoryOk = useRef(false);
-  const peopleNames = useMemo(() => knownPeople(transactions), [transactions]);
+  // Tus amigos de FLOWI primero; luego las personas con las que ya compartiste
+  const { friends } = useFriends();
+  const peopleNames = useMemo(() => {
+    const seen = new Set<string>();
+    return [...friends.map(f => f.name), ...knownPeople(transactions)].filter(n => { const k = personKey(n); if (!k || seen.has(k)) return false; seen.add(k); return true; });
+  }, [transactions, friends]);
   // Lo que se guarda del compartido (solo personas con nombre) y tu parte
   const { sharedInfo, sharedMine } = useMemo((): { sharedInfo: SharedInfo | null; sharedMine: number } => {
     const total = amountNum;

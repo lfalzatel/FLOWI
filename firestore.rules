@@ -127,6 +127,58 @@ service cloud.firestore {
       allow update: if ownsExisting() && request.resource.data.userId == resource.data.userId;
     }
 
+    // ── Amigos ────────────────────────────────────────────────
+    // Perfil público mínimo: nombre, foto y @usuario (nada de gastos, saldos ni correo).
+    function validPublicProfile() {
+      let d = request.resource.data;
+      return d.name is string && d.name.size() > 0 && d.name.size() <= 60
+        && d.username is string && d.username.size() <= 40
+        && (d.photo == null || (d.photo is string && d.photo.size() <= 600));
+    }
+
+    // Lo puede ver quien tenga sesión (para el enlace de invitación); solo el dueño lo escribe
+    match /fl_profiles/{uid} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create, update: if signedIn() && request.auth.uid == uid && validPublicProfile()
+        && request.resource.data.keys().hasOnly(['name', 'photo', 'username', 'searchable', 'updatedAt'])
+        && request.resource.data.searchable is bool;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Buscador: solo están quienes dejan que los encuentren por el nombre
+    match /fl_directory/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == uid && validPublicProfile()
+        && request.resource.data.keys().hasOnly(['name', 'photo', 'username', 'prefixes', 'updatedAt'])
+        && request.resource.data.prefixes is list && request.resource.data.prefixes.size() <= 80;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Solicitudes de amistad: id = "{de}_{para}". Las ven solo las dos personas.
+    // La envía quien la crea; solo la persona que la recibe la acepta o la rechaza; cualquiera de las dos la borra
+    // (cancelar una solicitud o eliminar a un amigo).
+    match /fl_friend_requests/{id} {
+      allow read: if signedIn() && request.auth.uid in resource.data.users;
+      allow create: if signedIn()
+        && request.resource.data.from == request.auth.uid
+        && request.resource.data.to is string
+        && request.resource.data.to != request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.to
+        && request.resource.data.users == [request.auth.uid, request.resource.data.to]
+        && request.resource.data.status == 'pending'
+        && request.resource.data.keys().hasOnly(['from', 'to', 'users', 'status', 'fromName', 'fromPhoto', 'fromUsername',
+             'toName', 'toPhoto', 'toUsername', 'createdAt'])
+        && request.resource.data.fromName is string && request.resource.data.fromName.size() <= 60
+        && request.resource.data.toName is string && request.resource.data.toName.size() <= 60;
+      allow update: if signedIn()
+        && resource.data.to == request.auth.uid
+        && resource.data.status == 'pending'
+        && request.resource.data.status in ['accepted', 'rejected']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt']);
+      allow delete: if signedIn() && request.auth.uid in resource.data.users;
+    }
+
     // Todo lo demás queda cerrado
   }
 }

@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useDebts } from '@/hooks/useDebts';
 import { useDebtTotals } from '@/hooks/useDebtTotals';
+import { FriendsCard } from '@/components/dashboard/FriendsCard';
 import { Transaction } from '@/lib/firestore';
 import { BalanceCard }     from '@/components/dashboard/BalanceCard';
 import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
@@ -390,6 +391,7 @@ export default function DashboardPage() {
 
         {/* Meta de ahorro principal */}
         <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} demoGoals={demo?.goals} /></div>
+        {!demo && <FriendsCard currency={profile?.currency} />}
         {!demo && <NetWorthCard transactions={transactions} currency={profile?.currency} />}
         {!demo && <InvestmentsSummaryCard currency={profile?.currency} />}
         </div>

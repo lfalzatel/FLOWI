@@ -8,6 +8,9 @@ import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
+import { useFriends } from '@/components/FriendsProvider';
+import { answerFriendRequest } from '@/lib/friends';
+import { Avatar } from '@/components/friends/Avatar';
 import { useReminders } from '@/hooks/useReminders';
 import { getPendingDues, dueLabel, eventDueLabel, isPaymentReminder, ReminderDue } from '@/lib/reminderDue';
 import { useData } from '@/components/DataProvider';
@@ -55,6 +58,7 @@ export function Header() {
   }, [showLogoModal]);
 
   const { notifications } = useInAppNotifications();
+  const { incoming: friendRequests } = useFriends(); // solicitudes de amistad sin responder
   const { reminders } = useReminders();
   const [showDropdown, setShowDropdown] = useState(false);
   const [payingDue, setPayingDue] = useState<ReminderDue | null>(null);
@@ -87,7 +91,7 @@ export function Header() {
   // (un gasto ya registrado de esa categoría cerca del vencimiento cuenta como pagado)
   const { transactions } = useData();
   const upcomingReminders = getPendingDues(reminders, new Date(), transactions).slice(0, 6);
-  const unread = notifications.length + upcomingReminders.length;
+  const unread = notifications.length + upcomingReminders.length + friendRequests.length;
 
   // Dynamic colors for the logo based on theme
   let logoOuterColor = '#10B981'; // Default / Dark theme
@@ -280,13 +284,28 @@ export function Header() {
                 <Link href="/servicios/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>{tr('Ver ajustes')}</Link>
               </div>
 
-              {notifications.length === 0 && upcomingReminders.length === 0 ? (
+              {notifications.length === 0 && upcomingReminders.length === 0 && friendRequests.length === 0 ? (
                 <div className="py-6 text-center">
                   <Bell className="w-8 h-8 text-text-muted/30 mx-auto mb-2" />
                   <p className={`text-text-secondary text-sm ${isTechTheme ? 'font-mono' : ''}`}>{tr('Al día. Nada por aquí.')}</p>
                 </div>
               ) : (
                 <div className="space-y-1">
+                  {/* Solicitudes de amistad */}
+                  {friendRequests.map(r => (
+                    <div key={r.id} className={`p-3 mb-2 flex gap-3 items-center border border-accent/30 bg-accent/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                      <Avatar p={{ name: r.fromName, photo: r.fromPhoto }} size={32} isTech={isTechTheme} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm text-text-primary leading-snug ${isTechTheme ? 'font-mono' : ''}`}><b>{r.fromName.split(/\s+/)[0]}</b> quiere ser tu amigo en FLOWI</p>
+                        <div className="flex gap-1.5 mt-1.5">
+                          <button type="button" onClick={() => answerFriendRequest(r.id, true).catch(() => {})}
+                                  className={`px-2.5 py-1 text-[11px] font-semibold border border-accent bg-accent/15 text-accent ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>Aceptar</button>
+                          <button type="button" onClick={() => answerFriendRequest(r.id, false).catch(() => {})}
+                                  className={`px-2.5 py-1 text-[11px] font-semibold border border-glass-border text-text-muted ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>Ahora no</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                   {/* Alertas inmediatas (InApp) */}
                   {notifications.map(n => (
                     <div key={n.id} className={`p-3 bg-accent/10 mb-2 flex gap-3 items-start border border-accent/20 ${isTechTheme ? 'rounded-none border-l-4 border-l-accent' : 'rounded-xl'}`}>
