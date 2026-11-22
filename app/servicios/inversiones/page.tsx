@@ -419,7 +419,7 @@ export default function InversionesPage() {
               <label htmlFor="mv-amount" className="text-xs text-text-muted mb-1.5 block">
                 {moving.mode === 'ajuste' ? (kindOf(moving.inv) === 'ahorro' ? '¿Cuánto dice la app que tienes hoy?' : '¿Cuánto vale hoy según la app?') : '¿Cuánto?'}
               </label>
-              <input id="mv-amount" type="text" inputMode="decimal" placeholder="$ 0" value={moveAmount} autoFocus
+              <input autoComplete="off" id="mv-amount" type="text" inputMode="decimal" placeholder="$ 0" value={moveAmount} autoFocus
                      onChange={(e) => setMoveAmount(formatMoneyInput(e.target.value))}
                      className={`w-full bg-glass border px-4 py-3 font-bold text-text-primary focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
               {moving.mode === 'ajuste' && kindOf(moving.inv) === 'ahorro' && (

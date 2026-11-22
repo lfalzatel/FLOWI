@@ -233,7 +233,7 @@ export function ProfileModal({ onClose }: Props) {
           {/* Teléfono */}
           <div className={`${isCyberpunk ? 'bg-black border border-accent/20 rounded-none' : 'bg-glass border border-glass-border rounded-xl'} px-3 py-2 flex items-center gap-3`}>
             <Phone className="w-4 h-4 text-accent shrink-0" />
-            <input
+            <input autoComplete="off"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}

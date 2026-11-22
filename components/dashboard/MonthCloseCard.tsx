@@ -222,7 +222,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
                   <span className="text-xs text-text-muted">¿Cuánto apartas?</span>
                   <div className={`mt-1 flex items-center gap-2 px-3 py-2.5 border border-glass-border bg-white/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
                     <span className="text-accent font-bold">$</span>
-                    <input inputMode="numeric" value={amount} onChange={(e) => setAmount(formatAmountInput(e.target.value))}
+                    <input autoComplete="off" inputMode="numeric" value={amount} onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                            className="flex-1 min-w-0 bg-transparent outline-none text-text-primary font-bold" />
                   </div>
                 </label>

@@ -121,7 +121,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
                     </p>
                     <label className="block space-y-1">
                       <span className="text-xs text-text-muted">Para confirmar, escribe <b className="text-text-primary">{word}</b></span>
-                      <input value={typed} onChange={e => setTyped(e.target.value.toUpperCase())} disabled={busy} autoCapitalize="characters"
+                      <input autoComplete="off" value={typed} onChange={e => setTyped(e.target.value.toUpperCase())} disabled={busy} autoCapitalize="characters"
                              className={`w-full px-3 py-2.5 bg-glass border border-glass-border text-text-primary text-sm focus:outline-none focus:border-red-400 ${isTechTheme ? 'rounded-none font-mono' : 'rounded-xl'}`} />
                     </label>
                     <button type="button" disabled={busy || typed.trim() !== word}

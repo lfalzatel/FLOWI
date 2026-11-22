@@ -212,7 +212,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const UNITS: { id: ReminderAlert['unit']; label: string }[] = [{ id: 'minutes', label: 'min' }, { id: 'hours', label: 'horas' }, { id: 'days', label: 'días' }];
   const hasAmount = type !== 'daily' && type !== 'budget_alert';
   const timeInput = (
-    <input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className={field} aria-label="Hora" />
+    <input autoComplete="off" type="time" required value={time} onChange={(e) => setTime(e.target.value)} className={field} aria-label="Hora" />
   );
 
   return createPortal(
@@ -232,7 +232,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
             {/* Título + sugerencia de categoría */}
             <div>
               <label className={lbl} htmlFor="rem-title">Título</label>
-              <input id="rem-title" type="text" required placeholder="Ej: Pagar arriendo, cambio de aceite" value={title}
+              <input autoComplete="off" id="rem-title" type="text" required placeholder="Ej: Pagar arriendo, cambio de aceite" value={title}
                      onChange={(e) => setTitle(e.target.value)} className={field} />
               {merchantSuggestion && !merchant && type !== 'budget_alert' ? (
                 <button type="button" onClick={() => { setCategory(merchantSuggestion.category); setMerchant(merchantSuggestion.merchant); }}
@@ -284,7 +284,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                 {hasAmount && (
                   <div className="min-w-0">
                     <label className={lbl} htmlFor="rem-amount">Valor</label>
-                    <input id="rem-amount" type="text" inputMode="numeric" placeholder="Opcional" value={amountText}
+                    <input autoComplete="off" id="rem-amount" type="text" inputMode="numeric" placeholder="Opcional" value={amountText}
                            onChange={(e) => { const d = e.target.value.replace(/\D/g, ''); setAmountText(d ? Number(d).toLocaleString(currentLocale()) : ''); }}
                            className={field} />
                   </div>
@@ -326,7 +326,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
               <div className="grid grid-cols-[1.4fr_1fr] gap-2">
                 <div>
                   <label className={lbl} htmlFor="rem-date">{type === 'yearly' ? 'Fecha (cada año)' : 'Fecha'}</label>
-                  <input id="rem-date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={field} />
+                  <input autoComplete="off" id="rem-date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={field} />
                 </div>
                 <div><span className={lbl}>Hora</span>{timeInput}</div>
               </div>
@@ -346,7 +346,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                 <div className="grid grid-cols-[0.8fr_1fr] gap-2">
                   <div>
                     <label className={lbl} htmlFor="rem-day">Día del mes</label>
-                    <input id="rem-day" type="number" min={1} max={31} required value={dayOfMonth} inputMode="numeric"
+                    <input autoComplete="off" id="rem-day" type="number" min={1} max={31} required value={dayOfMonth} inputMode="numeric"
                            onChange={(e) => { const v = e.target.value; if (v === '') setDayOfMonth(''); else { const n = parseInt(v, 10); if (!isNaN(n)) setDayOfMonth(Math.max(1, Math.min(31, n))); } }}
                            className={field} />
                   </div>
@@ -361,7 +361,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                 {everyMonths > 1 && (
                   <div>
                     <label className={lbl} htmlFor="rem-start">¿En qué mes toca la próxima vez?</label>
-                    <input id="rem-start" type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value || thisMonthKey)} className={field} />
+                    <input autoComplete="off" id="rem-start" type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value || thisMonthKey)} className={field} />
                     <p className="text-[11px] text-text-muted mt-1">Desde ahí se repite cada {everyMonths} meses, el día {dayOfMonth || 1}.</p>
                   </div>
                 )}
@@ -400,7 +400,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                 <span className={lbl}>Avisarme antes</span>
                 {alerts.map(alert => (
                   <div key={alert.id} className="flex items-center gap-1.5">
-                    <input type="number" min={1} value={alert.value} inputMode="numeric"
+                    <input autoComplete="off" type="number" min={1} value={alert.value} inputMode="numeric"
                            onChange={e => updateAlert(alert.id, 'value', Number(e.target.value))}
                            className={`${field} !w-16 text-center px-1`} aria-label="Cantidad" />
                     {UNITS.map(u => (

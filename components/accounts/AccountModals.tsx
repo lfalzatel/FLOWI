@@ -160,7 +160,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
 
       <div>
         <label htmlFor="acc-name" className={s.label}>Nombre</label>
-        <input id="acc-name" type="text" value={name} maxLength={30} onChange={(e) => setName(e.target.value)}
+        <input id="acc-name" type="text" autoComplete="off" value={name} maxLength={30} onChange={(e) => setName(e.target.value)}
                placeholder={kind === 'efectivo' ? 'Efectivo' : kind === 'credito' ? 'Ej: Visa Bancolombia' : kind === 'billetera' ? 'Ej: Nequi' : 'Ej: Bancolombia ahorros'}
                className={s.input} />
         <p className={s.hint}>No escribas números de cuenta: FLOWI no los necesita.</p>
@@ -169,7 +169,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
       {!account && (
         <div>
           <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? '¿Cuánto debes hoy en la tarjeta?' : initial ? `¿Cuánto tenías en ${name || 'esta cuenta'} antes de este movimiento?` : '¿Cuánto tienes hoy en esta cuenta?'}</label>
-          <input id="acc-balance" type="text" inputMode="decimal" placeholder="$ 0" value={balance}
+          <input id="acc-balance" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={balance}
                  onChange={(e) => setBalance(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>Míralo en la app del banco. Desde hoy, tus gastos e ingresos de esta cuenta lo van moviendo.</p>
         </div>
@@ -178,7 +178,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
       {kind === 'credito' && (
         <div>
           <label htmlFor="acc-limit" className={s.label}>Cupo de la tarjeta (opcional)</label>
-          <input id="acc-limit" type="text" inputMode="decimal" placeholder="$ 0" value={limit}
+          <input id="acc-limit" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={limit}
                  onChange={(e) => setLimit(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>Con el cupo, FLOWI te muestra cuánto te queda disponible para usar.</p>
         </div>
@@ -275,7 +275,7 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
            footer={<button type="button" disabled={saving} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar saldo'}</button>}>
       <div>
         <label htmlFor="adj" className={s.label}>{credit ? '¿Cuánto debes hoy según el banco?' : '¿Cuánto dice el banco que tienes hoy?'}</label>
-        <input id="adj" type="text" inputMode="decimal" value={value} onChange={(e) => setValue(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus />
+        <input id="adj" type="text" autoComplete="off" inputMode="decimal" value={value} onChange={(e) => setValue(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus />
         <p className={s.hint}>
           FLOWI calculaba {formatCurrency(Math.abs(current), currency)}.
           {diff !== 0 && <> La diferencia ({diff > 0 ? '+' : '−'}{formatCurrency(Math.abs(Math.round(diff)), currency)}) suele ser algo que no registraste, como un cobro del banco o unos intereses.</>}
@@ -388,7 +388,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
       <div className="space-y-3">
         <div>
           <label htmlFor="tr-amount" className={s.label}>Monto</label>
-          <input id="tr-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus={!!payCard} />
+          <input id="tr-amount" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus={!!payCard} />
           {payCard && owed > 0 && (
             <button type="button" onClick={() => setAmount(formatMoneyInput(Math.round(owed * 100) / 100))} className={`mt-1.5 ${s.chip(value === Math.round(owed * 100) / 100)}`}>
               Todo: {formatCurrency(owed, currency)}
@@ -398,11 +398,11 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
         <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="tr-date" className={s.label}>Fecha</label>
-          <input id="tr-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className={s.input} />
+          <input id="tr-date" type="date" autoComplete="off" value={date} onChange={(e) => setDate(e.target.value)} className={s.input} />
         </div>
         <div>
           <label htmlFor="tr-time" className={s.label}>Hora</label>
-          <input id="tr-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className={s.input} />
+          <input id="tr-time" type="time" autoComplete="off" value={time} onChange={(e) => setTime(e.target.value)} className={s.input} />
         </div>
         </div>
       </div>
@@ -420,7 +420,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
       })()}
       <div>
         <label htmlFor="tr-note" className={s.label}>Nota (opcional)</label>
-        <input id="tr-note" type="text" value={note} maxLength={50} onChange={(e) => setNote(e.target.value)}
+        <input id="tr-note" type="text" autoComplete="off" value={note} maxLength={50} onChange={(e) => setNote(e.target.value)}
                placeholder={toAcc?.kind === 'credito' ? 'Pago de la tarjeta' : toAcc?.kind === 'efectivo' ? 'Retiro en cajero' : 'Ej: paso a Nequi'} className={s.input} />
       </div>
       <p className="text-[11px] text-text-muted">{payCard

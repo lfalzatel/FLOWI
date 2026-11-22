@@ -88,7 +88,7 @@ export function ManageBudgetModal({ onClose }: Props) {
           </label>
           <div className="relative">
             <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold ${isTechTheme ? 'text-accent font-mono' : 'text-text-muted'}`}>$</span>
-            <input
+            <input autoComplete="off"
               type="number"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}

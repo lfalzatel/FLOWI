@@ -133,7 +133,7 @@ export default function GastosPage() {
         <div className="min-w-0 lg:sticky lg:top-24">
           {/* Buscador Universal */}
           <div className="mb-4 relative lg:hidden">
-            <input
+            <input autoComplete="off"
               type="text"
               placeholder={isTechTheme ? tr('SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR...') : tr('Buscar por categoría, descripción o monto...')}
               value={searchQuery}
@@ -198,7 +198,7 @@ export default function GastosPage() {
         <div className="min-w-0">
           {/* Buscador Universal */}
           <div className="mb-4 relative hidden lg:block">
-            <input
+            <input autoComplete="off"
               type="text"
               placeholder={isTechTheme ? tr('SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR...') : tr('Buscar por categoría, descripción o monto...')}
               value={searchQuery}

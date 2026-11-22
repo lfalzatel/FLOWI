@@ -117,7 +117,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
               <label htmlFor="goal-name" className={labelClass}>¿Para qué estás ahorrando?</label>
               <div className="flex gap-2">
                 <span className={`shrink-0 w-12 flex items-center justify-center text-2xl bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-xl'}`}>{emoji}</span>
-                <input id="goal-name" type="text" value={name} maxLength={40} onChange={(e) => setName(e.target.value)}
+                <input autoComplete="off" id="goal-name" type="text" value={name} maxLength={40} onChange={(e) => setName(e.target.value)}
                        placeholder="Ej: Moto, viaje a Cartagena, fondo de emergencia" className={inputClass} required />
               </div>
               <div className="flex flex-wrap gap-1.5 mt-2.5">
@@ -133,7 +133,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="goal-target" className={labelClass}>Valor de la meta</label>
-                <input id="goal-target" type="text" inputMode="numeric" placeholder="$ 0" value={target}
+                <input autoComplete="off" id="goal-target" type="text" inputMode="numeric" placeholder="$ 0" value={target}
                        onChange={(e) => setTarget(formatAmountInput(e.target.value))} className={`${inputClass} font-bold`} required />
               </div>
               <div>
@@ -141,7 +141,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
                 {linkedInv ? (
                   <div className={`${inputClass} text-text-secondary`}>{formatCurrency(Math.round(investmentValue(linkedInv).value), 'COP')}</div>
                 ) : (
-                  <input id="goal-saved" type="text" inputMode="numeric" placeholder="$ 0" value={saved}
+                  <input autoComplete="off" id="goal-saved" type="text" inputMode="numeric" placeholder="$ 0" value={saved}
                          onChange={(e) => setSaved(formatAmountInput(e.target.value))} className={inputClass} />
                 )}
               </div>
@@ -179,7 +179,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
             <div>
               <label htmlFor="goal-deadline" className={labelClass}>¿Para cuándo la quieres? (opcional)</label>
               <div className="flex gap-2">
-                <input id="goal-deadline" type="month" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
+                <input autoComplete="off" id="goal-deadline" type="month" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
                 {deadline && (
                   <button type="button" onClick={() => setDeadline('')} className={`shrink-0 px-3 text-xs border ${isTechTheme ? 'rounded-none border-accent/30 text-accent' : 'rounded-xl border-glass-border text-text-secondary'}`}>
                     Quitar

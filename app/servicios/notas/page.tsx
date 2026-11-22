@@ -59,7 +59,7 @@ export default function NotasPage() {
         {notes.length > 0 && (
           <div className={`flex items-center gap-3 px-4 py-3 mb-6 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-2xl'}`}>
             <Search className="w-5 h-5 text-text-muted" />
-            <input 
+            <input autoComplete="off" 
               type="text" 
               placeholder="Buscar en tus notas..." 
               value={search}

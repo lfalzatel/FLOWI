@@ -480,7 +480,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
 
                         {editingCategory === subcatName ? (
                           <div className="flex items-center gap-1">
-                            <input 
+                            <input autoComplete="off" 
                               type="number"
                               placeholder="Meta $"
                               value={tempBudgetVal}

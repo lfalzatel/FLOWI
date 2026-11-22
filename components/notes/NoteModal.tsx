@@ -181,7 +181,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-            <input
+            <input autoComplete="off"
               type="text"
               placeholder="Título"
               value={title}

@@ -183,7 +183,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
         <div className="px-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-            <input
+            <input autoComplete="off"
               type="text"
               enterKeyHint="search"
               ref={searchRef}

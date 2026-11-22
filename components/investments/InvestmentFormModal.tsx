@@ -316,12 +316,12 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="inv-amount" className={labelClass}>Monto invertido</label>
-                <input id="inv-amount" type="text" inputMode="numeric" placeholder="$ 0" value={amount}
+                <input autoComplete="off" id="inv-amount" type="text" inputMode="numeric" placeholder="$ 0" value={amount}
                        onChange={(e) => setAmount(formatAmountInput(e.target.value))} className={`${inputClass} font-bold`} required />
               </div>
               <div>
                 <label htmlFor="inv-rate" className={labelClass}>Tasa E.A. (%)</label>
-                <input id="inv-rate" type="text" inputMode="decimal" placeholder="9,9" value={rate}
+                <input autoComplete="off" id="inv-rate" type="text" inputMode="decimal" placeholder="9,9" value={rate}
                        onChange={(e) => setRate(e.target.value.replace(/[^\d.,]/g, ''))} className={`${inputClass} font-bold`} required />
               </div>
             </div>
@@ -329,11 +329,11 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="inv-start" className={labelClass}>{renewing ? 'Se renueva el' : 'Fecha de apertura'}</label>
-                <input id="inv-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} required />
+                <input autoComplete="off" id="inv-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} required />
               </div>
               <div>
                 <label htmlFor="inv-end" className={labelClass}>Vence el</label>
-                <input id="inv-end" type="date" value={maturity} min={start} onChange={(e) => setMaturity(e.target.value)} className={inputClass} required />
+                <input autoComplete="off" id="inv-end" type="date" value={maturity} min={start} onChange={(e) => setMaturity(e.target.value)} className={inputClass} required />
               </div>
             </div>
             <div className="grid grid-cols-4 gap-1.5 -mt-3">
@@ -376,7 +376,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
               <div className="space-y-5">
             <div>
                   <label htmlFor="inv-bank-interest" className={labelClass}>Intereses del periodo según el banco (opcional)</label>
-                  <input id="inv-bank-interest" type="text" inputMode="numeric" placeholder="$ 0" value={bankInterest}
+                  <input autoComplete="off" id="inv-bank-interest" type="text" inputMode="numeric" placeholder="$ 0" value={bankInterest}
                          onChange={(e) => setBankInterest(formatAmountInput(e.target.value))} className={inputClass} />
                   <p className={hint}>Si el banco te muestra la cifra exacta, ponla aquí y uso esa en vez del cálculo.</p>
                 </div>
@@ -384,12 +384,12 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="inv-nominal" className={labelClass}>Tasa nominal (opcional)</label>
-                    <input id="inv-nominal" type="text" inputMode="decimal" placeholder="9,61" value={nominal}
+                    <input autoComplete="off" id="inv-nominal" type="text" inputMode="decimal" placeholder="9,61" value={nominal}
                            onChange={(e) => setNominal(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
                   </div>
                   <div>
                     <label htmlFor="inv-wh" className={labelClass}>Retención (%)</label>
-                    <input id="inv-wh" type="text" inputMode="decimal" value={withholding}
+                    <input autoComplete="off" id="inv-wh" type="text" inputMode="decimal" value={withholding}
                            onChange={(e) => setWithholding(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
                   </div>
                 </div>
@@ -401,7 +401,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
 
                 <div>
                   <label htmlFor="inv-note" className={labelClass}>Nota (opcional)</label>
-                  <input id="inv-note" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)}
+                  <input autoComplete="off" id="inv-note" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)}
                          placeholder="Ej: para la prima del carro" className={inputClass} />
                   <p className={hint}>No escribas números de CDT ni de cuenta: FLOWI no los necesita.</p>
                 </div>

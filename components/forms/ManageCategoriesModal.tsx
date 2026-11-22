@@ -279,7 +279,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                 {/* Buscador */}
                 <div className="flex-1 min-w-0 md:w-[35%] md:flex-none relative flex items-center">
                   <Search className={`w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-2.5 pointer-events-none ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />
-                  <input
+                  <input autoComplete="off"
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -516,7 +516,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                 <label className={`block text-xs font-semibold mb-2 uppercase tracking-wider ${isTechTheme ? 'text-accent' : 'text-white/70'}`}>
                   Nombre de la Categoría
                 </label>
-                <input
+                <input autoComplete="off"
                   type="text"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}

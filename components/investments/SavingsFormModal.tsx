@@ -338,26 +338,26 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
 
           <div>
             <label htmlFor="sv-note" className={lbl}>Nombre (opcional)</label>
-            <input id="sv-note" value={note} maxLength={40} onChange={(e) => setNote(e.target.value)} className={input}
+            <input autoComplete="off" id="sv-note" value={note} maxLength={40} onChange={(e) => setNote(e.target.value)} className={input}
                    placeholder={isSavings ? 'Ej: Cajita viaje, fondo de emergencia' : kind === 'fondo' ? 'Ej: Acciones Ecopetrol, ETF' : 'Ej: Pensión voluntaria'} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="sv-amount" className={lbl}>{isSavings ? (investment ? 'Saldo inicial' : 'Saldo de hoy') : isFund ? 'Lo que has depositado' : 'Lo que has invertido'}</label>
-              <input id="sv-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount}
+              <input autoComplete="off" id="sv-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount}
                      onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${input} font-bold`} />
             </div>
             {isSavings ? (
               <div>
                 <label htmlFor="sv-rate" className={lbl}>Tasa E.A. (%)</label>
-                <input id="sv-rate" type="text" inputMode="decimal" placeholder="9,25" value={rate}
+                <input autoComplete="off" id="sv-rate" type="text" inputMode="decimal" placeholder="9,25" value={rate}
                        onChange={(e) => setRate(e.target.value.replace(/[^\d.,]/g, ''))} className={`${input} font-bold`} />
               </div>
             ) : (
               <div>
                 <label htmlFor="sv-current" className={lbl}>{isFund ? 'Lo que vale hoy' : 'Valor actual'}</label>
-                <input id="sv-current" type="text" inputMode="decimal" placeholder="Igual al invertido" value={current}
+                <input autoComplete="off" id="sv-current" type="text" inputMode="decimal" placeholder="Igual al invertido" value={current}
                        onChange={(e) => setCurrent(formatMoneyInput(e.target.value))} className={input} />
               </div>
             )}
@@ -372,22 +372,22 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label htmlFor="sv-symbol" className={lbl}>Símbolo</label>
-                <input id="sv-symbol" value={symbol} maxLength={12} onChange={(e) => setSymbol(e.target.value.toUpperCase())} className={input} placeholder="CELSIA" />
+                <input autoComplete="off" id="sv-symbol" value={symbol} maxLength={12} onChange={(e) => setSymbol(e.target.value.toUpperCase())} className={input} placeholder="CELSIA" />
               </div>
               <div>
                 <label htmlFor="sv-units" className={lbl}>N.º acciones</label>
-                <input id="sv-units" type="text" inputMode="decimal" value={units} onChange={(e) => setUnits(e.target.value.replace(/[^\d.,]/g, ''))} className={input} placeholder="14" />
+                <input autoComplete="off" id="sv-units" type="text" inputMode="decimal" value={units} onChange={(e) => setUnits(e.target.value.replace(/[^\d.,]/g, ''))} className={input} placeholder="14" />
               </div>
               <div>
                 <label htmlFor="sv-div" className={lbl}>Dividendos</label>
-                <input id="sv-div" type="text" inputMode="decimal" value={dividends} onChange={(e) => setDividends(formatMoneyInput(e.target.value))} className={input} placeholder="$ 0" />
+                <input autoComplete="off" id="sv-div" type="text" inputMode="decimal" value={dividends} onChange={(e) => setDividends(formatMoneyInput(e.target.value))} className={input} placeholder="$ 0" />
               </div>
             </div>
           )}
           {isFund && !isStock && (
             <div>
               <label htmlFor="sv-yr" className={lbl}>Rentabilidad último año (%) · opcional</label>
-              <input id="sv-yr" type="text" inputMode="decimal" value={yearReturn} onChange={(e) => setYearReturn(e.target.value.replace(/[^\d.,-]/g, ''))} className={input} placeholder="26,22" />
+              <input autoComplete="off" id="sv-yr" type="text" inputMode="decimal" value={yearReturn} onChange={(e) => setYearReturn(e.target.value.replace(/[^\d.,-]/g, ''))} className={input} placeholder="26,22" />
               <p className={hint}>Solo para que la recuerdes; la ganancia se calcula con el valor de hoy.</p>
             </div>
           )}

@@ -695,9 +695,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                       ))}
                     </div>
                     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-                      <input id="tx-date" type="date" aria-label="Fecha" value={date} onChange={(e) => { setDate(e.target.value); if (e.target.value) setShowDate(false); }} required
+                      <input autoComplete="off" id="tx-date" type="date" aria-label="Fecha" value={date} onChange={(e) => { setDate(e.target.value); if (e.target.value) setShowDate(false); }} required
                              className={`w-full bg-glass border py-2.5 px-3 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
-                      <input id="tx-time" type="time" aria-label="Hora" value={time} onChange={(e) => setTime(e.target.value)} onBlur={() => setShowDate(false)} required
+                      <input autoComplete="off" id="tx-time" type="time" aria-label="Hora" value={time} onChange={(e) => setTime(e.target.value)} onBlur={() => setShowDate(false)} required
                              className={`w-[8.5rem] bg-glass border py-2.5 px-2.5 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
                     </div>
                   </div>
@@ -893,7 +893,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   </button>
                 )}
                 {isTypingMerchant ? (
-                  <input
+                  <input autoComplete="off"
                     autoFocus
                     value={merchantDraft}
                     onChange={(e) => setMerchantDraft(e.target.value)}

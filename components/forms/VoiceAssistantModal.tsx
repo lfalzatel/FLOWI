@@ -943,7 +943,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Hora</label>
-                              <input
+                              <input autoComplete="off"
                                 type="time"
                                 value={cmd.time || '08:00'}
                                 onFocus={() => stopListening()}
@@ -955,7 +955,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             </div>
                             <div>
                               <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Fecha</label>
-                              <input
+                              <input autoComplete="off"
                                 type="date"
                                 value={cmd.dueDate || ''}
                                 onFocus={() => stopListening()}
@@ -970,7 +970,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           {/* Detalle */}
                           <div>
                             <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Título / Recordar</label>
-                            <input
+                            <input autoComplete="off"
                               type="text"
                               value={cmd.content || ''}
                               onFocus={() => stopListening()}
@@ -992,7 +992,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           {/* Título de la Nota */}
                           <div>
                             <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Título de la Nota</label>
-                            <input
+                            <input autoComplete="off"
                               type="text"
                               value={cmd.title || ''}
                               onFocus={() => stopListening()}
@@ -1094,7 +1094,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Monto</label>
                             <div className="relative flex items-center">
                               <span className="absolute left-2 text-xs font-bold text-accent">$</span>
-                              <input 
+                              <input autoComplete="off" 
                                 type="number"
                                 value={res.amount || ''}
                                 onFocus={() => stopListening()}
@@ -1129,7 +1129,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
                         <div>
                           <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Descripción / Concepto</label>
-                          <input 
+                          <input autoComplete="off" 
                             type="text"
                             value={res.description}
                             onFocus={() => stopListening()}
@@ -1151,7 +1151,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 {days > 0 ? ` (hace ${days} ${days === 1 ? 'día' : 'días'})` : ''}{receiptStatus === 'done' && readKind === 'recibo' ? ', la que dice el recibo.' : '.'}
                               </p>
                               <div className="flex items-center gap-2">
-                                <input type="date" value={res.date} max={today}
+                                <input autoComplete="off" type="date" value={res.date} max={today}
                                        onChange={(e) => { if (e.target.value) { handleUpdateItem(idx, 'date', e.target.value); handleUpdateItem(idx, 'time', undefined); } }}
                                        aria-label="Cambiar la fecha"
                                        className={`flex-1 min-w-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
@@ -1285,7 +1285,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           {/* Buscador de Categorías */}
           <div className="relative mb-4">
             <Search className={`w-4 h-4 absolute left-3 top-3 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
-            <input
+            <input autoComplete="off"
               type="text"
               placeholder="Buscar categoría..."
               value={categorySearch}

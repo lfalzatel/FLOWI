@@ -101,14 +101,14 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
         {draft.people.map((p, i) => (
           <div key={i} className="space-y-1">
             <div className="flex items-center gap-2">
-              <input value={p.name} placeholder={draft.paidByMe ? `Persona ${i + 1}` : 'Nombre de quien pagó'}
+              <input autoComplete="off" value={p.name} placeholder={draft.paidByMe ? `Persona ${i + 1}` : 'Nombre de quien pagó'}
                      onFocus={() => setFocusIdx(i)} onBlur={() => setTimeout(() => setFocusIdx(f => (f === i ? null : f)), 150)}
                      onChange={e => setPerson(i, { name: e.target.value })}
                      className={`${input} flex-1 min-w-0`} aria-label={`Nombre de la persona ${i + 1}`} />
               {draft.paidByMe && (draft.equal ? (
                 <span className="w-24 text-right text-sm font-semibold text-text-secondary shrink-0">{fmt(amounts[i] || 0)}</span>
               ) : (
-                <input value={p.amount} inputMode="decimal" placeholder="0"
+                <input autoComplete="off" value={p.amount} inputMode="decimal" placeholder="0"
                        onChange={e => setPerson(i, { amount: e.target.value.replace(cents ? /[^0-9.,]/g : /[^0-9]/g, '') })}
                        className={`${input} w-24 text-right shrink-0`} aria-label={`Monto de ${p.name || `la persona ${i + 1}`}`} />
               ))}

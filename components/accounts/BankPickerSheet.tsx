@@ -91,7 +91,7 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-            <input ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar banco o medio de pago…"
+            <input autoComplete="off" ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar banco o medio de pago…"
                    className={`w-full pl-9 pr-3 py-2.5 text-sm bg-glass border text-text-primary placeholder-text-muted focus:outline-none ${isTech ? 'rounded-none border-accent/30 focus:border-accent' : 'rounded-xl border-glass-border focus:border-accent'}`} />
           </div>
         </div>

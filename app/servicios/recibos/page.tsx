@@ -66,7 +66,7 @@ export default function RecibosPage() {
 
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar por tienda o producto…" aria-label="Buscar recibos"
+          <input autoComplete="off" value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar por tienda o producto…" aria-label="Buscar recibos"
                  className={`w-full bg-glass border border-glass-border py-3 pl-10 pr-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent ${isTech ? 'rounded-none' : 'rounded-xl'}`} />
         </div>
 

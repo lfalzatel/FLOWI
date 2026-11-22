@@ -128,22 +128,22 @@ export function ReceiptItemsList({
                   <div className="space-y-1.5 p-2 -mx-1 bg-accent/5 border border-accent/30 rounded-lg">
                     <div>
                       <label className={lbl}>Producto</label>
-                      <input className={field} value={it.name} onChange={e => update(k, { name: e.target.value.slice(0, 50) })} />
+                      <input autoComplete="off" className={field} value={it.name} onChange={e => update(k, { name: e.target.value.slice(0, 50) })} />
                     </div>
                     <div className="grid grid-cols-3 gap-1.5">
                       <div>
                         <label className={lbl}>Cantidad{it.unit ? ` (${it.unit})` : ''}</label>
-                        <input className={field} inputMode="decimal" defaultValue={String(it.qty).replace('.', ',')}
+                        <input autoComplete="off" className={field} inputMode="decimal" defaultValue={String(it.qty).replace('.', ',')}
                                onChange={e => { const q = toNum(e.target.value); if (q > 0) update(k, { qty: Math.round(q * 1000) / 1000 }); }} />
                       </div>
                       <div>
                         <label className={lbl}>Precio c/u</label>
-                        <input className={field} inputMode="numeric" value={pesosText(it.price)} placeholder="—"
+                        <input autoComplete="off" className={field} inputMode="numeric" value={pesosText(it.price)} placeholder="—"
                                onChange={e => update(k, { price: toPesos(e.target.value) || undefined })} />
                       </div>
                       <div>
                         <label className={lbl}>Total</label>
-                        <input className={field} inputMode="numeric" value={pesosText(it.total)}
+                        <input autoComplete="off" className={field} inputMode="numeric" value={pesosText(it.total)}
                                onChange={e => update(k, { total: toPesos(e.target.value) })} />
                       </div>
                     </div>
@@ -186,17 +186,17 @@ export function ReceiptItemsList({
             <div className={`mt-1.5 p-2 border border-dashed border-accent/40 space-y-1.5 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
               <div>
                 <label className={lbl}>Producto</label>
-                <input ref={nameRef} className={field} placeholder="Ej. Arroz Diana" value={draft.name} enterKeyHint="next"
+                <input autoComplete="off" ref={nameRef} className={field} placeholder="Ej. Arroz Diana" value={draft.name} enterKeyHint="next"
                        onChange={e => { setDraft(d => ({ ...d, name: e.target.value })); setDraftCat(null); }} onKeyDown={onEnter} />
               </div>
               <div className="flex items-end gap-1.5">
                 <div className="w-16 shrink-0">
                   <label className={lbl}>Cant.</label>
-                  <input className={field} inputMode="decimal" value={draft.qty} onChange={e => setDraft(d => ({ ...d, qty: e.target.value }))} onKeyDown={onEnter} />
+                  <input autoComplete="off" className={field} inputMode="decimal" value={draft.qty} onChange={e => setDraft(d => ({ ...d, qty: e.target.value }))} onKeyDown={onEnter} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <label className={lbl}>Precio c/u</label>
-                  <input className={field} inputMode="numeric" placeholder="$" value={draft.price ? toPesos(draft.price).toLocaleString(currentLocale()) : ''} enterKeyHint="done"
+                  <input autoComplete="off" className={field} inputMode="numeric" placeholder="$" value={draft.price ? toPesos(draft.price).toLocaleString(currentLocale()) : ''} enterKeyHint="done"
                          onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} onKeyDown={onEnter} />
                 </div>
                 <button type="button" onClick={addDraft} aria-label="Agregar producto"

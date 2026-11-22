@@ -394,7 +394,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
         <button type="button" onClick={() => { setInsuranceMode('pct'); setInsurance(''); }} className={chip(insuranceMode === 'pct')}>% del saldo</button>
         <button type="button" onClick={() => { setInsuranceMode('fijo'); setInsurance(''); }} className={chip(insuranceMode === 'fijo')}>Valor fijo al mes</button>
       </div>
-      <input type="text" inputMode="decimal" value={insurance}
+      <input autoComplete="off" type="text" inputMode="decimal" value={insurance}
              onChange={(e) => setInsurance(insuranceMode === 'pct' ? e.target.value.replace(/[^0-9.,]/g, '').slice(0, 6) : onlyNum(e.target.value))}
              className={inputCls}
              placeholder={insuranceMode === 'va' ? 'Ej. 233 (lo que muestra el banco hoy)' : insuranceMode === 'pct' ? 'Ej. 0,143 (% mensual)' : 'Valor al mes, ej. 1000'} />
@@ -539,7 +539,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           {/* Quién / nombre */}
           <div className={editCls}>
             <label className={labelCls}>{who}</label>
-            <input type="text" required disabled={isReadOnly} value={title} onChange={(e) => setTitle(e.target.value)}
+            <input autoComplete="off" type="text" required disabled={isReadOnly} value={title} onChange={(e) => setTitle(e.target.value)}
                    className={inputCls} placeholder={whoPh} />
           </div>
 
@@ -547,14 +547,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           <div className={`grid grid-cols-2 gap-2 ${editCls}`}>
             <div className={compact ? 'col-span-2' : ''}>
               <label className={labelCls}>{isBank ? 'Valor desembolsado' : owedToMe ? '¿Cuánto le prestaste?' : '¿Cuánto te prestó?'}</label>
-              <input type="text" inputMode="decimal" required disabled={isReadOnly} value={totalAmount}
+              <input autoComplete="off" type="text" inputMode="decimal" required disabled={isReadOnly} value={totalAmount}
                      onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setTotalAmount(v); }}
                      className={inputCls} placeholder="0" />
             </div>
             {!compact && (
               <div>
                 <label className={labelCls}>{isBank ? 'Fecha de desembolso' : 'Fecha del préstamo'}</label>
-                <input type="date" required disabled={isReadOnly} value={debtDate} onChange={(e) => setDebtDate(e.target.value)} className={dateCls} />
+                <input autoComplete="off" type="date" required disabled={isReadOnly} value={debtDate} onChange={(e) => setDebtDate(e.target.value)} className={dateCls} />
               </div>
             )}
           </div>
@@ -565,7 +565,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               <label className={labelCls} title={isBank ? 'Tasa Efectiva Anual' : ''}>
                 {isBank ? 'Tasa Efectiva Anual (%)' : 'Interés (opcional)'}
               </label>
-              <input type="text" inputMode="decimal" disabled={isReadOnly} value={interestRate}
+              <input autoComplete="off" type="text" inputMode="decimal" disabled={isReadOnly} value={interestRate}
                      onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setInterestRate(v); }}
                      className={inputCls} placeholder={isBank ? 'Ej. 28,17' : rateUnit === 'mensual' ? 'Ej. 2' : 'Ej. 26,8'} />
               {!isBank && !isReadOnly && (
@@ -581,13 +581,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             {isBank ? (
               <div>
                 <label className={labelCls}>Plazo (meses)</label>
-                <input type="text" inputMode="numeric" disabled={isReadOnly} value={termMonths}
+                <input autoComplete="off" type="text" inputMode="numeric" disabled={isReadOnly} value={termMonths}
                        onChange={(e) => setTermMonths(onlyNum(e.target.value))} className={inputCls} placeholder="60" />
               </div>
             ) : (
               <div>
                 <label className={labelCls}>{owedToMe ? 'Ya te pagó' : 'Ya le pagaste'}</label>
-                <input type="text" inputMode="decimal" disabled={isReadOnly || !!debtToEdit} value={paidAmount}
+                <input autoComplete="off" type="text" inputMode="decimal" disabled={isReadOnly || !!debtToEdit} value={paidAmount}
                        onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setPaidAmount(v); }}
                        className={inputCls} placeholder="0" />
                 {!!debtToEdit && <p className={hint}>Los pagos se registran como abonos.</p>}
@@ -601,14 +601,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className={labelCls}>Día de pago</label>
-                  <input type="text" inputMode="numeric" value={paymentDay}
+                  <input autoComplete="off" type="text" inputMode="numeric" value={paymentDay}
                          onChange={(e) => setPaymentDay(onlyNum(e.target.value).slice(0, 2))} className={inputCls} placeholder="15" />
                   <p className={hint}>El día de la "Fecha próximo pago" del banco.</p>
                 </div>
                 {!debtToEdit ? (
                   <div>
                     <label className={labelCls}>Capital vigente</label>
-                    <input type="text" inputMode="decimal" value={capitalNow}
+                    <input autoComplete="off" type="text" inputMode="decimal" value={capitalNow}
                            onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setCapitalNow(v); }}
                            className={inputCls} placeholder={totalAmount || 'Igual al desembolsado'} />
                     <p className={hint}>Solo si ya le has pagado capital.</p>
@@ -616,7 +616,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 ) : (
                   <div>
                     <label className={labelCls}>Cuota mensual</label>
-                    <input type="text" inputMode="numeric" value={installment}
+                    <input autoComplete="off" type="text" inputMode="numeric" value={installment}
                            onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder="Opcional" />
                   </div>
                 )}
@@ -627,7 +627,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               {!debtToEdit && (
                 <div>
                   <label className={labelCls}>Cuota mensual</label>
-                  <input type="text" inputMode="numeric" value={installment}
+                  <input autoComplete="off" type="text" inputMode="numeric" value={installment}
                          onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder="La que te informó el banco (opcional)" />
                 </div>
               )}
@@ -665,15 +665,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                   <div className="grid grid-cols-3 gap-2">
                     <div>
                       <label className={labelCls}>Cuotas</label>
-                      <input type="text" inputMode="numeric" value={termMonths} onChange={(e) => setTermMonths(onlyNum(e.target.value))} className={inputCls} placeholder="6" />
+                      <input autoComplete="off" type="text" inputMode="numeric" value={termMonths} onChange={(e) => setTermMonths(onlyNum(e.target.value))} className={inputCls} placeholder="6" />
                     </div>
                     <div>
                       <label className={labelCls}>Día de pago</label>
-                      <input type="text" inputMode="numeric" value={paymentDay} onChange={(e) => setPaymentDay(onlyNum(e.target.value).slice(0, 2))} className={inputCls} placeholder="30" />
+                      <input autoComplete="off" type="text" inputMode="numeric" value={paymentDay} onChange={(e) => setPaymentDay(onlyNum(e.target.value).slice(0, 2))} className={inputCls} placeholder="30" />
                     </div>
                     <div>
                       <label className={labelCls}>Cuota</label>
-                      <input type="text" inputMode="numeric" value={installment} onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder={suggested ? String(suggested) : 'Valor'} />
+                      <input autoComplete="off" type="text" inputMode="numeric" value={installment} onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder={suggested ? String(suggested) : 'Valor'} />
                     </div>
                   </div>
                   <p className="text-[10px] text-text-muted leading-snug normal-case">
@@ -692,7 +692,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               <label htmlFor="debt-date" className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium`}>
                 {isBank ? 'Fecha de desembolso' : 'Fecha del préstamo'}
               </label>
-              <input id="debt-date" type="date" required value={debtDate} onChange={(e) => setDebtDate(e.target.value)}
+              <input autoComplete="off" id="debt-date" type="date" required value={debtDate} onChange={(e) => setDebtDate(e.target.value)}
                      className={`${dateCls} !w-auto !py-1.5 text-xs`} />
             </div>
           )}
@@ -739,13 +739,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             <div className={`order-2 p-4 border grid grid-cols-2 gap-3 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
               <div>
                 <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{owedToMe ? 'Abono recibido' : 'Registrar abono'}</label>
-                <input type="text" inputMode="decimal" value={abono}
+                <input autoComplete="off" type="text" inputMode="decimal" value={abono}
                        onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setAbono(v); }}
                        className={inputCls} placeholder="0" />
               </div>
               <div>
                 <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Fecha</label>
-                <input type="date" value={abonoDate} onChange={(e) => setAbonoDate(e.target.value)} className={dateCls} />
+                <input autoComplete="off" type="date" value={abonoDate} onChange={(e) => setAbonoDate(e.target.value)} className={dateCls} />
               </div>
             </div>
           )}

@@ -92,7 +92,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
               </label>
               <div className="relative">
                 <span className={`absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold ${isTechTheme ? 'text-accent/70' : 'text-text-secondary'}`}>$</span>
-                <input id="goal-move-amount" type="text" inputMode="numeric" placeholder="0" autoFocus value={amount}
+                <input autoComplete="off" id="goal-move-amount" type="text" inputMode="numeric" placeholder="0" autoFocus value={amount}
                        onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                        className={`w-full bg-glass border py-3 pl-10 pr-4 text-3xl font-bold text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
               </div>
@@ -112,7 +112,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
               </div>
             )}
 
-            <input type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)} placeholder="Nota (opcional): prima, quincena, CDT…"
+            <input autoComplete="off" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)} placeholder="Nota (opcional): prima, quincena, CDT…"
                    className={`w-full bg-glass border px-4 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-xl focus:border-accent'}`} />
 
             {error && <p className="text-xs text-[var(--red)]">{error}</p>}
