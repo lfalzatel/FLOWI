@@ -11,12 +11,13 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useInvestments } from '@/hooks/useInvestments';
 import { useDebts } from '@/hooks/useDebts';
+import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { AccountFormModal, AdjustBalanceModal, TransferModal } from '@/components/accounts/AccountModals';
 import { AccountIcon } from '@/components/accounts/AccountIcon';
-import { Account, Transfer, deleteAccount } from '@/lib/firestore';
+import { Account, Debt, Transfer, deleteAccount } from '@/lib/firestore';
 import { AccountState, KIND_LABEL, accountStates, netWorth } from '@/lib/accounts';
 import { businessMoneyByAccount } from '@/lib/business';
 import { formatCurrency } from '@/lib/format';
@@ -29,7 +30,7 @@ export default function CuentasPage() {
   const { accounts, transfers, loading, error } = useAccounts();
   const { transactions } = useExpenses();
   const { investments } = useInvestments();
-  const { debts } = useDebts();
+  const { debts, refresh: refreshDebts } = useDebts();
   const currency = profile?.currency || 'COP';
   // Las cuentas pueden tener centavos (como en la app del banco): se muestran solo si los hay
   const fmt = (n: number) => {
@@ -47,6 +48,7 @@ export default function CuentasPage() {
   const [transferFrom, setTransferFrom] = useState<string | null>(null);
   const [paying, setPaying] = useState<AccountState | null>(null);
   const [editingTransfer, setEditingTransfer] = useState<Transfer | null>(null);
+  const [openDebt, setOpenDebt] = useState<Debt | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -54,7 +56,7 @@ export default function CuentasPage() {
     if (!authLoading && !user) router.push('/login');
   }, [authLoading, user, router]);
 
-  const states = useMemo(() => accountStates(accounts, transactions, transfers, investments), [accounts, transactions, transfers, investments]);
+  const states = useMemo(() => accountStates(accounts, transactions, transfers, investments, debts), [accounts, transactions, transfers, investments, debts]);
   // Parte del saldo que es plata del negocio (ventas − costos por esa cuenta); el resto es personal
   const bizMap = useMemo(() => businessMoneyByAccount(accounts, transactions), [accounts, transactions]);
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
@@ -194,11 +196,25 @@ export default function CuentasPage() {
                         </div>
                       );
                     })()}
-                    {credit && states.length > 1 && (
-                      <button type="button" onClick={() => setPaying(st)} className={`mt-3 w-full ${ghost} py-2.5 text-sm !text-accent !border-accent/50`}>
-                        <HandCoins className="w-4 h-4" /> Abonar a la tarjeta
-                      </button>
-                    )}
+                    {credit && (() => {
+                      // Préstamos que viven en esta tarjeta: se abonan en la deuda (con sus intereses y cuotas)
+                      const linkedDebts = st.movements.filter(m => m.kind === 'debt').map(m => (m as { debt: Debt }).debt);
+                      const ownOwed = -st.balance - st.movements.filter(m => m.kind === 'debt').reduce((s, m) => s - m.amount, 0);
+                      return (
+                        <>
+                          {linkedDebts.map(d => (
+                            <button key={d.id} type="button" onClick={() => setOpenDebt(d)} className={`mt-3 w-full ${ghost} py-2.5 text-sm !text-accent !border-accent/50`}>
+                              <HandCoins className="w-4 h-4" /> Abonar a {d.title}
+                            </button>
+                          ))}
+                          {states.length > 1 && (!linkedDebts.length || ownOwed > 0) && (
+                            <button type="button" onClick={() => setPaying(st)} className={`mt-3 w-full ${ghost} py-2.5 text-sm !text-accent !border-accent/50`}>
+                              <HandCoins className="w-4 h-4" /> Abonar a la tarjeta
+                            </button>
+                          )}
+                        </>
+                      );
+                    })()}
 
                     {open && (
                       <div className={`mt-3 pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
@@ -210,6 +226,9 @@ export default function CuentasPage() {
                               {m.kind === 'base'
                                 ? <span className="text-text-muted"><AnimatedNumber value={m.amount} format={fmt} /></span>
                                 : <span className={m.amount >= 0 ? 'text-emerald-400 font-semibold' : 'text-text-primary'}>{m.amount >= 0 ? '+' : '−'}<AnimatedNumber value={Math.abs(m.amount)} format={fmt} /></span>}
+                              {m.kind === 'debt' && (
+                                <button type="button" onClick={() => setOpenDebt(m.debt)} aria-label="Ver la deuda" className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
+                              )}
                               {m.kind === 'transfer' && m.transfer.id && (
                                 <button type="button" onClick={() => setEditingTransfer(m.transfer)} aria-label="Editar transferencia" className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
                               )}
@@ -265,6 +284,7 @@ export default function CuentasPage() {
       )}
       {adjusting && <AdjustBalanceModal account={adjusting.account} current={adjusting.balance} currency={currency} onClose={() => setAdjusting(null)} />}
       {editingTransfer && <TransferModal accounts={accounts} editing={editingTransfer} currency={currency} onClose={() => setEditingTransfer(null)} />}
+      {openDebt && <AddDebtModal debtToEdit={openDebt} onClose={() => setOpenDebt(null)} onSuccess={() => refreshDebts()} />}
       {paying && <TransferModal accounts={accounts} payCard={paying.account.id} owed={Math.max(0, -paying.balance)} currency={currency} onClose={() => setPaying(null)} />}
       {transferFrom !== null && <TransferModal accounts={accounts} initialFrom={transferFrom || undefined} currency={currency} onClose={() => setTransferFrom(null)} />}
       <ConfirmDialog

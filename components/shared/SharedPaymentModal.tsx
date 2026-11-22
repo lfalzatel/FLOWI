@@ -10,6 +10,7 @@ import { formatCurrency, hasCents } from '@/lib/format';
 import { displayExpr, evalAmount } from '@/lib/amountExpr';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { paidOf, remainingOf, withAbsorbed, withPayment, withoutPayment } from '@/lib/shared';
+import { accountFor } from '@/lib/accounts';
 
 // Abono de un gasto compartido: lo que una persona te devuelve (o lo que tú le pagas) por partes,
 // con la cuenta donde entró la plata. Si alguien nunca paga, "Lo asumo yo" lo pasa a tus gastos.
@@ -90,6 +91,21 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
            )}>
       <div className={`p-3 border text-sm ${s.isTech ? 'rounded-none border-accent/30' : 'rounded-xl border-glass-border'}`}>
         <p className="text-text-primary font-semibold truncate">{what}</p>
+        {/* Detalles del gasto: cuándo, cuánto costó todo, con qué se pagó y con quién se compartió */}
+        {(() => {
+          const d = tx.date instanceof Date ? tx.date : (tx.date as any)?.toDate?.() ?? new Date();
+          const payAcc = accounts.find(a => a.id === accountFor(tx, accounts));
+          const others = shared.people.filter((_, i) => i !== index).map(p => p.name.split(/\s+/)[0]).filter(Boolean);
+          return (
+            <div className="text-[11px] text-text-muted mt-1 space-y-0.5">
+              <p>{d.toLocaleString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })} · {tx.category}</p>
+              <p>{toMe ? 'Pagaste' : `Pagó ${first}`} <b className="text-text-secondary">{fmt(shared.total)}</b>
+                {toMe && (payAcc || tx.paymentMethod) ? <> con <b className="text-text-secondary">{payAcc?.name || tx.paymentMethod}</b></> : null}</p>
+              {others.length > 0 && <p>También compartido con {others.join(', ')}</p>}
+              {tx.merchant && <p>Comercio: {tx.merchant}</p>}
+            </div>
+          );
+        })()}
         <p className="text-xs text-text-muted mt-0.5">
           {toMe ? `Le tocaba a ${first}` : `Le debías a ${first}`}: <b className="text-text-secondary">{fmt(person.amount)}</b>
           {paid > 0 && <> · abonado <b className="text-accent">{fmt(paid)}</b></>}

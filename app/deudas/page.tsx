@@ -213,7 +213,9 @@ export default function DeudasPage() {
           <ul className={`glass-card divide-y divide-glass-border px-3 ${isCyberpunk ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
             {sharedOpen.slice(0, 6).map(e => (
               <li key={`${e.tx.id}-${e.index}`} className="flex items-center gap-2 py-2">
-                <div className="flex-1 min-w-0">
+                <div role="button" tabIndex={0} onClick={() => setSharedPay({ tx: e.tx, index: e.index })}
+                     onKeyDown={ev => { if (ev.key === 'Enter') setSharedPay({ tx: e.tx, index: e.index }); }}
+                     className="flex-1 min-w-0 cursor-pointer">
                   <p className="text-xs text-text-primary truncate">{e.toMe ? tr('{p} te debe', { p: e.name.split(/\s+/)[0] }) : tr('Le debes a {p}', { p: e.name.split(/\s+/)[0] })} · {e.tx.description?.trim() || tr(e.tx.category)}</p>
                   <p className="text-[10px] text-text-muted">
                     {e.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}

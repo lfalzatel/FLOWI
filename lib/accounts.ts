@@ -26,6 +26,7 @@ export type Movement =
   | { kind: 'tx'; date: Date; amount: number; label: string; tx: Transaction }
   | { kind: 'transfer'; date: Date; amount: number; label: string; transfer: Transfer }
   | { kind: 'cdt'; date: Date; amount: number; label: string }
+  | { kind: 'debt'; date: Date; amount: number; label: string; debt: Debt }
   | { kind: 'base'; date: Date; amount: number; label: string };
 
 export interface AccountState {
@@ -47,7 +48,7 @@ export function accountFor(tx: Transaction, accounts: Account[]): string | null 
   return main ? main.id! : null;
 }
 
-export function accountStates(accounts: Account[], transactions: Transaction[], transfers: Transfer[], investments: Investment[] = []): AccountState[] {
+export function accountStates(accounts: Account[], transactions: Transaction[], transfers: Transfer[], investments: Investment[] = [], debts: Debt[] = []): AccountState[] {
   const states = new Map<string, AccountState>();
   for (const a of accounts) {
     if (!a.id || a.archived) continue;
@@ -99,6 +100,17 @@ export function accountStates(accounts: Account[], transactions: Transaction[], 
     for (const f of inv.fundings || []) cdtMove(f, -1, inv);
     for (const f of inv.payouts || []) cdtMove(f, 1, inv);
   }
+  // Préstamo vinculado a una tarjeta de crédito (p. ej. un avance o crédito de Crediágil): lo que se debe
+  // hoy (capital + intereses y seguro causados) ocupa cupo de esa tarjeta. Los abonos a la deuda lo bajan.
+  for (const d of debts) {
+    const st = d.accountId ? states.get(d.accountId) : undefined;
+    if (!st || st.account.kind !== 'credito' || !isLinkedCardDebt(d)) continue;
+    const owed = debtOwedNow(d);
+    if (owed <= 0) continue;
+    st.balance -= owed;
+    const date = d.createdAt instanceof Date ? d.createdAt : new Date();
+    st.movements.push({ kind: 'debt', date, amount: -owed, label: `${d.title} (préstamo, a hoy)`, debt: d });
+  }
 
   const order: AccountKind[] = ['banco', 'billetera', 'efectivo', 'credito'];
   return Array.from(states.values())
@@ -117,7 +129,16 @@ export interface NetWorth {
   total: number;
 }
 
+/** Deuda que yo debo, pendiente, que puede vivir en una tarjeta. */
+const isLinkedCardDebt = (d: Debt) => d.status === 'pending' && d.direction !== 'me_deben';
+/** Lo que se debe hoy de una deuda: capital que falta + intereses y seguro causados. */
+export function debtOwedNow(d: Debt, now = new Date()): number {
+  return Math.max(0, d.totalAmount - d.paidAmount) + calculateDebtInterest(d, now).accumulatedInterest;
+}
+
 export function netWorth(states: AccountState[], investments: Investment[], debts: Debt[], now = new Date()): NetWorth {
+  // Las deudas vinculadas a una tarjeta ya están dentro del saldo de la tarjeta: no se cuentan dos veces
+  const cardIds = new Set(states.filter(s => s.account.kind === 'credito').map(s => s.account.id));
   let accounts = 0, cards = 0;
   for (const s of states) {
     if (s.balance >= 0) accounts += s.balance;
@@ -129,7 +150,8 @@ export function netWorth(states: AccountState[], investments: Investment[], debt
   let owedToMe = 0, owed = 0;
   for (const d of debts) {
     if (d.status !== 'pending') continue;
-    const left = Math.max(0, d.totalAmount - d.paidAmount) + calculateDebtInterest(d, now).accumulatedInterest;
+    if (isLinkedCardDebt(d) && d.accountId && cardIds.has(d.accountId)) continue;
+    const left = debtOwedNow(d, now);
     if (d.direction === 'me_deben') owedToMe += left;
     else owed += left;
   }

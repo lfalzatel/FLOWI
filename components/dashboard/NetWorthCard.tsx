@@ -19,7 +19,7 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
   const { accounts, transfers, loading, error } = useAccounts();
   const { investments } = useInvestments();
   const { debts } = useDebts();
-  const states = useMemo(() => accountStates(accounts, transactions, transfers, investments), [accounts, transactions, transfers, investments]);
+  const states = useMemo(() => accountStates(accounts, transactions, transfers, investments, debts), [accounts, transactions, transfers, investments, debts]);
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
   if (loading || error || !states.length) return null;
   const fmt = (n: number) => formatCurrency(n, currency);
