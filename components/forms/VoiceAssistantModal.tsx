@@ -1172,11 +1172,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 <input autoComplete="off" type="time" value={res.time || '12:00'}
                                        onChange={(e) => handleUpdateItem(idx, 'time', e.target.value || undefined)}
                                        aria-label="Cambiar la hora"
-                                       className={`w-[5.5rem] shrink-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
-                                <button type="button" onClick={() => { handleUpdateItem(idx, 'date', undefined); handleUpdateItem(idx, 'time', undefined); }}
-                                        className={`shrink-0 px-2.5 py-1 text-[11px] font-bold border border-amber-400/60 text-amber-300 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
-                                  Usar hoy
-                                </button>
+                                       className={`flex-1 min-w-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
                               </div>
                             </div>
                           );

@@ -342,6 +342,18 @@ async function shrinkImage(file: File): Promise<string> {
 }
 
 // "382.939" leído como 382,939 (el punto era de miles): con exactamente 3 decimales, en pesos son miles
+// Hora impresa en el recibo o comprobante, en 24 horas ("10:37 p.m." → 22:37). Solo si es válida y no está en el futuro.
+function printedTime(raw: unknown, date?: string): string | undefined {
+  const tm = typeof raw === 'string' ? raw.trim().match(/^(\d{1,2}):(\d{2})\s*([ap])?\.?\s*m?/i) : null;
+  if (!tm || Number(tm[1]) > 23 || Number(tm[2]) > 59) return undefined;
+  let h = Number(tm[1]);
+  if (tm[3]?.toLowerCase() === 'p' && h < 12) h += 12;
+  if (tm[3]?.toLowerCase() === 'a' && h === 12) h = 0;
+  const hhmm = `${String(h).padStart(2, '0')}:${tm[2]}`;
+  const day = date || new Date().toLocaleDateString('en-CA');
+  return new Date(`${day}T${hhmm}:00`) <= new Date() ? hhmm : undefined;
+}
+
 export function pesosFix(n: number): number {
   if (!Number.isFinite(n) || n <= 0 || n >= 1000) return n;
   const k = Math.round(n * 1000);
@@ -354,7 +366,7 @@ function receiptPrompt(customLabels: string[]) {
 (B) una captura de la app de un banco o billetera (Bancolombia, Nequi, Daviplata, BBVA...) con una LISTA DE MOVIMIENTOS.
 Responde SOLO con un JSON.
 Si es (A): {"kind":"recibo","total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró","items":[{"name":"producto como aparece","qty":cantidad,"unit":"kg o null","price":precio_unitario,"total":total_del_renglon,"category":"..."}]}
-Si es (B): {"kind":"movimientos","bank":"banco o billetera o null","movimientos":[{"type":"ingreso"|"gasto","amount":numero_en_pesos,"date":"YYYY-MM-DD o null","description":"texto corto y claro (ej. Transferencia de Luis Felipe, Cuota de manejo tarjeta débito)","category":"..."}]}
+Si es (B): {"kind":"movimientos","bank":"banco o billetera o null","movimientos":[{"type":"ingreso"|"gasto","amount":numero_en_pesos,"date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","description":"texto corto y claro (ej. Transferencia de Luis Felipe, Cuota de manejo tarjeta débito)","category":"..."}]}
 Reglas:
 - En (A), "total" es el TOTAL A PAGAR (no el subtotal, ni el IVA, ni el cambio).
 - Los bancos muestran las salidas de plata con signo menos ("$ -382.939,00"): los valores siempre van POSITIVOS. ",00" al final son centavos: "$ -382.939,00" = 382939.
@@ -436,11 +448,13 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
         const type: 'gasto' | 'ingreso' = mv?.type === 'ingreso' ? 'ingreso' : 'gasto';
         const category = matchCategory(mv?.category, type, customLabels);
         const date = recentDate(mv?.date);
+        const time = printedTime(mv?.time, date);
         results.push({
           kind: 'transaction', type, amount: Math.round(amount), category,
           description: String(mv?.description || category).slice(0, 80),
           isFixed: type === 'gasto' && isFixedExpenseCategory(category), rawText: 'Movimientos del banco',
           ...(date ? { date } : {}),
+          ...(time ? { time } : {}),
         });
       }
       if (!results.length) return { ok: false, reason: 'unreadable' };
@@ -462,17 +476,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
       ...it, category: it.category ? matchCategory(it.category, 'gasto', customLabels) : category,
     })).map(it => (it.category === 'Otros' && category !== 'Otros' ? { ...it, category } : it));
     // Hora del recibo (solo si es válida y, si la compra es de hoy, no está en el futuro)
-    let time: string | undefined;
-    const tm = typeof parsed.time === 'string' ? parsed.time.match(/^(\d{1,2}):(\d{2})\s*([ap])?\.?\s*m?/i) : null;
-    if (tm && Number(tm[1]) < 24 && Number(tm[2]) < 60) {
-      // "10:37 p.m." → 22:37 (por si la IA no la pasa a 24 horas)
-      let h = Number(tm[1]);
-      if (tm[3]?.toLowerCase() === 'p' && h < 12) h += 12;
-      if (tm[3]?.toLowerCase() === 'a' && h === 12) h = 0;
-      const hhmm = `${String(h).padStart(2, '0')}:${tm[2]}`;
-      const day = date || new Date().toLocaleDateString('en-CA');
-      if (new Date(`${day}T${hhmm}:00`) <= new Date()) time = hhmm;
-    }
+    const time = printedTime(parsed.time, date);
     const result: ParsedVoiceResult = {
       kind: 'transaction', type: 'gasto', amount: Math.round(total), category,
       description: String(parsed.description || merchant || category).slice(0, 80),
