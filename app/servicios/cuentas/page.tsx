@@ -45,6 +45,7 @@ export default function CuentasPage() {
   const [deleting, setDeleting] = useState<Account | null>(null);
   const [adjusting, setAdjusting] = useState<AccountState | null>(null);
   const [transferFrom, setTransferFrom] = useState<string | null>(null);
+  const [paying, setPaying] = useState<AccountState | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -180,6 +181,24 @@ export default function CuentasPage() {
                       </div>
                     </button>
 
+                    {credit && (a.creditLimit || 0) > 0 && (() => {
+                      const used = Math.max(0, -st.balance);
+                      const pct = Math.min(100, (used / a.creditLimit!) * 100);
+                      return (
+                        <div className="mt-3">
+                          <p className="text-[11px] text-text-muted truncate">Disponible <span className={used > a.creditLimit! ? 'text-red-400 font-semibold' : 'text-text-primary font-semibold'}>{fmt(Math.max(0, a.creditLimit! - used))}</span> de {fmt(a.creditLimit!)}</p>
+                          <div className={`mt-1 h-1.5 bg-white/10 overflow-hidden ${isTech ? 'rounded-none' : 'rounded-full'}`}>
+                            <div className={`h-full ${pct >= 90 ? 'bg-red-400' : pct >= 70 ? 'bg-amber-400' : 'bg-accent'}`} style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    {credit && states.length > 1 && (
+                      <button type="button" onClick={() => setPaying(st)} className={`mt-3 w-full ${ghost} py-2.5 text-sm !text-accent !border-accent/50`}>
+                        <HandCoins className="w-4 h-4" /> Abonar a la tarjeta
+                      </button>
+                    )}
+
                     {open && (
                       <div className={`mt-3 pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
                         <ul className="space-y-1.5">
@@ -197,6 +216,25 @@ export default function CuentasPage() {
                           ))}
                         </ul>
                         {st.movements.length > shown.length && <p className="text-[10px] text-text-muted mt-1">y {st.movements.length - shown.length} movimientos más antiguos</p>}
+                        {credit && (() => {
+                          const abonos = st.movements.filter(m => m.kind === 'transfer' && m.amount > 0);
+                          if (!abonos.length) return null;
+                          const total = abonos.reduce((s, m) => s + m.amount, 0);
+                          return (
+                            <div className={`mt-3 pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
+                              <p className="text-xs font-semibold text-text-secondary mb-1.5">Abonos ({abonos.length}) · {fmt(total)}</p>
+                              <ul className="space-y-1">
+                                {abonos.map((m, i) => (
+                                  <li key={i} className="flex items-center gap-2 text-xs">
+                                    <span className="shrink-0 whitespace-nowrap text-text-muted">{m.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {m.date.toLocaleTimeString(currentLocale(), { hour: 'numeric', minute: '2-digit' })}</span>
+                                    <span className="flex-1 min-w-0 truncate text-text-secondary">{m.label.replace(/^Abono desde /, 'De ')}</span>
+                                    <span className="text-emerald-400 font-semibold">{fmt(m.amount)}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        })()}
                         <div className="mt-3 flex gap-2">
                           <button type="button" onClick={() => setAdjusting(st)} className={ghost}><Scale className="w-3.5 h-3.5" /> Ajustar saldo</button>
                           {states.length > 1 && <button type="button" onClick={() => setTransferFrom(a.id!)} className={ghost}><ArrowLeftRight className="w-3.5 h-3.5" /> Mover</button>}
@@ -224,6 +262,7 @@ export default function CuentasPage() {
                           onDelete={(a) => { setShowForm(false); setDeleting(a); }} />
       )}
       {adjusting && <AdjustBalanceModal account={adjusting.account} current={adjusting.balance} currency={currency} onClose={() => setAdjusting(null)} />}
+      {paying && <TransferModal accounts={accounts} payCard={paying.account.id} owed={Math.max(0, -paying.balance)} currency={currency} onClose={() => setPaying(null)} />}
       {transferFrom !== null && <TransferModal accounts={accounts} initialFrom={transferFrom || undefined} currency={currency} onClose={() => setTransferFrom(null)} />}
       <ConfirmDialog
         isOpen={!!deleting}

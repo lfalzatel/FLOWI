@@ -73,11 +73,12 @@ export function accountStates(accounts: Account[], transactions: Transaction[], 
     const to = states.get(tr.toId);
     if (from && date.getTime() >= new Date(from.account.baseAt).getTime()) {
       from.balance -= tr.amount;
-      from.movements.push({ kind: 'transfer', date, amount: -tr.amount, label: `A ${to?.account.name || 'otra cuenta'}`, transfer: tr });
+      const toCard = to?.account.kind === 'credito';
+      from.movements.push({ kind: 'transfer', date, amount: -tr.amount, label: `${toCard ? 'Abono a' : 'A'} ${to?.account.name || 'otra cuenta'}`, transfer: tr });
     }
     if (to && date.getTime() >= new Date(to.account.baseAt).getTime()) {
       to.balance += tr.amount;
-      to.movements.push({ kind: 'transfer', date, amount: tr.amount, label: `Desde ${from?.account.name || 'otra cuenta'}`, transfer: tr });
+      to.movements.push({ kind: 'transfer', date, amount: tr.amount, label: `${to.account.kind === 'credito' ? 'Abono desde' : 'Desde'} ${from?.account.name || 'otra cuenta'}`, transfer: tr });
     }
   }
   // CDT: lo que salió de una cuenta para abrirlo o abonarle, y lo que volvió al pagarlo

@@ -94,6 +94,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
   const [purpose, setPurpose] = useState<'gastar' | 'ahorro'>(account?.purpose || 'gastar');
   const [methodsSheet, setMethodsSheet] = useState(false);
   const [balance, setBalance] = useState('');
+  const [limit, setLimit] = useState(account?.creditLimit ? formatMoneyInput(account.creditLimit) : '');
   const [isDefault, setIsDefault] = useState(account ? !!account.isDefault : isFirst);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -124,7 +125,8 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
         await Promise.all(accounts.filter(a => a.isDefault && a.id && a.id !== account?.id).map(a => updateAccount(a.id!, { isDefault: false })));
       }
       if (account?.id) {
-        await updateAccount(account.id, { name: name.trim(), kind, methods: finalMethods, isDefault, purpose: kind === 'credito' ? 'gastar' : purpose });
+        await updateAccount(account.id, { name: name.trim(), kind, methods: finalMethods, isDefault, purpose: kind === 'credito' ? 'gastar' : purpose,
+          creditLimit: kind === 'credito' ? parseMoneyInput(limit) : 0 });
       } else {
         const amount = parseMoneyInput(balance);
         const id = await addAccount({
@@ -132,6 +134,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
           purpose: kind === 'credito' ? 'gastar' : purpose,
           baseBalance: kind === 'credito' ? -amount : amount,
           baseAt: new Date().toISOString(), adjustments: [], archived: false,
+          ...(kind === 'credito' && parseMoneyInput(limit) > 0 ? { creditLimit: parseMoneyInput(limit) } : {}),
         });
         onCreated?.(id);
       }
@@ -169,6 +172,15 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
           <input id="acc-balance" type="text" inputMode="decimal" placeholder="$ 0" value={balance}
                  onChange={(e) => setBalance(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>Míralo en la app del banco. Desde hoy, tus gastos e ingresos de esta cuenta lo van moviendo.</p>
+        </div>
+      )}
+
+      {kind === 'credito' && (
+        <div>
+          <label htmlFor="acc-limit" className={s.label}>Cupo de la tarjeta (opcional)</label>
+          <input id="acc-limit" type="text" inputMode="decimal" placeholder="$ 0" value={limit}
+                 onChange={(e) => setLimit(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
+          <p className={s.hint}>Con el cupo, FLOWI te muestra cuánto te queda disponible para usar.</p>
         </div>
       )}
 
@@ -276,14 +288,17 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
 }
 
 // ── Transferir entre mis cuentas ─────────────────────────────────────────
-export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose }: {
-  accounts: Account[]; initialFrom?: string; currency?: string; onClose: () => void;
+// Con payCard (id de una tarjeta de crédito) funciona como "Abonar a la tarjeta": la tarjeta queda fija como destino,
+// sale de la cuenta principal y la fecha es la de hoy con la hora del momento.
+export function TransferModal({ accounts, initialFrom, payCard, owed = 0, currency = 'COP', onClose }: {
+  accounts: Account[]; initialFrom?: string; payCard?: string; owed?: number; currency?: string; onClose: () => void;
 }) {
   const s = useStyles();
   const { user } = useAuth();
   const active = accounts.filter(a => !a.archived && a.id);
-  const [from, setFrom] = useState(initialFrom || active[0]?.id || '');
-  const [to, setTo] = useState(active.find(a => a.id !== (initialFrom || active[0]?.id))?.id || '');
+  const payFrom = payCard ? (active.find(a => a.isDefault && a.id !== payCard && a.kind !== 'credito') || active.find(a => a.id !== payCard && a.kind !== 'credito') || active.find(a => a.id !== payCard)) : undefined;
+  const [from, setFrom] = useState(payCard ? payFrom?.id || '' : initialFrom || active[0]?.id || '');
+  const [to, setTo] = useState(payCard || active.find(a => a.id !== (initialFrom || active[0]?.id))?.id || '');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getLocalDateString());
   const [note, setNote] = useState('');
@@ -300,7 +315,7 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
       const today = getLocalDateString();
       const [y, m, d] = date.split('-').map(Number);
       const when = date === today ? new Date() : new Date(y, m - 1, d, 12);
-      await addTransfer({ userId: user.uid, fromId: from, toId: to, amount: value, date: when.toISOString(), note: note.trim() });
+      await addTransfer({ userId: user.uid, fromId: from, toId: to, amount: value, date: when.toISOString(), note: note.trim() || (payCard ? 'Abono a la tarjeta' : '') });
       onClose();
     } catch (err) {
       console.error('Error saving transfer:', err);
@@ -325,13 +340,20 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
   };
 
   return (
-    <Shell title="Mover plata entre cuentas" onClose={onClose}
+    <Shell title={payCard ? `Abonar a ${toAcc?.name || 'la tarjeta'}` : 'Mover plata entre cuentas'} onClose={onClose}
            footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar'}</button>}>
       <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
         <div><span className={s.label}>Sale de</span>{accField(from, 'from')}</div>
-        <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label="Intercambiar"
-                className="mb-5 p-2 rounded-full text-accent hover:bg-accent/10"><ArrowRightLeft className="w-5 h-5" /></button>
-        <div><span className={s.label}>Llega a</span>{accField(to, 'to')}</div>
+        {payCard
+          ? <span className="mb-5 p-2 text-accent" aria-hidden="true"><ArrowRightLeft className="w-5 h-5" /></span>
+          : <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label="Intercambiar"
+                className="mb-5 p-2 rounded-full text-accent hover:bg-accent/10"><ArrowRightLeft className="w-5 h-5" /></button>}
+        <div><span className={s.label}>{payCard ? 'Abono a' : 'Llega a'}</span>{payCard
+          ? <div className={`w-full flex flex-col items-center gap-1.5 px-2 py-3 bg-glass border ${s.isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>
+              {toAcc && <AccountIcon account={toAcc} className="w-8 h-8 text-2xl flex items-center justify-center" />}
+              <span className="text-xs font-semibold truncate max-w-full text-text-primary">{toAcc?.name}</span>
+            </div>
+          : accField(to, 'to')}</div>
       </div>
       {choosing && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center">
@@ -359,7 +381,12 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="tr-amount" className={s.label}>Monto</label>
-          <input id="tr-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
+          <input id="tr-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus={!!payCard} />
+          {payCard && owed > 0 && (
+            <button type="button" onClick={() => setAmount(formatMoneyInput(Math.round(owed * 100) / 100))} className={`mt-1.5 ${s.chip(value === Math.round(owed * 100) / 100)}`}>
+              Todo: {formatCurrency(owed, currency)}
+            </button>
+          )}
         </div>
         <div>
           <label htmlFor="tr-date" className={s.label}>Fecha</label>
@@ -371,7 +398,9 @@ export function TransferModal({ accounts, initialFrom, currency = 'COP', onClose
         <input id="tr-note" type="text" value={note} maxLength={50} onChange={(e) => setNote(e.target.value)}
                placeholder={toAcc?.kind === 'credito' ? 'Pago de la tarjeta' : toAcc?.kind === 'efectivo' ? 'Retiro en cajero' : 'Ej: paso a Nequi'} className={s.input} />
       </div>
-      <p className="text-[11px] text-text-muted">No es un gasto ni un ingreso: la plata sigue siendo tuya, solo cambia de lugar{toAcc?.kind === 'credito' ? ' (pagar la tarjeta baja lo que debes en ella)' : ''}.</p>
+      <p className="text-[11px] text-text-muted">{payCard
+        ? 'El abono baja lo que debes en la tarjeta y descuenta la plata de la cuenta de donde sale. No es un gasto: las compras ya las registraste como gastos.'
+        : <>No es un gasto ni un ingreso: la plata sigue siendo tuya, solo cambia de lugar{toAcc?.kind === 'credito' ? ' (pagar la tarjeta baja lo que debes en ella)' : ''}.</>}</p>
       {active.length < 2 && <p className="text-xs text-amber-500">Necesitas al menos dos cuentas para mover plata entre ellas.</p>}
       {error && <p className="text-xs text-[var(--red)]">{error}</p>}
     </Shell>

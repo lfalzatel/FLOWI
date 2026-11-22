@@ -645,6 +645,7 @@ export interface Account {
   isDefault?: boolean;       // recibe los movimientos que no dicen con qué se pagaron
   purpose?: 'gastar' | 'ahorro'; // 'ahorro' no cuenta en "Hoy puedes gastar" (por defecto 'gastar')
   baseBalance: number;       // saldo en baseAt (en crédito: negativo = lo que se debe)
+  creditLimit?: number;      // solo tarjetas de crédito: cupo total
   baseAt: string;            // ISO
   adjustments?: { at: string; from: number; to: number }[];
   confirmedAt?: string;      // última vez que la persona confirmó que el saldo cuadra con el banco
