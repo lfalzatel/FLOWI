@@ -27,6 +27,8 @@ export function parseMoneyInput(value: string): number {
   return isNaN(n) ? 0 : Math.round(n * 100) / 100;
 }
 import { formatCurrency } from '@/lib/format';
+import { AmountKeypad } from '@/components/forms/AmountKeypad';
+import { displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { getLocalDateString } from '@/lib/dateUtils';
 
 // ── Piezas comunes ───────────────────────────────────────────────────────
@@ -299,7 +301,9 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
   const payFrom = payCard ? (active.find(a => a.isDefault && a.id !== payCard && a.kind !== 'credito') || active.find(a => a.id !== payCard && a.kind !== 'credito') || active.find(a => a.id !== payCard)) : undefined;
   const [from, setFrom] = useState(editing ? editing.fromId : payCard ? payFrom?.id || '' : initialFrom || active[0]?.id || '');
   const [to, setTo] = useState(editing ? editing.toId : payCard || active.find(a => a.id !== (initialFrom || active[0]?.id))?.id || '');
-  const [amount, setAmount] = useState(editing ? formatMoneyInput(editing.amount) : '');
+  // Monto con la calculadora (como en gastos): se guarda la cuenta escrita ("350000+20000") y se resuelve al guardar
+  const [amount, setAmount] = useState(editing ? String(editing.amount) : '');
+  const [showKeys, setShowKeys] = useState(!editing);
   const editDate = editing ? new Date(editing.date) : new Date();
   const [date, setDate] = useState(getLocalDateString(editDate));
   const [time, setTime] = useState(`${String(editDate.getHours()).padStart(2, '0')}:${String(editDate.getMinutes()).padStart(2, '0')}`);
@@ -308,7 +312,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
   const [note, setNote] = useState(editing?.note || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const value = parseMoneyInput(amount);
+  const value = Math.max(0, Math.round((evalAmount(amount) ?? 0) * 100) / 100);
   const canSave = !!from && !!to && from !== to && value > 0 && !saving;
   const toAcc = active.find(a => a.id === to);
 
@@ -387,12 +391,26 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
       )}
       <div className="space-y-3">
         <div>
-          <label htmlFor="tr-amount" className={s.label}>Monto</label>
-          <input id="tr-amount" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus={!!payCard} />
+          <span className={s.label}>Monto</span>
+          <button type="button" onClick={() => setShowKeys(v => !v)} aria-label="Monto"
+                  className={`${s.input} text-left text-xl font-bold tabular-nums ${showKeys ? '!border-accent' : ''}`}>
+            {amount ? `$ ${displayExpr(amount)}` : <span className="text-text-muted">$ 0</span>}
+            {hasOperator(amount) && <span className="ml-2 text-sm font-normal text-text-muted">= {formatCurrency(value, currency)}</span>}
+          </button>
           {payCard && owed > 0 && (
-            <button type="button" onClick={() => setAmount(formatMoneyInput(Math.round(owed * 100) / 100))} className={`mt-1.5 ${s.chip(value === Math.round(owed * 100) / 100)}`}>
-              Todo: {formatCurrency(owed, currency)}
-            </button>
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {[['Todo', Math.round(owed * 100) / 100], ['Mitad', Math.round(owed / 2)]].map(([label, v]) => (
+                <button key={label as string} type="button" onClick={() => setAmount(String(v))} className={s.chip(value === v)}>
+                  {label}: {formatCurrency(v as number, currency)}
+                </button>
+              ))}
+            </div>
+          )}
+          {showKeys && (
+            <div className="mt-2 -mx-3">
+              <AmountKeypad value={amount} isTech={s.isTech} nextLabel="Listo"
+                            onChange={setAmount} onNext={() => setShowKeys(false)} />
+            </div>
           )}
         </div>
         <div className="grid grid-cols-2 gap-3">
