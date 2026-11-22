@@ -41,3 +41,23 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
+
+// "Compartir con FLOWI" (share_target del manifest): el celular manda aquí la imagen o el texto con POST.
+// El sitio es estático, así que lo recibe el service worker: lo guarda en la caché "flowi-share" y abre
+// /gastos, donde la app lo toma (lib/shareInbox.ts) y abre el lector de fotos o el formulario.
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'POST' || url.origin !== self.location.origin || url.pathname !== '/compartir-recibo') return;
+  event.respondWith((async () => {
+    try {
+      const form = await event.request.formData();
+      const file = form.getAll('file').find(f => f && typeof f === 'object' && f.size > 0);
+      const text = [form.get('title'), form.get('text'), form.get('url')].filter(v => typeof v === 'string' && v.trim()).join('\n');
+      await caches.delete('flowi-share');
+      const cache = await caches.open('flowi-share');
+      if (file) await cache.put('/__shared-file', new Response(file, { headers: { 'Content-Type': file.type || 'image/jpeg' } }));
+      await cache.put('/__shared-meta', new Response(JSON.stringify({ at: Date.now(), text, name: file ? file.name : '', type: file ? file.type : '', hasFile: !!file }), { headers: { 'Content-Type': 'application/json' } }));
+    } catch (e) { /* si algo falla, igual se abre FLOWI */ }
+    return Response.redirect('/gastos?compartido=1', 303);
+  })());
+});

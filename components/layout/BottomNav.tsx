@@ -11,7 +11,9 @@ import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { AddDebtModal } from '@/components/forms/AddDebtModal';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { VoiceAssistantModal } from '@/components/forms/VoiceAssistantModal';
-import { ParsedVoiceResult } from '@/lib/voiceParser';
+import { ParsedVoiceResult, parseVoiceTransaction } from '@/lib/voiceParser';
+import { takeSharedInbox, amountFromBankText, descriptionFromBankText } from '@/lib/shareInbox';
+import { getAiKey } from '@/lib/aiAssist';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { NoteModal } from '@/components/notes/NoteModal';
@@ -42,7 +44,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [quick, setQuick] = useState<Exclude<QuickAction, 'voz' | 'extracto'> | null>(null);
   const [receipt, setReceipt] = useState<File | 'no-key' | null>(null);
   const router = useRouter();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   // Mantener presionado = hablar directo (como antes)
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressed = useRef(false);
@@ -60,6 +62,26 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [investKind, setInvestKind] = useState<InvestmentKind | null>(null);
   const [debtFiles, setDebtFiles] = useState<File[] | null>(null);
   const closeQuick = () => { setQuick(null); setInvestKind(null); setDebtFiles(null); };
+  // Lo que llegó por "Compartir con FLOWI" (imagen de un recibo o comprobante, o texto del banco)
+  // Solo con la sesión ya abierta: si no, lo compartido espera en la caché hasta después de entrar
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    takeSharedInbox().then(inbox => {
+      if (!alive || !inbox) return;
+      if (window.location.search.includes('compartido=1')) window.history.replaceState(null, '', window.location.pathname);
+      if (inbox.file) { openVoice(getAiKey() ? inbox.file : 'no-key'); return; }
+      if (inbox.text) {
+        const clean = descriptionFromBankText(inbox.text);
+        const parsed = parseVoiceTransaction(clean || inbox.text);
+        const amount = amountFromBankText(inbox.text) ?? parseVoiceTransaction(inbox.text).amount;
+        setParsedVoiceData({ ...parsed, amount, description: clean || parsed.description });
+        setShowAdd(true);
+      }
+    });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
   useEffect(() => {
     const open = () => setShowSheet(true);
     // Desde el formulario de gasto/ingreso: "Dictar" o "Desde foto o pantallazo"
