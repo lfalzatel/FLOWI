@@ -139,7 +139,8 @@
 /* ─── Base ─────────────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* clip (no hidden): evita que la página se corra de lado en el celular sin volver al body un contenedor de scroll */
+html { scroll-behavior: smooth; overflow-x: clip; }
 
 body {
   font-family: 'DM Sans', sans-serif;
@@ -147,7 +148,7 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Ambient glow */

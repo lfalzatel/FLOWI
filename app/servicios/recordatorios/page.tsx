@@ -315,7 +315,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className={`font-semibold text-sm text-text-primary ${isTechTheme ? 'font-mono tracking-wide' : ''}`}>
+            <p className={`font-semibold text-sm text-text-primary min-w-0 [overflow-wrap:anywhere] ${isTechTheme ? 'font-mono tracking-wide' : ''}`}>
               {displayLabel}
             </p>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent font-medium">

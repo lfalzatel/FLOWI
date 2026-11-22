@@ -246,9 +246,9 @@ export default function DeudasPage() {
                         className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer animate-card-mix"
                         style={{ animationDelay: `${i * 0.1}s` }}
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className={`text-text-primary font-medium text-sm ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
+                        <div className="flex justify-between items-start gap-3 mb-2">
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-text-primary font-medium text-sm [overflow-wrap:anywhere] ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
                             {debt.description && (
                               <p className={`text-xs text-text-muted mt-0.5 max-w-[200px] sm:max-w-md line-clamp-1 italic ${isCyberpunk ? 'font-mono' : ''}`}>
                                 {debt.description}
@@ -278,7 +278,7 @@ export default function DeudasPage() {
                               ) : null}
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right shrink-0">
                             <p className={`text-text-primary font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
                               <AnimatedNumber value={pending} prefix="$" delay={i * 0.1} />
                             </p>
@@ -331,9 +331,9 @@ export default function DeudasPage() {
                         className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer opacity-60 hover:opacity-100 transition-opacity animate-card-mix"
                         style={{ animationDelay: `${i * 0.1}s` }}
                       >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className={`text-text-primary font-medium text-sm line-through ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-text-primary font-medium text-sm line-through [overflow-wrap:anywhere] ${isCyberpunk ? 'font-mono' : ''}`}>{displayLabel}</p>
                             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                               <span className="flex items-center gap-0.5 text-[10px] text-text-secondary font-medium bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">
                                 <Calendar className="w-3 h-3" /> {dateStr}
@@ -343,7 +343,7 @@ export default function DeudasPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right shrink-0">
                             <p className={`text-accent font-bold text-sm ${isCyberpunk ? 'font-mono' : ''}`}>
                               ${debt.totalAmount.toLocaleString(currentLocale(), { minimumFractionDigits: 2 })}
                             </p>
