@@ -16,6 +16,7 @@ export interface Transaction {
   merchant?: string | null;
   paymentMethod?: string | null;
   accountId?: string | null; // cuenta exacta (gana sobre el medio de pago); ver lib/accounts.ts
+  countBefore?: string | null; // id de la cuenta donde se cuenta aunque sea de antes de crearla (o del último ajuste)
   business?: boolean;        // "Es del negocio" (Modo negocio); si falta, se deduce de la categoría (lib/business.ts)
   items?: ReceiptItem[];     // productos del recibo escaneado (lib/receiptItems.ts)
   receiptId?: string;        // mismo valor en las partes de una compra repartida por categoría
@@ -661,6 +662,7 @@ export interface Transfer {
   amount: number;
   date: string;              // ISO
   note?: string;
+  countBefore?: boolean;     // contarlo aunque sea de antes de crear (o ajustar) las cuentas
   createdAt?: Timestamp | Date;
 }
 
@@ -677,6 +679,9 @@ export async function deleteAccount(id: string) {
 export async function addTransfer(t: Omit<Transfer, 'id' | 'createdAt'>): Promise<string> {
   const ref = await addDoc(collection(db, 'fl_transfers'), { ...t, createdAt: serverTimestamp() });
   return ref.id;
+}
+export async function updateTransfer(id: string, data: Partial<Transfer>) {
+  await updateDoc(doc(db, 'fl_transfers', id), data);
 }
 export async function deleteTransfer(id: string) {
   await deleteDoc(doc(db, 'fl_transfers', id));

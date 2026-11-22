@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 import { X, Trash2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
-import { Account, AccountKind, addAccount, addTransfer, updateAccount } from '@/lib/firestore';
+import { Account, AccountKind, Transfer, addAccount, addTransfer, updateAccount, updateTransfer, deleteTransfer } from '@/lib/firestore';
 import { KIND_EMOJI, KIND_LABEL, suggestMethods } from '@/lib/accounts';
 import { AccountIcon } from '@/components/accounts/AccountIcon';
 import { BankLogo, BankPickerSheet } from '@/components/accounts/BankPickerSheet';
@@ -290,18 +290,22 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
 // ── Transferir entre mis cuentas ─────────────────────────────────────────
 // Con payCard (id de una tarjeta de crédito) funciona como "Abonar a la tarjeta": la tarjeta queda fija como destino,
 // sale de la cuenta principal y la fecha es la de hoy con la hora del momento.
-export function TransferModal({ accounts, initialFrom, payCard, owed = 0, currency = 'COP', onClose }: {
-  accounts: Account[]; initialFrom?: string; payCard?: string; owed?: number; currency?: string; onClose: () => void;
+export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editing, currency = 'COP', onClose }: {
+  accounts: Account[]; initialFrom?: string; payCard?: string; owed?: number; editing?: Transfer; currency?: string; onClose: () => void;
 }) {
   const s = useStyles();
   const { user } = useAuth();
   const active = accounts.filter(a => !a.archived && a.id);
   const payFrom = payCard ? (active.find(a => a.isDefault && a.id !== payCard && a.kind !== 'credito') || active.find(a => a.id !== payCard && a.kind !== 'credito') || active.find(a => a.id !== payCard)) : undefined;
-  const [from, setFrom] = useState(payCard ? payFrom?.id || '' : initialFrom || active[0]?.id || '');
-  const [to, setTo] = useState(payCard || active.find(a => a.id !== (initialFrom || active[0]?.id))?.id || '');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(getLocalDateString());
-  const [note, setNote] = useState('');
+  const [from, setFrom] = useState(editing ? editing.fromId : payCard ? payFrom?.id || '' : initialFrom || active[0]?.id || '');
+  const [to, setTo] = useState(editing ? editing.toId : payCard || active.find(a => a.id !== (initialFrom || active[0]?.id))?.id || '');
+  const [amount, setAmount] = useState(editing ? formatMoneyInput(editing.amount) : '');
+  const editDate = editing ? new Date(editing.date) : new Date();
+  const [date, setDate] = useState(getLocalDateString(editDate));
+  const [time, setTime] = useState(`${String(editDate.getHours()).padStart(2, '0')}:${String(editDate.getMinutes()).padStart(2, '0')}`);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [countBefore, setCountBefore] = useState(editing ? editing.countBefore !== false : true);
+  const [note, setNote] = useState(editing?.note || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const value = parseMoneyInput(amount);
@@ -312,10 +316,13 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, curren
     if (!user || !canSave) return;
     setSaving(true);
     try {
-      const today = getLocalDateString();
       const [y, m, d] = date.split('-').map(Number);
-      const when = date === today ? new Date() : new Date(y, m - 1, d, 12);
-      await addTransfer({ userId: user.uid, fromId: from, toId: to, amount: value, date: when.toISOString(), note: note.trim() || (payCard ? 'Abono a la tarjeta' : '') });
+      const [hh, mm] = (time || '12:00').split(':').map(Number);
+      const when = new Date(y, m - 1, d, hh, mm);
+      const early = [from, to].some(id => { const a = active.find(x => x.id === id); return a && when.getTime() < new Date(a.baseAt).getTime(); });
+      const data = { fromId: from, toId: to, amount: value, date: when.toISOString(), note: note.trim() || (payCard ? 'Abono a la tarjeta' : ''), countBefore: early && countBefore };
+      if (editing?.id) await updateTransfer(editing.id, data);
+      else await addTransfer({ userId: user.uid, ...data });
       onClose();
     } catch (err) {
       console.error('Error saving transfer:', err);
@@ -340,7 +347,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, curren
   };
 
   return (
-    <Shell title={payCard ? `Abonar a ${toAcc?.name || 'la tarjeta'}` : 'Mover plata entre cuentas'} onClose={onClose}
+    <Shell title={editing ? (toAcc?.kind === 'credito' ? 'Editar abono' : 'Editar transferencia') : payCard ? `Abonar a ${toAcc?.name || 'la tarjeta'}` : 'Mover plata entre cuentas'} onClose={onClose}
            footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar'}</button>}>
       <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
         <div><span className={s.label}>Sale de</span>{accField(from, 'from')}</div>
@@ -378,7 +385,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, curren
         </div>,
         document.body,
       )}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-3">
         <div>
           <label htmlFor="tr-amount" className={s.label}>Monto</label>
           <input id="tr-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount} onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus={!!payCard} />
@@ -388,11 +395,29 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, curren
             </button>
           )}
         </div>
+        <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="tr-date" className={s.label}>Fecha</label>
           <input id="tr-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className={s.input} />
         </div>
+        <div>
+          <label htmlFor="tr-time" className={s.label}>Hora</label>
+          <input id="tr-time" type="time" value={time} onChange={(e) => setTime(e.target.value)} className={s.input} />
+        </div>
+        </div>
       </div>
+      {(() => {
+        const [y, m, d] = date.split('-').map(Number);
+        const [hh, mm] = (time || '12:00').split(':').map(Number);
+        const when = new Date(y, m - 1, d, hh, mm).getTime();
+        const early = [from, to].map(id => active.find(x => x.id === id)).find(a => a && when < new Date(a.baseAt).getTime());
+        return early ? (
+          <label className="flex items-start gap-2 cursor-pointer text-[11px] text-text-secondary">
+            <input type="checkbox" checked={countBefore} onChange={(e) => setCountBefore(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--accent)]" />
+            <span>Es de antes de que creaste o ajustaste {early.name}. Contarlo en los saldos (desmárcalo si el saldo que escribiste ya lo incluía).</span>
+          </label>
+        ) : null;
+      })()}
       <div>
         <label htmlFor="tr-note" className={s.label}>Nota (opcional)</label>
         <input id="tr-note" type="text" value={note} maxLength={50} onChange={(e) => setNote(e.target.value)}
@@ -401,6 +426,14 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, curren
       <p className="text-[11px] text-text-muted">{payCard
         ? 'El abono baja lo que debes en la tarjeta y descuenta la plata de la cuenta de donde sale. No es un gasto: las compras ya las registraste como gastos.'
         : <>No es un gasto ni un ingreso: la plata sigue siendo tuya, solo cambia de lugar{toAcc?.kind === 'credito' ? ' (pagar la tarjeta baja lo que debes en ella)' : ''}.</>}</p>
+      {editing?.id && (confirmDelete
+        ? <div className="flex gap-2">
+            <button type="button" onClick={() => setConfirmDelete(false)} className={`flex-1 py-2.5 text-xs font-semibold border border-glass-border text-text-secondary ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>No borrar</button>
+            <button type="button" onClick={async () => { await deleteTransfer(editing.id!); onClose(); }} className={`flex-1 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/40 bg-red-500/10 ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>Sí, borrar</button>
+          </div>
+        : <button type="button" onClick={() => setConfirmDelete(true)} className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${s.isTech ? 'rounded-none uppercase' : 'rounded-xl'}`}>
+            <Trash2 className="w-4 h-4" /> {toAcc?.kind === 'credito' ? 'Borrar abono' : 'Borrar transferencia'}
+          </button>)}
       {active.length < 2 && <p className="text-xs text-amber-500">Necesitas al menos dos cuentas para mover plata entre ellas.</p>}
       {error && <p className="text-xs text-[var(--red)]">{error}</p>}
     </Shell>

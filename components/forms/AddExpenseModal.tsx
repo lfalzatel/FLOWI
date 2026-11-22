@@ -210,6 +210,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const norm = (x: string) => normalizeText(x);
   const accountOfMethod = paymentMethod ? activeAccounts.find(a => a.methods.some(m => norm(m) === norm(paymentMethod))) : undefined;
   const mainAccount = activeAccounts.find(a => a.isDefault);
+  // Un gasto anterior a cuando se creó (o ajustó) la cuenta no mueve su saldo, salvo que la persona lo pida
+  const targetAccount = accountOfMethod || mainAccount;
+  const [countBeforeChoice, setCountBeforeChoice] = useState<boolean | null>(null);
+  const txWhen = (() => { const [y, mo, d] = date.split('-').map(Number); const [h, mi] = (time || '12:00').split(':').map(Number); return new Date(y, mo - 1, d, h, mi); })();
+  const beforeBase = !!targetAccount && txWhen.getTime() < new Date(targetAccount.baseAt).getTime();
+  const countBefore = countBeforeChoice ?? (transactionToEdit?.countBefore ? transactionToEdit.countBefore === targetAccount?.id : true);
   const [creatingAccount, setCreatingAccount] = useState(false);
   useEffect(() => {
     if (paymentTouched.current || paymentMethod || initialVoiceParsed?.paymentMethod) return;
@@ -457,6 +463,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         ...extras,
         ...(type === 'gasto' ? { isFixed } : {}),
         business: isBusiness,
+        ...(beforeBase && countBefore && targetAccount?.id ? { countBefore: targetAccount.id } : transactionToEdit?.countBefore ? { countBefore: null } : {}),
         // Al editar se envía null para quitar un compartido anterior
         ...(sharedInfo ? { shared: sharedInfo } : transactionToEdit?.shared ? { shared: null } : {}),
       };
@@ -940,6 +947,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 <p className="mt-2 text-[11px] text-text-muted normal-case">
                   {type === 'gasto' ? t('Se descuenta de') : t('Se suma a')} <b className="text-text-secondary">{(accountOfMethod || mainAccount)!.name}</b>
                   {!paymentMethod ? ` ${t('(tu cuenta principal)')}` : ''}.
+                  {beforeBase && (
+                    <label className="mt-1.5 flex items-start gap-2 cursor-pointer text-text-secondary">
+                      <input type="checkbox" checked={countBefore} onChange={(e) => setCountBeforeChoice(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--accent)]" />
+                      <span>{t('Es de antes de que creaste o ajustaste {a}. Contarlo en su saldo (desmárcalo si el saldo que escribiste ya lo incluía).', { a: targetAccount!.name })}</span>
+                    </label>
+                  )}
                 </p>
               ) : null
             )}

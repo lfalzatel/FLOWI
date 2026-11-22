@@ -16,7 +16,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { AccountFormModal, AdjustBalanceModal, TransferModal } from '@/components/accounts/AccountModals';
 import { AccountIcon } from '@/components/accounts/AccountIcon';
-import { Account, deleteAccount, deleteTransfer } from '@/lib/firestore';
+import { Account, Transfer, deleteAccount } from '@/lib/firestore';
 import { AccountState, KIND_LABEL, accountStates, netWorth } from '@/lib/accounts';
 import { businessMoneyByAccount } from '@/lib/business';
 import { formatCurrency } from '@/lib/format';
@@ -46,6 +46,7 @@ export default function CuentasPage() {
   const [adjusting, setAdjusting] = useState<AccountState | null>(null);
   const [transferFrom, setTransferFrom] = useState<string | null>(null);
   const [paying, setPaying] = useState<AccountState | null>(null);
+  const [editingTransfer, setEditingTransfer] = useState<Transfer | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -210,7 +211,7 @@ export default function CuentasPage() {
                                 ? <span className="text-text-muted"><AnimatedNumber value={m.amount} format={fmt} /></span>
                                 : <span className={m.amount >= 0 ? 'text-emerald-400 font-semibold' : 'text-text-primary'}>{m.amount >= 0 ? '+' : '−'}<AnimatedNumber value={Math.abs(m.amount)} format={fmt} /></span>}
                               {m.kind === 'transfer' && m.transfer.id && (
-                                <button type="button" onClick={() => deleteTransfer(m.transfer.id!)} aria-label="Borrar transferencia" className="text-text-muted hover:text-[var(--red)] px-1">×</button>
+                                <button type="button" onClick={() => setEditingTransfer(m.transfer)} aria-label="Editar transferencia" className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
                               )}
                             </li>
                           ))}
@@ -222,13 +223,14 @@ export default function CuentasPage() {
                           const total = abonos.reduce((s, m) => s + m.amount, 0);
                           return (
                             <div className={`mt-3 pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
-                              <p className="text-xs font-semibold text-text-secondary mb-1.5">Abonos ({abonos.length}) · {fmt(total)}</p>
+                              <p className="text-xs font-semibold text-text-secondary mb-1.5">Abonos ({abonos.length}) · {fmt(total)} <span className="font-normal text-text-muted">· toca uno para editarlo</span></p>
                               <ul className="space-y-1">
                                 {abonos.map((m, i) => (
-                                  <li key={i} className="flex items-center gap-2 text-xs">
+                                  <li key={i} onClick={() => m.kind === 'transfer' && setEditingTransfer(m.transfer)} className="flex items-center gap-2 text-xs cursor-pointer hover:opacity-80">
                                     <span className="shrink-0 whitespace-nowrap text-text-muted">{m.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {m.date.toLocaleTimeString(currentLocale(), { hour: 'numeric', minute: '2-digit' })}</span>
                                     <span className="flex-1 min-w-0 truncate text-text-secondary">{m.label.replace(/^Abono desde /, 'De ')}</span>
                                     <span className="text-emerald-400 font-semibold">{fmt(m.amount)}</span>
+                                    <Pencil className="w-3 h-3 text-text-muted shrink-0" />
                                   </li>
                                 ))}
                               </ul>
@@ -262,6 +264,7 @@ export default function CuentasPage() {
                           onDelete={(a) => { setShowForm(false); setDeleting(a); }} />
       )}
       {adjusting && <AdjustBalanceModal account={adjusting.account} current={adjusting.balance} currency={currency} onClose={() => setAdjusting(null)} />}
+      {editingTransfer && <TransferModal accounts={accounts} editing={editingTransfer} currency={currency} onClose={() => setEditingTransfer(null)} />}
       {paying && <TransferModal accounts={accounts} payCard={paying.account.id} owed={Math.max(0, -paying.balance)} currency={currency} onClose={() => setPaying(null)} />}
       {transferFrom !== null && <TransferModal accounts={accounts} initialFrom={transferFrom || undefined} currency={currency} onClose={() => setTransferFrom(null)} />}
       <ConfirmDialog
