@@ -62,9 +62,11 @@ export function accountStates(accounts: Account[], transactions: Transaction[], 
     if (!st) continue;
     // Un gasto compartido mueve la plata real: el total si pagaste tú, y lo que te devuelven o pagas después
     for (const m of moneyMoves(t)) {
-      if (m.date.getTime() < new Date(st.account.baseAt).getTime() && t.countBefore !== st.account.id) continue;
-      st.balance += m.amount;
-      st.movements.push({ kind: 'tx', date: m.date, amount: m.amount, label: m.label, tx: t });
+      // Un abono puede entrar a otra cuenta (p. ej. el gasto fue con la tarjeta y te pagaron por Nequi)
+      const target = (m.accountId && states.get(m.accountId)) || st;
+      if (m.date.getTime() < new Date(target.account.baseAt).getTime() && t.countBefore !== target.account.id) continue;
+      target.balance += m.amount;
+      target.movements.push({ kind: 'tx', date: m.date, amount: m.amount, label: m.label, tx: t });
     }
   }
   for (const tr of transfers) {

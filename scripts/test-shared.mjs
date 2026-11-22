@@ -61,5 +61,22 @@ eq('enlace con monto raro', S.readShareLink(Buffer.from(JSON.stringify({ i: [{ d
 const msg = S.chargeMessage(b[0], n => `$${n}`, 'Luis Alzate');
 eq('mensaje incluye lo pendiente y la invitación', [msg.includes('Hola Ana'), msg.includes('$30000'), msg.includes('/compartido?g='), msg.includes('gratis')], [true, true, true, true]);
 
+// Abonos y "lo asumo yo"
+const viaje = { total: 382939, paidByMe: true, people: [{ name: 'Leidy', amount: 382939 }] };
+const ab1 = S.withPayment(viaje, 0, 100000, new Date('2026-11-20T10:00:00'), 'nequi');
+eq('abono parcial: falta el resto', [S.pendingToMe(ab1), !!ab1.people[0].settledAt], [282939, false]);
+const ab2 = S.withPayment(ab1, 0, 282939, new Date('2026-11-21T10:00:00'), 'nequi');
+eq('abono que completa: saldado', [S.pendingToMe(ab2), !!ab2.people[0].settledAt], [0, true]);
+eq('abonos entran a su cuenta', S.moneyMoves({ type: 'gasto', amount: 0, category: 'Viajes', date: d, shared: ab1 }).map(m => [m.amount, m.accountId ?? null]),
+  [[-382939, null], [100000, 'nequi']]);
+eq('borrar abono vuelve a pendiente', S.pendingToMe(S.withoutPayment(ab2, 0, 1)), 282939);
+const asum = S.withAbsorbed(ab1, 0);
+eq('lo asumo yo: sube tu gasto y queda a paz y salvo', [asum.added, S.pendingToMe(asum.shared), S.myPart(asum.shared)], [282939, 0, 282939]);
+eq('saldo por persona descuenta abonos', S.sharedBalances([{ id: 'v', type: 'gasto', amount: 0, category: 'Viajes', date: d, shared: ab1 }])[0].owesMe, 282939);
+const legacy = S.withPayment({ ...viaje, people: [{ name: 'Leidy', amount: 50000, settledAt: '2026-11-18T00:00:00Z' }] }, 0, 1, new Date());
+eq('saldado antiguo conserva lo pagado al abonar', S.paidOf(legacy.people[0]), 50001);
+const msg2 = S.chargeMessage(S.sharedBalances([{ id: 'v', type: 'gasto', amount: 0, category: 'Viajes', description: 'Despegar', date: d, shared: ab1 }])[0], n => `$${n}`);
+eq('mensaje suave con lo que falta', [msg2.includes('Tienes un gasto compartido conmigo'), msg2.includes('$282939'), msg2.includes('ya abonaste $100000')], [true, true, true]);
+
 console.log(fails ? `\n${fails} fallaron` : '\nTodas pasaron');
 process.exit(fails ? 1 : 0);

@@ -68,7 +68,8 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
         // Gasto compartido: lo que falta por cobrar o por pagar
         const sh = t.type === 'gasto' ? t.shared : null;
         const sharedNote = !sh ? '' : sh.paidByMe
-          ? (pendingToMe(sh) ? `👥 ${tr('Te deben {m}', { m: money(pendingToMe(sh)) })}` : `👥 ${tr('Compartido · ya te pagaron')}`)
+          // Lo que pagaste de verdad, y lo que falta que te devuelvan (el monto grande es solo tu parte)
+          ? `👥 ${tr('Pagaste {m}', { m: money(sh.total) })} · ${pendingToMe(sh) ? tr('te deben {m}', { m: money(pendingToMe(sh)) }) : tr('ya te pagaron')}`
           : (pendingFromMe(sh) ? `👥 ${tr('Le debes a {p}', { p: sh.people[0]?.name ?? '' })}` : `👥 ${tr('Pagó {p} · ya le pagaste', { p: sh.people[0]?.name ?? '' })}`);
         const displayLabel = isCyberpunk 
           ? `>_ ${displayName.toUpperCase().replace(/\s+/g, '_')}` 

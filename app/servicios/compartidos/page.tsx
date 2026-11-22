@@ -3,7 +3,8 @@ import { currentLocale } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronDown, Users, Plus, MessageCircle, Check } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Users, Plus, MessageCircle, Check, HandCoins } from 'lucide-react';
+import { SharedPaymentModal } from '@/components/shared/SharedPaymentModal';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/components/DataProvider';
@@ -30,6 +31,7 @@ export default function CompartidosPage() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [busy, setBusy] = useState(false);
+  const [paying, setPaying] = useState<{ tx: Transaction; index: number } | null>(null);
 
   const balances = useMemo(() => sharedBalances(transactions), [transactions]);
   const pending = balances.filter(b => b.owesMe || b.iOwe);
@@ -100,13 +102,17 @@ export default function CompartidosPage() {
                       {e.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {e.toMe ? 'pagaste tú' : `pagó ${b.name.split(/\s+/)[0]}`}
                     </p>
                   </button>
-                  <span className={`text-xs font-semibold tabular-nums ${e.settled ? 'text-text-muted' : e.toMe ? 'text-accent' : 'text-[var(--red)]'}`}>
-                    {e.toMe ? '+' : '−'}{fmt(e.amount)}
+                  <span className="text-right shrink-0">
+                    <span className={`block text-xs font-semibold tabular-nums ${e.settled ? 'text-text-muted' : e.toMe ? 'text-accent' : 'text-[var(--red)]'}`}>
+                      {e.toMe ? '+' : '−'}{fmt(e.settled ? e.amount : e.pending)}
+                    </span>
+                    {!e.settled && e.paid > 0 && <span className="block text-[10px] text-text-muted">abonado {fmt(e.paid)} de {fmt(e.amount)}</span>}
                   </span>
-                  <button type="button" disabled={busy} onClick={() => settle([e], !e.settled)}
-                          aria-label={e.settled ? 'Marcar como pendiente' : 'Marcar como pagado'}
-                          className={`w-7 h-7 flex items-center justify-center border shrink-0 ${isTech ? 'rounded-none' : 'rounded-full'} ${e.settled ? 'border-accent bg-accent/20 text-accent' : 'border-glass-border text-text-muted'}`}>
-                    <Check className="w-3.5 h-3.5" />
+                  {/* Abonar (o ver los abonos de uno ya saldado) */}
+                  <button type="button" onClick={() => setPaying({ tx: e.tx, index: e.index })}
+                          aria-label={e.settled ? 'Ver abonos' : 'Registrar abono'}
+                          className={`h-7 px-2 flex items-center gap-1 border shrink-0 text-[11px] font-semibold ${isTech ? 'rounded-none' : 'rounded-full'} ${e.settled ? 'border-accent bg-accent/20 text-accent' : 'border-accent/40 text-accent'}`}>
+                    {e.settled ? <Check className="w-3.5 h-3.5" /> : <><HandCoins className="w-3.5 h-3.5" /> Abonar</>}
                   </button>
                 </li>
               ))}
@@ -204,6 +210,7 @@ export default function CompartidosPage() {
       <BottomNav />
       {adding && <AddExpenseModal initialShared onClose={() => setAdding(false)} />}
       {editing && <AddExpenseModal transactionToEdit={editing} onClose={() => setEditing(null)} />}
+      {paying && <SharedPaymentModal tx={paying.tx} index={paying.index} onClose={() => setPaying(null)} />}
     </div>
   );
 }

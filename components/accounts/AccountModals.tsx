@@ -30,7 +30,7 @@ import { formatCurrency } from '@/lib/format';
 import { getLocalDateString } from '@/lib/dateUtils';
 
 // ── Piezas comunes ───────────────────────────────────────────────────────
-function useStyles() {
+export function useStyles() {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
   return {
@@ -44,7 +44,7 @@ function useStyles() {
   };
 }
 
-function Shell({ title, onClose, children, footer }: { title: string; onClose: () => void; children: React.ReactNode; footer: React.ReactNode }) {
+export function Shell({ title, onClose, children, footer }: { title: string; onClose: () => void; children: React.ReactNode; footer: React.ReactNode }) {
   const { theme, isTech } = useStyles();
   if (typeof document === 'undefined') return null;
   return createPortal(

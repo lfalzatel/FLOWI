@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Users, X, Plus } from 'lucide-react';
-import { equalShares, personKey } from '@/lib/shared';
+import { SharedPayment, equalShares, personKey } from '@/lib/shared';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { displayExpr, evalAmount } from '@/lib/amountExpr';
 
@@ -9,7 +9,8 @@ import { displayExpr, evalAmount } from '@/lib/amountExpr';
 export interface SharedDraft {
   paidByMe: boolean;
   equal: boolean;                                 // partes iguales (se recalculan con el total)
-  people: { name: string; amount: string; settledAt?: string | null }[];
+  // Abonos y lo asumido se conservan al editar (se manejan en Compartidos)
+  people: { name: string; amount: string; settledAt?: string | null; payments?: SharedPayment[]; absorbed?: number }[];
 }
 
 export const emptySharedDraft = (): SharedDraft => ({ paidByMe: true, equal: true, people: [{ name: '', amount: '' }] });
@@ -39,7 +40,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
   const [calcIdx, setCalcIdx] = useState<number | null>(null); // persona con la calculadora abierta
   const r = (n: number) => (cents ? Math.round(n * 100) / 100 : Math.round(n));
   const amounts = draftAmounts(draft, total, cents);
-  const others = r(amounts.reduce((s, a) => s + a, 0));
+  const others = r(amounts.reduce((s, a) => s + a, 0) - draft.people.reduce((s, p) => s + (p.absorbed || 0), 0));
   const mine = r(draft.paidByMe ? total - others : total);
   const box = isTech ? 'rounded-none' : 'rounded-xl';
   const chip = isTech ? 'rounded-none font-mono' : 'rounded-full';
@@ -155,7 +156,13 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
                 </div>
               );
             })()}
-            {p.settledAt && <p className="text-[10px] text-accent">✓ Ya {draft.paidByMe ? 'te pagó' : 'le pagaste'}</p>}
+            {(() => {
+              const paid = (p.payments || []).reduce((s2, x) => s2 + x.amount, 0);
+              if (p.absorbed) return <p className="text-[10px] text-amber-400">Lo asumiste como gasto tuyo ({fmt(p.absorbed)})</p>;
+              if (p.settledAt) return <p className="text-[10px] text-accent">✓ Ya {draft.paidByMe ? 'te pagó' : 'le pagaste'}</p>;
+              if (paid > 0) return <p className="text-[10px] text-accent">Abonado {fmt(paid)}</p>;
+              return null;
+            })()}
           </div>
         ))}
         {draft.paidByMe && (

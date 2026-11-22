@@ -15,7 +15,10 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { dayKeyNow, isPremium, receiptsDailyLimit, receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { applyVoiceCorrection } from '@/lib/voiceCorrection';
-import { useState, useEffect, useRef } from 'react';
+import { personKey, sharedBalances } from '@/lib/shared';
+import { SharedPaymentModal } from '@/components/shared/SharedPaymentModal';
+import type { Transaction } from '@/lib/firestore';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
@@ -510,6 +513,22 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     if (!parsedResults.some(needs)) return;
     setParsedResults(prev => prev.map(r => (needs(r) ? ({ ...r, paymentMethod: (r as any).paymentMethod || mainPay, _payDefaulted: true } as any) : r)));
   }, [parsedResults, mainPay]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Un ingreso que nombra a alguien que te debe de un gasto compartido (p. ej. "Transferencia de Leidy" en
+  // un comprobante de Nequi) puede ser su abono: se ofrece registrarlo ahí en vez de como ingreso suelto.
+  const owedPeople = useMemo(() => sharedBalances(transactions).filter(b => b.owesMe > 0), [transactions]);
+  const abonoMatch = (r: any) => {
+    if (r?.type !== 'ingreso' || !owedPeople.length) return null;
+    const text = ` ${personKey(`${r.description || ''} ${r.merchant || ''} ${r.rawText || ''}`).replace(/[^a-z0-9ñ]+/g, ' ')} `;
+    for (const b of owedPeople) {
+      const first = personKey(b.name.split(/\s+/)[0]);
+      if (first.length < 3 || !text.includes(` ${first} `)) continue;
+      const entry = b.entries.filter(e => e.toMe && !e.settled).sort((a, c) => a.date.getTime() - c.date.getTime())[0];
+      if (entry) return { person: b, entry };
+    }
+    return null;
+  };
+  const [abono, setAbono] = useState<{ tx: Transaction; index: number; amount: number; when: Date } | null>(null);
 
   const handleRemoveResult = (index: number) => {
     setParsedResults(prev => prev.filter((_, i) => i !== index));
@@ -1063,6 +1082,25 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     /* Renderizado de Transacciones Estándar */
                     <div>
                       <div className="flex flex-col items-start gap-1 mb-2 pr-8">
+                        {(() => {
+                          const m = abonoMatch(res);
+                          if (!m) return null;
+                          const first = m.person.name.split(/\s+/)[0];
+                          return (
+                            <button type="button"
+                                    onClick={() => {
+                                      const when = res.date ? new Date(`${res.date}T${(res as any).time || '12:00'}:00`) : new Date();
+                                      setAbono({ tx: m.entry.tx, index: m.entry.index, amount: res.amount || 0, when });
+                                      handleRemoveResult(idx);
+                                    }}
+                                    className={`w-full text-left mb-1 p-2.5 border-2 border-accent bg-accent/10 normal-case ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                              <span className="block text-xs font-bold text-accent">🤝 ¿Es un abono de {first}?</span>
+                              <span className="block text-[11px] text-text-secondary">
+                                Te debe {formatCurrency(m.entry.pending, 'COP')} de «{m.entry.tx.description?.trim() || m.entry.tx.category}». Toca para registrarlo como abono.
+                              </span>
+                            </button>
+                          );
+                        })()}
                         <span className="text-[9px] text-amber-300 font-medium leading-tight">
                           {(res as any)._dup && (
                             <span className="block text-amber-400 font-semibold mb-0.5">⚠ Parece que ya lo registraste el {(res as any)._dup}. Bórralo con 🗑 si es el mismo.</span>
@@ -1362,6 +1400,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           </div>
         </div>
       </div>
+    )}
+    {abono && (
+      <SharedPaymentModal tx={abono.tx} index={abono.index} initialAmount={abono.amount} initialWhen={abono.when}
+                          onClose={() => { setAbono(null); if (!parsedResults.length) onClose(); }} />
     )}
   </div>,
     document.body

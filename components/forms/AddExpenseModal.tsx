@@ -333,7 +333,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         setAmount(String(sh.paidByMe ? sh.total : transactionToEdit.amount));
         const eq = equalShares(sh.total, sh.people.length);
         const equal = sh.paidByMe && sh.people.every((p, i) => p.amount === eq[i]);
-        setShared({ paidByMe: sh.paidByMe, equal, people: sh.people.map(p => ({ name: p.name, amount: String(p.amount), settledAt: p.settledAt ?? null })) });
+        setShared({ paidByMe: sh.paidByMe, equal, people: sh.people.map(p => ({ name: p.name, amount: String(p.amount), settledAt: p.settledAt ?? null, payments: p.payments, absorbed: p.absorbed })) });
       } else {
         setShared(null);
       }
@@ -401,13 +401,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     if (type !== 'gasto' || !shared || !total) return { sharedInfo: null, sharedMine: total };
     const amounts = draftAmounts(shared, total, cents);
     const people = shared.people
-      .map((p, i) => ({ name: p.name.trim(), amount: amounts[i] || 0, settledAt: p.settledAt ?? null }))
+      .map((p, i) => ({ name: p.name.trim(), amount: amounts[i] || 0, settledAt: p.settledAt ?? null, ...(p.payments?.length ? { payments: p.payments } : {}), ...(p.absorbed ? { absorbed: p.absorbed } : {}) }))
       .filter(p => p.name && personKey(p.name));
     if (!people.length) return { sharedInfo: null, sharedMine: total };
     if (!shared.paidByMe) {
       return { sharedInfo: { total, paidByMe: false, people: [{ ...people[0], amount: total }] }, sharedMine: total };
     }
-    const others = people.reduce((s, p) => s + p.amount, 0);
+    // Lo que alguien nunca pagó y asumiste sigue siendo parte de tu gasto
+    const others = people.reduce((s, p) => s + p.amount - (p.absorbed || 0), 0);
     return { sharedInfo: { total, paidByMe: true, people }, sharedMine: roundMoney(total - others, currency) };
   }, [type, shared, amountNum, cents, currency]);
 

@@ -19,6 +19,8 @@ import Link from 'next/link';
 import { Users, ChevronRight } from 'lucide-react';
 import { useData } from '@/components/DataProvider';
 import { sharedBalances } from '@/lib/shared';
+import { SharedPaymentModal } from '@/components/shared/SharedPaymentModal';
+import type { Transaction } from '@/lib/firestore';
 
 const toDate = (value: any): Date | null => {
   if (!value) return null;
@@ -43,9 +45,14 @@ export default function DeudasPage() {
   const router = useRouter();
   // Gastos compartidos pendientes (viven en los gastos; aquí solo se resumen y se enlazan)
   const { transactions } = useData();
-  const sharedPending = sharedBalances(transactions).reduce(
+  const sharedList = sharedBalances(transactions);
+  const sharedPending = sharedList.reduce(
     (acc, b) => ({ toMe: acc.toMe + b.owesMe, fromMe: acc.fromMe + b.iOwe, people: acc.people + (b.owesMe || b.iOwe ? 1 : 0) }),
     { toMe: 0, fromMe: 0, people: 0 });
+  // Cada gasto compartido pendiente, para abonarlo desde aquí (vive en el gasto: no se duplica como deuda)
+  const sharedOpen = sharedList.flatMap(b => b.entries.filter(e => !e.settled).map(e => ({ ...e, name: b.name })))
+    .sort((a, c) => c.date.getTime() - a.date.getTime());
+  const [sharedPay, setSharedPay] = useState<{ tx: Transaction; index: number } | null>(null);
   
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -175,7 +182,7 @@ export default function DeudasPage() {
             {[
               { label: tr('Deudas activas'), value: String(iOweCount), tone: 'text-text-primary' },
               { label: tr('Cuotas al mes'), value: monthlyInstallments ? fmt(monthlyInstallments) : '—', tone: 'text-orange-400' },
-              { label: tr('Me deben'), value: owedToMe ? fmt(owedToMe) : '—', tone: 'text-emerald-400' },
+              { label: tr('Me deben'), value: owedToMe + sharedPending.toMe ? fmt(owedToMe + sharedPending.toMe) : '—', tone: 'text-emerald-400' },
             ].map(c => (
               <div key={c.label} className={`glass-card p-3 ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
                 <p className="text-[10px] text-text-muted leading-tight">{c.label}</p>
@@ -202,6 +209,27 @@ export default function DeudasPage() {
             <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />
           </Link>
         )}
+        {sharedOpen.length > 0 && (
+          <ul className={`glass-card divide-y divide-glass-border px-3 ${isCyberpunk ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
+            {sharedOpen.slice(0, 6).map(e => (
+              <li key={`${e.tx.id}-${e.index}`} className="flex items-center gap-2 py-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-text-primary truncate">{e.toMe ? tr('{p} te debe', { p: e.name.split(/\s+/)[0] }) : tr('Le debes a {p}', { p: e.name.split(/\s+/)[0] })} · {e.tx.description?.trim() || tr(e.tx.category)}</p>
+                  <p className="text-[10px] text-text-muted">
+                    {e.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}
+                    {e.paid > 0 ? ` · ${tr('abonado {m} de {t}', { m: fmt(e.paid), t: fmt(e.amount) })}` : ''}
+                  </p>
+                </div>
+                <span className={`text-xs font-semibold tabular-nums shrink-0 ${e.toMe ? 'text-emerald-400' : 'text-[var(--red)]'}`}>{fmt(e.pending)}</span>
+                <button type="button" onClick={() => setSharedPay({ tx: e.tx, index: e.index })}
+                        className={`h-7 px-2.5 text-[11px] font-semibold border border-accent/40 text-accent shrink-0 ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}>
+                  {tr('Abonar')}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {sharedPay && <SharedPaymentModal tx={sharedPay.tx} index={sharedPay.index} onClose={() => setSharedPay(null)} />}
         </div>
 
         <div className="min-w-0">
