@@ -27,7 +27,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
 import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle } from '@/lib/voiceParser';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
-import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi } from '@/lib/aiAssist';
+import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi, startOpenRouterConnect } from '@/lib/aiAssist';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
@@ -828,10 +828,24 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         )}
         {receiptStatus === 'loading' && <ReadingTips isTech={isTechTheme} />}
         {receiptStatus === 'no-key' && (
-          <p className="text-[11px] text-text-muted max-w-xs mb-1 normal-case">
-            Para leer recibos necesitas la IA gratuita.{' '}
-            <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a> (es gratis y tu clave queda solo en este celular).
-          </p>
+          // Sin IA no se leen recibos: aviso grande con el botón para conectarla ahí mismo
+          <div className={`w-full max-w-xs mt-2 mb-1 p-4 text-left normal-case border-2 border-accent bg-accent/10 shadow-[0_0_24px_-6px_var(--accent)] ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Sparkles className="w-5 h-5 text-accent shrink-0 animate-pulse" />
+              <p className="text-sm font-bold text-text-primary">Activa la IA para leer recibos</p>
+            </div>
+            <p className="text-xs text-text-secondary mb-3">
+              FLOWI lee el monto, el comercio, la fecha y los productos de tus recibos y comprobantes. Es gratis y tu clave queda solo en este celular.
+            </p>
+            <button
+              type="button"
+              onClick={() => { startOpenRouterConnect().catch(() => router.push('/configuracion')); }}
+              className={`w-full py-3 text-sm font-bold bg-accent text-black flex items-center justify-center gap-2 hover:opacity-90 ${isTechTheme ? 'rounded-none uppercase font-mono' : 'rounded-xl'}`}
+            >
+              <Sparkles className="w-4 h-4" /> Conectar IA gratis
+            </button>
+            <p className="text-[10px] text-text-muted mt-2 text-center">Después vuelve a tomar o compartir la foto.</p>
+          </div>
         )}
         {receiptStatus === 'error' && (
           <p className="text-[11px] text-red-400 max-w-xs mb-1 normal-case">{receiptError}</p>
