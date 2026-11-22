@@ -8,6 +8,7 @@ import { Plus, X, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useDebts } from '@/hooks/useDebts';
+import { useDebtTotals } from '@/hooks/useDebtTotals';
 import { Transaction } from '@/lib/firestore';
 import { BalanceCard }     from '@/components/dashboard/BalanceCard';
 import { ExpenseChart }    from '@/components/dashboard/ExpenseChart';
@@ -54,7 +55,8 @@ let hasShownSplashInThisJSContext = false;
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions: realTransactions, loading: realLoading, refresh } = useExpenses();
-  const { totalDeudas: realTotalDeudas } = useDebts();
+  useDebts();
+  const { total: realTotalDeudas } = useDebtTotals(); // préstamos + tarjetas de crédito, sin contar dos veces
   const realCommitments = useCommitments(realTransactions);
   const { goals: realGoals, loading: realGoalsLoading } = useGoals();
   const { investments } = useInvestments();

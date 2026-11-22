@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { CalendarCheck, ChevronRight, TrendingDown, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useDebts } from '@/hooks/useDebts';
+import { useDebtTotals } from '@/hooks/useDebtTotals';
 import { formatCurrency } from '@/lib/format';
-import { calculateDebtInterest } from '@/lib/firestore';
 import { DailyBudget } from '@/lib/dailyBudget';
 
 type Props =
@@ -154,20 +154,23 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
 }
 
 function DebtsContent({ balance, currency, onClose }: { balance: number; currency?: string; onClose: () => void }) {
-  const { debts, totalDeudas, totalMeDeben } = useDebts();
+  const { debts, totalMeDeben } = useDebts();
+  const totals = useDebtTotals();
+  const totalDeudas = totals.total;
   const f = (n: number) => formatCurrency(n, currency);
-  const pending = (dir: 'debo' | 'me_deben') => debts
-    .filter(d => d.status === 'pending' && (d.direction || 'debo') === dir)
-    .map(d => ({ id: d.id, title: d.title, left: Math.max(0, d.totalAmount - d.paidAmount) + calculateDebtInterest(d).accumulatedInterest, interest: !!d.interestRate }))
-    .sort((a, b) => b.left - a.left);
-  const owe = pending('debo');
-  const owed = pending('me_deben');
+  const owed = debts.filter(d => d.status === 'pending' && d.direction === 'me_deben');
+  // Préstamos fuera de tarjetas y cada tarjeta de crédito (con los préstamos que viven en ella)
+  const owe = [
+    ...totals.loans.map(l => ({ id: l.debt.id, title: l.debt.title, left: l.left, hint: l.debt.interestRate ? 'Incluye intereses' : undefined })),
+    ...totals.cards.map(c => ({ id: c.state.account.id, title: c.state.account.name, left: c.owed,
+      hint: c.linked.length ? `Tarjeta · incluye ${c.linked.map(l => l.debt.title).join(', ')}` : 'Tarjeta de crédito' })),
+  ].sort((a, b) => b.left - a.left);
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-text-secondary leading-relaxed">
-        Es la suma de lo que <strong>te falta por pagar</strong> de tus deudas activas: lo que debías menos los abonos que has hecho,
-        más los intereses acumulados si la deuda tiene tasa.
+        Es la suma de lo que <strong>te falta por pagar</strong>: tus préstamos (lo que debías menos los abonos, más los intereses
+        si tienen tasa) y lo que debes en tus tarjetas de crédito.
       </p>
 
       {owe.length === 0 ? (
@@ -175,7 +178,7 @@ function DebtsContent({ balance, currency, onClose }: { balance: number; currenc
       ) : (
         <div>
           {owe.slice(0, 6).map(d => (
-            <Row key={d.id} label={d.title} hint={d.interest ? 'Incluye intereses' : undefined} value={f(d.left)} />
+            <Row key={d.id} label={d.title} hint={d.hint} value={f(d.left)} />
           ))}
           {owe.length > 6 && <p className="text-[11px] text-text-muted py-1">y {owe.length - 6} más…</p>}
           <Row label="Total que debes" value={f(totalDeudas)} strong />
