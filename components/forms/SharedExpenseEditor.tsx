@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { Users, X, Plus } from 'lucide-react';
 import { equalShares, personKey } from '@/lib/shared';
+import { AmountKeypad } from '@/components/forms/AmountKeypad';
+import { displayExpr, evalAmount } from '@/lib/amountExpr';
 
 // Borrador del formulario: los montos van como texto mientras se escriben
 export interface SharedDraft {
@@ -17,7 +19,8 @@ export function draftAmounts(d: SharedDraft, total: number, cents = false): numb
   const r = (n: number) => (cents ? Math.round(n * 100) / 100 : Math.round(n));
   if (!d.paidByMe) return [r(total)];
   if (d.equal) return equalShares(r(total), d.people.length, cents);
-  return d.people.map(p => r(Number(String(p.amount).replace(',', '.')) || 0));
+  // Cada monto puede ser una cuenta hecha con la calculadora ("382939÷2", "100000+25000")
+  return d.people.map(p => r(Math.max(0, evalAmount(String(p.amount).replace(',', '.')) ?? 0)));
 }
 
 interface Props {
@@ -33,6 +36,7 @@ interface Props {
 
 export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cents = false, onChange, onRemove }: Props) {
   const [focusIdx, setFocusIdx] = useState<number | null>(null);
+  const [calcIdx, setCalcIdx] = useState<number | null>(null); // persona con la calculadora abierta
   const r = (n: number) => (cents ? Math.round(n * 100) / 100 : Math.round(n));
   const amounts = draftAmounts(draft, total, cents);
   const others = r(amounts.reduce((s, a) => s + a, 0));
@@ -69,6 +73,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
         <span className={`flex items-center gap-1.5 text-xs font-bold text-accent ${isTech ? 'font-mono uppercase tracking-wider' : ''}`}>
           <Users className="w-4 h-4" /> Gasto compartido
         </span>
+        {total > 0 && <span className="ml-auto text-xs text-text-muted">Total <b className="text-text-primary">{fmt(r(total))}</b></span>}
         <button type="button" onClick={onRemove} aria-label="Quitar gasto compartido" className="p-1 text-text-muted hover:text-text-primary">
           <X className="w-4 h-4" />
         </button>
@@ -106,11 +111,14 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
                      onChange={e => setPerson(i, { name: e.target.value })}
                      className={`${input} flex-1 min-w-0`} aria-label={`Nombre de la persona ${i + 1}`} />
               {draft.paidByMe && (draft.equal ? (
-                <span className="w-24 text-right text-sm font-semibold text-text-secondary shrink-0">{fmt(amounts[i] || 0)}</span>
+                <button type="button" onClick={() => { switchEqual(false); setCalcIdx(i); }} title="Cambiar el monto"
+                        className="w-28 text-right text-sm font-semibold text-text-secondary shrink-0 underline decoration-dotted underline-offset-4">{fmt(amounts[i] || 0)}</button>
               ) : (
-                <input autoComplete="off" value={p.amount} inputMode="decimal" placeholder="0"
-                       onChange={e => setPerson(i, { amount: e.target.value.replace(cents ? /[^0-9.,]/g : /[^0-9]/g, '') })}
-                       className={`${input} w-24 text-right shrink-0`} aria-label={`Monto de ${p.name || `la persona ${i + 1}`}`} />
+                <button type="button" onClick={() => setCalcIdx(c => (c === i ? null : i))}
+                        className={`${input} w-28 text-right shrink-0 truncate ${calcIdx === i ? '!border-accent' : ''}`}
+                        aria-label={`Monto de ${p.name || `la persona ${i + 1}`}`}>
+                  {p.amount ? displayExpr(p.amount) : <span className="text-text-muted">0</span>}
+                </button>
               ))}
               {draft.paidByMe && draft.people.length > 1 && (
                 <button type="button" aria-label="Quitar persona" onClick={() => onChange({ ...draft, people: draft.people.filter((_, j) => j !== i) })}
@@ -125,6 +133,28 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
                 ))}
               </div>
             )}
+            {calcIdx === i && !draft.equal && draft.paidByMe && (() => {
+              // Atajos para repartir; lo demás se hace con la calculadora
+              const rest = r(total - amounts.reduce((s2, a, j) => (j === i ? s2 : s2 + a), 0));
+              const quick: [string, number][] = [['Todo', r(total)], ['Mitad', r(total / 2)], ...(draft.people.length > 1 && rest > 0 ? [['Lo que falta', rest] as [string, number]] : [])];
+              const val = evalAmount(p.amount);
+              return (
+                <div className={`mt-1 border ${isTech ? 'border-accent/30' : 'border-glass-border rounded-xl overflow-hidden'}`}>
+                  <div className="flex flex-wrap items-center gap-1.5 px-3 pt-2">
+                    {total > 0 && quick.map(([label, v]) => (
+                      <button key={label} type="button" onClick={() => setPerson(i, { amount: String(v) })}
+                              className={`px-2.5 py-1 text-[11px] font-semibold border border-accent/40 text-accent ${chip}`}>{label}: {fmt(v)}</button>
+                    ))}
+                    {p.amount && /[+\-×÷]/.test(p.amount.replace(/^-/, '')) && val !== null && (
+                      <span className="ml-auto text-xs text-text-muted">= <b className="text-text-primary">{fmt(r(val))}</b></span>
+                    )}
+                  </div>
+                  <AmountKeypad value={p.amount} isTech={isTech} decimals={cents} nextLabel="Listo"
+                                onChange={v => setPerson(i, { amount: v })}
+                                onNext={() => { const v = evalAmount(draft.people[i]?.amount || ''); if (v !== null) setPerson(i, { amount: String(r(Math.max(0, v))) }); setCalcIdx(null); }} />
+                </div>
+              );
+            })()}
             {p.settledAt && <p className="text-[10px] text-accent">✓ Ya {draft.paidByMe ? 'te pagó' : 'le pagaste'}</p>}
           </div>
         ))}
