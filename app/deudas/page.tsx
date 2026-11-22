@@ -21,6 +21,10 @@ import { useData } from '@/components/DataProvider';
 import { sharedBalances } from '@/lib/shared';
 import { SharedPaymentModal } from '@/components/shared/SharedPaymentModal';
 import type { Transaction } from '@/lib/firestore';
+import { useAccounts } from '@/hooks/useAccounts';
+import { useInvestments } from '@/hooks/useInvestments';
+import { accountStates, type AccountState } from '@/lib/accounts';
+import { TransferModal } from '@/components/accounts/AccountModals';
 
 const toDate = (value: any): Date | null => {
   if (!value) return null;
@@ -53,6 +57,14 @@ export default function DeudasPage() {
   const sharedOpen = sharedList.flatMap(b => b.entries.filter(e => !e.settled).map(e => ({ ...e, name: b.name })))
     .sort((a, c) => c.date.getTime() - a.date.getTime());
   const [sharedPay, setSharedPay] = useState<{ tx: Transaction; index: number } | null>(null);
+  // Tarjetas de crédito: también son deudas. Lo que debes en cada una (con los préstamos vinculados adentro)
+  const { accounts, transfers } = useAccounts();
+  const { investments } = useInvestments();
+  const cardStates = accountStates(accounts, transactions, transfers, investments, debts)
+    .filter(s => s.account.kind === 'credito' && s.balance < 0);
+  const inCard = new Set(cardStates.flatMap(s => s.movements.filter(m => m.kind === 'debt').map(m => (m as { debt: Debt }).debt.id)));
+  const cardsOwed = cardStates.reduce((sum, s) => sum - s.balance, 0);
+  const [payingCard, setPayingCard] = useState<AccountState | null>(null);
   
   const [showAdd, setShowAdd] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -62,13 +74,14 @@ export default function DeudasPage() {
 
   // Calcular el total de deudas acumulando dinámicamente los intereses generados
   // (solo lo que yo debo; lo que me deben no es plata por pagar)
+  // Los préstamos vinculados a una tarjeta ya están dentro de lo que debes en esa tarjeta: no se suman dos veces
   const totalDeudasConInteres = debts
-    .filter(d => d.status !== 'paid' && (d.direction || 'debo') === 'debo')
+    .filter(d => d.status !== 'paid' && (d.direction || 'debo') === 'debo' && !inCard.has(d.id))
     .reduce((sum, d) => {
       const basePending = d.totalAmount - d.paidAmount;
       const interestData = calculateDebtInterest(d);
       return sum + basePending + interestData.accumulatedInterest;
-    }, 0);
+    }, 0) + cardsOwed;
 
   const isInPeriod = (d: Date | null) => {
     if (filterType === 'all') return true;
@@ -80,13 +93,13 @@ export default function DeudasPage() {
   };
 
   // Las pendientes se ven siempre (siguen vigentes); las liquidadas, solo en el periodo en que se pagaron
-  const activeDebts = debts.filter(d => d.status !== 'paid');
+  const activeDebts = debts.filter(d => d.status !== 'paid' && !inCard.has(d.id)); // las de tarjeta se ven dentro de la tarjeta
   const paidDebts = debts.filter(d => d.status === 'paid' && isInPeriod(settledDate(d)));
   const hiddenPaidCount = debts.filter(d => d.status === 'paid').length - paidDebts.length;
   const pendingOf = (d: Debt) => d.totalAmount - d.paidAmount + calculateDebtInterest(d).accumulatedInterest;
   const owedToMe = activeDebts.filter(d => d.direction === 'me_deben').reduce((s, d) => s + pendingOf(d), 0);
-  const iOweCount = activeDebts.filter(d => (d.direction || 'debo') === 'debo').length;
-  const monthlyInstallments = activeDebts
+  const iOweCount = activeDebts.filter(d => (d.direction || 'debo') === 'debo').length + cardStates.length;
+  const monthlyInstallments = debts.filter(d => d.status !== 'paid')
     .filter(d => (d.direction || 'debo') === 'debo' && d.installment)
     .reduce((s, d) => s + (d.installment || 0) + monthlyInsuranceOf(d), 0);
 
@@ -231,6 +244,7 @@ export default function DeudasPage() {
             ))}
           </ul>
         )}
+        {payingCard && <TransferModal accounts={accounts} payCard={payingCard.account.id} owed={Math.max(0, -payingCard.balance - payingCard.movements.filter(m => m.kind === 'debt').reduce((s, m) => s - m.amount, 0))} currency={profile?.currency || 'COP'} onClose={() => setPayingCard(null)} />}
         {sharedPay && <SharedPaymentModal tx={sharedPay.tx} index={sharedPay.index} onClose={() => setSharedPay(null)} />}
         </div>
 
@@ -245,12 +259,85 @@ export default function DeudasPage() {
                 <div key={i} className="glass-card h-20 rounded-2xl animate-pulse" />
               ))}
             </div>
-          ) : debts.length === 0 ? (
+          ) : debts.length === 0 && !cardStates.length ? (
             <div className="glass-card rounded-2xl p-6 text-center text-text-muted text-sm">
               {tr('No tienes deudas registradas. ¡Buen trabajo!')}
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Tarjetas de crédito: cada una es una deuda; los préstamos vinculados van adentro */}
+              {cardStates.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>{tr('Tarjetas de crédito')} ({cardStates.length})</h3>
+                  {cardStates.map(st => {
+                    const a = st.account;
+                    const owed = -st.balance;
+                    const linkedDebts = st.movements.filter(m => m.kind === 'debt').map(m => m as { debt: Debt; amount: number });
+                    const purchases = st.movements.filter(m => m.kind === 'tx' && m.amount < 0).slice(0, 3);
+                    const pct = a.creditLimit ? Math.min(100, (owed / a.creditLimit) * 100) : 0;
+                    return (
+                      <div key={a.id} className={`glass-card p-4 space-y-2 ${isCyberpunk ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <CreditCard className="w-4 h-4 text-orange-400 shrink-0" />
+                            <p className="text-sm font-semibold text-text-primary truncate">{a.name}</p>
+                          </div>
+                          <p className="text-sm font-bold text-orange-400 shrink-0">{tr('Debes {m}', { m: fmt(owed) })}</p>
+                        </div>
+                        {a.creditLimit ? (
+                          <div>
+                            <p className="text-[11px] text-text-muted">{tr('Disponible {m} de {t}', { m: fmt(Math.max(0, a.creditLimit - owed)), t: fmt(a.creditLimit) })}</p>
+                            <div className={`mt-1 h-1.5 bg-white/10 overflow-hidden ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}>
+                              <div className={`h-full ${pct >= 90 ? 'bg-red-400' : pct >= 70 ? 'bg-amber-400' : 'bg-accent'}`} style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        ) : null}
+                        {linkedDebts.length > 0 && (
+                          <ul className="space-y-1">
+                            {linkedDebts.map(m => (
+                              <li key={m.debt.id}>
+                                <button type="button" onClick={() => setSelectedDebt(m.debt)}
+                                        className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 text-xs border border-orange-500/30 bg-orange-500/5 ${isCyberpunk ? 'rounded-none' : 'rounded-xl'}`}>
+                                  <span className="truncate text-text-secondary">{tr('Incluye')} <b className="text-text-primary">{m.debt.title}</b></span>
+                                  <span className="flex items-center gap-1 shrink-0 text-text-primary font-semibold">{fmt(-m.amount)} <ChevronRight className="w-3.5 h-3.5 text-text-muted" /></span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {purchases.length > 0 && (
+                          <div className="text-[11px] text-text-muted space-y-0.5">
+                            <p className="font-semibold">{tr('Últimas compras')}</p>
+                            {purchases.map((m, i) => (
+                              <p key={i} className="flex justify-between gap-2">
+                                <span className="truncate">{m.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {m.label}</span>
+                                <span className="shrink-0 text-text-secondary">{fmt(-m.amount)}</span>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex gap-2 pt-1">
+                          {(linkedDebts.length ? linkedDebts.length === 1 ? [linkedDebts[0]] : [] : []).map(m => (
+                            <button key={m.debt.id} type="button" onClick={() => setSelectedDebt(m.debt)}
+                                    className={`flex-1 py-2 text-xs font-semibold border border-accent/40 text-accent ${isCyberpunk ? 'rounded-none' : 'rounded-xl'}`}>
+                              {tr('Abonar a {p}', { p: m.debt.title })}
+                            </button>
+                          ))}
+                          {owed + linkedDebts.reduce((s, m) => s + m.amount, 0) > 0 && (
+                            <button type="button" onClick={() => setPayingCard(st)}
+                                    className={`flex-1 py-2 text-xs font-semibold border border-accent/40 text-accent ${isCyberpunk ? 'rounded-none' : 'rounded-xl'}`}>
+                              {tr('Abonar a la tarjeta')}
+                            </button>
+                          )}
+                          <Link href="/servicios/cuentas" className={`px-3 py-2 text-xs font-semibold border border-glass-border text-text-secondary ${isCyberpunk ? 'rounded-none' : 'rounded-xl'}`}>
+                            {tr('Ver')}
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               {/* Deudas Activas */}
               {activeDebts.length > 0 && (
                 <div className="space-y-2">
