@@ -12,6 +12,7 @@ import { getLocalDateString } from '@/lib/dateUtils';
 import { getAiKey, insuranceRateFromAccrued, readDebtWithAi } from '@/lib/aiAssist';
 import { ReadingOverlay } from '@/components/forms/ReadingTips';
 import { useDebts } from '@/hooks/useDebts';
+import { useAccounts } from '@/hooks/useAccounts';
 import { DictateButton } from '@/components/forms/DictateButton';
 import { parseDebtSpeech } from '@/lib/formDictation';
 
@@ -90,6 +91,16 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
   // Deuda existente: lo de todos los días (resumen y abono) arriba; editar los datos, plegado
   const compact = !!debtToEdit && !isReadOnly;
   const [showEdit, setShowEdit] = useState(false);
+  // Cuenta vinculada a la deuda y cuenta del abono
+  const { accounts } = useAccounts();
+  const activeAccounts = accounts.filter(a => !a.archived && a.id);
+  const [accountId, setAccountId] = useState<string>(debtToEdit?.accountId || '');
+  const [pendingAccount, setPendingAccount] = useState<string | null>(null); // cambio esperando confirmación
+  const [abonoAccount, setAbonoAccount] = useState<string>('');
+  const accName = (id?: string | null) => activeAccounts.find(a => a.id === id)?.name || '';
+  const linked = activeAccounts.find(a => a.id === accountId);
+  // El abono sale de (o entra a) una cuenta de verdad: la vinculada si no es tarjeta de crédito, si no la principal
+  const abonoAcc = abonoAccount || (linked && linked.kind !== 'credito' ? linked.id! : (activeAccounts.find(a => a.isDefault && a.kind !== 'credito') || activeAccounts.find(a => a.kind !== 'credito'))?.id || '');
   const editCls = compact ? `order-4 ${showEdit ? '' : 'hidden'}` : '';
 
   const isBank = kind === 'banco';
@@ -270,6 +281,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
         installment: parseInt(installment) || null,
         termMonths: parseInt(termMonths) || null,
         paymentDay: day || null,
+        accountId: accountId || null,
       };
       // Con intereses, la deuda queda saldada cuando lo abonado cubre capital + intereses causados
       const owedExtra = debtToEdit ? calculateDebtInterest(debtToEdit).accumulatedInterest : 0;
@@ -306,6 +318,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           amount: abonoAmount,
           description: newPayment.description,
           date: finalDate,
+          ...(abonoAcc ? { accountId: abonoAcc } : {}),
         });
         await updateDebt(debtToEdit.id!, {
           title, totalAmount: total, paidAmount: paid, status, interestRate: rate, ...plan, description,
@@ -425,6 +438,24 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
         onConfirm={handleDelete}
         title="Eliminar deuda"
         message="¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer."
+      />
+      <ConfirmDialog
+        isOpen={pendingAccount !== null}
+        onCancel={() => setPendingAccount(null)}
+        onConfirm={async () => {
+          const next = pendingAccount || '';
+          setPendingAccount(null);
+          setAccountId(next);
+          if (debtToEdit?.id) {
+            try { await updateDebt(debtToEdit.id, { accountId: next || null }); onSuccess(); }
+            catch (err) { console.error('No se pudo cambiar la cuenta de la deuda', err); }
+          }
+        }}
+        title="Cambiar cuenta"
+        confirmText="Sí, cambiar"
+        message={pendingAccount
+          ? `Esta deuda quedará vinculada a ${accName(pendingAccount)}${accountId ? ` (antes ${accName(accountId) || 'otra cuenta'})` : ''}. Los abonos nuevos usarán esa cuenta; los que ya registraste no cambian.`
+          : `Esta deuda quedará sin cuenta vinculada${accountId ? ` (antes ${accName(accountId) || 'otra cuenta'})` : ''}.`}
       />
       <div
         className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
@@ -697,13 +728,30 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             </div>
           )}
 
+          {activeAccounts.length > 0 && !isReadOnly && (
+            <div className={compact ? 'order-2' : ''}>
+              <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>
+                {owedToMe ? '¿De qué cuenta salió la plata?' : isBank ? '¿En qué cuenta o tarjeta está?' : '¿A qué cuenta te llegó la plata?'}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {[{ id: '', name: 'Ninguna' }, ...activeAccounts.map(a => ({ id: a.id!, name: a.name }))].map(a => (
+                  <button key={a.id || 'none'} type="button"
+                          onClick={() => { if (a.id === accountId) return; if (debtToEdit?.id) setPendingAccount(a.id); else setAccountId(a.id); }}
+                          className={`px-3 py-1.5 text-xs font-semibold border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${accountId === a.id ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary'}`}>
+                    {a.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Resumen con las mismas palabras del banco */}
           {debtToEdit && (() => {
             const c = calculateDebtInterest(debtToEdit);
             const hasCharges = (debtToEdit.interestRate || 0) > 0 || (debtToEdit.monthlyInsurance || 0) > 0 || (debtToEdit.insuranceRate || 0) > 0;
             const next = !isReadOnly ? nextDebtPaymentDate(debtToEdit) : null;
-            if (!hasCharges && !next) return null;
             const row = 'flex justify-between';
+            const left = Math.max(0, debtToEdit.totalAmount - debtToEdit.paidAmount);
             return (
               <div className={`${compact ? 'order-1' : ''} p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-glass border-glass-border rounded-2xl text-xs space-y-1 text-text-secondary'}`}>
                 {hasCharges && (
@@ -721,6 +769,23 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                       <span className={isTechTheme ? 'text-accent font-mono' : 'text-[#00E5A0] font-mono'}>{fmt(c.currentTotal)}</span>
                     </div>
                   </>
+                )}
+                {!hasCharges && (
+                  <>
+                    <div className={row}><span>{owedToMe ? 'Le prestaste' : 'Monto'}</span><span className="text-text-primary">{fmt(debtToEdit.totalAmount)}</span></div>
+                    {debtToEdit.paidAmount > 0 && <div className={row}><span>Abonado</span><span className="text-accent font-semibold">−{fmt(debtToEdit.paidAmount)}</span></div>}
+                    <hr className="border-glass-border my-1.5" />
+                    <div className="flex justify-between text-sm font-bold">
+                      <span className={isTechTheme ? 'text-accent' : 'text-text-primary font-syne'}>{isReadOnly ? 'Total pagado' : owedToMe ? 'Te debe a la fecha' : 'Deuda a la fecha'}</span>
+                      <span className={isTechTheme ? 'text-accent font-mono' : 'text-[#00E5A0] font-mono'}>{fmt(isReadOnly ? debtToEdit.paidAmount : left)}</span>
+                    </div>
+                  </>
+                )}
+                {linked && (
+                  <div className={`${row} pt-1`}>
+                    <span>{owedToMe ? 'Salió de' : isBank ? 'Está en' : 'Te llegó a'}</span>
+                    <span className="text-text-primary">{linked.name}</span>
+                  </div>
                 )}
                 {next && (
                   <div className={`${row} pt-1`}>
@@ -747,6 +812,19 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Fecha</label>
                 <input autoComplete="off" type="date" value={abonoDate} onChange={(e) => setAbonoDate(e.target.value)} className={dateCls} />
               </div>
+              {abono && activeAccounts.some(a => a.kind !== 'credito') && (
+                <div className="col-span-2">
+                  <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{owedToMe ? '¿A qué cuenta te llegó?' : '¿De qué cuenta salió?'}</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeAccounts.filter(a => a.kind !== 'credito').map(a => (
+                      <button key={a.id} type="button" onClick={() => setAbonoAccount(a.id!)}
+                              className={`px-3 py-1.5 text-xs font-semibold border ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${abonoAcc === a.id ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary'}`}>
+                        {a.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

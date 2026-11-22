@@ -125,6 +125,8 @@ export interface Debt {
   direction?: 'debo' | 'me_deben';
   // Crédito de un banco (con tasa, seguro y cuotas) o préstamo entre personas
   debtKind?: 'banco' | 'persona';
+  // Cuenta vinculada: donde está la deuda (p. ej. la tarjeta) o de donde salió / a donde entró la plata
+  accountId?: string | null;
   payments?: Array<{
     id: string;
     amount: number;
