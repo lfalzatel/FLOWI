@@ -463,9 +463,13 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
     })).map(it => (it.category === 'Otros' && category !== 'Otros' ? { ...it, category } : it));
     // Hora del recibo (solo si es válida y, si la compra es de hoy, no está en el futuro)
     let time: string | undefined;
-    const tm = typeof parsed.time === 'string' ? parsed.time.match(/^(\d{1,2}):(\d{2})/) : null;
+    const tm = typeof parsed.time === 'string' ? parsed.time.match(/^(\d{1,2}):(\d{2})\s*([ap])?\.?\s*m?/i) : null;
     if (tm && Number(tm[1]) < 24 && Number(tm[2]) < 60) {
-      const hhmm = `${tm[1].padStart(2, '0')}:${tm[2]}`;
+      // "10:37 p.m." → 22:37 (por si la IA no la pasa a 24 horas)
+      let h = Number(tm[1]);
+      if (tm[3]?.toLowerCase() === 'p' && h < 12) h += 12;
+      if (tm[3]?.toLowerCase() === 'a' && h === 12) h = 0;
+      const hhmm = `${String(h).padStart(2, '0')}:${tm[2]}`;
       const day = date || new Date().toLocaleDateString('en-CA');
       if (new Date(`${day}T${hhmm}:00`) <= new Date()) time = hhmm;
     }

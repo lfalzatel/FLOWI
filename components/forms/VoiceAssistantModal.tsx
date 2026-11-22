@@ -1169,6 +1169,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                        onChange={(e) => { if (e.target.value) { handleUpdateItem(idx, 'date', e.target.value); handleUpdateItem(idx, 'time', undefined); } }}
                                        aria-label="Cambiar la fecha"
                                        className={`flex-1 min-w-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
+                                <input autoComplete="off" type="time" value={res.time || '12:00'}
+                                       onChange={(e) => handleUpdateItem(idx, 'time', e.target.value || undefined)}
+                                       aria-label="Cambiar la hora"
+                                       className={`w-[5.5rem] shrink-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
                                 <button type="button" onClick={() => { handleUpdateItem(idx, 'date', undefined); handleUpdateItem(idx, 'time', undefined); }}
                                         className={`shrink-0 px-2.5 py-1 text-[11px] font-bold border border-amber-400/60 text-amber-300 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
                                   Usar hoy
@@ -1177,7 +1181,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             </div>
                           );
                         })() : res.date ? (
-                          <p className={`text-[10px] text-text-muted normal-case px-1 -mx-1 ${hl('date')}`}>Fecha: hoy</p>
+                          <div className={`flex items-center gap-2 text-[10px] text-text-muted normal-case px-1 -mx-1 ${hl('date')}`}>
+                            <span>Fecha: hoy, a las</span>
+                            <input autoComplete="off" type="time" value={res.time || new Date().toTimeString().slice(0, 5)}
+                                   onChange={(e) => handleUpdateItem(idx, 'time', e.target.value || undefined)}
+                                   aria-label="Cambiar la hora"
+                                   className={`w-[5.5rem] px-2 py-0.5 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
+                          </div>
                         ) : null}
                         {res.type === 'gasto' && res.items?.length ? (
                           <div className="space-y-2">
