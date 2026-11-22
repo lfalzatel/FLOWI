@@ -27,7 +27,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
 import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle } from '@/lib/voiceParser';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
-import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi, startOpenRouterConnect } from '@/lib/aiAssist';
+import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi } from '@/lib/aiAssist';
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
@@ -839,7 +839,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             </p>
             <button
               type="button"
-              onClick={() => { startOpenRouterConnect().catch(() => router.push('/configuracion')); }}
+              onClick={() => { onClose(); router.push('/configuracion#ia'); }}
               className={`w-full py-3 text-sm font-bold bg-accent text-black flex items-center justify-center gap-2 hover:opacity-90 ${isTechTheme ? 'rounded-none uppercase font-mono' : 'rounded-xl'}`}
             >
               <Sparkles className="w-4 h-4" /> Conectar IA gratis

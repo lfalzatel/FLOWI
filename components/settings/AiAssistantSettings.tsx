@@ -35,7 +35,7 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
   const mono = isTechTheme ? 'font-mono' : '';
 
   return (
-    <section className="space-y-3">
+    <section id="ia" className="space-y-3 scroll-mt-20">
       {onToggle ? (
         <button onClick={onToggle} className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}>
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Asistente de voz con IA</h2>

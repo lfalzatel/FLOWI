@@ -61,11 +61,12 @@ export default function ConfigPage() {
     seguridad: false
   });
 
-  // Desde el menú de perfil ("Apoyar a FLOWI") se llega con #apoyar: abrir esa sección
+  // Desde el menú de perfil se llega con #apoyar, y desde el aviso "Activa la IA" con #ia: abrir esa sección
   useEffect(() => {
-    if (window.location.hash === '#apoyar') {
-      setOpenSections(prev => ({ ...prev, apoyar: true }));
-      setTimeout(() => document.getElementById('apoyar')?.scrollIntoView({ behavior: 'smooth' }), 300);
+    const target = window.location.hash.slice(1);
+    if (target === 'apoyar' || target === 'ia') {
+      setOpenSections(prev => ({ ...prev, [target]: true }));
+      setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 300);
     }
   }, []);
 
