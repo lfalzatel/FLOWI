@@ -4,6 +4,8 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  // El manifest siempre de la red: si el service worker da uno viejo, Android instala FLOWI sin "Compartir"
+  publicExcludes: ['!noprecache/**/*', '!manifest.json'],
 });
 
 const nextConfig = {

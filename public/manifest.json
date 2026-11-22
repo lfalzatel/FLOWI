@@ -1,8 +1,10 @@
 {
+  "id": "/",
   "name": "Flowi - Gestión de Gastos",
   "short_name": "Flowi",
   "description": "Tu dinero, en flujo",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0A0A0F",
   "theme_color": "#00E5A0",
