@@ -341,15 +341,23 @@ async function shrinkImage(file: File): Promise<string> {
   }
 }
 
+// "382.939" leído como 382,939 (el punto era de miles): con exactamente 3 decimales, en pesos son miles
+export function pesosFix(n: number): number {
+  if (!Number.isFinite(n) || n <= 0 || n >= 1000) return n;
+  const k = Math.round(n * 1000);
+  return Math.abs(n * 1000 - k) < 1e-6 && k % 10 !== 0 ? k : n;
+}
+
 function receiptPrompt(customLabels: string[]) {
   return `Lees fotos de Colombia de dos tipos:
-(A) un recibo, factura o tiquete de compra, o
+(A) un recibo, factura o tiquete de compra, o el comprobante o detalle de UNA sola operación en la app del banco (una compra con tarjeta, un pago, una transferencia): en ese caso el comercio o concepto es "merchant", el valor es "total" e "items" va vacío, o
 (B) una captura de la app de un banco o billetera (Bancolombia, Nequi, Daviplata, BBVA...) con una LISTA DE MOVIMIENTOS.
 Responde SOLO con un JSON.
 Si es (A): {"kind":"recibo","total":numero_en_pesos,"merchant":"nombre del comercio o null","date":"YYYY-MM-DD o null","time":"HH:MM en formato 24 horas o null","category":"...","description":"texto corto de lo que se compró","items":[{"name":"producto como aparece","qty":cantidad,"unit":"kg o null","price":precio_unitario,"total":total_del_renglon,"category":"..."}]}
 Si es (B): {"kind":"movimientos","bank":"banco o billetera o null","movimientos":[{"type":"ingreso"|"gasto","amount":numero_en_pesos,"date":"YYYY-MM-DD o null","description":"texto corto y claro (ej. Transferencia de Luis Felipe, Cuota de manejo tarjeta débito)","category":"..."}]}
 Reglas:
 - En (A), "total" es el TOTAL A PAGAR (no el subtotal, ni el IVA, ni el cambio).
+- Los bancos muestran las salidas de plata con signo menos ("$ -382.939,00"): los valores siempre van POSITIVOS. ",00" al final son centavos: "$ -382.939,00" = 382939.
 - En (A), "items" son TODOS los productos del recibo, uno por renglón y en el mismo orden, aunque se repitan. "qty" puede tener decimales (0.845 kg). "total" del renglón es lo que costó ese renglón. No incluyas subtotales, IVA, cambio ni medios de pago. Si el recibo no detalla productos, usa "items":[]. "category" de cada producto es la categoría de gasto que le corresponde a ESE producto (ej. huevos → Mercado, cerveza → Licores y Bares, jabón → Aseo si existe) de la misma lista de categorías.
 - En (B), cada movimiento es una fila: los valores en verde o con "+" son ingresos; en rojo o con "-" son gastos. No incluyas el saldo disponible.
 - Separadores de miles: casi siempre en Colombia el punto separa miles ("$45.900" = 45900, "1.250.000" = 1250000). Pero muchas cajas registradoras imprimen al estilo inglés: coma para miles y punto para decimales ("10,450.00" = 10450, "$225,040" = 225040, "3,350.16" = 3350). Mira cómo están escritos los precios del recibo y usa la misma regla en todo el recibo. En pesos colombianos los totales casi nunca tienen centavos: si un total te queda con decimales (225.04), seguramente la coma era de miles.
@@ -423,7 +431,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
       const bank = typeof parsed.bank === 'string' && parsed.bank.trim() && parsed.bank !== 'null' ? parsed.bank.trim().slice(0, 30) : undefined;
       const results: ParsedVoiceResult[] = [];
       for (const mv of parsed.movimientos.slice(0, 20)) {
-        const amount = Math.abs(Number(mv?.amount));
+        const amount = pesosFix(Math.abs(Number(mv?.amount)));
         if (!Number.isFinite(amount) || amount <= 0) continue;
         const type: 'gasto' | 'ingreso' = mv?.type === 'ingreso' ? 'ingreso' : 'gasto';
         const category = matchCategory(mv?.category, type, customLabels);
@@ -440,7 +448,7 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
     }
 
     // (A) Recibo de compra
-    let total = Number(parsed?.total);
+    let total = pesosFix(Math.abs(Number(parsed?.total)));
     if (!Number.isFinite(total) || total <= 0) return { ok: false, reason: 'unreadable' };
     // "225,040" leído como 225.04: si la suma de productos es ~1000 veces el total, la coma era de miles
     const rawItems = Array.isArray(parsed.items) ? parsed.items : [];
