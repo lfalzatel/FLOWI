@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, Share2, FileSpreadsheet, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
@@ -94,7 +94,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       } catch (e) {
         console.error("Error al calcular fechas de la semana:", e);
       }
-      return `Semana: ${filterValue}`;
+      return tr('Semana: {a}', { a: filterValue });
     }
     // Formato YYYY-MM-DD -> DD/MM/YYYY
     try {
@@ -112,9 +112,9 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     
     // Encabezado Corporativo
     csv += "FLOWI — Tu dinero en flujo\n";
-    csv += `Reporte de:;${title}\n`;
-    csv += `Periodo del reporte:;${getPeriodString()}\n`;
-    csv += `Fecha y hora de consulta:;${dateStr}\n\n`;
+    csv += `${tr('Reporte de:')};${title}\n`;
+    csv += `${tr('Periodo del reporte:')};${getPeriodString()}\n`;
+    csv += `${tr('Fecha y hora de consulta:')};${dateStr}\n\n`;
 
     // Resumen Ejecutivo
     csv += "RESUMEN EJECUTIVO\n";
@@ -122,16 +122,16 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
       const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
       const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
-      csv += `Total Deuda original:;"${Math.round(total)}"\n`;
-      csv += `Total Abonado:;"${Math.round(paid)}"\n`;
-      csv += `Total Pendiente de pago:;"${Math.round(pending)}"\n\n`;
+      csv += `${tr('Total Deuda original:')};"${Math.round(total)}"\n`;
+      csv += `${tr('Total Abonado:')};"${Math.round(paid)}"\n`;
+      csv += `${tr('Total Pendiente de pago:')};"${Math.round(pending)}"\n\n`;
     } else {
       const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
       const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
       const balanceReal = totalIngresos - totalGastos;
-      csv += `Total Ingresos:;"${Math.round(totalIngresos)}"\n`;
-      csv += `Total Gastos:;"${Math.round(totalGastos)}"\n`;
-      csv += `Dinero Disponible (Balance):;"${Math.round(balanceReal)}"\n\n`;
+      csv += `${tr('Total Ingresos:')};"${Math.round(totalIngresos)}"\n`;
+      csv += `${tr('Total Gastos:')};"${Math.round(totalGastos)}"\n`;
+      csv += `${tr('Dinero Disponible (Balance):')};"${Math.round(balanceReal)}"\n\n`;
     }
 
     // Tabla de Datos
@@ -140,12 +140,12 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       csv += "Concepto;Monto Total;Abonado;Deuda Pendiente;Estado\n";
       debts.forEach(d => {
         const pending = d.totalAmount - d.paidAmount;
-        csv += `"${d.title}";"${Math.round(d.totalAmount)}";"${Math.round(d.paidAmount)}";"${Math.round(pending)}";"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
+        csv += `"${d.title}";"${Math.round(d.totalAmount)}";"${Math.round(d.paidAmount)}";"${Math.round(pending)}";"${d.status === 'paid' ? tr('Liquidada') : tr('Pendiente')}"\n`;
       });
     } else {
       csv += "Fecha y Hora;Categoría;Tipo;Descripción;Monto\n";
       transactions.forEach(t => {
-        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";"${Math.round(t.amount)}"\n`;
+        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? tr('Gasto') : tr('Ingreso')}";"${t.description || ''}";"${Math.round(t.amount)}"\n`;
       });
     }
 
@@ -174,9 +174,9 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       
       summaryHTML = `
         <div class="summary-card">
-          <div><strong>Total Deuda:</strong> $${total.toLocaleString()}</div>
-          <div><strong>Total Abonado:</strong> $${paid.toLocaleString()}</div>
-          <div style="color: #e28743;"><strong>Pendiente:</strong> $${pending.toLocaleString()}</div>
+          <div><strong>${tr('Total Deuda:')}</strong> $${total.toLocaleString()}</div>
+          <div><strong>${tr('Total Abonado:')}</strong> $${paid.toLocaleString()}</div>
+          <div style="color: #e28743;"><strong>${tr('Pendiente:')}</strong> $${pending.toLocaleString()}</div>
         </div>
       `;
 
@@ -188,7 +188,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             <td>$${d.totalAmount.toLocaleString()}</td>
             <td>$${d.paidAmount.toLocaleString()}</td>
             <td style="color: #e28743; font-weight: bold;">$${pending.toLocaleString()}</td>
-            <td><span class="badge ${d.status === 'paid' ? 'badge-paid' : 'badge-pending'}">${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}</span></td>
+            <td><span class="badge ${d.status === 'paid' ? 'badge-paid' : 'badge-pending'}">${d.status === 'paid' ? tr('Liquidada') : tr('Pendiente')}</span></td>
           </tr>
         `;
       });
@@ -199,9 +199,9 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
 
       summaryHTML = `
         <div class="summary-card">
-          <div><strong>Ingresos:</strong> <span style="color: #10b981;">$${totalIngresos.toLocaleString()}</span></div>
-          <div><strong>Gastos:</strong> <span style="color: #ef4444;">$${totalGastos.toLocaleString()}</span></div>
-          <div><strong>Disponible:</strong> <span style="color: #10b981; font-weight: 800;">$${balanceReal.toLocaleString()}</span></div>
+          <div><strong>${tr('Ingresos:')}</strong> <span style="color: #10b981;">$${totalIngresos.toLocaleString()}</span></div>
+          <div><strong>${tr('Gastos:')}</strong> <span style="color: #ef4444;">$${totalGastos.toLocaleString()}</span></div>
+          <div><strong>${tr('Disponible:')}</strong> <span style="color: #10b981; font-weight: 800;">$${balanceReal.toLocaleString()}</span></div>
         </div>
       `;
 
@@ -210,7 +210,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           <tr>
             <td style="color: #666; font-size: 11px;">${formatTimestamp(t.date)}</td>
             <td><strong>${t.category}</strong></td>
-            <td><span class="badge ${t.type === 'gasto' ? 'badge-gasto' : 'badge-ingreso'}">${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}</span></td>
+            <td><span class="badge ${t.type === 'gasto' ? 'badge-gasto' : 'badge-ingreso'}">${t.type === 'gasto' ? tr('Gasto') : tr('Ingreso')}</span></td>
             <td style="color: #555;">${t.description || '-'}</td>
             <td style="font-weight: bold; text-align: right;">$${t.amount.toLocaleString()}</td>
           </tr>
@@ -255,8 +255,8 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           <div class="action-bar no-print">
             <span>¿Qué deseas hacer con tu reporte de ${title}?</span>
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-secondary" onclick="window.print()">Guardar como PDF / Imprimir</button>
-              <button class="btn btn-primary" onclick="window.close()">Cerrar Pestaña</button>
+              <button class="btn btn-secondary" onclick="window.print()">${tr('Guardar como PDF / Imprimir')}</button>
+              <button class="btn btn-primary" onclick="window.close()">${tr('Cerrar Pestaña')}</button>
             </div>
           </div>
 
@@ -267,8 +267,8 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             </div>
             <div class="report-meta">
               <div class="report-title">Reporte de ${title}</div>
-              <div><strong>Periodo:</strong> ${getPeriodString()}</div>
-              <div><strong>Fecha y hora de consulta:</strong> ${dateStr}</div>
+              <div><strong>${tr('Periodo:')}</strong> ${getPeriodString()}</div>
+              <div><strong>${tr('Fecha y hora de consulta:')}</strong> ${dateStr}</div>
             </div>
           </div>
           
@@ -277,8 +277,8 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           <table>
             <thead>
               ${debts.length > 0 
-                ? '<tr><th>Concepto</th><th>Monto Original</th><th>Abonado</th><th>Pendiente</th><th>Estado</th></tr>'
-                : '<tr><th>Fecha y Hora</th><th>Categoría</th><th>Tipo</th><th>Descripción</th><th style="text-align: right;">Monto</th></tr>'
+                ? `<tr><th>${tr('Concepto')}</th><th>${tr('Monto Original')}</th><th>${tr('Abonado')}</th><th>${tr('Pendiente')}</th><th>${tr('Estado')}</th></tr>`
+                : `<tr><th>${tr('Fecha y Hora')}</th><th>${tr('Categoría')}</th><th>${tr('Tipo')}</th><th>${tr('Descripción')}</th><th style="text-align: right;">${tr('Monto')}</th></tr>`
               }
             </thead>
             <tbody>
@@ -302,25 +302,25 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
     let csv = "";
     const dateStr = new Date().toLocaleDateString(currentLocale()) + ' ' + new Date().toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' });
     csv += "FLOWI — Tu dinero en flujo\n";
-    csv += `Reporte de:;${title}\n`;
-    csv += `Periodo del reporte:;${getPeriodString()}\n`;
-    csv += `Fecha y hora de consulta:;${dateStr}\n\n`;
+    csv += `${tr('Reporte de:')};${title}\n`;
+    csv += `${tr('Periodo del reporte:')};${getPeriodString()}\n`;
+    csv += `${tr('Fecha y hora de consulta:')};${dateStr}\n\n`;
 
     csv += "RESUMEN EJECUTIVO\n";
     if (debts.length > 0) {
       const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
       const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
       const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
-      csv += `Total Deuda original:;"${Math.round(total)}"\n`;
-      csv += `Total Abonado:;"${Math.round(paid)}"\n`;
-      csv += `Total Pendiente de pago:;"${Math.round(pending)}"\n\n`;
+      csv += `${tr('Total Deuda original:')};"${Math.round(total)}"\n`;
+      csv += `${tr('Total Abonado:')};"${Math.round(paid)}"\n`;
+      csv += `${tr('Total Pendiente de pago:')};"${Math.round(pending)}"\n\n`;
     } else {
       const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
       const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
       const balanceReal = totalIngresos - totalGastos;
-      csv += `Total Ingresos:;"${Math.round(totalIngresos)}"\n`;
-      csv += `Total Gastos:;"${Math.round(totalGastos)}"\n`;
-      csv += `Dinero Disponible (Balance):;"${Math.round(balanceReal)}"\n\n`;
+      csv += `${tr('Total Ingresos:')};"${Math.round(totalIngresos)}"\n`;
+      csv += `${tr('Total Gastos:')};"${Math.round(totalGastos)}"\n`;
+      csv += `${tr('Dinero Disponible (Balance):')};"${Math.round(balanceReal)}"\n\n`;
     }
 
     csv += "DETALLE DEL REPORTE\n";
@@ -328,12 +328,12 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
       csv += "Concepto;Monto Total;Abonado;Deuda Pendiente;Estado\n";
       debts.forEach(d => {
         const pending = d.totalAmount - d.paidAmount;
-        csv += `"${d.title}";"${Math.round(d.totalAmount)}";"${Math.round(d.paidAmount)}";"${Math.round(pending)}";"${d.status === 'paid' ? 'Liquidada' : 'Pendiente'}"\n`;
+        csv += `"${d.title}";"${Math.round(d.totalAmount)}";"${Math.round(d.paidAmount)}";"${Math.round(pending)}";"${d.status === 'paid' ? tr('Liquidada') : tr('Pendiente')}"\n`;
       });
     } else {
       csv += "Fecha y Hora;Categoría;Tipo;Descripción;Monto\n";
       transactions.forEach(t => {
-        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? 'Gasto' : 'Ingreso'}";"${t.description || ''}";"${Math.round(t.amount)}"\n`;
+        csv += `"${formatTimestamp(t.date)}";"${t.category}";"${t.type === 'gasto' ? tr('Gasto') : tr('Ingreso')}";"${t.description || ''}";"${Math.round(t.amount)}"\n`;
       });
     }
     return csv;
@@ -380,7 +380,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
   // Compartir reporte mediante Web Share API (PDF, Excel o Imagen)
   const handleShare = async () => {
     if (!navigator.share) {
-      alert('Tu navegador o dispositivo no soporta la función de compartir directamente.');
+      alert(tr('Tu navegador o dispositivo no soporta la función de compartir directamente.'));
       return;
     }
 
@@ -410,12 +410,12 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         doc.setFontSize(14);
         doc.setTextColor(17, 24, 39);
         doc.setFont('helvetica', 'bold');
-        doc.text(`Reporte de ${title}`, 130, 20);
+        doc.text(tr('Reporte de {a}', { a: title }), 130, 20);
         
         doc.setFontSize(9);
         doc.setTextColor(107, 114, 128);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Periodo: ${getPeriodString()}`, 130, 25);
+        doc.text(tr('Periodo: {a}', { a: getPeriodString() }), 130, 25);
         doc.text(`Fecha y hora de consulta: ${new Date().toLocaleDateString(currentLocale())} ${new Date().toLocaleTimeString(currentLocale(), { hour: '2-digit', minute: '2-digit' })}`, 130, 30);
         
         doc.line(14, 35, 196, 35);
@@ -423,7 +423,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         // Resumen Ejecutivo en el PDF
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
-        doc.text("RESUMEN EJECUTIVO", 14, 45);
+        doc.text(tr('RESUMEN EJECUTIVO'), 14, 45);
         
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
@@ -431,16 +431,16 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           const pending = debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0);
           const paid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
           const total = debts.reduce((sum, d) => sum + d.totalAmount, 0);
-          doc.text(`Total Deuda Original: $${total.toLocaleString()}`, 14, 52);
-          doc.text(`Total Abonado: $${paid.toLocaleString()}`, 14, 58);
-          doc.text(`Total Pendiente: $${pending.toLocaleString()}`, 14, 64);
+          doc.text(tr('Total Deuda Original: {a}', { a: `$${total.toLocaleString()}` }), 14, 52);
+          doc.text(tr('Total Abonado: {a}', { a: `$${paid.toLocaleString()}` }), 14, 58);
+          doc.text(tr('Total Pendiente: {a}', { a: `$${pending.toLocaleString()}` }), 14, 64);
         } else {
           const totalGastos = transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0);
           const totalIngresos = transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0);
           const balanceReal = totalIngresos - totalGastos;
-          doc.text(`Total Ingresos: $${totalIngresos.toLocaleString()}`, 14, 52);
-          doc.text(`Total Gastos: $${totalGastos.toLocaleString()}`, 14, 58);
-          doc.text(`Dinero Disponible (Balance): $${balanceReal.toLocaleString()}`, 14, 64);
+          doc.text(tr('Total Ingresos: {a}', { a: `$${totalIngresos.toLocaleString()}` }), 14, 52);
+          doc.text(tr('Total Gastos: {a}', { a: `$${totalGastos.toLocaleString()}` }), 14, 58);
+          doc.text(tr('Dinero Disponible (Balance): {a}', { a: `$${balanceReal.toLocaleString()}` }), 14, 64);
         }
 
         doc.line(14, 72, 196, 72);
@@ -448,17 +448,17 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
         // Detalle de transacciones
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
-        doc.text("DETALLE DEL REPORTE", 14, 80);
+        doc.text(tr('DETALLE DEL REPORTE'), 14, 80);
 
         let y = 90;
         doc.setFontSize(9);
         doc.setFont('helvetica', 'bold');
         if (debts.length > 0) {
-          doc.text("Concepto", 14, y);
-          doc.text("Monto Total", 70, y);
-          doc.text("Abonado", 110, y);
-          doc.text("Pendiente", 150, y);
-          doc.text("Estado", 180, y);
+          doc.text(tr('Concepto'), 14, y);
+          doc.text(tr('Monto Total'), 70, y);
+          doc.text(tr('Abonado'), 110, y);
+          doc.text(tr('Pendiente'), 150, y);
+          doc.text(tr('Estado'), 180, y);
           y += 6;
           doc.setFont('helvetica', 'normal');
           debts.forEach(d => {
@@ -467,22 +467,22 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             doc.text(`$${d.totalAmount.toLocaleString()}`, 70, y);
             doc.text(`$${d.paidAmount.toLocaleString()}`, 110, y);
             doc.text(`$${(d.totalAmount - d.paidAmount).toLocaleString()}`, 150, y);
-            doc.text(d.status === 'paid' ? 'Liquidada' : 'Pendiente', 180, y);
+            doc.text(d.status === 'paid' ? tr('Liquidada') : tr('Pendiente'), 180, y);
             y += 6;
           });
         } else {
-          doc.text("Fecha y Hora", 14, y);
-          doc.text("Categoría", 60, y);
-          doc.text("Tipo", 105, y);
-          doc.text("Descripción", 130, y);
-          doc.text("Monto", 180, y);
+          doc.text(tr('Fecha y Hora'), 14, y);
+          doc.text(tr('Categoría'), 60, y);
+          doc.text(tr('Tipo'), 105, y);
+          doc.text(tr('Descripción'), 130, y);
+          doc.text(tr('Monto'), 180, y);
           y += 6;
           doc.setFont('helvetica', 'normal');
           transactions.forEach(t => {
             if (y > 280) { doc.addPage(); y = 20; }
             doc.text(formatTimestamp(t.date), 14, y);
             doc.text(t.category, 60, y);
-            doc.text(t.type === 'gasto' ? 'Gasto' : 'Ingreso', 105, y);
+            doc.text(t.type === 'gasto' ? tr('Gasto') : tr('Ingreso'), 105, y);
             doc.text(t.description || '-', 130, y);
             doc.text(`$${t.amount.toLocaleString()}`, 180, y);
             y += 6;
@@ -573,8 +573,8 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                   <FileText className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>Documento PDF (.pdf)</h4>
-                  <p className="text-xs text-text-muted mt-0.5">Reporte formal limpio con tablas ordenadas listo para imprimir.</p>
+                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{tr('Documento PDF (.pdf)')}</h4>
+                  <p className="text-xs text-text-muted mt-0.5">{tr('Reporte formal limpio con tablas ordenadas listo para imprimir.')}</p>
                 </div>
               </button>
 
@@ -586,8 +586,8 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                   <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>Hoja de Cálculo (.csv)</h4>
-                  <p className="text-xs text-text-muted mt-0.5">Ideal para importar y analizar en Excel o Google Sheets.</p>
+                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{tr('Hoja de Cálculo (.csv)')}</h4>
+                  <p className="text-xs text-text-muted mt-0.5">{tr('Ideal para importar y analizar en Excel o Google Sheets.')}</p>
                 </div>
               </button>
 
@@ -599,8 +599,8 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                   <ImageIcon className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>Captura de Imagen (.png)</h4>
-                  <p className="text-xs text-text-muted mt-0.5">Ficha ejecutiva visual ideal para compartir por redes sociales.</p>
+                  <h4 className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent' : 'text-text-primary'}`}>{tr('Captura de Imagen (.png)')}</h4>
+                  <p className="text-xs text-text-muted mt-0.5">{tr('Ficha ejecutiva visual ideal para compartir por redes sociales.')}</p>
                 </div>
               </button>
             </div>
@@ -608,7 +608,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
             // Estado de Carga
             <div className="py-12 flex flex-col items-center justify-center gap-3">
               <Loader2 className="w-8 h-8 text-accent animate-spin" />
-              <p className={`text-sm ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>Generando reporte...</p>
+              <p className={`text-sm ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>{tr('Generando reporte...')}</p>
             </div>
           ) : (
             // Pantalla 2: Previsualización del Reporte
@@ -630,34 +630,34 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
 
                 {/* Resumen Ejecutivo (Estilo PDF) */}
                 <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100 space-y-1">
-                  <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Resumen Ejecutivo</span>
+                  <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">{tr('Resumen Ejecutivo')}</span>
                   {debts.length > 0 ? (
                     <div className="grid grid-cols-3 gap-2 text-[9px] text-center pt-0.5">
                       <div>
-                        <div className="text-[7px] text-slate-400">Total Deuda</div>
+                        <div className="text-[7px] text-slate-400">{tr('Total Deuda')}</div>
                         <div className="font-bold text-slate-700">${debts.reduce((sum, d) => sum + d.totalAmount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[7px] text-slate-400">Abonado</div>
+                        <div className="text-[7px] text-slate-400">{tr('Abonado')}</div>
                         <div className="font-bold text-emerald-600">${debts.reduce((sum, d) => sum + d.paidAmount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[7px] text-slate-400">Pendiente</div>
+                        <div className="text-[7px] text-slate-400">{tr('Pendiente')}</div>
                         <div className="font-bold text-amber-600">${debts.reduce((sum, d) => sum + (d.totalAmount - d.paidAmount), 0).toLocaleString()}</div>
                       </div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-2 text-[9px] text-center pt-0.5">
                       <div>
-                        <div className="text-[7px] text-slate-400">Ingresos</div>
+                        <div className="text-[7px] text-slate-400">{tr('Ingresos')}</div>
                         <div className="font-bold text-emerald-600">${transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[7px] text-slate-400">Gastos</div>
+                        <div className="text-[7px] text-slate-400">{tr('Gastos')}</div>
                         <div className="font-bold text-red-500">${transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0).toLocaleString()}</div>
                       </div>
                       <div>
-                        <div className="text-[7px] text-slate-400">Disponible</div>
+                        <div className="text-[7px] text-slate-400">{tr('Disponible')}</div>
                         <div className="font-bold text-emerald-600 font-extrabold">${(transactions.filter(t => t.type === 'ingreso').reduce((sum, t) => sum + t.amount, 0) - transactions.filter(t => t.type === 'gasto').reduce((sum, t) => sum + t.amount, 0)).toLocaleString()}</div>
                       </div>
                     </div>
@@ -666,23 +666,23 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
 
                 {/* Tabla de Detalle (Estilo PDF) */}
                 <div className="space-y-1.5">
-                  <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Detalle del Reporte</span>
+                  <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">{tr('Detalle del Reporte')}</span>
                   <table className="w-full text-left text-[8px] border-collapse">
                     <thead>
                       <tr className="border-b border-slate-200 bg-slate-50/50 text-slate-500 font-bold">
                         {debts.length > 0 ? (
                           <>
-                            <th className="py-1">Concepto</th>
-                            <th className="py-1">Total</th>
-                            <th className="py-1">Abonado</th>
-                            <th className="py-1 text-right">Pendiente</th>
+                            <th className="py-1">{tr('Concepto')}</th>
+                            <th className="py-1">{tr('Total')}</th>
+                            <th className="py-1">{tr('Abonado')}</th>
+                            <th className="py-1 text-right">{tr('Pendiente')}</th>
                           </>
                         ) : (
                           <>
-                            <th className="py-1">Fecha/Hora</th>
-                            <th className="py-1">Categoría</th>
-                            <th className="py-1">Tipo</th>
-                            <th className="py-1 text-right">Monto</th>
+                            <th className="py-1">{tr('Fecha/Hora')}</th>
+                            <th className="py-1">{tr('Categoría')}</th>
+                            <th className="py-1">{tr('Tipo')}</th>
+                            <th className="py-1 text-right">{tr('Monto')}</th>
                           </>
                         )}
                       </tr>
