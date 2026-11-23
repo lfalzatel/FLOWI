@@ -20,8 +20,7 @@ import {
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
   Sun, Monitor, Terminal, Moon, Layers, Heart, Compass,
-  Crown, ShieldCheck,
-} from 'lucide-react';
+  Crown, ShieldCheck, Sparkles } from 'lucide-react';
 
 const menuItems = [
   { icon: User,       label: 'Mi perfil',         href: '#',              divider: false, soon: false },
@@ -287,6 +286,9 @@ export function ProfileCapsule() {
                   } else if (t === 'glassmorphism') {
                     icon = <Layers className="w-4 h-4 mb-1" />;
                     label = 'Glass';
+                  } else if (t === 'nebula') {
+                    icon = <Sparkles className="w-4 h-4 mb-1" />;
+                    label = 'Nebulosa';
                   } else if (t === 'kiloCode') {
                     icon = <Terminal className="w-4 h-4 mb-1" />;
                     label = 'Kilo';

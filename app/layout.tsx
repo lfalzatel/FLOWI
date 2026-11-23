@@ -50,6 +50,7 @@ export const viewport: Viewport = {
 
 import { DataProvider } from '@/components/DataProvider';
 import { FriendsProvider } from '@/components/FriendsProvider';
+import { ThemedBackground } from '@/components/effects/ThemedBackground';
 import { SharedLinksProvider } from '@/components/SharedLinksProvider';
 import { WelcomeTour } from '@/components/layout/WelcomeTour';
 import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LanguageProvider>
         <InAppNotificationProvider>
           <ThemeProvider>
+            <ThemedBackground />
             <DataProvider>
             <FriendsProvider>
             <SharedLinksProvider>

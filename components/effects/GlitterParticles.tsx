@@ -15,12 +15,15 @@ interface Props {
 export const GLITTER_THEMES: Record<string, { colors: string[]; light?: boolean; bg: string }> = {
   dark: { colors: ['#7DD3FC', '#38BDF8', '#22D3EE', '#A5F3FC', '#FFFFFF'],
     bg: 'radial-gradient(ellipse at 30% 35%, #0E4A63 0%, #062435 45%, #020B12 100%)' },
-  cyberpunk: { colors: ['#00FF41', '#39FF88', '#0FF0FC', '#B6FFCE', '#FFFFFF'],
-    bg: 'radial-gradient(ellipse at 30% 35%, #0B3B22 0%, #05200F 45%, #010804 100%)' },
-  kiloCode: { colors: ['#F0DB4F', '#FACC15', '#F97316', '#FDE68A', '#FFFFFF'],
-    bg: 'radial-gradient(ellipse at 30% 35%, #4A3608 0%, #241803 45%, #0A0701 100%)' },
-  glassmorphism: { colors: ['#C4B5FD', '#A78BFA', '#F0ABFC', '#93C5FD', '#FFFFFF'],
+  // Glass: el fondo de la página de prueba (azul profundo) con tarjetas de vidrio
+  glassmorphism: { colors: ['#7DD3FC', '#38BDF8', '#22D3EE', '#A5F3FC', '#FFFFFF'],
+    bg: 'radial-gradient(ellipse at 30% 40%, #0E4A63 0%, #062435 45%, #020B12 100%)' },
+  // Nebulosa: violeta y rosado
+  nebula: { colors: ['#C4B5FD', '#A78BFA', '#F0ABFC', '#93C5FD', '#FFFFFF'],
     bg: 'radial-gradient(ellipse at 30% 35%, #3B1F66 0%, #1E1040 45%, #0A0618 100%)' },
+  // Cyber y Kilo: partículas sobre su fondo de siempre (sin resplandor)
+  cyberpunk: { colors: ['#00FF41', '#39FF88', '#0FF0FC', '#B6FFCE', '#FFFFFF'], bg: 'var(--bg-deep)' },
+  kiloCode: { colors: ['#F0DB4F', '#FACC15', '#F97316', '#FDE68A', '#FFFFFF'], bg: 'var(--bg-deep)' },
   light: { colors: ['#06B6D4', '#10B981', '#0EA5E9', '#14B8A6'], light: true,
     bg: 'radial-gradient(ellipse at 30% 35%, #E0F7FB 0%, #EEF9F6 45%, #F8FAFC 100%)' },
 };

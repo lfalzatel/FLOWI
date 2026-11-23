@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check } from 'lucide-react';
+import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check, Sparkles } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 
 interface Props {
   onClose: () => void;
 }
 
-type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'cyberpunk' | 'kiloCode';
+type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'nebula' | 'cyberpunk' | 'kiloCode';
 
 export function ManageThemesModal({ onClose }: Props) {
   const { theme, setTheme, allowedThemes, setAllowedThemes } = useTheme();
@@ -52,6 +52,7 @@ export function ManageThemesModal({ onClose }: Props) {
       case 'light': return <Sun className="w-4 h-4" />;
       case 'dark': return <Moon className="w-4 h-4" />;
       case 'glassmorphism': return <Layers className="w-4 h-4" />;
+      case 'nebula': return <Sparkles className="w-4 h-4" />;
       case 'cyberpunk': return <Terminal className="w-4 h-4" />;
       case 'kiloCode': return <Zap className="w-4 h-4" />;
     }
@@ -62,6 +63,7 @@ export function ManageThemesModal({ onClose }: Props) {
       case 'light': return isTechTheme ? 'DIA' : 'Día';
       case 'dark': return isTechTheme ? 'NOCHE (ORIGINAL)' : 'Noche (Original)';
       case 'glassmorphism': return isTechTheme ? 'GLASSMORPHISM' : 'Glassmorphism';
+      case 'nebula': return isTechTheme ? 'NEBULOSA' : 'Nebulosa';
       case 'cyberpunk': return isTechTheme ? 'CYBERPUNK' : 'Cyberpunk';
       case 'kiloCode': return isTechTheme ? 'KILOCODE' : 'KiloCode';
     }
@@ -141,7 +143,7 @@ export function ManageThemesModal({ onClose }: Props) {
             </p>
             
             <div className="space-y-2">
-              {(['light', 'dark', 'glassmorphism', 'cyberpunk', 'kiloCode'] as ThemeType[]).map(t => {
+              {(['light', 'dark', 'glassmorphism', 'nebula', 'cyberpunk', 'kiloCode'] as ThemeType[]).map(t => {
                 const selectedIndex = localAllowed.indexOf(t);
                 const isSelected = selectedIndex !== -1;
                 

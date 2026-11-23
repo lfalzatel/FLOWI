@@ -49,6 +49,50 @@
   --text-secondary:rgba(255, 255, 255, 0.6);
   --text-muted:    rgba(255, 255, 255, 0.3);
 }
+/* Fondo de partículas de toda la app (components/effects/ThemedBackground): las pantallas dejan ver el fondo */
+[data-particles] .min-h-screen.bg-deep { background-color: transparent; }
+
+/* Glass: estilo de la página de prueba — acento cian y tarjetas de vidrio con más desenfoque */
+[data-theme='glassmorphism'] {
+  --accent:        34 211 238;
+  --accent-dim:    6 182 212;
+  --accent-glow:   rgba(34, 211, 238, 0.18);
+  --glass:         rgba(8, 40, 56, 0.45);
+  --glass-hover:   rgba(12, 56, 76, 0.55);
+  --glass-border:  rgba(125, 211, 252, 0.16);
+  --glass-strong:  rgba(8, 40, 56, 0.65);
+  --bg-card:       #0B2A3A;
+  --bg-card-hover: #0F3547;
+}
+[data-theme='glassmorphism'] .glass-card, [data-theme='glassmorphism'] .glass-card-strong {
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 0 40px -18px rgba(34, 211, 238, 0.35);
+}
+
+/* Nebulosa (nuevo): violeta con tarjetas de vidrio translúcido */
+[data-theme='nebula'] {
+  --accent:        0 229 160;
+  --accent-dim:    0 179 126;
+  --accent-glow:   rgba(196, 181, 253, 0.15);
+  --bg-deep:       #0A0618;
+  --bg-card:       #1E1040;
+  --bg-card-hover: #2A1656;
+  --glass:         rgba(255, 255, 255, 0.06);
+  --glass-hover:   rgba(255, 255, 255, 0.09);
+  --glass-border:  rgba(255, 255, 255, 0.10);
+  --glass-strong:  rgba(255, 255, 255, 0.12);
+  --text-primary:  rgba(255, 255, 255, 0.95);
+  --text-secondary:rgba(255, 255, 255, 0.60);
+  --text-muted:    rgba(255, 255, 255, 0.32);
+  --red:           #FF5B5B;
+  --yellow:        #F5A623;
+}
+[data-theme='nebula'] .glass-card, [data-theme='nebula'] .glass-card-strong {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 [data-theme='dark'] .glass-card, [data-theme='dark'] .glass-card-strong, [data-theme='dark'] .bg-glass, [data-theme='dark'] .backdrop-blur-2xl, [data-theme='dark'] .backdrop-blur-3xl {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
