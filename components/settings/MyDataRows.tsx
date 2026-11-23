@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Download, FileJson, FileSpreadsheet, Loader2, Lock, Trash2, X } from 'lucide-react';
@@ -48,7 +49,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
         <div className="flex items-center gap-3">
           <div className={icon('blue')}><Download className="w-4 h-4 text-blue-400" /></div>
           <div className={mono}>
-            <p className="text-sm font-medium text-text-primary">Descargar mis datos</p>
+            <p className="text-sm font-medium text-text-primary">{tr('Descargar mis datos')}</p>
             <p className="text-[10px] text-text-muted">Excel (CSV) con tus movimientos o todo en un archivo</p>
           </div>
         </div>
@@ -57,8 +58,8 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
         <div className="flex items-center gap-3">
           <div className={icon('orange')}><Trash2 className="w-4 h-4 text-orange-400" /></div>
           <div className={mono}>
-            <p className="text-sm font-medium text-text-primary">Borrar todo lo registrado</p>
-            <p className="text-[10px] text-text-muted">Empezar de cero, sin cerrar tu cuenta</p>
+            <p className="text-sm font-medium text-text-primary">{tr('Borrar todo lo registrado')}</p>
+            <p className="text-[10px] text-text-muted">{tr('Empezar de cero, sin cerrar tu cuenta')}</p>
           </div>
         </div>
       </button>
@@ -66,8 +67,8 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
         <div className="flex items-center gap-3">
           <div className={icon('red')}><Lock className="w-4 h-4 text-red-500" /></div>
           <div className={mono}>
-            <p className="text-sm font-medium text-red-400">Eliminar mi cuenta</p>
-            <p className="text-[10px] text-red-400/70">Borra la cuenta y todos tus datos. No se puede deshacer</p>
+            <p className="text-sm font-medium text-red-400">{tr('Eliminar mi cuenta')}</p>
+            <p className="text-[10px] text-red-400/70">{tr('Borra la cuenta y todos tus datos. No se puede deshacer')}</p>
           </div>
         </div>
       </button>
@@ -77,23 +78,23 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
           <div onClick={e => e.stopPropagation()}
                className={`relative w-full sm:max-w-md bg-deep border border-glass-border p-6 space-y-4 max-h-[90vh] overflow-y-auto ${isTechTheme ? 'rounded-none' : 'rounded-t-3xl sm:rounded-3xl'}`}
                style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
-            <button type="button" onClick={close} aria-label="Cerrar" className="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-glass flex items-center justify-center">
+            <button type="button" onClick={close} aria-label={tr('Cerrar')} className="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-glass flex items-center justify-center">
               <X className="w-4 h-4 text-text-muted" />
             </button>
 
             {open === 'export' && (
               <>
-                <h3 className="text-lg font-bold font-syne text-text-primary pr-8">Descargar mis datos</h3>
-                <p className="text-sm text-text-secondary">El archivo se guarda en tu celular o computador. Nadie más lo recibe.</p>
-                <button type="button" disabled={busy} onClick={() => run(async () => `Listo: ${await exportCsv(uid)} movimientos descargados.`)}
+                <h3 className="text-lg font-bold font-syne text-text-primary pr-8">{tr('Descargar mis datos')}</h3>
+                <p className="text-sm text-text-secondary">{tr('El archivo se guarda en tu celular o computador. Nadie más lo recibe.')}</p>
+                <button type="button" disabled={busy} onClick={() => run(async () => tr('Listo: {a} movimientos descargados.', { a: await exportCsv(uid) }))}
                         className={`${btn} bg-accent text-black`}>
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />} Mis gastos e ingresos (Excel)
                 </button>
-                <button type="button" disabled={busy} onClick={() => run(async () => `Listo: ${await exportJson(uid)} registros descargados.`)}
+                <button type="button" disabled={busy} onClick={() => run(async () => tr('Listo: {a} registros descargados.', { a: await exportJson(uid) }))}
                         className={`${btn} border border-glass-border text-text-primary hover:bg-glass`}>
                   <FileJson className="w-4 h-4 text-accent" /> Todo (perfil, deudas, cuentas, metas…)
                 </button>
-                <p className="text-[11px] text-text-muted">“Todo” es un archivo JSON: sirve como copia de seguridad o para llevar tus datos a otra app.</p>
+                <p className="text-[11px] text-text-muted">{tr('“Todo” es un archivo JSON: sirve como copia de seguridad o para llevar tus datos a otra app.')}</p>
               </>
             )}
 
@@ -103,13 +104,13 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
                   {open === 'records' ? 'Borrar todo lo registrado' : 'Eliminar mi cuenta'}
                 </h3>
                 {open === 'account' && isAdmin ? (
-                  <p className="text-sm text-text-secondary">La cuenta de administrador no se puede eliminar desde la app.</p>
+                  <p className="text-sm text-text-secondary">{tr('La cuenta de administrador no se puede eliminar desde la app.')}</p>
                 ) : (
                   <>
                     <p className="text-sm text-text-secondary">
                       {open === 'records'
-                        ? 'Se borran para siempre tus '
-                        : 'Se borran para siempre tu cuenta, tu perfil y tus '}
+                        ? tr('Se borran para siempre tus ')
+                        : tr('Se borran para siempre tu cuenta, tu perfil y tus ')}
                       {RECORD_COLLECTIONS.map(c => c.label).join(', ')}.
                       {open === 'records'
                         ? ' Tu cuenta, tu plan y tu configuración se mantienen.'
@@ -117,10 +118,10 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
                     </p>
                     <p className="text-sm text-amber-400">
                       No se puede deshacer.{' '}
-                      <button type="button" onClick={() => show('export')} className="underline">Descarga tus datos antes</button> si quieres conservarlos.
+                      <button type="button" onClick={() => show('export')} className="underline">{tr('Descarga tus datos antes')}</button> si quieres conservarlos.
                     </p>
                     <label className="block space-y-1">
-                      <span className="text-xs text-text-muted">Para confirmar, escribe <b className="text-text-primary">{word}</b></span>
+                      <span className="text-xs text-text-muted">{tr('Para confirmar, escribe')} <b className="text-text-primary">{word}</b></span>
                       <input autoComplete="off" value={typed} onChange={e => setTyped(e.target.value.toUpperCase())} disabled={busy} autoCapitalize="characters"
                              className={`w-full px-3 py-2.5 bg-glass border border-glass-border text-text-primary text-sm focus:outline-none focus:border-red-400 ${isTechTheme ? 'rounded-none font-mono' : 'rounded-xl'}`} />
                     </label>
@@ -128,7 +129,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
                             onClick={() => run(async () => {
                               if (open === 'records') {
                                 const n = await deleteMyRecords(uid);
-                                return `Listo: se borraron ${n} registros. Puedes empezar de cero.`;
+                                return tr('Listo: se borraron {a} registros. Puedes empezar de cero.', { a: n });
                               }
                               await deleteMyAccount();
                               clearLocalData(uid);
@@ -148,7 +149,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
 
             {msg && <p className={`text-sm text-center ${msg.ok ? 'text-accent' : 'text-red-400'}`}>{msg.text}</p>}
             {done && open === 'records' && (
-              <button type="button" onClick={() => window.location.reload()} className={`${btn} border border-glass-border text-text-primary`}>Cerrar</button>
+              <button type="button" onClick={() => window.location.reload()} className={`${btn} border border-glass-border text-text-primary`}>{tr('Cerrar')}</button>
             )}
           </div>
         </div>,

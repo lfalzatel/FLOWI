@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import Link from 'next/link';
 import { ChevronRight, Crown } from 'lucide-react';
@@ -18,12 +18,12 @@ export function PlanCard({ isTechTheme }: { isTechTheme: boolean }) {
       </span>
       <span className="flex-1 min-w-0 text-left">
         <span className="block text-sm font-bold text-text-primary normal-case">
-          {premium ? 'Tienes FLOWI Premium' : 'Tu plan: Gratis'}
+          {premium ? tr('Tienes FLOWI Premium') : tr('Tu plan: Gratis')}
         </span>
         <span className="block text-[11px] text-text-muted normal-case leading-snug">
           {premium
-            ? (untilText ? `Activo hasta el ${untilText}.${playStore ? '' : ' Toca para renovar o ver tu plan.'}` : 'Activo.')
-            : playStore ? 'Mira qué incluye cada plan.' : 'Pásate a Premium desde $4.167 al mes: inversiones, metas y recibos sin límite.'}
+            ? (untilText ? tr('Activo hasta el {a}.{b}', { a: untilText, b: playStore ? '' : ' Toca para renovar o ver tu plan.' }) : tr('Activo.'))
+            : playStore ? tr('Mira qué incluye cada plan.') : tr('Pásate a Premium desde $4.167 al mes: inversiones, metas y recibos sin límite.')}
         </span>
       </span>
       <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />

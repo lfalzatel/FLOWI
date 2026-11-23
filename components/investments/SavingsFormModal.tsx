@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { showLimit, usePlan, usePlanGate } from '@/lib/plans';
 import { useInvestments } from '@/hooks/useInvestments';
 import { useRef, useState } from 'react';
@@ -86,7 +87,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
     if (d.amount) setAmount(formatMoneyInput(d.amount));
     if (d.current) setCurrent(formatMoneyInput(d.current));
     if (d.rateEA) setRate(String(d.rateEA).replace('.', ','));
-    return list([d.bank && `entidad (${d.bank})`, d.amount && 'monto', d.current && 'saldo actual', d.rateEA && 'tasa']);
+    return list([d.bank && tr('entidad ({a})', { a: d.bank }), d.amount && 'monto', d.current && 'saldo actual', d.rateEA && 'tasa']);
   };
 
   const readId = useRef(0); // al cancelar la lectura, la respuesta que llegue después se ignora
@@ -103,18 +104,18 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
         setAiState(rf.reason === 'no-key' ? 'no-key' : 'error');
         setAiMsg(rf.reason === 'unreadable' ? 'No pude leer los datos. Prueba con la captura donde se vea lo que vale hoy y lo depositado.'
           : rf.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
-          : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.');
+          : tr('La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'));
         return;
       }
       if (rf.items.length > 1 && !investment) {
         setFound(rf.items);
         setAiState('done');
-        setAiMsg(`Encontré ${rf.items.length} inversiones en la captura. Guárdalas todas o elige una para revisarla.`);
+        setAiMsg(tr('Encontré {a} inversiones en la captura. Guárdalas todas o elige una para revisarla.', { a: rf.items.length }));
         return;
       }
       fillFrom(rf.items[0]);
       setAiState('done');
-      setAiMsg(!rf.items[0].invested ? 'Listo. Revisa y completa lo que has depositado.' : 'Listo. Revisa los datos antes de guardar.');
+      setAiMsg(!rf.items[0].invested ? tr('Listo. Revisa y completa lo que has depositado.') : tr('Listo. Revisa los datos antes de guardar.'));
       return;
     }
     const r = await readSavingsWithAi(files, kind);
@@ -123,7 +124,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
       setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos. Prueba con una captura donde se vea el saldo y, si la hay, la tasa.'
         : r.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
-        : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.');
+        : tr('La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'));
       return;
     }
     const d = r.data;
@@ -140,7 +141,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       ? [!d.balance && 'saldo', !d.rateEA && 'tasa E.A.'].filter(Boolean)
       : [!d.balance && 'valor actual', !d.invested && 'lo invertido'].filter(Boolean);
     setAiState('done');
-    setAiMsg(missing.length ? `Listo. Revisa y completa: ${missing.join(', ')}.` : 'Listo. Revisa los datos antes de guardar.');
+    setAiMsg(missing.length ? tr('Listo. Revisa y completa: {a}.', { a: missing.join(', ') }) : tr('Listo. Revisa los datos antes de guardar.'));
   }
 
   function fillFrom(it: FundReading) {
@@ -192,7 +193,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       else setSaving(false);
     } catch (err) {
       console.error('Error saving investments:', err);
-      setError('No se pudieron guardar. Revisa tu conexión e inténtalo de nuevo.');
+      setError(tr('No se pudieron guardar. Revisa tu conexión e inténtalo de nuevo.'));
       setSaving(false);
     }
   }
@@ -230,7 +231,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       onClose();
     } catch (err: any) {
       console.error('Error saving investment:', err);
-      setError('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
+      setError(tr('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'));
       setSaving(false);
     }
   }
@@ -250,7 +251,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             <h2 className={isTech ? 'font-bold text-xl text-accent uppercase' : 'font-syne font-bold text-xl text-text-primary'}>{investment ? 'Editar' : 'Nuevo'}: {info.short}</h2>
             <p className="text-[11px] text-text-muted">{info.examples}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className={isTech ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={isTech ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-5">
@@ -263,7 +264,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
               <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                      onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
               {aiState === 'loading' && (
-                <ReadingOverlay isTech={isTech} title={`Leyendo ${info.short.toLowerCase()}`} label="Leyendo las capturas…"
+                <ReadingOverlay isTech={isTech} title={tr('Leyendo {a}', { a: info.short.toLowerCase() })} label="Leyendo las capturas…"
                                 onCancel={() => { readId.current++; setAiState('idle'); }} />
               )}
               {(
@@ -271,17 +272,17 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
                       onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
                       className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>
                 <Camera className="w-4 h-4" />
-                Llenar desde captura de la app
+                {tr('Llenar desde captura de la app')}
               </button>
               )}
               <p className={hint}>
                 {aiState === 'no-key'
-                  ? <>Para leer capturas necesitas la IA gratuita (gratis siempre). <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a>.</>
+                  ? <>Para leer capturas necesitas la IA gratuita (gratis siempre). <a href="/configuracion" className="text-accent font-semibold underline">{tr('Conéctala en Configuración')}</a>.</>
                   : aiMsg
                     ? <span className={aiState === 'error' ? 'text-red-400' : 'text-text-secondary'}>{aiMsg}</span>
                     : isFund
-                      ? 'Sube la captura del portafolio: puedo leer varias inversiones a la vez. No se guardan números de cuenta.'
-                      : 'Sube la captura donde se vea el saldo (y la tasa si aparece). No se guardan números de cuenta.'}
+                      ? tr('Sube la captura del portafolio: puedo leer varias inversiones a la vez. No se guardan números de cuenta.')
+                      : tr('Sube la captura donde se vea el saldo (y la tasa si aparece). No se guardan números de cuenta.')}
               </p>
               {found.length > 1 && (
                 <div className={`mt-3 border divide-y ${isTech ? 'rounded-none border-accent/30 divide-accent/20' : 'rounded-xl border-glass-border divide-glass-border'}`}>
@@ -293,11 +294,11 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
                           <p className="text-sm font-semibold text-text-primary truncate">{it.name || it.symbol || `Inversión ${i + 1}`}</p>
                           <p className="text-[11px] text-text-muted truncate">
                             {it.assetType === 'acciones' ? `Acciones${it.units ? ` · ${it.units}` : ''}` : 'Fondo'}
-                            {it.value ? ` · vale ${formatCurrency(it.value, 'COP')}` : ''}
+                            {it.value ? tr(' · vale {a}', { a: formatCurrency(it.value, 'COP') }) : ''}
                             {gain !== null ? ` · ${gain >= 0 ? '+' : '−'}${formatCurrency(Math.abs(gain), 'COP')}` : ''}
                           </p>
                         </div>
-                        <button type="button" onClick={() => fillFrom(it)} className="text-xs font-semibold text-accent shrink-0">Revisar</button>
+                        <button type="button" onClick={() => fillFrom(it)} className="text-xs font-semibold text-accent shrink-0">{tr('Revisar')}</button>
                       </div>
                     );
                   })}
@@ -320,15 +321,15 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
                 <Info className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
                 <p>
                   {isStock
-                    ? 'Las acciones no tienen tasa: valen lo que valga la acción cada día y a veces pagan dividendos. Anota lo que invertiste y lo que valen hoy (está en la app) y te muestro si ganas o pierdes.'
-                    : 'Los fondos no tienen una tasa fija como un CDT: su valor sube y baja cada día. Anota lo que has depositado y lo que vale hoy (está en la app) y te muestro tu ganancia. La rentabilidad del último año es solo de referencia, no garantiza lo que vas a ganar.'}
+                    ? tr('Las acciones no tienen tasa: valen lo que valga la acción cada día y a veces pagan dividendos. Anota lo que invertiste y lo que valen hoy (está en la app) y te muestro si ganas o pierdes.')
+                    : tr('Los fondos no tienen una tasa fija como un CDT: su valor sube y baja cada día. Anota lo que has depositado y lo que vale hoy (está en la app) y te muestro tu ganancia. La rentabilidad del último año es solo de referencia, no garantiza lo que vas a ganar.')}
                 </p>
               </div>
             </>
           )}
           <div>
             <span className={lbl}>{kind === 'fondo' ? 'Plataforma o entidad' : 'Entidad'}</span>
-            <BankField value={bank} placeholder="Elegir" onClick={() => setBankSheet(true)} />
+            <BankField value={bank} placeholder={tr('Elegir')} onClick={() => setBankSheet(true)} />
             {bankSheet && (
               <BankPickerSheet title={kind === 'fondo' ? '¿Dónde inviertes?' : '¿Dónde está esta plata?'} selected={bank ? [bank] : []}
                                onlyBanks={kind !== 'ahorro'} allowCustom extra={PLACES[kind]} favorites={PLACES[kind]}
@@ -357,29 +358,29 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             ) : (
               <div>
                 <label htmlFor="sv-current" className={lbl}>{isFund ? 'Lo que vale hoy' : 'Valor actual'}</label>
-                <input autoComplete="off" id="sv-current" type="text" inputMode="decimal" placeholder="Igual al invertido" value={current}
+                <input autoComplete="off" id="sv-current" type="text" inputMode="decimal" placeholder={tr('Igual al invertido')} value={current}
                        onChange={(e) => setCurrent(formatMoneyInput(e.target.value))} className={input} />
               </div>
             )}
           </div>
           <p className={`${hint} -mt-3`}>
             {isSavings
-              ? 'Calculo los intereses día a día con la tasa. Si el saldo de la app no cuadra, usa "Ajustar saldo".'
-              : 'El valor sube y baja: actualízalo cuando quieras con lo que dice la app y te muestro cuánto ganas o pierdes.'}
+              ? tr('Calculo los intereses día a día con la tasa. Si el saldo de la app no cuadra, usa "Ajustar saldo".')
+              : tr('El valor sube y baja: actualízalo cuando quieras con lo que dice la app y te muestro cuánto ganas o pierdes.')}
           </p>
 
           {isStock && (
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label htmlFor="sv-symbol" className={lbl}>Símbolo</label>
-                <input autoComplete="off" id="sv-symbol" value={symbol} maxLength={12} onChange={(e) => setSymbol(e.target.value.toUpperCase())} className={input} placeholder="CELSIA" />
+                <label htmlFor="sv-symbol" className={lbl}>{tr('Símbolo')}</label>
+                <input autoComplete="off" id="sv-symbol" value={symbol} maxLength={12} onChange={(e) => setSymbol(e.target.value.toUpperCase())} className={input} placeholder={tr('CELSIA')} />
               </div>
               <div>
-                <label htmlFor="sv-units" className={lbl}>N.º acciones</label>
+                <label htmlFor="sv-units" className={lbl}>{tr('N.º acciones')}</label>
                 <input autoComplete="off" id="sv-units" type="text" inputMode="decimal" value={units} onChange={(e) => setUnits(e.target.value.replace(/[^\d.,]/g, ''))} className={input} placeholder="14" />
               </div>
               <div>
-                <label htmlFor="sv-div" className={lbl}>Dividendos</label>
+                <label htmlFor="sv-div" className={lbl}>{tr('Dividendos')}</label>
                 <input autoComplete="off" id="sv-div" type="text" inputMode="decimal" value={dividends} onChange={(e) => setDividends(formatMoneyInput(e.target.value))} className={input} placeholder="$ 0" />
               </div>
             </div>
@@ -394,7 +395,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
 
           {(needsFrom || (!investment && !hasAccounts)) && (
             <AccountPicker accounts={accounts} value={from} onChange={setFrom}
-                           label={investment ? '¿De dónde salió la plata al abrirlo?' : '¿De dónde sale la plata?'}
+                           label={investment ? tr('¿De dónde salió la plata al abrirlo?') : tr('¿De dónde sale la plata?')}
                            noneLabel="No descontar (ya estaba ahorrada)"
                            autoMain={!investment}
                            emptyHint="Aún no tienes cuentas en FLOWI, así que no la descuento de ninguna. Créalas en Servicios → Cuentas y patrimonio."
@@ -422,12 +423,12 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
           {found.length > 1 ? (
           <button type="button" disabled={saving || (needsFrom && from === undefined)} onClick={saveAll}
                   className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : 'rounded-xl bg-accent text-white'}`}>
-            {saving ? 'Guardando...' : `Guardar las ${found.length} inversiones`}
+            {saving ? tr('Guardando...') : tr('Guardar las {a} inversiones', { a: found.length })}
           </button>
           ) : (
           <button type="button" disabled={!canSave} onClick={save}
                   className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : 'rounded-xl bg-accent text-white'}`}>
-            {saving ? 'Guardando...' : investment ? 'Guardar cambios' : 'Guardar'}
+            {saving ? tr('Guardando...') : investment ? tr('Guardar cambios') : tr('Guardar')}
           </button>
           )}
         </div>

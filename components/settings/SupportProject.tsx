@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import { useState } from 'react';
 import { Heart, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
@@ -47,7 +48,7 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
     <section id="apoyar" className="space-y-3 scroll-mt-24">
       {onToggle ? (
         <button onClick={onToggle} className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}>
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Apoyar a FLOWI</h2>
+          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Apoyar a FLOWI')}</h2>
           {open ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
         </button>
       ) : (
@@ -62,9 +63,9 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
             <Heart className="w-4 h-4 text-pink-400" />
           </div>
           <div className={mono}>
-            <p className="text-sm font-medium text-text-primary normal-case">¿Te sirve FLOWI? Puedes apoyar el proyecto</p>
+            <p className="text-sm font-medium text-text-primary normal-case">{tr('¿Te sirve FLOWI? Puedes apoyar el proyecto')}</p>
             <p className="text-[11px] text-text-muted normal-case leading-relaxed mt-0.5">
-              FLOWI es gratis y sin publicidad. Si quieres ayudar a que siga creciendo, envía el aporte que quieras desde
+              {tr('FLOWI es gratis y sin publicidad. Si quieres ayudar a que siga creciendo, envía el aporte que quieras desde')}
               Nequi, Bancolombia, BBVA o cualquier banco: en tu app elige Transferir → a una llave (Bre-B) y pega una de estas llaves.
             </p>
           </div>
@@ -86,7 +87,7 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
                 >
                   <span className={`text-sm text-text-primary normal-case break-all ${mono}`}>{key}</span>
                   <span className={`shrink-0 flex items-center gap-1 text-[11px] font-semibold ${copied === key ? 'text-emerald-400' : 'text-accent'} ${mono}`}>
-                    {copied === key ? <><Check className="w-3.5 h-3.5" /> Copiada</> : <><Copy className="w-3.5 h-3.5" /> Copiar</>}
+                    {copied === key ? <><Check className="w-3.5 h-3.5" /> {tr('Copiada')}</> : <><Copy className="w-3.5 h-3.5" /> {tr('Copiar')}</>}
                   </span>
                 </button>
               ))}
@@ -95,10 +96,10 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
         </div>
 
         <p className={`text-[10px] text-text-muted normal-case ${mono}`}>
-          Antes de confirmar, tu banco te mostrará el nombre del titular para que verifiques. ¡Gracias por tu apoyo!
+          {tr('Antes de confirmar, tu banco te mostrará el nombre del titular para que verifiques. ¡Gracias por tu apoyo!')}
         </p>
 
-        <p className={`text-[11px] text-text-secondary normal-case ${mono}`}>¿Prefieres apoyar con una suscripción y tener más funciones?</p>
+        <p className={`text-[11px] text-text-secondary normal-case ${mono}`}>{tr('¿Prefieres apoyar con una suscripción y tener más funciones?')}</p>
         <PlanCard isTechTheme={isTechTheme} />
       </div>
       )}

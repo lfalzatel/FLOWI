@@ -1,4 +1,5 @@
 'use client';
+import { tr, lazyT } from '@/lib/i18n';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Compass, Volume2, VolumeX, X } from 'lucide-react';
@@ -16,25 +17,25 @@ const VOICE_KEY = 'flowi_tour_voice';
 // target admite alternativas separadas por "|" (la primera que esté en pantalla)
 interface Step { target?: string; title: string; text: string }
 
-const STEPS: Step[] = [
-  { title: '¡Hola! Te muestro FLOWI', text: 'Primero te enseño a registrar tu plata y después a leer tu pantalla de inicio. Lo que ves ahora son datos de ejemplo: tus datos no se tocan. Puedes omitir el recorrido cuando quieras.' },
-  { target: 'voice|add', title: '1. Registra lo que sea desde aquí', text: 'Toca este botón y verás todo lo que puedes registrar: hablar, un gasto, un ingreso, la foto de un recibo, un extracto del banco, una deuda, un recordatorio, una nota o un CDT. Lo más rápido es hablar: di "gasté veinte mil en almuerzo" o "me pagaron el sueldo". Si mantienes presionado el botón, te escucho de una vez.' },
-  { target: '#nav-gastos', title: '2. Gastos e ingresos', text: 'En estas pestañas ves la lista completa de gastos y de ingresos, y puedes editar o borrar. Cuando un gasto se repite cada mes, como el arriendo o los servicios, márcalo como gasto fijo; los demás son tus gastos del día a día.' },
-  { target: '#nav-deudas', title: '3. Deudas', text: 'Aquí registras lo que debes y también lo que te deben, con intereses si aplica. Cada vez que pagas una parte, registras el abono y la deuda va bajando.' },
-  { target: 'filter', title: 'Ahora, tu inicio: el período', text: 'Aquí escoges si ves todo, el mes, la semana o un día. Con las flechas cambias de mes. Todas las cifras de abajo dependen de lo que elijas aquí.' },
-  { target: '#balance-card', title: 'Dinero disponible', text: 'Es lo que entró menos lo que salió en el período. En el ejemplo entraron tres millones y medio de sueldo y ya salió el arriendo. Si sale en rojo, gastaste más de lo que entró. Debajo, el balance neto también descuenta tus deudas.' },
-  { target: 'totals', title: 'Gastos e ingresos del período', text: 'En rojo, todo lo que salió. En verde, todo lo que entró.' },
-  { target: 'debts', title: 'Deudas pendientes', text: 'Lo que te falta por pagar de tus deudas. En el ejemplo, del préstamo de Juan ya se abonaron doscientos mil y faltan cuatrocientos mil. Tócala para ver el detalle.' },
-  { target: 'today', title: 'Hoy puedes gastar', text: 'La cifra más útil del día: cuánto puedes gastar hoy sin quedarte corto a fin de mes. Ya aparta los pagos fijos que faltan, como el internet. Si te pasas, se pone en rojo y te dice cuánto puedes gastar desde mañana. Tócala para ver la cuenta.' },
-  { target: 'next-action', title: 'Tu siguiente acción', text: 'Lo más útil que puedes hacer ahora. En el ejemplo, pagar el internet que vence pronto. Tócala para registrarlo, o sáltala por hoy con la X. Al empezar cada mes aquí te invito a cerrar el mes anterior.' },
-  { target: 'projection', title: 'Control y proyección', text: 'Tus gastos fijos, el dinero libre que te queda y tu límite diario. Cada cuadro se puede tocar para ver el desglose.' },
-  { target: 'commitments', title: 'Próximos compromisos', text: 'Los pagos fijos que te faltan este mes, con el valor que pagaste el mes pasado. Cuando pagues uno, tócalo para registrarlo.' },
-  { target: 'goals', title: 'Metas de ahorro', text: 'Tu meta principal y cuánto llevas. Toca para ver todas tus metas y cuándo las lograrías.' },
-  { target: 'chart', title: 'Gráfica del período', text: 'Muestra cómo se movió tu plata día a día en el período que elegiste.' },
-  { target: 'budgets', title: 'Gastos por categoría', text: 'Compara en qué gastas con una guía sana: necesidades, gustos y ahorro. Toca cada grupo para ver sus categorías.' },
-  { target: 'profile', title: 'Personaliza FLOWI', text: 'En tu foto cambias el tema y los colores: Cyber, Día, Noche y más. Ahí mismo está "Ver tutorial" para repetir este recorrido cuando quieras.' },
-  { title: '¡Listo!', text: 'Ya sabes registrar y leer tu inicio. Al cerrar vuelven tus datos reales. ¡A llevar tus cuentas claras!' },
-];
+const STEPS: Step[] = lazyT(() => ([
+  { title: tr('¡Hola! Te muestro FLOWI'), text: tr('Primero te enseño a registrar tu plata y después a leer tu pantalla de inicio. Lo que ves ahora son datos de ejemplo: tus datos no se tocan. Puedes omitir el recorrido cuando quieras.') },
+  { target: 'voice|add', title: '1. Registra lo que sea desde aquí', text: tr('Toca este botón y verás todo lo que puedes registrar: hablar, un gasto, un ingreso, la foto de un recibo, un extracto del banco, una deuda, un recordatorio, una nota o un CDT. Lo más rápido es hablar: di "gasté veinte mil en almuerzo" o "me pagaron el sueldo". Si mantienes presionado el botón, te escucho de una vez.') },
+  { target: '#nav-gastos', title: '2. Gastos e ingresos', text: tr('En estas pestañas ves la lista completa de gastos y de ingresos, y puedes editar o borrar. Cuando un gasto se repite cada mes, como el arriendo o los servicios, márcalo como gasto fijo; los demás son tus gastos del día a día.') },
+  { target: '#nav-deudas', title: '3. Deudas', text: tr('Aquí registras lo que debes y también lo que te deben, con intereses si aplica. Cada vez que pagas una parte, registras el abono y la deuda va bajando.') },
+  { target: 'filter', title: tr('Ahora, tu inicio: el período'), text: tr('Aquí escoges si ves todo, el mes, la semana o un día. Con las flechas cambias de mes. Todas las cifras de abajo dependen de lo que elijas aquí.') },
+  { target: '#balance-card', title: tr('Dinero disponible'), text: tr('Es lo que entró menos lo que salió en el período. En el ejemplo entraron tres millones y medio de sueldo y ya salió el arriendo. Si sale en rojo, gastaste más de lo que entró. Debajo, el balance neto también descuenta tus deudas.') },
+  { target: 'totals', title: tr('Gastos e ingresos del período'), text: tr('En rojo, todo lo que salió. En verde, todo lo que entró.') },
+  { target: 'debts', title: tr('Deudas pendientes'), text: tr('Lo que te falta por pagar de tus deudas. En el ejemplo, del préstamo de Juan ya se abonaron doscientos mil y faltan cuatrocientos mil. Tócala para ver el detalle.') },
+  { target: 'today', title: tr('Hoy puedes gastar'), text: tr('La cifra más útil del día: cuánto puedes gastar hoy sin quedarte corto a fin de mes. Ya aparta los pagos fijos que faltan, como el internet. Si te pasas, se pone en rojo y te dice cuánto puedes gastar desde mañana. Tócala para ver la cuenta.') },
+  { target: 'next-action', title: tr('Tu siguiente acción'), text: tr('Lo más útil que puedes hacer ahora. En el ejemplo, pagar el internet que vence pronto. Tócala para registrarlo, o sáltala por hoy con la X. Al empezar cada mes aquí te invito a cerrar el mes anterior.') },
+  { target: 'projection', title: tr('Control y proyección'), text: tr('Tus gastos fijos, el dinero libre que te queda y tu límite diario. Cada cuadro se puede tocar para ver el desglose.') },
+  { target: 'commitments', title: tr('Próximos compromisos'), text: tr('Los pagos fijos que te faltan este mes, con el valor que pagaste el mes pasado. Cuando pagues uno, tócalo para registrarlo.') },
+  { target: 'goals', title: tr('Metas de ahorro'), text: tr('Tu meta principal y cuánto llevas. Toca para ver todas tus metas y cuándo las lograrías.') },
+  { target: 'chart', title: tr('Gráfica del período'), text: tr('Muestra cómo se movió tu plata día a día en el período que elegiste.') },
+  { target: 'budgets', title: tr('Gastos por categoría'), text: tr('Compara en qué gastas con una guía sana: necesidades, gustos y ahorro. Toca cada grupo para ver sus categorías.') },
+  { target: 'profile', title: tr('Personaliza FLOWI'), text: tr('En tu foto cambias el tema y los colores: Cyber, Día, Noche y más. Ahí mismo está "Ver tutorial" para repetir este recorrido cuando quieras.') },
+  { title: tr('¡Listo!'), text: tr('Ya sabes registrar y leer tu inicio. Al cerrar vuelven tus datos reales. ¡A llevar tus cuentas claras!') },
+]));
 
 function findTarget(step: Step): HTMLElement | null {
   if (!step.target) return null;
@@ -72,12 +73,12 @@ export function TourOffer({ onStart, onSkip }: { onStart: (voice: boolean) => vo
         <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-accent/15 flex items-center justify-center">
           <Compass className="w-7 h-7 text-accent" />
         </div>
-        <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>¿Te muestro cómo usar FLOWI?</h2>
-        <p className="text-sm text-text-secondary mt-1 mb-5">Un recorrido de un minuto por tu pantalla de inicio: qué significa cada cifra y cómo aprovecharla.</p>
+        <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('¿Te muestro cómo usar FLOWI?')}</h2>
+        <p className="text-sm text-text-secondary mt-1 mb-5">{tr('Un recorrido de un minuto por tu pantalla de inicio: qué significa cada cifra y cómo aprovecharla.')}</p>
         <div className="space-y-2">
-          <button type="button" onClick={() => onStart(true)} className={primary}><Volume2 className="w-4 h-4" /> Sí, con voz</button>
-          <button type="button" onClick={() => onStart(false)} className={secondary}>Sí, solo leyendo</button>
-          <button type="button" onClick={onSkip} className="w-full py-2 text-xs font-semibold text-text-muted hover:text-text-primary">Omitir</button>
+          <button type="button" onClick={() => onStart(true)} className={primary}><Volume2 className="w-4 h-4" /> {tr('Sí, con voz')}</button>
+          <button type="button" onClick={() => onStart(false)} className={secondary}>{tr('Sí, solo leyendo')}</button>
+          <button type="button" onClick={onSkip} className="w-full py-2 text-xs font-semibold text-text-muted hover:text-text-primary">{tr('Omitir')}</button>
         </div>
       </div>
     </div>,
@@ -228,7 +229,7 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
   const total = steps.length;
 
   return createPortal(
-    <div className={`fixed inset-0 z-[200] ${isTechTheme ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label="Recorrido por FLOWI">
+    <div className={`fixed inset-0 z-[200] ${isTechTheme ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('Recorrido por FLOWI')}>
       {/* Bloquea la pantalla de abajo; el hueco del resaltado es solo visual */}
       <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
       {rect ? (
@@ -240,7 +241,7 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
 
       {demo && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-400 text-black text-[11px] font-bold shadow-lg pointer-events-none whitespace-nowrap">
-          Datos de ejemplo · tus datos no se tocan
+          {tr('Datos de ejemplo · tus datos no se tocan')}
         </div>
       )}
 
@@ -249,12 +250,12 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
           <h3 className={`font-bold ${isTechTheme ? 'text-accent uppercase text-sm' : 'font-syne text-text-primary'}`}>{step.title}</h3>
           <div className="flex items-center gap-1 -mr-1 -mt-1 shrink-0">
             {canSpeak && (
-              <button type="button" onClick={toggleVoice} aria-label={voice ? 'Silenciar la voz' : 'Activar la voz'} title={voice ? 'Silenciar' : 'Escuchar'}
+              <button type="button" onClick={toggleVoice} aria-label={voice ? tr('Silenciar la voz') : tr('Activar la voz')} title={voice ? tr('Silenciar') : tr('Escuchar')}
                       className={`p-1.5 rounded-lg ${voice ? 'text-accent' : 'text-text-muted'} hover:bg-white/10`}>
                 {voice ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
             )}
-            <button type="button" onClick={finish} aria-label="Cerrar el recorrido" className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/10">
+            <button type="button" onClick={finish} aria-label={tr('Cerrar el recorrido')} className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/10">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -264,7 +265,7 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
           <span className="text-[11px] text-text-muted">{index + 1} de {total}</span>
           <div className="flex items-center gap-2">
             {index === 0 ? (
-              <button type="button" onClick={finish} className="px-3 py-2 text-xs font-semibold text-text-muted hover:text-text-primary">Omitir</button>
+              <button type="button" onClick={finish} className="px-3 py-2 text-xs font-semibold text-text-muted hover:text-text-primary">{tr('Omitir')}</button>
             ) : (
               <button type="button" onClick={() => go(-1)} className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold border ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-primary'}`}>
                 <ChevronLeft className="w-3.5 h-3.5" /> Atrás

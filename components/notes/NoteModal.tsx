@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { X, Check, Palette, Trash2, Copy } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -174,7 +175,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
                 disabled={loading}
                 className={`ml-2 px-4 py-1.5 font-bold text-sm ${isTechTheme ? 'bg-accent text-black uppercase rounded-none' : 'bg-text-primary text-deep rounded-full'} hover:opacity-90 disabled:opacity-50`}
               >
-                {loading ? '...' : note ? 'Guardar' : 'Crear'}
+                {loading ? '...' : note ? tr('Guardar') : tr('Crear')}
               </button>
             </div>
           </div>
@@ -183,7 +184,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
             <input autoComplete="off"
               type="text"
-              placeholder="Título"
+              placeholder={tr('Título')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={`w-full bg-transparent border-none outline-none text-xl font-bold placeholder-text-muted
@@ -191,7 +192,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
             />
             <textarea
               ref={contentRef}
-              placeholder="Escribe tu nota aquí..."
+              placeholder={tr('Escribe tu nota aquí...')}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className={`w-full bg-transparent border-none outline-none resize-none min-h-[200px] text-base placeholder-text-muted
@@ -205,7 +206,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
         isOpen={showConfirmDelete}
         onCancel={() => setShowConfirmDelete(false)}
         onConfirm={confirmDeleteNote}
-        title="Eliminar Nota"
+        title={tr('Eliminar Nota')}
         message="¿Estás seguro de que deseas eliminar esta nota? Esta acción no se puede deshacer."
         confirmText="Eliminar"
       />

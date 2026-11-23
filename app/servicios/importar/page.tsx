@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { ReadingOverlay } from '@/components/forms/ReadingTips';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -63,11 +63,11 @@ export default function ImportarPage() {
       const guess = guessColumns(table);
       setSheet(table);
       setMap(guess || { headerRow: 0, date: -1, description: -1, amount: null, debit: null, credit: null });
-      if (!guess) setError('No reconocí las columnas de este archivo. Elige abajo cuál es la fecha, la descripción y el valor.');
+      if (!guess) setError(tr('No reconocí las columnas de este archivo. Elige abajo cuál es la fecha, la descripción y el valor.'));
     } catch (err) {
       console.error('Error reading statement:', err);
       setSheet(null); setMap(null);
-      setError('No pude abrir el archivo. Usa un CSV o un Excel (.xlsx o .xls) descargado de tu banco.');
+      setError(tr('No pude abrir el archivo. Usa un CSV o un Excel (.xlsx o .xls) descargado de tu banco.'));
     } finally {
       setReading(false);
     }
@@ -95,7 +95,7 @@ export default function ImportarPage() {
       refresh?.();
     } catch (err) {
       console.error('Error importing statement:', err);
-      setError('Se cortó la importación. Lo que alcanzó a guardarse quedó registrado; vuelve a cargar el archivo y los ya importados saldrán como duplicados.');
+      setError(tr('Se cortó la importación. Lo que alcanzó a guardarse quedó registrado; vuelve a cargar el archivo y los ya importados saldrán como duplicados.'));
     } finally {
       setSaving(null);
     }
@@ -103,7 +103,7 @@ export default function ImportarPage() {
 
   const card = isTechTheme ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
   const select = `w-full px-2.5 py-2 text-xs bg-black/30 border border-glass-border text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`;
-  const headers = sheet && map ? (sheet[map.headerRow] || []).map((h, i) => String(h ?? '').trim() || `Columna ${i + 1}`) : [];
+  const headers = sheet && map ? (sheet[map.headerRow] || []).map((h, i) => String(h ?? '').trim() || tr('Columna {a}', { a: i + 1 })) : [];
   const colSelect = (label: string, value: number | null, onChange: (v: number | null) => void, optional = false) => (
     <label className="block">
       <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{label}</span>
@@ -119,10 +119,10 @@ export default function ImportarPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTechTheme ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className={`text-xl font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Importar extracto</h1>
+          <h1 className={`text-xl font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Importar extracto')}</h1>
         </div>
 
         {imported !== null && (
@@ -130,7 +130,7 @@ export default function ImportarPage() {
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
             <div className="text-sm text-text-secondary">
               <p className="font-semibold text-emerald-400">Se importaron {imported} movimientos.</p>
-              <p>Ya los ves en tus gastos e ingresos. <Link href="/" className="text-accent font-semibold">Ir a Inicio</Link></p>
+              <p>{tr('Ya los ves en tus gastos e ingresos.')} <Link href="/" className="text-accent font-semibold">{tr('Ir a Inicio')}</Link></p>
             </div>
           </div>
         )}
@@ -140,7 +140,7 @@ export default function ImportarPage() {
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-2xl bg-accent/15 flex items-center justify-center shrink-0"><FileSpreadsheet className="w-5 h-5 text-accent" /></div>
             <div>
-              <p className="text-sm font-semibold text-text-primary">Sube los movimientos de tu banco</p>
+              <p className="text-sm font-semibold text-text-primary">{tr('Sube los movimientos de tu banco')}</p>
               <p className="text-xs text-text-muted">CSV o Excel (.xlsx, .xls). Revisas todo antes de guardar y los que ya tenías registrados se marcan para no duplicarlos.</p>
             </div>
           </div>
@@ -149,16 +149,16 @@ export default function ImportarPage() {
           <button type="button" onClick={() => fileRef.current?.click()} disabled={reading || !!saving}
                   className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs tracking-wider' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} text-sm`}`}>
             {reading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            {reading ? 'Leyendo…' : fileName ? 'Elegir otro archivo' : 'Elegir archivo'}
+            {reading ? tr('Leyendo…') : fileName ? tr('Elegir otro archivo') : tr('Elegir archivo')}
           </button>
-          {reading && <ReadingOverlay isTech={isTechTheme} title="Leyendo tu extracto" label="Leyendo tus movimientos…" />}
+          {reading && <ReadingOverlay isTech={isTechTheme} title={tr('Leyendo tu extracto')} label="Leyendo tus movimientos…" />}
           {fileName && <p className="text-[11px] text-text-muted truncate">Archivo: {fileName}</p>}
           <details className="text-xs text-text-secondary">
-            <summary className="cursor-pointer text-accent font-semibold">¿Dónde descargo mis movimientos?</summary>
+            <summary className="cursor-pointer text-accent font-semibold">{tr('¿Dónde descargo mis movimientos?')}</summary>
             <ul className="mt-2 space-y-1.5 list-disc pl-4 leading-relaxed">
-              <li><b>Bancolombia:</b> en la Sucursal Virtual Personas (desde el computador), entra a tu cuenta, consulta los movimientos y usa la opción de descargar o exportar a Excel.</li>
-              <li><b>Otros bancos:</b> busca "descargar movimientos" o "exportar" en la banca en línea; casi todos dan Excel o CSV.</li>
-              <li><b>Nequi:</b> por ahora solo entrega el extracto en PDF, que aún no se puede importar. Para Nequi usa la voz o la foto del recibo.</li>
+              <li><b>{tr('Bancolombia:')}</b> en la Sucursal Virtual Personas (desde el computador), entra a tu cuenta, consulta los movimientos y usa la opción de descargar o exportar a Excel.</li>
+              <li><b>{tr('Otros bancos:')}</b> busca "descargar movimientos" o "exportar" en la banca en línea; casi todos dan Excel o CSV.</li>
+              <li><b>{tr('Nequi:')}</b> {tr('por ahora solo entrega el extracto en PDF, que aún no se puede importar. Para Nequi usa la voz o la foto del recibo.')}</li>
             </ul>
           </details>
         </section>
@@ -172,10 +172,10 @@ export default function ImportarPage() {
         {/* 2. Columnas */}
         {sheet && map && (
           <section className={`${card} p-5 space-y-3`}>
-            <p className="text-sm font-semibold text-text-primary">Columnas del archivo</p>
+            <p className="text-sm font-semibold text-text-primary">{tr('Columnas del archivo')}</p>
             <p className="text-xs text-text-muted -mt-2">Las adiviné; cámbialas si algo no cuadra.</p>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Fila de encabezados</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{tr('Fila de encabezados')}</span>
               <select className={select} value={map.headerRow} onChange={(e) => setMap({ ...map, headerRow: Number(e.target.value) })}>
                 {sheet.slice(0, 30).map((r, i) => <option key={i} value={i}>Fila {i + 1}: {r.filter(Boolean).slice(0, 4).join(' · ').slice(0, 50) || '(vacía)'}</option>)}
               </select>
@@ -210,8 +210,8 @@ export default function ImportarPage() {
                 </label>
               )}
               <div className="mt-2 flex gap-3 text-xs font-semibold">
-                <button type="button" onClick={() => setAll(true)} className="text-accent">Marcar todos</button>
-                <button type="button" onClick={() => setAll(false)} className="text-text-muted">Desmarcar todos</button>
+                <button type="button" onClick={() => setAll(true)} className="text-accent">{tr('Marcar todos')}</button>
+                <button type="button" onClick={() => setAll(false)} className="text-text-muted">{tr('Desmarcar todos')}</button>
               </div>
             </div>
 
@@ -224,19 +224,19 @@ export default function ImportarPage() {
                       <div className="flex items-start justify-between gap-2">
                         <p className="text-sm font-medium text-text-primary truncate">{r.description}</p>
                         <button type="button" onClick={() => update(r.id, { type: r.type === 'gasto' ? 'ingreso' : 'gasto', category: r.type === 'gasto' ? 'Otros ingresos' : 'Otros' })}
-                                title="Cambiar entre gasto e ingreso"
+                                title={tr('Cambiar entre gasto e ingreso')}
                                 className={`text-sm font-bold shrink-0 ${r.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
                           {r.type === 'gasto' ? '−' : '+'}{fmt(r.amount)}
                         </button>
                       </div>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="text-[11px] text-text-muted shrink-0">{new Date(`${r.date}T12:00:00`).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: '2-digit' })}</span>
-                        <select className={`${select} !py-1 !text-[11px]`} value={r.category} onChange={(e) => update(r.id, { category: e.target.value })} aria-label="Categoría">
+                        <select className={`${select} !py-1 !text-[11px]`} value={r.category} onChange={(e) => update(r.id, { category: e.target.value })} aria-label={tr('Categoría')}>
                           {!(r.type === 'gasto' ? expenseCategories : incomeCategories).some(c => c.label === r.category) && <option value={r.category}>{r.category}</option>}
                           {(r.type === 'gasto' ? expenseCategories : incomeCategories).map(c => <option key={c.label} value={c.label}>{c.label}</option>)}
                         </select>
                       </div>
-                      {r.duplicate && <p className="text-[10px] text-amber-500 mt-1">Parece que ya lo registraste.</p>}
+                      {r.duplicate && <p className="text-[10px] text-amber-500 mt-1">{tr('Parece que ya lo registraste.')}</p>}
                     </div>
                   </div>
                 </li>
@@ -253,7 +253,7 @@ export default function ImportarPage() {
         )}
 
         {sheet && map && rows.length === 0 && !error && (
-          <p className="text-xs text-text-muted text-center">No encontré movimientos con fecha y valor con estas columnas. Revisa la selección de arriba.</p>
+          <p className="text-xs text-text-muted text-center">{tr('No encontré movimientos con fecha y valor con estas columnas. Revisa la selección de arriba.')}</p>
         )}
       </main>
       <BottomNav onSuccess={refresh} />

@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -132,12 +132,12 @@ export default function HormigaPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl lg:max-w-6xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Suscripciones y gastos hormiga</h1>
-            <p className="text-xs text-text-muted">Lo pequeño que se repite y, sumado, pesa. Toca uno para ver su historial.</p>
+            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Suscripciones y gastos hormiga')}</h1>
+            <p className="text-xs text-text-muted">{tr('Lo pequeño que se repite y, sumado, pesa. Toca uno para ver su historial.')}</p>
           </div>
         </div>
 
@@ -167,23 +167,23 @@ export default function HormigaPage() {
                   </>
                 )
               ) : activeSubs.length === 0 ? (
-                <p className="text-sm text-text-secondary">No encontré suscripciones en tus gastos recientes. Cuando registres Netflix, Spotify, apps o juegos, aparecerán aquí.</p>
+                <p className="text-sm text-text-secondary">{tr('No encontré suscripciones en tus gastos recientes. Cuando registres Netflix, Spotify, apps o juegos, aparecerán aquí.')}</p>
               ) : (
                 <>
                   <div>
-                    <p className="text-[11px] text-text-muted">Las que se cobran cada mes te cuestan</p>
-                    <p className={`text-2xl font-bold text-rose-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={subsMonthly} format={fmt} /> <span className="text-sm font-medium text-text-muted">al mes</span></p>
+                    <p className="text-[11px] text-text-muted">{tr('Las que se cobran cada mes te cuestan')}</p>
+                    <p className={`text-2xl font-bold text-rose-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={subsMonthly} format={fmt} /> <span className="text-sm font-medium text-text-muted">{tr('al mes')}</span></p>
                     <p className="text-xs text-text-secondary">Son {fmt(subsMonthly * 12)} al año.</p>
                   </div>
                   <ul className="space-y-1">
                     {activeSubs.map(s => subRow(s.key, s.name, s.category,
-                      s.monthly ? `Cada mes${s.nextDate ? ` · próximo cobro ~${shortDate(s.nextDate)}` : ''}` : `Un cobro el ${shortDate(s.lastDate)} · ¿es mensual?`,
+                      s.monthly ? `Cada mes${s.nextDate ? tr(' · próximo cobro ~{a}', { a: shortDate(s.nextDate) }) : ''}` : `Un cobro el ${shortDate(s.lastDate)} · ¿es mensual?`,
                       s.lastAmount))}
                   </ul>
                   {oldSubs.length > 0 && (
                     <p className="text-[11px] text-text-muted">Sin cobros en más de 40 días: {oldSubs.map(s => s.name).join(', ')}.</p>
                   )}
-                  {tip(`¿Todavía usas todas? Cancelar una de ${fmt(activeSubs[0].lastAmount)} te ahorra ${fmt(activeSubs[0].lastAmount * 12)} al año.`)}
+                  {tip(tr('¿Todavía usas todas? Cancelar una de {a} te ahorra {b} al año.', { a: fmt(activeSubs[0].lastAmount), b: fmt(activeSubs[0].lastAmount * 12) }))}
                 </>
               )}
             </section>
@@ -208,12 +208,12 @@ export default function HormigaPage() {
                   </>
                 )
               ) : ant.groups.length === 0 ? (
-                <p className="text-sm text-text-secondary">No veo compras pequeñas que se repitan. ¡Bien! Aquí aparecerán el tinto, el mecato, los domicilios o el parqueadero si se vuelven costumbre.</p>
+                <p className="text-sm text-text-secondary">{tr('No veo compras pequeñas que se repitan. ¡Bien! Aquí aparecerán el tinto, el mecato, los domicilios o el parqueadero si se vuelven costumbre.')}</p>
               ) : (
                 <>
                   <div>
                     <p className="text-[11px] text-text-muted">Compras de menos de {fmt(ANT_MAX_AMOUNT)} que se repiten</p>
-                    <p className={`text-2xl font-bold text-amber-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={ant.monthly} format={fmt} /> <span className="text-sm font-medium text-text-muted">al mes</span></p>
+                    <p className={`text-2xl font-bold text-amber-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={ant.monthly} format={fmt} /> <span className="text-sm font-medium text-text-muted">{tr('al mes')}</span></p>
                     <p className="text-xs text-text-secondary">A este ritmo son {fmt(ant.yearly)} al año. Promedio de los últimos {ant.days} días.</p>
                   </div>
                   <ul className="space-y-2">
@@ -221,7 +221,7 @@ export default function HormigaPage() {
                       `${g.count} veces · ${fmt(g.average)} cada una${g.examples.length ? ` · ${g.examples.join(', ')}` : ''}`,
                       g.monthly, 'al mes'))}
                   </ul>
-                  {top && tip(`Si gastas la mitad en ${top.label.toLowerCase()}, te quedan ${fmt(top.monthly / 2)} más cada mes: ${fmt(top.yearly / 2)} al año para tus metas.`)}
+                  {top && tip(tr('Si gastas la mitad en {a}, te quedan {b} más cada mes: {c} al año para tus metas.', { a: top.label.toLowerCase(), b: fmt(top.monthly / 2), c: fmt(top.yearly / 2) }))}
                 </>
               )}
             </section>

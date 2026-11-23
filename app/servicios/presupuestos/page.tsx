@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 
 import { expandByItems } from '@/lib/receiptItems';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
@@ -10,7 +11,7 @@ import {
   Download, BookOpen, ShieldCheck
 } from 'lucide-react';
 import { 
-  PieChart as RechartsPieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer 
+  PieChart as RechartsPieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 
 import { Header } from '@/components/layout/Header';
@@ -202,12 +203,12 @@ export default function PresupuestosPage() {
               <span className={`text-[10px] sm:text-xs font-medium uppercase tracking-wider block ${
                 isTechTheme ? 'text-accent/70' : 'text-text-muted'
               }`}>
-                Servicios Financieros
+                {tr('Servicios Financieros')}
               </span>
               <h1 className={`truncate ${
                 isTechTheme ? 'font-bold text-base sm:text-lg text-accent uppercase tracking-wider' : 'font-syne font-bold text-base sm:text-xl text-text-primary'
               }`}>
-                Centro de Presupuestos
+                {tr('Centro de Presupuestos')}
               </h1>
             </div>
           </div>
@@ -222,7 +223,7 @@ export default function PresupuestosPage() {
             }`}
           >
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar Reporte</span>
+            <span className="hidden sm:inline">{tr('Exportar Reporte')}</span>
           </button>
         </div>
 
@@ -251,10 +252,10 @@ export default function PresupuestosPage() {
               </div>
               <div>
                 <h2 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
-                  Presupuesto Global del Mes
+                  {tr('Presupuesto Global del Mes')}
                 </h2>
                 <p className={`text-xs ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                  Límite total proyectado para todos tus gastos
+                  {tr('Límite total proyectado para todos tus gastos')}
                 </p>
               </div>
             </div>
@@ -266,7 +267,7 @@ export default function PresupuestosPage() {
                   ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                   : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
             }`}>
-              {isOverGlobalBudget ? 'EXCEDIDO' : <><AnimatedNumber value={percentageSpent} format={(n: number) => `${Math.round(n)}%`} /> CONSUMIDO</>}
+              {isOverGlobalBudget ? 'EXCEDIDO' : <><AnimatedNumber value={percentageSpent} format={(n: number) => `${Math.round(n)}%`} /> {tr('CONSUMIDO')}</>}
             </span>
           </div>
 
@@ -295,10 +296,10 @@ export default function PresupuestosPage() {
             {/* 3. Presupuesto Mensual con icono de lápiz para editar adentro */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>Presupuesto Mensual</span>
+                <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>{tr('Presupuesto Mensual')}</span>
                 <button
                   onClick={() => setIsBudgetModalOpen(true)}
-                  title="Editar Presupuesto Mensual"
+                  title={tr('Editar Presupuesto Mensual')}
                   className={`p-1 rounded-lg transition-all ${
                     isTechTheme 
                       ? 'text-accent hover:bg-accent/20 border border-accent/40' 
@@ -309,14 +310,14 @@ export default function PresupuestosPage() {
                 </button>
               </div>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                {globalBudget > 0 ? <AnimatedNumber value={globalBudget} format={(n: number) => formatCurrency(n, currency)} /> : 'Sin asignar'}
+                {globalBudget > 0 ? <AnimatedNumber value={globalBudget} format={(n: number) => formatCurrency(n, currency)} /> : tr('Sin asignar')}
               </p>
             </div>
 
             {/* 4. Restante Libre / Exceso */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
               <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                {globalRemaining < 0 ? 'Exceso' : 'Restante Libre'}
+                {globalRemaining < 0 ? tr('Exceso') : tr('Restante Libre')}
               </span>
               <p className={`text-lg font-bold mt-0.5 ${
                 globalRemaining < 0 ? 'text-red-400' : 'text-emerald-400'
@@ -364,7 +365,7 @@ export default function PresupuestosPage() {
               <div className="flex items-center gap-2">
                 <PieChart className="w-5 h-5 text-purple-400" />
                 <h3 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
-                  Distribución del Gasto
+                  {tr('Distribución del Gasto')}
                 </h3>
               </div>
               
@@ -379,7 +380,7 @@ export default function PresupuestosPage() {
                       : 'text-text-muted hover:text-text-primary'
                   }`}
                 >
-                  Categorías
+                  {tr('Categorías')}
                 </button>
                 <button
                   type="button"
@@ -390,7 +391,7 @@ export default function PresupuestosPage() {
                       : 'text-text-muted hover:text-text-primary'
                   }`}
                 >
-                  Subcategorías
+                  {tr('Subcategorías')}
                 </button>
               </div>
             </div>
@@ -458,26 +459,26 @@ export default function PresupuestosPage() {
                 ¿Cómo Repartir tu Salario? (Regla 50 / 30 / 20)
               </h2>
               <p className={`text-xs ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                Fórmula dorada recomendada por economistas e instituciones financieras
+                {tr('Fórmula dorada recomendada por economistas e instituciones financieras')}
               </p>
             </div>
           </div>
 
           <p className="text-xs text-text-muted leading-relaxed mb-4">
-            Según los principales marcos de finanzas personales, la distribución idónea del ingreso mensual se divide en 3 pilares clave para garantizar estabilidad y crecimiento económico:
+            {tr('Según los principales marcos de finanzas personales, la distribución idónea del ingreso mensual se divide en 3 pilares clave para garantizar estabilidad y crecimiento económico:')}
           </p>
 
           {/* Barra de Distribución 50 / 30 / 20 */}
           <div className="space-y-1.5 mb-5">
             <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/10 p-0.5">
-              <div className="h-full bg-blue-500 rounded-l-full w-[50%]" title="50% Necesidades" />
-              <div className="h-full bg-amber-400 w-[30%]" title="30% Deseos" />
-              <div className="h-full bg-emerald-400 rounded-r-full w-[20%]" title="20% Ahorro" />
+              <div className="h-full bg-blue-500 rounded-l-full w-[50%]" title={tr('50% Necesidades')} />
+              <div className="h-full bg-amber-400 w-[30%]" title={tr('30% Deseos')} />
+              <div className="h-full bg-emerald-400 rounded-r-full w-[20%]" title={tr('20% Ahorro')} />
             </div>
             <div className="flex justify-between text-[11px] font-bold">
-              <span className="text-blue-400">50% Necesidades</span>
-              <span className="text-amber-400">30% Deseos</span>
-              <span className="text-emerald-400">20% Ahorro / Inversión</span>
+              <span className="text-blue-400">{tr('50% Necesidades')}</span>
+              <span className="text-amber-400">{tr('30% Deseos')}</span>
+              <span className="text-emerald-400">{tr('20% Ahorro / Inversión')}</span>
             </div>
           </div>
 
@@ -486,15 +487,15 @@ export default function PresupuestosPage() {
             {/* Pilar 1: 50% Necesidades */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-blue-500/30' : 'bg-blue-500/5 border-blue-500/20'}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-blue-400 uppercase">50% Necesidades</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold">Esenciales</span>
+                <span className="text-xs font-bold text-blue-400 uppercase">{tr('50% Necesidades')}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold">{tr('Esenciales')}</span>
               </div>
               <p className="text-[11px] text-text-muted mb-2">
-                Vivienda, mercado, servicios, transporte, salud, educación y cuotas de tus deudas.
+                {tr('Vivienda, mercado, servicios, transporte, salud, educación y cuotas de tus deudas.')}
               </p>
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-blue-500/20">
-                  <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
+                  <span className="text-[10px] text-text-muted block">{tr('Monto sugerido:')}</span>
                   <span className="text-sm font-bold text-blue-400"><AnimatedNumber value={globalBudget * 0.50} format={(n: number) => formatCurrency(n, currency)} /></span>
                 </div>
               )}
@@ -504,15 +505,15 @@ export default function PresupuestosPage() {
             {/* Pilar 2: 30% Deseos */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-amber-500/30' : 'bg-amber-500/5 border-amber-500/20'}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-amber-400 uppercase">30% Deseos</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">Estilo de Vida</span>
+                <span className="text-xs font-bold text-amber-400 uppercase">{tr('30% Deseos')}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">{tr('Estilo de Vida')}</span>
               </div>
               <p className="text-[11px] text-text-muted mb-2">
-                Comer fuera, licores y rumba, entretenimiento, viajes, compras, suscripciones y gustos personales.
+                {tr('Comer fuera, licores y rumba, entretenimiento, viajes, compras, suscripciones y gustos personales.')}
               </p>
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-amber-500/20">
-                  <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
+                  <span className="text-[10px] text-text-muted block">{tr('Monto sugerido:')}</span>
                   <span className="text-sm font-bold text-amber-400"><AnimatedNumber value={globalBudget * 0.30} format={(n: number) => formatCurrency(n, currency)} /></span>
                 </div>
               )}
@@ -522,15 +523,15 @@ export default function PresupuestosPage() {
             {/* Pilar 3: 20% Ahorro e Inversión */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-emerald-500/30' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-emerald-400 uppercase">20% Ahorro</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">Futuro</span>
+                <span className="text-xs font-bold text-emerald-400 uppercase">{tr('20% Ahorro')}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">{tr('Futuro')}</span>
               </div>
               <p className="text-[11px] text-text-muted mb-2">
                 Fondo de emergencia (3-6 meses), CDT, inversiones, pensión voluntaria y abonos extra a deudas.
               </p>
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-emerald-500/20">
-                  <span className="text-[10px] text-text-muted block">Monto sugerido:</span>
+                  <span className="text-[10px] text-text-muted block">{tr('Monto sugerido:')}</span>
                   <span className="text-sm font-bold text-emerald-400"><AnimatedNumber value={globalBudget * 0.20} format={(n: number) => formatCurrency(n, currency)} /></span>
                 </div>
               )}
@@ -547,20 +548,20 @@ export default function PresupuestosPage() {
             <ul className="text-[11px] text-text-muted space-y-1.5 pl-1">
               <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
                 <div>
-                  <strong className="text-text-primary">Harvard Law School / Elizabeth Warren:</strong>
-                  <span className="block text-[10px] text-text-muted">Creadora de la norma 50/30/20 en el libro <em>"All Your Worth: The Ultimate Lifetime Money Plan"</em>.</span>
+                  <strong className="text-text-primary">{tr('Harvard Law School / Elizabeth Warren:')}</strong>
+                  <span className="block text-[10px] text-text-muted">{tr('Creadora de la norma 50/30/20 en el libro')} <em>{tr('"All Your Worth: The Ultimate Lifetime Money Plan"')}</em>.</span>
                 </div>
               </li>
               <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
                 <div>
                   <strong className="text-text-primary">Banco Interamericano de Desarrollo (BID):</strong>
-                  <span className="block text-[10px] text-text-muted">Guías oficiales de Educación y Salud Financiera para hogares de Latinoamérica.</span>
+                  <span className="block text-[10px] text-text-muted">{tr('Guías oficiales de Educación y Salud Financiera para hogares de Latinoamérica.')}</span>
                 </div>
               </li>
               <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
                 <div>
                   <strong className="text-text-primary">Investopedia & CFP Board:</strong>
-                  <span className="block text-[10px] text-text-muted">Estándares internacionales de planificación de presupuestos personales.</span>
+                  <span className="block text-[10px] text-text-muted">{tr('Estándares internacionales de planificación de presupuestos personales.')}</span>
                 </div>
               </li>
             </ul>
@@ -584,7 +585,7 @@ export default function PresupuestosPage() {
               <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
                 <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-red-400 uppercase">Alerta de Presupuesto Global Excedido</p>
+                  <p className="text-xs font-bold text-red-400 uppercase">{tr('Alerta de Presupuesto Global Excedido')}</p>
                   <p className="text-xs text-text-muted mt-0.5">
                     Has superado tu límite mensual proyectado por <AnimatedNumber value={Math.abs(globalRemaining)} format={(n: number) => formatCurrency(n, currency)} />. Intenta moderar los gastos variables en los {remainingDays} días restantes.
                   </p>
@@ -594,7 +595,7 @@ export default function PresupuestosPage() {
               <div className="p-3.5 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-yellow-400 uppercase">Presupuesto al 80% de Capacidad</p>
+                  <p className="text-xs font-bold text-yellow-400 uppercase">{tr('Presupuesto al 80% de Capacidad')}</p>
                   <p className="text-xs text-text-muted mt-0.5">
                     Estás cerca de alcanzar tu límite mensual. Te recomendamos mantener tu gasto diario por debajo de <AnimatedNumber value={dailyRecommendedBudget} format={(n: number) => formatCurrency(n, currency)} />.
                   </p>
@@ -604,9 +605,9 @@ export default function PresupuestosPage() {
               <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-emerald-400 uppercase">Salud Financiera Estable</p>
+                  <p className="text-xs font-bold text-emerald-400 uppercase">{tr('Salud Financiera Estable')}</p>
                   <p className="text-xs text-text-muted mt-0.5">
-                    Tus gastos se mantienen dentro del rango planificado para este período. Sigue así para cumplir tus metas de ahorro.
+                    {tr('Tus gastos se mantienen dentro del rango planificado para este período. Sigue así para cumplir tus metas de ahorro.')}
                   </p>
                 </div>
               </div>
@@ -626,7 +627,7 @@ export default function PresupuestosPage() {
       {showExportModal && (
         <ExportReportModal
           onClose={() => setShowExportModal(false)}
-          title="Reporte de Presupuestos y Gastos"
+          title={tr('Reporte de Presupuestos y Gastos')}
           transactions={filteredTransactions}
           filterType={filterType}
           filterValue={filterValue}

@@ -1,4 +1,5 @@
 'use client';
+import { tr, lazyT } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, ChevronUp, Fingerprint, KeyRound, Lock, Timer, X } from 'lucide-react';
@@ -11,13 +12,13 @@ import {
 
 type Step = 'new' | 'confirm' | 'verify-off' | 'verify-change' | 'bio';
 
-const TITLES: Record<Step, { title: string; text: string }> = {
-  'new': { title: 'Crea tu PIN', text: 'Escribe 4 números que recuerdes. Lo pediremos al abrir FLOWI.' },
-  'confirm': { title: 'Repite tu PIN', text: 'Escríbelo otra vez para confirmar.' },
-  'verify-off': { title: 'Quitar el bloqueo', text: 'Escribe tu PIN actual.' },
-  'verify-change': { title: 'Cambiar el PIN', text: 'Primero escribe tu PIN actual.' },
-  'bio': { title: '¿Usar tu huella?', text: '' },
-};
+const TITLES: Record<Step, { title: string; text: string }> = lazyT(() => ({
+  'new': { title: tr('Crea tu PIN'), text: tr('Escribe 4 números que recuerdes. Lo pediremos al abrir FLOWI.') },
+  'confirm': { title: tr('Repite tu PIN'), text: tr('Escríbelo otra vez para confirmar.') },
+  'verify-off': { title: tr('Quitar el bloqueo'), text: tr('Escribe tu PIN actual.') },
+  'verify-change': { title: tr('Cambiar el PIN'), text: tr('Primero escribe tu PIN actual.') },
+  'bio': { title: tr('¿Usar tu huella?'), text: '' },
+}));
 
 // Sección de Configuración: bloquear FLOWI con PIN y huella o rostro en este celular
 export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTechTheme: boolean; open?: boolean; onToggle?: () => void }) {
@@ -84,7 +85,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
     <section className="space-y-3">
       {onToggle && (
         <button onClick={onToggle} className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}>
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Seguridad</h2>
+          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Seguridad')}</h2>
           {open ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
         </button>
       )}
@@ -94,8 +95,8 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
             <div className="flex items-center gap-3">
               <div className={icon}><Lock className="w-4 h-4 text-accent" /></div>
               <div className={`text-left ${mono}`}>
-                <p className="text-sm font-medium text-text-primary">Bloquear FLOWI con PIN</p>
-                <p className="text-[10px] text-text-muted leading-relaxed">Nadie ve tu plata aunque tome tu celular. Solo en este dispositivo.</p>
+                <p className="text-sm font-medium text-text-primary">{tr('Bloquear FLOWI con PIN')}</p>
+                <p className="text-[10px] text-text-muted leading-relaxed">{tr('Nadie ve tu plata aunque tome tu celular. Solo en este dispositivo.')}</p>
               </div>
             </div>
             {sw(!!lock)}
@@ -108,7 +109,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
                   <div className="flex items-center gap-3">
                     <div className={icon}><Fingerprint className="w-4 h-4 text-accent" /></div>
                     <div className={`text-left ${mono}`}>
-                      <p className="text-sm font-medium text-text-primary">Usar huella o rostro</p>
+                      <p className="text-sm font-medium text-text-primary">{tr('Usar huella o rostro')}</p>
                       <p className="text-[10px] text-text-muted">{bioError || 'Desbloquea sin escribir el PIN'}</p>
                     </div>
                   </div>
@@ -120,8 +121,8 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
                 <div className="flex items-center gap-3">
                   <div className={icon}><Timer className="w-4 h-4 text-accent" /></div>
                   <div className={`text-left ${mono}`}>
-                    <p className="text-sm font-medium text-text-primary">Pedir el PIN otra vez</p>
-                    <p className="text-[10px] text-text-muted">Después de estar fuera de FLOWI</p>
+                    <p className="text-sm font-medium text-text-primary">{tr('Pedir el PIN otra vez')}</p>
+                    <p className="text-[10px] text-text-muted">{tr('Después de estar fuera de FLOWI')}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -137,7 +138,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
               <button type="button" onClick={() => go('verify-change')} className={`${row} border-b-0`}>
                 <div className="flex items-center gap-3">
                   <div className={icon}><KeyRound className="w-4 h-4 text-accent" /></div>
-                  <p className={`text-sm font-medium text-text-primary ${mono}`}>Cambiar el PIN</p>
+                  <p className={`text-sm font-medium text-text-primary ${mono}`}>{tr('Cambiar el PIN')}</p>
                 </div>
               </button>
             </>
@@ -150,7 +151,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
           <div onClick={e => e.stopPropagation()}
                className={`relative w-full sm:max-w-sm bg-deep border border-glass-border p-6 pb-8 space-y-5 ${isTechTheme ? 'rounded-none' : 'rounded-t-3xl sm:rounded-3xl'}`}
                style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
-            <button type="button" onClick={() => go(null)} aria-label="Cerrar" className="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-glass flex items-center justify-center">
+            <button type="button" onClick={() => go(null)} aria-label={tr('Cerrar')} className="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-glass flex items-center justify-center">
               <X className="w-4 h-4 text-text-muted" />
             </button>
             <div className="text-center space-y-1">
@@ -160,13 +161,13 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
             {step === 'bio' ? (
               <div className="space-y-3 text-center">
                 <Fingerprint className="w-14 h-14 text-accent mx-auto" />
-                <p className="text-sm text-text-secondary">Tu PIN quedó listo. También puedes entrar con la huella o el rostro de este celular.</p>
+                <p className="text-sm text-text-secondary">{tr('Tu PIN quedó listo. También puedes entrar con la huella o el rostro de este celular.')}</p>
                 {bioError && <p className="text-xs text-red-400">{bioError}</p>}
                 <button type="button" disabled={busy} onClick={turnOnBio}
                         className={`w-full py-3 font-bold bg-accent text-black disabled:opacity-60 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
-                  Activar huella o rostro
+                  {tr('Activar huella o rostro')}
                 </button>
-                <button type="button" onClick={() => go(null)} className="w-full py-2 text-sm text-text-muted">Ahora no</button>
+                <button type="button" onClick={() => go(null)} className="w-full py-2 text-sm text-text-muted">{tr('Ahora no')}</button>
               </div>
             ) : (
               <PinPad key={`${step}-${error?.n ?? 0}`} onComplete={onPin} error={error?.text} />

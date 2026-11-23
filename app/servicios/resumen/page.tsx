@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -59,11 +60,11 @@ export default function ResumenPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className={`flex-1 min-w-0 text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Resumen y estadísticas</h1>
-          <button type="button" onClick={() => setShowExport(true)} aria-label="Exportar el mes"
+          <h1 className={`flex-1 min-w-0 text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Resumen y estadísticas')}</h1>
+          <button type="button" onClick={() => setShowExport(true)} aria-label={tr('Exportar el mes')}
                   className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold ${isTech ? 'bg-accent/10 text-accent border border-accent/30 rounded-none uppercase' : 'bg-accent/10 text-accent rounded-full hover:bg-accent/20'}`}>
             <Download className="w-4 h-4" /> Exportar
           </button>
@@ -71,12 +72,12 @@ export default function ResumenPage() {
 
         {/* Selector de mes */}
         <div className={`${card} flex items-center justify-between p-2`}>
-          <button onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Mes anterior" className="p-2 text-text-secondary hover:text-accent"><ChevronLeft className="w-5 h-5" /></button>
+          <button onClick={() => setMonth(shiftMonth(month, -1))} aria-label={tr('Mes anterior')} className="p-2 text-text-secondary hover:text-accent"><ChevronLeft className="w-5 h-5" /></button>
           <div className="text-center">
             <p className={`font-bold capitalize ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>{s.monthName} {month.slice(0, 4)}</p>
-            {isCurrent && <p className="text-[10px] text-text-muted">Mes en curso: aún no termina</p>}
+            {isCurrent && <p className="text-[10px] text-text-muted">{tr('Mes en curso: aún no termina')}</p>}
           </div>
-          <button onClick={() => setMonth(shiftMonth(month, 1))} disabled={isCurrent} aria-label="Mes siguiente" className="p-2 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronRight className="w-5 h-5" /></button>
+          <button onClick={() => setMonth(shiftMonth(month, 1))} disabled={isCurrent} aria-label={tr('Mes siguiente')} className="p-2 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronRight className="w-5 h-5" /></button>
         </div>
 
         {/* Mapa semanal, justo debajo del mes */}
@@ -92,11 +93,11 @@ export default function ResumenPage() {
             <section className={`${card} p-5`}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-text-muted">Te ingresó</p>
+                  <p className="text-[11px] text-text-muted">{tr('Te ingresó')}</p>
                   <p className={`text-lg font-bold text-emerald-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={s.ingresos} format={fmt} /></p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-text-muted">Gastaste</p>
+                  <p className="text-[11px] text-text-muted">{tr('Gastaste')}</p>
                   <p className={`text-lg font-bold text-red-400 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={s.gastos} format={fmt} /></p>
                   {s.gastosChange !== null && (
                     <p className={`text-[11px] flex items-center gap-1 ${s.gastosChange > 0 ? 'text-red-400' : 'text-emerald-500'}`}>
@@ -114,7 +115,7 @@ export default function ResumenPage() {
                   </p>
                 </div>
                 {s.savingsRate !== null && s.balance > 0 && (
-                  <p className="text-xs text-text-secondary text-right">Ahorraste el<br /><b className="text-text-primary text-base"><AnimatedNumber value={s.savingsRate} format={(n: number) => `${Math.round(n)} %`} /></b></p>
+                  <p className="text-xs text-text-secondary text-right">{tr('Ahorraste el')}<br /><b className="text-text-primary text-base"><AnimatedNumber value={s.savingsRate} format={(n: number) => `${Math.round(n)} %`} /></b></p>
                 )}
               </div>
             </section>
@@ -135,7 +136,7 @@ export default function ResumenPage() {
 
             {/* Categorías */}
             <section className={`${card} p-5`}>
-              <h2 className={`text-sm font-bold mb-3 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>En qué se fue</h2>
+              <h2 className={`text-sm font-bold mb-3 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('En qué se fue')}</h2>
               <div className="space-y-3">
                 {s.categories.slice(0, 8).map(c => (
                   <div key={c.label}>
@@ -145,7 +146,7 @@ export default function ResumenPage() {
                       {c.change !== null && Math.abs(c.change) >= 10 && (
                         <span className={`text-[10px] ${c.change > 0 ? 'text-red-400' : 'text-emerald-500'}`}>{c.change > 0 ? '▲' : '▼'} {Math.abs(Math.round(c.change))} %</span>
                       )}
-                      {c.prev === 0 && <span className="text-[10px] text-sky-400">nuevo</span>}
+                      {c.prev === 0 && <span className="text-[10px] text-sky-400">{tr('nuevo')}</span>}
                       <span className="font-semibold text-text-primary tabular-nums"><AnimatedNumber value={c.amount} format={fmt} /></span>
                     </div>
                     <div className="mt-1 h-1.5 rounded-full bg-white/5 overflow-hidden"><div className="h-full rounded-full bg-accent/70" style={{ width: `${(c.amount / maxCat) * 100}%` }} /></div>
@@ -157,22 +158,22 @@ export default function ResumenPage() {
             {/* 50/30/20 y hábitos */}
             <section className={`${card} p-5 space-y-4`}>
               <div>
-                <h2 className={`text-sm font-bold mb-2 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>Regla 50/30/20</h2>
+                <h2 className={`text-sm font-bold mb-2 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('Regla 50/30/20')}</h2>
                 <div className="flex h-3 rounded-full overflow-hidden bg-white/5">
                   <div className="bg-blue-400" style={{ width: `${(s.pillars.necesidades / pillarTotal) * 100}%` }} />
                   <div className="bg-amber-400" style={{ width: `${(s.pillars.deseos / pillarTotal) * 100}%` }} />
                   <div className="bg-emerald-400" style={{ width: `${(s.pillars.ahorro / pillarTotal) * 100}%` }} />
                 </div>
                 <div className="mt-2 grid grid-cols-3 gap-2 text-[11px]">
-                  <p className="text-blue-400">Necesidades<br /><b className="text-text-primary"><AnimatedNumber value={s.pillars.necesidades} format={fmt} /></b></p>
-                  <p className="text-amber-400">Estilo de vida<br /><b className="text-text-primary"><AnimatedNumber value={s.pillars.deseos} format={fmt} /></b></p>
-                  <p className="text-emerald-400">Ahorro<br /><b className="text-text-primary"><AnimatedNumber value={s.pillars.ahorro} format={fmt} /></b></p>
+                  <p className="text-blue-400">{tr('Necesidades')}<br /><b className="text-text-primary"><AnimatedNumber value={s.pillars.necesidades} format={fmt} /></b></p>
+                  <p className="text-amber-400">{tr('Estilo de vida')}<br /><b className="text-text-primary"><AnimatedNumber value={s.pillars.deseos} format={fmt} /></b></p>
+                  <p className="text-emerald-400">{tr('Ahorro')}<br /><b className="text-text-primary"><AnimatedNumber value={s.pillars.ahorro} format={fmt} /></b></p>
                 </div>
               </div>
               <div className={`pt-4 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'} grid grid-cols-3 gap-2 text-center`}>
-                <div><p className="text-[10px] text-text-muted">Gastos fijos</p><p className="text-sm font-bold text-text-primary"><AnimatedNumber value={s.fixed} format={fmt} /></p></div>
-                <div><p className="text-[10px] text-text-muted">Día a día</p><p className="text-sm font-bold text-text-primary"><AnimatedNumber value={s.variable} format={fmt} /></p></div>
-                <div><p className="text-[10px] text-text-muted">Promedio diario</p><p className="text-sm font-bold text-text-primary"><AnimatedNumber value={s.avgDaily} format={fmt} /></p></div>
+                <div><p className="text-[10px] text-text-muted">{tr('Gastos fijos')}</p><p className="text-sm font-bold text-text-primary"><AnimatedNumber value={s.fixed} format={fmt} /></p></div>
+                <div><p className="text-[10px] text-text-muted">{tr('Día a día')}</p><p className="text-sm font-bold text-text-primary"><AnimatedNumber value={s.variable} format={fmt} /></p></div>
+                <div><p className="text-[10px] text-text-muted">{tr('Promedio diario')}</p><p className="text-sm font-bold text-text-primary"><AnimatedNumber value={s.avgDaily} format={fmt} /></p></div>
               </div>
             </section>
           </>
@@ -185,7 +186,7 @@ export default function ResumenPage() {
         )}
       </main>
       {showExport && (
-        <ExportReportModal onClose={() => setShowExport(false)} title="Resumen del mes" transactions={monthTx} filterType="month" filterValue={month} />
+        <ExportReportModal onClose={() => setShowExport(false)} title={tr('Resumen del mes')} transactions={monthTx} filterType="month" filterValue={month} />
       )}
       <BottomNav />
     </div>

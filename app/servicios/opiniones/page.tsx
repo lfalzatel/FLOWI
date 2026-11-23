@@ -1,5 +1,5 @@
 'use client';
-import { tr } from '@/lib/i18n';
+import { tr, lazyT } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,12 +15,12 @@ import {
 
 // Comentarios y sugerencias. Cada persona envía lo que le gusta, lo que no, ideas y fallas.
 // El administrador ve además el panel: puntos a favor y en contra por parte de la app, calificación y lo más usado.
-const SERVICE_NAMES: Record<string, string> = {
+const SERVICE_NAMES: Record<string, string> = lazyT(() => ({
   cuentas: tr('Cuentas'), hormiga: tr('Gastos hormiga'), amigos: tr('Amigos'), recordatorios: tr('Recordatorios'), resumen: tr('Resumen'),
   presupuestos: tr('Presupuestos'), metas: tr('Metas'), inversiones: tr('Inversiones'), negocio: tr('Mi negocio'), productos: tr('¿Cuánto gasto en…?'),
   recibos: tr('Mis recibos'), importar: tr('Importar extracto'), notas: tr('Notas'), compartidos: tr('Compartidos'), configuracion: tr('Configuración'),
   opiniones: tr('Comentarios'),
-};
+}));
 
 export default function OpinionesPage() {
   const { theme } = useTheme();

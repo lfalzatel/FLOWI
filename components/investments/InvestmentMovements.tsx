@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useState } from 'react';
 import { ChevronDown, ArrowDownToLine, ArrowUpFromLine, Scale, Sparkles, RefreshCw } from 'lucide-react';
 import type { Account, Investment } from '@/lib/firestore';
@@ -14,14 +14,14 @@ export function investmentMoves(inv: Investment, accounts: Account[]): Move[] {
   const out: Move[] = [];
   for (const f of inv.fundings || []) {
     const label = f.kind === 'apertura' ? 'Apertura' : f.kind === 'renovacion' ? 'Renovación (más capital)' : 'Depósito';
-    out.push({ at: f.at, amount: f.amount, label, account: f.accountId ? `desde ${name(f.accountId) || 'una cuenta'}` : 'ya estaba ahorrada', kind: 'in' });
+    out.push({ at: f.at, amount: f.amount, label, account: f.accountId ? tr('desde {a}', { a: name(f.accountId) || 'una cuenta' }) : 'ya estaba ahorrada', kind: 'in' });
   }
   for (const p of inv.payouts || []) {
     const label = p.kind === 'pago' ? 'Te pagaron' : p.kind === 'renovacion' ? 'Retiro al renovar' : 'Retiro';
     out.push({ at: p.at, amount: -p.amount, label, account: p.accountId ? `a ${name(p.accountId) || 'una cuenta'}` : undefined, kind: p.kind === 'pago' ? 'pay' : 'out' });
   }
   for (const a of inv.adjustments || []) {
-    out.push({ at: a.at, amount: a.to - a.from, label: 'Ajuste de saldo', account: `quedó en ${a.to}`, kind: 'adjust' });
+    out.push({ at: a.at, amount: a.to - a.from, label: tr('Ajuste de saldo'), account: tr('quedó en {a}', { a: a.to }), kind: 'adjust' });
   }
   return out.sort((x, y) => y.at.localeCompare(x.at));
 }

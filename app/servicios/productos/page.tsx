@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -77,22 +77,22 @@ export default function ProductosPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>¿Cuánto gasto en…?</h1>
-            <p className="text-xs text-text-muted">Busca un producto y mira cuánto se te va al mes y cómo cambia su precio.</p>
+            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('¿Cuánto gasto en…?')}</h1>
+            <p className="text-xs text-text-muted">{tr('Busca un producto y mira cuánto se te va al mes y cómo cambia su precio.')}</p>
           </div>
         </div>
 
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Ej. huevos, cerveza, gasolina…" autoComplete="off"
-                 aria-label="Producto a buscar"
+          <input value={query} onChange={e => setQuery(e.target.value)} placeholder={tr('Ej. huevos, cerveza, gasolina…')} autoComplete="off"
+                 aria-label={tr('Producto a buscar')}
                  className={`w-full bg-glass border border-glass-border py-3 pl-10 pr-10 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent ${isTech ? 'rounded-none' : 'rounded-xl'}`} />
           {query && (
-            <button type="button" onClick={() => setQuery('')} aria-label="Borrar búsqueda" className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted">
+            <button type="button" onClick={() => setQuery('')} aria-label={tr('Borrar búsqueda')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -102,7 +102,7 @@ export default function ProductosPage() {
           <div className="space-y-3">
             {suggestions.length > 0 && (
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-2">Lo que más compras</p>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-2">{tr('Lo que más compras')}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {suggestions.map(s => <button key={s} type="button" onClick={() => setQuery(s)} className={chip}>{s}</button>)}
                 </div>
@@ -112,8 +112,8 @@ export default function ProductosPage() {
               <ReceiptText className="w-5 h-5 text-accent shrink-0 mt-0.5" />
               <p className="text-xs text-text-secondary leading-relaxed">
                 {withItems
-                  ? 'Busca en los productos de tus recibos escaneados y en la descripción de tus otros gastos.'
-                  : 'Escanea tus recibos (o agrega los productos al registrar un gasto) y aquí verás cuánto gastas en cada cosa. Mientras tanto busco en la descripción de tus gastos.'}
+                  ? tr('Busca en los productos de tus recibos escaneados y en la descripción de tus otros gastos.')
+                  : tr('Escanea tus recibos (o agrega los productos al registrar un gasto) y aquí verás cuánto gastas en cada cosa. Mientras tanto busco en la descripción de tus gastos.')}
               </p>
             </div>
           </div>
@@ -133,28 +133,28 @@ export default function ProductosPage() {
               {filterType === 'all' ? (
                 <>
                   <div className={card}>
-                    <p className="text-[10px] text-text-muted">Este mes</p>
+                    <p className="text-[10px] text-text-muted">{tr('Este mes')}</p>
                     <p className="text-sm font-bold text-text-primary truncate">{fmt(data.thisMonth)}</p>
                   </div>
                   <div className={card}>
-                    <p className="text-[10px] text-text-muted">Promedio al mes</p>
+                    <p className="text-[10px] text-text-muted">{tr('Promedio al mes')}</p>
                     <p className="text-sm font-bold text-text-primary truncate">{fmt(data.monthlyAverage)}</p>
                   </div>
                 </>
               ) : (
                 <>
                   <div className={card}>
-                    <p className="text-[10px] text-text-muted">En este periodo</p>
+                    <p className="text-[10px] text-text-muted">{tr('En este periodo')}</p>
                     <p className="text-sm font-bold text-text-primary truncate">{fmt(view.total)}</p>
                   </div>
                   <div className={card}>
-                    <p className="text-[10px] text-text-muted">Por compra</p>
+                    <p className="text-[10px] text-text-muted">{tr('Por compra')}</p>
                     <p className="text-sm font-bold text-text-primary truncate">{view.purchases.length ? fmt(view.total / view.purchases.length) : '—'}</p>
                   </div>
                 </>
               )}
               <div className={card}>
-                <p className="text-[10px] text-text-muted">Compras</p>
+                <p className="text-[10px] text-text-muted">{tr('Compras')}</p>
                 <p className="text-sm font-bold text-text-primary truncate">{view.purchases.length}</p>
                 <p className="text-[10px] text-text-muted truncate">{fmt(view.total)} en total</p>
               </div>
@@ -168,10 +168,10 @@ export default function ProductosPage() {
                 </div>
                 {data.priceChange !== undefined && data.firstPrice && (
                   <div className={`text-right text-xs font-semibold ${Math.abs(data.priceChange) < 0.005 ? 'text-text-muted' : data.priceChange > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                    {Math.abs(data.priceChange) < 0.005 ? 'Igual' : (
+                    {Math.abs(data.priceChange) < 0.005 ? tr('Igual') : (
                       <span className="inline-flex items-center gap-1">
                         {data.priceChange > 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                        {data.priceChange > 0 ? 'Subió' : 'Bajó'} {Math.abs(Math.round(data.priceChange * 100))} %
+                        {data.priceChange > 0 ? tr('Subió') : tr('Bajó')} {Math.abs(Math.round(data.priceChange * 100))} %
                       </span>
                     )}
                     <p className="text-[10px] font-normal text-text-muted">vs. {fmt(data.firstPrice.price)} el {dayShort(data.firstPrice.date)}</p>
@@ -201,7 +201,7 @@ export default function ProductosPage() {
 
             {/* Compras */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-2">Cada compra</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-2">{tr('Cada compra')}</p>
               <ul className={`glass-card divide-y divide-glass-border ${box}`}>
                 {view.purchases.slice(0, 60).map((p, i) => {
                   const tx = p.txId ? transactions.find(t => t.id === p.txId) : undefined;

@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { requestNotificationPermission, scheduleNotificationViaSW } from '@/lib/notifications';
@@ -51,7 +52,7 @@ export function NotificationPrompter() {
       try { localStorage.setItem('notifications_enabled', 'true'); } catch {}
       if (user) syncPushToken(user.uid);
       window.dispatchEvent(new CustomEvent(CHANGED_EVENT, { detail: { enabled: true, silent: true } }));
-      scheduleNotificationViaSW({ title: 'Notificaciones activadas ✓', body: 'Te avisaremos tus pagos y recordatorios, incluso con FLOWI cerrada.', tag: 'flowi-notif-on' });
+      scheduleNotificationViaSW({ title: tr('Notificaciones activadas ✓'), body: tr('Te avisaremos tus pagos y recordatorios, incluso con FLOWI cerrada.'), tag: 'flowi-notif-on' });
       setDialog({ kind: 'enabled' });
     } else if (notificationsState() === 'blocked') {
       setDialog({ kind: 'blocked' });

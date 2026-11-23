@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr, lazyT } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
@@ -16,12 +16,12 @@ export function triggerPremiumCelebration(until?: Date) {
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(EVENT, { detail: { until: until?.toISOString() } }));
 }
 
-const PERKS = [
-  { icon: Camera, text: 'Recibos con foto sin límite' },
-  { icon: Landmark, text: 'Todas tus inversiones y CDT' },
-  { icon: Target, text: 'Todas las metas de ahorro' },
-  { icon: Sparkles, text: 'Y lo que vamos sumando' },
-];
+const PERKS = lazyT(() => ([
+  { icon: Camera, text: tr('Recibos con foto sin límite') },
+  { icon: Landmark, text: tr('Todas tus inversiones y CDT') },
+  { icon: Target, text: tr('Todas las metas de ahorro') },
+  { icon: Sparkles, text: tr('Y lo que vamos sumando') },
+]));
 
 function playFanfare() {
   try {
@@ -96,7 +96,7 @@ export function PremiumCelebration() {
   const untilText = open.until?.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 
   return createPortal(
-    <div className={`fixed inset-0 z-[100000] flex items-center justify-center p-6 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label="Ya eres Premium">
+    <div className={`fixed inset-0 z-[100000] flex items-center justify-center p-6 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('Ya eres Premium')}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" style={{ animation: 'pc-fade .4s ease-out' }} onClick={() => setOpen(null)} aria-hidden="true" />
       <div className="relative w-full max-w-sm flex flex-col items-center text-center">
         {/* Corona con rayos girando y un halo que respira */}
@@ -115,10 +115,10 @@ export function PremiumCelebration() {
 
         <h2 className={`text-3xl font-extrabold bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 bg-clip-text text-transparent ${isTech ? 'uppercase tracking-wider' : 'font-syne'}`}
             style={{ backgroundSize: '200% auto', animation: 'pc-up .5s ease-out .35s both, pc-text 3s linear infinite' }}>
-          ¡Ya eres Premium!
+          {tr('¡Ya eres Premium!')}
         </h2>
         <p className="text-sm text-white/80 mt-1" style={{ animation: 'pc-up .5s ease-out .5s both' }}>
-          Gracias por apoyar a FLOWI{untilText ? ` · activo hasta el ${untilText}` : ''}.
+          Gracias por apoyar a FLOWI{untilText ? tr(' · activo hasta el {a}', { a: untilText }) : ''}.
         </p>
 
         <ul className="mt-5 w-full space-y-2">
@@ -135,7 +135,7 @@ export function PremiumCelebration() {
         <button type="button" onClick={() => setOpen(null)}
                 className={`mt-6 w-full py-3.5 font-bold text-amber-950 bg-gradient-to-r from-amber-300 to-amber-500 shadow-lg shadow-amber-500/30 active:scale-[0.98] transition-transform ${isTech ? 'rounded-none uppercase tracking-widest' : 'rounded-xl'}`}
                 style={{ animation: `pc-up .45s ease-out ${0.7 + PERKS.length * 0.15}s both` }}>
-          ¡A disfrutarlo!
+          {tr('¡A disfrutarlo!')}
         </button>
       </div>
       <style>{`

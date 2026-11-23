@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -129,12 +129,12 @@ export default function InversionesPage() {
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTechTheme ? 'font-mono' : ''}`}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
-            <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+            <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className={`text-xl font-bold truncate ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Ahorro e inversiones</h1>
+            <h1 className={`text-xl font-bold truncate ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Ahorro e inversiones')}</h1>
           </div>
-          {investments.length > 0 && <button onClick={() => setChoosingKind(true)} className={primaryBtn}><Plus className="w-4 h-4" /> Nueva</button>}
+          {investments.length > 0 && <button onClick={() => setChoosingKind(true)} className={primaryBtn}><Plus className="w-4 h-4" /> {tr('Nueva')}</button>}
         </div>
 
         {error === 'permission-denied' && (
@@ -148,9 +148,9 @@ export default function InversionesPage() {
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-accent" /></div>
-              <span className={`text-xs font-medium ${isTechTheme ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>Tienes ahorrado e invertido</span>
+              <span className={`text-xs font-medium ${isTechTheme ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>{tr('Tienes ahorrado e invertido')}</span>
             </div>
-            <button onClick={() => setShowHelp(v => !v)} aria-label="¿Cómo se calcula?" className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
+            <button onClick={() => setShowHelp(v => !v)} aria-label={tr('¿Cómo se calcula?')} className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
           </div>
           <p className={`font-bold text-[clamp(24px,8vw,34px)] leading-none text-accent ${isTechTheme ? '' : 'font-syne'}`}><AnimatedNumber value={summary.invested} format={fmt} /></p>
           {summary.active.length > 0 && (
@@ -161,24 +161,24 @@ export default function InversionesPage() {
           {summary.active.length > 0 && (
             <div className={`mt-4 pt-4 border-t ${isTechTheme ? 'border-accent/20' : 'border-glass-border'} grid grid-cols-2 gap-3`}>
               <div>
-                <p className="text-[11px] text-text-muted">Llevas ganado</p>
+                <p className="text-[11px] text-text-muted">{tr('Llevas ganado')}</p>
                 <p className={`font-bold ${summary.earnedToDate < 0 ? 'text-red-400' : 'text-text-primary'}`}>{summary.earnedToDate < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(summary.earnedToDate)} format={fmt} /></p>
               </div>
               {hasCdt && (
                 <div>
-                  <p className="text-[11px] text-text-muted">Intereses de CDT al vencer</p>
+                  <p className="text-[11px] text-text-muted">{tr('Intereses de CDT al vencer')}</p>
                   <p className="font-bold text-emerald-500"><AnimatedNumber value={summary.netInterest} format={fmt} /></p>
-                  <p className="text-[10px] text-text-muted">después de retención</p>
+                  <p className="text-[10px] text-text-muted">{tr('después de retención')}</p>
                 </div>
               )}
             </div>
           )}
           {showHelp && (
             <p className={`mt-4 pt-4 border-t ${isTechTheme ? 'border-accent/20' : 'border-glass-border'} text-xs text-text-secondary leading-relaxed`}>
-              Es <b className="text-text-primary">ahorro, no gasto</b>: no cuenta en lo que puedes gastar en el mes. Si sacas la plata de una de tus cuentas, la descuento de esa cuenta.
-              <br />· <b className="text-text-primary">CDT</b>: los intereses se pagan al vencer; "llevas ganado" reparte los del periodo según los días corridos.
-              <br />· <b className="text-text-primary">Ahorro que paga intereses</b> (Nu, Lulo…): calculo los intereses día a día con la tasa E.A. Si no cuadra con la app, usa "Ajustar saldo".
-              <br />· <b className="text-text-primary">Acciones, fondos y pensión</b>: su valor sube y baja; actualízalo con lo que dice la app y te muestro la ganancia o pérdida.
+              Es <b className="text-text-primary">{tr('ahorro, no gasto')}</b>: no cuenta en lo que puedes gastar en el mes. Si sacas la plata de una de tus cuentas, la descuento de esa cuenta.
+              <br />· <b className="text-text-primary">{tr('CDT')}</b>: los intereses se pagan al vencer; "llevas ganado" reparte los del periodo según los días corridos.
+              <br />· <b className="text-text-primary">{tr('Ahorro que paga intereses')}</b> (Nu, Lulo…): calculo los intereses día a día con la tasa E.A. Si no cuadra con la app, usa "Ajustar saldo".
+              <br />· <b className="text-text-primary">{tr('Acciones, fondos y pensión')}</b>: su valor sube y baja; actualízalo con lo que dice la app y te muestro la ganancia o pérdida.
             </p>
           )}
         </section>
@@ -190,8 +190,8 @@ export default function InversionesPage() {
             <div className={`w-14 h-14 mx-auto mb-3 flex items-center justify-center bg-accent/10 ${isTechTheme ? 'rounded-none border border-accent/40' : 'rounded-2xl'}`}>
               <TrendingUp className="w-7 h-7 text-accent" />
             </div>
-            <h2 className={`font-bold text-lg mb-1 ${isTechTheme ? 'text-accent uppercase' : 'text-text-primary'}`}>¿Dónde crece tu plata?</h2>
-            <p className="text-sm text-text-secondary mb-5">Un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria. Regístralo y te digo cuánto vas ganando.</p>
+            <h2 className={`font-bold text-lg mb-1 ${isTechTheme ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('¿Dónde crece tu plata?')}</h2>
+            <p className="text-sm text-text-secondary mb-5">{tr('Un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria. Regístralo y te digo cuánto vas ganando.')}</p>
             <button onClick={() => setChoosingKind(true)} className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
               <Plus className="w-5 h-5" /> Registrar la primera
             </button>
@@ -214,7 +214,7 @@ export default function InversionesPage() {
                       </div>
                       <p className="text-xs text-text-secondary mt-0.5 flex items-center gap-1"><KIcon className="w-3 h-3 text-text-muted" />{sub}</p>
                     </div>
-                    <button onClick={() => openEdit(inv)} aria-label={`Editar ${nameOf(inv)}`}
+                    <button onClick={() => openEdit(inv)} aria-label={tr('Editar {a}', { a: nameOf(inv) })}
                             className={`shrink-0 p-2 -mr-1 -mt-1 ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}>
                       <Pencil className="w-4 h-4" />
                     </button>
@@ -249,19 +249,19 @@ export default function InversionesPage() {
                           {[
                             inv.symbol && `${inv.symbol}`,
                             inv.units && `${String(inv.units).replace('.', ',')} ${inv.units === 1 ? 'acción' : 'acciones'}`,
-                            inv.dividends && `dividendos recibidos ${fmt(inv.dividends)}`,
+                            inv.dividends && tr('dividendos recibidos {a}', { a: fmt(inv.dividends) }),
                             inv.yearReturn && `rentabilidad último año ${String(inv.yearReturn).replace('.', ',')}% (referencia)`,
                           ].filter(Boolean).join(' · ')}
                         </p>
                       )}
                       {k !== 'ahorro' && inv.valueAt && Date.now() - new Date(inv.valueAt).getTime() > 30 * 86400000 && (
-                        <p className="mt-2 text-[11px] text-amber-500">Hace más de un mes no actualizas el valor: toca "Actualizar valor" con lo que dice la app.</p>
+                        <p className="mt-2 text-[11px] text-amber-500">{tr('Hace más de un mes no actualizas el valor: toca "Actualizar valor" con lo que dice la app.')}</p>
                       )}
                       <div className="mt-3 grid grid-cols-3 gap-2">
-                        <button onClick={() => { setMoving({ inv, mode: 'deposito' }); setMoveAmount(''); setMoveAccount(undefined); }} className={ghost}><ArrowDownToLine className="w-3.5 h-3.5" /> Depositar</button>
-                        <button onClick={() => { setMoving({ inv, mode: 'retiro' }); setMoveAmount(''); setMoveAccount(undefined); }} className={ghost}><ArrowUpFromLine className="w-3.5 h-3.5" /> Retirar</button>
+                        <button onClick={() => { setMoving({ inv, mode: 'deposito' }); setMoveAmount(''); setMoveAccount(undefined); }} className={ghost}><ArrowDownToLine className="w-3.5 h-3.5" /> {tr('Depositar')}</button>
+                        <button onClick={() => { setMoving({ inv, mode: 'retiro' }); setMoveAmount(''); setMoveAccount(undefined); }} className={ghost}><ArrowUpFromLine className="w-3.5 h-3.5" /> {tr('Retirar')}</button>
                         <button onClick={() => { setMoving({ inv, mode: 'ajuste' }); setMoveAmount(formatMoneyInput(v.value)); }} className={ghost}>
-                          {k === 'ahorro' ? <><Scale className="w-3.5 h-3.5" /> Ajustar</> : <><RefreshCw className="w-3.5 h-3.5" /> Valor</>}
+                          {k === 'ahorro' ? <><Scale className="w-3.5 h-3.5" /> {tr('Ajustar')}</> : <><RefreshCw className="w-3.5 h-3.5" /> {tr('Valor')}</>}
                         </button>
                       </div>
                       <InvestmentMovements inv={inv} accounts={accounts} fmt={fmt} isTech={isTechTheme} />
@@ -279,7 +279,7 @@ export default function InversionesPage() {
 
                     <div className="mt-3 flex items-center gap-3">
                       <div className={`flex-1 h-2.5 overflow-hidden bg-glass border border-glass-border ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}
-                           role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`Plazo corrido del CDT ${inv.bank}`}>
+                           role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={tr('Plazo corrido del CDT {a}', { a: inv.bank })}>
                         <div className={`h-full bg-gradient-to-r from-accent-dim to-accent transition-all duration-700 ${isTechTheme ? '' : 'rounded-full'}`} style={{ width: `${pct}%` }} />
                       </div>
                       <span className="text-xs font-bold text-accent w-9 text-right">{pct}%</span>
@@ -287,7 +287,7 @@ export default function InversionesPage() {
 
                     <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
                       <div>
-                        <p className="text-text-muted">Llevas ganado</p>
+                        <p className="text-text-muted">{tr('Llevas ganado')}</p>
                         <p className="font-semibold text-text-primary"><AnimatedNumber value={s.earnedToDate} format={fmt} /></p>
                       </div>
                       <div>
@@ -295,12 +295,12 @@ export default function InversionesPage() {
                         <p className="font-semibold text-text-primary"><AnimatedNumber value={s.interest} format={fmt} /></p>
                       </div>
                       <div>
-                        <p className="text-text-muted">Recibirás al vencer</p>
+                        <p className="text-text-muted">{tr('Recibirás al vencer')}</p>
                         <p className="font-semibold text-emerald-500"><AnimatedNumber value={s.netAtMaturity} format={fmt} /></p>
                         <p className="text-[10px] text-text-muted">menos {fmt(s.withholding)} de retención</p>
                       </div>
                       <div>
-                        <p className="text-text-muted">Vence</p>
+                        <p className="text-text-muted">{tr('Vence')}</p>
                         <p className={`font-semibold ${soon ? 'text-amber-500' : 'text-text-primary'}`}>{formatDay(inv.maturityDate)}</p>
                         <p className={`text-[10px] ${soon ? 'text-amber-500' : 'text-text-muted'}`}>{whenText(s.daysLeft)}{inv.autoRenew ? ' · se renueva solo' : ''}</p>
                       </div>
@@ -320,7 +320,7 @@ export default function InversionesPage() {
                     ) : soon ? (
                       <p className="mt-3 flex items-start gap-1.5 text-[12px] text-amber-500">
                         <CalendarClock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                        <span>Antes de que se renueve, compara la tasa con otros bancos.</span>
+                        <span>{tr('Antes de que se renueve, compara la tasa con otros bancos.')}</span>
                       </p>
                     ) : null}
                     <InvestmentMovements inv={inv} accounts={accounts} fmt={fmt} isTech={isTechTheme} />
@@ -331,7 +331,7 @@ export default function InversionesPage() {
 
             {closed.length > 0 && (
               <section>
-                <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Terminados</h2>
+                <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>{tr('Terminados')}</h2>
                 <div className="space-y-2">
                   {closed.map(inv => {
                     const last = inv.history?.[inv.history.length - 1];
@@ -350,7 +350,7 @@ export default function InversionesPage() {
             )}
 
             <p className="text-[11px] text-text-muted text-center px-4">
-              Esta plata no cuenta como gasto ni en lo que puedes gastar en el mes. No guardes números de producto ni de cuenta.
+              {tr('Esta plata no cuenta como gasto ni en lo que puedes gastar en el mes. No guardes números de producto ni de cuenta.')}
             </p>
           </>
         )}
@@ -396,12 +396,12 @@ export default function InversionesPage() {
             )}
             <div className="space-y-2">
               <button onClick={() => closeInvestment(closing, true)} disabled={hasAccounts && closeAccount === undefined} className={`w-full py-3 font-bold disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white'}`}>
-                Sí, registrar intereses
+                {tr('Sí, registrar intereses')}
               </button>
               <button onClick={() => closeInvestment(closing, false)} disabled={hasAccounts && closeAccount === undefined} className={`w-full py-3 text-sm font-semibold border disabled:opacity-50 ${isTechTheme ? 'rounded-none border-accent/30 text-accent' : 'rounded-xl border-glass-border text-text-secondary'}`}>
-                Solo marcarlo como terminado
+                {tr('Solo marcarlo como terminado')}
               </button>
-              <button onClick={() => setClosing(null)} className="w-full py-2 text-xs text-text-muted">Cancelar</button>
+              <button onClick={() => setClosing(null)} className="w-full py-2 text-xs text-text-muted">{tr('Cancelar')}</button>
             </div>
           </div>
         </div>,
@@ -423,7 +423,7 @@ export default function InversionesPage() {
                      onChange={(e) => setMoveAmount(formatMoneyInput(e.target.value))}
                      className={`w-full bg-glass border px-4 py-3 font-bold text-text-primary focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
               {moving.mode === 'ajuste' && kindOf(moving.inv) === 'ahorro' && (
-                <p className="text-[11px] text-text-muted mt-1.5">Desde hoy calculo los intereses a partir de ese saldo.</p>
+                <p className="text-[11px] text-text-muted mt-1.5">{tr('Desde hoy calculo los intereses a partir de ese saldo.')}</p>
               )}
             </div>
             {moving.mode !== 'ajuste' && (
@@ -435,9 +435,9 @@ export default function InversionesPage() {
             <div className="space-y-2">
               <button onClick={saveMove} disabled={parseMoneyInput(moveAmount) <= 0 || moveSaving || (moving.mode !== 'ajuste' && hasAccounts && moveAccount === undefined)}
                       className={`w-full py-3 font-bold disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white'}`}>
-                {moveSaving ? 'Guardando...' : 'Guardar'}
+                {moveSaving ? tr('Guardando...') : tr('Guardar')}
               </button>
-              <button onClick={() => setMoving(null)} className="w-full py-2 text-xs text-text-muted">Cancelar</button>
+              <button onClick={() => setMoving(null)} className="w-full py-2 text-xs text-text-muted">{tr('Cancelar')}</button>
             </div>
           </div>
         </div>,
@@ -446,8 +446,8 @@ export default function InversionesPage() {
 
       <ConfirmDialog
         isOpen={!!deleting}
-        title="Eliminar"
-        message={deleting ? `¿Eliminar ${nameOf(deleting)}? No se borra ningún gasto ni ingreso.` : ''}
+        title={tr('Eliminar')}
+        message={deleting ? tr('¿Eliminar {a}? No se borra ningún gasto ni ingreso.', { a: nameOf(deleting) }) : ''}
         confirmText="Eliminar"
         onConfirm={async () => { if (deleting?.id) await deleteInvestment(deleting.id); setDeleting(null); setEditing(null); }}
         onCancel={() => setDeleting(null)}

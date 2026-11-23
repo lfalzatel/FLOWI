@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr, lazyT } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -11,7 +11,7 @@ import { formatCompactCOP } from '@/lib/chartFormat';
 import { ANT_MAX_AMOUNT, HistoryTarget, spendingHistory } from '@/lib/spendingInsights';
 
 type Resolver = (raw: string, type?: 'gasto' | 'ingreso') => { label: string; group: string };
-const RANGES = [{ n: 3, label: '3 meses' }, { n: 6, label: '6 meses' }, { n: 12, label: '12 meses' }, { n: 0, label: 'Todo' }];
+const RANGES = lazyT(() => ([{ n: 3, label: tr('3 meses') }, { n: 6, label: tr('6 meses') }, { n: 12, label: tr('12 meses') }, { n: 0, label: tr('Todo') }]));
 
 const monthName = (k: string, long = false) => {
   const d = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1);
@@ -79,25 +79,25 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
             <h3 className="text-lg font-bold font-syne text-text-primary truncate">{target.label}</h3>
             <p className="text-[11px] text-text-muted">{target.kind === 'sub' ? 'Historial de cobros' : 'Todo lo que has gastado en esto, mes a mes'}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="w-8 h-8 rounded-full hover:bg-glass flex items-center justify-center">
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="w-8 h-8 rounded-full hover:bg-glass flex items-center justify-center">
             <X className="w-4 h-4 text-text-muted" />
           </button>
         </div>
 
         <div className="overflow-y-auto px-5 pb-6 space-y-4" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
           {!all.length ? (
-            <p className="text-sm text-text-secondary py-6 text-center">Todavía no hay gastos registrados aquí.</p>
+            <p className="text-sm text-text-secondary py-6 text-center">{tr('Todavía no hay gastos registrados aquí.')}</p>
           ) : (
             <>
               {isAnt && (
                 <div className={`p-3 border border-amber-500/30 bg-amber-500/5 space-y-2 ${box}`}>
                   <p className="text-[11px] text-text-secondary leading-snug">
                     {onlySmall
-                      ? <>Como en <b>Gastos hormiga</b>: solo compras de {fmt(ANT_MAX_AMOUNT)} o menos.{target.note ? <> Allá ves {target.note}.</> : null}</>
+                      ? <>{tr('Como en')} <b>{tr('Gastos hormiga')}</b>: solo compras de {fmt(ANT_MAX_AMOUNT)} o menos.{target.note ? <> Allá ves {target.note}.</> : null}</>
                       : <>Todas tus compras de {target.label.toLowerCase()}, también las grandes. Gastos hormiga solo cuenta las de {fmt(ANT_MAX_AMOUNT)} o menos.</>}
                   </p>
                   <div className="flex gap-1.5">
-                    {[{ v: true, l: 'Compras pequeñas' }, { v: false, l: 'Todas las compras' }].map(o => (
+                    {[{ v: true, l: tr('Compras pequeñas') }, { v: false, l: tr('Todas las compras') }].map(o => (
                       <button key={o.l} type="button" onClick={() => { setOnlySmall(o.v); setSelected(null); }}
                               className={`flex-1 py-1.5 text-[11px] font-semibold border transition-colors ${box} ${onlySmall === o.v ? 'border-amber-500 bg-amber-500/15 text-amber-400' : 'border-glass-border text-text-secondary hover:bg-glass'}`}>
                         {o.l}
@@ -110,10 +110,10 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
               {/* Datos rápidos */}
               <div className="grid grid-cols-3 gap-2">
                 <div className={`glass-card p-3 ${box}`}>
-                  <p className="text-[10px] text-text-muted">Este mes</p>
+                  <p className="text-[10px] text-text-muted">{tr('Este mes')}</p>
                   <p className="text-sm font-bold text-text-primary truncate">{fmt(current.total)}</p>
                   {trend !== null && Math.round(trend * 100) === 0 && (
-                    <p className="text-[10px] text-text-muted">Igual que el anterior</p>
+                    <p className="text-[10px] text-text-muted">{tr('Igual que el anterior')}</p>
                   )}
                   {trend !== null && Math.round(trend * 100) !== 0 && (
                     <p className={`text-[10px] flex items-center gap-0.5 ${trend > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -123,11 +123,11 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
                   )}
                 </div>
                 <div className={`glass-card p-3 ${box}`}>
-                  <p className="text-[10px] text-text-muted">Mes pasado</p>
+                  <p className="text-[10px] text-text-muted">{tr('Mes pasado')}</p>
                   <p className="text-sm font-bold text-text-primary truncate">{previous ? fmt(previous.total) : '—'}</p>
                 </div>
                 <div className={`glass-card p-3 ${box}`}>
-                  <p className="text-[10px] text-text-muted">Promedio al mes</p>
+                  <p className="text-[10px] text-text-muted">{tr('Promedio al mes')}</p>
                   <p className="text-sm font-bold text-text-primary truncate">{closed.length ? fmt(average) : '—'}</p>
                 </div>
               </div>
@@ -164,16 +164,16 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
                   </BarChart>
                 </ResponsiveContainer>
                 <p className="text-[10px] text-text-muted text-center">
-                  {range ? `Últimos ${months.length} meses` : 'Desde tu primer registro'}: {fmt(rangeTotal)} · Toca una barra para ver ese mes
+                  {range ? tr('Últimos {a} meses', { a: months.length }) : tr('Desde tu primer registro')}: {fmt(rangeTotal)} · Toca una barra para ver ese mes
                 </p>
               </div>
 
               {/* Lista por mes */}
               <div className="space-y-4">
                 {selected && (
-                  <button type="button" onClick={() => setSelected(null)} className="text-[11px] text-accent underline">Ver todos los meses</button>
+                  <button type="button" onClick={() => setSelected(null)} className="text-[11px] text-accent underline">{tr('Ver todos los meses')}</button>
                 )}
-                {listMonths.length === 0 && <p className="text-xs text-text-muted text-center">Sin gastos en este mes.</p>}
+                {listMonths.length === 0 && <p className="text-xs text-text-muted text-center">{tr('Sin gastos en este mes.')}</p>}
                 {listMonths.map(m => (
                   <div key={m.month} ref={el => { monthRefs.current[m.month] = el; }} className="space-y-1.5 scroll-mt-2">
                     <div className="flex items-center justify-between">

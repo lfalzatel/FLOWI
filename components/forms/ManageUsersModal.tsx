@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { DateFilter, type FilterType } from '@/components/dashboard/DateFilter';
 import { getISOWeekString, getLocalDateString } from '@/lib/dateUtils';
@@ -151,9 +151,9 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
               </div>
               <div>
                 <h2 className={`${isTechTheme ? 'font-mono font-bold text-accent uppercase tracking-widest text-lg' : 'font-syne font-bold text-text-primary text-xl'}`}>
-                  {isTechTheme ? '>_ GESTION_USUARIOS' : 'Gestión de Usuarios'}
+                  {isTechTheme ? '>_ GESTION_USUARIOS' : tr('Gestión de Usuarios')}
                 </h2>
-                <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Administra el acceso y roles</p>
+                <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Administra el acceso y roles')}</p>
               </div>
             </div>
 
@@ -191,7 +191,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                   );
                 })()}
                 {users.map(u => {
-                  const displayName = u.name || (u.email ? u.email.split('@')[0] : 'Usuario');
+                  const displayName = u.name || (u.email ? u.email.split('@')[0] : tr('Usuario'));
                   const initials = displayName
                     .split(' ')
                     .map(n => n[0])
@@ -228,7 +228,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
 
                       <div className="flex-shrink-0">
                         {u.email === currentUserEmail ? (
-                          <span className={`text-[10px] px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú</span>
+                          <span className={`text-[10px] px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>{tr('Tú')}</span>
                         ) : (
                           <span className={`text-[10px] px-2 py-1 uppercase tracking-widest ${isTechTheme ? 'font-mono border border-accent/30 text-accent' : 'bg-glass border border-glass-border text-text-primary rounded-lg'}`}>
                             {u.role === 'admin' ? 'ADMIN' : 'USUARIO'}
@@ -244,7 +244,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
         ) : (
           <>
             {(() => {
-              const displayName = selectedUser.name || (selectedUser.email ? selectedUser.email.split('@')[0] : 'Usuario');
+              const displayName = selectedUser.name || (selectedUser.email ? selectedUser.email.split('@')[0] : tr('Usuario'));
               const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
               const colors = ['bg-[#FF5B5B]/20 text-[#FF5B5B]', 'bg-[#F5A623]/20 text-[#F5A623]', 'bg-[#A855F7]/20 text-[#A855F7]', 'bg-[#00E5A0]/20 text-[#00E5A0]', 'bg-[#3B82F6]/20 text-[#3B82F6]', 'bg-[#EC4899]/20 text-[#EC4899]'];
               const avatarColorClass = colors[displayName.length % colors.length];
@@ -263,7 +263,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                 <div className="space-y-3">
                   {/* Encabezado compacto: volver, foto, nombre y datos en una fila */}
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setSelectedUser(null)} aria-label="Volver a la lista"
+                    <button onClick={() => setSelectedUser(null)} aria-label={tr('Volver a la lista')}
                             className={`shrink-0 w-8 h-8 flex items-center justify-center ${isTechTheme ? 'bg-accent/10 border border-accent/30 rounded-none text-accent' : 'bg-glass rounded-xl text-text-secondary hover:text-white'}`}>
                       {'<'}
                     </button>
@@ -279,13 +279,13 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
 
                   {/* Rol con botones (sin la lista blanca del sistema) */}
                   <div className={`${box} flex items-center justify-between gap-2`}>
-                    <span className={lbl}>Rol</span>
+                    <span className={lbl}>{tr('Rol')}</span>
                     {isMe ? (
                       <span className={`text-xs px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú (Administrador)</span>
                     ) : (
                       <div className="flex gap-1.5">
-                        <button type="button" disabled={savingId === selectedUser.id || !isAdmin} onClick={() => handleChangeRole(selectedUser.id!, 'Usuario')} className={roleChip(!isAdmin)}>Usuario</button>
-                        <button type="button" disabled={savingId === selectedUser.id || isAdmin} onClick={() => handleChangeRole(selectedUser.id!, 'admin')} className={roleChip(isAdmin)}>Administrador</button>
+                        <button type="button" disabled={savingId === selectedUser.id || !isAdmin} onClick={() => handleChangeRole(selectedUser.id!, 'Usuario')} className={roleChip(!isAdmin)}>{tr('Usuario')}</button>
+                        <button type="button" disabled={savingId === selectedUser.id || isAdmin} onClick={() => handleChangeRole(selectedUser.id!, 'admin')} className={roleChip(isAdmin)}>{tr('Administrador')}</button>
                       </div>
                     )}
                   </div>
@@ -298,29 +298,29 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                   <div className={box}>
                     <p className={`${lbl} mb-2`}>Finanzas · {periodLabel}</p>
                     {userStats.error ? (
-                      <p className="text-xs text-amber-500 leading-snug">No hay acceso a los montos de este usuario. Falta publicar la regla de Firestore que permite al administrador leerlos.</p>
+                      <p className="text-xs text-amber-500 leading-snug">{tr('No hay acceso a los montos de este usuario. Falta publicar la regla de Firestore que permite al administrador leerlos.')}</p>
                     ) : userStats.loading ? (
                       <div className="flex justify-center py-3"><div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>
                     ) : (
                       <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-                        <div><p className={lbl}>Ingresos</p><p className={`${val} text-green-400`}><AnimatedNumber value={periodIngresos} format={money} /></p></div>
-                        <div><p className={lbl}>Gastos</p><p className={`${val} text-red-400`}><AnimatedNumber value={periodGastos} format={money} /></p></div>
-                        <div><p className={lbl}>Balance</p><p className={`${val} text-accent`}>{periodIngresos - periodGastos < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(periodIngresos - periodGastos)} format={money} /></p></div>
-                        <div><p className={lbl}>Deudas hoy</p><p className={`${val} text-orange-400`}><AnimatedNumber value={userDebt} format={money} /></p></div>
+                        <div><p className={lbl}>{tr('Ingresos')}</p><p className={`${val} text-green-400`}><AnimatedNumber value={periodIngresos} format={money} /></p></div>
+                        <div><p className={lbl}>{tr('Gastos')}</p><p className={`${val} text-red-400`}><AnimatedNumber value={periodGastos} format={money} /></p></div>
+                        <div><p className={lbl}>{tr('Balance')}</p><p className={`${val} text-accent`}>{periodIngresos - periodGastos < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(periodIngresos - periodGastos)} format={money} /></p></div>
+                        <div><p className={lbl}>{tr('Deudas hoy')}</p><p className={`${val} text-orange-400`}><AnimatedNumber value={userDebt} format={money} /></p></div>
                       </div>
                     )}
                   </div>
 
                   {/* Actividad */}
                   <div className={box}>
-                    <p className={`${lbl} mb-2`}>Actividad</p>
+                    <p className={`${lbl} mb-2`}>{tr('Actividad')}</p>
                     <div className="grid grid-cols-3 gap-x-2 gap-y-2">
-                      <div><p className={lbl}>Registros</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (filterType === 'all' ? (userStats.txCount ?? '—') : periodTx.length)}</p></div>
-                      <div><p className={lbl}>Días con registros</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (filterType === 'all' ? (userStats.txDays ?? '—') : periodDays)}</p></div>
-                      <div><p className={lbl}>Días en la app</p><p className={`${val} text-text-primary`}>{selectedUser.activeDays ?? '—'}</p></div>
-                      <div><p className={lbl}>Primer registro</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(userStats.firstTx)}</p></div>
-                      <div><p className={lbl}>Último registro</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(last)}</p></div>
-                      <div><p className={lbl}>Último uso</p><p className={`${val} text-text-primary text-xs`}>{selectedUser.lastActiveDay ? fmtDay(new Date(selectedUser.lastActiveDay + 'T12:00:00')) : '—'}</p></div>
+                      <div><p className={lbl}>{tr('Registros')}</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (filterType === 'all' ? (userStats.txCount ?? '—') : periodTx.length)}</p></div>
+                      <div><p className={lbl}>{tr('Días con registros')}</p><p className={`${val} text-text-primary`}>{userStats.loading ? '…' : (filterType === 'all' ? (userStats.txDays ?? '—') : periodDays)}</p></div>
+                      <div><p className={lbl}>{tr('Días en la app')}</p><p className={`${val} text-text-primary`}>{selectedUser.activeDays ?? '—'}</p></div>
+                      <div><p className={lbl}>{tr('Primer registro')}</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(userStats.firstTx)}</p></div>
+                      <div><p className={lbl}>{tr('Último registro')}</p><p className={`${val} text-text-primary text-xs`}>{fmtDay(last)}</p></div>
+                      <div><p className={lbl}>{tr('Último uso')}</p><p className={`${val} text-text-primary text-xs`}>{selectedUser.lastActiveDay ? fmtDay(new Date(selectedUser.lastActiveDay + 'T12:00:00')) : '—'}</p></div>
                     </div>
                   </div>
                 </div>

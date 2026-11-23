@@ -36,6 +36,28 @@ export function tr(es: string, vars?: Vars): string {
   return translate(current, es, vars);
 }
 
+/**
+ * Lista o tabla de textos definida fuera de un componente (se evalúa una sola vez al cargar). Con lazyT se
+ * vuelve a armar con el idioma actual cada vez que se usa: const TIPS = lazyT(() => [{ title: tr('…') }]).
+ */
+export function lazyT<T extends object>(factory: () => T): T {
+  let cache: { lang: Lang; value: T } | null = null;
+  const value = () => {
+    if (!cache || cache.lang !== current) cache = { lang: current, value: factory() };
+    return cache.value as any;
+  };
+  const target = (Array.isArray(factory()) ? [] : {}) as T;
+  return new Proxy(target, {
+    get: (_, p) => { const v = value()[p]; return typeof v === 'function' ? v.bind(value()) : v; },
+    has: (_, p) => p in value(),
+    ownKeys: () => Reflect.ownKeys(value()),
+    getOwnPropertyDescriptor: (_, p) => {
+      const d = Reflect.getOwnPropertyDescriptor(value(), p);
+      return d ? { ...d, configurable: true } : undefined;
+    },
+  });
+}
+
 interface LangCtx {
   lang: Lang;
   locale: string;                      // para fechas y números: es-CO / en-US

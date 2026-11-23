@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -61,21 +62,21 @@ export default function NegocioPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Mi negocio</h1>
-            <p className="text-xs text-text-muted">Tus ventas aparte de tu plata personal</p>
+            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mi negocio')}</h1>
+            <p className="text-xs text-text-muted">{tr('Tus ventas aparte de tu plata personal')}</p>
           </div>
         </div>
 
         {/* Selector de mes (otros meses: Premium) */}
         <div className={`${card} flex items-center justify-between p-2`}>
-          <button onClick={() => premium && setMonth(shiftMonth(month, -1))} disabled={!premium} aria-label="Mes anterior"
+          <button onClick={() => premium && setMonth(shiftMonth(month, -1))} disabled={!premium} aria-label={tr('Mes anterior')}
                   className="p-2 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronLeft className="w-5 h-5" /></button>
           <p className={`font-bold capitalize ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>{monthNameOf(month)} {month.slice(0, 4)}</p>
-          <button onClick={() => setMonth(shiftMonth(month, 1))} disabled={isCurrent} aria-label="Mes siguiente"
+          <button onClick={() => setMonth(shiftMonth(month, 1))} disabled={isCurrent} aria-label={tr('Mes siguiente')}
                   className="p-2 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronRight className="w-5 h-5" /></button>
         </div>
 
@@ -87,18 +88,18 @@ export default function NegocioPage() {
             <section className={`${card} p-5 space-y-4`}>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[11px] text-text-muted flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> Vendiste</p>
+                  <p className="text-[11px] text-text-muted flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> {tr('Vendiste')}</p>
                   <p className={`text-lg font-bold text-emerald-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={m.sales} format={fmt} /></p>
                   <p className="text-[10px] text-text-muted">{m.salesCount} {m.salesCount === 1 ? 'venta' : 'ventas'}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-text-muted flex items-center gap-1"><TrendingDown className="w-3.5 h-3.5 text-red-400" /> Costos</p>
+                  <p className="text-[11px] text-text-muted flex items-center gap-1"><TrendingDown className="w-3.5 h-3.5 text-red-400" /> {tr('Costos')}</p>
                   <p className={`text-lg font-bold text-red-400 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={m.costs} format={fmt} /></p>
-                  <p className="text-[10px] text-text-muted">Mercancía, insumos, envíos…</p>
+                  <p className="text-[10px] text-text-muted">{tr('Mercancía, insumos, envíos…')}</p>
                 </div>
               </div>
               <div className={`pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
-                <p className="text-[11px] text-text-muted">Ganancia del mes</p>
+                <p className="text-[11px] text-text-muted">{tr('Ganancia del mes')}</p>
                 <p className={`text-2xl font-bold ${m.profit >= 0 ? 'text-accent' : 'text-red-400'} ${isTech ? '' : 'font-syne'}`}>
                   {m.profit < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(m.profit)} format={fmt} />
                 </p>
@@ -122,8 +123,8 @@ export default function NegocioPage() {
             {/* Lo que dejó cada venta (producto, envío y demás costos que se le pusieron) */}
             {sales.length > 0 && (
               <section className={`${card} p-5`}>
-                <h2 className={`text-sm font-bold mb-1 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>Lo que te dejó cada venta</h2>
-                <p className="text-[11px] text-text-muted mb-3">Al registrar una venta, agrégale el costo del producto y el envío para ver cuánto te quedó.</p>
+                <h2 className={`text-sm font-bold mb-1 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>{tr('Lo que te dejó cada venta')}</h2>
+                <p className="text-[11px] text-text-muted mb-3">{tr('Al registrar una venta, agrégale el costo del producto y el envío para ver cuánto te quedó.')}</p>
                 <ul className="divide-y divide-glass-border">
                   {sales.map(({ sale, costs, costTotal, profit }) => (
                     <li key={sale.id} className="py-2.5">
@@ -137,7 +138,7 @@ export default function NegocioPage() {
                         <p className="text-[11px] text-text-muted">
                           {costs.length
                             ? <>Vendiste {fmt(sale.amount)} · {costs.map(c => `${costLabel(c.category)} ${fmt(c.amount)}`).join(' · ')} → {profit >= 0 ? 'te quedó' : 'perdiste'}</>
-                            : <>Vendiste {fmt(sale.amount)} · <span className="text-amber-400">sin costos: toca para agregarlos</span></>}
+                            : <>Vendiste {fmt(sale.amount)} · <span className="text-amber-400">{tr('sin costos: toca para agregarlos')}</span></>}
                         </p>
                       </button>
                     </li>
@@ -149,7 +150,7 @@ export default function NegocioPage() {
             {/* La plata del negocio dentro de cada cuenta (el resto del saldo es personal) */}
             {bizByAccount.length > 0 && (
               <section className={`${card} p-5`}>
-                <h2 className={`text-sm font-bold mb-1 flex items-center gap-1.5 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}><Wallet className="w-4 h-4" /> Plata del negocio en tus cuentas</h2>
+                <h2 className={`text-sm font-bold mb-1 flex items-center gap-1.5 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}><Wallet className="w-4 h-4" /> {tr('Plata del negocio en tus cuentas')}</h2>
                 <p className="text-[11px] text-text-muted mb-3">Ventas menos costos que entraron o salieron por cada cuenta. El resto del saldo es tuyo (sueldo y demás).</p>
                 <ul className="space-y-1.5">
                   {bizByAccount.map(a => (
@@ -164,9 +165,9 @@ export default function NegocioPage() {
 
             {!hasAny && (
               <section className={`${card} p-5 text-sm text-text-secondary leading-relaxed space-y-2`}>
-                <p className="font-semibold text-text-primary">¿Cómo funciona?</p>
-                <p>Registra tus ventas con la categoría <b>Venta</b> o <b>Venta por catálogo</b>, y lo que compras para vender con <b>Inventario</b> o <b>Insumos</b>. Quedan aquí solos.</p>
-                <p>Para cualquier otro movimiento, al registrarlo toca <b>🏪 Negocio: Sí</b>. Así tu sueldo y tus gastos personales no se mezclan con el negocio.</p>
+                <p className="font-semibold text-text-primary">{tr('¿Cómo funciona?')}</p>
+                <p>{tr('Registra tus ventas con la categoría')} <b>{tr('Venta')}</b> o <b>{tr('Venta por catálogo')}</b>{tr(', y lo que compras para vender con')} <b>{tr('Inventario')}</b> o <b>{tr('Insumos')}</b>{tr('. Quedan aquí solos.')}</p>
+                <p>{tr('Para cualquier otro movimiento, al registrarlo toca')} <b>{tr('🏪 Negocio: Sí')}</b>{tr('. Así tu sueldo y tus gastos personales no se mezclan con el negocio.')}</p>
               </section>
             )}
 
@@ -174,7 +175,7 @@ export default function NegocioPage() {
               <>
                 {m.byCategory.length > 0 && (
                   <section className={`${card} p-5`}>
-                    <h2 className={`text-sm font-bold mb-3 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>En qué se movió</h2>
+                    <h2 className={`text-sm font-bold mb-3 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('En qué se movió')}</h2>
                     <div className="space-y-2.5">
                       {m.byCategory.map(c => (
                         <div key={`${c.type}${c.label}`}>
@@ -192,7 +193,7 @@ export default function NegocioPage() {
                 )}
                 {m.items.length > 0 && (
                   <section>
-                    <h2 className={`text-sm font-bold mb-3 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>Movimientos del negocio</h2>
+                    <h2 className={`text-sm font-bold mb-3 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>{tr('Movimientos del negocio')}</h2>
                     <TransactionList transactions={m.items} onEdit={(tx) => setEditing(tx)} animationKey={month} />
                   </section>
                 )}
@@ -200,8 +201,8 @@ export default function NegocioPage() {
             ) : (
               <section className={`${card} p-5 text-center space-y-3`}>
                 <div className="flex justify-center"><span className="w-11 h-11 flex items-center justify-center rounded-2xl bg-amber-400/15"><Lock className="w-5 h-5 text-amber-400" /></span></div>
-                <p className="text-sm font-bold text-text-primary">Más de tu negocio con Premium</p>
-                <p className="text-xs text-text-secondary leading-relaxed">Meses anteriores, comparación con el mes pasado, en qué vendes y gastas más, y la lista de movimientos del negocio.</p>
+                <p className="text-sm font-bold text-text-primary">{tr('Más de tu negocio con Premium')}</p>
+                <p className="text-xs text-text-secondary leading-relaxed">{tr('Meses anteriores, comparación con el mes pasado, en qué vendes y gastas más, y la lista de movimientos del negocio.')}</p>
                 <Link href="/planes" className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
                   <Crown className="w-4 h-4" /> Ver planes
                 </Link>

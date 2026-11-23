@@ -29,7 +29,7 @@ import {
   ChevronRight, ChevronDown, ChevronUp, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
   FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass, Languages } from 'lucide-react';
-import { useT } from '@/lib/i18n';
+import { useT, tr } from '@/lib/i18n';
 
 export default function ConfigPage() {
   const router = useRouter();
@@ -359,8 +359,8 @@ export default function ConfigPage() {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div>
-            <span className={`text-xs font-medium uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>Centro de Control</span>
-            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>Configuración</h1>
+            <span className={`text-xs font-medium uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{tr('Centro de Control')}</span>
+            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>{tr('Configuración')}</h1>
           </div>
         </div>
 
@@ -376,7 +376,7 @@ export default function ConfigPage() {
             onClick={() => toggleSection('cuenta')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
           >
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Cuenta y Perfil</h2>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Cuenta y Perfil')}</h2>
             {openSections.cuenta ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
           </button>
           
@@ -418,7 +418,7 @@ export default function ConfigPage() {
                   <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'ENVIAR_EMAIL_DE_RECUPERACION' : 'Enviar email de recuperación'}</p>
                 </div>
               </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
             </div>
             <div className="w-full flex items-center justify-between p-4 bg-white/[0.01]">
               <div className="flex items-center gap-3">
@@ -442,7 +442,7 @@ export default function ConfigPage() {
             onClick={() => toggleSection('notificaciones')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
           >
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Notificaciones</h2>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Notificaciones')}</h2>
             {openSections.notificaciones ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
           </button>
 
@@ -538,7 +538,7 @@ export default function ConfigPage() {
             onClick={() => toggleSection('sonidos')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
           >
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Sonidos y Animaciones</h2>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Sonidos y Animaciones')}</h2>
             {openSections.sonidos ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
           </button>
 
@@ -559,8 +559,8 @@ export default function ConfigPage() {
                       <Music className="w-4 h-4 text-emerald-400" />
                     </div>
                     <div>
-                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>Sonidos por Acción</p>
-                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Ingresos, Gastos, Ediciones y Eliminaciones</p>
+                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('Sonidos por Acción')}</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{tr('Ingresos, Gastos, Ediciones y Eliminaciones')}</p>
                     </div>
                   </div>
                   {openSoundSubSections.acciones ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
@@ -573,7 +573,7 @@ export default function ConfigPage() {
                       className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
                     >
                       <div>
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>Ingresos y Abonos</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>{tr('Ingresos y Abonos')}</p>
                         <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundIngreso)}</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-text-muted" />
@@ -584,7 +584,7 @@ export default function ConfigPage() {
                       className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
                     >
                       <div>
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-rose-400 uppercase' : 'text-rose-400'}`}>Gastos</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-rose-400 uppercase' : 'text-rose-400'}`}>{tr('Gastos')}</p>
                         <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundGasto)}</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-text-muted" />
@@ -595,7 +595,7 @@ export default function ConfigPage() {
                       className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
                     >
                       <div>
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Ediciones</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>{tr('Ediciones')}</p>
                         <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundEdicion)}</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-text-muted" />
@@ -606,7 +606,7 @@ export default function ConfigPage() {
                       className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
                     >
                       <div>
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-red-400 uppercase' : 'text-red-400'}`}>Eliminaciones</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-red-400 uppercase' : 'text-red-400'}`}>{tr('Eliminaciones')}</p>
                         <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundEliminacion)}</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-text-muted" />
@@ -630,8 +630,8 @@ export default function ConfigPage() {
                       <Volume2 className="w-4 h-4 text-cyan-400" />
                     </div>
                     <div>
-                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>Navegación y Efectos</p>
-                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Menú inferior y partículas voladoras</p>
+                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('Navegación y Efectos')}</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{tr('Menú inferior y partículas voladoras')}</p>
                     </div>
                   </div>
                   {openSoundSubSections.navegacion ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
@@ -655,7 +655,7 @@ export default function ConfigPage() {
                       className="w-full flex items-center justify-between p-3.5 sm:px-5 hover:bg-white/5 transition-colors text-left"
                     >
                       <div>
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Partículas Voladoras</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>{tr('Partículas Voladoras')}</p>
                         <p className="text-[11px] text-text-muted mt-0.5">{getSoundName(soundParticles)}</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-text-muted" />
@@ -679,8 +679,8 @@ export default function ConfigPage() {
                       <Sparkles className="w-4 h-4 text-amber-400" />
                     </div>
                     <div>
-                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>Animaciones Visuales y Voz</p>
-                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Tarjeta 3D, confeti, explosiones y asistente</p>
+                      <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('Animaciones Visuales y Voz')}</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{tr('Tarjeta 3D, confeti, explosiones y asistente')}</p>
                     </div>
                   </div>
                   {openSoundSubSections.animaciones ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
@@ -692,7 +692,7 @@ export default function ConfigPage() {
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                       <div className="text-left pr-2">
                         <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'text-text-primary'}`}>Tarjeta 3D Central (Power Card)</p>
-                        <p className="text-[10px] text-text-muted">Efecto 3D holográfico en la tarjeta principal</p>
+                        <p className="text-[10px] text-text-muted">{tr('Efecto 3D holográfico en la tarjeta principal')}</p>
                       </div>
                       <button 
                         onClick={toggleAnimCard}
@@ -705,8 +705,8 @@ export default function ConfigPage() {
                     {/* Toggle Celebración y Confeti 🎉 */}
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                       <div className="text-left pr-2">
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>Celebración y Confeti 🎉</p>
-                        <p className="text-[10px] text-text-muted">Lluvia de confeti al guardar registros</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-purple-400 uppercase' : 'text-purple-400'}`}>{tr('Celebración y Confeti 🎉')}</p>
+                        <p className="text-[10px] text-text-muted">{tr('Lluvia de confeti al guardar registros')}</p>
                       </div>
                       <button 
                         onClick={toggleAnimConfetti}
@@ -719,8 +719,8 @@ export default function ConfigPage() {
                     {/* Toggle Explosión de Partículas ✨ */}
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                       <div className="text-left pr-2">
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>Explosión de Partículas ✨</p>
-                        <p className="text-[10px] text-text-muted">Trayectoria voladora hacia el menú y saldo</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-cyan-400 uppercase' : 'text-cyan-400'}`}>{tr('Explosión de Partículas ✨')}</p>
+                        <p className="text-[10px] text-text-muted">{tr('Trayectoria voladora hacia el menú y saldo')}</p>
                       </div>
                       <button 
                         onClick={toggleAnimBurst}
@@ -733,8 +733,8 @@ export default function ConfigPage() {
                     {/* Toggle Voz Hablada de Confirmación 🔊 */}
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                       <div className="text-left pr-2">
-                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>Voz Hablada de Confirmación 🔊</p>
-                        <p className="text-[10px] text-text-muted">Respuesta por voz al procesar comandos</p>
+                        <p className={`text-xs font-bold ${isTechTheme ? 'font-mono text-emerald-400 uppercase' : 'text-emerald-400'}`}>{tr('Voz Hablada de Confirmación 🔊')}</p>
+                        <p className="text-[10px] text-text-muted">{tr('Respuesta por voz al procesar comandos')}</p>
                       </div>
                       <button 
                         onClick={toggleSoundSpeech}
@@ -756,7 +756,7 @@ export default function ConfigPage() {
             onClick={() => toggleSection('gestion')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
           >
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Gestión</h2>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Gestión')}</h2>
             {openSections.gestion ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
           </button>
 
@@ -821,7 +821,7 @@ export default function ConfigPage() {
             onClick={() => toggleSection('apariencia')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
           >
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Apariencia</h2>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Apariencia')}</h2>
             {openSections.apariencia ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
           </button>
 
@@ -849,7 +849,7 @@ export default function ConfigPage() {
                   <Languages className="w-4 h-4 text-sky-400" />
                 </div>
                 <div className="text-left min-w-0">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>Idioma · Language</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{tr('Idioma · Language')}</p>
                   <p className={`text-[10px] normal-case ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{t('Se guarda en este celular')}</p>
                 </div>
               </div>
@@ -874,7 +874,7 @@ export default function ConfigPage() {
                   <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'COMPACTO_/_NORMAL_/_GRANDE' : 'Tamaño: Compacto / Normal / Grande'}</p>
                 </div>
               </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
             </div>
           </div>
           )}
@@ -890,7 +890,7 @@ export default function ConfigPage() {
             onClick={() => toggleSection('finanzas')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
           >
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Finanzas</h2>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Finanzas')}</h2>
             {openSections.finanzas ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
           </button>
 
@@ -945,7 +945,7 @@ export default function ConfigPage() {
                   <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'EJ_DIA_15_O_DIA_30' : 'Ej: Día 15 o Día 30'}</p>
                 </div>
               </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
             </div>
             <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">
               <div className="flex items-center gap-3">
@@ -957,7 +957,7 @@ export default function ConfigPage() {
                   <p className={`text-[10px] ${isTechTheme ? 'font-mono text-[var(--red)]/50' : 'text-text-muted'}`}>{isTechTheme ? 'NETFLIX_INTERNET_ETC' : 'Netflix, Internet, etc.'}</p>
                 </div>
               </div>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-[var(--red)]/30 text-[var(--red)] bg-[var(--red)]/5' : 'bg-glass-strong text-text-muted'}`}>Pronto</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-[var(--red)]/30 text-[var(--red)] bg-[var(--red)]/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
             </div>
           </div>
           )}
@@ -969,7 +969,7 @@ export default function ConfigPage() {
             onClick={() => toggleSection('privacidad')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-red-500/20 pb-1' : 'ml-2 pr-2'}`}
           >
-            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-red-400 uppercase tracking-wide' : 'font-syne font-semibold text-sm text-red-400'}`}>Datos y Privacidad</h2>
+            <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-red-400 uppercase tracking-wide' : 'font-syne font-semibold text-sm text-red-400'}`}>{tr('Datos y Privacidad')}</h2>
             {openSections.privacidad ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-red-400' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-red-400' : 'text-text-muted'}`} />}
           </button>
 
@@ -997,9 +997,9 @@ export default function ConfigPage() {
 
         {/* Siempre visible, sin abrir ninguna sección */}
         <p className={`text-center text-xs pt-2 ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
-          <a href="/legal#privacidad" className="underline hover:text-accent">Política de privacidad</a>
+          <a href="/legal#privacidad" className="underline hover:text-accent">{tr('Política de privacidad')}</a>
           {' · '}
-          <a href="/legal#terminos" className="underline hover:text-accent">Términos de uso</a>
+          <a href="/legal#terminos" className="underline hover:text-accent">{tr('Términos de uso')}</a>
           <br />
           {'Soporte: '}
           <a href="mailto:soporteflowiapp@gmail.com" className="underline hover:text-accent">soporteflowiapp@gmail.com</a>

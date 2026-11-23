@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { Check, Loader2, X } from 'lucide-react';
 import { ManualPayment, reviewManualPayment, watchPendingManualPayments } from '@/lib/manualPay';
@@ -21,7 +21,7 @@ export function ManualPaymentsReview({ isTech }: { isTech: boolean }) {
     setMsg('');
     try {
       const r = await reviewManualPayment(p.id, approve);
-      setMsg(approve ? `Premium activado para ${p.userName || p.userEmail}${r.premiumUntil ? ` hasta el ${new Date(r.premiumUntil).toLocaleDateString(currentLocale())}` : ''}.` : 'Comprobante rechazado.');
+      setMsg(approve ? `Premium activado para ${p.userName || p.userEmail}${r.premiumUntil ? ` hasta el ${new Date(r.premiumUntil).toLocaleDateString(currentLocale())}` : ''}.` : tr('Comprobante rechazado.'));
     } catch (e: any) {
       console.error('Revisar pago:', e);
       setMsg('No se pudo guardar la revisión. Intenta de nuevo.');
@@ -38,14 +38,14 @@ export function ManualPaymentsReview({ isTech }: { isTech: boolean }) {
       </h2>
       {msg && <p className="text-xs text-accent">{msg}</p>}
       {list.length === 0 ? (
-        <p className="text-xs text-text-muted">No hay comprobantes pendientes. Cuando alguien pague por transferencia aparecerá aquí.</p>
+        <p className="text-xs text-text-muted">{tr('No hay comprobantes pendientes. Cuando alguien pague por transferencia aparecerá aquí.')}</p>
       ) : list.map(p => {
         const plan = PLANS.find(x => x.id === p.plan);
         return (
           <div key={p.id} className={`flex gap-3 p-3 border border-glass-border ${isTech ? 'rounded-none' : 'rounded-2xl'}`}>
-            <button type="button" onClick={() => setZoom(p.image)} className="shrink-0" aria-label="Ver comprobante">
+            <button type="button" onClick={() => setZoom(p.image)} className="shrink-0" aria-label={tr('Ver comprobante')}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.image} alt="Comprobante" className={`w-16 h-24 object-cover bg-black/30 ${isTech ? 'rounded-none' : 'rounded-lg'}`} />
+              <img src={p.image} alt={tr('Comprobante')} className={`w-16 h-24 object-cover bg-black/30 ${isTech ? 'rounded-none' : 'rounded-lg'}`} />
             </button>
             <div className="flex-1 min-w-0 space-y-1">
               <p className="text-sm font-semibold text-text-primary truncate">{p.userName || 'Sin nombre'}</p>
@@ -67,12 +67,12 @@ export function ManualPaymentsReview({ isTech }: { isTech: boolean }) {
           </div>
         );
       })}
-      <p className="text-[10px] text-text-muted">Antes de aprobar, confirma en tu Nequi o banco que la plata sí llegó.</p>
+      <p className="text-[10px] text-text-muted">{tr('Antes de aprobar, confirma en tu Nequi o banco que la plata sí llegó.')}</p>
 
       {zoom && (
         <div className="fixed inset-0 z-[130] bg-black/90 flex items-center justify-center p-4" onClick={() => setZoom(null)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={zoom} alt="Comprobante" className="max-w-full max-h-full object-contain" />
+          <img src={zoom} alt={tr('Comprobante')} className="max-w-full max-h-full object-contain" />
         </div>
       )}
     </section>

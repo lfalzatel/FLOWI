@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -55,18 +55,18 @@ export default function RecibosPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Mis recibos</h1>
-            <p className="text-xs text-text-muted">Tus compras con todos sus productos. Toca una para ver el detalle.</p>
+            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mis recibos')}</h1>
+            <p className="text-xs text-text-muted">{tr('Tus compras con todos sus productos. Toca una para ver el detalle.')}</p>
           </div>
         </div>
 
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-          <input autoComplete="off" value={query} onChange={e => setQuery(e.target.value)} placeholder="Buscar por tienda o producto…" aria-label="Buscar recibos"
+          <input autoComplete="off" value={query} onChange={e => setQuery(e.target.value)} placeholder={tr('Buscar por tienda o producto…')} aria-label={tr('Buscar recibos')}
                  className={`w-full bg-glass border border-glass-border py-3 pl-10 pr-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent ${isTech ? 'rounded-none' : 'rounded-xl'}`} />
         </div>
 
@@ -76,7 +76,7 @@ export default function RecibosPage() {
           <div className={`glass-card p-6 text-center ${box}`}>
             <ReceiptText className="w-10 h-10 text-accent/40 mx-auto mb-3" />
             <p className="text-sm text-text-primary font-medium">{query ? `No hay recibos con «${query}»` : 'Todavía no tienes recibos con productos'}</p>
-            {!query && <p className="text-xs text-text-muted mt-1">Escanea un recibo con el ＋ o agrega los productos al registrar un gasto, y aparecerá aquí.</p>}
+            {!query && <p className="text-xs text-text-muted mt-1">{tr('Escanea un recibo con el ＋ o agrega los productos al registrar un gasto, y aparecerá aquí.')}</p>}
           </div>
         ) : (
           byMonth.map(list => (
@@ -133,7 +133,7 @@ export default function RecibosPage() {
                           <div className="flex gap-2 pt-1">
                             <button type="button" onClick={() => setEditing(t)}
                                     className={`flex-1 py-2 text-xs font-semibold border border-accent/40 text-accent ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
-                              Editar compra
+                              {tr('Editar compra')}
                             </button>
                             <Link href="/servicios/productos"
                                   className={`flex-1 py-2 text-xs font-semibold border border-glass-border text-text-secondary text-center inline-flex items-center justify-center gap-1 ${isTech ? 'rounded-none' : 'rounded-xl'}`}>

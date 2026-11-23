@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { X, LogOut, User as UserIcon, Phone, Camera, Trash2 } from 'lucide-react';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
@@ -187,12 +188,12 @@ export function ProfileModal({ onClose }: Props) {
         className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-5 glass-dropdown ${isCyberpunk ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} aria-label="Cerrar" className={`absolute top-4 right-4 transition-colors ${isCyberpunk ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
+        <button onClick={onClose} aria-label={tr('Cerrar')} className={`absolute top-4 right-4 transition-colors ${isCyberpunk ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
           <X className="w-5 h-5" />
         </button>
 
         <h2 className={`${isCyberpunk ? 'font-mono font-bold text-accent uppercase tracking-widest' : 'font-syne font-bold text-text-primary'} text-lg mb-3`}>
-          {isCyberpunk ? '>_ MI_PERFIL' : 'Mi Perfil'}
+          {isCyberpunk ? '>_ MI_PERFIL' : tr('Mi Perfil')}
         </h2>
 
         <div className="space-y-3">
@@ -201,10 +202,10 @@ export function ProfileModal({ onClose }: Props) {
             <div
               className={`relative w-16 h-16 shrink-0 cursor-pointer group ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}
               onClick={() => fileInputRef.current?.click()}
-              title="Cambiar foto"
+              title={tr('Cambiar foto')}
             >
               {user?.photoURL ? (
-                <Image src={user.photoURL} alt={user.displayName || 'Usuario'} fill
+                <Image src={user.photoURL} alt={user.displayName || tr('Usuario')} fill
                   className={`${isCyberpunk ? 'rounded-none' : 'rounded-full'} border-2 border-accent object-cover group-hover:opacity-75 transition-opacity`} />
               ) : (
                 <div className={`w-16 h-16 ${isCyberpunk ? 'rounded-none border border-accent/30 bg-accent/5' : 'rounded-full border-2 border-glass-border bg-glass'} flex items-center justify-center`}>
@@ -238,15 +239,15 @@ export function ProfileModal({ onClose }: Props) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className={`flex-1 min-w-0 bg-transparent text-sm font-medium focus:outline-none ${isCyberpunk ? 'font-mono text-accent placeholder:text-accent/30' : 'text-text-primary'}`}
-              placeholder="Ingresa tu teléfono"
-              aria-label="Teléfono"
+              placeholder={tr('Ingresa tu teléfono')}
+              aria-label={tr('Teléfono')}
             />
             <button
               onClick={handleSavePhone}
               disabled={savingPhone}
               className={`text-xs font-semibold disabled:opacity-50 transition-colors ${isCyberpunk ? 'font-mono text-accent border border-accent px-2 py-1 uppercase tracking-wider hover:bg-accent hover:text-black' : 'text-accent hover:underline'}`}
             >
-              {savingPhone ? (isCyberpunk ? '...' : 'Guardando...') : (isCyberpunk ? 'OK' : 'Guardar')}
+              {savingPhone ? (isCyberpunk ? '...' : tr('Guardando...')) : (isCyberpunk ? 'OK' : tr('Guardar'))}
             </button>
           </div>
 
@@ -255,7 +256,7 @@ export function ProfileModal({ onClose }: Props) {
             <div className={`p-3 flex items-center gap-2 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
               <span className="text-xl">📅</span>
               <div className="min-w-0">
-                <p className={`text-[10px] uppercase tracking-wider leading-tight ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Días usando FLOWI</p>
+                <p className={`text-[10px] uppercase tracking-wider leading-tight ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{tr('Días usando FLOWI')}</p>
                 <p className={`text-base font-bold ${isCyberpunk ? 'font-mono text-accent' : 'text-text-primary'}`}>
                   <AnimatedNumber value={profile?.activeDays ?? 0} /> {(profile?.activeDays ?? 0) === 1 ? 'día' : 'días'}
                 </p>
@@ -264,7 +265,7 @@ export function ProfileModal({ onClose }: Props) {
             <div className={`p-3 flex items-center gap-2 ${isCyberpunk ? 'border border-accent/20 bg-accent/5' : 'bg-glass rounded-2xl border border-glass-border'}`}>
               <span className="text-xl">🔥</span>
               <div className="min-w-0">
-                <p className={`text-[10px] uppercase tracking-wider leading-tight ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>Racha actual</p>
+                <p className={`text-[10px] uppercase tracking-wider leading-tight ${isCyberpunk ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{tr('Racha actual')}</p>
                 <p className={`text-base font-bold ${isCyberpunk ? 'font-mono text-accent' : 'text-text-primary'}`}>
                   {userStats.loading ? '…' : <><AnimatedNumber value={streak} /> {streak === 1 ? 'día' : 'días'}</>}
                 </p>
@@ -285,19 +286,19 @@ export function ProfileModal({ onClose }: Props) {
             ) : (
               <div className="grid grid-cols-2 gap-x-3 gap-y-2">
                 <div>
-                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Ingresos</p>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Ingresos')}</p>
                   <p className={`text-sm font-semibold text-green-400 ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={periodIngresos} format={money} /></p>
                 </div>
                 <div>
-                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Gastos</p>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Gastos')}</p>
                   <p className={`text-sm font-semibold text-red-400 ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={periodGastos} format={money} /></p>
                 </div>
                 <div>
-                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Balance</p>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Balance')}</p>
                   <p className={`text-sm font-semibold text-accent ${isCyberpunk ? 'font-mono' : ''}`}>{periodIngresos - periodGastos < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(periodIngresos - periodGastos)} format={money} /></p>
                 </div>
                 <div>
-                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>Deudas hoy</p>
+                  <p className={`text-[10px] uppercase tracking-wider ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Deudas hoy')}</p>
                   <p className={`text-sm font-semibold text-orange-400 ${isCyberpunk ? 'font-mono' : ''}`}><AnimatedNumber value={userStats.deudas} format={money} /></p>
                 </div>
               </div>
@@ -310,14 +311,14 @@ export function ProfileModal({ onClose }: Props) {
               className={`w-full font-bold py-3 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-transparent border border-white text-white rounded-none uppercase font-mono tracking-widest hover:bg-white hover:text-black' : 'bg-glass border border-glass-border text-text-primary rounded-xl hover:bg-glass-hover active:scale-[0.98]'}`}
             >
               <LogOut className="w-4 h-4" />
-              {isCyberpunk ? 'SALIR' : 'Cerrar sesión'}
+              {isCyberpunk ? 'SALIR' : tr('Cerrar sesión')}
             </button>
             <button
               onClick={handleDeleteAccountClick}
               className={`w-full font-bold py-3 transition-all flex items-center justify-center gap-2 text-sm ${isCyberpunk ? 'bg-black border border-red-500/50 text-red-500 rounded-none uppercase font-mono tracking-widest hover:bg-red-500/10' : 'bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500/20 active:scale-[0.98]'}`}
             >
               <Trash2 className="w-4 h-4" />
-              {isCyberpunk ? 'ELIMINAR' : 'Eliminar cuenta'}
+              {isCyberpunk ? 'ELIMINAR' : tr('Eliminar cuenta')}
             </button>
           </div>
         </div>
@@ -327,23 +328,23 @@ export function ProfileModal({ onClose }: Props) {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-4">
           <div className={`${isCyberpunk ? 'bg-black border-2 rounded-none shadow-[0_0_50px_rgba(239,68,68,0.3)]' : 'bg-card border-2 rounded-3xl'} border-red-500 p-8 max-w-sm w-full text-center animate-fade-in-up`}>
             <h3 className={`text-red-500 text-xl font-bold mb-4 uppercase ${isCyberpunk ? 'font-mono tracking-widest' : 'font-syne'}`}>
-              {isCyberpunk ? '>_ ADVERTENCIA_CRITICA' : 'Advertencia Crítica'}
+              {isCyberpunk ? '>_ ADVERTENCIA_CRITICA' : tr('Advertencia Crítica')}
             </h3>
             <p className={`text-sm mb-8 leading-relaxed ${isCyberpunk ? 'font-mono text-white/80' : 'text-text-secondary'}`}>
-              ESTA ACCIÓN ES IRREVERSIBLE. SE BORRARÁN TODOS TUS DATOS DE MANERA PERMANENTE. ¿CONFIRMAR ELIMINACIÓN DE CUENTA?
+              {tr('ESTA ACCIÓN ES IRREVERSIBLE. SE BORRARÁN TODOS TUS DATOS DE MANERA PERMANENTE. ¿CONFIRMAR ELIMINACIÓN DE CUENTA?')}
             </p>
             <div className="flex flex-col gap-3">
               <button
                 onClick={executeDeleteAccount}
                 className={`w-full bg-red-500/10 border border-red-500 text-red-500 font-bold uppercase py-3 transition-colors ${isCyberpunk ? 'font-mono tracking-widest hover:bg-red-500 hover:text-black' : 'rounded-xl hover:bg-red-500/20'}`}
               >
-                {isCyberpunk ? '>_ CONFIRMAR_PURGA' : 'Confirmar Eliminación'}
+                {isCyberpunk ? '>_ CONFIRMAR_PURGA' : tr('Confirmar Eliminación')}
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className={`w-full bg-transparent border font-bold uppercase py-3 transition-colors ${isCyberpunk ? 'border-white/30 text-white/70 font-mono tracking-widest hover:bg-white/10' : 'border-glass-border text-text-secondary rounded-xl hover:bg-glass-hover'}`}
               >
-                {isCyberpunk ? '>_ ABORTAR' : 'Cancelar'}
+                {isCyberpunk ? '>_ ABORTAR' : tr('Cancelar')}
               </button>
             </div>
           </div>

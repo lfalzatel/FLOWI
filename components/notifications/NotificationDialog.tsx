@@ -1,4 +1,5 @@
 'use client';
+import { tr, lazyT } from '@/lib/i18n';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -13,12 +14,12 @@ interface Props {
   onCancel: () => void;   // "Ahora no" / cerrar
 }
 
-const COPY: Record<NotificationDialogKind, { badge: string; title: string; confirm: string; cancel?: string }> = {
-  ask: { badge: 'Avisos de pagos', title: '¿Te avisamos de tus pagos?', confirm: 'Sí, avísame', cancel: 'Ahora no' },
-  enabled: { badge: 'Notificaciones activas', title: '¡Listo! Te avisaremos a tiempo', confirm: 'Entendido' },
-  blocked: { badge: 'Notificaciones bloqueadas', title: 'Tu celular tiene bloqueados los avisos', confirm: 'Entendido' },
-  'ios-install': { badge: 'Primero instala FLOWI', title: 'En iPhone, instala FLOWI para recibir avisos', confirm: 'Entendido' },
-};
+const COPY: Record<NotificationDialogKind, { badge: string; title: string; confirm: string; cancel?: string }> = lazyT(() => ({
+  ask: { badge: tr('Avisos de pagos'), title: tr('¿Te avisamos de tus pagos?'), confirm: tr('Sí, avísame'), cancel: tr('Ahora no') },
+  enabled: { badge: tr('Notificaciones activas'), title: tr('¡Listo! Te avisaremos a tiempo'), confirm: tr('Entendido') },
+  blocked: { badge: tr('Notificaciones bloqueadas'), title: tr('Tu celular tiene bloqueados los avisos'), confirm: tr('Entendido') },
+  'ios-install': { badge: tr('Primero instala FLOWI'), title: tr('En iPhone, instala FLOWI para recibir avisos'), confirm: tr('Entendido') },
+}));
 
 // Mismo diseño del diálogo de eliminar (ConfirmDialog), en el color de la app
 export function NotificationDialog({ kind, context, onConfirm, onCancel }: Props) {
@@ -40,24 +41,24 @@ export function NotificationDialog({ kind, context, onConfirm, onCancel }: Props
       return (
         <>
           {context
-            ? <>Te avisamos de <b>{context}</b> antes de que se te pase, aunque FLOWI esté cerrada.</>
-            : <>Te avisamos de tus pagos y recordatorios antes de que se te pasen, aunque FLOWI esté cerrada.</>}
+            ? <>{tr('Te avisamos de')} <b>{context}</b> {tr('antes de que se te pase, aunque FLOWI esté cerrada.')}</>
+            : <>{tr('Te avisamos de tus pagos y recordatorios antes de que se te pasen, aunque FLOWI esté cerrada.')}</>}
           {' '}Solo lo importante: un resumen a las 7 a. m. cuando hay algo que pagar.
         </>
       );
     }
     if (kind === 'enabled') {
-      return <>Todos los días a las <b>7 a. m.</b> te contamos qué pagos tienes hoy y mañana, y tus recordatorios llegan a su hora. Puedes apagarlos cuando quieras tocando tu foto → Notificaciones.</>;
+      return <>{tr('Todos los días a las')} <b>{tr('7 a. m.')}</b> {tr('te contamos qué pagos tienes hoy y mañana, y tus recordatorios llegan a su hora. Puedes apagarlos cuando quieras tocando tu foto → Notificaciones.')}</>;
     }
     if (kind === 'blocked') {
       return (
         <>
-          Para activarlos: toca el <b>candado</b> (o los tres puntos ⋮) junto a la dirección de FLOWI → <b>Configuración del sitio</b> → <b>Notificaciones</b> → <b>Permitir</b>.
-          {' '}Si instalaste FLOWI como app: mantén presionado su ícono → <b>Información de la app</b> → <b>Notificaciones</b>.
+          Para activarlos: toca el <b>{tr('candado')}</b> (o los tres puntos ⋮) junto a la dirección de FLOWI → <b>{tr('Configuración del sitio')}</b> → <b>{tr('Notificaciones')}</b> → <b>{tr('Permitir')}</b>.
+          {' '}Si instalaste FLOWI como app: mantén presionado su ícono → <b>{tr('Información de la app')}</b> → <b>{tr('Notificaciones')}</b>.
         </>
       );
     }
-    return <>Abre FLOWI en Safari, toca <b>Compartir</b> (el cuadro con la flecha) → <b>Agregar a pantalla de inicio</b>. Luego abre FLOWI desde ese ícono y activa los avisos.</>;
+    return <>{tr('Abre FLOWI en Safari, toca')} <b>{tr('Compartir')}</b> (el cuadro con la flecha) → <b>{tr('Agregar a pantalla de inicio')}</b>{tr('. Luego abre FLOWI desde ese ícono y activa los avisos.')}</>;
   })();
 
   const accent = kind === 'blocked' ? 'amber' : 'accent';
@@ -75,7 +76,7 @@ export function NotificationDialog({ kind, context, onConfirm, onCancel }: Props
           ? 'bg-[#05050A] border-2 border-accent/50 rounded-none font-mono text-xs text-white'
           : isLight ? 'bg-white border border-gray-200 rounded-3xl text-gray-900' : 'bg-[#0D1527] border border-white/10 rounded-3xl text-white'
       }`}>
-        <button onClick={onCancel} aria-label="Cerrar"
+        <button onClick={onCancel} aria-label={tr('Cerrar')}
                 className={`absolute top-4 right-4 transition-colors p-1 ${isTechTheme ? 'text-accent/70 hover:text-accent' : isLight ? 'text-gray-400 hover:text-gray-600' : 'text-white/40 hover:text-white'}`}>
           <X className="w-4 h-4" />
         </button>

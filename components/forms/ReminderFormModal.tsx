@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -212,7 +212,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const UNITS: { id: ReminderAlert['unit']; label: string }[] = [{ id: 'minutes', label: 'min' }, { id: 'hours', label: 'horas' }, { id: 'days', label: 'días' }];
   const hasAmount = type !== 'daily' && type !== 'budget_alert';
   const timeInput = (
-    <input autoComplete="off" type="time" required value={time} onChange={(e) => setTime(e.target.value)} className={field} aria-label="Hora" />
+    <input autoComplete="off" type="time" required value={time} onChange={(e) => setTime(e.target.value)} className={field} aria-label={tr('Hora')} />
   );
 
   return createPortal(
@@ -222,17 +222,17 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
       <div className={`relative w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden z-10 glass-dropdown animate-fade-in-up ${isTechTheme ? 'border border-accent/50 rounded-none' : 'rounded-3xl'}`}>
         <div className={`shrink-0 flex items-center justify-between px-5 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
           <h2 className={isTechTheme ? 'font-bold text-xl text-accent tracking-wide uppercase' : 'font-syne font-bold text-xl text-text-primary'}>
-            {reminder ? 'Editar recordatorio' : 'Nuevo recordatorio'}
+            {reminder ? tr('Editar recordatorio') : tr('Nuevo recordatorio')}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className={isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-4">
             {/* Título + sugerencia de categoría */}
             <div>
-              <label className={lbl} htmlFor="rem-title">Título</label>
-              <input autoComplete="off" id="rem-title" type="text" required placeholder="Ej: Pagar arriendo, cambio de aceite" value={title}
+              <label className={lbl} htmlFor="rem-title">{tr('Título')}</label>
+              <input autoComplete="off" id="rem-title" type="text" required placeholder={tr('Ej: Pagar arriendo, cambio de aceite')} value={title}
                      onChange={(e) => setTitle(e.target.value)} className={field} />
               {merchantSuggestion && !merchant && type !== 'budget_alert' ? (
                 <button type="button" onClick={() => { setCategory(merchantSuggestion.category); setMerchant(merchantSuggestion.merchant); }}
@@ -256,9 +256,9 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
               <button type="button" onClick={() => setPaymentChoice(!isPaymentNow)}
                       className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 border text-left ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-xl border-glass-border'}`}>
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-text-primary">¿Es un pago?</span>
+                  <span className="block text-sm font-semibold text-text-primary">{tr('¿Es un pago?')}</span>
                   <span className="block text-[11px] text-text-muted">
-                    {isPaymentNow ? 'Cuenta en tus compromisos y te pregunto "Ya lo pagué"' : 'Evento o tarea: te aviso y lo marcas como "Listo"'}
+                    {isPaymentNow ? tr('Cuenta en tus compromisos y te pregunto "Ya lo pagué"') : tr('Evento o tarea: te aviso y lo marcas como "Listo"')}
                   </span>
                 </span>
                 <span className={`w-11 h-6 shrink-0 rounded-full relative transition-colors ${isPaymentNow ? 'bg-accent' : 'bg-gray-600'}`}>
@@ -271,7 +271,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
             {type !== 'budget_alert' && isPaymentNow && (
               <div className={`grid gap-2 ${hasAmount ? 'grid-cols-[1.3fr_1fr]' : 'grid-cols-1'}`}>
                 <div className="min-w-0">
-                  <span className={lbl}>Categoría</span>
+                  <span className={lbl}>{tr('Categoría')}</span>
                   <button type="button" onClick={() => setCatSheet(true)} className={`${field} flex items-center gap-2 text-left`}>
                     {merchant
                       ? <><CategoryIcon icon={merchantMeta?.icon || merchant} label={merchant} className="w-4 h-4 text-sm flex items-center justify-center shrink-0" /><span className="truncate">{merchant}</span></>
@@ -283,8 +283,8 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                 </div>
                 {hasAmount && (
                   <div className="min-w-0">
-                    <label className={lbl} htmlFor="rem-amount">Valor</label>
-                    <input autoComplete="off" id="rem-amount" type="text" inputMode="numeric" placeholder="Opcional" value={amountText}
+                    <label className={lbl} htmlFor="rem-amount">{tr('Valor')}</label>
+                    <input autoComplete="off" id="rem-amount" type="text" inputMode="numeric" placeholder={tr('Opcional')} value={amountText}
                            onChange={(e) => { const d = e.target.value.replace(/\D/g, ''); setAmountText(d ? Number(d).toLocaleString(currentLocale()) : ''); }}
                            className={field} />
                   </div>
@@ -294,7 +294,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
             {type !== 'budget_alert' && isPaymentNow && category && merchantOptions2.length > 0 && (
               <div>
-                <span className={lbl}>¿Cuál? <span className="normal-case opacity-70">(opcional)</span></span>
+                <span className={lbl}>{tr('¿Cuál?')} <span className="normal-case opacity-70">(opcional)</span></span>
                 <div className="flex flex-wrap gap-1.5">
                   {merchantOptions2.slice(0, showAllMerchants ? 60 : 8).map(mLabel => {
                     const meta = findCatalogEntry(mLabel);
@@ -315,7 +315,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
             {/* Frecuencia */}
             <div>
-              <span className={lbl}>Frecuencia</span>
+              <span className={lbl}>{tr('Frecuencia')}</span>
               <div className="grid grid-cols-3 gap-1.5">
                 {TYPES.map(t => <button key={t.id} type="button" onClick={() => setType(t.id)} className={chip(type === t.id)}>{t.label}</button>)}
               </div>
@@ -328,39 +328,39 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                   <label className={lbl} htmlFor="rem-date">{type === 'yearly' ? 'Fecha (cada año)' : 'Fecha'}</label>
                   <input autoComplete="off" id="rem-date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={field} />
                 </div>
-                <div><span className={lbl}>Hora</span>{timeInput}</div>
+                <div><span className={lbl}>{tr('Hora')}</span>{timeInput}</div>
               </div>
             )}
-            {type === 'daily' && <div className="w-1/2"><span className={lbl}>Hora</span>{timeInput}</div>}
+            {type === 'daily' && <div className="w-1/2"><span className={lbl}>{tr('Hora')}</span>{timeInput}</div>}
             {type === 'weekly' && (
               <div className="space-y-2">
-                <span className={lbl}>Día de la semana</span>
+                <span className={lbl}>{tr('Día de la semana')}</span>
                 <div className="grid grid-cols-7 gap-1">
                   {WEEK.map(([d, l]) => <button key={d} type="button" onClick={() => setDayOfWeek(d)} className={`${chip(dayOfWeek === d)} px-0`}>{l}</button>)}
                 </div>
-                <div className="w-1/2"><span className={lbl}>Hora</span>{timeInput}</div>
+                <div className="w-1/2"><span className={lbl}>{tr('Hora')}</span>{timeInput}</div>
               </div>
             )}
             {type === 'monthly' && (
               <div className="space-y-3">
                 <div className="grid grid-cols-[0.8fr_1fr] gap-2">
                   <div>
-                    <label className={lbl} htmlFor="rem-day">Día del mes</label>
+                    <label className={lbl} htmlFor="rem-day">{tr('Día del mes')}</label>
                     <input autoComplete="off" id="rem-day" type="number" min={1} max={31} required value={dayOfMonth} inputMode="numeric"
                            onChange={(e) => { const v = e.target.value; if (v === '') setDayOfMonth(''); else { const n = parseInt(v, 10); if (!isNaN(n)) setDayOfMonth(Math.max(1, Math.min(31, n))); } }}
                            className={field} />
                   </div>
-                  <div><span className={lbl}>Hora</span>{timeInput}</div>
+                  <div><span className={lbl}>{tr('Hora')}</span>{timeInput}</div>
                 </div>
                 <div>
-                  <span className={lbl}>Repetir cada</span>
+                  <span className={lbl}>{tr('Repetir cada')}</span>
                   <div className="grid grid-cols-5 gap-1.5">
                     {[1, 2, 3, 4, 6].map(n => <button key={n} type="button" onClick={() => setEveryMonths(n)} className={`${chip(everyMonths === n)} px-0`}>{n === 1 ? 'Mes' : `${n} m`}</button>)}
                   </div>
                 </div>
                 {everyMonths > 1 && (
                   <div>
-                    <label className={lbl} htmlFor="rem-start">¿En qué mes toca la próxima vez?</label>
+                    <label className={lbl} htmlFor="rem-start">{tr('¿En qué mes toca la próxima vez?')}</label>
                     <input autoComplete="off" id="rem-start" type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value || thisMonthKey)} className={field} />
                     <p className="text-[11px] text-text-muted mt-1">Desde ahí se repite cada {everyMonths} meses, el día {dayOfMonth || 1}.</p>
                   </div>
@@ -377,11 +377,11 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
             {/* Cómo avisar */}
             <div>
-              <span className={lbl}>Cómo avisarte</span>
+              <span className={lbl}>{tr('Cómo avisarte')}</span>
               <div className="grid grid-cols-4 gap-1.5">
-                <button type="button" onClick={() => setPushEnabled(!pushEnabled)} className={`${chip(pushEnabled)} px-0`}>Push</button>
-                <button type="button" onClick={() => setInAppEnabled(!inAppEnabled)} className={`${chip(inAppEnabled)} px-0`}>En la app</button>
-                <button type="button" onClick={() => setSound(!sound)} className={`${chip(sound)} px-0`}>Sonido</button>
+                <button type="button" onClick={() => setPushEnabled(!pushEnabled)} className={`${chip(pushEnabled)} px-0`}>{tr('Push')}</button>
+                <button type="button" onClick={() => setInAppEnabled(!inAppEnabled)} className={`${chip(inAppEnabled)} px-0`}>{tr('En la app')}</button>
+                <button type="button" onClick={() => setSound(!sound)} className={`${chip(sound)} px-0`}>{tr('Sonido')}</button>
                 <button type="button" onClick={() => setActive(!active)} className={`${chip(active)} px-0`}>{active ? 'Activo' : 'Pausado'}</button>
               </div>
             </div>
@@ -389,36 +389,36 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
             {/* Opcionales plegados */}
             {(showNote || description) ? (
               <div>
-                <label className={lbl} htmlFor="rem-note">Nota</label>
-                <textarea id="rem-note" rows={2} placeholder="Ej: referencia de pago, cuenta, observaciones" value={description}
+                <label className={lbl} htmlFor="rem-note">{tr('Nota')}</label>
+                <textarea id="rem-note" rows={2} placeholder={tr('Ej: referencia de pago, cuenta, observaciones')} value={description}
                           onChange={(e) => setDescription(e.target.value)} className={`${field} resize-none`} />
               </div>
             ) : null}
 
             {type !== 'budget_alert' && (showAlerts || alerts.length > 0) && (
               <div className="space-y-2">
-                <span className={lbl}>Avisarme antes</span>
+                <span className={lbl}>{tr('Avisarme antes')}</span>
                 {alerts.map(alert => (
                   <div key={alert.id} className="flex items-center gap-1.5">
                     <input autoComplete="off" type="number" min={1} value={alert.value} inputMode="numeric"
                            onChange={e => updateAlert(alert.id, 'value', Number(e.target.value))}
-                           className={`${field} !w-16 text-center px-1`} aria-label="Cantidad" />
+                           className={`${field} !w-16 text-center px-1`} aria-label={tr('Cantidad')} />
                     {UNITS.map(u => (
                       <button key={u.id} type="button" onClick={() => updateAlert(alert.id, 'unit', u.id)} className={`${chip(alert.unit === u.id)} flex-1 px-0`}>{u.label}</button>
                     ))}
-                    <button type="button" onClick={() => removeAlert(alert.id)} aria-label="Quitar aviso" className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                    <button type="button" onClick={() => removeAlert(alert.id)} aria-label={tr('Quitar aviso')} className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 ))}
-                <button type="button" onClick={addAlert} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Otro aviso</button>
+                <button type="button" onClick={addAlert} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> {tr('Otro aviso')}</button>
               </div>
             )}
 
             <div className="flex flex-wrap gap-4">
               {!showNote && !description && (
-                <button type="button" onClick={() => setShowNote(true)} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Nota</button>
+                <button type="button" onClick={() => setShowNote(true)} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> {tr('Nota')}</button>
               )}
               {type !== 'budget_alert' && !showAlerts && alerts.length === 0 && (
-                <button type="button" onClick={() => { setShowAlerts(true); addAlert(); }} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Avisarme antes</button>
+                <button type="button" onClick={() => { setShowAlerts(true); addAlert(); }} className="text-xs text-accent font-semibold inline-flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> {tr('Avisarme antes')}</button>
               )}
             </div>
 
@@ -433,7 +433,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
           <div className={`shrink-0 px-5 pt-3 pb-4 border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             <button type="submit" disabled={loading}
                     className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
-              {loading ? 'Guardando...' : reminder ? 'Guardar cambios' : 'Crear recordatorio'}
+              {loading ? tr('Guardando...') : reminder ? tr('Guardar cambios') : tr('Crear recordatorio')}
             </button>
           </div>
         </form>
@@ -475,7 +475,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
             setShowConfirmDelete(false);
           }
         }}
-        title="Eliminar Recordatorio"
+        title={tr('Eliminar Recordatorio')}
         message="¿Estás seguro de que deseas eliminar este recordatorio? Esta acción no se puede deshacer."
         confirmText="Eliminar"
       />

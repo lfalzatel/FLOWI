@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { usePlanGate } from '@/lib/plans';
 import { useInvestments } from '@/hooks/useInvestments';
 import { useRef, useState } from 'react';
@@ -94,7 +95,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
     if (d.rateEA) setRate(rateText(d.rateEA));
     if (d.startDate) setStart(d.startDate);
     if (d.maturityDate) setMaturity(d.maturityDate);
-    return list([d.bank && `banco (${d.bank})`, d.amount && 'monto', d.rateEA && 'tasa', d.startDate && 'apertura', d.maturityDate && 'vencimiento']);
+    return list([d.bank && tr('banco ({a})', { a: d.bank }), d.amount && 'monto', d.rateEA && 'tasa', d.startDate && 'apertura', d.maturityDate && 'vencimiento']);
   };
 
   async function readShots(files: File[]) {
@@ -114,7 +115,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
       setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
       setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos del CDT. Prueba con capturas donde se vea el monto, la tasa y las fechas.'
         : r.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
-        : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.');
+        : tr('La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'));
       return;
     }
     const d = r.data;
@@ -136,11 +137,11 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
       const real = Math.round((b.getTime() - a.getTime()) / 86400000);
       const banco = days360(a, b);
       if (Math.abs(real - d.termDays) > 2 && Math.abs(banco - d.termDays) > 2) {
-        warn = ` Ojo: el banco dice ${d.termDays} días de plazo, pero las fechas que leí dan ${banco}. Revisa la fecha de vencimiento.`;
+        warn = tr(' Ojo: el banco dice {a} días de plazo, pero las fechas que leí dan {b}. Revisa la fecha de vencimiento.', { a: d.termDays, b: banco });
       }
     }
     setAiState(warn ? 'error' : 'done');
-    setAiMsg((missing.length ? `Listo. No encontré: ${missing.join(', ')}. Complétalo y revisa todo antes de guardar.` : 'Listo. Revisa que todo esté bien antes de guardar.') + warn);
+    setAiMsg((missing.length ? tr('Listo. No encontré: {a}. Complétalo y revisa todo antes de guardar.', { a: missing.join(', ') }) : tr('Listo. Revisa que todo esté bien antes de guardar.')) + warn);
   }
 
   const fmt = (n: number) => formatCurrency(n, currency);
@@ -216,8 +217,8 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
     } catch (err: any) {
       console.error('Error saving investment:', err);
       setError(err?.code === 'permission-denied'
-        ? 'La base de datos todavía no permite guardar inversiones. Hay que publicar las reglas de "fl_investments".'
-        : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
+        ? tr('La base de datos todavía no permite guardar inversiones. Hay que publicar las reglas de "fl_investments".')
+        : tr('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'));
       setLoading(false);
     }
   }
@@ -238,9 +239,9 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
            onClick={(e) => e.stopPropagation()}>
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
           <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent tracking-wide uppercase' : 'font-syne font-bold text-xl text-text-primary'}`}>
-            {renewing ? 'Renovar CDT' : investment ? 'Editar CDT' : 'Nuevo CDT'}
+            {renewing ? tr('Renovar CDT') : investment ? tr('Editar CDT') : tr('Nuevo CDT')}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className={`p-1 -mr-1 ${isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={`p-1 -mr-1 ${isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -251,12 +252,12 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
               <div>
                 <span className={labelClass}>Los intereses de este periodo ({fmt(prev.netInterest)} después de retención)</span>
                 <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setAmountFromMode('suma')} className={chipClass(interestMode === 'suma')}>Se suman al CDT</button>
-                  <button type="button" onClick={() => setAmountFromMode('pagado')} className={chipClass(interestMode === 'pagado')}>Me los pagaron</button>
+                  <button type="button" onClick={() => setAmountFromMode('suma')} className={chipClass(interestMode === 'suma')}>{tr('Se suman al CDT')}</button>
+                  <button type="button" onClick={() => setAmountFromMode('pagado')} className={chipClass(interestMode === 'pagado')}>{tr('Me los pagaron')}</button>
                 </div>
                 <p className={hint}>{interestMode === 'suma'
-                  ? 'El nuevo capital incluye los intereses. Si el banco te da otra cifra exacta, cámbiala abajo.'
-                  : 'Los registro como un ingreso en "Rendimientos / intereses" con fecha del vencimiento.'}</p>
+                  ? tr('El nuevo capital incluye los intereses. Si el banco te da otra cifra exacta, cámbiala abajo.')
+                  : tr('Los registro como un ingreso en "Rendimientos / intereses" con fecha del vencimiento.')}</p>
               </div>
             )}
 
@@ -270,7 +271,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                 <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                        onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
                 {aiState === 'loading' && (
-                  <ReadingOverlay isTech={isTechTheme} title="Leyendo el CDT" label="Leyendo las capturas del banco…"
+                  <ReadingOverlay isTech={isTechTheme} title={tr('Leyendo el CDT')} label="Leyendo las capturas del banco…"
                                   onCancel={() => { readId.current++; setAiState('idle'); }} />
                 )}
                 {(
@@ -278,7 +279,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                         onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
                         className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-60 ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>
                   <Camera className="w-4 h-4" />
-                  Llenar desde capturas del banco
+                  {tr('Llenar desde capturas del banco')}
                 </button>
                 )}
                 {aiState === 'loan' && (
@@ -294,17 +295,17 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                 {aiState !== 'loading' && aiState !== 'loan' && (
                 <p className={hint}>
                   {aiState === 'no-key'
-                    ? <>Para leer capturas necesitas la IA gratuita. <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a>.</>
+                    ? <>{tr('Para leer capturas necesitas la IA gratuita.')} <a href="/configuracion" className="text-accent font-semibold underline">{tr('Conéctala en Configuración')}</a>.</>
                     : aiMsg
                       ? <span className={aiState === 'error' ? 'text-red-400' : 'text-text-secondary'}>{aiMsg}</span>
-                      : 'Puedes elegir varias (resumen y detalle). Si quieres, recorta los números de CDT y de cuenta: no se necesitan.'}
+                      : tr('Puedes elegir varias (resumen y detalle). Si quieres, recorta los números de CDT y de cuenta: no se necesitan.')}
                 </p>
                 )}
               </div>
             )}
 
             <div>
-              <span className={labelClass}>Banco</span>
+              <span className={labelClass}>{tr('Banco')}</span>
               <BankField value={bank} onClick={() => setBankSheet(true)} />
               {bankSheet && (
                 <BankPickerSheet selected={bank ? [bank] : []} onlyBanks allowCustom extra={BANKS}
@@ -315,7 +316,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="inv-amount" className={labelClass}>Monto invertido</label>
+                <label htmlFor="inv-amount" className={labelClass}>{tr('Monto invertido')}</label>
                 <input autoComplete="off" id="inv-amount" type="text" inputMode="numeric" placeholder="$ 0" value={amount}
                        onChange={(e) => setAmount(formatAmountInput(e.target.value))} className={`${inputClass} font-bold`} required />
               </div>
@@ -332,7 +333,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                 <input autoComplete="off" id="inv-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} required />
               </div>
               <div>
-                <label htmlFor="inv-end" className={labelClass}>Vence el</label>
+                <label htmlFor="inv-end" className={labelClass}>{tr('Vence el')}</label>
                 <input autoComplete="off" id="inv-end" type="date" value={maturity} min={start} onChange={(e) => setMaturity(e.target.value)} className={inputClass} required />
               </div>
             </div>
@@ -357,19 +358,19 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                 value={moneyAccount}
                 onChange={setMoneyAccount}
                 label={renewing
-                  ? extra >= 1 ? `¿De qué cuenta sale lo que agregas (${fmt(extra)})?`
-                    : extra <= -1 ? `¿A qué cuenta llega lo que retiras (${fmt(-extra)})?`
-                    : '¿A qué cuenta te pagaron los intereses?'
-                  : investment ? '¿De dónde salió la plata al abrirlo?' : '¿De dónde sale la plata?'}
-                noneLabel={renewing ? 'No moverla de mis cuentas' : 'No descontar (ya estaba ahorrada)'}
+                  ? extra >= 1 ? tr('¿De qué cuenta sale lo que agregas ({a})?', { a: fmt(extra) })
+                    : extra <= -1 ? tr('¿A qué cuenta llega lo que retiras ({a})?', { a: fmt(-extra) })
+                    : tr('¿A qué cuenta te pagaron los intereses?')
+                  : investment ? tr('¿De dónde salió la plata al abrirlo?') : tr('¿De dónde sale la plata?')}
+                noneLabel={renewing ? tr('No moverla de mis cuentas') : tr('No descontar (ya estaba ahorrada)')}
                 autoMain={!investment || renewing}
-                hint={renewing ? undefined : 'Si sale de una cuenta, la descuento de su saldo y de lo que puedes gastar este mes (cuenta como ahorro, no como gasto).'}
+                hint={renewing ? undefined : tr('Si sale de una cuenta, la descuento de su saldo y de lo que puedes gastar este mes (cuenta como ahorro, no como gasto).')}
               />
             )}
 
             <button type="button" onClick={() => setShowMore(v => !v)}
                     className="w-full flex items-center justify-between text-xs font-semibold text-accent">
-              <span>{showMore ? 'Menos detalles' : 'Más detalles (intereses del banco, tasa nominal, retención, nota)'}</span>
+              <span>{showMore ? tr('Menos detalles') : tr('Más detalles (intereses del banco, tasa nominal, retención, nota)')}</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showMore ? 'rotate-180' : ''}`} />
             </button>
             {showMore && (
@@ -378,7 +379,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                   <label htmlFor="inv-bank-interest" className={labelClass}>Intereses del periodo según el banco (opcional)</label>
                   <input autoComplete="off" id="inv-bank-interest" type="text" inputMode="numeric" placeholder="$ 0" value={bankInterest}
                          onChange={(e) => setBankInterest(formatAmountInput(e.target.value))} className={inputClass} />
-                  <p className={hint}>Si el banco te muestra la cifra exacta, ponla aquí y uso esa en vez del cálculo.</p>
+                  <p className={hint}>{tr('Si el banco te muestra la cifra exacta, ponla aquí y uso esa en vez del cálculo.')}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -396,14 +397,14 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
 
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input type="checkbox" checked={autoRenew} onChange={(e) => setAutoRenew(e.target.checked)} className="w-4 h-4 accent-[var(--accent)]" />
-                  <span className="text-sm text-text-secondary">El banco lo renueva automáticamente</span>
+                  <span className="text-sm text-text-secondary">{tr('El banco lo renueva automáticamente')}</span>
                 </label>
 
                 <div>
                   <label htmlFor="inv-note" className={labelClass}>Nota (opcional)</label>
                   <input autoComplete="off" id="inv-note" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)}
-                         placeholder="Ej: para la prima del carro" className={inputClass} />
-                  <p className={hint}>No escribas números de CDT ni de cuenta: FLOWI no los necesita.</p>
+                         placeholder={tr('Ej: para la prima del carro')} className={inputClass} />
+                  <p className={hint}>{tr('No escribas números de CDT ni de cuenta: FLOWI no los necesita.')}</p>
                 </div>
               </div>
             )}
@@ -421,7 +422,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
           <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-4 border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             <button type="submit" disabled={!canSave}
                     className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : 'rounded-xl bg-accent text-white hover:bg-accent/90'}`}>
-              {loading ? 'Guardando...' : renewing ? 'Renovar' : investment ? 'Guardar cambios' : 'Guardar CDT'}
+              {loading ? tr('Guardando...') : renewing ? tr('Renovar') : investment ? tr('Guardar cambios') : tr('Guardar CDT')}
             </button>
           </div>
         </form>

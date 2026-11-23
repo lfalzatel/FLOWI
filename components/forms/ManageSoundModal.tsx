@@ -1,4 +1,5 @@
 'use client';
+import { tr, lazyT } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Play, Check, Music, Volume2, Sparkles, Zap, Radio } from 'lucide-react';
@@ -14,84 +15,84 @@ interface SoundOption {
   icon?: string;
 }
 
-const SOUND_DICTIONARY: Record<SoundActionType, { title: string; subtitle: string; options: SoundOption[] }> = {
+const SOUND_DICTIONARY: Record<SoundActionType, { title: string; subtitle: string; options: SoundOption[] }> = lazyT(() => ({
   ingreso: {
-    title: 'Sonido para Ingresos y Abonos',
-    subtitle: 'Elige el efecto sonoro al añadir dinero a tus cuentas',
+    title: tr('Sonido para Ingresos y Abonos'),
+    subtitle: tr('Elige el efecto sonoro al añadir dinero a tus cuentas'),
     options: [
-      { value: 'mario_1up', label: '🍄 Mario Bros 1-UP', desc: 'Vida Extra 8-Bit NES' },
-      { value: 'mario_coin', label: '🪙 Mario Bros Coin', desc: 'Moneda 8-Bit NES' },
-      { value: 'synth', label: '🎵 Arpegio Celestial', desc: 'Sintetizador armónico suave (Web Audio)' },
-      { value: 'bass', label: '🔊 Bajo Ciberpunk', desc: 'Acorde electrónico moderno' },
-      { value: 'bell', label: '🔔 Campanada Clásica', desc: 'Campana cristalina tradicional' },
-      { value: 'silent', label: '🔇 Silencioso', desc: 'Sin sonido de confirmación' }
+      { value: 'mario_1up', label: '🍄 Mario Bros 1-UP', desc: tr('Vida Extra 8-Bit NES') },
+      { value: 'mario_coin', label: '🪙 Mario Bros Coin', desc: tr('Moneda 8-Bit NES') },
+      { value: 'synth', label: '🎵 Arpegio Celestial', desc: tr('Sintetizador armónico suave (Web Audio)') },
+      { value: 'bass', label: '🔊 Bajo Ciberpunk', desc: tr('Acorde electrónico moderno') },
+      { value: 'bell', label: '🔔 Campanada Clásica', desc: tr('Campana cristalina tradicional') },
+      { value: 'silent', label: '🔇 Silencioso', desc: tr('Sin sonido de confirmación') }
     ]
   },
   gasto: {
-    title: 'Sonido para Gastos',
-    subtitle: 'Efecto al registrar una salida de dinero',
+    title: tr('Sonido para Gastos'),
+    subtitle: tr('Efecto al registrar una salida de dinero'),
     options: [
-      { value: 'mario_coin', label: '🪙 Mario Bros Coin', desc: 'Moneda 8-Bit NES' },
-      { value: 'synth', label: '💥 Acorde Resonante', desc: 'Tono synth descendente' },
-      { value: 'rover', label: '🚀 Rover Landing', desc: 'Impulso suave de despegue' },
-      { value: 'soft', label: '🔔 Campanada Suave', desc: 'Efecto acústico sutil' },
-      { value: 'silent', label: '🔇 Silencioso', desc: 'Sin sonido de confirmación' }
+      { value: 'mario_coin', label: '🪙 Mario Bros Coin', desc: tr('Moneda 8-Bit NES') },
+      { value: 'synth', label: '💥 Acorde Resonante', desc: tr('Tono synth descendente') },
+      { value: 'rover', label: '🚀 Rover Landing', desc: tr('Impulso suave de despegue') },
+      { value: 'soft', label: '🔔 Campanada Suave', desc: tr('Efecto acústico sutil') },
+      { value: 'silent', label: '🔇 Silencioso', desc: tr('Sin sonido de confirmación') }
     ]
   },
   edicion: {
-    title: 'Sonido para Ediciones',
-    subtitle: 'Efecto al modificar o actualizar transacciones',
+    title: tr('Sonido para Ediciones'),
+    subtitle: tr('Efecto al modificar o actualizar transacciones'),
     options: [
-      { value: 'mario_jump', label: '🍄 Mario Bros Jump', desc: 'Salto 8-Bit NES' },
-      { value: 'synth', label: '🔮 Doble Repique Cristalino', desc: 'Micro-arpegio armónico' },
-      { value: 'bell', label: '🔔 Campanada Clásica', desc: 'Efecto metálico limpio' },
-      { value: 'silent', label: '🔇 Silencioso', desc: 'Sin sonido de confirmación' }
+      { value: 'mario_jump', label: '🍄 Mario Bros Jump', desc: tr('Salto 8-Bit NES') },
+      { value: 'synth', label: '🔮 Doble Repique Cristalino', desc: tr('Micro-arpegio armónico') },
+      { value: 'bell', label: '🔔 Campanada Clásica', desc: tr('Efecto metálico limpio') },
+      { value: 'silent', label: '🔇 Silencioso', desc: tr('Sin sonido de confirmación') }
     ]
   },
   eliminacion: {
-    title: 'Sonido para Eliminaciones',
-    subtitle: 'Efecto al borrar datos o transacciones',
+    title: tr('Sonido para Eliminaciones'),
+    subtitle: tr('Efecto al borrar datos o transacciones'),
     options: [
-      { value: 'mario_pipe', label: '🍄 Mario Bros Pipe', desc: 'Entrada a tubo 8-Bit NES' },
-      { value: 'synth', label: '⚡ Barrido Descendente De-Rez', desc: 'Disolución ciberpunk' },
-      { value: 'synth_laser', label: '💥 Láser Ciberpunk Descendente', desc: 'Efecto retro sci-fi' },
-      { value: 'synth_dissolve', label: '🌌 Disolución Armónica', desc: 'Acorde descendente espacio' },
-      { value: 'boomstick', label: '💣 Boomstick Ciberpunk', desc: 'Golpe grave de desintegración' },
-      { value: 'silent', label: '🔇 Silencioso', desc: 'Sin sonido de confirmación' }
+      { value: 'mario_pipe', label: '🍄 Mario Bros Pipe', desc: tr('Entrada a tubo 8-Bit NES') },
+      { value: 'synth', label: '⚡ Barrido Descendente De-Rez', desc: tr('Disolución ciberpunk') },
+      { value: 'synth_laser', label: '💥 Láser Ciberpunk Descendente', desc: tr('Efecto retro sci-fi') },
+      { value: 'synth_dissolve', label: '🌌 Disolución Armónica', desc: tr('Acorde descendente espacio') },
+      { value: 'boomstick', label: '💣 Boomstick Ciberpunk', desc: tr('Golpe grave de desintegración') },
+      { value: 'silent', label: '🔇 Silencioso', desc: tr('Sin sonido de confirmación') }
     ]
   },
   ui_nav: {
-    title: 'Sonido de Navegación (PAE)',
-    subtitle: 'Micro-feedback al tocar el menú inferior y pestañas',
+    title: tr('Sonido de Navegación (PAE)'),
+    subtitle: tr('Micro-feedback al tocar el menú inferior y pestañas'),
     options: [
-      { value: 'pop', label: '🍿 Pop / Burbuja', desc: 'Feedback suave estilo iOS' },
-      { value: 'click', label: '⚡ Click Digital', desc: 'Sensación mecánica de interruptor' },
-      { value: 'chime', label: '🎵 Campana Armónica', desc: 'Micro-acorde musical' },
-      { value: 'haptic', label: '📳 Toque Háptico', desc: 'Pulso grave sutil' },
-      { value: 'arcade', label: '✨ Chime Brillos', desc: 'Secuencia ascendente retro' },
-      { value: 'silent', label: '🔇 Silencioso', desc: 'Desactivar feedback de navegación' }
+      { value: 'pop', label: '🍿 Pop / Burbuja', desc: tr('Feedback suave estilo iOS') },
+      { value: 'click', label: '⚡ Click Digital', desc: tr('Sensación mecánica de interruptor') },
+      { value: 'chime', label: '🎵 Campana Armónica', desc: tr('Micro-acorde musical') },
+      { value: 'haptic', label: '📳 Toque Háptico', desc: tr('Pulso grave sutil') },
+      { value: 'arcade', label: '✨ Chime Brillos', desc: tr('Secuencia ascendente retro') },
+      { value: 'silent', label: '🔇 Silencioso', desc: tr('Desactivar feedback de navegación') }
     ]
   },
   particles: {
-    title: 'Sonido de Partículas Voladoras',
-    subtitle: 'Efecto auditivo durante la animación de partículas',
+    title: tr('Sonido de Partículas Voladoras'),
+    subtitle: tr('Efecto auditivo durante la animación de partículas'),
     options: [
-      { value: 'crystal', label: '🔮 Cristalino Pentatónico', desc: 'Cascada de tonos armónicos' },
-      { value: 'arcade', label: '✨ Arcade 8-Bit', desc: 'Ráfaga vintage NES' },
-      { value: 'marimba', label: '🪵 Marimba Acústica', desc: 'Toques de madera cálida' },
-      { value: 'synth_laser', label: '⚡ Neón Ciberpunk', desc: 'Onda sintetizada retro' },
-      { value: 'silent', label: '🔇 Silencioso', desc: 'Desactivar sonido en partículas' }
+      { value: 'crystal', label: '🔮 Cristalino Pentatónico', desc: tr('Cascada de tonos armónicos') },
+      { value: 'arcade', label: '✨ Arcade 8-Bit', desc: tr('Ráfaga vintage NES') },
+      { value: 'marimba', label: '🪵 Marimba Acústica', desc: tr('Toques de madera cálida') },
+      { value: 'synth_laser', label: '⚡ Neón Ciberpunk', desc: tr('Onda sintetizada retro') },
+      { value: 'silent', label: '🔇 Silencioso', desc: tr('Desactivar sonido en partículas') }
     ]
   },
   notification: {
-    title: 'Tono de Alerta de Notificaciones',
-    subtitle: 'Sonido predeterminado para avisos y recordatorios',
+    title: tr('Tono de Alerta de Notificaciones'),
+    subtitle: tr('Sonido predeterminado para avisos y recordatorios'),
     options: [
-      { value: 'notification.mp3', label: '🫧 Suave (Burbuja)', desc: 'Tono ligero e inofensivo' },
-      { value: 'notification-sound.mp3', label: '🔔 Clásico (Campana)', desc: 'Campanada clara de atención' }
+      { value: 'notification.mp3', label: '🫧 Suave (Burbuja)', desc: tr('Tono ligero e inofensivo') },
+      { value: 'notification-sound.mp3', label: '🔔 Clásico (Campana)', desc: tr('Campanada clara de atención') }
     ]
   }
-};
+}));
 
 interface Props {
   actionType: SoundActionType;
@@ -225,7 +226,7 @@ export function ManageSoundModal({ actionType, currentValue, onClose, onSelect }
                   type="button"
                   data-no-ui-sound="true"
                   onClick={(e) => handlePlayPreview(opt.value, e)}
-                  title="Escuchar vista previa"
+                  title={tr('Escuchar vista previa')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition ${
                     isPlaying
                       ? 'bg-accent text-black scale-105 animate-pulse'
@@ -235,7 +236,7 @@ export function ManageSoundModal({ actionType, currentValue, onClose, onSelect }
                   }`}
                 >
                   <Play className={`w-3.5 h-3.5 ${isPlaying ? 'fill-black' : 'fill-current'}`} />
-                  <span>{isPlaying ? 'Sonando...' : 'Escuchar'}</span>
+                  <span>{isPlaying ? tr('Sonando...') : tr('Escuchar')}</span>
                 </button>
               </div>
             );
@@ -255,7 +256,7 @@ export function ManageSoundModal({ actionType, currentValue, onClose, onSelect }
                 : 'bg-white/10 text-white rounded-xl hover:bg-white/20'
             }`}
           >
-            Cancelar
+            {tr('Cancelar')}
           </button>
           <button
             type="button"
@@ -266,7 +267,7 @@ export function ManageSoundModal({ actionType, currentValue, onClose, onSelect }
                 : 'bg-[#D10074] text-white rounded-xl hover:bg-[#D10074]/90 shadow-[#D10074]/30'
             }`}
           >
-            Guardar Tono
+            {tr('Guardar Tono')}
           </button>
         </div>
       </div>

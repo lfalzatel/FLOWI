@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 // Estadísticas del Resumen del mes: mapa semanal, racha, distribución por categoría e histórico.
 // Todo sigue al mes elegido arriba y usa el mismo estilo de tarjeta que el resto del resumen.
 import { useEffect, useMemo, useState } from 'react';
@@ -61,11 +61,11 @@ export function WeeklyMap({ transactions, month, isTech, fmt }: { transactions: 
   return (
     <section className={`${look.card} p-5`}>
       <div className="flex items-center justify-between gap-2 mb-4">
-        <h2 className={look.title}><Calendar className="w-4 h-4 text-accent" /> Mapa semanal</h2>
+        <h2 className={look.title}><Calendar className="w-4 h-4 text-accent" /> {tr('Mapa semanal')}</h2>
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => setWeeksAgo(n => n + 1)} aria-label="Semana anterior" className="p-1 text-text-secondary hover:text-accent"><ChevronLeft className="w-4 h-4" /></button>
+          <button type="button" onClick={() => setWeeksAgo(n => n + 1)} aria-label={tr('Semana anterior')} className="p-1 text-text-secondary hover:text-accent"><ChevronLeft className="w-4 h-4" /></button>
           <span className="text-[11px] font-semibold text-text-primary min-w-[6.5rem] text-center">{w.isNow ? 'Esta semana' : w.label}</span>
-          <button type="button" onClick={() => setWeeksAgo(n => Math.max(0, n - 1))} disabled={weeksAgo === 0} aria-label="Semana siguiente" className="p-1 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
+          <button type="button" onClick={() => setWeeksAgo(n => Math.max(0, n - 1))} disabled={weeksAgo === 0} aria-label={tr('Semana siguiente')} className="p-1 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
         </div>
       </div>
       <div className="grid grid-cols-7 gap-2">
@@ -80,7 +80,7 @@ export function WeeklyMap({ transactions, month, isTech, fmt }: { transactions: 
           </div>
         ))}
       </div>
-      <p className="mt-3 text-[11px] text-text-muted">Gastaste <b className="text-text-primary">{fmt(w.total)}</b> en esta semana. Más oscuro = día de más gasto.</p>
+      <p className="mt-3 text-[11px] text-text-muted">{tr('Gastaste')} <b className="text-text-primary">{fmt(w.total)}</b> {tr('en esta semana. Más oscuro = día de más gasto.')}</p>
     </section>
   );
 }
@@ -142,16 +142,16 @@ export function MonthStats({ transactions, month, resolve, isTech, fmt, activeDa
       {/* Racha y días usando FLOWI */}
       <section className={`${look.card} p-5 grid grid-cols-2 gap-4`}>
         <div>
-          <h2 className={look.title}><Flame className="w-4 h-4 text-orange-500" /> Racha</h2>
+          <h2 className={look.title}><Flame className="w-4 h-4 text-orange-500" /> {tr('Racha')}</h2>
           <p className={`mt-1 text-2xl font-black text-text-primary ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={streak} format={(n: number) => String(Math.round(n))} /> 🔥</p>
-          <p className="text-[10px] text-text-muted leading-snug">Días seguidos con algo registrado</p>
+          <p className="text-[10px] text-text-muted leading-snug">{tr('Días seguidos con algo registrado')}</p>
         </div>
         {(activeDays ?? 0) > 0 && (
           <div>
-            <h2 className={look.title}>📅 Días con FLOWI</h2>
+            <h2 className={look.title}>{tr('📅 Días con FLOWI')}</h2>
             <p className={`mt-1 text-2xl font-black text-text-primary ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={activeDays || 0} format={(n: number) => String(Math.round(n))} /></p>
             <p className="text-[10px] text-text-muted leading-snug">
-              {firstActiveDay ? `Desde el ${new Date(firstActiveDay + 'T12:00:00').toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Cada día que abres la app'}
+              {firstActiveDay ? `Desde el ${new Date(firstActiveDay + 'T12:00:00').toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' })}` : tr('Cada día que abres la app')}
             </p>
           </div>
         )}
@@ -160,15 +160,15 @@ export function MonthStats({ transactions, month, resolve, isTech, fmt, activeDa
       {/* Distribución */}
       <section className={`${look.card} p-5`}>
         <div className="flex items-center justify-between gap-2 mb-2">
-          <h2 className={look.title}><PieChart className="w-4 h-4 text-accent" /> Distribución</h2>
+          <h2 className={look.title}><PieChart className="w-4 h-4 text-accent" /> {tr('Distribución')}</h2>
           <div className="flex items-center gap-1.5">
-            <select value={grouping} onChange={e => setGrouping(e.target.value as any)} className={look.select} aria-label="Agrupar por">
-              <option value="categories">Grupos</option>
-              <option value="subcategories">Categorías</option>
+            <select value={grouping} onChange={e => setGrouping(e.target.value as any)} className={look.select} aria-label={tr('Agrupar por')}>
+              <option value="categories">{tr('Grupos')}</option>
+              <option value="subcategories">{tr('Categorías')}</option>
             </select>
-            <select value={order} onChange={e => setOrder(e.target.value as any)} className={look.select} aria-label="Ordenar por">
-              <option value="amount">Por monto</option>
-              <option value="frequency">Por veces</option>
+            <select value={order} onChange={e => setOrder(e.target.value as any)} className={look.select} aria-label={tr('Ordenar por')}>
+              <option value="amount">{tr('Por monto')}</option>
+              <option value="frequency">{tr('Por veces')}</option>
             </select>
           </div>
         </div>
@@ -185,12 +185,12 @@ export function MonthStats({ transactions, month, resolve, isTech, fmt, activeDa
               </RechartsPieChart>
             </ResponsiveContainer>
           </div>
-        ) : <p className="text-sm text-text-secondary py-6 text-center">No hay gastos en este mes.</p>}
+        ) : <p className="text-sm text-text-secondary py-6 text-center">{tr('No hay gastos en este mes.')}</p>}
       </section>
 
       {/* Histórico */}
       <section className={`${look.card} p-5`}>
-        <h2 className={`${look.title} mb-4`}><BarChart2 className="w-4 h-4 text-accent" /> Últimos 6 meses</h2>
+        <h2 className={`${look.title} mb-4`}><BarChart2 className="w-4 h-4 text-accent" /> {tr('Últimos 6 meses')}</h2>
         <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={history} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>

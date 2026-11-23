@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { usePlanGate } from '@/lib/plans';
 import { useGoals } from '@/hooks/useGoals';
 import { useState } from 'react';
@@ -81,8 +81,8 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
     } catch (err: any) {
       console.error('Error saving goal:', err);
       setError(err?.code === 'permission-denied'
-        ? 'La base de datos todavía no permite guardar metas. Hay que habilitar la colección "fl_goals" en las reglas de Firestore.'
-        : 'No se pudo guardar la meta. Revisa tu conexión e inténtalo de nuevo.');
+        ? tr('La base de datos todavía no permite guardar metas. Hay que habilitar la colección "fl_goals" en las reglas de Firestore.')
+        : tr('No se pudo guardar la meta. Revisa tu conexión e inténtalo de nuevo.'));
       setLoading(false);
     }
   }
@@ -104,9 +104,9 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
       >
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
           <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent tracking-wide uppercase' : 'font-syne font-bold text-xl text-text-primary'}`}>
-            {goal ? 'Editar meta' : 'Nueva meta'}
+            {goal ? tr('Editar meta') : tr('Nueva meta')}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className={`p-1 -mr-1 ${isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={`p-1 -mr-1 ${isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -114,11 +114,11 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
         <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 pb-5 space-y-5">
             <div>
-              <label htmlFor="goal-name" className={labelClass}>¿Para qué estás ahorrando?</label>
+              <label htmlFor="goal-name" className={labelClass}>{tr('¿Para qué estás ahorrando?')}</label>
               <div className="flex gap-2">
                 <span className={`shrink-0 w-12 flex items-center justify-center text-2xl bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-xl'}`}>{emoji}</span>
                 <input autoComplete="off" id="goal-name" type="text" value={name} maxLength={40} onChange={(e) => setName(e.target.value)}
-                       placeholder="Ej: Moto, viaje a Cartagena, fondo de emergencia" className={inputClass} required />
+                       placeholder={tr('Ej: Moto, viaje a Cartagena, fondo de emergencia')} className={inputClass} required />
               </div>
               <div className="flex flex-wrap gap-1.5 mt-2.5">
                 {GOAL_EMOJIS.map(e => (
@@ -132,12 +132,12 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="goal-target" className={labelClass}>Valor de la meta</label>
+                <label htmlFor="goal-target" className={labelClass}>{tr('Valor de la meta')}</label>
                 <input autoComplete="off" id="goal-target" type="text" inputMode="numeric" placeholder="$ 0" value={target}
                        onChange={(e) => setTarget(formatAmountInput(e.target.value))} className={`${inputClass} font-bold`} required />
               </div>
               <div>
-                <label htmlFor="goal-saved" className={labelClass}>Ya tengo ahorrado</label>
+                <label htmlFor="goal-saved" className={labelClass}>{tr('Ya tengo ahorrado')}</label>
                 {linkedInv ? (
                   <div className={`${inputClass} text-text-secondary`}>{formatCurrency(Math.round(investmentValue(linkedInv).value), 'COP')}</div>
                 ) : (
@@ -149,23 +149,23 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
 
             {activeInv.length > 0 && (
               <div>
-                <span className={labelClass}>¿Dónde guardas esta plata?</span>
+                <span className={labelClass}>{tr('¿Dónde guardas esta plata?')}</span>
                 <div className="flex flex-wrap gap-1.5">
-                  <button type="button" onClick={() => setLinkedId(null)} className={`${chipClass(!linkedId)} !flex-none px-3`}>Lo registro a mano</button>
+                  <button type="button" onClick={() => setLinkedId(null)} className={`${chipClass(!linkedId)} !flex-none px-3`}>{tr('Lo registro a mano')}</button>
                   {activeInv.map(i => (
                     <button key={i.id} type="button" onClick={() => setLinkedId(i.id!)} className={`${chipClass(linkedId === i.id)} !flex-none px-3`}>{invName(i)}</button>
                   ))}
                 </div>
                 <p className="text-[11px] text-text-muted mt-1.5">
                   {linkedInv
-                    ? `Lo ahorrado será lo que tengas en ${invName(linkedInv)}, con sus depósitos e intereses. No tienes que registrarlo a mano.`
-                    : 'Si la plata de esta meta está en una Cajita, un CDT o un fondo, enlázala y el progreso se actualiza solo.'}
+                    ? tr('Lo ahorrado será lo que tengas en {a}, con sus depósitos e intereses. No tienes que registrarlo a mano.', { a: invName(linkedInv) })
+                    : tr('Si la plata de esta meta está en una Cajita, un CDT o un fondo, enlázala y el progreso se actualiza solo.')}
                 </p>
               </div>
             )}
 
             <div>
-              <span className={labelClass}>Prioridad</span>
+              <span className={labelClass}>{tr('Prioridad')}</span>
               <div className="flex gap-2">
                 {(['alta', 'media', 'baja'] as GoalPriority[]).map(p => (
                   <button key={p} type="button" onClick={() => setPriority(p)} className={chipClass(priority === p)}>
@@ -173,7 +173,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-text-muted mt-1.5">Las de prioridad alta reciben una parte mayor de lo que ahorras cada mes.</p>
+              <p className="text-[11px] text-text-muted mt-1.5">{tr('Las de prioridad alta reciben una parte mayor de lo que ahorras cada mes.')}</p>
             </div>
 
             <div>
@@ -182,7 +182,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
                 <input autoComplete="off" id="goal-deadline" type="month" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
                 {deadline && (
                   <button type="button" onClick={() => setDeadline('')} className={`shrink-0 px-3 text-xs border ${isTechTheme ? 'rounded-none border-accent/30 text-accent' : 'rounded-xl border-glass-border text-text-secondary'}`}>
-                    Quitar
+                    {tr('Quitar')}
                   </button>
                 )}
               </div>
@@ -201,7 +201,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
           <div className={`shrink-0 px-5 sm:px-6 pt-3 pb-4 border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             <button type="submit" disabled={!canSave}
                     className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : 'rounded-xl bg-accent text-white hover:bg-accent/90'}`}>
-              {loading ? 'Guardando...' : goal ? 'Guardar cambios' : 'Crear meta'}
+              {loading ? tr('Guardando...') : goal ? tr('Guardar cambios') : tr('Crear meta')}
             </button>
           </div>
         </form>

@@ -169,9 +169,9 @@ export function ProfileCapsule() {
 
   if (!user) return null;
  
-  const displayName = profile?.name || user.displayName || 'Usuario';
+  const displayName = profile?.name || user.displayName || tr('Usuario');
   const photoURL = profile?.photoURL || user.photoURL || '/default-avatar.png';
-  const role = profile?.role || 'Usuario';
+  const role = profile?.role || tr('Usuario');
   const email = profile?.email || user.email || '';
 
   const handleShare = () => {
@@ -180,7 +180,7 @@ export function ProfileCapsule() {
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
-        title: 'FLOWI - Gastos Personales',
+        title: tr('FLOWI - Gastos Personales'),
         text: shareMessage,
         url: shareUrl,
       }).catch(() => {});
@@ -395,7 +395,7 @@ export function ProfileCapsule() {
                       </div>
                       <span className={`text-sm opacity-70 ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
                     </div>
-                    <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider">Pronto</span>
+                    <span className="text-[9px] bg-glass-strong px-1.5 py-0.5 rounded uppercase tracking-wider">{tr('Pronto')}</span>
                   </button>
                 ) : item.isNotificationToggle ? (
                   <div
@@ -571,19 +571,19 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">1</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Abre la aplicación en el navegador <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>Safari</strong> de tu dispositivo Apple.
+                  Abre la aplicación en el navegador <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('Safari')}</strong> de tu dispositivo Apple.
                 </p>
               </div>
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Toca el botón de <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>Compartir</strong> (el cuadro con una flecha hacia arriba) en la barra de opciones inferior.
+                  Toca el botón de <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('Compartir')}</strong> (el cuadro con una flecha hacia arriba) en la barra de opciones inferior.
                 </p>
               </div>
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">3</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Busca la opción que dice <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Agregar a inicio"</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Add to Home Screen"</strong> y selecciónala.
+                  Busca la opción que dice <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('"Agregar a inicio"')}</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('"Add to Home Screen"')}</strong> y selecciónala.
                 </p>
               </div>
             </div>
@@ -594,13 +594,13 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">1</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Toca el botón de opciones del navegador (los <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>tres puntos verticales</strong> arriba a la derecha).
+                  Toca el botón de opciones del navegador (los <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('tres puntos verticales')}</strong> arriba a la derecha).
                 </p>
               </div>
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Busca y selecciona la opción <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Instalar aplicación"</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Agregar a la pantalla principal"</strong>.
+                  Busca y selecciona la opción <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('"Instalar aplicación"')}</strong> o <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('"Agregar a la pantalla principal"')}</strong>.
                 </p>
               </div>
               <div className="flex gap-4 items-start">
@@ -617,13 +617,13 @@ function InstallInstructionsModal({ onClose, isTechTheme }: { onClose: () => voi
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">1</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  En la parte derecha de la barra de direcciones de tu navegador (Chrome, Edge, etc.), busca el icono de un <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>monitor con una flecha apuntando hacia abajo</strong> o una pequeña ventana de instalación.
+                  En la parte derecha de la barra de direcciones de tu navegador (Chrome, Edge, etc.), busca el icono de un <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('monitor con una flecha apuntando hacia abajo')}</strong> o una pequeña ventana de instalación.
                 </p>
               </div>
               <div className="flex gap-4 items-start">
                 <div className="w-6 h-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xs font-bold shrink-0">2</div>
                 <p className={`text-sm ${isTechTheme ? 'font-mono text-accent/80' : 'text-text-secondary'}`}>
-                  Haz clic en él y confirma la instalación seleccionando <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>"Instalar"</strong>.
+                  Haz clic en él y confirma la instalación seleccionando <strong className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{tr('"Instalar"')}</strong>.
                 </p>
               </div>
             </div>

@@ -1,12 +1,12 @@
 'use client';
-import { tr } from '@/lib/i18n';
+import { tr, lazyT } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 // Mientras la IA lee un recibo o unas capturas (puede tardar unos segundos): una barra animada y
 // tarjetas que cuentan funciones de FLOWI. Pasan solas, y con las flechas se puede ir y volver.
-const TIPS: { title: string; text: string }[] = [
+const TIPS: { title: string; text: string }[] = lazyT(() => ([
   { title: tr('Mantén presionado el +'), text: tr('Y dicta: "gasté 20 mil en almuerzo y 8 mil en tinto". Registra varias cosas a la vez.') },
   { title: tr('Corrige con la voz'), text: tr('Después de leer un recibo, toca "Corregir con la voz" y di: "eran 25 mil" o "ponlo en Nequi".') },
   { title: tr('Hoy puedes gastar'), text: tr('Te dice cuánto puedes gastar hoy sin quedarte corto antes de fin de mes.') },
@@ -24,7 +24,7 @@ const TIPS: { title: string; text: string }[] = [
   { title: tr('Exporta tus datos'), text: tr('Descarga tus movimientos en Excel cuando quieras, desde el botón de descarga.') },
   { title: tr('Bloqueo con huella'), text: tr('En Configuración → Seguridad proteges FLOWI con PIN o huella.') },
   { title: tr('Temas'), text: tr('Cambia los colores de FLOWI desde tu perfil: claro, oscuro y otros estilos.') },
-];
+]));
 
 /**
  * Pantalla limpia mientras se leen capturas: tapa el formulario con solo el título, la barra y las

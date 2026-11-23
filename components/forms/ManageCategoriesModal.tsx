@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus, Trash2, Edit2, Search, ChevronDown, ChevronUp, Check } from 'lucide-react';
@@ -120,7 +121,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
     const isSystemAdmin = profile?.role === 'admin';
     if (!cat.isCustom && !isSystemAdmin) return;
 
-    if (!window.confirm(`¿Eliminar la categoría "${cat.label}"? No borrará las transacciones antiguas.`)) return;
+    if (!window.confirm(tr('¿Eliminar la categoría "{a}"? No borrará las transacciones antiguas.', { a: cat.label }))) return;
     setLoading(true);
     try {
       if (cat.isCustom && cat.id) {
@@ -283,7 +284,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar..."
+                    placeholder={tr('Buscar...')}
                     className={`w-full pl-8 pr-7 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-colors focus:outline-none ${
                       isTechTheme 
                         ? 'bg-black border border-accent/40 text-accent placeholder:text-accent/40 focus:border-accent' 
@@ -310,7 +311,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                   }`}
                 >
                   <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span>CREAR CATEGORÍA</span>
+                  <span>{tr('CREAR CATEGORÍA')}</span>
                 </button>
               </div>
 
@@ -341,14 +342,14 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                     onClick={() => toggleExpandAll(true)}
                     className={`px-1.5 py-0.5 transition ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}
                   >
-                    Expandir
+                    {tr('Expandir')}
                   </button>
                   <span className="text-white/20">|</span>
                   <button 
                     onClick={() => toggleExpandAll(false)}
                     className={`px-1.5 py-0.5 transition ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}
                   >
-                    Colapsar
+                    {tr('Colapsar')}
                   </button>
                 </div>
               </div>
@@ -359,14 +360,14 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
               {totalFilteredCount === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-center">
                   <p className={`text-sm font-medium ${isTechTheme ? 'text-accent/60 font-mono' : 'text-text-muted'}`}>
-                    No se encontraron categorías que coincidan con la búsqueda.
+                    {tr('No se encontraron categorías que coincidan con la búsqueda.')}
                   </p>
                   {searchQuery && (
                     <button 
                       onClick={() => setSearchQuery('')} 
                       className="mt-3 text-xs text-accent underline font-semibold"
                     >
-                      Limpiar búsqueda
+                      {tr('Limpiar búsqueda')}
                     </button>
                   )}
                 </div>
@@ -427,7 +428,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                           <div className="p-3 space-y-2 bg-black/20 max-h-[380px] overflow-y-auto scrollbar-thin">
                             {subcats.length === 0 ? (
                               <p className={`text-center text-xs py-4 ${isTechTheme ? 'text-accent/40' : 'text-text-muted'}`}>
-                                Sin subcategorías en esta sección.
+                                {tr('Sin subcategorías en esta sección.')}
                               </p>
                             ) : (
                               subcats.map((cat, i) => (
@@ -476,7 +477,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                                       <>
                                         <button 
                                           onClick={() => handleEdit(cat)} 
-                                          title="Editar"
+                                          title={tr('Editar')}
                                           className={`p-1.5 rounded-lg transition ${
                                             isTechTheme ? 'text-accent/70 hover:text-accent hover:bg-accent/20' : 'text-text-secondary hover:text-text-primary hover:bg-white/10'
                                           }`}
@@ -485,7 +486,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                                         </button>
                                         <button 
                                           onClick={() => handleDelete(cat)} 
-                                          title="Eliminar"
+                                          title={tr('Eliminar')}
                                           disabled={loading}
                                           className="p-1.5 rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition"
                                         >
@@ -514,7 +515,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
             <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
               <div>
                 <label className={`block text-xs font-semibold mb-2 uppercase tracking-wider ${isTechTheme ? 'text-accent' : 'text-white/70'}`}>
-                  Nombre de la Categoría
+                  {tr('Nombre de la Categoría')}
                 </label>
                 <input autoComplete="off"
                   type="text"
@@ -525,14 +526,14 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                       ? 'bg-black border border-accent/40 text-accent focus:border-accent font-mono' 
                       : 'bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:border-[#D10074]'
                   }`}
-                  placeholder="Ej. Comida para la mascota, Streaming, Gimnasio"
+                  placeholder={tr('Ej. Comida para la mascota, Streaming, Gimnasio')}
                   required
                 />
               </div>
 
               <div>
                 <label className={`block text-xs font-semibold mb-2 uppercase tracking-wider ${isTechTheme ? 'text-accent' : 'text-white/70'}`}>
-                  Color Representativo
+                  {tr('Color Representativo')}
                 </label>
                 <div className="flex flex-wrap gap-2.5 p-3 border border-white/10 rounded-2xl bg-black/20">
                   {COLORS.map(c => (
@@ -557,7 +558,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
 
               <div>
                 <label className={`block text-xs font-semibold mb-2 uppercase tracking-wider ${isTechTheme ? 'text-accent' : 'text-white/70'}`}>
-                  Seleccionar Icono
+                  {tr('Seleccionar Icono')}
                 </label>
                 
                 <div className="flex flex-col sm:flex-row gap-3 h-64 border border-white/10 rounded-2xl overflow-hidden bg-black/30">
@@ -610,7 +611,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                       : 'bg-white/10 text-white rounded-xl hover:bg-white/20'
                   }`}
                 >
-                  Cancelar
+                  {tr('Cancelar')}
                 </button>
                 <button
                   type="submit"
@@ -621,7 +622,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                       : 'bg-[#D10074] text-white rounded-xl hover:bg-[#D10074]/90 shadow-[#D10074]/30'
                   }`}
                 >
-                  {loading ? 'Guardando...' : (editingId ? 'Actualizar Categoría' : 'Guardar Categoría')}
+                  {loading ? tr('Guardando...') : (editingId ? tr('Actualizar Categoría') : tr('Guardar Categoría'))}
                 </button>
               </div>
             </form>

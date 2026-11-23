@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
@@ -47,7 +48,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
       onClose();
     } catch (err: any) {
       console.error('Error saving goal movement:', err);
-      setError('No se pudo registrar. Revisa tu conexión e inténtalo de nuevo.');
+      setError(tr('No se pudo registrar. Revisa tu conexión e inténtalo de nuevo.'));
       setLoading(false);
     }
   }
@@ -69,7 +70,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
           <h2 className={`truncate ${isTechTheme ? 'font-bold text-lg text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}`}>
             {goal.emoji} {goal.name}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className={`p-1 -mr-1 ${isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={`p-1 -mr-1 ${isTechTheme ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -77,13 +78,13 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
         <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pb-5 space-y-4">
             <div className={`flex p-1 bg-glass border border-glass-border ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
-              <button type="button" onClick={() => { setMode('ahorro'); setAmount(''); }} className={tabClass(mode === 'ahorro')}>Ahorré</button>
-              <button type="button" onClick={() => { setMode('retiro'); setAmount(''); }} className={tabClass(mode === 'retiro')} disabled={goal.savedAmount <= 0}>Retiré</button>
+              <button type="button" onClick={() => { setMode('ahorro'); setAmount(''); }} className={tabClass(mode === 'ahorro')}>{tr('Ahorré')}</button>
+              <button type="button" onClick={() => { setMode('retiro'); setAmount(''); }} className={tabClass(mode === 'retiro')} disabled={goal.savedAmount <= 0}>{tr('Retiré')}</button>
             </div>
 
             <p className="text-xs text-text-secondary">
               Llevas <b className="text-text-primary">{formatCurrency(goal.savedAmount, currency)}</b>
-              {remaining > 0 ? <> · te faltan <b className="text-text-primary">{formatCurrency(remaining, currency)}</b></> : <> · ¡meta cumplida!</>}
+              {remaining > 0 ? <> {tr('· te faltan')} <b className="text-text-primary">{formatCurrency(remaining, currency)}</b></> : <> {tr('· ¡meta cumplida!')}</>}
             </p>
 
             <div>
@@ -96,7 +97,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
                        onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                        className={`w-full bg-glass border py-3 pl-10 pr-4 text-3xl font-bold text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
               </div>
-              {tooMuch && <p className="text-[11px] text-[var(--red)] mt-1.5">No puedes retirar más de lo que llevas ahorrado.</p>}
+              {tooMuch && <p className="text-[11px] text-[var(--red)] mt-1.5">{tr('No puedes retirar más de lo que llevas ahorrado.')}</p>}
             </div>
 
             {quick.length > 0 && (

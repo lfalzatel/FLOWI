@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -57,10 +58,10 @@ export default function MetasPage() {
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTechTheme ? 'font-mono' : ''}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+            <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className={`text-xl font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Metas</h1>
+            <h1 className={`text-xl font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Metas')}</h1>
           </div>
           {goals.length > 0 && (
             <button onClick={openNew}
@@ -80,7 +81,7 @@ export default function MetasPage() {
         <section className={`${card} p-5`}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center"><PiggyBank className="w-4 h-4 text-accent" /></div>
-            <span className={`text-xs font-medium ${isTechTheme ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>Ahorrado en tus metas</span>
+            <span className={`text-xs font-medium ${isTechTheme ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>{tr('Ahorrado en tus metas')}</span>
           </div>
           <p className={`font-bold text-[clamp(24px,8vw,34px)] leading-none text-accent ${isTechTheme ? '' : 'font-syne'}`}><AnimatedNumber value={totalSaved} format={fmt} /></p>
           {totalTarget > 0 && <p className="text-xs text-text-muted mt-1">de {fmt(totalTarget)} en {goals.length} {goals.length === 1 ? 'meta' : 'metas'}</p>}
@@ -89,10 +90,10 @@ export default function MetasPage() {
             <TrendingUp className="w-4 h-4 text-accent shrink-0 mt-0.5" />
             <p className="text-xs text-text-secondary leading-relaxed">
               {capacity.monthsUsed === 0
-                ? 'Cuando tengas al menos un mes completo de ingresos y gastos registrados, te diré cuánto puedes ahorrar al mes y cuándo cumplirías cada meta.'
+                ? tr('Cuando tengas al menos un mes completo de ingresos y gastos registrados, te diré cuánto puedes ahorrar al mes y cuándo cumplirías cada meta.')
                 : capacity.monthly > 0
-                  ? <>Tu ritmo real de ahorro es de <b className="text-text-primary">{fmt(capacity.monthly)} al mes</b> (lo que te sobró en promedio {capacity.monthsUsed === 1 ? 'el mes pasado' : `en los últimos ${capacity.monthsUsed} meses`}). Lo reparto entre tus metas según su prioridad.</>
-                  : <>En {capacity.monthsUsed === 1 ? 'el último mes' : `los últimos ${capacity.monthsUsed} meses`} gastaste más de lo que ingresó, así que a este ritmo no alcanzarías a ahorrar. Revisa tus gastos en <Link href="/servicios/presupuestos" className="text-accent underline">Presupuestos</Link>.</>}
+                  ? <>{tr('Tu ritmo real de ahorro es de')} <b className="text-text-primary">{fmt(capacity.monthly)} al mes</b> (lo que te sobró en promedio {capacity.monthsUsed === 1 ? 'el mes pasado' : `en los últimos ${capacity.monthsUsed} meses`}). Lo reparto entre tus metas según su prioridad.</>
+                  : <>En {capacity.monthsUsed === 1 ? 'el último mes' : `los últimos ${capacity.monthsUsed} meses`} gastaste más de lo que ingresó, así que a este ritmo no alcanzarías a ahorrar. Revisa tus gastos en <Link href="/servicios/presupuestos" className="text-accent underline">{tr('Presupuestos')}</Link>.</>}
             </p>
           </div>
         </section>
@@ -104,8 +105,8 @@ export default function MetasPage() {
             <div className={`w-14 h-14 mx-auto mb-3 flex items-center justify-center bg-accent/10 ${isTechTheme ? 'rounded-none border border-accent/40' : 'rounded-2xl'}`}>
               <Target className="w-7 h-7 text-accent" />
             </div>
-            <h2 className={`font-bold text-lg mb-1 ${isTechTheme ? 'text-accent uppercase' : 'text-text-primary'}`}>¿Para qué quieres ahorrar?</h2>
-            <p className="text-sm text-text-secondary mb-5">Una moto, un viaje, la prima del apartamento o un fondo para emergencias. Crea tu meta y te digo cuándo la lograrías.</p>
+            <h2 className={`font-bold text-lg mb-1 ${isTechTheme ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('¿Para qué quieres ahorrar?')}</h2>
+            <p className="text-sm text-text-secondary mb-5">{tr('Una moto, un viaje, la prima del apartamento o un fondo para emergencias. Crea tu meta y te digo cuándo la lograrías.')}</p>
             <button onClick={openNew}
                     className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
               <Plus className="w-5 h-5" /> Crear mi primera meta
@@ -133,7 +134,7 @@ export default function MetasPage() {
                           <b className="text-text-primary"><AnimatedNumber value={goal.savedAmount} format={fmt} /></b> de {fmt(goal.targetAmount)}
                         </p>
                       </div>
-                      <button onClick={() => { setEditing(goal); setShowForm(true); }} aria-label={`Editar ${goal.name}`}
+                      <button onClick={() => { setEditing(goal); setShowForm(true); }} aria-label={tr('Editar {a}', { a: goal.name })}
                               className={`shrink-0 p-2 -mr-1 -mt-1 ${isTechTheme ? 'text-accent/70 hover:text-accent' : 'text-text-muted hover:text-text-primary'}`}>
                         <Pencil className="w-4 h-4" />
                       </button>
@@ -141,7 +142,7 @@ export default function MetasPage() {
 
                     <div className="mt-3 flex items-center gap-3">
                       <div className={`flex-1 h-2.5 overflow-hidden bg-glass border border-glass-border ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}
-                           role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`Progreso de ${goal.name}`}>
+                           role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={tr('Progreso de {a}', { a: goal.name })}>
                         <div className={`h-full bg-gradient-to-r from-accent-dim to-accent transition-all duration-700 ${isTechTheme ? '' : 'rounded-full'}`} style={{ width: `${pct}%` }} />
                       </div>
                       <span className="text-xs font-bold text-accent w-9 text-right">{pct}%</span>
@@ -154,7 +155,7 @@ export default function MetasPage() {
                         </p>
                       ) : capacity.monthsUsed > 0 ? (
                         <p className="flex items-start gap-1.5"><TrendingUp className="w-3.5 h-3.5 mt-0.5 shrink-0 text-text-muted" />
-                          <span>Con tu ritmo actual no hay sobrante para esta meta. Cada ahorro que registres la acerca.</span>
+                          <span>{tr('Con tu ritmo actual no hay sobrante para esta meta. Cada ahorro que registres la acerca.')}</span>
                         </p>
                       ) : null}
                       {goal.deadline && p.requiredPerMonth !== null && (
@@ -187,7 +188,7 @@ export default function MetasPage() {
 
             {doneGoals.length > 0 && (
               <section>
-                <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>Metas cumplidas</h2>
+                <h2 className={`text-xs font-bold uppercase tracking-wider mb-2 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>{tr('Metas cumplidas')}</h2>
                 <div className="space-y-2">
                   {doneGoals.map(goal => (
                     <button key={goal.id} onClick={() => setMoving(goal)}
@@ -224,8 +225,8 @@ export default function MetasPage() {
       )}
       <ConfirmDialog
         isOpen={!!deleting}
-        title="Eliminar meta"
-        message={deleting ? `¿Eliminar "${deleting.name}"? Se borra también su historial de ahorros.` : ''}
+        title={tr('Eliminar meta')}
+        message={deleting ? tr('¿Eliminar "{a}"? Se borra también su historial de ahorros.', { a: deleting.name }) : ''}
         confirmText="Eliminar"
         onConfirm={async () => { if (deleting?.id) await deleteGoal(deleting.id); setDeleting(null); setEditing(null); }}
         onCancel={() => setDeleting(null)}

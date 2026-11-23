@@ -1,4 +1,5 @@
 'use client';
+import { tr, lazyT } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, X } from 'lucide-react';
@@ -10,25 +11,25 @@ import { startOpenRouterConnect } from '@/lib/aiAssist';
 
 interface GuideStep { emoji: string; title: string; text: string; tip?: string }
 
-const STEPS: GuideStep[] = [
-  { emoji: '✨', title: 'Conecta la IA gratis',
-    text: 'Te muestro cómo conectar la IA gratuita en un minuto. Con ella FLOWI entiende mejor lo que dictas y puede leer recibos y capturas del banco. Es gratis hoy y sigue siendo gratis después de configurarla: FLOWI solo usa los modelos gratuitos.' },
+const STEPS: GuideStep[] = lazyT(() => ([
+  { emoji: '✨', title: tr('Conecta la IA gratis'),
+    text: tr('Te muestro cómo conectar la IA gratuita en un minuto. Con ella FLOWI entiende mejor lo que dictas y puede leer recibos y capturas del banco. Es gratis hoy y sigue siendo gratis después de configurarla: FLOWI solo usa los modelos gratuitos.') },
   { emoji: '👆', title: '1. Toca "Conectar IA gratis"',
-    text: 'FLOWI te lleva a OpenRouter, la página que da acceso a los modelos de IA gratuitos.' },
+    text: tr('FLOWI te lleva a OpenRouter, la página que da acceso a los modelos de IA gratuitos.') },
   { emoji: '🔑', title: '2. Entra con Google',
-    text: 'Toca "Continuar con Google" y elige tu cuenta. Si ya tienes cuenta de OpenRouter, solo inicia sesión.' },
+    text: tr('Toca "Continuar con Google" y elige tu cuenta. Si ya tienes cuenta de OpenRouter, solo inicia sesión.') },
   { emoji: '💳', title: '3. Si te pide tarjeta, NO la pongas',
-    text: 'Si aparece "Add a payment method", no llenes nada. Baja hasta el final de esa pantalla y toca "Later" o "Skip". Sin tarjeta no hay forma de que te cobren: la IA de FLOWI es gratis siempre.',
-    tip: 'Busca abajo: Later / Skip' },
+    text: tr('Si aparece "Add a payment method", no llenes nada. Baja hasta el final de esa pantalla y toca "Later" o "Skip". Sin tarjeta no hay forma de que te cobren: la IA de FLOWI es gratis siempre.'),
+    tip: tr('Busca abajo: Later / Skip') },
   { emoji: '⏭️', title: '4. Omite otra vez',
-    text: 'Si aparece otra pantalla preguntando algo más, como créditos o tu uso, vuelve a tocar "Skip".',
-    tip: 'Otra vez: Skip' },
+    text: tr('Si aparece otra pantalla preguntando algo más, como créditos o tu uso, vuelve a tocar "Skip".'),
+    tip: tr('Otra vez: Skip') },
   { emoji: '✅', title: '5. Toca "Authorize"',
-    text: 'Verás una pantalla que pide permiso para FLOWI. Revisa que diga flowi-gastos punto web punto app y toca el botón morado "Authorize". No cambies nada más.',
-    tip: 'Botón morado: Authorize' },
+    text: tr('Verás una pantalla que pide permiso para FLOWI. Revisa que diga flowi-gastos punto web punto app y toca el botón morado "Authorize". No cambies nada más.'),
+    tip: tr('Botón morado: Authorize') },
   { emoji: '🎉', title: '6. ¡Listo!',
-    text: 'Vuelves a FLOWI y verás "IA conectada". Desde ahí ya puedes dictar con más precisión y llenar con fotos los recibos y tus CDT. Y recuerda: es gratis, no tienes que pagar nada ni ahora ni después.' },
-];
+    text: tr('Vuelves a FLOWI y verás "IA conectada". Desde ahí ya puedes dictar con más precisión y llenar con fotos los recibos y tus CDT. Y recuerda: es gratis, no tienes que pagar nada ni ahora ni después.') },
+]));
 
 const VOICE_KEY = 'flowi_ai_guide_voice';
 
@@ -89,12 +90,12 @@ export function AiConnectGuide({ onClose }: { onClose: () => void }) {
           <span className="text-[10px] uppercase tracking-wider text-text-muted">Paso {i + 1} de {STEPS.length}</span>
           <div className="flex items-center gap-1">
             {canSpeak && (
-              <button type="button" onClick={toggleVoice} aria-label={voice ? 'Silenciar voz' : 'Activar voz'}
+              <button type="button" onClick={toggleVoice} aria-label={voice ? tr('Silenciar voz') : tr('Activar voz')}
                       className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/10">
                 {voice ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
             )}
-            <button type="button" onClick={onClose} aria-label="Cerrar la guía" className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/10">
+            <button type="button" onClick={onClose} aria-label={tr('Cerrar la guía')} className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/10">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -119,7 +120,7 @@ export function AiConnectGuide({ onClose }: { onClose: () => void }) {
           {last ? (
             <button type="button" onClick={connect}
                     className={`py-3 font-bold ${isTech ? 'bg-accent/20 border border-accent text-accent' : `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`} ${btn}`}>
-              Conectar ahora
+              {tr('Conectar ahora')}
             </button>
           ) : (
             <button type="button" onClick={() => setI(i + 1)}

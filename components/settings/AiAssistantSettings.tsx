@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { Sparkles, Check, Unplug, ChevronDown, ChevronUp, PlayCircle } from 'lucide-react';
 import { AiConnectGuide } from './AiConnectGuide';
@@ -38,7 +39,7 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
     <section id="ia" className="space-y-3 scroll-mt-20">
       {onToggle ? (
         <button onClick={onToggle} className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}>
-          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>Asistente de voz con IA</h2>
+          <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Asistente de voz con IA')}</h2>
           {open ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
         </button>
       ) : (
@@ -54,19 +55,19 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
           </div>
           <div className={`text-left ${mono}`}>
             <p className="text-sm font-medium text-text-primary normal-case">
-              {connected ? 'IA conectada' : 'Mejora el dictado con IA gratis (opcional)'}
+              {connected ? tr('IA conectada') : tr('Mejora el dictado con IA gratis (opcional)')}
             </p>
             <p className="text-[11px] text-text-muted normal-case leading-relaxed mt-0.5">
               {connected
-                ? 'Cuando el asistente no entienda una frase, la consultará con modelos gratuitos usando tu cuenta de OpenRouter. Siempre podrás revisar antes de guardar. Es gratis: FLOWI solo usa modelos gratuitos y nunca te pedirá pagar por esto.'
-                : 'Conecta tu cuenta gratuita de OpenRouter (puedes crearla con Google en un minuto). Es gratis hoy y después de configurarla: solo se usan modelos gratuitos y la conexión queda guardada solo en este dispositivo.'}
+                ? tr('Cuando el asistente no entienda una frase, la consultará con modelos gratuitos usando tu cuenta de OpenRouter. Siempre podrás revisar antes de guardar. Es gratis: FLOWI solo usa modelos gratuitos y nunca te pedirá pagar por esto.')
+                : tr('Conecta tu cuenta gratuita de OpenRouter (puedes crearla con Google en un minuto). Es gratis hoy y después de configurarla: solo se usan modelos gratuitos y la conexión queda guardada solo en este dispositivo.')}
             </p>
           </div>
         </div>
 
-        {status === 'connecting' && <p className={`text-[11px] text-text-secondary ${mono}`}>Conectando…</p>}
-        {status === 'success' && <p className={`text-[11px] text-emerald-400 ${mono}`}>Listo: tu IA quedó conectada.</p>}
-        {status === 'error' && <p className={`text-[11px] text-red-400 ${mono}`}>No se pudo conectar. Inténtalo de nuevo.</p>}
+        {status === 'connecting' && <p className={`text-[11px] text-text-secondary ${mono}`}>{tr('Conectando…')}</p>}
+        {status === 'success' && <p className={`text-[11px] text-emerald-400 ${mono}`}>{tr('Listo: tu IA quedó conectada.')}</p>}
+        {status === 'error' && <p className={`text-[11px] text-red-400 ${mono}`}>{tr('No se pudo conectar. Inténtalo de nuevo.')}</p>}
 
         {connected ? (
           <div className="flex items-center justify-between gap-2">
@@ -88,10 +89,10 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
             onClick={() => startOpenRouterConnect()}
             className={`w-full py-2.5 text-sm font-bold bg-accent/15 border border-accent text-accent hover:bg-accent/25 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider' : 'rounded-xl'}`}
           >
-            Conectar IA gratis
+            {tr('Conectar IA gratis')}
           </button>
           <p className={`text-[10px] text-text-muted normal-case leading-relaxed ${mono}`}>
-            Si OpenRouter te pide una tarjeta, no la pongas: baja y toca "Later" o "Skip". Sin tarjeta no hay forma de que te cobren.
+            {tr('Si OpenRouter te pide una tarjeta, no la pongas: baja y toca "Later" o "Skip". Sin tarjeta no hay forma de que te cobren.')}
           </p>
           </>
         )}
@@ -105,7 +106,7 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
         {showGuide && <AiConnectGuide onClose={() => setShowGuide(false)} />}
 
         <p className={`text-[10px] text-text-muted normal-case leading-relaxed ${mono}`}>
-          Privacidad: al usar la IA, la frase dictada se envía al modelo gratuito elegido por OpenRouter, que podría usarla para mejorar sus servicios. Si no la conectas, todo se procesa en tu dispositivo.
+          {tr('Privacidad: al usar la IA, la frase dictada se envía al modelo gratuito elegido por OpenRouter, que podría usarla para mejorar sus servicios. Si no la conectas, todo se procesa en tu dispositivo.')}
         </p>
       </div>
       )}

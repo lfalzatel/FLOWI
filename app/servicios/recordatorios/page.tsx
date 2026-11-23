@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { findCatalogEntry } from '@/lib/categories';
 import { useState, useEffect } from 'react';
@@ -75,13 +75,13 @@ export default function RecordatoriosPage() {
 
   const handleTestNotification = () => {
     scheduleNotificationViaSW({
-      title: '¡Prueba de Notificación!',
-      body: 'Si ves esto, las notificaciones push locales están funcionando bien.',
+      title: tr('¡Prueba de Notificación!'),
+      body: tr('Si ves esto, las notificaciones push locales están funcionando bien.'),
       tag: 'test',
     });
     pushInApp({
-      title: 'Prueba in-app',
-      body: 'Notificación en la campanita'
+      title: tr('Prueba in-app'),
+      body: tr('Notificación en la campanita')
     });
     playNotificationSound();
   };
@@ -134,10 +134,10 @@ export default function RecordatoriosPage() {
             </Link>
             <div>
               <h1 className={`${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl lg:text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-xl sm:text-2xl lg:text-3xl text-text-primary'} truncate`}>
-                Recordatorios
+                {tr('Recordatorios')}
               </h1>
               <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>
-                Citas, fechas importantes y tus pagos del mes
+                {tr('Citas, fechas importantes y tus pagos del mes')}
               </p>
             </div>
           </div>
@@ -148,14 +148,14 @@ export default function RecordatoriosPage() {
                 className={`flex items-center justify-center p-2.5 bg-glass border border-glass-border
                             text-text-secondary hover:text-accent hover:bg-glass-hover active:scale-[0.97] transition-all
                             ${isTechTheme ? 'rounded-none font-mono' : 'rounded-2xl'}`}
-                title="Probar Notificaciones"
+                title={tr('Probar Notificaciones')}
               >
                 <Beaker className="w-5 h-5" />
               </button>
             )}
             <button
               onClick={() => { setEditingReminder(null); setShowForm(true); }}
-              aria-label="Nuevo recordatorio" title="Nuevo recordatorio"
+              aria-label={tr('Nuevo recordatorio')} title={tr('Nuevo recordatorio')}
               className={`flex items-center justify-center w-10 h-10 bg-gradient-to-br from-accent to-accent-dim
                           ${theme === 'light' ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
@@ -185,7 +185,7 @@ export default function RecordatoriosPage() {
           <div className={`glass-card p-4 flex gap-3 border ${isTechTheme ? 'border-yellow-500/30 rounded-none' : 'border-yellow-500/10 rounded-2xl'}`}>
             <Bell className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-text-primary font-medium">Alertas del sistema desactivadas</p>
+              <p className="text-sm text-text-primary font-medium">{tr('Alertas del sistema desactivadas')}</p>
               <p className="text-xs text-text-muted mt-0.5">
                 Para recibir avisos en segundo plano (incluso con la app cerrada), activa las notificaciones del navegador.
               </p>
@@ -193,7 +193,7 @@ export default function RecordatoriosPage() {
                 onClick={handleRequestPermission}
                 className="mt-2 text-xs font-semibold text-accent hover:underline"
               >
-                Activar notificaciones
+                {tr('Activar notificaciones')}
               </button>
             </div>
           </div>
@@ -209,8 +209,8 @@ export default function RecordatoriosPage() {
         ) : reminders.length === 0 ? (
           <div className={`glass-card p-8 text-center ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
             <Bell className="w-10 h-10 text-accent/40 mx-auto mb-3" />
-            <p className="text-text-primary font-medium">Sin recordatorios</p>
-            <p className="text-text-muted text-sm mt-1">Crea alertas personalizadas para estar al día con tus pagos recurrentes.</p>
+            <p className="text-text-primary font-medium">{tr('Sin recordatorios')}</p>
+            <p className="text-text-muted text-sm mt-1">{tr('Crea alertas personalizadas para estar al día con tus pagos recurrentes.')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -248,7 +248,7 @@ export default function RecordatoriosPage() {
         isOpen={!!deletingReminderId}
         onCancel={() => setDeletingReminderId(null)}
         onConfirm={confirmDeleteReminder}
-        title="Eliminar Recordatorio"
+        title={tr('Eliminar Recordatorio')}
         message="¿Estás seguro de que deseas eliminar este recordatorio? Esta acción no se puede deshacer."
         confirmText="Eliminar"
       />
@@ -268,31 +268,31 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
   delay: number;
 }) {
   const typeLabel = {
-    once: 'Una vez',
-    daily: 'Diario',
-    weekly: 'Semanal',
-    monthly: reminder.everyMonths && reminder.everyMonths > 1 ? `Cada ${reminder.everyMonths} meses` : 'Mensual',
-    yearly: 'Anual',
-    budget_alert: 'Alerta presupuesto',
+    once: tr('Una vez'),
+    daily: tr('Diario'),
+    weekly: tr('Semanal'),
+    monthly: reminder.everyMonths && reminder.everyMonths > 1 ? tr('Cada {a} meses', { a: reminder.everyMonths }) : tr('Mensual'),
+    yearly: tr('Anual'),
+    budget_alert: tr('Alerta presupuesto'),
   }[reminder.type] ?? reminder.type;
 
   const dayOfWeekNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
   const getFrecuenciaDetail = () => {
     if (reminder.type === 'weekly' && reminder.dayOfWeek !== undefined) {
-      return `cada ${dayOfWeekNames[reminder.dayOfWeek]}`;
+      return tr('cada {a}', { a: dayOfWeekNames[reminder.dayOfWeek] });
     }
     if (reminder.type === 'monthly' && reminder.dayOfMonth !== undefined) {
       return reminder.everyMonths && reminder.everyMonths > 1
-        ? `el día ${reminder.dayOfMonth}, cada ${reminder.everyMonths} meses`
-        : `el día ${reminder.dayOfMonth} del mes`;
+        ? tr('el día {a}, cada {b} meses', { a: reminder.dayOfMonth, b: reminder.everyMonths })
+        : tr('el día {a} del mes', { a: reminder.dayOfMonth });
     }
     if (reminder.type === 'yearly' && reminder.date) {
       const [, m, d] = reminder.date.split('-').map(Number);
       return `cada año el ${new Date(2000, m - 1, d).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long' })}`;
     }
     if (reminder.type === 'budget_alert' && reminder.budgetPercent !== undefined) {
-      return `al consumir el ${reminder.budgetPercent}%`;
+      return tr('al consumir el {a}%', { a: reminder.budgetPercent });
     }
     return '';
   };
@@ -323,7 +323,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
             </span>
             {!reminder.active && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-text-muted">
-                Pausado
+                {tr('Pausado')}
               </span>
             )}
           </div>
@@ -331,7 +331,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
             {reminder.amount
               ? <b className="text-text-primary">${reminder.amount.toLocaleString(currentLocale())} · </b>
               : lastPay ? <b className="text-text-primary">${lastPay.amount.toLocaleString(currentLocale())} <span className="font-normal text-text-muted">(último pago, {lastPay.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })})</span> · </b> : null}
-            {reminder.description || 'Sin notas'}
+            {reminder.description || tr('Sin notas')}
           </p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {reminder.type !== 'budget_alert' && (
@@ -345,9 +345,9 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
               </span>
             )}
             <div className="flex gap-1.5 ml-auto">
-              {reminder.pushEnabled && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">Push</span>}
-              {reminder.inAppEnabled && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">In-app</span>}
-              {reminder.sound && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">Sonido</span>}
+              {reminder.pushEnabled && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">{tr('Push')}</span>}
+              {reminder.inAppEnabled && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">{tr('In-app')}</span>}
+              {reminder.sound && <span className="text-[9px] px-1 bg-white/5 text-text-muted uppercase">{tr('Sonido')}</span>}
             </div>
           </div>
         </div>
@@ -384,7 +384,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
             onClick={(e) => { e.stopPropagation(); onPay(due); }}
             className={`shrink-0 px-4 py-2 text-xs font-bold ${isTechTheme ? 'rounded-none border border-accent text-accent uppercase' : 'rounded-lg bg-accent/15 text-accent hover:bg-accent/25'}`}
           >
-            {isPaymentReminder(reminder) ? 'Ya lo pagué' : 'Listo ✓'}
+            {isPaymentReminder(reminder) ? tr('Ya lo pagué') : tr('Listo ✓')}
           </button>
         </div>
       )}
