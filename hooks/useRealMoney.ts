@@ -4,7 +4,7 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useInvestments } from '@/hooks/useInvestments';
 import { useDebts } from '@/hooks/useDebts';
-import { AccountState, accountStates } from '@/lib/accounts';
+import { AccountState, accountStates, cardReserves } from '@/lib/accounts';
 import { RealMoney, estimateNextIncome } from '@/lib/dailyBudget';
 
 export interface RealMoneyInfo extends RealMoney {
@@ -28,27 +28,6 @@ export function useRealMoney(): RealMoneyInfo | null {
     const spend = states.filter(s => s.account.kind !== 'credito' && s.account.purpose !== 'ahorro');
     if (!spend.length) return null;
     const cash = spend.reduce((sum, s) => sum + s.balance, 0);
-    const cardLoans = states.reduce((sum, s) => sum + s.movements.filter(m => m.kind === 'debt').reduce((x, m) => x - m.amount, 0), 0);
-    // Lo que se aparta por cada tarjeta: todo lo que se debe (si la pagas completa) o solo el pago fijo del mes
-    const now = new Date();
-    const cards = states.filter(s => s.account.kind === 'credito').map(s => {
-      const loans = s.movements.filter(m => m.kind === 'debt').reduce((x, m) => x - m.amount, 0);
-      const owed = Math.max(0, -s.balance - loans);
-      const a = s.account;
-      if (a.payMode !== 'fijo' || !(a.payAmount && a.payAmount > 0)) return { state: s, owed, reserve: owed, fixed: false };
-      // Abonos a la tarjeta en este mes: ya cuentan para el pago del mes
-      const paidThisMonth = s.movements
-        .filter(m => m.kind === 'transfer' && m.amount > 0 && m.date.getFullYear() === now.getFullYear() && m.date.getMonth() === now.getMonth())
-        .reduce((x, m) => x + m.amount, 0);
-      const today = s.movements
-        .filter(m => m.kind === 'tx' && m.amount < 0 && m.date.toDateString() === now.toDateString())
-        .reduce((x, m) => x - m.amount, 0);
-      return { state: s, owed, reserve: Math.max(0, Math.min(owed, a.payAmount - paidThisMonth)), fixed: true, today };
-    });
-    const fixedCardToday = cards.reduce((sum, c) => sum + ((c as { today?: number }).today || 0), 0);
-    const cardDebt = cards.reduce((sum, c) => sum + c.reserve, 0);
-    const cardOwed = cards.reduce((sum, c) => sum + c.owed, 0);
-    const anyFixed = cards.some(c => c.fixed && c.owed > 0);
-    return { cash, cardDebt, cardOwed, anyFixed, fixedCardToday, cardLoans, nextIncome: estimateNextIncome(transactions), states };
+    return { cash, ...cardReserves(states), nextIncome: estimateNextIncome(transactions), states };
   }, [accounts, transfers, transactions, investments, debts, loading, error]);
 }

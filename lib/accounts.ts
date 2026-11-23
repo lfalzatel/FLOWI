@@ -129,6 +129,35 @@ export interface NetWorth {
   total: number;
 }
 
+/**
+ * Lo que "Hoy puedes gastar" aparta por las tarjetas de crédito: todo lo que se debe en compras (si la pagas
+ * completa cada mes) o solo el pago fijo del mes menos lo ya abonado. Los préstamos vinculados a una tarjeta
+ * no se apartan aquí: se pagan por cuotas, que van en los compromisos.
+ */
+export function cardReserves(states: AccountState[], now = new Date()) {
+  const loansOf = (s: AccountState) => s.movements.filter(m => m.kind === 'debt').reduce((x, m) => x - m.amount, 0);
+  const cards = states.filter(s => s.account.kind === 'credito').map(s => {
+    const owed = Math.max(0, -s.balance - loansOf(s));
+    const a = s.account;
+    if (a.payMode !== 'fijo' || !(a.payAmount && a.payAmount > 0)) return { owed, reserve: owed, fixed: false, today: 0 };
+    const paidThisMonth = s.movements
+      .filter(m => m.kind === 'transfer' && m.amount > 0 && m.date.getFullYear() === now.getFullYear() && m.date.getMonth() === now.getMonth())
+      .reduce((x, m) => x + m.amount, 0);
+    // Compras de hoy con esta tarjeta: no salen de las cuentas ni suben lo que se aparta
+    const today = s.movements
+      .filter(m => m.kind === 'tx' && m.amount < 0 && m.date.toDateString() === now.toDateString())
+      .reduce((x, m) => x - m.amount, 0);
+    return { owed, reserve: Math.max(0, Math.min(owed, a.payAmount - paidThisMonth)), fixed: true, today };
+  });
+  return {
+    cardDebt: cards.reduce((sum, c) => sum + c.reserve, 0),
+    cardOwed: cards.reduce((sum, c) => sum + c.owed, 0),
+    anyFixed: cards.some(c => c.fixed && c.owed > 0),
+    fixedCardToday: cards.reduce((sum, c) => sum + c.today, 0),
+    cardLoans: states.reduce((sum, s) => sum + loansOf(s), 0),
+  };
+}
+
 /** Deuda que yo debo, pendiente, que puede vivir en una tarjeta. */
 const isLinkedCardDebt = (d: Debt) => d.status === 'pending' && d.direction !== 'me_deben';
 /** Lo que se debe hoy de una deuda: capital que falta + intereses y seguro causados. */

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:voice": "node scripts/test-voice-parser.mjs"
+    "test:voice": "node scripts/test-voice-parser.mjs",
+    "test": "node scripts/test-all.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

@@ -25,8 +25,10 @@ jobs:
 
       - run: npm ci
 
-      - name: Probar el analizador de comandos de voz
-        run: npm run test:voice
+      # Todas las pruebas (voz, recibos, montos, compartidos, cuentas y tarjetas, cuota diaria, amigos)
+      # y las traducciones. Si alguna falla, no se publica.
+      - name: Pruebas
+        run: npm test
 
       - name: Compilar (exportación estática a out/)
         run: npm run build
