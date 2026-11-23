@@ -7,8 +7,17 @@ interface Props {
   className?: string;
   density?: number;          // partículas por cada 10.000 px² (por defecto 1.1)
   colors?: string[];         // colores de las partículas
-  background?: string;       // degradado de fondo (CSS)
+  background?: string;       // degradado de fondo (CSS); 'none' = transparente (la página pone el suyo)
+  light?: boolean;           // fondo claro: las partículas se pintan normal (no suman luz) y más suaves
 }
+
+// Colores de las partículas para cada tema de FLOWI
+export const GLITTER_THEMES: Record<string, { colors: string[]; light?: boolean }> = {
+  dark: { colors: ['#7DD3FC', '#38BDF8', '#22D3EE', '#A5F3FC', '#FFFFFF'] },
+  cyberpunk: { colors: ['#00FF41', '#39FF88', '#0FF0FC', '#B6FFCE', '#FFFFFF'] },
+  kiloCode: { colors: ['#F0DB4F', '#FACC15', '#F97316', '#FDE68A', '#FFFFFF'] },
+  light: { colors: ['#06B6D4', '#10B981', '#0EA5E9', '#14B8A6'], light: true },
+};
 
 interface P { x: number; y: number; r: number; vx: number; vy: number; tw: number; ts: number; c: string; blur: boolean }
 
@@ -17,6 +26,7 @@ export function GlitterParticles({
   density = 1.1,
   colors = ['#7DD3FC', '#38BDF8', '#22D3EE', '#A5F3FC', '#FFFFFF'],
   background = 'radial-gradient(ellipse at 30% 40%, #0E4A63 0%, #062435 45%, #020B12 100%)',
+  light = false,
 }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -52,18 +62,18 @@ export function GlitterParticles({
     const draw = (now: number) => {
       const dt = Math.min(50, now - last) / 16.67; last = now;
       ctx.clearRect(0, 0, w, h);
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = light ? 'source-over' : 'lighter';
       for (const p of parts) {
         p.x += p.vx * dt; p.y += p.vy * dt; p.tw += 0.03 * p.ts * dt;
         if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
         if (p.x < -10) p.x = w + 10; else if (p.x > w + 10) p.x = -10;
-        const a = p.blur ? 0.12 + 0.1 * Math.sin(p.tw) : 0.35 + 0.65 * Math.max(0, Math.sin(p.tw));
+        const a = (p.blur ? 0.12 + 0.1 * Math.sin(p.tw) : 0.35 + 0.65 * Math.max(0, Math.sin(p.tw))) * (light ? 0.55 : 1);
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * (p.blur ? 3 : 4));
         g.addColorStop(0, p.c); g.addColorStop(1, 'transparent');
         ctx.globalAlpha = a;
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (p.blur ? 3 : 4), 0, Math.PI * 2); ctx.fill();
-        if (!p.blur) { ctx.globalAlpha = Math.min(1, a + 0.2); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2); ctx.fill(); }
+        if (!p.blur) { ctx.globalAlpha = Math.min(1, a + 0.2); ctx.fillStyle = light ? p.c : '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2); ctx.fill(); }
       }
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
       if (!reduce) raf = requestAnimationFrame(draw);
@@ -75,10 +85,10 @@ export function GlitterParticles({
     const vis = () => { cancelAnimationFrame(raf); if (!document.hidden && !reduce) { last = performance.now(); raf = requestAnimationFrame(draw); } };
     document.addEventListener('visibilitychange', vis);
     return () => { cancelAnimationFrame(raf); ro.disconnect(); document.removeEventListener('visibilitychange', vis); };
-  }, [density, colors]);
+  }, [density, colors, light]);
 
   return (
-    <div className={`absolute inset-0 overflow-hidden ${className}`} style={{ background }} aria-hidden="true">
+    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`} style={background === 'none' ? undefined : { background }} aria-hidden="true">
       <canvas ref={ref} className="w-full h-full block" />
     </div>
   );
