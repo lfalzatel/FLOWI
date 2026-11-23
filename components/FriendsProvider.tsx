@@ -1,5 +1,6 @@
 'use client';
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
+import { triggerFriendCelebration } from '@/components/friends/FriendCelebration';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
@@ -48,6 +49,19 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     })();
     return () => { alive = false; };
   }, [user?.uid, name, photo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Amistad nueva durante la sesión (la primera carga no cuenta): celebración
+  const knownFriends = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!ready || !user) return;
+    const accepted = all.filter(r => r.status === 'accepted');
+    const ids = new Set(accepted.map(r => r.id));
+    if (knownFriends.current) {
+      const fresh = accepted.find(r => !knownFriends.current!.has(r.id));
+      if (fresh) { const o = otherSide(fresh, user.uid); triggerFriendCelebration({ name: o.name, photo: o.photo }); }
+    }
+    knownFriends.current = ids;
+  }, [all, ready, user]);
 
   // Solicitudes donde está la persona (enviadas o recibidas)
   useEffect(() => {

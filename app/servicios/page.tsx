@@ -1,7 +1,7 @@
 'use client';
 import { tr } from '@/lib/i18n';
 import { useTheme } from '@/components/ThemeProvider';
-import { Bug, Store, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, FileSpreadsheet, Landmark, Wallet, ShoppingBasket, UserPlus } from 'lucide-react';
+import { Bug, Store, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, FileSpreadsheet, Landmark, Wallet, ShoppingBasket, UserPlus, MessageSquareHeart } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -11,6 +11,7 @@ import { ProfileModal } from '@/components/forms/ProfileModal';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 import { triggerDualBurst } from '@/components/dashboard/DualTrajectoryBurst';
 import { triggerPremiumCelebration } from '@/components/plans/PremiumCelebration';
+import { triggerFriendCelebration } from '@/components/friends/FriendCelebration';
 import { speakText } from '@/lib/voiceParser';
 import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Trash2, Volume2, Crown } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -47,6 +48,8 @@ const SERVICES: ServiceItem[] = [
     icon: StickyNote, href: '/servicios/notas', color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
   { id: 'compartidos', group: 'Tu plata', title: 'Gastos compartidos', description: 'Quién te debe y a quién le debes, y cobra por WhatsApp',
     icon: Users, href: '/servicios/compartidos', color: 'text-orange-500', bgColor: 'bg-orange-500/10', isNew: true },
+  { id: 'opiniones', group: 'Tu cuenta', title: 'Comentarios y sugerencias', description: 'Cuéntanos qué te gusta, qué no y tus ideas',
+    icon: MessageSquareHeart, href: '/servicios/opiniones', color: 'text-pink-500', bgColor: 'bg-pink-500/10', isNew: true },
   { id: 'configuracion', group: 'Tu cuenta', title: 'Configuración', description: 'Moneda, temas, sonidos y avisos',
     icon: Settings, href: '/configuracion', color: 'text-gray-500', bgColor: 'bg-gray-500/10' },
   { id: 'perfil', group: 'Tu cuenta', title: 'Mi perfil', description: 'Tu nombre, foto y datos de la cuenta',
@@ -79,7 +82,7 @@ export default function ServiciosPage() {
             Probar Animaciones & Sonidos Web Audio
           </span>
         </div>
-        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
           <button
             onClick={() => triggerPowerAnimation(50000, 'ingreso')}
             className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
@@ -156,6 +159,19 @@ export default function ServiciosPage() {
             <Crown className="w-4 h-4 mb-1" />
             <span className="text-[10px] font-extrabold uppercase">Premium</span>
             <span className="text-[9px] opacity-80">Bienvenida</span>
+          </button>
+
+          <button
+            onClick={() => triggerFriendCelebration({ name: 'Leidy' })}
+            className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
+              isTechTheme
+                ? 'border border-cyan-400/40 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/20'
+                : 'bg-cyan-400/10 border border-cyan-400/40 text-cyan-600 rounded-2xl hover:bg-cyan-400/20'
+            }`}
+          >
+            <UserPlus className="w-4 h-4 mb-1" />
+            <span className="text-[10px] font-extrabold uppercase">Amigo</span>
+            <span className="text-[9px] opacity-80">Aceptado</span>
           </button>
 
           <button

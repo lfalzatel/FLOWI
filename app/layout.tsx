@@ -58,6 +58,7 @@ import { NotificationPrompter } from '@/components/notifications/NotificationPro
 import { UpdateWatcher } from '@/components/layout/UpdateWatcher';
 import { LimitPrompter } from '@/components/plans/LimitPrompter';
 import { PremiumCelebration } from '@/components/plans/PremiumCelebration';
+import { FriendCelebration } from '@/components/friends/FriendCelebration';
 import { UsageTracker } from '@/components/layout/UsageTracker';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 import { AppLock } from '@/components/security/AppLock';
@@ -88,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <UpdateWatcher />
               <LimitPrompter />
               <PremiumCelebration />
+              <FriendCelebration />
               <UsageTracker />
               <AppLock />
               <PlayStoreDetector />

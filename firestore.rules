@@ -222,6 +222,26 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.owner == request.auth.uid;
     }
 
+    // ── Comentarios y sugerencias (lib/feedback.ts) ──
+    // Cada persona envía y ve los suyos; el administrador los ve todos, los marca, responde y borra.
+    match /fl_feedback/{id} {
+      allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if createsOwn()
+        && request.resource.data.keys().hasOnly(['userId', 'userName', 'type', 'area', 'rating', 'text', 'status', 'reply', 'createdAt'])
+        && request.resource.data.type in ['gusta', 'mejorar', 'idea', 'error']
+        && request.resource.data.area is string && request.resource.data.area.size() <= 40
+        && request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+        && request.resource.data.userName is string && request.resource.data.userName.size() <= 60
+        && (request.resource.data.rating == null || (request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5))
+        && request.resource.data.status == 'nuevo'
+        && request.resource.data.reply == null;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reply'])
+        && request.resource.data.status in ['nuevo', 'visto', 'hecho']
+        && (request.resource.data.reply == null || (request.resource.data.reply is string && request.resource.data.reply.size() <= 500));
+      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
     // Todo lo demás queda cerrado
   }
 }
