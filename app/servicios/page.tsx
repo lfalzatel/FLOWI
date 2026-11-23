@@ -67,7 +67,8 @@ export default function ServiciosPage() {
     <div className="relative min-h-screen flex flex-col bg-deep">
       {/* Fondo de partículas brillantes con los colores del tema */}
       <div className="fixed inset-0 z-0">
-        <GlitterParticles background="none" density={0.6} colors={(GLITTER_THEMES[theme] || GLITTER_THEMES.dark).colors} light={!!(GLITTER_THEMES[theme] || GLITTER_THEMES.dark).light} />
+        <GlitterParticles density={0.6} background={(GLITTER_THEMES[theme] || GLITTER_THEMES.dark).bg}
+                          colors={(GLITTER_THEMES[theme] || GLITTER_THEMES.dark).colors} light={!!(GLITTER_THEMES[theme] || GLITTER_THEMES.dark).light} />
       </div>
       <Header />
       <main className={`relative flex-1 pb-32 p-4 pt-6 max-w-lg md:max-w-3xl lg:max-w-6xl mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>

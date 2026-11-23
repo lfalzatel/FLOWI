@@ -12,12 +12,17 @@ interface Props {
 }
 
 // Colores de las partículas para cada tema de FLOWI
-export const GLITTER_THEMES: Record<string, { colors: string[]; light?: boolean }> = {
-  dark: { colors: ['#7DD3FC', '#38BDF8', '#22D3EE', '#A5F3FC', '#FFFFFF'] },
-  cyberpunk: { colors: ['#00FF41', '#39FF88', '#0FF0FC', '#B6FFCE', '#FFFFFF'] },
-  kiloCode: { colors: ['#F0DB4F', '#FACC15', '#F97316', '#FDE68A', '#FFFFFF'] },
-  light: { colors: ['#06B6D4', '#10B981', '#0EA5E9', '#14B8A6'], light: true },
-  glassmorphism: { colors: ['#C4B5FD', '#A78BFA', '#F0ABFC', '#93C5FD', '#FFFFFF'] },
+export const GLITTER_THEMES: Record<string, { colors: string[]; light?: boolean; bg: string }> = {
+  dark: { colors: ['#7DD3FC', '#38BDF8', '#22D3EE', '#A5F3FC', '#FFFFFF'],
+    bg: 'radial-gradient(ellipse at 30% 35%, #0E4A63 0%, #062435 45%, #020B12 100%)' },
+  cyberpunk: { colors: ['#00FF41', '#39FF88', '#0FF0FC', '#B6FFCE', '#FFFFFF'],
+    bg: 'radial-gradient(ellipse at 30% 35%, #0B3B22 0%, #05200F 45%, #010804 100%)' },
+  kiloCode: { colors: ['#F0DB4F', '#FACC15', '#F97316', '#FDE68A', '#FFFFFF'],
+    bg: 'radial-gradient(ellipse at 30% 35%, #4A3608 0%, #241803 45%, #0A0701 100%)' },
+  glassmorphism: { colors: ['#C4B5FD', '#A78BFA', '#F0ABFC', '#93C5FD', '#FFFFFF'],
+    bg: 'radial-gradient(ellipse at 30% 35%, #3B1F66 0%, #1E1040 45%, #0A0618 100%)' },
+  light: { colors: ['#06B6D4', '#10B981', '#0EA5E9', '#14B8A6'], light: true,
+    bg: 'radial-gradient(ellipse at 30% 35%, #E0F7FB 0%, #EEF9F6 45%, #F8FAFC 100%)' },
 };
 
 interface P { x: number; y: number; r: number; vx: number; vy: number; tw: number; ts: number; c: string; blur: boolean }
