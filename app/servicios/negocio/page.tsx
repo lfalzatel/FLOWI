@@ -66,7 +66,7 @@ export default function NegocioPage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mi negocio')}</h1>
+            <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mi negocio')}</h1>
             <p className="text-xs text-text-muted">{tr('Tus ventas aparte de tu plata personal')}</p>
           </div>
         </div>

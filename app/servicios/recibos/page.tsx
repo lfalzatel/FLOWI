@@ -59,7 +59,7 @@ export default function RecibosPage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mis recibos')}</h1>
+            <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mis recibos')}</h1>
             <p className="text-xs text-text-muted">{tr('Tus compras con todos sus productos. Toca una para ver el detalle.')}</p>
           </div>
         </div>

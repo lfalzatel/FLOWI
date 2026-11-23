@@ -136,7 +136,7 @@ export default function HormigaPage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Suscripciones y gastos hormiga')}</h1>
+            <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Suscripciones y gastos hormiga')}</h1>
             <p className="text-xs text-text-muted">{tr('Lo pequeño que se repite y, sumado, pesa. Toca uno para ver su historial.')}</p>
           </div>
         </div>

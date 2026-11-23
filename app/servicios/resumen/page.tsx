@@ -63,7 +63,7 @@ export default function ResumenPage() {
           <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className={`flex-1 min-w-0 text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Resumen y estadísticas')}</h1>
+          <h1 className={`flex-1 min-w-0 text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Resumen y estadísticas')}</h1>
           <button type="button" onClick={() => setShowExport(true)} aria-label={tr('Exportar el mes')}
                   className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold ${isTech ? 'bg-accent/10 text-accent border border-accent/30 rounded-none uppercase' : 'bg-accent/10 text-accent rounded-full hover:bg-accent/20'}`}>
             <Download className="w-4 h-4" /> Exportar

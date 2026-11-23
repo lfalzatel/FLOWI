@@ -282,6 +282,7 @@ export const EN: Record<string, string> = {
   'Moneda, temas, sonidos y avisos': 'Currency, themes, sounds and alerts',
   'Tu nombre, foto y datos de la cuenta': 'Your name, photo and account details',
   'Historial y control de préstamos': 'Loan history and tracking',
+  'Herramientas para manejar tu dinero': 'Tools to manage your money',
   'Total Pendiente': 'Total outstanding',
   'Suma de todas tus deudas activas': 'Sum of all your active debts',
   'Deudas activas': 'Active debts',

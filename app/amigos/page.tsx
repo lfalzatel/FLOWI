@@ -157,7 +157,7 @@ export default function AmigosPage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Amigos')}</h1>
+            <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Amigos')}</h1>
             <p className="text-xs text-text-muted">{tr('Busca a tus amigos para compartir gastos. Solo ven tu nombre y tu foto.')}</p>
           </div>
         </div>

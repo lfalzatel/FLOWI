@@ -43,7 +43,7 @@ export default function NotasPage() {
             <Link href="/servicios" className={`p-2 -ml-2 bg-glass border hover:bg-white/[0.05] transition-colors ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className={`text-xl font-bold ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
+            <h1 className={`text-2xl font-bold leading-tight ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
               {tr('Mis Notas')}
             </h1>
           </div>

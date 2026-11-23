@@ -82,7 +82,7 @@ export default function CuentasPage() {
             <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className={`text-xl font-bold truncate ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Cuentas y patrimonio')}</h1>
+            <h1 className={`text-2xl font-bold leading-tight truncate ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Cuentas y patrimonio')}</h1>
           </div>
           {states.length > 0 && <button onClick={() => { setEditing(null); setShowForm(true); }} className={btn}><Plus className="w-4 h-4" /> {tr('Cuenta')}</button>}
         </div>

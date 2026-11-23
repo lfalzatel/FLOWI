@@ -206,7 +206,7 @@ export default function PresupuestosPage() {
                 {tr('Servicios Financieros')}
               </span>
               <h1 className={`truncate ${
-                isTechTheme ? 'font-bold text-base sm:text-lg text-accent uppercase tracking-wider' : 'font-syne font-bold text-base sm:text-xl text-text-primary'
+                isTechTheme ? 'font-bold text-2xl leading-tight text-accent uppercase tracking-wider' : 'font-syne font-bold text-2xl leading-tight text-text-primary'
               }`}>
                 {tr('Centro de Presupuestos')}
               </h1>

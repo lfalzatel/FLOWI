@@ -81,7 +81,7 @@ export default function ProductosPage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('¿Cuánto gasto en…?')}</h1>
+            <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('¿Cuánto gasto en…?')}</h1>
             <p className="text-xs text-text-muted">{tr('Busca un producto y mira cuánto se te va al mes y cómo cambia su precio.')}</p>
           </div>
         </div>

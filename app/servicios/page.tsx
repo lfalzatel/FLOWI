@@ -66,9 +66,12 @@ export default function ServiciosPage() {
     <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
       <main className={`relative flex-1 pb-32 p-4 pt-6 max-w-lg md:max-w-3xl lg:max-w-6xl mx-auto w-full ${isTechTheme ? 'font-mono' : ''}`}>
-        <h1 className={`text-2xl font-bold mb-6 ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary'}`}>
-          {tr('Servicios')}
-        </h1>
+        <div className="mb-6">
+          <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>
+            {tr('Servicios')}
+          </h1>
+          <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>{tr('Herramientas para manejar tu dinero')}</p>
+        </div>
 
 
       {/* Grid de Servicios (agrupada; se puede reordenar manteniendo presionada una tarjeta) */}
