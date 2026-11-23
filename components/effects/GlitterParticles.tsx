@@ -17,6 +17,7 @@ export const GLITTER_THEMES: Record<string, { colors: string[]; light?: boolean 
   cyberpunk: { colors: ['#00FF41', '#39FF88', '#0FF0FC', '#B6FFCE', '#FFFFFF'] },
   kiloCode: { colors: ['#F0DB4F', '#FACC15', '#F97316', '#FDE68A', '#FFFFFF'] },
   light: { colors: ['#06B6D4', '#10B981', '#0EA5E9', '#14B8A6'], light: true },
+  glassmorphism: { colors: ['#C4B5FD', '#A78BFA', '#F0ABFC', '#93C5FD', '#FFFFFF'] },
 };
 
 interface P { x: number; y: number; r: number; vx: number; vy: number; tw: number; ts: number; c: string; blur: boolean }
