@@ -40,6 +40,7 @@ import { SharedInfo, equalShares, knownPeople, personKey } from '@/lib/shared';
 import { formatCurrency, hasCents, roundMoney } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { useFriends } from '@/components/FriendsProvider';
+import { useSharedLinks } from '@/components/SharedLinksProvider';
 import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { CalendarDays, ChevronDown } from 'lucide-react';
 import { useT, currentLocale, tr } from '@/lib/i18n';
@@ -334,7 +335,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         setAmount(String(sh.paidByMe ? sh.total : transactionToEdit.amount));
         const eq = equalShares(sh.total, sh.people.length);
         const equal = sh.paidByMe && sh.people.every((p, i) => p.amount === eq[i]);
-        setShared({ paidByMe: sh.paidByMe, equal, people: sh.people.map(p => ({ name: p.name, amount: String(p.amount), settledAt: p.settledAt ?? null, payments: p.payments, absorbed: p.absorbed })) });
+        setShared({ paidByMe: sh.paidByMe, equal, people: sh.people.map(p => ({ name: p.name, amount: String(p.amount), settledAt: p.settledAt ?? null, payments: p.payments, absorbed: p.absorbed, friendUid: p.friendUid ?? null })) });
       } else {
         setShared(null);
       }
@@ -397,6 +398,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const noCategoryOk = useRef(false);
   // Tus amigos de FLOWI primero; luego las personas con las que ya compartiste
   const { friends } = useFriends();
+  const { linkFor } = useSharedLinks();
   const peopleNames = useMemo(() => {
     const seen = new Set<string>();
     return [...friends.map(f => f.name), ...knownPeople(transactions)].filter(n => { const k = personKey(n); if (!k || seen.has(k)) return false; seen.add(k); return true; });
@@ -407,7 +409,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     if (type !== 'gasto' || !shared || !total) return { sharedInfo: null, sharedMine: total };
     const amounts = draftAmounts(shared, total, cents);
     const people = shared.people
-      .map((p, i) => ({ name: p.name.trim(), amount: amounts[i] || 0, settledAt: p.settledAt ?? null, ...(p.payments?.length ? { payments: p.payments } : {}), ...(p.absorbed ? { absorbed: p.absorbed } : {}) }))
+      .map((p, i) => ({ name: p.name.trim(), amount: amounts[i] || 0, settledAt: p.settledAt ?? null, ...(p.payments?.length ? { payments: p.payments } : {}), ...(p.absorbed ? { absorbed: p.absorbed } : {}), ...(shared.paidByMe && p.friendUid ? { friendUid: p.friendUid } : {}) }))
       .filter(p => p.name && personKey(p.name));
     if (!people.length) return { sharedInfo: null, sharedMine: total };
     if (!shared.paidByMe) {
@@ -792,6 +794,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             {type === 'gasto' && (shared ? (
               <div className="mt-2">
                 <SharedExpenseEditor draft={shared} total={amountNum} knownNames={peopleNames} isTech={isTechTheme}
+                                     friends={friends} linkStatus={(fu) => (transactionToEdit?.id ? linkFor(transactionToEdit.id, fu)?.status : undefined)}
                                      fmt={fmt} cents={cents} onChange={setShared} onRemove={() => setShared(null)} />
               </div>
             ) : (

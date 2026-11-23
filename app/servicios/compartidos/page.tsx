@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronDown, Users, Plus, MessageCircle, Check, HandCoins } from 'lucide-react';
 import { SharedPaymentModal } from '@/components/shared/SharedPaymentModal';
+import { IncomingShared } from '@/components/shared/IncomingShared';
+import { useSharedLinks } from '@/components/SharedLinksProvider';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/components/DataProvider';
@@ -32,6 +34,7 @@ export default function CompartidosPage() {
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [busy, setBusy] = useState(false);
   const [paying, setPaying] = useState<{ tx: Transaction; index: number } | null>(null);
+  const { linkFor } = useSharedLinks();
 
   const balances = useMemo(() => sharedBalances(transactions), [transactions]);
   const pending = balances.filter(b => b.owesMe || b.iOwe);
@@ -100,6 +103,12 @@ export default function CompartidosPage() {
                     <p className={`text-xs truncate ${e.settled ? 'text-text-muted line-through' : 'text-text-primary'}`}>{e.tx.description?.trim() || e.tx.category}</p>
                     <p className="text-[10px] text-text-muted">
                       {e.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {e.toMe ? 'pagaste tú' : `pagó ${b.name.split(/\s+/)[0]}`}
+                      {(() => {
+                        // Con un amigo de FLOWI: si ya lo aceptó en su app
+                        const fu = e.tx.shared?.people[e.index]?.friendUid;
+                        const st = e.toMe && fu && e.tx.id ? linkFor(e.tx.id, fu)?.status : e.tx.sharedLinkId ? 'friend' : undefined;
+                        return st === 'accepted' ? ' · 🔗 en su FLOWI' : st === 'pending' ? ' · 🔗 esperando que lo acepte' : st === 'rejected' ? ' · no lo aceptó en su FLOWI' : st === 'friend' ? ' · 🔗 compartido por FLOWI' : '';
+                      })()}
                     </p>
                   </button>
                   <span className="text-right shrink-0">
@@ -167,6 +176,8 @@ export default function CompartidosPage() {
             <p className="text-lg font-bold text-[var(--red)] tabular-nums">{fmt(totalFromMe)}</p>
           </div>
         </div>
+
+        <IncomingShared isTech={isTech} />
 
         <button type="button" onClick={() => setAdding(true)}
                 className={`w-full py-3 text-sm font-bold inline-flex items-center justify-center gap-2 ${isTech ? 'rounded-none bg-accent/15 border border-accent text-accent uppercase tracking-wider' : 'rounded-xl bg-accent text-white'}`}>

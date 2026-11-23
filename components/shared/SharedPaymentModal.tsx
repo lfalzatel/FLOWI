@@ -11,6 +11,8 @@ import { displayExpr, evalAmount } from '@/lib/amountExpr';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { paidOf, remainingOf, withAbsorbed, withPayment, withoutPayment } from '@/lib/shared';
 import { accountFor } from '@/lib/accounts';
+import { linkId, payKey } from '@/lib/sharedLinks';
+import { markLinkPaymentRemoved } from '@/components/SharedLinksProvider';
 
 // Abono de un gasto compartido: lo que una persona te devuelve (o lo que tú le pagas) por partes,
 // con la cuenta donde entró la plata. Si alguien nunca paga, "Lo asumo yo" lo pasa a tus gastos.
@@ -175,7 +177,12 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
                   {x.accountId ? ` · ${active.find(a => a.id === x.accountId)?.name || 'cuenta'}` : ''}
                 </span>
                 <span className="font-semibold text-accent tabular-nums">{fmt(x.amount)}</span>
-                <button type="button" disabled={busy} onClick={() => write(withoutPayment(shared, index, j))} aria-label="Borrar abono"
+                <button type="button" disabled={busy} onClick={() => {
+                  // Abono de un gasto con un amigo de FLOWI: se avisa al enlace para que no reaparezca
+                  const lid = tx.sharedLinkId || (shared.paidByMe && person.friendUid && tx.id ? linkId(tx.id, person.friendUid) : null);
+                  if (lid) markLinkPaymentRemoved(lid, payKey(x));
+                  write(withoutPayment(shared, index, j));
+                }} aria-label="Borrar abono"
                         className="p-1 text-text-muted hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
               </li>
             ))}

@@ -10,7 +10,7 @@ export interface SharedDraft {
   paidByMe: boolean;
   equal: boolean;                                 // partes iguales (se recalculan con el total)
   // Abonos y lo asumido se conservan al editar (se manejan en Compartidos)
-  people: { name: string; amount: string; settledAt?: string | null; payments?: SharedPayment[]; absorbed?: number }[];
+  people: { name: string; amount: string; settledAt?: string | null; payments?: SharedPayment[]; absorbed?: number; friendUid?: string | null }[];
 }
 
 export const emptySharedDraft = (): SharedDraft => ({ paidByMe: true, equal: true, people: [{ name: '', amount: '' }] });
@@ -28,6 +28,8 @@ interface Props {
   draft: SharedDraft;
   total: number;             // lo escrito en "Monto"
   knownNames: string[];
+  friends?: { uid: string; name: string }[]; // amigos de FLOWI: si eliges uno, el gasto le llega a su app
+  linkStatus?: (friendUid: string) => string | undefined; // al editar: pendiente / aceptado / rechazado
   isTech: boolean;
   fmt: (n: number) => string;
   cents?: boolean;           // la moneda usa centavos (euro, dólar…)
@@ -35,7 +37,9 @@ interface Props {
   onRemove: () => void;
 }
 
-export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cents = false, onChange, onRemove }: Props) {
+export function SharedExpenseEditor({ draft, total, knownNames, friends = [], linkStatus, isTech, fmt, cents = false, onChange, onRemove }: Props) {
+  // El amigo de FLOWI que corresponde a un nombre (nombre completo igual)
+  const friendFor = (name: string) => friends.find(f => personKey(f.name) === personKey(name))?.uid || null;
   const [focusIdx, setFocusIdx] = useState<number | null>(null);
   const [calcIdx, setCalcIdx] = useState<number | null>(null); // persona con la calculadora abierta
   const r = (n: number) => (cents ? Math.round(n * 100) / 100 : Math.round(n));
@@ -109,7 +113,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
             <div className="flex items-center gap-2">
               <input autoComplete="off" value={p.name} placeholder={draft.paidByMe ? `Persona ${i + 1}` : 'Nombre de quien pagó'}
                      onFocus={() => setFocusIdx(i)} onBlur={() => setTimeout(() => setFocusIdx(f => (f === i ? null : f)), 150)}
-                     onChange={e => setPerson(i, { name: e.target.value })}
+                     onChange={e => setPerson(i, { name: e.target.value, friendUid: friendFor(e.target.value) })}
                      className={`${input} flex-1 min-w-0`} aria-label={`Nombre de la persona ${i + 1}`} />
               {draft.paidByMe && (draft.equal ? (
                 <button type="button" onClick={() => { switchEqual(false); setCalcIdx(i); }} title="Cambiar el monto"
@@ -129,8 +133,8 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
             {focusIdx === i && suggestions(i).length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {suggestions(i).map(n => (
-                  <button key={n} type="button" onMouseDown={e => e.preventDefault()} onClick={() => { setPerson(i, { name: n }); setFocusIdx(null); }}
-                          className={`px-2.5 py-1 text-[11px] border border-glass-border text-text-secondary hover:border-accent/50 ${chip}`}>{n}</button>
+                  <button key={n} type="button" onMouseDown={e => e.preventDefault()} onClick={() => { setPerson(i, { name: n, friendUid: friendFor(n) }); setFocusIdx(null); }}
+                          className={`px-2.5 py-1 text-[11px] border border-glass-border text-text-secondary hover:border-accent/50 ${chip}`}>{friendFor(n) ? '🔗 ' : ''}{n}</button>
                 ))}
               </div>
             )}
@@ -156,6 +160,15 @@ export function SharedExpenseEditor({ draft, total, knownNames, isTech, fmt, cen
                 </div>
               );
             })()}
+            {draft.paidByMe && p.friendUid && (
+              <p className="text-[10px] text-accent">
+                🔗 {(() => {
+                  const st = linkStatus?.(p.friendUid!);
+                  const first = p.name.split(/\s+/)[0];
+                  return st === 'accepted' ? `${first} lo tiene en su FLOWI` : st === 'rejected' ? `${first} no lo aceptó` : st === 'pending' ? `Esperando que ${first} lo acepte` : `Le llega a ${first} en su FLOWI para aceptarlo`;
+                })()}
+              </p>
+            )}
             {(() => {
               const paid = (p.payments || []).reduce((s2, x) => s2 + x.amount, 0);
               if (p.absorbed) return <p className="text-[10px] text-amber-400">Lo asumiste como gasto tuyo ({fmt(p.absorbed)})</p>;

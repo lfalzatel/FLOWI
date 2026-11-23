@@ -235,6 +235,47 @@ exports.avisarAmistadAceptada = onDocumentUpdated({ document: 'fl_friend_request
   });
 });
 
+// Un amigo te compartió un gasto (lib/sharedLinks.ts)
+exports.avisarGastoCompartido = onDocumentCreated({ document: 'fl_shared_links/{id}', region: 'us-central1' }, async (event) => {
+  const l = event.data?.data();
+  if (!l || l.status !== 'pending' || !l.friend) return;
+  const share = Math.round(Number(l.share || 0)).toLocaleString('es-CO');
+  await pushTo(l.friend, {
+    title: `👥 ${firstName(l.ownerName)} compartió un gasto contigo`,
+    body: `${String(l.description || 'Un gasto').slice(0, 60)}: te toca $${share}. Acéptalo en FLOWI.`,
+    url: '/servicios/compartidos',
+    tag: `compartido-${event.params.id}`,
+  });
+});
+
+// Tu amigo aceptó el gasto que le compartiste, o te registró un abono
+exports.avisarCambioCompartido = onDocumentUpdated({ document: 'fl_shared_links/{id}', region: 'us-central1' }, async (event) => {
+  const before = event.data?.before.data();
+  const after = event.data?.after.data();
+  if (!before || !after) return;
+  if (before.status === 'pending' && after.status === 'accepted') {
+    await pushTo(after.owner, {
+      title: `🤝 ${firstName(after.friendName)} aceptó el gasto compartido`,
+      body: `${String(after.description || '').slice(0, 60)} ya está en su FLOWI.`,
+      url: '/servicios/compartidos',
+      tag: `compartido-ok-${event.params.id}`,
+    });
+    return;
+  }
+  // Abono nuevo anotado por el amigo: avisarle a quien pagó
+  const prev = new Set((before.payments || []).map((p) => p.id));
+  const added = (after.payments || []).filter((p) => !prev.has(p.id) && p.by === after.friend);
+  if (added.length) {
+    const total = added.reduce((s, p) => s + Number(p.amount || 0), 0);
+    await pushTo(after.owner, {
+      title: `💸 ${firstName(after.friendName)} te abonó $${Math.round(total).toLocaleString('es-CO')}`,
+      body: `De ${String(after.description || 'un gasto compartido').slice(0, 60)}.`,
+      url: '/servicios/compartidos',
+      tag: `abono-${event.params.id}-${added[0].id}`,
+    });
+  }
+});
+
 // ── Eliminar mi cuenta ────────────────────────────────────────────────
 // La persona borra su cuenta y todo lo que registró (Ley 1581: derecho a suprimir sus datos).
 // Se conserva solo el registro de los pagos (valor, plan, fecha y estado), como dice la política;
@@ -278,6 +319,15 @@ exports.eliminarMiCuenta = onCall({ region: 'us-central1', timeoutSeconds: 300 }
   }
 
   // Amigos: perfil público, buscador y solicitudes donde está la persona
+  // Gastos compartidos con amigos donde participa
+  for (;;) {
+    const links = await db.collection('fl_shared_links').where('users', 'array-contains', uid).limit(400).get();
+    if (links.empty) break;
+    const batch = db.batch();
+    links.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    removed += links.size;
+  }
   await db.collection('fl_profiles').doc(uid).delete().catch(() => {});
   await db.collection('fl_directory').doc(uid).delete().catch(() => {});
   for (;;) {

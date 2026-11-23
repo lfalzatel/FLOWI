@@ -179,6 +179,49 @@ service cloud.firestore {
       allow delete: if signedIn() && request.auth.uid in resource.data.users;
     }
 
+    // ── Gastos compartidos entre amigos (lib/sharedLinks.ts) ──
+    // id = "{gasto}_{amigo}". Lo crea quien pagó (con un gasto suyo y solo con un amigo aceptado).
+    // Los dos lo ven; cada uno cambia solo lo suyo: quien pagó, los datos del gasto; el amigo, si lo acepta.
+    // Los abonos los pueden anotar los dos (los mismos que se ven en la app de cada uno).
+    function friendsAccepted(a, b) {
+      let ab = /databases/$(database)/documents/fl_friend_requests/$(a + '_' + b);
+      let ba = /databases/$(database)/documents/fl_friend_requests/$(b + '_' + a);
+      return (exists(ab) && get(ab).data.status == 'accepted') || (exists(ba) && get(ba).data.status == 'accepted');
+    }
+
+    match /fl_shared_links/{id} {
+      allow read: if signedIn() && request.auth.uid in resource.data.users;
+      allow create: if signedIn()
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.friend is string
+        && request.resource.data.friend != request.auth.uid
+        && request.resource.data.users == [request.auth.uid, request.resource.data.friend]
+        && request.resource.data.txId is string
+        && id == request.resource.data.txId + '_' + request.resource.data.friend
+        && request.resource.data.status == 'pending'
+        && request.resource.data.share is number && request.resource.data.share >= 0
+        && request.resource.data.keys().hasOnly(['owner', 'friend', 'users', 'ownerName', 'friendName', 'txId', 'friendTxId',
+             'description', 'category', 'date', 'share', 'status', 'payments', 'removed', 'absorbed', 'createdAt', 'updatedAt'])
+        && get(/databases/$(database)/documents/fl_expenses/$(request.resource.data.txId)).data.userId == request.auth.uid
+        && friendsAccepted(request.auth.uid, request.resource.data.friend);
+      allow update: if signedIn()
+        && request.resource.data.payments is list && request.resource.data.payments.size() <= 200
+        && (
+          // Quien pagó: los datos del gasto, los abonos y lo que asumió; o marcarlo como borrado
+          (resource.data.owner == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['description', 'category', 'date', 'share', 'status', 'payments', 'removed', 'absorbed', 'updatedAt'])
+            && (request.resource.data.status == resource.data.status || request.resource.data.status == 'deleted'))
+          // El amigo: aceptarlo o rechazarlo, sus abonos y el gasto que se creó en su app
+          || (resource.data.friend == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'friendTxId', 'payments', 'removed', 'updatedAt'])
+            && (request.resource.data.status == resource.data.status
+                || (resource.data.status == 'pending' && request.resource.data.status in ['accepted', 'rejected'])
+                || (resource.data.status == 'accepted' && request.resource.data.status == 'rejected')))
+        );
+      allow delete: if signedIn() && resource.data.owner == request.auth.uid;
+    }
+
     // Todo lo demás queda cerrado
   }
 }

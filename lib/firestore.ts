@@ -21,6 +21,7 @@ export interface Transaction {
   items?: ReceiptItem[];     // productos del recibo escaneado (lib/receiptItems.ts)
   receiptId?: string;        // mismo valor en las partes de una compra repartida por categoría
   shared?: SharedInfo | null; // gasto compartido: amount es TU parte (lib/shared.ts)
+  sharedLinkId?: string | null; // te lo compartió un amigo de FLOWI (fl_shared_links)
   saleId?: string;           // Mi negocio: une una venta (ingreso) con sus costos (gastos: producto, envío…)
   _partOf?: string;          // solo en informes (expandByItems): parte por categoría del gasto con este id; no se guarda
 }

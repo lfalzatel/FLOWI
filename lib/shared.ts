@@ -7,6 +7,7 @@ import { normalizeText } from '@/lib/categories';
 
 // Abono: parte de lo pendiente que ya se pagó (y a qué cuenta entró o de cuál salió)
 export interface SharedPayment {
+  id?: string;               // para sincronizar con el amigo (fl_shared_links)
   amount: number;
   at: string;                // ISO
   accountId?: string | null; // cuenta donde entró (o de donde salió); sin ella, la cuenta del gasto
@@ -18,6 +19,7 @@ export interface SharedPerson {
   settledAt?: string | null; // ISO: cuándo quedó saldado
   payments?: SharedPayment[];
   absorbed?: number;         // lo que nunca pagó y asumiste como gasto tuyo
+  friendUid?: string | null; // es tu amigo en FLOWI: el gasto le llega a su app (lib/sharedLinks.ts)
 }
 
 /** Lo que ya se pagó de la parte de esa persona. Saldado sin abonos (antes de existir los abonos) = todo. */
@@ -187,7 +189,8 @@ export function withPayment(info: SharedInfo, index: number, amount: number, whe
     people: info.people.map((p, i) => {
       if (i !== index) return p;
       const base: SharedPayment[] = p.payments?.length ? p.payments : p.settledAt && !p.absorbed ? [{ amount: p.amount, at: p.settledAt }] : [];
-      const next: SharedPerson = { ...p, payments: [...base, { amount, at: when.toISOString(), accountId: accountId ?? null }] };
+      const id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+      const next: SharedPerson = { ...p, payments: [...base, { id, amount, at: when.toISOString(), accountId: accountId ?? null }] };
       return { ...next, settledAt: remainingOf(next) <= 0 ? when.toISOString() : null };
     }),
   };

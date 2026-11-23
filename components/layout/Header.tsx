@@ -10,6 +10,8 @@ import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useFriends } from '@/components/FriendsProvider';
 import { GuestBanner } from '@/components/layout/GuestBanner';
+import { useSharedLinks } from '@/components/SharedLinksProvider';
+import { IncomingShared } from '@/components/shared/IncomingShared';
 import { answerFriendRequest } from '@/lib/friends';
 import { Avatar } from '@/components/friends/Avatar';
 import { useReminders } from '@/hooks/useReminders';
@@ -60,6 +62,7 @@ export function Header() {
 
   const { notifications } = useInAppNotifications();
   const { incoming: friendRequests } = useFriends(); // solicitudes de amistad sin responder
+  const { incoming: sharedIncoming, deletedForMe } = useSharedLinks(); // gastos que te compartieron
   const { reminders } = useReminders();
   const [showDropdown, setShowDropdown] = useState(false);
   const [payingDue, setPayingDue] = useState<ReminderDue | null>(null);
@@ -92,7 +95,7 @@ export function Header() {
   // (un gasto ya registrado de esa categoría cerca del vencimiento cuenta como pagado)
   const { transactions } = useData();
   const upcomingReminders = getPendingDues(reminders, new Date(), transactions).slice(0, 6);
-  const unread = notifications.length + upcomingReminders.length + friendRequests.length;
+  const unread = notifications.length + upcomingReminders.length + friendRequests.length + sharedIncoming.length + deletedForMe.length;
 
   // Dynamic colors for the logo based on theme
   let logoOuterColor = '#10B981'; // Default / Dark theme
@@ -285,13 +288,15 @@ export function Header() {
                 <Link href="/servicios/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>{tr('Ver ajustes')}</Link>
               </div>
 
-              {notifications.length === 0 && upcomingReminders.length === 0 && friendRequests.length === 0 ? (
+              {notifications.length === 0 && upcomingReminders.length === 0 && friendRequests.length === 0 && !sharedIncoming.length && !deletedForMe.length ? (
                 <div className="py-6 text-center">
                   <Bell className="w-8 h-8 text-text-muted/30 mx-auto mb-2" />
                   <p className={`text-text-secondary text-sm ${isTechTheme ? 'font-mono' : ''}`}>{tr('Al día. Nada por aquí.')}</p>
                 </div>
               ) : (
                 <div className="space-y-1">
+                  {/* Gastos que un amigo te compartió */}
+                  <IncomingShared isTech={isTechTheme} compact />
                   {/* Solicitudes de amistad */}
                   {friendRequests.map(r => (
                     <div key={r.id} className={`p-3 mb-2 flex gap-3 items-center border border-accent/30 bg-accent/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
