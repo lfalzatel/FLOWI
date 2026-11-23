@@ -20,6 +20,7 @@ import { useData } from '@/components/DataProvider';
 import { MarkPaidDialog } from '@/components/reminders/MarkPaidDialog';
 import { Bell, Clock, Info, MessageCircle } from 'lucide-react';
 import { FlowLines } from '@/components/FlowLines';
+import { GlitterParticles, GLITTER_THEMES } from '@/components/effects/GlitterParticles';
 
 export function Header() {
   const pathname = usePathname();
@@ -109,6 +110,10 @@ export function Header() {
   } else if (theme === 'kiloCode') {
     logoOuterColor = '#F0DB4F'; // JS Yellow
     logoInnerColor = '#F97316'; // Orange
+    logoDotColor = '#F97316';
+  } else if (theme === 'nebula') {
+    logoOuterColor = '#C4B5FD'; // Lavanda
+    logoInnerColor = '#F0ABFC'; // Rosado
     logoDotColor = '#F97316';
   } else if (theme === 'light') {
     // Colores originales del diseño en modo día
@@ -372,14 +377,17 @@ export function Header() {
       {showLogoModal && typeof document !== 'undefined' && createPortal(
         <div 
           onClick={() => setShowLogoModal(false)}
-          className="fixed inset-0 bg-black/90 backdrop-blur-lg z-[120] flex flex-col items-center justify-center p-4 cursor-pointer animate-fade-in"
+          className="fixed inset-0 bg-[#0A0A0F] z-[120] flex flex-col items-center justify-center p-4 cursor-pointer animate-fade-in"
         >
+          {/* Mismo fondo del tema con partículas que el splash */}
+          <GlitterParticles density={0.85} background={(GLITTER_THEMES[theme] || GLITTER_THEMES.glassmorphism).bg}
+            colors={(GLITTER_THEMES[theme] || GLITTER_THEMES.glassmorphism).colors} light={!!(GLITTER_THEMES[theme] || GLITTER_THEMES.glassmorphism).light} />
           {/* Ondas de FLOWI arriba y abajo (la de abajo, en espejo) */}
           <FlowLines className="absolute inset-x-0 top-0 h-[34%]" />
           <FlowLines className="absolute inset-x-0 bottom-0 h-[34%] -scale-y-100" />
 
           {/* Giant Logo (Without card frame) */}
-          <div className="relative w-56 h-56 mb-8 select-none pointer-events-none">
+          <div className="relative z-10 w-56 h-56 mb-8 select-none pointer-events-none">
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
               <circle
                 cx="50" cy="50" r="46"
@@ -417,7 +425,7 @@ export function Header() {
           </div>
 
           {/* Brand Text */}
-          <div className="text-center select-none pointer-events-none">
+          <div className="relative z-10 text-center select-none pointer-events-none">
             <h2 
               className={`text-3xl font-bold tracking-widest ${isTechTheme ? 'font-mono uppercase' : 'font-syne uppercase'}`}
               style={{ color: logoOuterColor, textShadow: `0 0 12px ${logoOuterColor}80` }}
@@ -426,7 +434,7 @@ export function Header() {
             </h2>
             <p 
               className={`text-xs mt-2 tracking-widest ${isTechTheme ? 'font-mono' : ''}`}
-              style={{ color: '#A1A1AA' }}
+              style={{ color: theme === 'light' ? '#475569' : '#A1A1AA' }}
             >
               {tr('Tu dinero, en flujo.')}
             </p>
