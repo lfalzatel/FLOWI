@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
@@ -6,23 +7,23 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 // Mientras la IA lee un recibo o unas capturas (puede tardar unos segundos): una barra animada y
 // tarjetas que cuentan funciones de FLOWI. Pasan solas, y con las flechas se puede ir y volver.
 const TIPS: { title: string; text: string }[] = [
-  { title: 'Mantén presionado el +', text: 'Y dicta: "gasté 20 mil en almuerzo y 8 mil en tinto". Registra varias cosas a la vez.' },
-  { title: 'Corrige con la voz', text: 'Después de leer un recibo, toca "Corregir con la voz" y di: "eran 25 mil" o "ponlo en Nequi".' },
-  { title: 'Hoy puedes gastar', text: 'Te dice cuánto puedes gastar hoy sin quedarte corto antes de fin de mes.' },
-  { title: 'Recordatorios con aviso', text: 'Te aviso tus pagos aunque FLOWI esté cerrada, y los marcas con "Ya lo pagué".' },
-  { title: 'Gastos hormiga', text: 'En Servicios ves cuánto se te va en tintos, domicilios o suscripciones al año.' },
-  { title: 'Tus CDT y fondos', text: 'Registra tus inversiones y te digo cuánto vas ganando y cuándo vencen.' },
-  { title: 'Créditos como en el banco', text: 'Pon la tasa, el seguro y el día de pago: FLOWI calcula intereses y seguro igual que el banco.' },
-  { title: 'Me deben', text: '¿Prestaste plata? Regístrala como "Me deben" y cada abono te entra como ingreso.' },
-  { title: 'Próximos compromisos', text: 'Los pagos fijos que te faltan este mes, y los que ya pagaste.' },
-  { title: 'Tus cuentas', text: 'Nequi, banco, efectivo: cada movimiento sabe de qué cuenta salió y ves el saldo de cada una.' },
-  { title: 'Metas de ahorro', text: 'Ponle nombre y fecha a lo que quieres lograr y mira cuánto te falta cada mes.' },
-  { title: 'Importa tu extracto', text: 'Sube el extracto del banco y FLOWI registra los movimientos por ti.' },
-  { title: 'Filtra por fechas', text: 'Arriba en Gastos e Ingresos eliges día, semana, mes o todo, y te mueves con las flechas.' },
-  { title: 'Mi negocio', text: 'Separa las ventas de tu negocio de tu plata personal y mira tu ganancia.' },
-  { title: 'Exporta tus datos', text: 'Descarga tus movimientos en Excel cuando quieras, desde el botón de descarga.' },
-  { title: 'Bloqueo con huella', text: 'En Configuración → Seguridad proteges FLOWI con PIN o huella.' },
-  { title: 'Temas', text: 'Cambia los colores de FLOWI desde tu perfil: claro, oscuro y otros estilos.' },
+  { title: tr('Mantén presionado el +'), text: tr('Y dicta: "gasté 20 mil en almuerzo y 8 mil en tinto". Registra varias cosas a la vez.') },
+  { title: tr('Corrige con la voz'), text: tr('Después de leer un recibo, toca "Corregir con la voz" y di: "eran 25 mil" o "ponlo en Nequi".') },
+  { title: tr('Hoy puedes gastar'), text: tr('Te dice cuánto puedes gastar hoy sin quedarte corto antes de fin de mes.') },
+  { title: tr('Recordatorios con aviso'), text: tr('Te aviso tus pagos aunque FLOWI esté cerrada, y los marcas con "Ya lo pagué".') },
+  { title: tr('Gastos hormiga'), text: tr('En Servicios ves cuánto se te va en tintos, domicilios o suscripciones al año.') },
+  { title: tr('Tus CDT y fondos'), text: tr('Registra tus inversiones y te digo cuánto vas ganando y cuándo vencen.') },
+  { title: tr('Créditos como en el banco'), text: tr('Pon la tasa, el seguro y el día de pago: FLOWI calcula intereses y seguro igual que el banco.') },
+  { title: tr('Me deben'), text: tr('¿Prestaste plata? Regístrala como "Me deben" y cada abono te entra como ingreso.') },
+  { title: tr('Próximos compromisos'), text: tr('Los pagos fijos que te faltan este mes, y los que ya pagaste.') },
+  { title: tr('Tus cuentas'), text: tr('Nequi, banco, efectivo: cada movimiento sabe de qué cuenta salió y ves el saldo de cada una.') },
+  { title: tr('Metas de ahorro'), text: tr('Ponle nombre y fecha a lo que quieres lograr y mira cuánto te falta cada mes.') },
+  { title: tr('Importa tu extracto'), text: tr('Sube el extracto del banco y FLOWI registra los movimientos por ti.') },
+  { title: tr('Filtra por fechas'), text: tr('Arriba en Gastos e Ingresos eliges día, semana, mes o todo, y te mueves con las flechas.') },
+  { title: tr('Mi negocio'), text: tr('Separa las ventas de tu negocio de tu plata personal y mira tu ganancia.') },
+  { title: tr('Exporta tus datos'), text: tr('Descarga tus movimientos en Excel cuando quieras, desde el botón de descarga.') },
+  { title: tr('Bloqueo con huella'), text: tr('En Configuración → Seguridad proteges FLOWI con PIN o huella.') },
+  { title: tr('Temas'), text: tr('Cambia los colores de FLOWI desde tu perfil: claro, oscuro y otros estilos.') },
 ];
 
 /**
@@ -42,7 +43,7 @@ export function ReadingOverlay({ isTech, title, label, onCancel }: { isTech: boo
         <ReadingTips isTech={isTech} label={label} />
         {onCancel && (
           <button type="button" onClick={onCancel} className="mt-1 text-xs text-text-muted hover:text-text-primary underline normal-case">
-            Cancelar y llenarlo a mano
+            {tr('Cancelar y llenarlo a mano')}
           </button>
         )}
       </div>
@@ -106,17 +107,17 @@ export function ReadingTips({ isTech, label = 'Leyendo el recibo…' }: { isTech
         </div>
       </div>
       <div className={`flex items-center gap-1 p-2 border border-accent/20 bg-accent/5 ${isTech ? 'rounded-none' : 'rounded-2xl'}`}>
-        <button type="button" onClick={() => go(-1)} aria-label="Consejo anterior" className={arrow}>
+        <button type="button" onClick={() => go(-1)} aria-label={tr('Consejo anterior')} className={arrow}>
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div key={i} className="flex-1 min-w-0 text-left py-1" style={{ animation: `${dir === 1 ? 'flowi-tip-next' : 'flowi-tip-prev'} .3s ease-out` }}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-accent" /> ¿Sabías que…? <span className="ml-auto font-normal normal-case tracking-normal">{i + 1}/{TIPS.length}</span>
+            <Sparkles className="w-3 h-3 text-accent" /> {tr('¿Sabías que…?')} <span className="ml-auto font-normal normal-case tracking-normal">{i + 1}/{TIPS.length}</span>
           </p>
           <p className="text-sm font-semibold text-text-primary normal-case mt-0.5">{tip.title}</p>
           <p className="text-xs text-text-secondary normal-case leading-snug min-h-[2.5em]">{tip.text}</p>
         </div>
-        <button type="button" onClick={() => go(1)} aria-label="Siguiente consejo" className={arrow}>
+        <button type="button" onClick={() => go(1)} aria-label={tr('Siguiente consejo')} className={arrow}>
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>

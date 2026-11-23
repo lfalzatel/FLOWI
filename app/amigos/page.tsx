@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -77,7 +78,7 @@ export default function AmigosPage() {
   };
   const answer = async (id: string, accept: boolean) => {
     setBusy(id);
-    try { await answerFriendRequest(id, accept); } catch { setError('No se pudo responder la solicitud.'); }
+    try { await answerFriendRequest(id, accept); } catch { setError(tr('No se pudo responder la solicitud.')); }
     finally { setBusy(null); }
   };
 
@@ -88,11 +89,11 @@ export default function AmigosPage() {
     const rel = relation(p.uid);
     if (rel.kind === 'friend') return (
       <span className="flex gap-1.5">
-        <span className={`${btn} border-accent/40 text-accent`}><Check className="w-3.5 h-3.5" /> Amigos</span>
-        <button type="button" disabled title="Muy pronto" className={`${btn} border-glass-border text-text-muted opacity-60`}><MessageCircle className="w-3.5 h-3.5" /> Chat</button>
+        <span className={`${btn} border-accent/40 text-accent`}><Check className="w-3.5 h-3.5" /> {tr('Amigos')}</span>
+        <button type="button" disabled title={tr('Muy pronto')} className={`${btn} border-glass-border text-text-muted opacity-60`}><MessageCircle className="w-3.5 h-3.5" /> {tr('Chat')}</button>
       </span>
     );
-    if (rel.kind === 'outgoing') return <span className={`${btn} border-glass-border text-text-muted`}><Clock className="w-3.5 h-3.5" /> Enviada</span>;
+    if (rel.kind === 'outgoing') return <span className={`${btn} border-glass-border text-text-muted`}><Clock className="w-3.5 h-3.5" /> {tr('Enviada')}</span>;
     if (rel.kind === 'incoming') return (
       <button type="button" disabled={!!busy} onClick={() => answer(rel.r.id, true)} className={`${btn} border-accent bg-accent/15 text-accent`}>
         <Check className="w-3.5 h-3.5" /> Aceptar
@@ -119,10 +120,10 @@ export default function AmigosPage() {
   const shareMine = async () => {
     if (!me) return;
     const url = inviteLink(me.uid);
-    const text = `Agrégame como amigo en FLOWI: ${url}`;
+    const text = tr('Agrégame como amigo en FLOWI: {a}', { a: url });
     try {
       if (navigator.share) await navigator.share({ title: 'FLOWI', text, url });
-      else { await navigator.clipboard.writeText(url); setError('Enlace copiado ✓'); }
+      else { await navigator.clipboard.writeText(url); setError(tr('Enlace copiado ✓')); }
     } catch { /* la persona canceló */ }
   };
 
@@ -135,9 +136,9 @@ export default function AmigosPage() {
         <main className="relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32">
           <div className={`glass-card glass-static p-6 text-center space-y-3 ${box}`}>
             <Users className="w-10 h-10 text-accent/50 mx-auto" />
-            <p className="text-sm text-text-primary font-semibold">Para tener amigos en FLOWI necesitas una cuenta</p>
-            <p className="text-xs text-text-muted">Así tus amigos te pueden encontrar y compartir gastos contigo.</p>
-            <button type="button" onClick={() => setRemoving({ id: '__link', name: '' })} className={`${btn} mx-auto border-accent bg-accent/15 text-accent`}>Vincular mi cuenta de Google</button>
+            <p className="text-sm text-text-primary font-semibold">{tr('Para tener amigos en FLOWI necesitas una cuenta')}</p>
+            <p className="text-xs text-text-muted">{tr('Así tus amigos te pueden encontrar y compartir gastos contigo.')}</p>
+            <button type="button" onClick={() => setRemoving({ id: '__link', name: '' })} className={`${btn} mx-auto border-accent bg-accent/15 text-accent`}>{tr('Vincular mi cuenta de Google')}</button>
           </div>
         </main>
         <BottomNav />
@@ -152,25 +153,25 @@ export default function AmigosPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/" aria-label="Volver" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/" aria-label={tr('Volver')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Amigos</h1>
-            <p className="text-xs text-text-muted">Busca a tus amigos para compartir gastos. Solo ven tu nombre y tu foto.</p>
+            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Amigos')}</h1>
+            <p className="text-xs text-text-muted">{tr('Busca a tus amigos para compartir gastos. Solo ven tu nombre y tu foto.')}</p>
           </div>
         </div>
 
         {noRules && (
           <p className={`p-3 text-xs text-amber-300 border border-amber-400/40 bg-amber-400/10 ${box}`}>
-            Amigos todavía no está activado en la base de datos. Muy pronto vas a poder buscar y agregar amigos.
+            {tr('Amigos todavía no está activado en la base de datos. Muy pronto vas a poder buscar y agregar amigos.')}
           </p>
         )}
 
         {/* Llegó con el enlace de alguien */}
         {invited && (
           <div className={`glass-card p-3 border-accent/40 ${box}`}>
-            <p className="text-xs text-accent font-semibold mb-1">Te invitaron a ser amigos</p>
+            <p className="text-xs text-accent font-semibold mb-1">{tr('Te invitaron a ser amigos')}</p>
             <ul><PersonRow p={invited} /></ul>
           </div>
         )}
@@ -178,18 +179,18 @@ export default function AmigosPage() {
         {/* Buscador */}
         <div className={`flex items-center gap-2 px-3 py-2.5 bg-glass border ${isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>
           <Search className="w-4 h-4 text-text-muted shrink-0" />
-          <input autoComplete="off" value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar por nombre o @usuario"
-                 className="flex-1 min-w-0 bg-transparent text-sm text-text-primary placeholder-text-muted focus:outline-none" aria-label="Buscar amigos" />
-          {q && <button type="button" onClick={() => setQ('')} aria-label="Borrar búsqueda" className="text-text-muted"><X className="w-4 h-4" /></button>}
+          <input autoComplete="off" value={q} onChange={e => setQ(e.target.value)} placeholder={tr('Buscar por nombre o @usuario')}
+                 className="flex-1 min-w-0 bg-transparent text-sm text-text-primary placeholder-text-muted focus:outline-none" aria-label={tr('Buscar amigos')} />
+          {q && <button type="button" onClick={() => setQ('')} aria-label={tr('Borrar búsqueda')} className="text-text-muted"><X className="w-4 h-4" /></button>}
         </div>
 
         {justSent && (
           <div className={`p-3 border border-accent/40 bg-accent/10 space-y-2 ${box}`}>
-            <p className="text-xs text-text-primary">✓ Le enviaste una solicitud a <b>{justSent.name.split(/\s+/)[0]}</b>. Le llega en FLOWI; si quieres, avísale también por WhatsApp.</p>
+            <p className="text-xs text-text-primary">{tr('✓ Le enviaste una solicitud a')} <b>{justSent.name.split(/\s+/)[0]}</b>. Le llega en FLOWI; si quieres, avísale también por WhatsApp.</p>
             <div className="flex gap-2">
               <a href={friendWhatsapp(me?.name || '', me?.uid || '', justSent.name, true)} target="_blank" rel="noopener noreferrer"
-                 className={`${btn} border-emerald-500/40 bg-emerald-500/15 text-emerald-400`}><MessageCircle className="w-3.5 h-3.5" /> Avisarle por WhatsApp</a>
-              <button type="button" onClick={() => setJustSent(null)} className={`${btn} border-glass-border text-text-muted`}>Listo</button>
+                 className={`${btn} border-emerald-500/40 bg-emerald-500/15 text-emerald-400`}><MessageCircle className="w-3.5 h-3.5" /> {tr('Avisarle por WhatsApp')}</a>
+              <button type="button" onClick={() => setJustSent(null)} className={`${btn} border-glass-border text-text-muted`}>{tr('Listo')}</button>
             </div>
           </div>
         )}
@@ -199,15 +200,15 @@ export default function AmigosPage() {
         {results !== null && (
           <section className={`glass-card px-3 ${box}`}>
             {searching && !results.length ? (
-              <p className="py-4 text-center text-xs text-text-muted">Buscando…</p>
+              <p className="py-4 text-center text-xs text-text-muted">{tr('Buscando…')}</p>
             ) : results.length ? (
               <ul className="divide-y divide-glass-border">{results.map(p => <PersonRow key={p.uid} p={p} />)}</ul>
             ) : (
               <div className="py-4 text-center space-y-2">
-                <p className="text-sm text-text-secondary">No encontramos a «{q.trim()}» en FLOWI.</p>
-                <p className="text-[11px] text-text-muted">Puede que aún no la tenga, o que no deje que la encuentren por el nombre.</p>
+                <p className="text-sm text-text-secondary">{tr('No encontramos a «{q}» en FLOWI.', { q: q.trim() })}</p>
+                <p className="text-[11px] text-text-muted">{tr('Puede que aún no la tenga, o que no deje que la encuentren por el nombre.')}</p>
                 <a href={friendWhatsapp(me?.name || '', me?.uid || '', q.trim(), false)} target="_blank" rel="noopener noreferrer"
-                   className={`${btn} mx-auto border-emerald-500/40 bg-emerald-500/15 text-emerald-400`}><MessageCircle className="w-3.5 h-3.5" /> Invitar a FLOWI por WhatsApp</a>
+                   className={`${btn} mx-auto border-emerald-500/40 bg-emerald-500/15 text-emerald-400`}><MessageCircle className="w-3.5 h-3.5" /> {tr('Invitar a FLOWI por WhatsApp')}</a>
               </div>
             )}
           </section>
@@ -216,13 +217,13 @@ export default function AmigosPage() {
         {/* Solicitudes recibidas */}
         {incoming.length > 0 && (
           <section className="space-y-2">
-            <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">Solicitudes ({incoming.length})</h2>
+            <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('Solicitudes')} ({incoming.length})</h2>
             <ul className={`glass-card px-3 divide-y divide-glass-border ${box}`}>
               {incoming.map(r => (
                 <PersonRow key={r.id} p={{ uid: r.from, name: r.fromName, photo: r.fromPhoto, username: r.fromUsername }}>
                   <span className="flex gap-1.5">
-                    <button type="button" disabled={busy === r.id} onClick={() => answer(r.id, true)} className={`${btn} border-accent bg-accent/15 text-accent`}><Check className="w-3.5 h-3.5" /> Aceptar</button>
-                    <button type="button" disabled={busy === r.id} onClick={() => answer(r.id, false)} aria-label="Rechazar" className={`${btn} border-glass-border text-text-muted`}><X className="w-3.5 h-3.5" /></button>
+                    <button type="button" disabled={busy === r.id} onClick={() => answer(r.id, true)} className={`${btn} border-accent bg-accent/15 text-accent`}><Check className="w-3.5 h-3.5" /> {tr('Aceptar')}</button>
+                    <button type="button" disabled={busy === r.id} onClick={() => answer(r.id, false)} aria-label={tr('Rechazar')} className={`${btn} border-glass-border text-text-muted`}><X className="w-3.5 h-3.5" /></button>
                   </span>
                 </PersonRow>
               ))}
@@ -232,7 +233,7 @@ export default function AmigosPage() {
 
         {/* Mis amigos */}
         <section className="space-y-2">
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">Mis amigos {friends.length ? `(${friends.length})` : ''}</h2>
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('Mis amigos')} {friends.length ? `(${friends.length})` : ''}</h2>
           {!ready ? (
             <div className="flex justify-center py-6"><div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" /></div>
           ) : friends.length ? (
@@ -240,7 +241,7 @@ export default function AmigosPage() {
               {friends.map(f => (
                 <PersonRow key={f.uid} p={f}>
                   <span className="flex gap-1.5">
-                    <button type="button" disabled title="Muy pronto" className={`${btn} border-glass-border text-text-muted opacity-60`}><MessageCircle className="w-3.5 h-3.5" /> Chat</button>
+                    <button type="button" disabled title={tr('Muy pronto')} className={`${btn} border-glass-border text-text-muted opacity-60`}><MessageCircle className="w-3.5 h-3.5" /> {tr('Chat')}</button>
                     <button type="button" onClick={() => setRemoving({ id: f.requestId, name: f.name })} aria-label={`Eliminar a ${f.name}`}
                             className={`${btn} border-glass-border text-text-muted`}><UserMinus className="w-3.5 h-3.5" /></button>
                   </span>
@@ -250,11 +251,11 @@ export default function AmigosPage() {
           ) : (
             <div className={`glass-card glass-static p-5 text-center space-y-1 ${box}`}>
               <Users className="w-9 h-9 text-accent/40 mx-auto" />
-              <p className="text-sm text-text-primary">Todavía no tienes amigos en FLOWI</p>
-              <p className="text-[11px] text-text-muted">Búscalos arriba o compárteles tu enlace.</p>
+              <p className="text-sm text-text-primary">{tr('Todavía no tienes amigos en FLOWI')}</p>
+              <p className="text-[11px] text-text-muted">{tr('Búscalos arriba o compárteles tu enlace.')}</p>
             </div>
           )}
-          {pendingSent > 0 && <p className="text-[11px] text-text-muted">{pendingSent === 1 ? '1 solicitud enviada' : `${pendingSent} solicitudes enviadas`} esperando respuesta.</p>}
+          {pendingSent > 0 && <p className="text-[11px] text-text-muted">{pendingSent === 1 ? tr('1 solicitud enviada esperando respuesta.') : tr('{n} solicitudes enviadas esperando respuesta.', { n: pendingSent })}</p>}
         </section>
 
         {/* Mi perfil público */}
@@ -264,22 +265,22 @@ export default function AmigosPage() {
               <Avatar p={me} isTech={isTech} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-text-primary truncate">{me.name}</p>
-                <p className="text-[11px] text-text-muted truncate">@{me.username} · así te ven tus amigos</p>
+                <p className="text-[11px] text-text-muted truncate">@{me.username} · {tr('así te ven tus amigos')}</p>
               </div>
-              <button type="button" onClick={shareMine} className={`${btn} border-accent/40 text-accent`}><Share2 className="w-3.5 h-3.5" /> Mi enlace</button>
+              <button type="button" onClick={shareMine} className={`${btn} border-accent/40 text-accent`}><Share2 className="w-3.5 h-3.5" /> {tr('Mi enlace')}</button>
             </div>
             <label className="flex items-start gap-2 text-xs text-text-secondary cursor-pointer">
               <input type="checkbox" checked={me.searchable} onChange={e => setSearchable(e.target.checked).catch(() => {})} className="mt-0.5 w-4 h-4 accent-[var(--accent)]" />
-              <span>Que me encuentren por mi nombre. Si lo apagas, solo te pueden agregar con tu enlace.</span>
+              <span>{tr('Que me encuentren por mi nombre. Si lo apagas, solo te pueden agregar con tu enlace.')}</span>
             </label>
           </section>
         )}
       </main>
       <BottomNav />
-      <ConfirmDialog isOpen={!!removing} title="Eliminar amigo" confirmText="Sí, eliminar"
+      <ConfirmDialog isOpen={!!removing} title={tr('Eliminar amigo')} confirmText="Sí, eliminar"
                      message={removing ? `${removing.name.split(/\s+/)[0]} ya no estará en tus amigos. No se le avisa.` : ''}
                      onCancel={() => setRemoving(null)}
-                     onConfirm={async () => { const r = removing; setRemoving(null); if (r) await removeFriendship(r.id).catch(() => setError('No se pudo eliminar.')); }} />
+                     onConfirm={async () => { const r = removing; setRemoving(null); if (r) await removeFriendship(r.id).catch(() => setError(tr('No se pudo eliminar.'))); }} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSharedLinks } from '@/components/SharedLinksProvider';
@@ -30,16 +31,16 @@ export function IncomingShared({ isTech, compact = false }: { isTech: boolean; c
         return (
           <div key={l.id} className={`${card} border-accent/40 bg-accent/5`}>
             <p className="text-sm text-text-primary leading-snug">
-              👥 <b>{who}</b> compartió contigo <b>{l.description}</b> ({when})
+              👥 <b>{who}</b> {tr('compartió contigo')} <b>{l.description}</b> ({when})
             </p>
             <p className="text-xs text-text-secondary mt-0.5">
-              Te toca <b className="text-accent">{fmt(l.share)}</b>. Si lo aceptas, queda en tus gastos con «Pagó {who}» y le debes eso.
+              {tr('Te toca')} <b className="text-accent">{fmt(l.share)}</b>. {tr('Si lo aceptas, queda en tus gastos con «Pagó {p}» y le debes eso.', { p: who })}
             </p>
             <div className="flex gap-1.5 mt-2">
               <button type="button" disabled={busy === l.id} onClick={() => run(l.id, () => accept(l))}
                       className={`${btn} border-accent bg-accent/15 text-accent`}>{busy === l.id ? 'Guardando…' : 'Aceptar'}</button>
               <button type="button" disabled={busy === l.id} onClick={() => run(l.id, () => reject(l))}
-                      className={`${btn} border-glass-border text-text-muted`}>No es mío</button>
+                      className={`${btn} border-glass-border text-text-muted`}>{tr('No es mío')}</button>
             </div>
           </div>
         );
@@ -47,14 +48,14 @@ export function IncomingShared({ isTech, compact = false }: { isTech: boolean; c
       {deletedForMe.map(l => (
         <div key={l.id} className={`${card} border-amber-400/40 bg-amber-400/5`}>
           <p className="text-sm text-text-primary leading-snug">
-            {l.ownerName.split(/\s+/)[0]} borró <b>{l.description}</b> de sus gastos compartidos.
+            {tr('{p} borró', { p: l.ownerName.split(/\s+/)[0] })} <b>{l.description}</b> {tr('de sus gastos compartidos.')}
           </p>
           <div className="flex gap-1.5 mt-2">
             <button type="button" disabled={busy === l.id}
                     onClick={() => run(l.id, async () => { if (l.friendTxId) await deleteExpense(l.friendTxId); await updateLink(l.id, { friendTxId: null }); })}
-                    className={`${btn} border-amber-400/60 text-amber-300`}>Borrarlo también de mis gastos</button>
+                    className={`${btn} border-amber-400/60 text-amber-300`}>{tr('Borrarlo también de mis gastos')}</button>
             <button type="button" disabled={busy === l.id} onClick={() => run(l.id, () => updateLink(l.id, { friendTxId: null }))}
-                    className={`${btn} border-glass-border text-text-muted`}>Dejarlo</button>
+                    className={`${btn} border-glass-border text-text-muted`}>{tr('Dejarlo')}</button>
           </div>
         </div>
       ))}

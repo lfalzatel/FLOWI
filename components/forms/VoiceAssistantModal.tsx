@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 
 import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
 import { groupByCategory, splitTotal } from '@/lib/receiptItems';
@@ -154,7 +154,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       : read.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
       : read.reason === 'timeout' ? 'La IA gratuita está lenta ahora y no alcanzó a leerlo. Inténtalo otra vez en un momento, o díctalo.'
       : read.reason === 'busy' ? 'La IA gratuita está ocupada en este momento. Inténtalo en un minuto, o díctalo.'
-      : 'No pude conectar con la IA. Revisa tu conexión e inténtalo de nuevo.'
+      : tr('No pude conectar con la IA. Revisa tu conexión e inténtalo de nuevo.')
     );
   };
 
@@ -400,12 +400,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             kind: 'command',
             action: 'create_reminder',
             targetUrl: '/servicios/recordatorios',
-            title: 'Nuevo Recordatorio 🔔',
+            title: tr('Nuevo Recordatorio 🔔'),
             content: cleanTitle,
             dueDate,
             time,
             frequency,
-            label: 'Guardar Recordatorio',
+            label: tr('Guardar Recordatorio'),
             rawText: text
           };
           setParsedResults([reminderCmd]);
@@ -442,7 +442,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             targetUrl: '/servicios/notas',
             title,
             content,
-            label: 'Guardar Nota',
+            label: tr('Guardar Nota'),
             rawText: text
           };
           setParsedResults([noteCmd]);
@@ -570,19 +570,19 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           const locale = detectUserLocaleAndCurrency(profile?.currency);
 
           if (cmd.action === 'navigate' && cmd.targetUrl) {
-            speakText(`Navegando a ${cmd.label || cmd.title}`, locale.language);
+            speakText(tr('Navegando a {a}', { a: cmd.label || cmd.title }), locale.language);
             router.push(cmd.targetUrl);
           } else if (cmd.action === 'create_note') {
             await addNote({
               userId: user.uid,
-              title: cmd.title || 'Nota por voz',
+              title: cmd.title || tr('Nota por voz'),
               content: cmd.content || cmd.rawText,
               color: '#3B82F6',
             });
           } else if (cmd.action === 'create_reminder') {
             await addReminder({
               userId: user.uid,
-              title: cmd.content || cmd.title || 'Recordatorio por voz',
+              title: cmd.content || cmd.title || tr('Recordatorio por voz'),
               description: cmd.rawText,
               type: cmd.frequency || 'once',
               date: cmd.dueDate || undefined,
@@ -603,7 +603,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         if (tx.type === 'deuda') {
           await addDebt({
             userId: user.uid,
-            title: tx.description || `Deuda con ${tx.debtPerson || 'persona'}`,
+            title: tx.description || tr('Deuda con {a}', { a: tx.debtPerson || 'persona' }),
             totalAmount: tx.amount,
             interestRate: tx.interestRate || 0,
             direction: tx.debtDirection || 'debo',
@@ -619,7 +619,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           const when = tx.time
             ? new Date(`${tx.date || new Date().toLocaleDateString('en-CA')}T${tx.time}:00`)
             : !tx.date || tx.date === new Date().toLocaleDateString('en-CA') ? new Date() : new Date(`${tx.date}T12:00:00`);
-          const base = (tx.merchant || tx.description || 'Compra').slice(0, 40);
+          const base = (tx.merchant || tx.description || tr('Compra')).slice(0, 40);
           for (let g = 0; g < groups.length; g++) {
             const names = groups[g].items.slice(0, 2).map(i => i.name.toLowerCase().replace(/^\w/, c => c.toUpperCase())).join(', ');
             await addExpense({
@@ -731,8 +731,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               >
                 <Check className="w-10 h-10 stroke-[3]" />
               </motion.div>
-              <h3 className="text-2xl font-bold text-white mb-1">¡Registrado con Éxito! 🎉</h3>
-              <p className="text-emerald-400 text-sm font-medium">Tus datos financieros fueron guardados</p>
+              <h3 className="text-2xl font-bold text-white mb-1">{tr('¡Registrado con Éxito! 🎉')}</h3>
+              <p className="text-emerald-400 text-sm font-medium">{tr('Tus datos financieros fueron guardados')}</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -752,7 +752,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5 text-accent animate-pulse" />
           <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent font-mono' : 'text-text-primary font-syne'}`}>
-            Asistente de Voz IA
+            {tr('Asistente de Voz IA')}
           </h2>
         </div>
 
@@ -762,7 +762,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
         {!reviewing && (<>
         <p className={`text-xs max-w-xs mb-4 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-          Dicta transacciones, comandos como "abrir estadísticas" o crea notas y recordatorios. También puedes registrar un gasto con la foto del recibo.
+          {tr('Dicta transacciones, comandos como "abrir estadísticas" o crea notas y recordatorios. También puedes registrar un gasto con la foto del recibo.')}
         </p>
 
         {/* Animación del Micrófono */}
@@ -802,7 +802,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             </span>
           ) : (
             <span className={`text-xs font-semibold ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-              Toca el micrófono para hablar
+              {tr('Toca el micrófono para hablar')}
             </span>
           )}
         </div>
@@ -816,7 +816,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           }`}
         >
           <Camera className="w-4 h-4 text-accent" />
-          Registrar con foto del recibo
+          {tr('Registrar con foto del recibo')}
         </button>
         </>)}
 
@@ -838,7 +838,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               </button>
             </div>
             {isListening && correctingRef.current && (
-              <p className="text-[10px] text-accent normal-case text-center">Di qué cambiar: "eran 25 mil", "ponlo en Nequi", "fue ayer"…</p>
+              <p className="text-[10px] text-accent normal-case text-center">{tr('Di qué cambiar: "eran 25 mil", "ponlo en Nequi", "fue ayer"…')}</p>
             )}
             {!isListening && transcript && correcting !== 'listening' && (
               <p className="text-[10px] text-text-muted normal-case italic text-center truncate">"{transcript}"</p>
@@ -851,19 +851,19 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           <div className={`w-full max-w-xs mt-2 mb-1 p-4 text-left normal-case border-2 border-accent bg-accent/10 shadow-[0_0_24px_-6px_var(--accent)] ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
             <div className="flex items-center gap-2 mb-1.5">
               <Sparkles className="w-5 h-5 text-accent shrink-0 animate-pulse" />
-              <p className="text-sm font-bold text-text-primary">Activa la IA para leer recibos</p>
+              <p className="text-sm font-bold text-text-primary">{tr('Activa la IA para leer recibos')}</p>
             </div>
             <p className="text-xs text-text-secondary mb-3">
-              FLOWI lee el monto, el comercio, la fecha y los productos de tus recibos y comprobantes. Es gratis y tu clave queda solo en este celular.
+              {tr('FLOWI lee el monto, el comercio, la fecha y los productos de tus recibos y comprobantes. Es gratis y tu clave queda solo en este celular.')}
             </p>
             <button
               type="button"
               onClick={() => { onClose(); router.push('/configuracion#ia'); }}
               className={`w-full py-3 text-sm font-bold bg-accent text-black flex items-center justify-center gap-2 hover:opacity-90 ${isTechTheme ? 'rounded-none uppercase font-mono' : 'rounded-xl'}`}
             >
-              <Sparkles className="w-4 h-4" /> Conectar IA gratis
+              <Sparkles className="w-4 h-4" /> {tr('Conectar IA gratis')}
             </button>
-            <p className="text-[10px] text-text-muted mt-2 text-center">Después vuelve a tomar o compartir la foto.</p>
+            <p className="text-[10px] text-text-muted mt-2 text-center">{tr('Después vuelve a tomar o compartir la foto.')}</p>
           </div>
         )}
         {receiptStatus === 'error' && (
@@ -895,7 +895,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                 <span>
                   {readKind === 'movimientos'
                     ? `Leí ${parsedResults.length} movimiento${parsedResults.length === 1 ? '' : 's'} de tu banco. Revisa y borra los que no quieras; la foto no se guarda.`
-                    : 'Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.'}
+                    : tr('Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.')}
                   {receiptsLeft !== null && (receiptsLeft === 0
                     ? ' Este era tu último recibo de hoy; mañana se renuevan.'
                     : ` Te ${receiptsLeft === 1 ? 'queda 1 recibo' : `quedan ${receiptsLeft} recibos`} hoy.`)}
@@ -908,7 +908,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   <Layers className="w-4 h-4" />
                   <span>{parsedResults.length} Elementos Detectados</span>
                 </span>
-                <span className="text-[10px] text-text-muted">Toca ✏️ para editar</span>
+                <span className="text-[10px] text-text-muted">{tr('Toca ✏️ para editar')}</span>
               </div>
             )}
 
@@ -929,7 +929,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     <button
                       type="button"
                       onClick={() => handleRemoveResult(idx)}
-                      title="Eliminar este elemento"
+                      title={tr('Eliminar este elemento')}
                       className="p-1 text-red-400/60 hover:text-red-400 transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -943,18 +943,18 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                         <div className="space-y-2.5 mt-1">
                           <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-amber-400">
                             <Bell className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                            <span>RECORDATORIO DETECTADO</span>
+                            <span>{tr('RECORDATORIO DETECTADO')}</span>
                           </div>
 
                           {/* Frecuencia Selectors */}
                           <div>
-                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-1">Frecuencia</label>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-1">{tr('Frecuencia')}</label>
                             <div className="grid grid-cols-4 gap-1">
                               {[
-                                { key: 'once', label: 'Una vez' },
-                                { key: 'daily', label: 'Diario' },
-                                { key: 'weekly', label: 'Semanal' },
-                                { key: 'monthly', label: 'Mensual' },
+                                { key: 'once', label: tr('Una vez') },
+                                { key: 'daily', label: tr('Diario') },
+                                { key: 'weekly', label: tr('Semanal') },
+                                { key: 'monthly', label: tr('Mensual') },
                               ].map((f) => (
                                 <button
                                   key={f.key}
@@ -975,7 +975,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           {/* Hora y Fecha */}
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Hora</label>
+                              <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Hora')}</label>
                               <input autoComplete="off"
                                 type="time"
                                 value={cmd.time || '08:00'}
@@ -987,7 +987,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                               />
                             </div>
                             <div>
-                              <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Fecha</label>
+                              <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Fecha')}</label>
                               <input autoComplete="off"
                                 type="date"
                                 value={cmd.dueDate || ''}
@@ -1002,13 +1002,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
                           {/* Detalle */}
                           <div>
-                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Título / Recordar</label>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Título / Recordar')}</label>
                             <input autoComplete="off"
                               type="text"
                               value={cmd.content || ''}
                               onFocus={() => stopListening()}
                               onChange={(e) => handleUpdateItem(idx, 'content', e.target.value)}
-                              placeholder="Escribe el detalle..."
+                              placeholder={tr('Escribe el detalle...')}
                               className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none focus:border-amber-400 ${
                                 isTechTheme ? 'bg-black/60 border border-amber-500/40 text-amber-400 font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
                               }`}
@@ -1019,18 +1019,18 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                         <div className="space-y-2.5 mt-1">
                           <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-purple-400">
                             <StickyNote className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
-                            <span>NOTA IMPORTANTE DETECTADA</span>
+                            <span>{tr('NOTA IMPORTANTE DETECTADA')}</span>
                           </div>
 
                           {/* Título de la Nota */}
                           <div>
-                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Título de la Nota</label>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Título de la Nota')}</label>
                             <input autoComplete="off"
                               type="text"
                               value={cmd.title || ''}
                               onFocus={() => stopListening()}
                               onChange={(e) => handleUpdateItem(idx, 'title', e.target.value)}
-                              placeholder="Ej: Citas médicas, Lista de compras..."
+                              placeholder={tr('Ej: Citas médicas, Lista de compras...')}
                               className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:border-purple-400 ${
                                 isTechTheme ? 'bg-black/60 border border-purple-500/40 text-purple-300 font-mono' : 'bg-black/40 border border-white/20 text-white'
                               }`}
@@ -1039,13 +1039,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
                           {/* Contenido / Nota */}
                           <div>
-                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Contenido / Nota</label>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Contenido / Nota')}</label>
                             <textarea
                               rows={3}
                               value={cmd.content || ''}
                               onFocus={() => stopListening()}
                               onChange={(e) => handleUpdateItem(idx, 'content', e.target.value)}
-                              placeholder="Escribe o corrige el contenido..."
+                              placeholder={tr('Escribe o corrige el contenido...')}
                               className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-400 leading-relaxed resize-none ${
                                 isTechTheme ? 'bg-black/60 border border-purple-500/40 text-white font-mono' : 'bg-black/40 border border-white/20 text-text-primary'
                               }`}
@@ -1119,7 +1119,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                               const nextType = res.type === 'gasto' ? 'ingreso' : res.type === 'ingreso' ? 'deuda' : 'gasto';
                               handleUpdateItem(idx, 'type', nextType);
                             }}
-                            title="Toca para cambiar entre Gasto, Ingreso o Deuda"
+                            title={tr('Toca para cambiar entre Gasto, Ingreso o Deuda')}
                             className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border transition-all active:scale-95 flex items-center gap-1 cursor-pointer ${
                               res.type === 'ingreso' 
                                 ? 'text-emerald-400 bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/25' 
@@ -1133,7 +1133,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           </button>
                           {res.isFixed && res.type === 'gasto' && (
                             <span className="text-[8px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-400 font-bold uppercase">
-                              Gasto Fijo
+                              {tr('Gasto Fijo')}
                             </span>
                           )}
                         </div>
@@ -1143,7 +1143,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                       <div className="space-y-2 pt-1 border-t border-white/10">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Monto</label>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Monto')}</label>
                             <div className="relative flex items-center">
                               <span className="absolute left-2 text-xs font-bold text-accent">$</span>
                               <input autoComplete="off" 
@@ -1159,7 +1159,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           </div>
 
                           <div>
-                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Categoría</label>
+                            <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Categoría')}</label>
                             <button
                               type="button"
                               onClick={() => {
@@ -1180,13 +1180,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                         </div>
 
                         <div>
-                          <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">Descripción / Concepto</label>
+                          <label className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">{tr('Descripción / Concepto')}</label>
                           <input autoComplete="off" 
                             type="text"
                             value={res.description}
                             onFocus={() => stopListening()}
                             onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
-                            placeholder="Escribe la descripción..."
+                            placeholder={tr('Escribe la descripción...')}
                             className={`w-full px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:border-accent transition-shadow ${hl('description')} ${
                               isTechTheme ? 'rounded-none bg-black/60 border border-accent/40 text-accent font-mono' : 'rounded-xl bg-black/40 border border-white/20 text-text-primary'
                             }`}
@@ -1205,21 +1205,21 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                               <div className="flex items-center gap-2">
                                 <input autoComplete="off" type="date" value={res.date} max={today}
                                        onChange={(e) => { if (e.target.value) { handleUpdateItem(idx, 'date', e.target.value); handleUpdateItem(idx, 'time', undefined); } }}
-                                       aria-label="Cambiar la fecha"
+                                       aria-label={tr('Cambiar la fecha')}
                                        className={`flex-1 min-w-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
                                 <input autoComplete="off" type="time" value={res.time || '12:00'}
                                        onChange={(e) => handleUpdateItem(idx, 'time', e.target.value || undefined)}
-                                       aria-label="Cambiar la hora"
+                                       aria-label={tr('Cambiar la hora')}
                                        className={`flex-1 min-w-0 px-2 py-1 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
                               </div>
                             </div>
                           );
                         })() : res.date ? (
                           <div className={`flex items-center gap-2 text-[10px] text-text-muted normal-case px-1 -mx-1 ${hl('date')}`}>
-                            <span>Fecha: hoy, a las</span>
+                            <span>{tr('Fecha: hoy, a las')}</span>
                             <input autoComplete="off" type="time" value={res.time || new Date().toTimeString().slice(0, 5)}
                                    onChange={(e) => handleUpdateItem(idx, 'time', e.target.value || undefined)}
-                                   aria-label="Cambiar la hora"
+                                   aria-label={tr('Cambiar la hora')}
                                    className={`w-[5.5rem] px-2 py-0.5 text-xs bg-black/40 border border-white/20 text-text-primary ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
                           </div>
                         ) : null}
@@ -1286,7 +1286,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   <Check className="w-5 h-5" />
                   <span>
                     {parsedResults.some(r => 'kind' in r && r.kind === 'command')
-                      ? 'Ejecutar Comando'
+                      ? tr('Ejecutar Comando')
                       : `Guardar ${parsedResults.length === 1 ? 'Transacción' : `Todas (${parsedResults.length})`}`}
                   </span>
                 </>
@@ -1302,7 +1302,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             }`}
           >
             <Keyboard className="w-4 h-4" />
-            <span>Cambiar a entrada manual con teclado</span>
+            <span>{tr('Cambiar a entrada manual con teclado')}</span>
           </button>
         </div>
       </div>
@@ -1322,7 +1322,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           <div className={`flex items-center justify-between pb-3 mb-3 border-b ${isTechTheme ? 'border-accent/30' : 'border-white/10'}`}>
             <div className="flex items-center gap-2">
               <Layers className="w-5 h-5 text-accent" />
-              <h3 className="text-sm font-bold uppercase tracking-wider">Seleccionar Categoría</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider">{tr('Seleccionar Categoría')}</h3>
             </div>
             <button
               type="button"
@@ -1345,7 +1345,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             <Search className={`w-4 h-4 absolute left-3 top-3 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             <input autoComplete="off"
               type="text"
-              placeholder="Buscar categoría..."
+              placeholder={tr('Buscar categoría...')}
               value={categorySearch}
               onChange={(e) => setCategorySearch(e.target.value)}
               onFocus={() => stopListening()}

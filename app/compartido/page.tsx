@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Users, Check } from 'lucide-react';
@@ -34,7 +34,7 @@ export default function CompartidoPage() {
           <div className="w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto">
             <Users className="w-7 h-7 text-emerald-400" />
           </div>
-          <h1 className="text-xl font-bold font-syne">Gasto compartido</h1>
+          <h1 className="text-xl font-bold font-syne">{tr('Gasto compartido')}</h1>
           {data && (
             <p className="text-sm text-white/60">
               {data.p ? `${data.p} te compartió` : 'Te compartieron'} {data.i.length === 1 ? 'lo que te tocó' : 'lo que quedó pendiente'}.
@@ -44,7 +44,7 @@ export default function CompartidoPage() {
 
         {data === undefined ? null : !data ? (
           <div className="rounded-3xl bg-[#0D1527] border border-white/5 p-5 text-center text-sm text-white/60">
-            Este enlace está incompleto o dañado. Pídele a quien te lo envió que lo mande otra vez.
+            {tr('Este enlace está incompleto o dañado. Pídele a quien te lo envió que lo mande otra vez.')}
           </div>
         ) : (
           <>
@@ -57,37 +57,37 @@ export default function CompartidoPage() {
                   </div>
                   <span className="text-sm font-bold tabular-nums">{fmt(x.a)}</span>
                   {user && (saved.includes(k) ? (
-                    <span className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center" aria-label="Guardado"><Check className="w-4 h-4" /></span>
+                    <span className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center" aria-label={tr('Guardado')}><Check className="w-4 h-4" /></span>
                   ) : (
                     <button type="button" onClick={() => setSaving(k)}
-                            className="px-3 py-1.5 rounded-xl bg-emerald-500 text-black text-xs font-bold">Anotar</button>
+                            className="px-3 py-1.5 rounded-xl bg-emerald-500 text-black text-xs font-bold">{tr('Anotar')}</button>
                   ))}
                 </li>
               ))}
               {data.i.length > 1 && (
-                <li className="flex justify-between p-4 text-sm"><span className="text-white/60">Total</span><b className="tabular-nums">{fmt(total)}</b></li>
+                <li className="flex justify-between p-4 text-sm"><span className="text-white/60">{tr('Total')}</span><b className="tabular-nums">{fmt(total)}</b></li>
               )}
             </ul>
 
             {loading ? null : user ? (
               <div className="text-center space-y-2">
-                <p className="text-xs text-white/50">Toca <b>Anotar</b> para guardarlo en tus gastos; puedes revisarlo antes de guardar.</p>
-                <Link href="/" className="text-xs text-emerald-400/80 hover:text-emerald-300">Ir a FLOWI</Link>
+                <p className="text-xs text-white/50">{tr('Toca')} <b>{tr('Anotar')}</b> para guardarlo en tus gastos; puedes revisarlo antes de guardar.</p>
+                <Link href="/" className="text-xs text-emerald-400/80 hover:text-emerald-300">{tr('Ir a FLOWI')}</Link>
               </div>
             ) : (
               <div className="rounded-3xl bg-gradient-to-br from-emerald-500/15 to-transparent border border-emerald-500/20 p-5 space-y-3 text-center">
-                <p className="font-semibold">¿Quieres saber en qué se te va la plata?</p>
-                <p className="text-sm text-white/60">FLOWI te ayuda a llevar el control de tus gastos y de lo que te deben. Es gratis y sin publicidad.</p>
+                <p className="font-semibold">{tr('¿Quieres saber en qué se te va la plata?')}</p>
+                <p className="text-sm text-white/60">{tr('FLOWI te ayuda a llevar el control de tus gastos y de lo que te deben. Es gratis y sin publicidad.')}</p>
                 <Link href={`/login?next=${encodeURIComponent(here)}`}
-                      className="block w-full py-3 rounded-xl bg-emerald-500 text-black font-bold">Probar FLOWI gratis</Link>
-                <p className="text-[11px] text-white/40">Al entrar puedes anotar este gasto con un toque.</p>
+                      className="block w-full py-3 rounded-xl bg-emerald-500 text-black font-bold">{tr('Probar FLOWI gratis')}</Link>
+                <p className="text-[11px] text-white/40">{tr('Al entrar puedes anotar este gasto con un toque.')}</p>
               </div>
             )}
           </>
         )}
 
         <p className="text-center text-[11px] text-white/30">
-          <Link href="/legal#privacidad" className="hover:text-white/60">Privacidad</Link>
+          <Link href="/legal#privacidad" className="hover:text-white/60">{tr('Privacidad')}</Link>
         </p>
       </main>
 

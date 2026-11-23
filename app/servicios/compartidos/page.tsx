@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -82,7 +82,7 @@ export default function CompartidosPage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-text-primary truncate">{b.name}</p>
             <p className="text-[11px] text-text-muted truncate">
-              {owes ? 'Te debe' : iOwe ? 'Le debes' : b.owesMe && b.iOwe ? 'Quedan a paz y salvo si se cruzan' : 'A paz y salvo'}
+              {owes ? tr('Te debe') : iOwe ? tr('Le debes') : b.owesMe && b.iOwe ? tr('Quedan a paz y salvo si se cruzan') : tr('A paz y salvo')}
               {' · '}{b.entries.length} {b.entries.length === 1 ? 'gasto' : 'gastos'}
             </p>
           </div>
@@ -94,7 +94,7 @@ export default function CompartidosPage() {
         {isOpen && (
           <div className="px-3 pb-3 space-y-2">
             {(b.owesMe > 0 && b.iOwe > 0) && (
-              <p className="text-[11px] text-text-muted">Te debe {fmt(b.owesMe)} y le debes {fmt(b.iOwe)}.</p>
+              <p className="text-[11px] text-text-muted">{tr('Te debe {a} y le debes {b}.', { a: fmt(b.owesMe), b: fmt(b.iOwe) })}</p>
             )}
             <ul className="divide-y divide-glass-border border-t border-glass-border">
               {b.entries.map(e => (
@@ -119,9 +119,9 @@ export default function CompartidosPage() {
                   </span>
                   {/* Abonar (o ver los abonos de uno ya saldado) */}
                   <button type="button" onClick={() => setPaying({ tx: e.tx, index: e.index })}
-                          aria-label={e.settled ? 'Ver abonos' : 'Registrar abono'}
+                          aria-label={e.settled ? tr('Ver abonos') : tr('Registrar abono')}
                           className={`h-7 px-2 flex items-center gap-1 border shrink-0 text-[11px] font-semibold ${isTech ? 'rounded-none' : 'rounded-full'} ${e.settled ? 'border-accent bg-accent/20 text-accent' : 'border-accent/40 text-accent'}`}>
-                    {e.settled ? <Check className="w-3.5 h-3.5" /> : <><HandCoins className="w-3.5 h-3.5" /> Abonar</>}
+                    {e.settled ? <Check className="w-3.5 h-3.5" /> : <><HandCoins className="w-3.5 h-3.5" /> {tr('Abonar')}</>}
                   </button>
                 </li>
               ))}
@@ -135,7 +135,7 @@ export default function CompartidosPage() {
                   </a>}
                   <button type="button" disabled={busy} onClick={() => settle(pendingToMe, true)}
                           className={`flex-1 min-w-[8rem] py-2 text-xs font-semibold border border-accent/40 text-accent ${btn}`}>
-                    Ya me pagó todo
+                    {tr('Ya me pagó todo')}
                   </button>
                 </>
               )}
@@ -157,22 +157,22 @@ export default function CompartidosPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Gastos compartidos</h1>
-            <p className="text-xs text-text-muted">Quién te debe, a quién le debes y cobra con un mensaje.</p>
+            <h1 className={`text-xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Gastos compartidos')}</h1>
+            <p className="text-xs text-text-muted">{tr('Quién te debe, a quién le debes y cobra con un mensaje.')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div className={`glass-card glass-static p-3 ${box}`}>
-            <p className="text-[11px] text-text-muted">Te deben</p>
+            <p className="text-[11px] text-text-muted">{tr('Te deben')}</p>
             <p className="text-lg font-bold text-accent tabular-nums">{fmt(totalToMe)}</p>
           </div>
           <div className={`glass-card glass-static p-3 ${box}`}>
-            <p className="text-[11px] text-text-muted">Debes</p>
+            <p className="text-[11px] text-text-muted">{tr('Debes')}</p>
             <p className="text-lg font-bold text-[var(--red)] tabular-nums">{fmt(totalFromMe)}</p>
           </div>
         </div>
@@ -189,21 +189,21 @@ export default function CompartidosPage() {
         ) : !balances.length ? (
           <div className={`glass-card glass-static p-6 text-center space-y-2 ${box}`}>
             <Users className="w-10 h-10 text-accent/40 mx-auto" />
-            <p className="text-sm text-text-primary font-medium">Todavía no tienes gastos compartidos</p>
+            <p className="text-sm text-text-primary font-medium">{tr('Todavía no tienes gastos compartidos')}</p>
             <p className="text-xs text-text-muted">
-              Cuando pagues algo entre varios, al registrar el gasto toca <b className="text-text-secondary">👥 Compartir este gasto</b>.
-              En tus gastos queda solo tu parte, y aquí ves lo que te debe cada persona. Tus amigos no necesitan tener FLOWI.
+              Cuando pagues algo entre varios, al registrar el gasto toca <b className="text-text-secondary">{tr('👥 Compartir este gasto')}</b>.
+              {tr('En tus gastos queda solo tu parte, y aquí ves lo que te debe cada persona. Tus amigos no necesitan tener FLOWI.')}
             </p>
           </div>
         ) : (
           <>
             {pending.length > 0 ? (
               <section className="space-y-2">
-                <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">Pendientes</h2>
+                <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('Pendientes')}</h2>
                 <ul className="space-y-2">{pending.map(b => <PersonCard key={b.key} b={b} />)}</ul>
               </section>
             ) : (
-              <p className="text-center text-sm text-text-muted">🎉 Estás a paz y salvo con todos.</p>
+              <p className="text-center text-sm text-text-muted">{tr('🎉 Estás a paz y salvo con todos.')}</p>
             )}
             {settled.length > 0 && (
               <section className="space-y-2">

@@ -202,12 +202,12 @@ export function Header() {
       {/* Navigation Menu for Desktop */}
       <nav className="hidden md:flex items-center gap-1.5 p-1 bg-glass border border-glass-border rounded-2xl">
         {[
-          { path: '/', label: 'Inicio', techLabel: '[ 01_INICIO ]' },
-          { path: '/gastos', label: 'Gastos', techLabel: '[ 02_GASTOS ]' },
-          { path: '/ingresos', label: 'Ingresos', techLabel: '[ 03_INGRESOS ]' },
-          { path: '/deudas', label: 'Deudas', techLabel: '[ 04_DEUDAS ]' },
-          { path: '/servicios', label: 'Servicios', techLabel: '[ 05_SERVICIOS ]' },
-          { path: '/configuracion', label: 'Configuración', techLabel: '[ 06_CONFIG ]' },
+          { path: '/', label: tr('Inicio'), techLabel: '[ 01_INICIO ]' },
+          { path: '/gastos', label: tr('Gastos'), techLabel: '[ 02_GASTOS ]' },
+          { path: '/ingresos', label: tr('Ingresos'), techLabel: '[ 03_INGRESOS ]' },
+          { path: '/deudas', label: tr('Deudas'), techLabel: '[ 04_DEUDAS ]' },
+          { path: '/servicios', label: tr('Servicios'), techLabel: '[ 05_SERVICIOS ]' },
+          { path: '/configuracion', label: tr('Configuración'), techLabel: '[ 06_CONFIG ]' },
         ].map((item) => {
           const isActive = pathname === item.path;
           return (
@@ -302,12 +302,12 @@ export function Header() {
                     <div key={r.id} className={`p-3 mb-2 flex gap-3 items-center border border-accent/30 bg-accent/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
                       <Avatar p={{ name: r.fromName, photo: r.fromPhoto }} size={32} isTech={isTechTheme} />
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm text-text-primary leading-snug ${isTechTheme ? 'font-mono' : ''}`}><b>{r.fromName.split(/\s+/)[0]}</b> quiere ser tu amigo en FLOWI</p>
+                        <p className={`text-sm text-text-primary leading-snug ${isTechTheme ? 'font-mono' : ''}`}><b>{r.fromName.split(/\s+/)[0]}</b> {tr('quiere ser tu amigo en FLOWI')}</p>
                         <div className="flex gap-1.5 mt-1.5">
                           <button type="button" onClick={() => answerFriendRequest(r.id, true).catch(() => {})}
-                                  className={`px-2.5 py-1 text-[11px] font-semibold border border-accent bg-accent/15 text-accent ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>Aceptar</button>
+                                  className={`px-2.5 py-1 text-[11px] font-semibold border border-accent bg-accent/15 text-accent ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>{tr('Aceptar')}</button>
                           <button type="button" onClick={() => answerFriendRequest(r.id, false).catch(() => {})}
-                                  className={`px-2.5 py-1 text-[11px] font-semibold border border-glass-border text-text-muted ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>Ahora no</button>
+                                  className={`px-2.5 py-1 text-[11px] font-semibold border border-glass-border text-text-muted ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>{tr('Ahora no')}</button>
                         </div>
                       </div>
                     </div>

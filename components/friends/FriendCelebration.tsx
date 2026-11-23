@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
@@ -65,7 +66,7 @@ export function FriendCelebration() {
         try { navigator.vibrate?.([30, 60, 30]); } catch { /* sin vibración */ }
         // Voz (si la persona tiene activada la voz en Configuración → Sonidos)
         const first = String((e as CustomEvent).detail?.name || '').split(/\s+/)[0];
-        speakText(first ? `¡Ahora eres amigo de ${first}!` : '¡Tienes un amigo nuevo en FLOWI!', 'es-CO');
+        speakText(first ? tr('¡Ahora eres amigo de {a}!', { a: first }) : tr('¡Tienes un amigo nuevo en FLOWI!'), 'es-CO');
       }, 650);
       setTimeout(() => setFriend(null), 3600);
     };
@@ -79,7 +80,7 @@ export function FriendCelebration() {
 
   return createPortal(
     <div className={`fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in-up ${isTech ? 'font-mono' : ''}`}
-         onClick={() => setFriend(null)} role="dialog" aria-label={`Ahora eres amigo de ${first}`}>
+         onClick={() => setFriend(null)} role="dialog" aria-label={tr('Ahora eres amigo de {a}', { a: first })}>
       <div className="flex flex-col items-center gap-5 px-6 text-center">
         <div className="relative flex items-center justify-center h-28 w-72">
           {/* Las dos fotos llegan desde los lados y se juntan */}
@@ -92,7 +93,7 @@ export function FriendCelebration() {
           <span className={`absolute text-4xl transition-all duration-300 ${met ? 'scale-125 opacity-100' : 'scale-0 opacity-0'}`} style={{ transitionDelay: met ? '80ms' : '0ms' }}>🤝</span>
         </div>
         <div className={`transition-all duration-500 ${met ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
-          <p className={`text-2xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'text-white font-syne'}`}>¡Ahora son amigos!</p>
+          <p className={`text-2xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'text-white font-syne'}`}>{tr('¡Ahora son amigos!')}</p>
           <p className="text-sm text-white/80 mt-1">Tú y {first} ya pueden compartir gastos en FLOWI.</p>
         </div>
       </div>

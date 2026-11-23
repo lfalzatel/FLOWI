@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useRef } from 'react';
@@ -54,13 +55,13 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className={`fixed inset-0 z-[90] flex items-end md:items-center justify-center md:p-4 ${isTechTheme ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label="¿Qué quieres registrar?">
+    <div className={`fixed inset-0 z-[90] flex items-end md:items-center justify-center md:p-4 ${isTechTheme ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('¿Qué quieres registrar?')}>
       <div className={`absolute inset-0 ${isLight ? 'bg-black/20' : 'bg-black/50'}`} onClick={onClose} aria-hidden="true" />
       <div className={`relative w-full max-w-md glass-dropdown p-5 pb-8 animate-fade-in-up ${isTechTheme ? 'rounded-none border-t md:border border-accent/50' : 'rounded-t-[32px] md:rounded-[32px]'}`}>
         <div className={`mx-auto mb-4 h-1 w-10 bg-white/20 ${isTechTheme ? 'hidden' : 'rounded-full'}`} />
         <div className="flex items-center justify-between mb-4">
-          <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase tracking-wide' : 'font-syne text-text-primary'}`}>¿Qué quieres registrar?</h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 -mr-1 text-text-secondary hover:text-text-primary">
+          <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase tracking-wide' : 'font-syne text-text-primary'}`}>{tr('¿Qué quieres registrar?')}</h2>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 -mr-1 text-text-secondary hover:text-text-primary">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -110,7 +111,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
             </button>
           ))}
         </div>
-        <p className="mt-4 text-center text-[10px] text-text-muted">Consejo: mantén presionado el botón para hablar directo.</p>
+        <p className="mt-4 text-center text-[10px] text-text-muted">{tr('Consejo: mantén presionado el botón para hablar directo.')}</p>
       </div>
     </div>,
     document.body,

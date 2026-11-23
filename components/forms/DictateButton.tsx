@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 
@@ -46,7 +47,7 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
       const t = textRef.current.trim();
       if (!t) return;
       const summary = onText(t);
-      setMsg(summary || 'Listo. Revisa los datos antes de guardar.');
+      setMsg(summary || tr('Listo. Revisa los datos antes de guardar.'));
     };
     recRef.current = rec;
     try { rec.start(); } catch { setMsg('No pude encender el micrófono.'); }
@@ -60,7 +61,7 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
                 ? 'border-red-500/60 bg-red-500/15 text-red-400'
                 : isTech ? 'border-accent/40 text-accent' : 'border-glass-border text-text-primary hover:bg-white/5'} ${isTech ? 'rounded-none uppercase text-xs' : 'rounded-xl'}`}>
         {listening ? <MicOff className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4 text-accent" />}
-        {listening ? 'Escuchando… toca para terminar' : label}
+        {listening ? tr('Escuchando… toca para terminar') : label}
       </button>
       <p className="text-[10px] text-text-muted leading-snug mt-1 normal-case">
         {listening
