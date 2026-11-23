@@ -276,6 +276,23 @@ exports.avisarCambioCompartido = onDocumentUpdated({ document: 'fl_shared_links/
   }
 });
 
+// Comentario o sugerencia nueva (app/servicios/opiniones): aviso a los administradores
+exports.avisarComentario = onDocumentCreated({ document: 'fl_feedback/{id}', region: 'us-central1' }, async (event) => {
+  const f = event.data?.data();
+  if (!f) return;
+  const emoji = { gusta: '👍', mejorar: '👎', idea: '💡', error: '🐞' }[f.type] || '💬';
+  const admins = await db.collection('users').where('role', '==', 'admin').get();
+  for (const a of admins.docs) {
+    if (a.id === f.userId) continue; // si lo escribió el mismo administrador, no se avisa
+    await pushTo(a.id, {
+      title: `${emoji} Comentario nuevo · ${String(f.area || '').slice(0, 30)}`,
+      body: `${firstName(f.userName)}: ${String(f.text || '').slice(0, 120)}`,
+      url: '/servicios/opiniones',
+      tag: `comentario-${event.params.id}`,
+    });
+  }
+});
+
 // ── Eliminar mi cuenta ────────────────────────────────────────────────
 // La persona borra su cuenta y todo lo que registró (Ley 1581: derecho a suprimir sus datos).
 // Se conserva solo el registro de los pagos (valor, plan, fecha y estado), como dice la política;
@@ -318,6 +335,15 @@ exports.eliminarMiCuenta = onCall({ region: 'us-central1', timeoutSeconds: 300 }
     await batch.commit();
   }
 
+  // Comentarios y sugerencias que envió
+  for (;;) {
+    const fb = await db.collection('fl_feedback').where('userId', '==', uid).limit(400).get();
+    if (fb.empty) break;
+    const batch = db.batch();
+    fb.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    removed += fb.size;
+  }
   // Amigos: perfil público, buscador y solicitudes donde está la persona
   // Gastos compartidos con amigos donde participa
   for (;;) {

@@ -5,6 +5,7 @@ import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { Avatar } from '@/components/friends/Avatar';
+import { speakText } from '@/lib/voiceParser';
 
 // Celebración de una amistad nueva: tu foto y la de tu amigo llegan desde los lados, se juntan con un 🤝
 // y salen chispas. Sale sola cuando aparece un amigo nuevo (aceptaste o te aceptaron) y se prueba desde Servicios.
@@ -59,7 +60,13 @@ export function FriendCelebration() {
       setFriend((e as CustomEvent).detail);
       setMet(false);
       playChime();
-      setTimeout(() => { setMet(true); sparks(); try { navigator.vibrate?.([30, 60, 30]); } catch { /* sin vibración */ } }, 650);
+      setTimeout(() => {
+        setMet(true); sparks();
+        try { navigator.vibrate?.([30, 60, 30]); } catch { /* sin vibración */ }
+        // Voz (si la persona tiene activada la voz en Configuración → Sonidos)
+        const first = String((e as CustomEvent).detail?.name || '').split(/\s+/)[0];
+        speakText(first ? `¡Ahora eres amigo de ${first}!` : '¡Tienes un amigo nuevo en FLOWI!', 'es-CO');
+      }, 650);
       setTimeout(() => setFriend(null), 3600);
     };
     window.addEventListener(EVENT, on);
