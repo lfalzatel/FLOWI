@@ -241,15 +241,15 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
         <div className={`mb-4 p-4 border flex items-start gap-3 ${isTech ? 'rounded-none border-accent/40 bg-accent/5' : 'rounded-2xl border-accent/30 bg-accent/10'}`}>
           <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className={`text-sm font-semibold ${isTech ? 'text-accent' : 'text-text-primary'}`}>Pon arriba lo que más usas</p>
+            <p className={`text-sm font-semibold ${isTech ? 'text-accent' : 'text-text-primary'}`}>{tr('Pon arriba lo que más usas')}</p>
             <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
               Lo que más abres: {suggested.slice(0, 3).map(id => byId.get(id)?.title).filter(Boolean).join(', ')}. Puedes seguir moviéndolas a tu gusto.
             </p>
             <div className="flex gap-2 mt-2">
               <button type="button" onClick={() => saveOrder(suggested)}
-                      className={`px-4 py-1.5 text-xs font-bold ${isTech ? 'rounded-none border border-accent text-accent' : 'rounded-lg bg-accent text-black'}`}>Ordenar por uso</button>
+                      className={`px-4 py-1.5 text-xs font-bold ${isTech ? 'rounded-none border border-accent text-accent' : 'rounded-lg bg-accent text-black'}`}>{tr('Ordenar por uso')}</button>
               <button type="button" onClick={() => user && updateDoc(doc(db, 'users', user.uid), { servicesSuggestOff: true }).catch(() => {})}
-                      className="px-3 py-1.5 text-xs text-text-muted">No, gracias</button>
+                      className="px-3 py-1.5 text-xs text-text-muted">{tr('No, gracias')}</button>
             </div>
           </div>
         </div>

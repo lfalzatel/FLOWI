@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import Link from 'next/link';
 import { Search, Users, ChevronRight } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -23,10 +24,10 @@ export function FriendsCard({ currency = 'COP' }: { currency?: string }) {
     <div className={`glass-card p-4 space-y-3 ${box} ${isTech ? 'font-mono' : ''}`}>
       <Link href="/amigos" className="flex items-center gap-2">
         <Users className="w-4 h-4 text-accent" />
-        <span className={`flex-1 text-sm font-semibold ${isTech ? 'text-accent uppercase tracking-wider' : 'text-text-primary font-syne'}`}>Amigos</span>
+        <span className={`flex-1 text-sm font-semibold ${isTech ? 'text-accent uppercase tracking-wider' : 'text-text-primary font-syne'}`}>{tr('Amigos')}</span>
         {incoming.length > 0 && (
           <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-accent text-black">
-            {incoming.length === 1 ? '1 solicitud' : `${incoming.length} solicitudes`}
+            {incoming.length === 1 ? tr('1 solicitud') : tr('{n} solicitudes', { n: incoming.length })}
           </span>
         )}
         <ChevronRight className="w-4 h-4 text-text-muted" />
@@ -38,21 +39,21 @@ export function FriendsCard({ currency = 'COP' }: { currency?: string }) {
             {friends.slice(0, 5).map(f => <Avatar key={f.uid} p={f} size={32} isTech={isTech} />)}
           </span>
           <span className="text-xs text-text-muted truncate">
-            {friends.length === 1 ? friends[0].name.split(/\s+/)[0] : `${friends.length} amigos`}
+            {friends.length === 1 ? friends[0].name.split(/\s+/)[0] : tr('{n} amigos', { n: friends.length })}
           </span>
         </Link>
       ) : (
-        <p className="text-xs text-text-muted">Agrega a tus amigos para compartir gastos y cobrarse fácil.</p>
+        <p className="text-xs text-text-muted">{tr('Agrega a tus amigos para compartir gastos y cobrarse fácil.')}</p>
       )}
 
       {owes.slice(0, 2).map(b => (
         <p key={b.key} className="text-xs text-text-secondary">
-          👥 {b.name.split(/\s+/)[0]} te debe <b className="text-accent">{formatCurrency(b.net, currency)}</b>
+          👥 {tr('{p} te debe', { p: b.name.split(/\s+/)[0] })} <b className="text-accent">{formatCurrency(b.net, currency)}</b>
         </p>
       ))}
 
       <Link href="/amigos" className={`w-full py-2.5 text-sm font-semibold inline-flex items-center justify-center gap-2 border border-accent/40 text-accent ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
-        <Search className="w-4 h-4" /> Buscar amigos
+        <Search className="w-4 h-4" /> {tr('Buscar amigos')}
       </Link>
     </div>
   );

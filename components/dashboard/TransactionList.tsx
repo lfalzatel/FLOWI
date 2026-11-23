@@ -40,7 +40,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
   const getCategoryIcon = (category: string) => {
     return allCategories.find(c => c.label.toLowerCase() === category.toLowerCase()) 
       || findCatalogEntry(category)
-      || { label: 'Otro', icon: '💡', color: '#6B7280' };
+      || { label: tr('Otro'), icon: '💡', color: '#6B7280' };
   };
 
   if (items.length === 0) {

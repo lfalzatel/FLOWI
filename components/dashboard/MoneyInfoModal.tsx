@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
@@ -40,30 +41,30 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
            onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
-            <h2 className={isTech ? 'font-bold text-lg text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}>Dinero disponible</h2>
-            <p className="text-xs text-text-muted">La plata que tienes hoy en tus cuentas para gastar</p>
+            <h2 className={isTech ? 'font-bold text-lg text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}>{tr('Dinero disponible')}</h2>
+            <p className="text-xs text-text-muted">{tr('La plata que tienes hoy en tus cuentas para gastar')}</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 -mr-1 text-text-secondary hover:text-text-primary"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 -mr-1 text-text-secondary hover:text-text-primary"><X className="w-5 h-5" /></button>
         </div>
 
         <ul className={`divide-y ${isTech ? 'divide-accent/15' : 'divide-glass-border'}`}>{spend.map(row)}</ul>
         <div className={`flex justify-between pt-2 mt-1 border-t ${isTech ? 'border-accent/30' : 'border-glass-border'}`}>
-          <span className="text-sm font-bold text-text-primary">Total para gastar</span>
+          <span className="text-sm font-bold text-text-primary">{tr('Total para gastar')}</span>
           <span className="text-sm font-bold text-accent tabular-nums"><AnimatedNumber value={real.cash} format={f} /></span>
         </div>
 
         {(pendingCommitments > 0 || real.cardDebt > 0) && (
           <div className={`mt-4 p-3 text-xs space-y-1 ${isTech ? 'rounded-none bg-accent/5 border border-accent/20' : 'rounded-2xl bg-white/5 border border-glass-border'}`}>
-            {pendingCommitments > 0 && <p className="flex justify-between text-text-secondary"><span>Compromisos por pagar este mes</span><span className="tabular-nums">− {f(pendingCommitments)}</span></p>}
+            {pendingCommitments > 0 && <p className="flex justify-between text-text-secondary"><span>{tr('Compromisos por pagar este mes')}</span><span className="tabular-nums">− {f(pendingCommitments)}</span></p>}
             {real.cardDebt > 0 && <p className="flex justify-between text-text-secondary"><span>{real.anyFixed ? 'Lo que pagas de tus tarjetas este mes' : 'Lo que debes en tarjetas'}</span><span className="tabular-nums">− {f(real.cardDebt)}</span></p>}
             {real.cardLoans > 0 && <p className="text-[10px] text-text-muted leading-snug">Los préstamos en tarjetas ({f(real.cardLoans)}) no se restan aquí: se pagan por cuotas, que ya van en tus compromisos.</p>}
-            <p className="flex justify-between font-bold text-text-primary pt-1"><span>Te queda libre</span><span className={`tabular-nums ${free < 0 ? 'text-red-400' : ''}`}>{free < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(free)} format={f} /></span></p>
+            <p className="flex justify-between font-bold text-text-primary pt-1"><span>{tr('Te queda libre')}</span><span className={`tabular-nums ${free < 0 ? 'text-red-400' : ''}`}>{free < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(free)} format={f} /></span></p>
           </div>
         )}
 
         {(saving.length > 0 || cards.length > 0) && (
           <>
-            <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-text-muted">No cuentan para gastar</p>
+            <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('No cuentan para gastar')}</p>
             <ul className={`divide-y ${isTech ? 'divide-accent/15' : 'divide-glass-border'}`}>{[...saving, ...cards].map(row)}</ul>
           </>
         )}
@@ -77,7 +78,7 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
         )}
 
         <p className="mt-4 text-[11px] text-text-muted leading-snug">
-          Si algún saldo no coincide con tu banco, ajústalo en Cuentas y patrimonio. Desde ahí, tus gastos e ingresos lo mantienen al día.
+          {tr('Si algún saldo no coincide con tu banco, ajústalo en Cuentas y patrimonio. Desde ahí, tus gastos e ingresos lo mantienen al día.')}
         </p>
         <Link href="/servicios/cuentas" onClick={onClose}
               className={`mt-3 w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-sm' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>

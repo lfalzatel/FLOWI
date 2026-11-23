@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Shell, useStyles } from '@/components/accounts/AccountModals';
@@ -62,7 +63,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
       onClose();
     } catch (e) {
       console.error('No se pudo guardar el abono', e);
-      setError('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
+      setError(tr('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'));
       setBusy(false);
     }
   };
@@ -83,13 +84,13 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
   const what = tx.description?.trim() || tx.category;
 
   return (
-    <Shell title={toMe ? `Abono de ${first}` : `Abono a ${first}`} onClose={onClose}
+    <Shell title={toMe ? tr('Abono de {a}', { a: first }) : tr('Abono a {a}', { a: first })} onClose={onClose}
            footer={pending > 0 ? (
              <button type="button" onClick={save} disabled={!value || over || busy} className={s.primary}>
-               {busy ? 'Guardando…' : value ? `Guardar abono de ${fmt(value)}` : 'Escribe el monto'}
+               {busy ? tr('Guardando…') : value ? tr('Guardar abono de {a}', { a: fmt(value) }) : tr('Escribe el monto')}
              </button>
            ) : (
-             <button type="button" onClick={onClose} className={s.primary}>Listo</button>
+             <button type="button" onClick={onClose} className={s.primary}>{tr('Listo')}</button>
            )}>
       <div className={`p-3 border text-sm ${s.isTech ? 'rounded-none border-accent/30' : 'rounded-xl border-glass-border'}`}>
         <p className="text-text-primary font-semibold truncate">{what}</p>
@@ -110,13 +111,13 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
         })()}
         <p className="text-xs text-text-muted mt-0.5">
           {toMe ? `Le tocaba a ${first}` : `Le debías a ${first}`}: <b className="text-text-secondary">{fmt(person.amount)}</b>
-          {paid > 0 && <> · abonado <b className="text-accent">{fmt(paid)}</b></>}
+          {paid > 0 && <> {tr('· abonado')} <b className="text-accent">{fmt(paid)}</b></>}
         </p>
         <p className="text-xs mt-0.5">
           {pending > 0
-            ? <>Falta <b className={toMe ? 'text-accent' : 'text-[var(--red)]'}>{fmt(pending)}</b></>
+            ? <>{tr('Falta')} <b className={toMe ? 'text-accent' : 'text-[var(--red)]'}>{fmt(pending)}</b></>
             : person.absorbed ? <span className="text-amber-400">Asumiste {fmt(person.absorbed)} como gasto tuyo</span>
-            : <span className="text-accent">✓ Saldado</span>}
+            : <span className="text-accent">{tr('✓ Saldado')}</span>}
         </p>
       </div>
 
@@ -144,11 +145,11 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="ab-date" className={s.label}>Fecha</label>
+              <label htmlFor="ab-date" className={s.label}>{tr('Fecha')}</label>
               <input id="ab-date" autoComplete="off" type="date" value={date} max={getLocalDateString()} onChange={e => e.target.value && setDate(e.target.value)} className={s.input} />
             </div>
             <div>
-              <label htmlFor="ab-time" className={s.label}>Hora</label>
+              <label htmlFor="ab-time" className={s.label}>{tr('Hora')}</label>
               <input id="ab-time" autoComplete="off" type="time" value={time} onChange={e => setTime(e.target.value)} className={s.input} />
             </div>
           </div>
@@ -182,7 +183,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
                   const lid = tx.sharedLinkId || (shared.paidByMe && person.friendUid && tx.id ? linkId(tx.id, person.friendUid) : null);
                   if (lid) markLinkPaymentRemoved(lid, payKey(x));
                   write(withoutPayment(shared, index, j));
-                }} aria-label="Borrar abono"
+                }} aria-label={tr('Borrar abono')}
                         className="p-1 text-text-muted hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
               </li>
             ))}
@@ -196,8 +197,8 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
             Los {fmt(pending)} que no te pagó {first} pasan a ser gasto tuyo en {tx.category}, y {first} queda a paz y salvo.
           </p>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setConfirmAbsorb(false)} className={`flex-1 ${s.chip(false)}`}>Cancelar</button>
-            <button type="button" disabled={busy} onClick={absorb} className={`flex-1 ${s.chip(true)}`}>Sí, lo asumo</button>
+            <button type="button" onClick={() => setConfirmAbsorb(false)} className={`flex-1 ${s.chip(false)}`}>{tr('Cancelar')}</button>
+            <button type="button" disabled={busy} onClick={absorb} className={`flex-1 ${s.chip(true)}`}>{tr('Sí, lo asumo')}</button>
           </div>
         </div>
       ) : (

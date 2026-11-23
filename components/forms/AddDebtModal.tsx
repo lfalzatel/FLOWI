@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -160,7 +160,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
     if (d.insuranceRate) { setInsuranceMode('pct'); setInsurance(String(d.insuranceRate)); setShowInsurance(true); }
     else if (d.monthlyInsurance) { setInsuranceMode('fijo'); setInsurance(String(d.monthlyInsurance)); setShowInsurance(true); }
     if (d.installment || d.paymentDay || d.termMonths) setShowPlan(true);
-    if (!description) setDescription(`Con la plata de mi crédito ${d.title}`);
+    if (!description) setDescription(tr('Con la plata de mi crédito {a}', { a: d.title }));
     setShowCopy(false);
     setAiMsg('');
   };
@@ -208,7 +208,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
       setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
       setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos del crédito. Prueba con capturas donde se vean el valor desembolsado, la tasa y las fechas.'
         : r.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
-        : 'La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.');
+        : tr('La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'));
       return;
     }
     const d = r.data;
@@ -239,7 +239,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
     }
     if (kind !== 'banco' && (d.installment || d.paymentDay || d.termMonths)) setShowPlan(true);
     setAiState('done');
-    setAiMsg(`Listo: llené ${r.found} datos.${insMsg} Revísalos antes de guardar.`);
+    setAiMsg(tr('Listo: llené {a} datos.{b} Revísalos antes de guardar.', { a: r.found, b: insMsg }));
   }
 
   // Capital sobre el que se cobra el seguro y % que sale de "lo que va hoy"
@@ -304,7 +304,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
           amount: abonoAmount,
           date: finalDate,
-          description: owedToMe ? `Abono de: ${title}` : `Abono a: ${title}`,
+          description: owedToMe ? tr('Abono de: {a}', { a: title }) : tr('Abono a: {a}', { a: title }),
         };
         const status = paid >= total + owedExtra ? 'paid' : 'pending';
 
@@ -397,15 +397,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
   const insuranceBlock = (
     <div>
       <div className="flex items-center justify-between gap-2 mb-1">
-        <label className={`${labelCls} !mb-0`} title="Seguro de vida deudor que cobra el banco">Seguro de vida deudor</label>
+        <label className={`${labelCls} !mb-0`} title={tr('Seguro de vida deudor que cobra el banco')}>{tr('Seguro de vida deudor')}</label>
         {!isBank && (
-          <button type="button" onClick={() => { setShowInsurance(false); setInsurance(''); }} className="text-[10px] text-text-muted underline">Quitar</button>
+          <button type="button" onClick={() => { setShowInsurance(false); setInsurance(''); }} className="text-[10px] text-text-muted underline">{tr('Quitar')}</button>
         )}
       </div>
       <div className="flex flex-wrap gap-1 mb-1.5">
-        <button type="button" onClick={() => { setInsuranceMode('va'); setInsurance(''); }} className={chip(insuranceMode === 'va')}>Lo que va hoy $</button>
-        <button type="button" onClick={() => { setInsuranceMode('pct'); setInsurance(''); }} className={chip(insuranceMode === 'pct')}>% del saldo</button>
-        <button type="button" onClick={() => { setInsuranceMode('fijo'); setInsurance(''); }} className={chip(insuranceMode === 'fijo')}>Valor fijo al mes</button>
+        <button type="button" onClick={() => { setInsuranceMode('va'); setInsurance(''); }} className={chip(insuranceMode === 'va')}>{tr('Lo que va hoy $')}</button>
+        <button type="button" onClick={() => { setInsuranceMode('pct'); setInsurance(''); }} className={chip(insuranceMode === 'pct')}>{tr('% del saldo')}</button>
+        <button type="button" onClick={() => { setInsuranceMode('fijo'); setInsurance(''); }} className={chip(insuranceMode === 'fijo')}>{tr('Valor fijo al mes')}</button>
       </div>
       <input autoComplete="off" type="text" inputMode="decimal" value={insurance}
              onChange={(e) => setInsurance(insuranceMode === 'pct' ? e.target.value.replace(/[^0-9.,]/g, '').slice(0, 6) : onlyNum(e.target.value))}
@@ -415,13 +415,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
         {insuranceMode === 'va'
           ? (vaPct
               ? `Eso es un ${vaPct.toLocaleString(currentLocale())} % mensual del saldo: unos ${fmt(insMonth)} al mes, y baja a medida que se paga.`
-              : 'Escribe el seguro que el banco muestra hasta hoy; con la fecha de desembolso saco el % solo.')
+              : tr('Escribe el seguro que el banco muestra hasta hoy; con la fecha de desembolso saco el % solo.'))
           : insuranceMode === 'pct'
-            ? `Un % mensual de lo que se debe; baja a medida que se paga.${insMonth ? ` Este mes: unos ${fmt(insMonth)}.` : ''}`
-            : 'El valor en pesos que cobra el banco cada mes por el seguro.'}
+            ? `Un % mensual de lo que se debe; baja a medida que se paga.${insMonth ? tr(' Este mes: unos {a}.', { a: fmt(insMonth) }) : ''}`
+            : tr('El valor en pesos que cobra el banco cada mes por el seguro.')}
       </p>
       {insuranceMode === 'va' && debtDate === getLocalDateString() && (
-        <p className={`${hint} text-amber-400`}>Pon primero la fecha de desembolso: con la de hoy no se puede calcular.</p>
+        <p className={`${hint} text-amber-400`}>{tr('Pon primero la fecha de desembolso: con la de hoy no se puede calcular.')}</p>
       )}
     </div>
   );
@@ -436,7 +436,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
         isOpen={showConfirmDelete}
         onCancel={() => setShowConfirmDelete(false)}
         onConfirm={handleDelete}
-        title="Eliminar deuda"
+        title={tr('Eliminar deuda')}
         message="¿Estás seguro de que quieres eliminar esta deuda? Esta acción no se puede deshacer."
       />
       <ConfirmDialog
@@ -451,22 +451,22 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             catch (err) { console.error('No se pudo cambiar la cuenta de la deuda', err); }
           }
         }}
-        title="Cambiar cuenta"
+        title={tr('Cambiar cuenta')}
         confirmText="Sí, cambiar"
         message={pendingAccount
-          ? `Esta deuda quedará vinculada a ${accName(pendingAccount)}${accountId ? ` (antes ${accName(accountId) || 'otra cuenta'})` : ''}. Los abonos nuevos usarán esa cuenta; los que ya registraste no cambian.`
-          : `Esta deuda quedará sin cuenta vinculada${accountId ? ` (antes ${accName(accountId) || 'otra cuenta'})` : ''}.`}
+          ? `Esta deuda quedará vinculada a ${accName(pendingAccount)}${accountId ? tr(' (antes {a})', { a: accName(accountId) || 'otra cuenta' }) : ''}. Los abonos nuevos usarán esa cuenta; los que ya registraste no cambian.`
+          : `Esta deuda quedará sin cuenta vinculada${accountId ? tr(' (antes {a})', { a: accName(accountId) || 'otra cuenta' }) : ''}.`}
       />
       <div
         className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} aria-label="Cerrar" className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
+        <button onClick={onClose} aria-label={tr('Cerrar')} className={`absolute top-4 right-4 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
           <X className="w-5 h-5" />
         </button>
 
         <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent mb-6 tracking-wide border-b border-accent/20 pb-2' : 'font-syne font-bold text-xl text-text-primary mb-4'}`}>
-          {isReadOnly ? 'Detalles de Deuda' : debtToEdit ? title || 'Editar Deuda' : 'Nueva Deuda'}
+          {isReadOnly ? tr('Detalles de Deuda') : debtToEdit ? title || tr('Editar Deuda') : tr('Nueva Deuda')}
         </h2>
 
         {isReadOnly && (
@@ -479,14 +479,14 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           {compact && (
             <button type="button" onClick={() => setShowEdit(v => !v)}
                     className="order-3 w-full flex items-center justify-between text-xs font-semibold text-accent">
-              <span>{showEdit ? 'Ocultar datos de la deuda' : 'Editar datos (tipo, monto, tasa, seguro, cuotas)'}</span>
+              <span>{showEdit ? tr('Ocultar datos de la deuda') : tr('Editar datos (tipo, monto, tasa, seguro, cuotas)')}</span>
               <span className={`transition-transform ${showEdit ? 'rotate-180' : ''}`}>▾</span>
             </button>
           )}
 
           {/* ¿Qué tipo de deuda? */}
           {!isReadOnly && (
-            <div className={`grid grid-cols-3 gap-2 ${editCls}`} role="radiogroup" aria-label="Tipo de deuda">
+            <div className={`grid grid-cols-3 gap-2 ${editCls}`} role="radiogroup" aria-label={tr('Tipo de deuda')}>
               {KINDS.map(k => {
                 const on = kind === k.id;
                 return (
@@ -515,7 +515,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             <div>
               <button type="button" onClick={() => setShowCopy(v => !v)}
                       className={`w-full flex items-center justify-between gap-2 py-2.5 px-3 text-sm font-semibold border transition-all ${isTechTheme ? 'rounded-none border-emerald-500/40 text-emerald-400 uppercase text-xs' : 'rounded-xl border-emerald-500/40 text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10'}`}>
-                <span className="flex items-center gap-2"><Landmark className="w-4 h-4" /> Es la misma de uno de mis créditos</span>
+                <span className="flex items-center gap-2"><Landmark className="w-4 h-4" /> {tr('Es la misma de uno de mis créditos')}</span>
                 <span className={`transition-transform ${showCopy ? 'rotate-180' : ''}`}>▾</span>
               </button>
               {showCopy && (
@@ -526,13 +526,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-text-primary truncate normal-case">{d.title}</span>
                         <span className="block text-[10px] text-text-muted normal-case">
-                          {d.interestRate ? `${d.interestRate}% E.A.` : 'Sin interés'}{d.insuranceRate || d.monthlyInsurance ? ' · con seguro' : ''}{d.termMonths ? ` · ${d.termMonths} meses` : ''}
+                          {d.interestRate ? `${d.interestRate}% E.A.` : tr('Sin interés')}{d.insuranceRate || d.monthlyInsurance ? ' · con seguro' : ''}{d.termMonths ? tr(' · {a} meses', { a: d.termMonths }) : ''}
                         </span>
                       </span>
                       <span className="text-sm font-bold text-text-primary shrink-0">{fmt(d.totalAmount)}</span>
                     </button>
                   ))}
-                  <p className={hint}>Copio monto, fecha, tasa, plazo, día de pago y seguro. Así las dos deudas avanzan iguales.</p>
+                  <p className={hint}>{tr('Copio monto, fecha, tasa, plazo, día de pago y seguro. Así las dos deudas avanzan iguales.')}</p>
                 </div>
               )}
             </div>
@@ -544,7 +544,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                      onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
               {aiState === 'loading' && (
-                <ReadingOverlay isTech={isTechTheme} title="Leyendo el crédito" label="Leyendo las capturas del banco…"
+                <ReadingOverlay isTech={isTechTheme} title={tr('Leyendo el crédito')} label="Leyendo las capturas del banco…"
                                 onCancel={() => { readId.current++; setAiState('idle'); }} />
               )}
               {(
@@ -557,11 +557,11 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               {aiState !== 'loading' && (
                 <p className={hint}>
                   {aiState === 'no-key'
-                    ? <>Para leer capturas necesitas la IA gratuita. <a href="/configuracion" className="text-accent font-semibold underline">Conéctala en Configuración</a>.</>
+                    ? <>{tr('Para leer capturas necesitas la IA gratuita.')} <a href="/configuracion" className="text-accent font-semibold underline">{tr('Conéctala en Configuración')}</a>.</>
                     : aiMsg
                       ? <span className={aiState === 'error' ? 'text-red-400' : 'text-text-secondary'}>{aiMsg}</span>
-                      : isBank ? 'Puedes elegir varias (detalle, tasa, desembolso). Los números del crédito no se necesitan.'
-                        : 'Si la plata salió de un crédito, sube los pantallazos de ese crédito y queda igual, con el seguro.'}
+                      : isBank ? tr('Puedes elegir varias (detalle, tasa, desembolso). Los números del crédito no se necesitan.')
+                        : tr('Si la plata salió de un crédito, sube los pantallazos de ese crédito y queda igual, con el seguro.')}
                 </p>
               )}
             </div>
@@ -594,15 +594,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           <div className={`grid grid-cols-2 gap-2 ${editCls}`}>
             <div>
               <label className={labelCls} title={isBank ? 'Tasa Efectiva Anual' : ''}>
-                {isBank ? 'Tasa Efectiva Anual (%)' : 'Interés (opcional)'}
+                {isBank ? tr('Tasa Efectiva Anual (%)') : tr('Interés (opcional)')}
               </label>
               <input autoComplete="off" type="text" inputMode="decimal" disabled={isReadOnly} value={interestRate}
                      onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setInterestRate(v); }}
                      className={inputCls} placeholder={isBank ? 'Ej. 28,17' : rateUnit === 'mensual' ? 'Ej. 2' : 'Ej. 26,8'} />
               {!isBank && !isReadOnly && (
                 <div className="flex gap-1 mt-1">
-                  <button type="button" onClick={() => setRateUnit('mensual')} className={chip(rateUnit === 'mensual')}>% al mes</button>
-                  <button type="button" onClick={() => setRateUnit('ea')} className={chip(rateUnit === 'ea')}>% E.A.</button>
+                  <button type="button" onClick={() => setRateUnit('mensual')} className={chip(rateUnit === 'mensual')}>{tr('% al mes')}</button>
+                  <button type="button" onClick={() => setRateUnit('ea')} className={chip(rateUnit === 'ea')}>{tr('% E.A.')}</button>
                 </div>
               )}
               {!isBank && rateUnit === 'mensual' && typedRate > 0 && (
@@ -621,7 +621,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 <input autoComplete="off" type="text" inputMode="decimal" disabled={isReadOnly || !!debtToEdit} value={paidAmount}
                        onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setPaidAmount(v); }}
                        className={inputCls} placeholder="0" />
-                {!!debtToEdit && <p className={hint}>Los pagos se registran como abonos.</p>}
+                {!!debtToEdit && <p className={hint}>{tr('Los pagos se registran como abonos.')}</p>}
               </div>
             )}
           </div>
@@ -631,24 +631,24 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             <div className={`space-y-3 ${editCls}`}>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className={labelCls}>Día de pago</label>
+                  <label className={labelCls}>{tr('Día de pago')}</label>
                   <input autoComplete="off" type="text" inputMode="numeric" value={paymentDay}
                          onChange={(e) => setPaymentDay(onlyNum(e.target.value).slice(0, 2))} className={inputCls} placeholder="15" />
-                  <p className={hint}>El día de la "Fecha próximo pago" del banco.</p>
+                  <p className={hint}>{tr('El día de la "Fecha próximo pago" del banco.')}</p>
                 </div>
                 {!debtToEdit ? (
                   <div>
-                    <label className={labelCls}>Capital vigente</label>
+                    <label className={labelCls}>{tr('Capital vigente')}</label>
                     <input autoComplete="off" type="text" inputMode="decimal" value={capitalNow}
                            onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setCapitalNow(v); }}
                            className={inputCls} placeholder={totalAmount || 'Igual al desembolsado'} />
-                    <p className={hint}>Solo si ya le has pagado capital.</p>
+                    <p className={hint}>{tr('Solo si ya le has pagado capital.')}</p>
                   </div>
                 ) : (
                   <div>
-                    <label className={labelCls}>Cuota mensual</label>
+                    <label className={labelCls}>{tr('Cuota mensual')}</label>
                     <input autoComplete="off" type="text" inputMode="numeric" value={installment}
-                           onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder="Opcional" />
+                           onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder={tr('Opcional')} />
                   </div>
                 )}
               </div>
@@ -657,18 +657,18 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
 
               {!debtToEdit && (
                 <div>
-                  <label className={labelCls}>Cuota mensual</label>
+                  <label className={labelCls}>{tr('Cuota mensual')}</label>
                   <input autoComplete="off" type="text" inputMode="numeric" value={installment}
                          onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder="La que te informó el banco (opcional)" />
                 </div>
               )}
               {suggested > 0 && String(suggested) !== installment && (
                 <button type="button" onClick={() => setInstallment(String(suggested))} className="-mt-2 text-[11px] text-accent text-left normal-case">
-                  Con esa tasa y plazo la cuota sería unos {fmt(suggested)}{insMonth ? ` + ${fmt(insMonth)} de seguro` : ''} · usar
+                  Con esa tasa y plazo la cuota sería unos {fmt(suggested)}{insMonth ? tr(' + {a} de seguro', { a: fmt(insMonth) }) : ''} · usar
                 </button>
               )}
               <p className="text-[10px] text-text-muted leading-snug normal-case">
-                Con el día de pago, la cuota aparece en Próximos compromisos y se descuenta de lo que puedes gastar hasta que registres el abono.
+                {tr('Con el día de pago, la cuota aparece en Próximos compromisos y se descuenta de lo que puedes gastar hasta que registres el abono.')}
               </p>
             </div>
           )}
@@ -689,28 +689,28 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             <div className={editCls}>
               {!showPlan ? (
                 <button type="button" onClick={() => setShowPlan(true)} className="text-xs text-accent font-semibold">
-                  + {owedToMe ? 'Te paga por cuotas' : 'Le pagas por cuotas'} (opcional)
+                  + {owedToMe ? tr('Te paga por cuotas') : tr('Le pagas por cuotas')} (opcional)
                 </button>
               ) : (
                 <div className={`p-3 border space-y-2 ${isTechTheme ? 'border-accent/20 rounded-none' : 'border-glass-border rounded-2xl'}`}>
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <label className={labelCls}>Cuotas</label>
+                      <label className={labelCls}>{tr('Cuotas')}</label>
                       <input autoComplete="off" type="text" inputMode="numeric" value={termMonths} onChange={(e) => setTermMonths(onlyNum(e.target.value))} className={inputCls} placeholder="6" />
                     </div>
                     <div>
-                      <label className={labelCls}>Día de pago</label>
+                      <label className={labelCls}>{tr('Día de pago')}</label>
                       <input autoComplete="off" type="text" inputMode="numeric" value={paymentDay} onChange={(e) => setPaymentDay(onlyNum(e.target.value).slice(0, 2))} className={inputCls} placeholder="30" />
                     </div>
                     <div>
-                      <label className={labelCls}>Cuota</label>
+                      <label className={labelCls}>{tr('Cuota')}</label>
                       <input autoComplete="off" type="text" inputMode="numeric" value={installment} onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder={suggested ? String(suggested) : 'Valor'} />
                     </div>
                   </div>
                   <p className="text-[10px] text-text-muted leading-snug normal-case">
                     {owedToMe
-                      ? 'Solo para que veas en cuántas cuotas te va a pagar. Cada abono que te haga entra como ingreso.'
-                      : 'Con el día de pago, la cuota aparece en Próximos compromisos.'}
+                      ? tr('Solo para que veas en cuántas cuotas te va a pagar. Cada abono que te haga entra como ingreso.')
+                      : tr('Con el día de pago, la cuota aparece en Próximos compromisos.')}
                   </p>
                 </div>
               )}
@@ -721,7 +721,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           {compact && (
             <div className="order-2 flex items-center justify-between gap-3">
               <label htmlFor="debt-date" className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium`}>
-                {isBank ? 'Fecha de desembolso' : 'Fecha del préstamo'}
+                {isBank ? tr('Fecha de desembolso') : tr('Fecha del préstamo')}
               </label>
               <input autoComplete="off" id="debt-date" type="date" required value={debtDate} onChange={(e) => setDebtDate(e.target.value)}
                      className={`${dateCls} !w-auto !py-1.5 text-xs`} />
@@ -731,7 +731,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           {activeAccounts.length > 0 && !isReadOnly && (
             <div className={compact ? 'order-2' : ''}>
               <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>
-                {owedToMe ? '¿De qué cuenta salió la plata?' : isBank ? '¿En qué cuenta o tarjeta está?' : '¿A qué cuenta te llegó la plata?'}
+                {owedToMe ? tr('¿De qué cuenta salió la plata?') : isBank ? tr('¿En qué cuenta o tarjeta está?') : tr('¿A qué cuenta te llegó la plata?')}
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {[{ id: '', name: 'Ninguna' }, ...activeAccounts.map(a => ({ id: a.id!, name: a.name }))].map(a => (
@@ -756,12 +756,12 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               <div className={`${compact ? 'order-1' : ''} p-4 border ${isTechTheme ? 'bg-deep border-accent/20 rounded-none font-mono text-[11px]' : 'bg-glass border-glass-border rounded-2xl text-xs space-y-1 text-text-secondary'}`}>
                 {hasCharges && (
                   <>
-                    <div className={row}><span>Capital vigente</span><span className="text-text-primary">{fmt(c.principalLeft)}</span></div>
+                    <div className={row}><span>{tr('Capital vigente')}</span><span className="text-text-primary">{fmt(c.principalLeft)}</span></div>
                     {(debtToEdit.interestRate || 0) > 0 && (
                       <div className={row}><span>Intereses corrientes{debtToEdit.interestRate ? ` (${debtToEdit.interestRate}% E.A.)` : ''}</span><span className="text-red-400 font-semibold">+{fmt(c.pendingInterest)}</span></div>
                     )}
                     {((debtToEdit.monthlyInsurance || 0) > 0 || (debtToEdit.insuranceRate || 0) > 0) && (
-                      <div className={row}><span>Seguro de vida deudor</span><span className="text-red-400 font-semibold">+{fmt(c.pendingInsurance)}</span></div>
+                      <div className={row}><span>{tr('Seguro de vida deudor')}</span><span className="text-red-400 font-semibold">+{fmt(c.pendingInsurance)}</span></div>
                     )}
                     <hr className="border-glass-border my-1.5" />
                     <div className="flex justify-between text-sm font-bold">
@@ -773,7 +773,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 {!hasCharges && (
                   <>
                     <div className={row}><span>{owedToMe ? 'Le prestaste' : 'Monto'}</span><span className="text-text-primary">{fmt(debtToEdit.totalAmount)}</span></div>
-                    {debtToEdit.paidAmount > 0 && <div className={row}><span>Abonado</span><span className="text-accent font-semibold">−{fmt(debtToEdit.paidAmount)}</span></div>}
+                    {debtToEdit.paidAmount > 0 && <div className={row}><span>{tr('Abonado')}</span><span className="text-accent font-semibold">−{fmt(debtToEdit.paidAmount)}</span></div>}
                     <hr className="border-glass-border my-1.5" />
                     <div className="flex justify-between text-sm font-bold">
                       <span className={isTechTheme ? 'text-accent' : 'text-text-primary font-syne'}>{isReadOnly ? 'Total pagado' : owedToMe ? 'Te debe a la fecha' : 'Deuda a la fecha'}</span>
@@ -783,13 +783,13 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 )}
                 {linked && (
                   <div className={`${row} pt-1`}>
-                    <span>{owedToMe ? 'Salió de' : isBank ? 'Está en' : 'Te llegó a'}</span>
+                    <span>{owedToMe ? tr('Salió de') : isBank ? tr('Está en') : tr('Te llegó a')}</span>
                     <span className="text-text-primary">{linked.name}</span>
                   </div>
                 )}
                 {next && (
                   <div className={`${row} pt-1`}>
-                    <span>Próximo pago</span>
+                    <span>{tr('Próximo pago')}</span>
                     <span className="text-text-primary">
                       {next.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' })}
                       {debtToEdit.installment ? ` · ${fmt(debtToEdit.installment)}` : ''}
@@ -809,7 +809,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                        className={inputCls} placeholder="0" />
               </div>
               <div>
-                <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>Fecha</label>
+                <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{tr('Fecha')}</label>
                 <input autoComplete="off" type="date" value={abonoDate} onChange={(e) => setAbonoDate(e.target.value)} className={dateCls} />
               </div>
               {abono && activeAccounts.some(a => a.kind !== 'credito') && (
@@ -832,7 +832,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             <label className={labelCls}>Nota (opcional)</label>
             <textarea disabled={isReadOnly} value={description} onChange={(e) => setDescription(e.target.value)}
                       className={`${inputCls} resize-none h-16`}
-                      placeholder={isBank ? 'Ej. Para pagar la moto' : 'Ej. Se lo presté para el arriendo'} />
+                      placeholder={isBank ? tr('Ej. Para pagar la moto') : tr('Ej. Se lo presté para el arriendo')} />
           </div>
 
           {debtToEdit && debtToEdit.payments && debtToEdit.payments.length > 0 && (
@@ -855,18 +855,18 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             {isReadOnly ? (
               <button type="button" onClick={onClose}
                       className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
-                Volver / Aceptar
+                {tr('Volver / Aceptar')}
               </button>
             ) : (
               <button type="submit" disabled={loading || aiState === 'loading'}
                       className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
-                {loading ? 'Guardando...' : debtToEdit ? 'Guardar cambios' : isBank ? 'Guardar crédito' : owedToMe ? 'Guardar préstamo' : 'Guardar deuda'}
+                {loading ? tr('Guardando...') : debtToEdit ? tr('Guardar cambios') : isBank ? tr('Guardar crédito') : owedToMe ? tr('Guardar préstamo') : tr('Guardar deuda')}
               </button>
             )}
             {debtToEdit && (
               <button type="button" onClick={() => setShowConfirmDelete(true)} disabled={loading}
                       className={`w-full font-bold py-3.5 transition-all active:scale-[0.98] disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 uppercase tracking-wider' : 'rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20'}`}>
-                Eliminar deuda
+                {tr('Eliminar deuda')}
               </button>
             )}
           </div>

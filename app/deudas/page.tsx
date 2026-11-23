@@ -341,7 +341,7 @@ export default function DeudasPage() {
               {/* Deudas Activas */}
               {activeDebts.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>Activas ({activeDebts.length})</h3>
+                  <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>{tr('Activas')} ({activeDebts.length})</h3>
                   <div className="space-y-2">
                   {activeDebts.map((debt, i) => {
                     const interestData = calculateDebtInterest(debt);
@@ -456,7 +456,7 @@ export default function DeudasPage() {
                                 <Calendar className="w-3 h-3" /> {dateStr}
                               </span>
                               <span className="flex items-center gap-0.5 text-[10px] text-accent font-medium bg-accent/10 px-1.5 py-0.5 rounded">
-                                <Check className="w-3 h-3" /> Liquidada
+                                <Check className="w-3 h-3" /> {tr('Liquidada')}
                               </span>
                             </div>
                           </div>

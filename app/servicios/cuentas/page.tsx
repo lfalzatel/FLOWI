@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -66,11 +66,11 @@ export default function CuentasPage() {
   const ghost = `flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold border transition-all active:scale-95 ${isTech ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-secondary hover:text-text-primary hover:bg-glass'}`;
 
   const rows: { label: string; value: number; sign: 1 | -1; href?: string; icon: any }[] = [
-    { label: 'En tus cuentas', value: worth.accounts, sign: 1, icon: Wallet },
-    { label: 'En CDT', value: worth.investments, sign: 1, href: '/servicios/inversiones', icon: Landmark },
-    { label: 'Te deben', value: worth.owedToMe, sign: 1, href: '/deudas', icon: HandCoins },
-    { label: 'Debes en tarjetas', value: worth.cards, sign: -1, icon: CreditCard },
-    { label: 'Debes en préstamos', value: worth.debts, sign: -1, href: '/deudas', icon: CreditCard },
+    { label: tr('En tus cuentas'), value: worth.accounts, sign: 1, icon: Wallet },
+    { label: tr('En CDT'), value: worth.investments, sign: 1, href: '/servicios/inversiones', icon: Landmark },
+    { label: tr('Te deben'), value: worth.owedToMe, sign: 1, href: '/deudas', icon: HandCoins },
+    { label: tr('Debes en tarjetas'), value: worth.cards, sign: -1, icon: CreditCard },
+    { label: tr('Debes en préstamos'), value: worth.debts, sign: -1, href: '/deudas', icon: CreditCard },
   ];
 
   return (
@@ -79,12 +79,12 @@ export default function CuentasPage() {
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
-            <Link href="/servicios" aria-label="Volver a Servicios" className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+            <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className={`text-xl font-bold truncate ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>Cuentas y patrimonio</h1>
+            <h1 className={`text-xl font-bold truncate ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Cuentas y patrimonio')}</h1>
           </div>
-          {states.length > 0 && <button onClick={() => { setEditing(null); setShowForm(true); }} className={btn}><Plus className="w-4 h-4" /> Cuenta</button>}
+          {states.length > 0 && <button onClick={() => { setEditing(null); setShowForm(true); }} className={btn}><Plus className="w-4 h-4" /> {tr('Cuenta')}</button>}
         </div>
 
         {error === 'permission-denied' && (
@@ -96,13 +96,13 @@ export default function CuentasPage() {
         {/* Patrimonio neto */}
         <section className={`${card} p-5`}>
           <div className="flex items-center justify-between mb-3">
-            <span className={`text-xs font-medium ${isTech ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>Tu patrimonio neto</span>
-            <button onClick={() => setShowHelp(v => !v)} aria-label="¿Qué es el patrimonio neto?" className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
+            <span className={`text-xs font-medium ${isTech ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>{tr('Tu patrimonio neto')}</span>
+            <button onClick={() => setShowHelp(v => !v)} aria-label={tr('¿Qué es el patrimonio neto?')} className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
           </div>
           <p className={`font-bold text-[clamp(26px,9vw,38px)] leading-none ${worth.total >= 0 ? 'text-accent' : 'text-[var(--red)]'} ${isTech ? '' : 'font-syne'}`}>
             {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
           </p>
-          <p className="text-xs text-text-muted mt-1">Tienes {fmt(worth.assets)} · debes {fmt(worth.liabilities)}</p>
+          <p className="text-xs text-text-muted mt-1">{tr('Tienes {a} · debes {b}', { a: fmt(worth.assets), b: fmt(worth.liabilities) })}</p>
 
           <div className={`mt-4 pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'} space-y-1`}>
             {rows.filter(r => r.value > 0 || r.label === 'En tus cuentas').map(r => {
@@ -134,7 +134,7 @@ export default function CuentasPage() {
             <div className={`w-14 h-14 mx-auto mb-3 flex items-center justify-center bg-accent/10 ${isTech ? 'rounded-none border border-accent/40' : 'rounded-2xl'}`}>
               <Wallet className="w-7 h-7 text-accent" />
             </div>
-            <h2 className={`font-bold text-lg mb-1 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>¿Dónde está tu plata?</h2>
+            <h2 className={`font-bold text-lg mb-1 ${isTech ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('¿Dónde está tu plata?')}</h2>
             <p className="text-sm text-text-secondary mb-5">
               Agrega tus cuentas (Bancolombia, Nequi, efectivo…) con lo que tienes hoy. Desde ahí tus gastos e ingresos las van moviendo y ves tu patrimonio completo.
             </p>
@@ -147,7 +147,7 @@ export default function CuentasPage() {
           <>
             {states.length > 1 && (
               <button onClick={() => setTransferFrom('')} className={`w-full ${ghost} py-3 text-sm`}>
-                <ArrowLeftRight className="w-4 h-4" /> Mover plata entre cuentas
+                <ArrowLeftRight className="w-4 h-4" /> {tr('Mover plata entre cuentas')}
               </button>
             )}
             <div className="space-y-3">
@@ -163,10 +163,10 @@ export default function CuentasPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className={`font-bold truncate ${isTech ? 'text-accent uppercase text-sm' : 'text-text-primary'}`}>{a.name}</h3>
-                          {a.purpose === 'ahorro' && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 ${isTech ? 'rounded-none' : 'rounded-full'}`}>Ahorro</span>}
-                          {a.isDefault && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-accent/15 text-accent ${isTech ? 'rounded-none' : 'rounded-full'}`}>Principal</span>}
+                          {a.purpose === 'ahorro' && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Ahorro')}</span>}
+                          {a.isDefault && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-accent/15 text-accent ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Principal')}</span>}
                         </div>
-                        <p className="text-[11px] text-text-muted truncate">{KIND_LABEL[a.kind]}{a.methods.length ? ` · ${a.methods.join(', ')}` : ''}</p>
+                        <p className="text-[11px] text-text-muted truncate">{tr(KIND_LABEL[a.kind])}{a.methods.length ? ` · ${a.methods.join(', ')}` : ''}</p>
                         {Math.round(bizMap.get(a.id!) || 0) !== 0 && !credit && (
                           <p className="text-[11px] truncate">
                             <span className="text-orange-400">🏪 Negocio {fmt(bizMap.get(a.id!) || 0)}</span>
@@ -177,7 +177,7 @@ export default function CuentasPage() {
                       <div className="text-right shrink-0">
                         <p className={`font-bold ${st.balance < 0 ? 'text-red-400' : 'text-text-primary'} ${isTech ? '' : 'font-syne'}`}>
                           {credit && st.balance < 0
-                            ? <>Debes <AnimatedNumber value={-st.balance} format={fmt} /></>
+                            ? <>{tr('Debes')} <AnimatedNumber value={-st.balance} format={fmt} /></>
                             : <>{st.balance < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(st.balance)} format={fmt} /></>}
                         </p>
                         <ChevronDown className={`w-4 h-4 ml-auto text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -189,7 +189,7 @@ export default function CuentasPage() {
                       const pct = Math.min(100, (used / a.creditLimit!) * 100);
                       return (
                         <div className="mt-3">
-                          <p className="text-[11px] text-text-muted truncate">Disponible <span className={used > a.creditLimit! ? 'text-red-400 font-semibold' : 'text-text-primary font-semibold'}>{fmt(Math.max(0, a.creditLimit! - used))}</span> de {fmt(a.creditLimit!)}</p>
+                          <p className="text-[11px] text-text-muted truncate">{tr('Disponible')} <span className={used > a.creditLimit! ? 'text-red-400 font-semibold' : 'text-text-primary font-semibold'}>{fmt(Math.max(0, a.creditLimit! - used))}</span> {tr('de')} {fmt(a.creditLimit!)}</p>
                           <div className={`mt-1 h-1.5 bg-white/10 overflow-hidden ${isTech ? 'rounded-none' : 'rounded-full'}`}>
                             <div className={`h-full ${pct >= 90 ? 'bg-red-400' : pct >= 70 ? 'bg-amber-400' : 'bg-accent'}`} style={{ width: `${pct}%` }} />
                           </div>
@@ -209,7 +209,7 @@ export default function CuentasPage() {
                           ))}
                           {states.length > 1 && (!linkedDebts.length || ownOwed > 0) && (
                             <button type="button" onClick={() => setPaying(st)} className={`mt-3 w-full ${ghost} py-2.5 text-sm !text-accent !border-accent/50`}>
-                              <HandCoins className="w-4 h-4" /> Abonar a la tarjeta
+                              <HandCoins className="w-4 h-4" /> {tr('Abonar a la tarjeta')}
                             </button>
                           )}
                         </>
@@ -227,10 +227,10 @@ export default function CuentasPage() {
                                 ? <span className="text-text-muted"><AnimatedNumber value={m.amount} format={fmt} /></span>
                                 : <span className={m.amount >= 0 ? 'text-emerald-400 font-semibold' : 'text-text-primary'}>{m.amount >= 0 ? '+' : '−'}<AnimatedNumber value={Math.abs(m.amount)} format={fmt} /></span>}
                               {m.kind === 'debt' && (
-                                <button type="button" onClick={() => setOpenDebt(m.debt)} aria-label="Ver la deuda" className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
+                                <button type="button" onClick={() => setOpenDebt(m.debt)} aria-label={tr('Ver la deuda')} className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
                               )}
                               {m.kind === 'transfer' && m.transfer.id && (
-                                <button type="button" onClick={() => setEditingTransfer(m.transfer)} aria-label="Editar transferencia" className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
+                                <button type="button" onClick={() => setEditingTransfer(m.transfer)} aria-label={tr('Editar transferencia')} className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
                               )}
                             </li>
                           ))}
@@ -242,7 +242,7 @@ export default function CuentasPage() {
                           const total = abonos.reduce((s, m) => s + m.amount, 0);
                           return (
                             <div className={`mt-3 pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
-                              <p className="text-xs font-semibold text-text-secondary mb-1.5">Abonos ({abonos.length}) · {fmt(total)} <span className="font-normal text-text-muted">· toca uno para editarlo</span></p>
+                              <p className="text-xs font-semibold text-text-secondary mb-1.5">Abonos ({abonos.length}) · {fmt(total)} <span className="font-normal text-text-muted">{tr('· toca uno para editarlo')}</span></p>
                               <ul className="space-y-1">
                                 {abonos.map((m, i) => (
                                   <li key={i} onClick={() => m.kind === 'transfer' && setEditingTransfer(m.transfer)} className="flex items-center gap-2 text-xs cursor-pointer hover:opacity-80">
@@ -257,9 +257,9 @@ export default function CuentasPage() {
                           );
                         })()}
                         <div className="mt-3 flex gap-2">
-                          <button type="button" onClick={() => setAdjusting(st)} className={ghost}><Scale className="w-3.5 h-3.5" /> Ajustar saldo</button>
-                          {states.length > 1 && <button type="button" onClick={() => setTransferFrom(a.id!)} className={ghost}><ArrowLeftRight className="w-3.5 h-3.5" /> Mover</button>}
-                          <button type="button" onClick={() => { setEditing(a); setShowForm(true); }} className={ghost}><Pencil className="w-3.5 h-3.5" /> Editar</button>
+                          <button type="button" onClick={() => setAdjusting(st)} className={ghost}><Scale className="w-3.5 h-3.5" /> {tr('Ajustar saldo')}</button>
+                          {states.length > 1 && <button type="button" onClick={() => setTransferFrom(a.id!)} className={ghost}><ArrowLeftRight className="w-3.5 h-3.5" /> {tr('Mover')}</button>}
+                          <button type="button" onClick={() => { setEditing(a); setShowForm(true); }} className={ghost}><Pencil className="w-3.5 h-3.5" /> {tr('Editar')}</button>
                         </div>
                       </div>
                     )}
@@ -269,8 +269,8 @@ export default function CuentasPage() {
             </div>
 
             <p className="text-[11px] text-text-muted text-center px-4">
-              Al registrar un gasto o ingreso, elige con qué lo pagaste para que se mueva la cuenta correcta. Si no lo dices, va a tu cuenta principal.
-              Cuando el saldo no cuadre con el banco, usa "Ajustar saldo".
+              {tr('Al registrar un gasto o ingreso, elige con qué lo pagaste para que se mueva la cuenta correcta. Si no lo dices, va a tu cuenta principal.')}
+              {tr('Cuando el saldo no cuadre con el banco, usa "Ajustar saldo".')}
             </p>
           </>
         )}
@@ -289,8 +289,8 @@ export default function CuentasPage() {
       {transferFrom !== null && <TransferModal accounts={accounts} initialFrom={transferFrom || undefined} currency={currency} onClose={() => setTransferFrom(null)} />}
       <ConfirmDialog
         isOpen={!!deleting}
-        title="Eliminar cuenta"
-        message={deleting ? `¿Eliminar "${deleting.name}"? Tus gastos e ingresos no se borran; solo dejan de contarse en esta cuenta.` : ''}
+        title={tr('Eliminar cuenta')}
+        message={deleting ? tr('¿Eliminar "{a}"? Tus gastos e ingresos no se borran; solo dejan de contarse en esta cuenta.', { a: deleting.name }) : ''}
         confirmText="Eliminar"
         onConfirm={async () => { if (deleting?.id) await deleteAccount(deleting.id); setDeleting(null); setEditing(null); }}
         onCancel={() => setDeleting(null)}

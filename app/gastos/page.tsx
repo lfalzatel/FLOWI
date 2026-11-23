@@ -259,7 +259,7 @@ export default function GastosPage() {
       {showExport && (
         <ExportReportModal
           onClose={() => setShowExport(false)}
-          title="Gastos"
+          title={tr('Gastos')}
           transactions={filteredTransactions}
           filterType={filterType}
           filterValue={filterValue}

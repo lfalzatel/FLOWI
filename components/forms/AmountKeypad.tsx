@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { Delete } from 'lucide-react';
 import { cleanExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 
@@ -40,7 +41,7 @@ export function AmountKeypad({ value, isTech, onChange, onNext, nextLabel = 'Sig
 
   return (
     <div className={`shrink-0 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] border-t ${isTech ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}
-         role="group" aria-label="Teclado del monto">
+         role="group" aria-label={tr('Teclado del monto')}>
       <div className="grid grid-cols-4 gap-1.5">
         {KEYS(decimals).flat().map(k => (
           <button key={k} type="button" onClick={() => press(k)} className={/[+\-×÷]/.test(k) ? op : num}
@@ -48,11 +49,11 @@ export function AmountKeypad({ value, isTech, onChange, onNext, nextLabel = 'Sig
             {k === '-' ? '−' : k === '.' ? ',' : k}
           </button>
         ))}
-        <button type="button" onClick={() => onChange('')} className={`${num} text-sm`} aria-label="Borrar todo">C</button>
-        <button type="button" onClick={() => onChange(value.slice(0, -1))} className={num} aria-label="Borrar">
+        <button type="button" onClick={() => onChange('')} className={`${num} text-sm`} aria-label={tr('Borrar todo')}>C</button>
+        <button type="button" onClick={() => onChange(value.slice(0, -1))} className={num} aria-label={tr('Borrar')}>
           <Delete className="w-5 h-5" />
         </button>
-        <button type="button" onClick={solve} className={op} aria-label="Igual">=</button>
+        <button type="button" onClick={solve} className={op} aria-label={tr('Igual')}>=</button>
         <button type="button" onClick={next}
                 className={`${base} text-sm font-bold ${isTech ? 'bg-accent text-deep uppercase' : 'bg-accent text-white'}`}>
           {nextLabel}

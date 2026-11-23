@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useState, useEffect } from 'react';
@@ -126,14 +126,14 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               <h4 className={`text-xs font-bold uppercase tracking-wider ${
                 isTechTheme ? 'font-mono text-accent' : 'font-syne text-text-primary'
               }`}>
-                {isCurrentMonth ? 'Control y Proyección Mensual' : 'Resumen del Mes'}
+                {isCurrentMonth ? tr('Control y Proyección Mensual') : tr('Resumen del Mes')}
               </h4>
               <p className={`text-[11px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
                 {totalIngresos > 0 
-                  ? `Base: Ingresos del mes (${formatCurrency(totalIngresos, profile?.currency)})` 
+                  ? tr('Base: Ingresos del mes ({a})', { a: formatCurrency(totalIngresos, profile?.currency) }) 
                   : profile?.budget 
-                    ? `Base: Presupuesto (${formatCurrency(profile.budget, profile?.currency)})` 
-                    : 'Sin ingresos ni presupuesto configurado'
+                    ? tr('Base: Presupuesto ({a})', { a: formatCurrency(profile.budget, profile?.currency) }) 
+                    : tr('Sin ingresos ni presupuesto configurado')
                 }
               </p>
             </div>
@@ -144,7 +144,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               isTechTheme ? 'bg-accent/10 border border-accent/20 text-accent' : 'bg-accent/10 text-accent'
             }`}>
               <Calendar className="w-3 h-3" />
-              <span>Quedan {diasRestantes} días</span>
+              <span>{tr('Quedan {n} días', { n: diasRestantes })}</span>
             </div>
           )}
         </div>
@@ -167,7 +167,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               <span className={`text-[10px] uppercase font-bold tracking-wider ${
                 isTechTheme ? 'text-accent/70' : 'text-text-muted'
               }`}>
-                Gastos Fijos
+                {tr('Gastos Fijos')}
               </span>
               <Info className="w-3 h-3 text-orange-400 opacity-60 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -179,7 +179,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             <span className={`block text-[9px] mt-0.5 truncate ${
               isTechTheme ? 'text-accent/50' : 'text-text-muted'
             }`}>
-              {fixedTransactionsList.length} ítems • Ver detalle
+              {tr('{n} ítems • Ver detalle', { n: fixedTransactionsList.length })}
             </span>
           </button>
 
@@ -199,7 +199,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               <span className={`text-[10px] uppercase font-bold tracking-wider ${
                 isTechTheme ? 'text-accent/70' : 'text-text-muted'
               }`}>
-                Disponible Libre
+                {tr('Disponible Libre')}
               </span>
               <Info className="w-3 h-3 text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -213,7 +213,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             <span className={`block text-[9px] mt-0.5 truncate ${
               isTechTheme ? 'text-accent/50' : 'text-text-muted'
             }`}>
-              Fórmula y desglose
+              {tr('Fórmula y desglose')}
             </span>
           </button>
 
@@ -231,7 +231,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] uppercase font-bold tracking-wider text-accent">
-                Límite Diario
+                {tr('Límite Diario')}
               </span>
               <Info className="w-3 h-3 text-accent opacity-60 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -244,7 +244,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
               }
             </p>
             <span className="block text-[9px] mt-0.5 truncate text-accent/80">
-              {isCurrentMonth ? '/ día restante' : '/ día prom.'}
+              {isCurrentMonth ? tr('/ día restante') : tr('/ día prom.')}
             </span>
           </button>
         </div>
@@ -268,21 +268,21 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
           </div>
           <p className={`text-[12px] leading-relaxed ${isTechTheme ? 'font-mono' : ''}`}>
             {baseLimit === 0 ? (
-              'Ingresa tus pagos del mes para habilitar el dinero libre disponible y tu presupuesto diario recomendado.'
+              tr('Ingresa tus pagos del mes para habilitar el dinero libre disponible y tu presupuesto diario recomendado.')
             ) : isWarning ? (
-              `Has superado tus ingresos/presupuesto del mes por ${formatCurrency(Math.abs(disponibleParaGastar), profile?.currency)}. Procura restringir tus nuevos gastos variables.`
+              tr('Has superado tus ingresos/presupuesto del mes por {a}. Procura restringir tus nuevos gastos variables.', { a: formatCurrency(Math.abs(disponibleParaGastar), profile?.currency) })
             ) : isCurrentMonth && hoy && hoy.remainingToday < 0 && hoy.tomorrowAllowance !== null ? (
               <>
-                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Hoy ya superaste tu cuota de <AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} />; desde mañana procura no pasar de <strong><AnimatedNumber value={hoy.tomorrowAllowance} format={(n: number) => formatCurrency(n, profile?.currency)} />/día</strong> durante los <strong>{diasRestantes - 1} días restantes</strong>.
+                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> {tr('y aún debes pagar')} <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> {tr('en compromisos')}</>}. Hoy ya superaste tu cuota de <AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} />; desde mañana procura no pasar de <strong><AnimatedNumber value={hoy.tomorrowAllowance} format={(n: number) => formatCurrency(n, profile?.currency)} />{tr('/día')}</strong> {tr('durante los')} <strong>{diasRestantes - 1} días restantes</strong>.
               </>
             ) : isCurrentMonth ? (
               <>
-                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> y aún debes pagar <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> en compromisos</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong><AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} />/día</strong> durante los <strong>{diasRestantes} días restantes</strong> del mes.
+                Te quedan <strong><AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> libres{compromisos > 0 && <> {tr('y aún debes pagar')} <strong><AnimatedNumber value={compromisos} format={(n: number) => formatCurrency(n, profile?.currency)} /></strong> {tr('en compromisos')}</>}. Para no superar tus ingresos, tu gasto máximo sugerido es de <strong><AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} />{tr('/día')}</strong> {tr('durante los')} <strong>{diasRestantes} días restantes</strong> del mes.
               </>
             ) : (
               disponibleParaGastar >= 0 
-                ? `Cerraste este mes con un remanente positivo de ${formatCurrency(disponibleParaGastar, profile?.currency)}.`
-                : `Cerraste este mes superando tu límite por ${formatCurrency(Math.abs(disponibleParaGastar), profile?.currency)}.`
+                ? tr('Cerraste este mes con un remanente positivo de {a}.', { a: formatCurrency(disponibleParaGastar, profile?.currency) })
+                : tr('Cerraste este mes superando tu límite por {a}.', { a: formatCurrency(Math.abs(disponibleParaGastar), profile?.currency) })
             )}
           </p>
         </div>
@@ -346,7 +346,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             {activeModal === 'fijos' && (
               <div className="space-y-4">
                 <div className={`p-4 rounded-2xl ${isTechTheme ? 'bg-accent/10 border border-accent/30' : 'bg-orange-500/10 border border-orange-500/20'}`}>
-                  <span className={`text-xs block font-semibold ${isTechTheme ? 'text-accent' : 'text-orange-400'}`}>Total Gastos Fijos</span>
+                  <span className={`text-xs block font-semibold ${isTechTheme ? 'text-accent' : 'text-orange-400'}`}>{tr('Total Gastos Fijos')}</span>
                   <p className={`text-2xl font-bold mt-1 ${isTechTheme ? 'text-accent font-mono' : 'text-orange-400 font-syne'}`}>
                     <AnimatedNumber value={gastosFijos} format={(n: number) => formatCurrency(n, profile?.currency)} />
                   </p>
@@ -357,11 +357,11 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
 
                 <div className="space-y-2">
                   <h4 className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'text-accent/80' : 'text-text-muted'}`}>
-                    Listado de Pagos Fijos
+                    {tr('Listado de Pagos Fijos')}
                   </h4>
                   {fixedTransactionsList.length === 0 ? (
                     <p className={`text-xs text-center py-6 ${isTechTheme ? 'text-accent/50' : 'text-text-muted'}`}>
-                      No hay gastos fijos registrados en este mes.
+                      {tr('No hay gastos fijos registrados en este mes.')}
                     </p>
                   ) : (
                     fixedTransactionsList.map((tx) => (
@@ -377,7 +377,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                           <div>
                             <p className={`text-xs font-bold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tx.category}</p>
                             <p className={`text-[10px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                              {tx.description || 'Gasto Fijo'} • {formatDateLabel(tx.date)}
+                              {tx.description || tr('Gasto Fijo')} • {formatDateLabel(tx.date)}
                             </p>
                           </div>
                         </div>
@@ -430,7 +430,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                   </h4>
                   {variableTransactionsList.length === 0 ? (
                     <p className={`text-xs text-center py-6 ${isTechTheme ? 'text-accent/50' : 'text-text-muted'}`}>
-                      No has realizado gastos variables en este período.
+                      {tr('No has realizado gastos variables en este período.')}
                     </p>
                   ) : (
                     <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
@@ -447,7 +447,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                             <div>
                               <p className={`text-xs font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tx.category}</p>
                               <p className={`text-[10px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                                {tx.description || 'Gasto variable'} • {formatDateLabel(tx.date)}
+                                {tx.description || tr('Gasto variable')} • {formatDateLabel(tx.date)}
                               </p>
                             </div>
                           </div>
@@ -466,13 +466,13 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
             {activeModal === 'diario' && (
               <div className="space-y-4">
                 <div className={`p-4 rounded-2xl ${isTechTheme ? 'bg-accent/10 border border-accent/30' : 'bg-accent/10 border border-accent/20'}`}>
-                  <span className="text-xs block font-bold text-accent uppercase tracking-wider">Cuota Diaria Recomendada</span>
+                  <span className="text-xs block font-bold text-accent uppercase tracking-wider">{tr('Cuota Diaria Recomendada')}</span>
                   <p className={`text-3xl font-bold mt-1 text-accent ${isTechTheme ? 'font-mono' : 'font-syne'}`}>
-                    <AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} /> <span className="text-sm font-normal">/ día</span>
+                    <AnimatedNumber value={cuotaDiaria} format={(n: number) => formatCurrency(n, profile?.currency)} /> <span className="text-sm font-normal">{tr('/ día')}</span>
                   </p>
                   <p className={`text-xs mt-1 ${isTechTheme ? 'text-accent/80' : 'text-text-secondary'}`}>
                     Basado en tus {diasRestantes} días restantes del mes, contando hoy.
-                    {hoy && hoy.spentToday > 0 && <> Hoy llevas <AnimatedNumber value={hoy.spentToday} format={(n: number) => formatCurrency(n, profile?.currency)} /> de esta cuota.</>}
+                    {hoy && hoy.spentToday > 0 && <> {tr('Hoy llevas')} <AnimatedNumber value={hoy.spentToday} format={(n: number) => formatCurrency(n, profile?.currency)} /> {tr('de esta cuota.')}</>}
                   </p>
                 </div>
 
@@ -480,7 +480,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                 <div className="grid grid-cols-2 gap-2">
                   <div className={`p-3 rounded-xl ${isTechTheme ? 'bg-accent/5 border border-accent/20' : 'bg-white/5 border border-white/5'}`}>
                     <span className={`text-[10px] block font-semibold ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-                      Gasto Diario Promedio Real
+                      {tr('Gasto Diario Promedio Real')}
                     </span>
                     <p className={`text-sm font-bold mt-0.5 ${isTechTheme ? 'text-accent font-mono' : 'text-text-primary font-syne'}`}>
                       <AnimatedNumber value={promedioGastoDiarioActual} format={(n: number) => formatCurrency(n, profile?.currency)} /> / día
@@ -492,15 +492,15 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
 
                   <div className={`p-3 rounded-xl ${isTechTheme ? 'bg-accent/5 border border-accent/20' : 'bg-white/5 border border-white/5'}`}>
                     <span className={`text-[10px] block font-semibold ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>
-                      Disponible Total
+                      {tr('Disponible Total')}
                     </span>
                     <p className={`text-sm font-bold mt-0.5 ${disponibleParaGastar < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                       <AnimatedNumber value={disponibleParaGastar} format={(n: number) => formatCurrency(n, profile?.currency)} />
                     </p>
                     <span className={`text-[9px] ${isTechTheme ? 'text-accent/50' : 'text-text-muted'}`}>
                       {compromisos > 0
-                        ? `Menos ${formatCurrency(compromisos, profile?.currency)} de compromisos por pagar`
-                        : `Para repartir en ${diasRestantes} días`}
+                        ? tr('Menos {a} de compromisos por pagar', { a: formatCurrency(compromisos, profile?.currency) })
+                        : tr('Para repartir en {a} días', { a: diasRestantes })}
                     </span>
                   </div>
                 </div>
@@ -516,8 +516,8 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                     {disponibleParaGastar < 0 
                       ? '⚠️ Has superado tu disponible mensual. Si haces nuevos gastos variables, aumentará tu déficit del mes.'
                       : hoy && hoy.remainingToday < 0 && hoy.tomorrowAllowance !== null
-                        ? `⚠️ Hoy ya superaste tu cuota por ${formatCurrency(-hoy.remainingToday, profile?.currency)}. Desde mañana, procura no pasar de ${formatCurrency(hoy.tomorrowAllowance, profile?.currency)} por día para cerrar el mes sin sobrepasar tus ingresos.`
-                        : `💡 Si mantienes tus gastos variables diarios por debajo de ${formatCurrency(cuotaDiaria, profile?.currency)} cada día, cerrarás el mes sin sobrepasar tus ingresos.`
+                        ? tr('⚠️ Hoy ya superaste tu cuota por {a}. Desde mañana, procura no pasar de {b} por día para cerrar el mes sin sobrepasar tus ingresos.', { a: formatCurrency(-hoy.remainingToday, profile?.currency), b: formatCurrency(hoy.tomorrowAllowance, profile?.currency) })
+                        : tr('💡 Si mantienes tus gastos variables diarios por debajo de {a} cada día, cerrarás el mes sin sobrepasar tus ingresos.', { a: formatCurrency(cuotaDiaria, profile?.currency) })
                     }
                   </p>
                 </div>

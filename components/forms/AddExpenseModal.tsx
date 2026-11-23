@@ -622,7 +622,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent tracking-wide' : 'font-syne font-bold text-xl text-text-primary'}`}>
             {transactionToEdit ? t('Editar Transacción') : t('Nueva Transacción')}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className={`p-1 -mr-1 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={`p-1 -mr-1 transition-colors ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-secondary hover:text-text-primary'}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -711,9 +711,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                       ))}
                     </div>
                     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-                      <input autoComplete="off" id="tx-date" type="date" aria-label="Fecha" value={date} onChange={(e) => { setDate(e.target.value); if (e.target.value) setShowDate(false); }} required
+                      <input autoComplete="off" id="tx-date" type="date" aria-label={tr('Fecha')} value={date} onChange={(e) => { setDate(e.target.value); if (e.target.value) setShowDate(false); }} required
                              className={`w-full bg-glass border py-2.5 px-3 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
-                      <input autoComplete="off" id="tx-time" type="time" aria-label="Hora" value={time} onChange={(e) => setTime(e.target.value)} onBlur={() => setShowDate(false)} required
+                      <input autoComplete="off" id="tx-time" type="time" aria-label={tr('Hora')} value={time} onChange={(e) => setTime(e.target.value)} onBlur={() => setShowDate(false)} required
                              className={`w-[8.5rem] bg-glass border py-2.5 px-2.5 text-text-primary focus:outline-none ${theme === 'dark' || isTechTheme ? '[color-scheme:dark]' : '[color-scheme:light]'} ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono text-accent' : 'border-glass-border rounded-xl focus:border-accent'}`} />
                     </div>
                   </div>
@@ -846,7 +846,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                       ? (isTechTheme ? 'bg-accent/20 border border-accent text-accent font-mono' : 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400')
                       : (isTechTheme ? 'bg-white/5 border border-white/10 text-accent/50 font-mono' : 'bg-white/5 border border-white/10 text-text-muted')
                   }`}
-                  title="Cambiar entre Gasto Fijo o Variable"
+                  title={tr('Cambiar entre Gasto Fijo o Variable')}
                 >
                   <span>📌 {t('Gasto Fijo')}:</span>
                   <span className={isFixed ? 'font-black underline' : ''}>{isFixed ? t('Sí') : t('No')}</span>
@@ -1091,7 +1091,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         isOpen={showConfirmDelete}
         onCancel={() => setShowConfirmDelete(false)}
         onConfirm={handleDelete}
-        title="Eliminar Transacción"
+        title={tr('Eliminar Transacción')}
         message="¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer y afectará tu balance."
         confirmText="Eliminar"
       />
@@ -1100,7 +1100,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         isOpen={showConfirmConvert}
         onCancel={() => setShowConfirmConvert(false)}
         onConfirm={handleConvertToDebt}
-        title="Pasar a Deuda"
+        title={tr('Pasar a Deuda')}
         message="¿Estás seguro de que quieres convertir este gasto en una deuda activa? Se creará una deuda pendiente y se eliminará este gasto."
         confirmText="Convertir"
       />
@@ -1109,7 +1109,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
         isOpen={!!repeatWarn}
         onCancel={() => { againRef.current = false; setRepeatWarn(null); }}
         onConfirm={() => { repeatOk.current = true; setRepeatWarn(null); handleSubmit({ preventDefault() {} } as React.FormEvent); }}
-        title="¿Ya lo pagaste?"
+        title={tr('¿Ya lo pagaste?')}
         message={`${repeatWarn || ''} ¿Es otro pago distinto y quieres registrarlo de nuevo?`}
         confirmText="Sí, es otro pago"
         cancelText="No, ya estaba"

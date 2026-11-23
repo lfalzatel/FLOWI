@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useMemo, useRef, useState } from 'react';
 import { ChevronDown, ReceiptText, Plus, Trash2, Check, Lightbulb } from 'lucide-react';
 import { ReceiptItem, itemsCheck, formatQty, groupByCategory, shortCategory } from '@/lib/receiptItems';
@@ -48,7 +48,7 @@ export function ReceiptItemsList({
   const [addToTotal, setAddToTotal] = useState<boolean | null>(null);
 
   const editable = !!onChange;
-  const fallback = fallbackCategory || 'Otros';
+  const fallback = fallbackCategory || tr('Otros');
   const groups = useMemo(() => groupByCategory(items || [], fallback), [items, fallback]);
   const catMeta = useMemo(() => new Map((categories || []).map(c => [c.label, c])), [categories]);
   const suggested = draft.name.trim().length >= 3 ? suggest?.(draft.name) || null : null;
@@ -129,7 +129,7 @@ export function ReceiptItemsList({
                 {editing === k && editable ? (
                   <div className="space-y-1.5 p-2 -mx-1 bg-accent/5 border border-accent/30 rounded-lg">
                     <div>
-                      <label className={lbl}>Producto</label>
+                      <label className={lbl}>{tr('Producto')}</label>
                       <input autoComplete="off" className={field} value={it.name} onChange={e => update(k, { name: e.target.value.slice(0, 50) })} />
                     </div>
                     <div className="grid grid-cols-3 gap-1.5">
@@ -139,12 +139,12 @@ export function ReceiptItemsList({
                                onChange={e => { const q = toNum(e.target.value); if (q > 0) update(k, { qty: Math.round(q * 1000) / 1000 }); }} />
                       </div>
                       <div>
-                        <label className={lbl}>Precio c/u</label>
+                        <label className={lbl}>{tr('Precio c/u')}</label>
                         <input autoComplete="off" className={field} inputMode="numeric" value={pesosText(it.price)} placeholder="—"
                                onChange={e => update(k, { price: toPesos(e.target.value) || undefined })} />
                       </div>
                       <div>
-                        <label className={lbl}>Total</label>
+                        <label className={lbl}>{tr('Total')}</label>
                         <input autoComplete="off" className={field} inputMode="numeric" value={pesosText(it.total)}
                                onChange={e => update(k, { total: toPesos(e.target.value) })} />
                       </div>
@@ -187,21 +187,21 @@ export function ReceiptItemsList({
           {editable && adding && (
             <div className={`mt-1.5 p-2 border border-dashed border-accent/40 space-y-1.5 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
               <div>
-                <label className={lbl}>Producto</label>
-                <input autoComplete="off" ref={nameRef} className={field} placeholder="Ej. Arroz Diana" value={draft.name} enterKeyHint="next"
+                <label className={lbl}>{tr('Producto')}</label>
+                <input autoComplete="off" ref={nameRef} className={field} placeholder={tr('Ej. Arroz Diana')} value={draft.name} enterKeyHint="next"
                        onChange={e => { setDraft(d => ({ ...d, name: e.target.value })); setDraftCat(null); }} onKeyDown={onEnter} />
               </div>
               <div className="flex items-end gap-1.5">
                 <div className="w-16 shrink-0">
-                  <label className={lbl}>Cant.</label>
+                  <label className={lbl}>{tr('Cant.')}</label>
                   <input autoComplete="off" className={field} inputMode="decimal" value={draft.qty} onChange={e => setDraft(d => ({ ...d, qty: e.target.value }))} onKeyDown={onEnter} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <label className={lbl}>Precio c/u</label>
+                  <label className={lbl}>{tr('Precio c/u')}</label>
                   <input autoComplete="off" className={field} inputMode="numeric" placeholder="$" value={draft.price ? toPesos(draft.price).toLocaleString(currentLocale()) : ''} enterKeyHint="done"
                          onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} onKeyDown={onEnter} />
                 </div>
-                <button type="button" onClick={addDraft} aria-label="Agregar producto"
+                <button type="button" onClick={addDraft} aria-label={tr('Agregar producto')}
                         className={`shrink-0 h-[30px] px-3 flex items-center gap-1 text-[11px] font-bold bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
                   <Plus className="w-3.5 h-3.5" /> Agregar
                 </button>
@@ -209,24 +209,24 @@ export function ReceiptItemsList({
               {showChips && draft.name.trim().length >= 3 && (
                 <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
                   <Lightbulb className="w-3 h-3 text-accent shrink-0" />
-                  <span>{draftCat ? 'Categoría:' : suggested ? 'Categoría sugerida:' : 'Categoría:'}</span>
+                  <span>{draftCat ? tr('Categoría:') : suggested ? tr('Categoría sugerida:') : tr('Categoría:')}</span>
                   {chip(newCat, () => setPickerFor(-1), 'Cambiar categoría')}
-                  <span className="truncate">toca para cambiarla</span>
+                  <span className="truncate">{tr('toca para cambiarla')}</span>
                 </div>
               )}
               {canAddToTotal && (
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input type="checkbox" checked={sumIt} onChange={e => setAddToTotal(e.target.checked)} className="mt-0.5 accent-[var(--accent,#10b981)]" />
                   <span className="text-[10px] text-text-secondary leading-snug">
-                    <b className="text-text-primary">Sumar al total del gasto</b> — márcalo si es de otro recibo de la misma compra.
-                    Déjalo sin marcar si la IA no leyó este producto y ya está en el total.
+                    <b className="text-text-primary">{tr('Sumar al total del gasto')}</b> — márcalo si es de otro recibo de la misma compra.
+                    {tr('Déjalo sin marcar si la IA no leyó este producto y ya está en el total.')}
                   </span>
                 </label>
               )}
               {items.length > 0 && (
                 <button type="button" onClick={() => { setAdding(false); setDraft({ name: '', qty: '1', price: '' }); setDraftCat(null); }}
                         className="text-[10px] text-text-muted underline">
-                  Cerrar
+                  {tr('Cerrar')}
                 </button>
               )}
             </div>
@@ -282,7 +282,7 @@ export function ItemsByCategory({ items, total, fallbackCategory, isTech, split,
   const meta = new Map((categories || []).map(c => [c.label, c]));
   return (
     <div className={`p-2.5 border border-accent/25 bg-accent/5 normal-case space-y-1.5 ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
-      <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">De esta compra</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{tr('De esta compra')}</p>
       <ul className="space-y-1">
         {groups.map((g, i) => (
           <li key={g.category} className="flex items-center gap-2 text-xs">

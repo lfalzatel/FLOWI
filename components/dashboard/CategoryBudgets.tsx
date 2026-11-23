@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 
 import { expandByItems } from '@/lib/receiptItems';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
@@ -18,7 +18,7 @@ import { CUSTOM_GROUP } from '@/lib/categories';
 import { BUDGET_GROUP_ORDER, GROUP_BUDGET_CONFIG, PILLAR_STYLES, createCategoryResolver } from '@/lib/categoryGroups';
 import { 
   Target, Plus, Edit3, Check, AlertTriangle, Sparkles, 
-  ChevronDown, ChevronUp, Layers, ListFilter 
+  ChevronDown, ChevronUp, Layers, ListFilter
 } from 'lucide-react';
 
 const VISIBLE_TRANSACTIONS = 8;
@@ -167,13 +167,13 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-accent animate-pulse" />
           <h3 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'text-text-primary font-syne'}`}>
-            Presupuestos Inteligentes por Categoría
+            {tr('Presupuestos Inteligentes por Categoría')}
           </h3>
         </div>
         <span className={`text-[11px] px-2.5 py-0.5 rounded-full ${
           isTechTheme ? 'bg-accent/20 text-accent font-mono border border-accent/40' : 'bg-white/10 text-text-muted'
         }`}>
-          Regla 50/30/20
+          {tr('Regla 50/30/20')}
         </span>
       </div>
 
@@ -199,17 +199,17 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
               </div>
               <div>
                 <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>
-                  Categorías Principales
+                  {tr('Categorías Principales')}
                 </p>
                 <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
-                  Presupuesto estimado según la regla 50 / 30 / 20
+                  {tr('Presupuesto estimado según la regla 50 / 30 / 20')}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                Abierto
+                {tr('Abierto')}
               </span>
               {openMainAccordion ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
             </div>
@@ -256,10 +256,10 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                         <span className="text-base">{config.icon}</span>
                         <div>
                           <p className={`text-xs font-bold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
-                            {mainCatName}
+                            {tr(mainCatName)}
                           </p>
                           <span className={`text-[9px] font-bold uppercase tracking-wider ${config.color}`}>
-                            {config.rule}
+                            {tr(config.rule)}
                           </span>
                         </div>
                       </div>
@@ -296,14 +296,14 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                           </span>
                           <span className="text-text-muted">
                             {isOverBudget
-                              ? <>Excedido por <AnimatedNumber value={spent - target} format={(n: number) => formatCurrency(n, currency)} /></>
-                              : <>Disponible: <AnimatedNumber value={target - spent} format={(n: number) => formatCurrency(n, currency)} /></>}
+                              ? <>{tr('Excedido por')} <AnimatedNumber value={spent - target} format={(n: number) => formatCurrency(n, currency)} /></>
+                              : <>{tr('Disponible:')} <AnimatedNumber value={target - spent} format={(n: number) => formatCurrency(n, currency)} /></>}
                           </span>
                         </div>
                       </div>
                     ) : (
                       <p className="text-[10px] text-text-muted italic pt-1">
-                        Configura tu Presupuesto Global Mensual para activar los estimados de la regla 50/30/20.
+                        {tr('Configura tu Presupuesto Global Mensual para activar los estimados de la regla 50/30/20.')}
                       </p>
                     )}
                     </button>
@@ -311,12 +311,12 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                     {isExpanded && (
                       <div className={`px-3.5 pb-3.5 pt-1 space-y-3 border-t ${isTechTheme ? 'border-accent/20' : 'border-white/10'}`}>
                         {!detail ? (
-                          <p className="text-[11px] text-text-muted text-center py-3">No hay gastos en esta categoría en el periodo.</p>
+                          <p className="text-[11px] text-text-muted text-center py-3">{tr('No hay gastos en esta categoría en el periodo.')}</p>
                         ) : (
                           <>
                             {/* En qué subcategorías se fue el dinero */}
                             <div className="space-y-1.5 pt-2">
-                              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">En qué se fue</p>
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{tr('En qué se fue')}</p>
                               {Object.entries(detail.subcategories)
                                 .sort((a, b) => b[1] - a[1])
                                 .map(([subcat, amount]) => {
@@ -365,7 +365,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                                   onClick={() => setShowAllTransactions(!showAllTransactions)}
                                   className="w-full text-center text-[11px] font-semibold text-accent pt-1"
                                 >
-                                  {showAllTransactions ? 'Ver menos' : `Ver todos (${detail.transactions.length})`}
+                                  {showAllTransactions ? 'Ver menos' : tr('Ver todos ({a})', { a: detail.transactions.length })}
                                 </button>
                               )}
                             </div>
@@ -401,7 +401,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
               </div>
               <div>
                 <p className={`text-sm font-bold ${isTechTheme ? 'font-mono text-accent uppercase' : 'font-syne text-text-primary'}`}>
-                  Todas las Subcategorías Detalladas
+                  {tr('Todas las Subcategorías Detalladas')}
                 </p>
                 <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
                   {allSubcategoryNames.length} subcategorías usadas en tu historial (Con metas editables)
@@ -423,7 +423,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
             <div className="p-4 space-y-3 bg-black/20">
               {allSubcategoryNames.length === 0 ? (
                 <p className="text-xs text-text-muted text-center py-4">
-                  No hay subcategorías registradas en este período.
+                  {tr('No hay subcategorías registradas en este período.')}
                 </p>
               ) : (
                 allSubcategoryNames.map(subcatName => {
@@ -482,7 +482,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                           <div className="flex items-center gap-1">
                             <input autoComplete="off" 
                               type="number"
-                              placeholder="Meta $"
+                              placeholder={tr('Meta $')}
                               value={tempBudgetVal}
                               onChange={(e) => setTempBudgetVal(e.target.value)}
                               className="w-24 bg-black/50 border border-accent p-1 text-xs font-bold text-accent rounded focus:outline-none"
@@ -533,8 +533,8 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                             </span>
                             <span className="text-text-muted">
                               {isOverBudget
-                                ? <>Excedido por <AnimatedNumber value={spent - target} format={(n: number) => formatCurrency(n, currency)} /></>
-                                : <>Resta: <AnimatedNumber value={target - spent} format={(n: number) => formatCurrency(n, currency)} /></>}
+                                ? <>{tr('Excedido por')} <AnimatedNumber value={spent - target} format={(n: number) => formatCurrency(n, currency)} /></>
+                                : <>{tr('Resta:')} <AnimatedNumber value={target - spent} format={(n: number) => formatCurrency(n, currency)} /></>}
                             </span>
                           </div>
                         </div>

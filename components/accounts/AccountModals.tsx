@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { usePlanGate } from '@/lib/plans';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -56,7 +56,7 @@ export function Shell({ title, onClose, children, footer }: { title: string; onC
            onClick={(e) => e.stopPropagation()}>
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTech ? 'border-b border-accent/20' : ''}`}>
           <h2 className={isTech ? 'font-bold text-xl text-accent tracking-wide uppercase' : 'font-syne font-bold text-xl text-text-primary'}>{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className={`p-1 -mr-1 ${isTech ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={`p-1 -mr-1 ${isTech ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -69,8 +69,8 @@ export function Shell({ title, onClose, children, footer }: { title: string; onC
 }
 
 const permissionMsg = (err: any) => err?.code === 'permission-denied'
-  ? 'La base de datos todavía no permite guardar cuentas. Hay que publicar las reglas de "fl_accounts".'
-  : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
+  ? tr('La base de datos todavía no permite guardar cuentas. Hay que publicar las reglas de "fl_accounts".')
+  : tr('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
 
 // ── Nueva / editar cuenta ────────────────────────────────────────────────
 type AccountFormProps = {
@@ -158,23 +158,23 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
   }
 
   return (
-    <Shell title={account ? 'Editar cuenta' : 'Nueva cuenta'} onClose={onClose}
+    <Shell title={account ? tr('Editar cuenta') : tr('Nueva cuenta')} onClose={onClose}
            footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? 'Guardando...' : account ? 'Guardar cambios' : 'Crear cuenta'}</button>}>
       <div>
-        <span className={s.label}>Tipo</span>
+        <span className={s.label}>{tr('Tipo')}</span>
         <div className="flex flex-wrap gap-2">
           {(Object.keys(KIND_LABEL) as AccountKind[]).map(k => (
-            <button key={k} type="button" onClick={() => setKind(k)} className={s.chip(kind === k)}>{KIND_EMOJI[k]} {KIND_LABEL[k]}</button>
+            <button key={k} type="button" onClick={() => setKind(k)} className={s.chip(kind === k)}>{KIND_EMOJI[k]} {tr(KIND_LABEL[k])}</button>
           ))}
         </div>
       </div>
 
       <div>
-        <label htmlFor="acc-name" className={s.label}>Nombre</label>
+        <label htmlFor="acc-name" className={s.label}>{tr('Nombre')}</label>
         <input id="acc-name" type="text" autoComplete="off" value={name} maxLength={30} onChange={(e) => setName(e.target.value)}
                placeholder={kind === 'efectivo' ? 'Efectivo' : kind === 'credito' ? 'Ej: Visa Bancolombia' : kind === 'billetera' ? 'Ej: Nequi' : 'Ej: Bancolombia ahorros'}
                className={s.input} />
-        <p className={s.hint}>No escribas números de cuenta: FLOWI no los necesita.</p>
+        <p className={s.hint}>{tr('No escribas números de cuenta: FLOWI no los necesita.')}</p>
       </div>
 
       {!account && (
@@ -182,7 +182,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
           <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? '¿Cuánto debes hoy en la tarjeta?' : initial ? `¿Cuánto tenías en ${name || 'esta cuenta'} antes de este movimiento?` : '¿Cuánto tienes hoy en esta cuenta?'}</label>
           <input id="acc-balance" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={balance}
                  onChange={(e) => setBalance(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
-          <p className={s.hint}>Míralo en la app del banco. Desde hoy, tus gastos e ingresos de esta cuenta lo van moviendo.</p>
+          <p className={s.hint}>{tr('Míralo en la app del banco. Desde hoy, tus gastos e ingresos de esta cuenta lo van moviendo.')}</p>
         </div>
       )}
 
@@ -191,36 +191,36 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
           <label htmlFor="acc-limit" className={s.label}>Cupo de la tarjeta (opcional)</label>
           <input id="acc-limit" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={limit}
                  onChange={(e) => setLimit(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
-          <p className={s.hint}>Con el cupo, FLOWI te muestra cuánto te queda disponible para usar.</p>
+          <p className={s.hint}>{tr('Con el cupo, FLOWI te muestra cuánto te queda disponible para usar.')}</p>
         </div>
       )}
 
       {kind === 'credito' && (
         <div className="space-y-2">
-          <span className={s.label}>¿Cómo la pagas?</span>
+          <span className={s.label}>{tr('¿Cómo la pagas?')}</span>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => setPayMode('total')} className={s.chip(payMode === 'total')}>Todo cada mes</button>
-            <button type="button" onClick={() => setPayMode('fijo')} className={s.chip(payMode === 'fijo')}>Un pago fijo al mes</button>
+            <button type="button" onClick={() => setPayMode('total')} className={s.chip(payMode === 'total')}>{tr('Todo cada mes')}</button>
+            <button type="button" onClick={() => setPayMode('fijo')} className={s.chip(payMode === 'fijo')}>{tr('Un pago fijo al mes')}</button>
           </div>
           {payMode === 'fijo' && (
-            <input type="text" autoComplete="off" inputMode="decimal" placeholder="¿Cuánto pagas al mes? $ 0" value={payAmount} aria-label="Pago al mes"
+            <input type="text" autoComplete="off" inputMode="decimal" placeholder={tr('¿Cuánto pagas al mes? $ 0')} value={payAmount} aria-label={tr('Pago al mes')}
                    onChange={(e) => setPayAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           )}
           <div className="flex items-center gap-2">
-            <label htmlFor="acc-payday" className="text-xs text-text-muted shrink-0">Día de pago</label>
-            <input id="acc-payday" type="text" autoComplete="off" inputMode="numeric" placeholder="Ej: 15" value={payDay} maxLength={2}
+            <label htmlFor="acc-payday" className="text-xs text-text-muted shrink-0">{tr('Día de pago')}</label>
+            <input id="acc-payday" type="text" autoComplete="off" inputMode="numeric" placeholder={tr('Ej: 15')} value={payDay} maxLength={2}
                    onChange={(e) => setPayDay(e.target.value.replace(/[^0-9]/g, ''))} className={`${s.input} !w-24 !py-2`} />
           </div>
           <p className={s.hint}>
             {payMode === 'fijo'
-              ? 'En "Hoy puedes gastar" solo se aparta este pago del mes (menos lo que ya le abonaste), no todo lo que debes.'
-              : 'En "Hoy puedes gastar" se aparta todo lo que debes en la tarjeta, porque lo pagas completo.'}
+              ? tr('En "Hoy puedes gastar" solo se aparta este pago del mes (menos lo que ya le abonaste), no todo lo que debes.')
+              : tr('En "Hoy puedes gastar" se aparta todo lo que debes en la tarjeta, porque lo pagas completo.')}
           </p>
         </div>
       )}
 
       <div>
-        <span className={s.label}>¿Qué movimientos caen aquí?</span>
+        <span className={s.label}>{tr('¿Qué movimientos caen aquí?')}</span>
         <div className="flex flex-wrap gap-1.5">
           {shownMethods.filter(m => !taken.has(m)).map(m => (
             <span key={m} className={`${s.chip(true)} inline-flex items-center gap-1.5`}>
@@ -233,32 +233,32 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
           </button>
         </div>
         {methodsSheet && (
-          <BankPickerSheet title="¿Qué movimientos caen aquí?" multiple
+          <BankPickerSheet title={tr('¿Qué movimientos caen aquí?')} multiple
                            selected={shownMethods.filter(m => !taken.has(m))}
-                           disabled={Object.fromEntries(Array.from(taken.entries()).map(([m, owner]) => [m, `Ya está en ${owner}`]))}
+                           disabled={Object.fromEntries(Array.from(taken.entries()).map(([m, owner]) => [m, tr('Ya está en {a}', { a: owner })]))}
                            onChange={(v) => { setMethodsTouched(true); setMethods(v); }}
                            onClose={() => setMethodsSheet(false)} />
         )}
-        <p className={s.hint}>Los gastos e ingresos que registres con estos medios de pago mueven esta cuenta.</p>
+        <p className={s.hint}>{tr('Los gastos e ingresos que registres con estos medios de pago mueven esta cuenta.')}</p>
       </div>
 
       {kind !== 'credito' && (
         <div>
-          <span className={s.label}>¿Para qué es esta plata?</span>
+          <span className={s.label}>{tr('¿Para qué es esta plata?')}</span>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setPurpose('gastar')} className={s.chip(purpose === 'gastar')}>Para gastar</button>
-            <button type="button" onClick={() => setPurpose('ahorro')} className={s.chip(purpose === 'ahorro')}>Ahorro</button>
+            <button type="button" onClick={() => setPurpose('gastar')} className={s.chip(purpose === 'gastar')}>{tr('Para gastar')}</button>
+            <button type="button" onClick={() => setPurpose('ahorro')} className={s.chip(purpose === 'ahorro')}>{tr('Ahorro')}</button>
           </div>
           <p className={s.hint}>{purpose === 'gastar'
-            ? 'Cuenta en "Hoy puedes gastar": es la plata del día a día.'
-            : 'No cuenta en "Hoy puedes gastar" (por ejemplo, tu fondo de emergencia), pero sí en tu patrimonio.'}</p>
+            ? tr('Cuenta en "Hoy puedes gastar": es la plata del día a día.')
+            : tr('No cuenta en "Hoy puedes gastar" (por ejemplo, tu fondo de emergencia), pero sí en tu patrimonio.')}</p>
         </div>
       )}
 
       <label className="flex items-start gap-3 cursor-pointer">
         <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--accent)]" />
         <span className="text-sm text-text-secondary">
-          Cuenta principal
+          {tr('Cuenta principal')}
           <span className="block text-[11px] text-text-muted">Recibe los gastos e ingresos que no dicen con qué se pagaron (la mayoría de los que dictas por voz).</span>
         </span>
       </label>
@@ -306,7 +306,7 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
   }
 
   return (
-    <Shell title={`Ajustar ${account.name}`} onClose={onClose}
+    <Shell title={tr('Ajustar {a}', { a: account.name })} onClose={onClose}
            footer={<button type="button" disabled={saving} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar saldo'}</button>}>
       <div>
         <label htmlFor="adj" className={s.label}>{credit ? '¿Cuánto debes hoy según el banco?' : '¿Cuánto dice el banco que tienes hoy?'}</label>
@@ -316,7 +316,7 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
           {diff !== 0 && <> La diferencia ({diff > 0 ? '+' : '−'}{formatCurrency(Math.abs(Math.round(diff)), currency)}) suele ser algo que no registraste, como un cobro del banco o unos intereses.</>}
         </p>
       </div>
-      <p className="text-[11px] text-text-muted">El ajuste no crea gastos ni ingresos: solo deja la cuenta igual a la del banco desde hoy.</p>
+      <p className="text-[11px] text-text-muted">{tr('El ajuste no crea gastos ni ingresos: solo deja la cuenta igual a la del banco desde hoy.')}</p>
       {error && <p className="text-xs text-[var(--red)]">{error}</p>}
     </Shell>
   );
@@ -364,8 +364,8 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
     } catch (err) {
       console.error('Error saving transfer:', err);
       setError(err && (err as any).code === 'permission-denied'
-        ? 'La base de datos todavía no permite guardar transferencias. Hay que publicar las reglas de "fl_transfers".'
-        : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
+        ? tr('La base de datos todavía no permite guardar transferencias. Hay que publicar las reglas de "fl_transfers".')
+        : tr('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'));
       setSaving(false);
     }
   }
@@ -387,10 +387,10 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
     <Shell title={editing ? (toAcc?.kind === 'credito' ? 'Editar abono' : 'Editar transferencia') : payCard ? `Abonar a ${toAcc?.name || 'la tarjeta'}` : 'Mover plata entre cuentas'} onClose={onClose}
            footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar'}</button>}>
       <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
-        <div><span className={s.label}>Sale de</span>{accField(from, 'from')}</div>
+        <div><span className={s.label}>{tr('Sale de')}</span>{accField(from, 'from')}</div>
         {payCard
           ? <span className="mb-5 p-2 text-accent" aria-hidden="true"><ArrowRightLeft className="w-5 h-5" /></span>
-          : <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label="Intercambiar"
+          : <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label={tr('Intercambiar')}
                 className="mb-5 p-2 rounded-full text-accent hover:bg-accent/10"><ArrowRightLeft className="w-5 h-5" /></button>}
         <div><span className={s.label}>{payCard ? 'Abono a' : 'Llega a'}</span>{payCard
           ? <div className={`w-full flex flex-col items-center gap-1.5 px-2 py-3 bg-glass border ${s.isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>
@@ -413,7 +413,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
                           className={`w-full flex items-center gap-3 p-3 border text-left ${s.isTech ? 'rounded-none' : 'rounded-2xl'} ${on ? 'border-accent bg-accent/10' : 'border-glass-border hover:bg-white/5'}`}>
                     <AccountIcon account={a} className="w-7 h-7 text-xl flex items-center justify-center" />
                     <span className="flex-1 text-sm text-text-primary">{a.name}</span>
-                    <span className="text-[11px] text-text-muted">{KIND_LABEL[a.kind]}</span>
+                    <span className="text-[11px] text-text-muted">{tr(KIND_LABEL[a.kind])}</span>
                   </button>
                 );
               })}
@@ -424,8 +424,8 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
       )}
       <div className="space-y-3">
         <div>
-          <span className={s.label}>Monto</span>
-          <button type="button" onClick={() => setShowKeys(v => !v)} aria-label="Monto"
+          <span className={s.label}>{tr('Monto')}</span>
+          <button type="button" onClick={() => setShowKeys(v => !v)} aria-label={tr('Monto')}
                   className={`${s.input} text-left text-xl font-bold tabular-nums ${showKeys ? '!border-accent' : ''}`}>
             {amount ? `$ ${displayExpr(amount)}` : <span className="text-text-muted">$ 0</span>}
             {hasOperator(amount) && <span className="ml-2 text-sm font-normal text-text-muted">= {formatCurrency(value, currency)}</span>}
@@ -448,11 +448,11 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
         </div>
         <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="tr-date" className={s.label}>Fecha</label>
+          <label htmlFor="tr-date" className={s.label}>{tr('Fecha')}</label>
           <input id="tr-date" type="date" autoComplete="off" value={date} onChange={(e) => setDate(e.target.value)} className={s.input} />
         </div>
         <div>
-          <label htmlFor="tr-time" className={s.label}>Hora</label>
+          <label htmlFor="tr-time" className={s.label}>{tr('Hora')}</label>
           <input id="tr-time" type="time" autoComplete="off" value={time} onChange={(e) => setTime(e.target.value)} className={s.input} />
         </div>
         </div>
@@ -475,17 +475,17 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
                placeholder={toAcc?.kind === 'credito' ? 'Pago de la tarjeta' : toAcc?.kind === 'efectivo' ? 'Retiro en cajero' : 'Ej: paso a Nequi'} className={s.input} />
       </div>
       <p className="text-[11px] text-text-muted">{payCard
-        ? 'El abono baja lo que debes en la tarjeta y descuenta la plata de la cuenta de donde sale. No es un gasto: las compras ya las registraste como gastos.'
+        ? tr('El abono baja lo que debes en la tarjeta y descuenta la plata de la cuenta de donde sale. No es un gasto: las compras ya las registraste como gastos.')
         : <>No es un gasto ni un ingreso: la plata sigue siendo tuya, solo cambia de lugar{toAcc?.kind === 'credito' ? ' (pagar la tarjeta baja lo que debes en ella)' : ''}.</>}</p>
       {editing?.id && (confirmDelete
         ? <div className="flex gap-2">
-            <button type="button" onClick={() => setConfirmDelete(false)} className={`flex-1 py-2.5 text-xs font-semibold border border-glass-border text-text-secondary ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>No borrar</button>
-            <button type="button" onClick={async () => { await deleteTransfer(editing.id!); onClose(); }} className={`flex-1 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/40 bg-red-500/10 ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>Sí, borrar</button>
+            <button type="button" onClick={() => setConfirmDelete(false)} className={`flex-1 py-2.5 text-xs font-semibold border border-glass-border text-text-secondary ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>{tr('No borrar')}</button>
+            <button type="button" onClick={async () => { await deleteTransfer(editing.id!); onClose(); }} className={`flex-1 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/40 bg-red-500/10 ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>{tr('Sí, borrar')}</button>
           </div>
         : <button type="button" onClick={() => setConfirmDelete(true)} className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${s.isTech ? 'rounded-none uppercase' : 'rounded-xl'}`}>
             <Trash2 className="w-4 h-4" /> {toAcc?.kind === 'credito' ? 'Borrar abono' : 'Borrar transferencia'}
           </button>)}
-      {active.length < 2 && <p className="text-xs text-amber-500">Necesitas al menos dos cuentas para mover plata entre ellas.</p>}
+      {active.length < 2 && <p className="text-xs text-amber-500">{tr('Necesitas al menos dos cuentas para mover plata entre ellas.')}</p>}
       {error && <p className="text-xs text-[var(--red)]">{error}</p>}
     </Shell>
   );

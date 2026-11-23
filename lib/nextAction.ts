@@ -1,4 +1,4 @@
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { Transaction } from './firestore';
 import { Commitment } from './commitments';
 import { DailyBudget } from './dailyBudget';
@@ -59,7 +59,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
         id: `premium:${getLocalDateString(premiumEnd.until)}`, kind: 'link', href: '/planes', tone: left <= 1 ? 'alert' : 'normal',
         title: left > 1 ? `${what} vence en ${left} días` : left === 1 ? `${what} vence mañana` : left === 0 ? `${what} vence hoy` : `${what} terminó`,
         detail: left >= 0
-          ? `Renuévalo antes del ${dateText} para seguir sin límites. Si renuevas antes, los días se suman. Toca para ver los planes.`
+          ? tr('Renuévalo antes del {a} para seguir sin límites. Si renuevas antes, los días se suman. Toca para ver los planes.', { a: dateText })
           : 'Volviste al plan gratis: tus datos siguen ahí, solo no puedes agregar más de lo que permite. Toca para renovar.',
       });
     }
@@ -75,8 +75,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     const when = c.daysLeft < 0 ? `venció hace ${-c.daysLeft} ${c.daysLeft === -1 ? 'día' : 'días'}` : c.daysLeft === 0 ? 'vence hoy' : 'vence mañana';
     out.push({
       id: `pay:${c.key}`, kind: 'pay', commitment: c, tone: c.daysLeft < 0 ? 'alert' : 'normal',
-      title: `Paga ${c.title}`,
-      detail: `${when[0].toUpperCase()}${when.slice(1)}${c.amount ? (c.debt ? ` · cuota de ${formatMoney(c.amount)}` : ` · el mes pasado fueron ${formatMoney(c.amount)}`) : ''}. Toca para registrarlo.`,
+      title: tr('Paga {a}', { a: c.title }),
+      detail: `${when[0].toUpperCase()}${when.slice(1)}${c.amount ? (c.debt ? tr(' · cuota de {a}', { a: formatMoney(c.amount) }) : tr(' · el mes pasado fueron {a}', { a: formatMoney(c.amount) })) : ''}. Toca para registrarlo.`,
     });
   }
 
@@ -88,8 +88,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
       id: `cdt:${m.id}`, kind: 'link', href: '/servicios/inversiones', tone: 'normal',
       title: `Tu CDT de ${m.bank} ${when}`,
       detail: m.daysLeft > 0
-        ? `${formatMoney(m.amount)}. Antes de que se renueve, compara la tasa con otros bancos.`
-        : `${formatMoney(m.amount)}. Cuéntame si lo renovaste o te lo pagaron.`,
+        ? tr('{a}. Antes de que se renueve, compara la tasa con otros bancos.', { a: formatMoney(m.amount) })
+        : tr('{a}. Cuéntame si lo renovaste o te lo pagaron.', { a: formatMoney(m.amount) }),
     });
   }
 
@@ -102,8 +102,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     if (now.getDate() >= usualDay) {
       out.push({
         id: 'income', kind: 'income', tone: 'normal',
-        title: `Registra tu ingreso de ${monthName}`,
-        detail: `Sin ingresos no puedo calcular cuánto puedes gastar. El mes pasado recibiste ${formatMoney(main.amount)} por ${main.description || main.category}.`,
+        title: tr('Registra tu ingreso de {a}', { a: monthName }),
+        detail: tr('Sin ingresos no puedo calcular cuánto puedes gastar. El mes pasado recibiste {a} por {b}.', { a: formatMoney(main.amount), b: main.description || main.category }),
         prefill: { amount: main.amount, category: main.category, description: main.description || '' },
       });
     }
@@ -114,8 +114,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     const next = pending.find(c => c.daysLeft >= 0) || pending[0];
     out.push({
       id: 'notify', kind: 'notify', tone: 'normal',
-      title: 'Activa los avisos de tus pagos',
-      detail: `Te avisamos de ${next.title} y tus otros pagos antes de que venzan, aunque FLOWI esté cerrada.`,
+      title: tr('Activa los avisos de tus pagos'),
+      detail: tr('Te avisamos de {a} y tus otros pagos antes de que venzan, aunque FLOWI esté cerrada.', { a: next.title }),
     });
   }
 
@@ -124,8 +124,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   if (acc) {
     out.push({
       id: `reconcile:${acc.id}`, kind: 'reconcile', tone: 'normal', accountId: acc.id, balance: acc.balance,
-      title: `¿Tu ${acc.name} dice ${formatMoney(acc.balance)}?`,
-      detail: 'Revisa la app del banco: si cuadra, lo confirmo; si no, lo ajustamos en un toque.',
+      title: tr('¿Tu {a} dice {b}?', { a: acc.name, b: formatMoney(acc.balance) }),
+      detail: tr('Revisa la app del banco: si cuadra, lo confirmo; si no, lo ajustamos en un toque.'),
     });
   }
 
@@ -134,8 +134,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   if (fund) {
     out.push({
       id: `fund:${fund.id}:${Math.floor(fund.days / 30)}`, kind: 'link', href: '/servicios/inversiones', tone: 'normal',
-      title: `¿Cuánto vale hoy ${fund.name}?`,
-      detail: `Hace ${fund.days} días no lo actualizas. Mira la app y anótalo para ver tu ganancia real.`,
+      title: tr('¿Cuánto vale hoy {a}?', { a: fund.name }),
+      detail: tr('Hace {a} días no lo actualizas. Mira la app y anótalo para ver tu ganancia real.', { a: fund.days }),
     });
   }
 
@@ -143,8 +143,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   if (today && today.hasBase && today.remainingToday < 0 && today.tomorrowAllowance !== null) {
     out.push({
       id: 'today-over', kind: 'today', tone: 'alert',
-      title: `Desde mañana, máximo ${formatMoney(today.tomorrowAllowance)} al día`,
-      detail: `Hoy te pasaste ${formatMoney(-today.remainingToday)} de tu cuota. Toca para ver el cálculo.`,
+      title: tr('Desde mañana, máximo {a} al día', { a: formatMoney(today.tomorrowAllowance) }),
+      detail: tr('Hoy te pasaste {a} de tu cuota. Toca para ver el cálculo.', { a: formatMoney(-today.remainingToday) }),
     });
   }
 
@@ -152,8 +152,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   if (!hasGoals) {
     out.push({
       id: 'goal-emergency', kind: 'link', href: '/servicios/metas', tone: 'normal',
-      title: 'Crea tu fondo de emergencia',
-      detail: 'Es la primera meta que conviene tener: unos 3 meses de tus gastos fijos para cualquier imprevisto.',
+      title: tr('Crea tu fondo de emergencia'),
+      detail: tr('Es la primera meta que conviene tener: unos 3 meses de tus gastos fijos para cualquier imprevisto.'),
     });
   }
 
@@ -164,8 +164,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     if (freeNow > 0) {
       out.push({
         id: 'goal-surplus', kind: 'link', href: '/servicios/metas', tone: 'normal',
-        title: `Aparta lo que te sobra de ${monthName}`,
-        detail: `Te quedan ${formatMoney(freeNow)} libres y el mes casi termina. Guárdalos en tu meta antes de que se vayan.`,
+        title: tr('Aparta lo que te sobra de {a}', { a: monthName }),
+        detail: tr('Te quedan {a} libres y el mes casi termina. Guárdalos en tu meta antes de que se vayan.', { a: formatMoney(freeNow) }),
       });
     }
   }
@@ -175,8 +175,8 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   if (!anyToday && now.getHours() >= 19) {
     out.push({
       id: 'add-today', kind: 'add', tone: 'normal',
-      title: '¿Gastaste algo hoy?',
-      detail: 'Anótalo ahora que lo recuerdas; con la voz te toma 5 segundos.',
+      title: tr('¿Gastaste algo hoy?'),
+      detail: tr('Anótalo ahora que lo recuerdas; con la voz te toma 5 segundos.'),
     });
   }
 
@@ -184,26 +184,26 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   if (summary) {
     out.push({
       id: `review:${summary.month}`, kind: 'link', href: `/servicios/resumen?mes=${summary.month}`, tone: 'normal',
-      title: `Revisa tu resumen de ${summary.name}`,
-      detail: summary.hint || `Mira en qué se fue tu plata en ${summary.name} y cómo vas frente al mes anterior.`,
+      title: tr('Revisa tu resumen de {a}', { a: summary.name }),
+      detail: summary.hint || tr('Mira en qué se fue tu plata en {a} y cómo vas frente al mes anterior.', { a: summary.name }),
     });
   }
 
   // 8. Descubrir FLOWI: funciones que aún no usa
   if (discover) {
     const tips: NextAction[] = [];
-    if (!discover.hasAccounts) tips.push({ id: 'tip:cuentas', kind: 'link', href: '/servicios/cuentas', tone: 'normal', title: 'Agrega tus cuentas y mira tu patrimonio', detail: 'Bancolombia, Nequi, efectivo… y tu "Dinero disponible" será la plata real que tienes.' });
-    if (!discover.hasInvestments) tips.push({ id: 'tip:inversiones', kind: 'link', href: '/servicios/inversiones', tone: 'normal', title: '¿Ahorras en Nu o tienes un CDT?', detail: 'Regístralo y te digo cuánto vas ganando con su tasa.' });
-    tips.push({ id: 'tip:recibo', kind: 'link', href: '/?accion=foto', tone: 'normal', title: 'Registra un gasto con la foto del recibo', detail: 'Toca el botón + y elige "Foto del recibo": la IA lee el total por ti.' });
-    tips.push({ id: 'tip:extracto', kind: 'link', href: '/servicios/importar', tone: 'normal', title: 'Importa el extracto de tu banco', detail: 'Sube el Excel y registro todos los movimientos de una vez.' });
-    tips.push({ id: 'tip:hormiga', kind: 'link', href: '/servicios/hormiga', tone: 'normal', title: '¿Cuánto se te va en gastos hormiga?', detail: 'Mira tus suscripciones y las compras pequeñas que se repiten, y cuánto suman al año.' });
-    if (discover.reminders < 3) tips.push({ id: 'tip:recordatorios', kind: 'link', href: '/servicios/recordatorios', tone: 'normal', title: 'Crea recordatorios para tus pagos fijos', detail: 'Te aviso antes de que venzan y los reservo en lo que puedes gastar.' });
+    if (!discover.hasAccounts) tips.push({ id: 'tip:cuentas', kind: 'link', href: '/servicios/cuentas', tone: 'normal', title: tr('Agrega tus cuentas y mira tu patrimonio'), detail: tr('Bancolombia, Nequi, efectivo… y tu "Dinero disponible" será la plata real que tienes.') });
+    if (!discover.hasInvestments) tips.push({ id: 'tip:inversiones', kind: 'link', href: '/servicios/inversiones', tone: 'normal', title: tr('¿Ahorras en Nu o tienes un CDT?'), detail: tr('Regístralo y te digo cuánto vas ganando con su tasa.') });
+    tips.push({ id: 'tip:recibo', kind: 'link', href: '/?accion=foto', tone: 'normal', title: tr('Registra un gasto con la foto del recibo'), detail: tr('Toca el botón + y elige "Foto del recibo": la IA lee el total por ti.') });
+    tips.push({ id: 'tip:extracto', kind: 'link', href: '/servicios/importar', tone: 'normal', title: tr('Importa el extracto de tu banco'), detail: tr('Sube el Excel y registro todos los movimientos de una vez.') });
+    tips.push({ id: 'tip:hormiga', kind: 'link', href: '/servicios/hormiga', tone: 'normal', title: tr('¿Cuánto se te va en gastos hormiga?'), detail: tr('Mira tus suscripciones y las compras pequeñas que se repiten, y cuánto suman al año.') });
+    if (discover.reminders < 3) tips.push({ id: 'tip:recordatorios', kind: 'link', href: '/servicios/recordatorios', tone: 'normal', title: tr('Crea recordatorios para tus pagos fijos'), detail: tr('Te aviso antes de que venzan y los reservo en lo que puedes gastar.') });
     out.push(...tips.filter(t => !discover.seenTips.includes(t.id)));
   }
 
   // 9. Apoyar el proyecto (siempre de último)
   if (showSupport) {
-    out.push({ id: 'support', kind: 'support', tone: 'normal', title: '¿Te sirve FLOWI? Apoya el proyecto', detail: 'Es gratis y sin publicidad. Toca para ver cómo ayudar a que siga creciendo.' });
+    out.push({ id: 'support', kind: 'support', tone: 'normal', title: tr('¿Te sirve FLOWI? Apoya el proyecto'), detail: tr('Es gratis y sin publicidad. Toca para ver cómo ayudar a que siga creciendo.') });
   }
 
   // Orden: lo urgente primero; luego ideas para descubrir y al final el apoyo. Máximo 6 tarjetas.

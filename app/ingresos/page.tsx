@@ -177,7 +177,7 @@ export default function IngresosPage() {
       {showExport && (
         <ExportReportModal
           onClose={() => setShowExport(false)}
-          title="Ingresos"
+          title={tr('Ingresos')}
           transactions={filteredTransactions}
           filterType={filterType}
           filterValue={filterValue}

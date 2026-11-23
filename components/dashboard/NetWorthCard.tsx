@@ -34,7 +34,7 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
           {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
         </p>
         <p className="text-[11px] text-text-muted truncate">
-          Cuentas {fmt(worth.accounts)}{worth.investments ? ` · CDT ${fmt(worth.investments)}` : ''}{worth.liabilities ? ` · ${tr('debes {m}', { m: fmt(worth.liabilities) })}` : ''}
+          {tr('Cuentas')} {fmt(worth.accounts)}{worth.investments ? ` · CDT ${fmt(worth.investments)}` : ''}{worth.liabilities ? ` · ${tr('debes {m}', { m: fmt(worth.liabilities) })}` : ''}
         </p>
       </div>
       <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />

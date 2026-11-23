@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Check, ChevronDown } from 'lucide-react';
@@ -62,13 +63,13 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
     const fav = favorites.filter(f => base.includes(f) && match(f));
     const rest = base.filter(l => !fav.includes(l) && match(l));
     const out: { name: string; items: string[] }[] = [];
-    if (fav.length) out.push({ name: 'Tus cuentas', items: fav });
+    if (fav.length) out.push({ name: tr('Tus cuentas'), items: fav });
     const banks = rest.filter(l => !WALLETS.includes(l) && !OTHERS.includes(l));
-    if (banks.length) out.push({ name: 'Bancos', items: banks });
+    if (banks.length) out.push({ name: tr('Bancos'), items: banks });
     const wallets = rest.filter(l => WALLETS.includes(l));
-    if (wallets.length) out.push({ name: 'Billeteras', items: wallets });
+    if (wallets.length) out.push({ name: tr('Billeteras'), items: wallets });
     const others = rest.filter(l => OTHERS.includes(l));
-    if (others.length) out.push({ name: 'Efectivo, tarjetas y otros', items: others });
+    if (others.length) out.push({ name: tr('Efectivo, tarjetas y otros'), items: others });
     return out;
   }, [query, extra, favorites, onlyBanks]);
 
@@ -87,11 +88,11 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
         <div className={`shrink-0 px-5 pt-4 pb-3 border-b ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
           <div className="flex items-center justify-between mb-3">
             <h2 className={isTech ? 'font-bold text-accent uppercase tracking-wide' : 'font-syne font-bold text-lg text-text-primary'}>{title}</h2>
-            <button type="button" onClick={onClose} aria-label="Cerrar" className={isTech ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
+            <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={isTech ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-            <input autoComplete="off" ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar banco o medio de pago…"
+            <input autoComplete="off" ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)} placeholder={tr('Buscar banco o medio de pago…')}
                    className={`w-full pl-9 pr-3 py-2.5 text-sm bg-glass border text-text-primary placeholder-text-muted focus:outline-none ${isTech ? 'rounded-none border-accent/30 focus:border-accent' : 'rounded-xl border-glass-border focus:border-accent'}`} />
           </div>
         </div>

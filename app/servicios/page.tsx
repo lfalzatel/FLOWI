@@ -79,7 +79,7 @@ export default function ServiciosPage() {
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-emerald-500'}`} />
           <span className={`text-xs font-bold uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent' : 'text-text-secondary'}`}>
-            Probar Animaciones & Sonidos Web Audio
+            {tr('Probar animaciones y sonidos')}
           </span>
         </div>
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
@@ -92,8 +92,8 @@ export default function ServiciosPage() {
             }`}
           >
             <TrendingUp className="w-4 h-4 mb-1" />
-            <span className="text-[10px] font-extrabold uppercase">Ingreso</span>
-            <span className="text-[9px] opacity-80">$50k</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Ingreso')}</span>
+            <span className="text-[9px] opacity-80">{tr('$50k')}</span>
           </button>
 
           <button
@@ -105,8 +105,8 @@ export default function ServiciosPage() {
             }`}
           >
             <TrendingDown className="w-4 h-4 mb-1" />
-            <span className="text-[10px] font-extrabold uppercase">Gasto</span>
-            <span className="text-[9px] opacity-80">$25k</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Gasto')}</span>
+            <span className="text-[9px] opacity-80">{tr('$25k')}</span>
           </button>
 
           <button
@@ -118,8 +118,8 @@ export default function ServiciosPage() {
             }`}
           >
             <Trash2 className="w-4 h-4 mb-1" />
-            <span className="text-[10px] font-extrabold uppercase">Eliminación</span>
-            <span className="text-[9px] opacity-80">$15k</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Eliminación')}</span>
+            <span className="text-[9px] opacity-80">{tr('$15k')}</span>
           </button>
 
           <button
@@ -131,8 +131,8 @@ export default function ServiciosPage() {
             }`}
           >
             <Sparkles className="w-4 h-4 mb-1 animate-pulse" />
-            <span className="text-[10px] font-extrabold uppercase">Partículas</span>
-            <span className="text-[9px] opacity-80">Voladoras</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Partículas')}</span>
+            <span className="text-[9px] opacity-80">{tr('Voladoras')}</span>
           </button>
 
           <button
@@ -144,8 +144,8 @@ export default function ServiciosPage() {
             }`}
           >
             <Sparkles className="w-4 h-4 mb-1" />
-            <span className="text-[10px] font-extrabold uppercase">Confeti</span>
-            <span className="text-[9px] opacity-80">Celebración</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Confeti')}</span>
+            <span className="text-[9px] opacity-80">{tr('Celebración')}</span>
           </button>
 
           <button
@@ -157,8 +157,8 @@ export default function ServiciosPage() {
             }`}
           >
             <Crown className="w-4 h-4 mb-1" />
-            <span className="text-[10px] font-extrabold uppercase">Premium</span>
-            <span className="text-[9px] opacity-80">Bienvenida</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Premium')}</span>
+            <span className="text-[9px] opacity-80">{tr('Bienvenida')}</span>
           </button>
 
           <button
@@ -170,8 +170,8 @@ export default function ServiciosPage() {
             }`}
           >
             <UserPlus className="w-4 h-4 mb-1" />
-            <span className="text-[10px] font-extrabold uppercase">Amigo</span>
-            <span className="text-[9px] opacity-80">Aceptado</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Amigo')}</span>
+            <span className="text-[9px] opacity-80">{tr('Aceptado')}</span>
           </button>
 
           <button
@@ -183,8 +183,8 @@ export default function ServiciosPage() {
             }`}
           >
             <Volume2 className="w-4 h-4 mb-1 animate-bounce" />
-            <span className="text-[10px] font-extrabold uppercase">Voz Hablada</span>
-            <span className="text-[9px] opacity-80">Confirmación</span>
+            <span className="text-[10px] font-extrabold uppercase">{tr('Voz Hablada')}</span>
+            <span className="text-[9px] opacity-80">{tr('Confirmación')}</span>
           </button>
         </div>
       </div>

@@ -297,7 +297,7 @@ export default function DashboardPage() {
             <div>
                <h3 className={`font-bold mb-1 ${isTechTheme ? 'text-accent font-mono uppercase tracking-widest text-sm' : 'text-text-primary'}`}>{tr('¡Bienvenido a Flowi!')}</h3>
                <p className={`text-sm ${isTechTheme ? 'text-accent/80 font-mono' : 'text-text-secondary'}`}>
-                 El modo por defecto es <b>Cyberpunk</b>. Puedes cambiar el diseño y los colores de la aplicación en cualquier momento tocando tu foto de perfil (arriba a la derecha).
+                 El modo por defecto es <b>{tr('Cyberpunk')}</b>. Puedes cambiar el diseño y los colores de la aplicación en cualquier momento tocando tu foto de perfil (arriba a la derecha).
                </p>
             </div>
             <button onClick={() => setShowNewUserMsg(false)} className={`ml-4 mt-0.5 ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-muted hover:text-text-primary'}`}>
@@ -311,7 +311,7 @@ export default function DashboardPage() {
           <div className="min-w-0">
             <p className={`text-xs md:text-sm ${isTechTheme ? 'font-mono text-accent/70 tracking-wider' : 'text-text-secondary'}`}>{greeting} 👋</p>
             <h1 className={`truncate ${isTechTheme ? 'font-mono font-bold text-xl md:text-2xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-xl md:text-2xl text-accent'}`}>
-              {profile?.name?.split(' ')[0] || 'Usuario'}
+              {profile?.name?.split(' ')[0] || tr('Usuario')}
             </h1>
           </div>
 
@@ -328,7 +328,7 @@ export default function DashboardPage() {
               aria-label={tr('Descargar reportes')}
             >
               <Download className="w-3.5 h-3.5 text-accent" />
-              <span className="hidden md:inline">Reportes</span>
+              <span className="hidden md:inline">{tr('Reportes')}</span>
             </button>
 
             {/* Desktop FAB */}

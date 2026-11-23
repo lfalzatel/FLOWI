@@ -133,7 +133,7 @@ const CumulativeTooltip = ({ active, payload, label }: any) => {
       {payload.filter((p: any) => p.value != null).map((p: any) => (
         <p key={p.dataKey} className="text-xs font-semibold text-text-primary flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: p.color }} />
-          {p.dataKey === 'gastos' ? 'Gastos' : 'Ingresos'}: {formatFullCOP(p.value)}
+          {p.dataKey === 'gastos' ? tr('Gastos') : tr('Ingresos')}: {formatFullCOP(p.value)}
         </p>
       ))}
     </div>
@@ -148,7 +148,7 @@ const HistoryTooltip = ({ active, payload, label }: any) => {
       {payload.map((p: any) => (
         <p key={p.dataKey} className="text-xs font-semibold text-text-primary flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: p.color }} />
-          {p.dataKey === 'gastos' ? 'Gastos' : 'Ingresos'}: {formatFullCOP(p.value)}
+          {p.dataKey === 'gastos' ? tr('Gastos') : tr('Ingresos')}: {formatFullCOP(p.value)}
         </p>
       ))}
     </div>
@@ -245,7 +245,7 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
     'day': 'Hoy'
   };
   const detailLabel = filterType === 'day' ? tr('Por hora') : tr('Por día');
-  const detailName = type === 'ingreso' ? 'Ingresos' : tr('Gastos variables');
+  const detailName = type === 'ingreso' ? tr('Ingresos') : tr('Gastos variables');
 
   const xAxisConfig = {
     'day': { angle: -90, height: 40, interval: 1 },
@@ -295,7 +295,7 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
         <h3 className="font-syne font-bold text-sm text-text-primary">{titleMap[filterType] || 'Resumen'}</h3>
         {!isHistory && (
           <div className={`flex p-0.5 border border-glass-border ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
-            {toggleButton('acumulado', 'Acumulado')}
+            {toggleButton('acumulado', tr('Acumulado'))}
             {toggleButton('detalle', detailLabel)}
           </div>
         )}
@@ -305,8 +305,8 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 min-h-[16px]">
         {(isHistory || view === 'acumulado') ? (
           <>
-            {showGastos && legendItem(GASTO_COLOR, 'Gastos', totals.gastos)}
-            {showIngresos && legendItem(INGRESO_COLOR, 'Ingresos', totals.ingresos)}
+            {showGastos && legendItem(GASTO_COLOR, tr('Gastos'), totals.gastos)}
+            {showIngresos && legendItem(INGRESO_COLOR, tr('Ingresos'), totals.ingresos)}
             {!isHistory && budget > 0 && (
               <span className="flex items-center gap-1 text-[10px] text-text-secondary normal-case">
                 <span className="w-3 border-t border-dashed border-text-secondary inline-block" />

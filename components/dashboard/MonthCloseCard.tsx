@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
@@ -50,7 +50,7 @@ export function MonthCloseCard({ month, transactions, pendingCommitments, pendin
           </div>
           <ChevronRight className="w-4 h-4 text-accent shrink-0" />
         </button>
-        <button type="button" onClick={skip} title="Omitir este cierre" aria-label={`Omitir el cierre de ${label}`}
+        <button type="button" onClick={skip} title={tr('Omitir este cierre')} aria-label={tr('Omitir el cierre de {a}', { a: label })}
                 className="p-2 mr-2 text-text-muted hover:text-text-primary shrink-0">
           <X className="w-4 h-4" />
         </button>
@@ -97,12 +97,12 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
     setSaving(true);
     setError('');
     try {
-      await addGoalMovement(goal, value, `Cierre de ${review.label}`);
-      setSavedNote(`Guardaste ${f(value)} en ${goal.emoji} ${goal.name}.`);
+      await addGoalMovement(goal, value, tr('Cierre de {a}', { a: review.label }));
+      setSavedNote(tr('Guardaste {a} en {b} {c}.', { a: f(value), b: goal.emoji, c: goal.name }));
       setStep(2);
     } catch (err) {
       console.error('Error saving to goal:', err);
-      setError('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.');
+      setError(tr('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'));
     } finally {
       setSaving(false);
     }
@@ -117,7 +117,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
       onClose();
     } catch (err) {
       console.error('Error closing month:', err);
-      setError('No se pudo cerrar el mes. Revisa tu conexión e inténtalo de nuevo.');
+      setError(tr('No se pudo cerrar el mes. Revisa tu conexión e inténtalo de nuevo.'));
       setSaving(false);
     }
   }
@@ -140,7 +140,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
               {step === 0 ? `Así te fue en ${review.label}` : step === 1 ? (surplus ? 'Lo que te sobró' : 'Para el próximo mes') : `Listo para ${nextLabel}`}
             </h3>
           </div>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
         </div>
         <div className="flex gap-1.5 mb-5">
           {[0, 1, 2].map(i => <div key={i} className={`h-1 flex-1 ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${i <= step ? 'bg-accent' : 'bg-white/10'}`} />)}
@@ -160,11 +160,11 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
 
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 rounded-xl bg-white/5 border border-glass-border">
-                <p className="text-[10px] text-text-muted">Gastos fijos</p>
+                <p className="text-[10px] text-text-muted">{tr('Gastos fijos')}</p>
                 <p className="text-sm font-bold text-text-primary">{f(review.fijos)}</p>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-glass-border">
-                <p className="text-[10px] text-text-muted">Gastos del día a día</p>
+                <p className="text-[10px] text-text-muted">{tr('Gastos del día a día')}</p>
                 <p className="text-sm font-bold text-text-primary">{f(review.variables)}</p>
               </div>
             </div>
@@ -178,7 +178,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
 
             {review.topCategories.length > 0 && (
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">En lo que más gastaste</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">{tr('En lo que más gastaste')}</p>
                 {review.topCategories.map(c => (
                   <div key={c.category} className="flex items-center gap-3 py-1.5">
                     <CategoryIcon icon={c.category} label={c.category} className="w-7 h-7 text-base flex items-center justify-center shrink-0" />
@@ -189,7 +189,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
               </div>
             )}
 
-            <button type="button" onClick={() => setStep(1)} className={primary}>Seguir</button>
+            <button type="button" onClick={() => setStep(1)} className={primary}>{tr('Seguir')}</button>
           </div>
         )}
 
@@ -200,11 +200,11 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
             </p>
             {activeGoals.length === 0 ? (
               <>
-                <p className="text-sm text-text-secondary">Aún no tienes metas de ahorro activas.</p>
+                <p className="text-sm text-text-secondary">{tr('Aún no tienes metas de ahorro activas.')}</p>
                 <Link href="/servicios/metas" onClick={onClose} className={`${primary} flex items-center justify-center gap-1`}>
                   Crear una meta <ChevronRight className="w-4 h-4" />
                 </Link>
-                <button type="button" onClick={() => setStep(2)} className={secondary}>Ahora no</button>
+                <button type="button" onClick={() => setStep(2)} className={secondary}>{tr('Ahora no')}</button>
               </>
             ) : (
               <>
@@ -219,7 +219,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
                   ))}
                 </div>
                 <label className="block">
-                  <span className="text-xs text-text-muted">¿Cuánto apartas?</span>
+                  <span className="text-xs text-text-muted">{tr('¿Cuánto apartas?')}</span>
                   <div className={`mt-1 flex items-center gap-2 px-3 py-2.5 border border-glass-border bg-white/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
                     <span className="text-accent font-bold">$</span>
                     <input autoComplete="off" inputMode="numeric" value={amount} onChange={(e) => setAmount(formatAmountInput(e.target.value))}
@@ -229,9 +229,9 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
                 <p className="text-[11px] text-text-muted -mt-2">Solo queda anotado en tu meta; no se registra como gasto.</p>
                 {error && <p className="text-xs text-[var(--red)]">{error}</p>}
                 <button type="button" onClick={saveToGoal} disabled={saving || !parseAmountInput(amount) || !goalId} className={primary}>
-                  {saving ? 'Guardando...' : 'Guardar en la meta'}
+                  {saving ? tr('Guardando...') : tr('Guardar en la meta')}
                 </button>
-                <button type="button" onClick={() => setStep(2)} className={secondary}>Ahora no</button>
+                <button type="button" onClick={() => setStep(2)} className={secondary}>{tr('Ahora no')}</button>
               </>
             )}
           </div>
@@ -241,16 +241,16 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
           <div className="space-y-4">
             <p className="text-sm text-text-secondary leading-relaxed">
               {review.ingresos === 0
-                ? `No registraste ingresos en ${review.label}, así que no puedo saber si te sobró. Este mes, anota lo que te entre para tener la foto completa.`
+                ? tr('No registraste ingresos en {a}, así que no puedo saber si te sobró. Este mes, anota lo que te entre para tener la foto completa.', { a: review.label })
                 : `Este mes salió más de lo que entró. No pasa nada: lo importante es verlo a tiempo.`}
             </p>
             {review.topCategories[0] && review.ingresos > 0 && (
               <p className="text-sm text-text-secondary leading-relaxed">
                 💡 Lo que más pesó fue <strong>{review.topCategories[0].category}</strong> ({f(review.topCategories[0].amount)}).
-                Si le bajas un poco este mes, se nota.
+                {tr('Si le bajas un poco este mes, se nota.')}
               </p>
             )}
-            <button type="button" onClick={() => setStep(2)} className={primary}>Seguir</button>
+            <button type="button" onClick={() => setStep(2)} className={primary}>{tr('Seguir')}</button>
           </div>
         )}
 
@@ -259,7 +259,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
             {savedNote && <p className="text-sm text-emerald-400">✓ {savedNote}</p>}
             <p className="text-sm text-text-secondary leading-relaxed">
               {pendingCount > 0
-                ? <>En {nextLabel} tienes <strong>{pendingCount} {pendingCount === 1 ? 'pago fijo pendiente' : 'pagos fijos pendientes'}</strong> por {f(pendingCommitments)}. Los verás en <strong>Próximos compromisos</strong>, y tu cuota de cada día ya los tiene en cuenta.</>
+                ? <>En {nextLabel} tienes <strong>{pendingCount} {pendingCount === 1 ? 'pago fijo pendiente' : 'pagos fijos pendientes'}</strong> por {f(pendingCommitments)}. Los verás en <strong>{tr('Próximos compromisos')}</strong>{tr(', y tu cuota de cada día ya los tiene en cuenta.')}</>
                 : <>Ya pagaste tus compromisos de {nextLabel}. Tu cuota de cada día te dirá cuánto puedes gastar.</>}
             </p>
             <p className="text-sm text-text-secondary leading-relaxed">
@@ -267,7 +267,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
             </p>
             {error && <p className="text-xs text-[var(--red)]">{error}</p>}
             <button type="button" onClick={finish} disabled={saving} className={primary}>
-              {saving ? 'Cerrando...' : `Cerrar ${review.label}`}
+              {saving ? tr('Cerrando...') : tr('Cerrar {a}', { a: review.label })}
             </button>
           </div>
         )}

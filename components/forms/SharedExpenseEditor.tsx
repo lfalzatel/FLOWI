@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useState } from 'react';
 import { Users, X, Plus } from 'lucide-react';
 import { SharedPayment, equalShares, personKey } from '@/lib/shared';
@@ -78,8 +79,8 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
         <span className={`flex items-center gap-1.5 text-xs font-bold text-accent ${isTech ? 'font-mono uppercase tracking-wider' : ''}`}>
           <Users className="w-4 h-4" /> Gasto compartido
         </span>
-        {total > 0 && <span className="ml-auto text-xs text-text-muted">Total <b className="text-text-primary">{fmt(r(total))}</b></span>}
-        <button type="button" onClick={onRemove} aria-label="Quitar gasto compartido" className="p-1 text-text-muted hover:text-text-primary">
+        {total > 0 && <span className="ml-auto text-xs text-text-muted">{tr('Total')} <b className="text-text-primary">{fmt(r(total))}</b></span>}
+        <button type="button" onClick={onRemove} aria-label={tr('Quitar gasto compartido')} className="p-1 text-text-muted hover:text-text-primary">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -88,7 +89,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
         {([true, false] as const).map(v => (
           <button key={String(v)} type="button" onClick={() => setMode(v)}
                   className={`py-2 text-xs font-semibold border transition-colors ${box} ${draft.paidByMe === v ? 'border-accent bg-accent/15 text-accent' : 'border-glass-border text-text-secondary'}`}>
-            {v ? 'Yo pagué' : 'Pagó otra persona'}
+            {v ? tr('Yo pagué') : tr('Pagó otra persona')}
           </button>
         ))}
       </div>
@@ -98,7 +99,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
           {([true, false] as const).map(v => (
             <button key={String(v)} type="button" onClick={() => switchEqual(v)}
                     className={`px-2.5 py-1 text-[11px] font-semibold border ${chip} ${draft.equal === v ? 'border-accent/60 bg-accent/10 text-accent' : 'border-glass-border text-text-muted'}`}>
-              {v ? 'Partes iguales' : 'Montos distintos'}
+              {v ? tr('Partes iguales') : tr('Montos distintos')}
             </button>
           ))}
         </div>
@@ -106,27 +107,27 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
 
       <div className="space-y-2">
         <p className="text-[11px] text-text-muted">
-          {draft.paidByMe ? '¿Con quién lo compartiste? Cada persona te debe su parte.' : '¿Quién pagó? Le debes lo que escribiste en Monto.'}
+          {draft.paidByMe ? tr('¿Con quién lo compartiste? Cada persona te debe su parte.') : tr('¿Quién pagó? Le debes lo que escribiste en Monto.')}
         </p>
         {draft.people.map((p, i) => (
           <div key={i} className="space-y-1">
             <div className="flex items-center gap-2">
-              <input autoComplete="off" value={p.name} placeholder={draft.paidByMe ? `Persona ${i + 1}` : 'Nombre de quien pagó'}
+              <input autoComplete="off" value={p.name} placeholder={draft.paidByMe ? tr('Persona {a}', { a: i + 1 }) : tr('Nombre de quien pagó')}
                      onFocus={() => setFocusIdx(i)} onBlur={() => setTimeout(() => setFocusIdx(f => (f === i ? null : f)), 150)}
                      onChange={e => setPerson(i, { name: e.target.value, friendUid: friendFor(e.target.value) })}
                      className={`${input} flex-1 min-w-0`} aria-label={`Nombre de la persona ${i + 1}`} />
               {draft.paidByMe && (draft.equal ? (
-                <button type="button" onClick={() => { switchEqual(false); setCalcIdx(i); }} title="Cambiar el monto"
+                <button type="button" onClick={() => { switchEqual(false); setCalcIdx(i); }} title={tr('Cambiar el monto')}
                         className="w-28 text-right text-sm font-semibold text-text-secondary shrink-0 underline decoration-dotted underline-offset-4">{fmt(amounts[i] || 0)}</button>
               ) : (
                 <button type="button" onClick={() => setCalcIdx(c => (c === i ? null : i))}
                         className={`${input} w-28 text-right shrink-0 truncate ${calcIdx === i ? '!border-accent' : ''}`}
-                        aria-label={`Monto de ${p.name || `la persona ${i + 1}`}`}>
+                        aria-label={`Monto de ${p.name || tr('la persona {a}', { a: i + 1 })}`}>
                   {p.amount ? displayExpr(p.amount) : <span className="text-text-muted">0</span>}
                 </button>
               ))}
               {draft.paidByMe && draft.people.length > 1 && (
-                <button type="button" aria-label="Quitar persona" onClick={() => onChange({ ...draft, people: draft.people.filter((_, j) => j !== i) })}
+                <button type="button" aria-label={tr('Quitar persona')} onClick={() => onChange({ ...draft, people: draft.people.filter((_, j) => j !== i) })}
                         className="p-1 text-text-muted hover:text-red-400 shrink-0"><X className="w-4 h-4" /></button>
               )}
             </div>
@@ -190,10 +191,10 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
         <div className={`text-xs border-t pt-2 space-y-0.5 ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
           {draft.paidByMe ? (
             <>
-              <p className="flex justify-between"><span className="text-text-muted">Te deben</span><b className="text-accent">{fmt(others)}</b></p>
+              <p className="flex justify-between"><span className="text-text-muted">{tr('Te deben')}</span><b className="text-accent">{fmt(others)}</b></p>
               <p className="flex justify-between"><span className="text-text-muted">Tu parte (va a tus gastos)</span>
                 <b className={mine < 0 ? 'text-red-400' : 'text-text-primary'}>{fmt(mine)}</b></p>
-              {mine < 0 && <p className="text-red-400">Lo de las demás personas suma más que el total.</p>}
+              {mine < 0 && <p className="text-red-400">{tr('Lo de las demás personas suma más que el total.')}</p>}
             </>
           ) : (
             <p className="flex justify-between"><span className="text-text-muted">Le debes (y va a tus gastos)</span><b className="text-text-primary">{fmt(mine)}</b></p>

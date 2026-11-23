@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -41,12 +41,12 @@ export function BalanceInfoModal(props: Props) {
             </div>
             <div>
               <h3 className={`font-bold ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-lg text-text-primary'}`}>
-                {isToday ? 'Hoy puedes gastar' : 'Deudas pendientes'}
+                {isToday ? tr('Hoy puedes gastar') : tr('Deudas pendientes')}
               </h3>
               <p className="text-xs text-text-muted">{isToday ? 'Cómo se calcula tu cuota de hoy' : 'Lo que te falta por pagar'}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="p-2 rounded-xl text-text-muted hover:text-text-primary">
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-2 rounded-xl text-text-muted hover:text-text-primary">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -82,8 +82,8 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
   if (!today.hasBase) {
     return (
       <p className="text-sm text-text-secondary leading-relaxed">
-        Para calcular cuánto puedes gastar cada día necesito saber con cuánto cuentas este mes.
-        Registra tus <strong>ingresos del mes</strong> (o define un presupuesto en Configuración) y aquí verás tu cuota diaria.
+        {tr('Para calcular cuánto puedes gastar cada día necesito saber con cuánto cuentas este mes.')}
+        Registra tus <strong>{tr('ingresos del mes')}</strong> (o define un presupuesto en Configuración) y aquí verás tu cuota diaria.
       </p>
     );
   }
@@ -95,7 +95,7 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         <p className={`text-3xl font-bold mt-1 ${over ? 'text-red-400' : 'text-accent'} ${isTechTheme ? '' : 'font-syne'}`}><AnimatedNumber value={Math.abs(today.remainingToday)} format={f} /></p>
         <p className="text-xs text-text-secondary mt-1">
           {over
-            ? `Tu cuota de hoy era ${f(today.todayAllowance)} y llevas ${f(today.spentToday)}. Lo que te pasaste se descuenta de los próximos días.`
+            ? tr('Tu cuota de hoy era {a} y llevas {b}. Lo que te pasaste se descuenta de los próximos días.', { a: f(today.todayAllowance), b: f(today.spentToday) })
             : today.mode === 'cuentas' && today.nextIncome
               ? `Es lo que puedes gastar hoy sin quedarte corto antes de tu próximo ingreso (${today.nextIncome.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long' })}).`
               : `Es lo que puedes gastar hoy sin quedarte corto antes de fin de mes.`}
@@ -103,22 +103,22 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
       </div>
 
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">Así se calcula</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">{tr('Así se calcula')}</p>
         {today.mode === 'cuentas' ? (
           <>
             <Row label="Plata en tus cuentas para gastar" hint="Saldo de hoy en Cuentas y patrimonio (sin las cuentas de ahorro)" value={f(today.cash)} sign="+" />
             {today.cardDebt > 0 && (today.anyFixed
-              ? <Row label="Lo que pagas de tus tarjetas este mes" hint={`Debes ${f(today.cardOwed || 0)} en total; aparto solo el pago de este mes`} value={f(today.cardDebt)} sign="−" />
+              ? <Row label="Lo que pagas de tus tarjetas este mes" hint={tr('Debes {a} en total; aparto solo el pago de este mes', { a: f(today.cardOwed || 0) })} value={f(today.cardDebt)} sign="−" />
               : <Row label="Lo que debes en tarjetas" hint="Lo aparto para pagarlas completas" value={f(today.cardDebt)} sign="−" />)}
             {!today.anyFixed && today.cardDebt > today.cash && (
               <p className="text-[11px] text-amber-300 leading-snug py-1">
-                Debes en tarjetas más de lo que tienes. Si no las pagas completas cada mes, en <Link href="/servicios/cuentas" className="underline font-semibold">Cuentas</Link> edita la tarjeta y elige <b>Un pago fijo al mes</b>: así solo aparto ese pago.
+                Debes en tarjetas más de lo que tienes. Si no las pagas completas cada mes, en <Link href="/servicios/cuentas" className="underline font-semibold">{tr('Cuentas')}</Link> {tr('edita la tarjeta y elige')} <b>{tr('Un pago fijo al mes')}</b>: así solo aparto ese pago.
               </p>
             )}
           </>
         ) : (
           <>
-            <Row label={today.baseIsBudget ? 'Tu presupuesto del mes' : 'Ingresos del mes'} value={f(today.base)} sign="+" />
+            <Row label={today.baseIsBudget ? tr('Tu presupuesto del mes') : tr('Ingresos del mes')} value={f(today.base)} sign="+" />
             <Row label="Gastos del mes" hint="Lo mismo que la tarjeta Gastos (incluye lo de hoy)" value={f(today.spentMonth)} sign="−" />
           </>
         )}
@@ -131,30 +131,30 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         <Row label="Libre ahora" value={f(Math.max(0, freeNow))} strong />
         {today.tomorrowAllowance !== null && (
           <>
-            <Row label={`Repartido en ${today.daysLeft - 1} días`}
+            <Row label={tr('Repartido en {a} días', { a: today.daysLeft - 1 })}
                  hint={today.mode === 'cuentas' && today.nextIncome
                    ? `Desde mañana hasta tu próximo ingreso (${today.nextIncome.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}), según cuándo te llegó el último`
-                   : 'Los días que faltan del mes, desde mañana'}
+                   : tr('Los días que faltan del mes, desde mañana')}
                  value={`÷ ${today.daysLeft - 1}`} />
-            <Row label="Desde mañana puedes gastar" value={`${f(today.tomorrowAllowance)} / día`} strong />
+            <Row label="Desde mañana puedes gastar" value={tr('{a} / día', { a: f(today.tomorrowAllowance) })} strong />
           </>
         )}
       </div>
 
       <div className="p-3 rounded-2xl bg-white/5 border border-glass-border">
-        <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">Y hoy</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">{tr('Y hoy')}</p>
         <p className="text-xs text-text-secondary leading-relaxed">
           Al empezar el día tu cuota era de <strong><AnimatedNumber value={today.todayAllowance} format={f} /></strong> (lo libre que tenías esta mañana ÷ {today.daysLeft} días, contando hoy).
           {today.spentToday > 0
-            ? <> Llevas <strong><AnimatedNumber value={today.spentToday} format={f} /></strong> en gastos del día a día: {over
-                ? <>te pasaste <strong className="text-red-400"><AnimatedNumber value={-today.remainingToday} format={f} /></strong>, y por eso la cuota de los próximos días baja.</>
-                : <>te quedan <strong className="text-accent"><AnimatedNumber value={today.remainingToday} format={f} /></strong> para hoy.</>}</>
-            : <> Aún no registras gastos del día a día hoy.</>}
+            ? <> {tr('Llevas')} <strong><AnimatedNumber value={today.spentToday} format={f} /></strong> en gastos del día a día: {over
+                ? <>{tr('te pasaste')} <strong className="text-red-400"><AnimatedNumber value={-today.remainingToday} format={f} /></strong>{tr(', y por eso la cuota de los próximos días baja.')}</>
+                : <>{tr('te quedan')} <strong className="text-accent"><AnimatedNumber value={today.remainingToday} format={f} /></strong> {tr('para hoy.')}</>}</>
+            : <> {tr('Aún no registras gastos del día a día hoy.')}</>}
         </p>
       </div>
 
       <p className="text-xs text-text-muted leading-relaxed">
-        💡 Lo que hoy no gastes se reparte en los días siguientes y tu cuota sube. La cuota de hoy es la misma que ves en <strong>Límite diario</strong>, más abajo.
+        💡 Lo que hoy no gastes se reparte en los días siguientes y tu cuota sube. La cuota de hoy es la misma que ves en <strong>{tr('Límite diario')}</strong>, más abajo.
       </p>
     </div>
   );
@@ -170,18 +170,18 @@ function DebtsContent({ balance, currency, onClose }: { balance: number; currenc
   const owe = [
     ...totals.loans.map(l => ({ id: l.debt.id, title: l.debt.title, left: l.left, hint: l.debt.interestRate ? 'Incluye intereses' : undefined })),
     ...totals.cards.map(c => ({ id: c.state.account.id, title: c.state.account.name, left: c.owed,
-      hint: c.linked.length ? `Tarjeta · incluye ${c.linked.map(l => l.debt.title).join(', ')}` : 'Tarjeta de crédito' })),
+      hint: c.linked.length ? tr('Tarjeta · incluye {a}', { a: c.linked.map(l => l.debt.title).join(', ') }) : tr('Tarjeta de crédito') })),
   ].sort((a, b) => b.left - a.left);
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-text-secondary leading-relaxed">
-        Es la suma de lo que <strong>te falta por pagar</strong>: tus préstamos (lo que debías menos los abonos, más los intereses
+        Es la suma de lo que <strong>{tr('te falta por pagar')}</strong>: tus préstamos (lo que debías menos los abonos, más los intereses
         si tienen tasa) y lo que debes en tus tarjetas de crédito.
       </p>
 
       {owe.length === 0 ? (
-        <p className="text-sm text-emerald-400">No tienes deudas pendientes. 🎉</p>
+        <p className="text-sm text-emerald-400">{tr('No tienes deudas pendientes. 🎉')}</p>
       ) : (
         <div>
           {owe.slice(0, 6).map(d => (
@@ -202,7 +202,7 @@ function DebtsContent({ balance, currency, onClose }: { balance: number; currenc
         <p className="text-xs text-text-secondary leading-relaxed">
           <strong>Balance neto (con deudas)</strong>, en la tarjeta de arriba, es tu dinero disponible menos estas deudas:
           {' '}{f(balance)} − {f(totalDeudas)} = <strong className={balance - totalDeudas < 0 ? 'text-red-400' : 'text-accent'}><AnimatedNumber value={balance - totalDeudas} format={f} /></strong>.
-          Te dice con cuánto quedarías si pagaras todo hoy.
+          {tr('Te dice con cuánto quedarías si pagaras todo hoy.')}
         </p>
       </div>
 
