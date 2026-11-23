@@ -35,7 +35,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
     let audio: HTMLAudioElement | null = null;
     try {
       if (mode === 'login' || mode === 'reload') {
-        audio = new Audio('/assets/sounds/550332__wax_vibe__cyberpunk-bass.wav');
+        audio = new Audio('/assets/sounds/splash-bass.wav'); // 3 s, liviano (132 KB) para que alcance a sonar
         audio.volume = 0.5;
       } else if (mode === 'logout') {
         audio = new Audio('/assets/sounds/73577__cyberpunk64bit__boomstick.mp3');
@@ -72,9 +72,13 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
 
     return () => {
       cancelAnimationFrame(animationFrame);
+      // Al terminar el splash el sonido no se corta en seco: baja el volumen suavemente
       if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
+        const a = audio;
+        const fade = setInterval(() => {
+          a.volume = Math.max(0, a.volume - 0.08);
+          if (a.volume <= 0.01) { clearInterval(fade); a.pause(); }
+        }, 50);
       }
     };
   }, [duration, mode]);
