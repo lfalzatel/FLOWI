@@ -68,6 +68,18 @@ function GoogleButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+// Usar FLOWI sin cuenta (modo invitado): los datos quedan en este celular hasta vincular Google
+function GuestButton({ onClick }: { onClick: () => void }) {
+  return (
+    <div className="mt-3 text-center">
+      <button onClick={onClick} className="text-sm font-semibold text-white/80 underline underline-offset-4 hover:text-white">
+        Probar sin cuenta
+      </button>
+      <p className="mt-1 text-[11px] text-white/40">Tus datos se guardan solo en este celular hasta que vincules tu cuenta.</p>
+    </div>
+  );
+}
+
 // Vista de ejemplo de la app (cifras inventadas, no son datos de nadie)
 function AppPreview() {
   const { t } = useT();
@@ -209,6 +221,23 @@ export default function LoginPage() {
     }
   };
 
+  const handleGuest = async () => {
+    try {
+      sessionStorage.setItem('login_in_progress', 'true');
+      setMode('login');
+      setIsSplashDone(false);
+      setAuthDoneUrl(null);
+      setShowSplash(true);
+      const { signInAsGuest } = await import('@/lib/auth');
+      const { isNewUser } = await signInAsGuest();
+      setAuthDoneUrl(takeNext() || (isNewUser ? '/?newuser=true' : '/?login=true'));
+    } catch (error) {
+      console.error('No se pudo entrar como invitado:', error);
+      sessionStorage.removeItem('login_in_progress');
+      setShowSplash(false);
+    }
+  };
+
   const section = 'relative z-10 w-full max-w-5xl mx-auto px-5';
 
   return (
@@ -234,6 +263,7 @@ export default function LoginPage() {
           </div>
           <div className="max-w-sm mx-auto md:mx-0 space-y-2">
             <GoogleButton onClick={handleGoogleLogin} />
+            <GuestButton onClick={handleGuest} />
             <p className="text-white/40 text-xs">
               {t('Al continuar, aceptas los')} <a href="/legal#terminos" className="underline hover:text-white/70">{t('términos de uso')}</a> {t('y la')}{' '}
               <a href="/legal#privacidad" className="underline hover:text-white/70">{t('política de privacidad')}</a>.
@@ -311,7 +341,7 @@ export default function LoginPage() {
         <div className="rounded-[2rem] bg-gradient-to-br from-emerald-500/15 via-[#0D1527] to-violet-500/10 border border-emerald-500/20 p-8 text-center max-w-xl mx-auto space-y-4">
           <h2 className="text-2xl font-bold font-syne">{t('Empieza hoy, es gratis')}</h2>
           <p className="text-white/60 text-sm">{t('En un minuto sabes cuánto puedes gastar hoy.')}</p>
-          <div className="max-w-sm mx-auto"><GoogleButton onClick={handleGoogleLogin} /></div>
+          <div className="max-w-sm mx-auto"><GoogleButton onClick={handleGoogleLogin} /><GuestButton onClick={handleGuest} /></div>
         </div>
       </section>
 

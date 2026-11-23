@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useFriends } from '@/components/FriendsProvider';
+import { GuestBanner } from '@/components/layout/GuestBanner';
 import { answerFriendRequest } from '@/lib/friends';
 import { Avatar } from '@/components/friends/Avatar';
 import { useReminders } from '@/hooks/useReminders';
@@ -429,6 +430,7 @@ export function Header() {
         document.body
       )}
     </header>
+    <GuestBanner />
     {payingDue && <MarkPaidDialog due={payingDue} onClose={() => setPayingDue(null)} />}
     </>
   );

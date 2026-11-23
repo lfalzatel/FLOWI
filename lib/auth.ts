@@ -1,4 +1,4 @@
-import { signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { signInWithPopup, signOut as firebaseSignOut, signInAnonymously, linkWithPopup, signInWithCredential, GoogleAuthProvider, type AuthCredential } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from './firebase';
 
@@ -52,9 +52,10 @@ export async function processGoogleUser(user: any) {
   if (!snap.exists()) {
     isNewUser = true;
     await setDoc(userRef, {
-      name:      user.displayName,
-      email:     user.email,
-      photoURL:  user.photoURL,
+      // Invitado (modo sin cuenta): sin nombre ni correo hasta que vincule su cuenta de Google
+      name:      user.isAnonymous ? 'Invitado' : user.displayName,
+      email:     user.email || '',
+      photoURL:  user.photoURL || '',
       // El rol de administrador se asigna desde "Gestionar usuarios" y queda guardado en el perfil
       role:      'Usuario',
       currency:  'COP',
@@ -64,15 +65,60 @@ export async function processGoogleUser(user: any) {
     const data = snap.data();
     const updates: any = {
       name: user.displayName || data.name || '',
-      email: user.email,
+      email: user.email || data.email || '',
       photoURL: user.photoURL || data.photoURL || '',
     };
     await setDoc(userRef, updates, { merge: true });
   }
 
-  saveKnownAccount(user);
+  if (!user.isAnonymous) saveKnownAccount(user);
 
   return { user, isNewUser };
+}
+
+// ── Modo invitado ─────────────────────────────────────────────────────
+// Usar FLOWI sin cuenta: Firebase crea un usuario anónimo. Sus datos quedan atados a este celular
+// hasta que vincule su cuenta de Google (entonces se conservan y se sincronizan).
+export async function signInAsGuest() {
+  const result = await signInAnonymously(auth);
+  return processGoogleUser(result.user);
+}
+
+export type LinkResult =
+  | { ok: true }
+  | { ok: false; conflict: AuthCredential; email?: string } // ese Google ya tiene cuenta en FLOWI
+  | { ok: false; error: string };
+
+/** Convierte al invitado en su cuenta de Google conservando todo lo que registró. */
+export async function linkGuestWithGoogle(): Promise<LinkResult> {
+  const current = auth.currentUser;
+  if (!current) return { ok: false, error: 'No hay sesión.' };
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
+  try {
+    const result = await linkWithPopup(current, googleProvider);
+    const g = result.user.providerData.find(p => p.providerId === 'google.com');
+    const userRef = doc(db, 'users', result.user.uid);
+    await setDoc(userRef, {
+      name: g?.displayName || result.user.displayName || 'Usuario',
+      email: g?.email || result.user.email || '',
+      photoURL: g?.photoURL || result.user.photoURL || '',
+    }, { merge: true });
+    saveKnownAccount({ uid: result.user.uid, email: g?.email, displayName: g?.displayName, photoURL: g?.photoURL });
+    return { ok: true };
+  } catch (e: any) {
+    if (e?.code === 'auth/credential-already-in-use' || e?.code === 'auth/email-already-in-use') {
+      const cred = GoogleAuthProvider.credentialFromError(e);
+      if (cred) return { ok: false, conflict: cred, email: e?.customData?.email };
+    }
+    if (e?.code === 'auth/popup-closed-by-user' || e?.code === 'auth/cancelled-popup-request') return { ok: false, error: '' };
+    return { ok: false, error: 'No se pudo vincular. Revisa tu conexión e inténtalo de nuevo.' };
+  }
+}
+
+/** Ese Google ya tenía cuenta en FLOWI: entra a ella (lo registrado como invitado queda en este celular sin uso). */
+export async function enterExistingAccount(cred: AuthCredential) {
+  const result = await signInWithCredential(auth, cred);
+  return processGoogleUser(result.user);
 }
 
 export async function signOut() {

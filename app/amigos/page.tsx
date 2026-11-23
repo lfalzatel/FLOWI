@@ -10,6 +10,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { Avatar } from '@/components/friends/Avatar';
+import { LinkAccountModal } from '@/components/layout/GuestBanner';
 import {
   PublicProfile, answerFriendRequest, friendWhatsapp, getPublicProfile, inviteLink, removeFriendship, searchPeople, sendFriendRequest,
 } from '@/lib/friends';
@@ -126,6 +127,24 @@ export default function AmigosPage() {
   };
 
   const noRules = unavailable || error === 'unavailable';
+  // Los invitados no tienen perfil público: para Amigos hace falta vincular la cuenta
+  if (user?.isAnonymous) {
+    return (
+      <div className="relative min-h-screen flex flex-col bg-deep">
+        <Header />
+        <main className="relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32">
+          <div className={`glass-card glass-static p-6 text-center space-y-3 ${box}`}>
+            <Users className="w-10 h-10 text-accent/50 mx-auto" />
+            <p className="text-sm text-text-primary font-semibold">Para tener amigos en FLOWI necesitas una cuenta</p>
+            <p className="text-xs text-text-muted">Así tus amigos te pueden encontrar y compartir gastos contigo.</p>
+            <button type="button" onClick={() => setRemoving({ id: '__link', name: '' })} className={`${btn} mx-auto border-accent bg-accent/15 text-accent`}>Vincular mi cuenta de Google</button>
+          </div>
+        </main>
+        <BottomNav />
+        {removing?.id === '__link' && <LinkAccountModal onClose={() => setRemoving(null)} />}
+      </div>
+    );
+  }
   const pendingSent = useMemo(() => outgoing.length, [outgoing]);
 
   return (

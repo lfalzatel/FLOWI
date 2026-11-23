@@ -32,9 +32,9 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
   const name = profile?.name || user?.displayName || '';
   const photo = profile?.photoURL || user?.photoURL || null;
 
-  // Perfil público al día (una vez por sesión o si cambian nombre o foto)
+  // Perfil público al día (una vez por sesión o si cambian nombre o foto). Los invitados no tienen.
   useEffect(() => {
-    if (!user || !name) return;
+    if (!user || !name || user.isAnonymous) return;
     let alive = true;
     (async () => {
       try {
@@ -51,7 +51,7 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
 
   // Solicitudes donde está la persona (enviadas o recibidas)
   useEffect(() => {
-    if (!user) { setAll([]); setReady(false); return; }
+    if (!user || user.isAnonymous) { setAll([]); setReady(!!user); return; }
     const q = query(collection(db, 'fl_friend_requests'), where('users', 'array-contains', user.uid));
     return onSnapshot(q, snap => {
       setAll(snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<FriendRequest, 'id'>) })));

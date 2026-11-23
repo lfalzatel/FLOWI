@@ -10,6 +10,7 @@ import { ManualPaymentsReview } from '@/components/plans/ManualPaymentsReview';
 import { ManualPayment, watchMyManualPayments } from '@/lib/manualPay';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
+import { LinkAccountModal } from '@/components/layout/GuestBanner';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { FREE_LIMITS, PLANS, PlanOption, usePlan } from '@/lib/plans';
@@ -43,6 +44,7 @@ export default function PlanesPage() {
   const [selected, setSelected] = useState<PlanOption['id']>('anual');
   const [paying, setPaying] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [needLink, setNeedLink] = useState(false); // invitado: para pagar necesita su cuenta de Google
 
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 
@@ -61,6 +63,7 @@ export default function PlanesPage() {
   }, []);
 
   const pay = async () => {
+    if (user?.isAnonymous) { setNeedLink(true); return; }
     setPaying(true);
     setMessage(null);
     try {
@@ -154,7 +157,7 @@ export default function PlanesPage() {
         </button>
 
         {/* Pagar por transferencia directa y enviar el comprobante */}
-        <button type="button" onClick={() => setManualOpen(true)}
+        <button type="button" onClick={() => (user?.isAnonymous ? setNeedLink(true) : setManualOpen(true))}
                 className={`w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 ${isTech ? 'rounded-none uppercase text-xs tracking-wider' : 'rounded-2xl'}`}>
           <Receipt className="w-4 h-4 text-accent" /> Pagar por transferencia y enviar comprobante
         </button>
@@ -181,6 +184,7 @@ export default function PlanesPage() {
       </main>
       <BottomNav />
       {manualOpen && <ManualPayModal plan={selected} onClose={() => setManualOpen(false)} />}
+      {needLink && <LinkAccountModal reason="Para pagar Premium necesitas una cuenta: así no lo pierdes si cambias de celular." onClose={() => setNeedLink(false)} />}
     </div>
   );
 }
