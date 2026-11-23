@@ -163,6 +163,33 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
               </div>
             ) : (
               <div className="space-y-3">
+                {/* Qué se usa más en Servicios (sumando a todas las personas) e invitados */}
+                {(() => {
+                  const sum: Record<string, number> = {};
+                  let people = 0;
+                  for (const u of users as any[]) {
+                    const us = u.servicesUsage as Record<string, number> | undefined;
+                    if (!us) continue;
+                    people++;
+                    for (const [k, v] of Object.entries(us)) sum[k] = (sum[k] || 0) + (v || 0);
+                  }
+                  const topUse = Object.entries(sum).sort((a, b) => b[1] - a[1]).slice(0, 8);
+                  const guests = (users as any[]).filter(u => u.name === 'Invitado' && !u.email).length;
+                  if (!topUse.length && !guests) return null;
+                  return (
+                    <div className={`p-3 text-xs ${isTechTheme ? 'border border-accent/20 rounded-none font-mono' : 'bg-glass border border-glass-border rounded-xl'}`}>
+                      {topUse.length > 0 && (
+                        <>
+                          <p className="font-semibold text-text-primary mb-1">Lo más usado en Servicios ({people} {people === 1 ? 'persona' : 'personas'})</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {topUse.map(([k, v]) => <span key={k} className="px-2 py-0.5 rounded-full bg-accent/10 text-accent">{k} · {v}</span>)}
+                          </div>
+                        </>
+                      )}
+                      {guests > 0 && <p className="text-text-muted mt-1.5">👤 {guests} {guests === 1 ? 'invitado' : 'invitados'} sin vincular cuenta</p>}
+                    </div>
+                  );
+                })()}
                 {users.map(u => {
                   const displayName = u.name || (u.email ? u.email.split('@')[0] : 'Usuario');
                   const initials = displayName

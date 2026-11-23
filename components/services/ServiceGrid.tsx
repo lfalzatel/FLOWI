@@ -3,8 +3,8 @@ import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Hand, RotateCcw } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
+import { Hand, RotateCcw, Sparkles } from 'lucide-react';
+import { doc, increment, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
@@ -80,6 +80,21 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
       document.removeEventListener('selectstart', noSelect);
     };
   }, []);
+
+  // ── Uso: cada vez que abre una tarjeta se cuenta (sirve para sugerirle un orden y para saber qué se usa más)
+  const usage = profile?.servicesUsage || {};
+  const countUse = (id: string) => {
+    if (!user) return;
+    updateDoc(doc(db, 'users', user.uid), { [`servicesUsage.${id}`]: increment(1) }).catch(() => {});
+  };
+  const totalUses = Object.values(usage).reduce((s, n) => s + (n || 0), 0);
+  // Orden sugerido: lo más usado primero; lo que nunca abre queda en el orden de siempre
+  const suggested = useMemo(() => {
+    const ids = services.map(s => s.id);
+    return [...ids].sort((a, b) => (usage[b] || 0) - (usage[a] || 0) || ids.indexOf(a) - ids.indexOf(b));
+  }, [services, usage]);
+  const top = (ids: string[]) => ids.slice(0, 4).join(',');
+  const showSuggest = !query && !profile?.servicesSuggestOff && totalUses >= 15 && top(suggested) !== top(order);
 
   const saveOrder = (ids: string[] | null) => {
     if (!user) return;
@@ -193,7 +208,7 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
     }
     return (
       <Link key={service.id} href={service.soon ? '#' : service.href} draggable={false}
-            onClick={(e) => { if (service.soon) e.preventDefault(); }} {...common}>
+            onClick={(e) => { if (service.soon) e.preventDefault(); else countUse(service.id); }} {...common}>
         {content}
       </Link>
     );
@@ -218,6 +233,24 @@ export function ServiceGrid({ services, groups, query, onProfile }: {
                     className={`mt-2 px-4 py-1.5 text-xs font-bold ${isTech ? 'rounded-none border border-accent text-accent' : 'rounded-lg bg-accent text-black'}`}>
               {tr('Entendido')}
             </button>
+          </div>
+        </div>
+      )}
+
+      {showSuggest && (
+        <div className={`mb-4 p-4 border flex items-start gap-3 ${isTech ? 'rounded-none border-accent/40 bg-accent/5' : 'rounded-2xl border-accent/30 bg-accent/10'}`}>
+          <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className={`text-sm font-semibold ${isTech ? 'text-accent' : 'text-text-primary'}`}>Pon arriba lo que más usas</p>
+            <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
+              Lo que más abres: {suggested.slice(0, 3).map(id => byId.get(id)?.title).filter(Boolean).join(', ')}. Puedes seguir moviéndolas a tu gusto.
+            </p>
+            <div className="flex gap-2 mt-2">
+              <button type="button" onClick={() => saveOrder(suggested)}
+                      className={`px-4 py-1.5 text-xs font-bold ${isTech ? 'rounded-none border border-accent text-accent' : 'rounded-lg bg-accent text-black'}`}>Ordenar por uso</button>
+              <button type="button" onClick={() => user && updateDoc(doc(db, 'users', user.uid), { servicesSuggestOff: true }).catch(() => {})}
+                      className="px-3 py-1.5 text-xs text-text-muted">No, gracias</button>
+            </div>
           </div>
         </div>
       )}

@@ -20,6 +20,8 @@ export interface UserProfile {
   categoryBudgets?: Record<string, number>; // presupuesto mensual por subcategoría
   servicesOrder?: string[] | null; // orden de las tarjetas de Servicios elegido por la persona
   servicesTipSeen?: boolean;       // ya leyó cómo reordenarlas
+  servicesUsage?: Record<string, number>; // cuántas veces abrió cada tarjeta de Servicios
+  servicesSuggestOff?: boolean;    // no quiere que FLOWI le sugiera ordenarlas por uso
   activeDays?: number;             // días en que abrió FLOWI (ver components/layout/UsageTracker.tsx)
   firstActiveDay?: string;         // YYYY-MM-DD
   lastActiveDay?: string;          // YYYY-MM-DD

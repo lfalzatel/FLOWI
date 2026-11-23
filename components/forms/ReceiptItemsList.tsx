@@ -80,7 +80,9 @@ export function ReceiptItemsList({
     if (canAddToTotal && sumIt) onAddToTotal?.(lineTotal);
     setDraft({ name: '', qty: '1', price: '' });
     setDraftCat(null);
-    nameRef.current?.focus();
+    // Agregado: se cierra el cuadro (y el teclado) y queda el botón "Agregar otro producto"
+    setAdding(false);
+    (document.activeElement as HTMLElement | null)?.blur?.();
   };
   const onEnter = (e: React.KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); addDraft(); } };
 
@@ -178,8 +180,8 @@ export function ReceiptItemsList({
           {/* Agregar: escondido detrás de un botón; al abrirlo, nombre arriba y cantidad, precio y ＋ abajo */}
           {editable && !adding && (
             <button type="button" onClick={() => { setAdding(true); setTimeout(() => nameRef.current?.focus(), 50); }}
-                    className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-accent">
-              <Plus className="w-3.5 h-3.5" /> Agregar producto
+                    className={`mt-2 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-accent border border-dashed border-accent/50 hover:bg-accent/10 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
+              <Plus className="w-3.5 h-3.5" /> {items?.length ? 'Agregar otro producto' : 'Agregar producto'}
             </button>
           )}
           {editable && adding && (

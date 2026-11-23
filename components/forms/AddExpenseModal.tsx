@@ -627,7 +627,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} autoComplete="off" className="flex-1 min-h-0 flex flex-col">
+        <form onSubmit={handleSubmit} autoComplete="off" className="flex-1 min-h-0 flex flex-col"
+              // Si se escribe en otro campo (productos, nombre, nota…) se abre el teclado del celular:
+              // la calculadora del monto se cierra para que no queden las dos abiertas a la vez
+              onFocusCapture={(e) => {
+                const el = e.target as HTMLElement;
+                if (step === 'amount' && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !(el as HTMLInputElement).readOnly
+                    && !['checkbox', 'radio', 'date', 'time', 'button'].includes((el as HTMLInputElement).type)))) setStep(null);
+              }}>
           {/* Campos con scroll; el botón de guardar queda fijo abajo */}
           {/* En el registro guiado sobra espacio abajo, para que el paso que toca pueda quedar arriba de todo */}
           <div ref={scrollRef} className={`flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 space-y-4 pb-5`}>
