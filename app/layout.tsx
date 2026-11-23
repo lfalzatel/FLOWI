@@ -51,6 +51,7 @@ export const viewport: Viewport = {
 import { DataProvider } from '@/components/DataProvider';
 import { FriendsProvider } from '@/components/FriendsProvider';
 import { ThemedBackground } from '@/components/effects/ThemedBackground';
+import { BootSplash } from '@/components/layout/BootSplash';
 import { SharedLinksProvider } from '@/components/SharedLinksProvider';
 import { WelcomeTour } from '@/components/layout/WelcomeTour';
 import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
@@ -67,8 +68,10 @@ import { PlayStoreDetector } from '@/components/layout/PlayStoreDetector';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Pone el tema guardado antes de pintar, para que no se vea un instante el tema por defecto */}
+        <script dangerouslySetInnerHTML={{ __html: "try{document.documentElement.setAttribute('data-theme',localStorage.getItem('flowi-theme')||'glassmorphism')}catch(e){}" }} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -94,6 +97,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <FriendCelebration />
               <UsageTracker />
               <AppLock />
+              <BootSplash />
               <PlayStoreDetector />
             </SharedLinksProvider>
             </FriendsProvider>

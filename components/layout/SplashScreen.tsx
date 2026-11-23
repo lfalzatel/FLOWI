@@ -15,6 +15,9 @@ const LOGOUT_MESSAGES = ["Borrando caché...", "Cerrando conexión...", "Descone
 import { useTheme } from '@/components/ThemeProvider';
 import { GlitterParticles, GLITTER_THEMES } from '@/components/effects/GlitterParticles';
 
+// Se muestra una sola vez por apertura de la app (en Inicio o en cualquier otra pantalla)
+export const splashSession = { shown: false };
+
 export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: SplashScreenProps) {
   const [progress, setProgress] = useState(mode === 'logout' ? 100 : 0);
   const [messageIndex, setMessageIndex] = useState(0);

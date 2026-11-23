@@ -46,12 +46,11 @@ import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
-import { SplashScreen } from '@/components/layout/SplashScreen';
+import { SplashScreen, splashSession } from '@/components/layout/SplashScreen';
 import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
 
-let hasShownSplashInThisJSContext = false;
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -107,7 +106,7 @@ export default function DashboardPage() {
     : realTotalDeudas;
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [showSplash, setShowSplash] = useState(() => !hasShownSplashInThisJSContext);
+  const [showSplash, setShowSplash] = useState(() => !splashSession.shown);
   const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
   const [splashDuration, setSplashDuration] = useState(1000);
   const [showNewUserMsg, setShowNewUserMsg] = useState(false);
@@ -136,7 +135,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
-    hasShownSplashInThisJSContext = true;
+    splashSession.shown = true;
 
     // Recorrido guiado: se ofrece una vez, o se abre directo desde Configuración (?tour=1)
     const params = new URLSearchParams(window.location.search);
