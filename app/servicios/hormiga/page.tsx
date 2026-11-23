@@ -197,7 +197,7 @@ export default function HormigaPage() {
                 ) : (
                   <>
                     <div>
-                      <p className="text-[11px] text-text-muted">Compras de menos de {fmt(ANT_MAX_AMOUNT)} {periodName}</p>
+                      <p className="text-[11px] text-text-muted">Compras de {fmt(ANT_MAX_AMOUNT)} o menos {periodName}</p>
                       <p className={`text-2xl font-bold text-amber-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={period.antTotal} format={fmt} /></p>
                     </div>
                     <ul className="space-y-2">
@@ -212,7 +212,7 @@ export default function HormigaPage() {
               ) : (
                 <>
                   <div>
-                    <p className="text-[11px] text-text-muted">Compras de menos de {fmt(ANT_MAX_AMOUNT)} que se repiten</p>
+                    <p className="text-[11px] text-text-muted">Compras de {fmt(ANT_MAX_AMOUNT)} o menos que se repiten</p>
                     <p className={`text-2xl font-bold text-amber-500 ${isTech ? '' : 'font-syne'}`}><AnimatedNumber value={ant.monthly} format={fmt} /> <span className="text-sm font-medium text-text-muted">{tr('al mes')}</span></p>
                     <p className="text-xs text-text-secondary">A este ritmo son {fmt(ant.yearly)} al año. Promedio de los últimos {ant.days} días.</p>
                   </div>
