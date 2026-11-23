@@ -55,7 +55,7 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
         {(pendingCommitments > 0 || real.cardDebt > 0) && (
           <div className={`mt-4 p-3 text-xs space-y-1 ${isTech ? 'rounded-none bg-accent/5 border border-accent/20' : 'rounded-2xl bg-white/5 border border-glass-border'}`}>
             {pendingCommitments > 0 && <p className="flex justify-between text-text-secondary"><span>Compromisos por pagar este mes</span><span className="tabular-nums">− {f(pendingCommitments)}</span></p>}
-            {real.cardDebt > 0 && <p className="flex justify-between text-text-secondary"><span>Lo que debes en tarjetas</span><span className="tabular-nums">− {f(real.cardDebt)}</span></p>}
+            {real.cardDebt > 0 && <p className="flex justify-between text-text-secondary"><span>{real.anyFixed ? 'Lo que pagas de tus tarjetas este mes' : 'Lo que debes en tarjetas'}</span><span className="tabular-nums">− {f(real.cardDebt)}</span></p>}
             {real.cardLoans > 0 && <p className="text-[10px] text-text-muted leading-snug">Los préstamos en tarjetas ({f(real.cardLoans)}) no se restan aquí: se pagan por cuotas, que ya van en tus compromisos.</p>}
             <p className="flex justify-between font-bold text-text-primary pt-1"><span>Te queda libre</span><span className={`tabular-nums ${free < 0 ? 'text-red-400' : ''}`}>{free < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(free)} format={f} /></span></p>
           </div>

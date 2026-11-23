@@ -97,6 +97,9 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
   const [methodsSheet, setMethodsSheet] = useState(false);
   const [balance, setBalance] = useState('');
   const [limit, setLimit] = useState(account?.creditLimit ? formatMoneyInput(account.creditLimit) : '');
+  const [payMode, setPayMode] = useState<'total' | 'fijo'>(account?.payMode || 'total');
+  const [payAmount, setPayAmount] = useState(account?.payAmount ? formatMoneyInput(account.payAmount) : '');
+  const [payDay, setPayDay] = useState(account?.payDay ? String(account.payDay) : '');
   const [isDefault, setIsDefault] = useState(account ? !!account.isDefault : isFirst);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -126,9 +129,14 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
         // Solo una cuenta principal
         await Promise.all(accounts.filter(a => a.isDefault && a.id && a.id !== account?.id).map(a => updateAccount(a.id!, { isDefault: false })));
       }
+      // Cómo se paga la tarjeta (para reservar en "Hoy puedes gastar" solo lo de este mes)
+      const day = Math.min(31, Math.max(0, parseInt(payDay) || 0));
+      const cardPay = kind === 'credito'
+        ? { payMode, payAmount: payMode === 'fijo' ? parseMoneyInput(payAmount) : 0, payDay: day || 0 }
+        : {};
       if (account?.id) {
         await updateAccount(account.id, { name: name.trim(), kind, methods: finalMethods, isDefault, purpose: kind === 'credito' ? 'gastar' : purpose,
-          creditLimit: kind === 'credito' ? parseMoneyInput(limit) : 0 });
+          creditLimit: kind === 'credito' ? parseMoneyInput(limit) : 0, ...cardPay });
       } else {
         const amount = parseMoneyInput(balance);
         const id = await addAccount({
@@ -137,6 +145,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
           baseBalance: kind === 'credito' ? -amount : amount,
           baseAt: new Date().toISOString(), adjustments: [], archived: false,
           ...(kind === 'credito' && parseMoneyInput(limit) > 0 ? { creditLimit: parseMoneyInput(limit) } : {}),
+          ...cardPay,
         });
         onCreated?.(id);
       }
@@ -183,6 +192,30 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
           <input id="acc-limit" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={limit}
                  onChange={(e) => setLimit(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>Con el cupo, FLOWI te muestra cuánto te queda disponible para usar.</p>
+        </div>
+      )}
+
+      {kind === 'credito' && (
+        <div className="space-y-2">
+          <span className={s.label}>¿Cómo la pagas?</span>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setPayMode('total')} className={s.chip(payMode === 'total')}>Todo cada mes</button>
+            <button type="button" onClick={() => setPayMode('fijo')} className={s.chip(payMode === 'fijo')}>Un pago fijo al mes</button>
+          </div>
+          {payMode === 'fijo' && (
+            <input type="text" autoComplete="off" inputMode="decimal" placeholder="¿Cuánto pagas al mes? $ 0" value={payAmount} aria-label="Pago al mes"
+                   onChange={(e) => setPayAmount(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
+          )}
+          <div className="flex items-center gap-2">
+            <label htmlFor="acc-payday" className="text-xs text-text-muted shrink-0">Día de pago</label>
+            <input id="acc-payday" type="text" autoComplete="off" inputMode="numeric" placeholder="Ej: 15" value={payDay} maxLength={2}
+                   onChange={(e) => setPayDay(e.target.value.replace(/[^0-9]/g, ''))} className={`${s.input} !w-24 !py-2`} />
+          </div>
+          <p className={s.hint}>
+            {payMode === 'fijo'
+              ? 'En "Hoy puedes gastar" solo se aparta este pago del mes (menos lo que ya le abonaste), no todo lo que debes.'
+              : 'En "Hoy puedes gastar" se aparta todo lo que debes en la tarjeta, porque lo pagas completo.'}
+          </p>
         </div>
       )}
 

@@ -23,7 +23,9 @@ export interface DailyBudget {
   tomorrowAllowance: number | null; // cuota de cada día desde mañana con lo que va hoy (null el último día)
   mode: 'mes' | 'cuentas';
   cash: number;           // modo cuentas: plata en las cuentas para gastar
-  cardDebt: number;       // modo cuentas: lo que se debe en tarjetas de crédito
+  cardDebt: number;       // modo cuentas: lo que se aparta para pagar las tarjetas este mes
+  cardOwed?: number;      // todo lo que se debe en tarjetas (para mostrarlo)
+  anyFixed?: boolean;     // alguna tarjeta se paga con un pago fijo
   nextIncome: Date | null; // modo cuentas: fecha estimada del próximo ingreso
 }
 
@@ -31,6 +33,11 @@ export interface RealMoney {
   cash: number;
   cardDebt: number;
   nextIncome: Date;
+  cardOwed?: number;
+  anyFixed?: boolean;
+  // Compras de hoy con tarjetas de pago fijo: no salen de las cuentas ni suben lo que se aparta,
+  // así que no se suman de vuelta a la cuota de la mañana
+  fixedCardToday?: number;
 }
 
 // Fecha probable del próximo ingreso principal: el día del mes en que llegó el ingreso más grande
@@ -75,13 +82,13 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
     const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const daysLeft = Math.max(1, Math.round((real.nextIncome.getTime() - today0.getTime()) / 86400000));
     // Los gastos de hoy ya salieron de las cuentas: se suman de vuelta para la cuota de la mañana
-    const freeAtStartOfDay = real.cash - real.cardDebt - pendingCommitments + spentToday;
+    const freeAtStartOfDay = real.cash - real.cardDebt - pendingCommitments + spentToday - (real.fixedCardToday || 0);
     const todayAllowance = Math.max(0, freeAtStartOfDay / daysLeft);
     return {
       hasBase: true, base: real.cash, baseIsBudget: false, spentMonth: gastos, pendingCommitments, savedMonth: 0,
       freeAtStartOfDay, todayAllowance, spentToday, remainingToday: todayAllowance - spentToday, daysLeft,
       tomorrowAllowance: daysLeft > 1 ? Math.max(0, (freeAtStartOfDay - spentToday) / (daysLeft - 1)) : null,
-      mode: 'cuentas', cash: real.cash, cardDebt: real.cardDebt, nextIncome: real.nextIncome,
+      mode: 'cuentas', cash: real.cash, cardDebt: real.cardDebt, cardOwed: real.cardOwed, anyFixed: real.anyFixed, nextIncome: real.nextIncome,
     };
   }
 

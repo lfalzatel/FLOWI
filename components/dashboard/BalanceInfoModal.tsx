@@ -107,7 +107,14 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         {today.mode === 'cuentas' ? (
           <>
             <Row label="Plata en tus cuentas para gastar" hint="Saldo de hoy en Cuentas y patrimonio (sin las cuentas de ahorro)" value={f(today.cash)} sign="+" />
-            {today.cardDebt > 0 && <Row label="Lo que debes en tarjetas" hint="Lo reservo para pagarlas" value={f(today.cardDebt)} sign="−" />}
+            {today.cardDebt > 0 && (today.anyFixed
+              ? <Row label="Lo que pagas de tus tarjetas este mes" hint={`Debes ${f(today.cardOwed || 0)} en total; aparto solo el pago de este mes`} value={f(today.cardDebt)} sign="−" />
+              : <Row label="Lo que debes en tarjetas" hint="Lo aparto para pagarlas completas" value={f(today.cardDebt)} sign="−" />)}
+            {!today.anyFixed && today.cardDebt > today.cash && (
+              <p className="text-[11px] text-amber-300 leading-snug py-1">
+                Debes en tarjetas más de lo que tienes. Si no las pagas completas cada mes, en <Link href="/servicios/cuentas" className="underline font-semibold">Cuentas</Link> edita la tarjeta y elige <b>Un pago fijo al mes</b>: así solo aparto ese pago.
+              </p>
+            )}
           </>
         ) : (
           <>
