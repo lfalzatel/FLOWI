@@ -30,8 +30,8 @@ export function NotificationDialog({ kind, context, onConfirm, onCancel }: Props
   const Icon = kind === 'enabled' ? CheckCircle2 : kind === 'blocked' ? BellOff : kind === 'ios-install' ? Smartphone : BellRing;
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    document.documentElement.style.overflow = 'hidden';
+    return () => { document.documentElement.style.overflow = ''; };
   }, []);
 
   if (typeof document === 'undefined') return null;

@@ -3,6 +3,15 @@ import { tr, lazyT } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { useTheme } from '@/components/ThemeProvider';
+import { GlitterParticles, GLITTER_THEMES } from '@/components/effects/GlitterParticles';
+
+/** Fondo animado del tema (como el splash) mientras la IA lee: más cosas en movimiento durante la espera. */
+export function ReadingBackdrop() {
+  const { theme } = useTheme();
+  const c = GLITTER_THEMES[theme] || GLITTER_THEMES.glassmorphism;
+  return <GlitterParticles density={1.2} background={c.bg} colors={c.colors} light={!!c.light} className="animate-fade-in" />;
+}
 
 // Mientras la IA lee un recibo o unas capturas (puede tardar unos segundos): una barra animada y
 // tarjetas que cuentan funciones de FLOWI. Pasan solas, y con las flechas se puede ir y volver.
@@ -34,7 +43,7 @@ export function ReadingOverlay({ isTech, title, label, onCancel }: { isTech: boo
   if (typeof document === 'undefined') return null;
   return createPortal(
     <div className={`fixed inset-0 z-[150] flex items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" aria-hidden="true" />
+      <ReadingBackdrop />
       <div className={`relative w-full max-w-md p-6 glass-dropdown animate-fade-in-up flex flex-col items-center text-center ${isTech ? 'rounded-none border border-accent uppercase' : 'rounded-3xl shadow-2xl'}`}>
         <div className="flex items-center gap-2 mb-1">
           <Sparkles className="w-5 h-5 text-accent animate-pulse" />

@@ -50,14 +50,11 @@ export function Header() {
   useEffect(() => {
     if (showLogoModal) {
       document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
     } else {
       document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
     }
     return () => {
       document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
     };
   }, [showLogoModal]);
 
@@ -71,13 +68,13 @@ export function Header() {
   // Close dropdown on click outside
   useEffect(() => {
     if (!showDropdown) {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       return;
     }
     
     // Prevent body scroll when dropdown is open on mobile
     if (window.innerWidth < 640) {
-      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     }
     
     const clickOut = (e: MouseEvent) => {
@@ -88,7 +85,7 @@ export function Header() {
     window.addEventListener('click', clickOut);
     return () => {
       window.removeEventListener('click', clickOut);
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, [showDropdown]);
 

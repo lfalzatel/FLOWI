@@ -83,8 +83,8 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
   const surplus = review.result > 0;
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    document.documentElement.style.overflow = 'hidden';
+    return () => { document.documentElement.style.overflow = ''; };
   }, []);
   useEffect(() => {
     if (!goalId && activeGoals[0]?.id) setGoalId(activeGoals[0].id);

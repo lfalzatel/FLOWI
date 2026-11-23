@@ -54,8 +54,8 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+    document.documentElement.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
   }, [onClose]);
 
   const pick = (k: string) => {

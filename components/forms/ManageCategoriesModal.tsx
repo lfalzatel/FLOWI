@@ -75,9 +75,9 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
 
   // Bloquear scroll del body mientras el modal esté abierto
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, []);
 

@@ -107,8 +107,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
   const owedToMe = kind === 'preste';
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    document.documentElement.style.overflow = 'hidden';
+    return () => { document.documentElement.style.overflow = ''; };
   }, []);
 
   // Capturas que llegaron de otro formulario: se leen de una vez como crédito de banco

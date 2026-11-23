@@ -26,9 +26,9 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
   const [previewData, setPreviewData] = useState<string | null>(null);
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, []);
 

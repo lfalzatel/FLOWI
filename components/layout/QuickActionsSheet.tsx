@@ -32,7 +32,7 @@ interface Props {
   context?: 'gasto' | 'ingreso' | 'deuda' | null;
   onClose: () => void;
   onAction: (action: QuickAction) => void;
-  onReceipt: (file: File | 'no-key') => void;
+  onReceipt: (file: File | File[] | 'no-key') => void;
 }
 
 // Menú del botón flotante: hablar arriba (lo más rápido) y debajo todo lo que se puede registrar
@@ -48,8 +48,8 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+    document.documentElement.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
   }, [onClose]);
 
   if (typeof document === 'undefined') return null;
@@ -88,8 +88,9 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
           </span>
         </button>
 
-        <input ref={fileRef} type="file" accept="image/*" className="hidden"
-               onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onReceipt(f); }} />
+        {/* Se pueden escoger varias fotos: un recibo largo puede venir en 2 o más partes */}
+        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+               onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; if (fs.length) onReceipt(fs.length > 1 ? fs : fs[0]); }} />
 
         <div className="grid grid-cols-4 gap-2">
           {ACTIONS.filter(a => a.id !== featured?.id).map(a => (

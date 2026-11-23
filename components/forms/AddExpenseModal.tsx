@@ -146,9 +146,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, []);
 
@@ -670,15 +670,17 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                         className={`w-12 shrink-0 flex flex-col items-center justify-center gap-0.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
                   <Camera className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">{t('Foto')}</span>
                 </button>
-                <input ref={shotRef} type="file" accept="image/*" className="hidden"
+                <input ref={shotRef} type="file" accept="image/*" multiple className="hidden"
                        onChange={async (e) => {
-                         const f = e.target.files?.[0];
-                         if (!f) return;
-                         let copy: File = f;
-                         try { copy = new File([await f.arrayBuffer()], f.name || 'recibo.jpg', { type: f.type || 'image/jpeg' }); } catch { /* se usa la original */ }
+                         const fs = Array.from(e.target.files || []).slice(0, 4);
+                         if (!fs.length) return;
+                         const copies: File[] = [];
+                         for (const f of fs) {
+                           try { copies.push(new File([await f.arrayBuffer()], f.name || 'recibo.jpg', { type: f.type || 'image/jpeg' })); } catch { copies.push(f); /* se usa la original */ }
+                         }
                          e.target.value = '';
                          onClose();
-                         window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: copy } }));
+                         window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: copies.length > 1 ? copies : copies[0] } }));
                        }} />
               </>
             )}

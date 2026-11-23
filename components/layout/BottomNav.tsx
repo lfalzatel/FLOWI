@@ -42,13 +42,13 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   // Menú del botón flotante y el formulario que se abrió desde él
   const [showSheet, setShowSheet] = useState(false);
   const [quick, setQuick] = useState<Exclude<QuickAction, 'voz' | 'extracto'> | null>(null);
-  const [receipt, setReceipt] = useState<File | 'no-key' | null>(null);
+  const [receipt, setReceipt] = useState<File | File[] | 'no-key' | null>(null);
   const router = useRouter();
   const { profile, user } = useAuth();
   // Mantener presionado = hablar directo (como antes)
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressed = useRef(false);
-  const openVoice = (withReceipt: File | 'no-key' | null = null) => {
+  const openVoice = (withReceipt: File | File[] | 'no-key' | null = null) => {
     setParsedVoiceData(null);
     setReceipt(withReceipt);
     setShowVoice(true);
@@ -85,7 +85,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   useEffect(() => {
     const open = () => setShowSheet(true);
     // Desde el formulario de gasto/ingreso: "Dictar" o "Desde foto o pantallazo"
-    const voice = (e: Event) => openVoice((e as CustomEvent<{ file?: File | 'no-key' }>).detail?.file ?? null);
+    const voice = (e: Event) => openVoice((e as CustomEvent<{ file?: File | File[] | 'no-key' }>).detail?.file ?? null);
     const dictate = () => { setShowVoice(false); setReceipt(null); setTimeout(() => openVoice(null), 80); };
     const debtShots = (e: Event) => { setDebtFiles((e as CustomEvent<{ files?: File[] }>).detail?.files || null); setShowSheet(false); setQuick('deuda'); };
     window.addEventListener('flowi-open-debt', debtShots);

@@ -40,12 +40,12 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
   // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
     if (activeModal) {
-      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, [activeModal]);
 

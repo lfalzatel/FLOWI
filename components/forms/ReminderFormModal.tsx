@@ -89,9 +89,9 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
       : isTechTheme ? 'border-accent/30' : '';
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, []);
 

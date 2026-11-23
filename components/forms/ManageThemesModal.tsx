@@ -17,11 +17,11 @@ export function ManageThemesModal({ onClose }: Props) {
   const [localAllowed, setLocalAllowed] = useState<ThemeType[]>([]);
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     if (allowedThemes) {
       setLocalAllowed([...allowedThemes] as ThemeType[]);
     }
-    return () => { document.body.style.overflow = 'auto'; };
+    return () => { document.documentElement.style.overflow = 'auto'; };
   }, [allowedThemes]);
 
   const toggleAllowedTheme = (t: ThemeType) => {

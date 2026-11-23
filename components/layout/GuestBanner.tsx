@@ -38,7 +38,7 @@ export function LinkAccountModal({ onClose, reason }: { onClose: () => void; rea
   const [error, setError] = useState('');
   const [conflict, setConflict] = useState<{ cred: AuthCredential; email?: string } | null>(null);
   const [done, setDone] = useState(false);
-  useEffect(() => { document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = ''; }; }, []);
+  useEffect(() => { document.documentElement.style.overflow = 'hidden'; return () => { document.documentElement.style.overflow = ''; }; }, []);
 
   const link = async () => {
     setBusy(true); setError('');

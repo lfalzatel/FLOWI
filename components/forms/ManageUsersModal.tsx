@@ -29,8 +29,8 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   });
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = 'auto'; };
+    document.documentElement.style.overflow = 'hidden';
+    return () => { document.documentElement.style.overflow = 'auto'; };
   }, []);
 
   useEffect(() => {

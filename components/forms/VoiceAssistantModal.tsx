@@ -9,7 +9,7 @@ import { isFixedExpenseCategory } from '@/lib/firestore';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useData } from '@/components/DataProvider';
 import { normalizeText } from '@/lib/categories';
-import { ReadingTips } from '@/components/forms/ReadingTips';
+import { ReadingTips, ReadingBackdrop } from '@/components/forms/ReadingTips';
 import { updateUserProfile } from '@/lib/firestore';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -41,7 +41,7 @@ interface VoiceAssistantModalProps {
   onOpenManual: () => void;
   onSuccessBulk?: () => void;
   // Desde el menú del botón flotante: abrir directo con la foto de un recibo (sin saludo ni micrófono)
-  receipt?: File | 'no-key' | null;
+  receipt?: File | File[] | 'no-key' | null;
   // Página desde donde se abrió: cambia el saludo, el ejemplo y lo que se asume si no se dice
   context?: 'gasto' | 'ingreso' | 'deuda' | null;
 }
@@ -108,8 +108,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     return { uid, p: (snap?.data() as any) || null };
   };
 
-  const handleReceiptFile = async (file: File | undefined, retake = false) => {
-    if (!file) return;
+  const handleReceiptFile = async (file: File | File[] | undefined, retake = false) => {
+    if (!file || (Array.isArray(file) && !file.length)) return;
     const me = await freshProfile();
     const free = retake && freeRetakesRef.current < 3;
     const used = receiptsUsed(me.p);
@@ -703,11 +703,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono text-sm' : ''}`}>
-      {/* Backdrop */}
-      <div 
-        className={`absolute inset-0 ${theme === 'light' ? 'bg-black/40 backdrop-blur-xs' : 'bg-black/75 backdrop-blur-md'}`} 
-        onClick={onClose} 
-      />
+      {/* Backdrop (mientras la IA lee la foto: el fondo animado del tema) */}
+      {receiptStatus === 'loading' ? <ReadingBackdrop /> : (
+        <div 
+          className={`absolute inset-0 ${theme === 'light' ? 'bg-black/40 backdrop-blur-xs' : 'bg-black/75 backdrop-blur-md'}`} 
+          onClick={onClose} 
+        />
+      )}
 
       <div 
         className={`w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center overflow-hidden ${
@@ -757,8 +759,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         </div>
 
         {/* Selector de foto (sirve para la primera foto y para "Otra foto") */}
-        <input ref={receiptInputRef} type="file" accept="image/*" className="hidden"
-               onChange={(e) => { const retake = retakeNextRef.current; retakeNextRef.current = false; handleReceiptFile(e.target.files?.[0], retake); e.target.value = ''; }} />
+        <input ref={receiptInputRef} type="file" accept="image/*" multiple className="hidden"
+               onChange={(e) => { const retake = retakeNextRef.current; retakeNextRef.current = false; const fs = Array.from(e.target.files || []).slice(0, 4); handleReceiptFile(fs.length > 1 ? fs : fs[0], retake); e.target.value = ''; }} />
 
         {!reviewing && (<>
         <p className={`text-xs max-w-xs mb-4 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`}>

@@ -398,7 +398,8 @@ export type ReceiptReadResult =
   | { ok: true; result: ParsedVoiceResult; results: ParsedVoiceResult[]; bank?: string }
   | { ok: false; reason: 'no-key' | 'no-model' | 'unreadable' | 'failed' | 'timeout' | 'busy' };
 
-export async function readReceiptWithAi(file: File, categories: { label: string; isCustom?: boolean }[]): Promise<ReceiptReadResult> {
+// Una o varias fotos del MISMO recibo (un recibo largo puede venir en 2 o más fotos, de arriba hacia abajo)
+export async function readReceiptWithAi(file: File | File[], categories: { label: string; isCustom?: boolean }[]): Promise<ReceiptReadResult> {
   const key = getAiKey();
   if (!key) return { ok: false, reason: 'no-key' };
   const models = await getFreeVisionModels(key).catch(() => []);
@@ -408,7 +409,8 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), RECEIPT_ITEMS_TIMEOUT_MS);
   try {
-    const images = await receiptImages(file);
+    const files = Array.isArray(file) ? file.slice(0, 4) : [file];
+    const images = (await Promise.all(files.map(receiptImages))).flat();
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       signal: controller.signal,
@@ -425,7 +427,9 @@ export async function readReceiptWithAi(file: File, categories: { label: string;
         messages: [
           { role: 'system', content: receiptPrompt(customLabels) },
           { role: 'user', content: [
-            { type: 'text', text: images.length > 1
+            { type: 'text', text: files.length > 1
+              ? `Lee este recibo. Son ${files.length} fotos del MISMO recibo largo, en orden de arriba hacia abajo (${images.length} imágenes en total), y pueden superponerse: no repitas los renglones que aparecen en dos fotos (guíate por el número de renglón si lo tiene). Da UN solo total: el que aparece al final del recibo.`
+              : images.length > 1
               ? `Lee este recibo. Son ${images.length} partes de la MISMA foto, en orden de arriba hacia abajo, y se superponen un poco: no repitas los renglones que aparecen en dos partes (guíate por el número de renglón si lo tiene).`
               : 'Lee esta foto (recibo o movimientos del banco).' },
             ...images.map(url => ({ type: 'image_url', image_url: { url } })),
