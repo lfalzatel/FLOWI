@@ -16,7 +16,7 @@ export function ThemedBackground() {
 
   return (
     <div className="fixed inset-0 -z-10 pointer-events-none" aria-hidden="true">
-      <GlitterParticles density={0.6} background={conf.bg} colors={conf.colors} light={!!conf.light} />
+      <GlitterParticles density={0.85} background={conf.bg} colors={conf.colors} light={!!conf.light} />
     </div>
   );
 }

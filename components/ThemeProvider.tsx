@@ -13,13 +13,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'glassmorphism',
   setTheme: () => null,
-  allowedThemes: ['glassmorphism', 'light', 'dark', 'cyberpunk', 'kiloCode'],
+  allowedThemes: ['glassmorphism', 'nebula', 'dark', 'light', 'cyberpunk'],
   setAllowedThemes: () => null,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('glassmorphism');
-  const [allowedThemes, setAllowedThemesState] = useState<Theme[]>(['glassmorphism', 'light', 'dark', 'cyberpunk', 'kiloCode']);
+  const [allowedThemes, setAllowedThemesState] = useState<Theme[]>(['glassmorphism', 'nebula', 'dark', 'light', 'cyberpunk']);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('flowi-theme') as Theme;

@@ -13,6 +13,7 @@ const RELOAD_MESSAGES = ["Restaurando sesión...", "Cargando datos...", "Listo"]
 const LOGOUT_MESSAGES = ["Borrando caché...", "Cerrando conexión...", "Desconectando perfil...", "Apagando..."];
 
 import { useTheme } from '@/components/ThemeProvider';
+import { GlitterParticles, GLITTER_THEMES } from '@/components/effects/GlitterParticles';
 
 export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: SplashScreenProps) {
   const [progress, setProgress] = useState(mode === 'logout' ? 100 : 0);
@@ -84,6 +85,8 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
   let logoDotColor = '#3B82F6';
   
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
+  const bgConf = GLITTER_THEMES[theme] || GLITTER_THEMES.glassmorphism;
+  const isLight = !!bgConf.light;
   
   if (theme === 'cyberpunk') {
     logoOuterColor = '#00FF41'; // Neon Green
@@ -107,6 +110,8 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
 
   return (
     <div className="fixed inset-0 bg-[#0A0A0F] z-[9999] flex flex-col items-center justify-center">
+      {/* Fondo del tema con partículas (el mismo de la app) */}
+      <GlitterParticles density={0.85} background={bgConf.bg} colors={bgConf.colors} light={!!bgConf.light} />
       {/* Glow effects */}
       <div className="absolute -top-32 -right-32 w-64 h-64 bg-accent/10 blur-3xl rounded-full" />
       <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-accent-dim/10 blur-3xl rounded-full" />
@@ -164,13 +169,13 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
       </h1>
       
       {/* Dynamic Subtitle / Message */}
-      <p className="mt-2 text-white/60 text-sm font-mono tracking-wider relative z-10 h-5 flex items-center justify-center gap-2">
+      <p className={`mt-2 ${isLight ? 'text-slate-600' : 'text-white/60'} text-sm font-mono tracking-wider relative z-10 h-5 flex items-center justify-center gap-2`}>
         <span>{`>_ ${currentMessage.toUpperCase()}`}</span>
         <span className="text-accent font-bold">[{Math.round(progress)}%]</span>
       </p>
 
       {/* Loading bar */}
-      <div className="mt-8 w-64 h-1 bg-white/10 rounded-full overflow-hidden relative z-10">
+      <div className={`mt-8 w-64 h-1 ${isLight ? 'bg-slate-300' : 'bg-white/10'} rounded-full overflow-hidden relative z-10`}>
         <div 
           className="h-full bg-accent rounded-full"
           style={{ width: `${progress}%` }}

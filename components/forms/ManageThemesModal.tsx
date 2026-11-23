@@ -31,8 +31,8 @@ export function ManageThemesModal({ onClose }: Props) {
       setLocalAllowed(filtered);
     } else {
       // Agregar al final si no excede el límite razonable para interacción (por ejemplo 3)
-      if (localAllowed.length >= 3) {
-        // Opcional: no permitir agregar más de 3
+      if (localAllowed.length >= 5) {
+        // No permitir más de 5
         return;
       }
       setLocalAllowed([...localAllowed, t]);
@@ -40,7 +40,7 @@ export function ManageThemesModal({ onClose }: Props) {
   };
 
   const handleSave = () => {
-    if (localAllowed.length < 2 || localAllowed.length > 3) return;
+    if (localAllowed.length < 2 || localAllowed.length > 5) return;
     if (setAllowedThemes) {
       setAllowedThemes(localAllowed);
     }
@@ -69,7 +69,7 @@ export function ManageThemesModal({ onClose }: Props) {
     }
   };
 
-  const isValidCount = localAllowed.length >= 2 && localAllowed.length <= 3;
+  const isValidCount = localAllowed.length >= 2 && localAllowed.length <= 5;
 
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
@@ -102,7 +102,7 @@ export function ManageThemesModal({ onClose }: Props) {
             <p className={`text-sm font-medium text-text-primary mb-3 ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
               {isTechTheme ? 'TEMA_VISUAL_ACTIVO' : 'Tema Visual Activo'}
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button onClick={() => setTheme('light')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'light' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Sun className="w-5 h-5 mb-1.5" />
                 <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'DIA' : 'Día'}</span>
@@ -114,6 +114,10 @@ export function ManageThemesModal({ onClose }: Props) {
               <button onClick={() => setTheme('glassmorphism')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'glassmorphism' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Layers className="w-5 h-5 mb-1.5" />
                 <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'GLASS' : 'Glass'}</span>
+              </button>
+              <button onClick={() => setTheme('nebula')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'nebula' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
+                <Sparkles className="w-5 h-5 mb-1.5" />
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'NEBULA' : 'Nebulosa'}</span>
               </button>
               <button onClick={() => setTheme('cyberpunk')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'cyberpunk' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Terminal className="w-5 h-5 mb-1.5" />
@@ -135,7 +139,7 @@ export function ManageThemesModal({ onClose }: Props) {
                 {isTechTheme ? 'MODOS_EN_MENU' : 'Modos en Menú Desplegable'}
               </p>
               <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono border border-accent/20 rounded-none' : 'rounded'} ${isValidCount ? 'text-accent bg-accent/10' : 'text-red-400 bg-red-500/10'}`}>
-                {localAllowed.length} {isTechTheme ? 'SEL' : 'seleccionados'} (Mín 2, Máx 3)
+                {localAllowed.length} {isTechTheme ? 'SEL' : 'seleccionados'} (Mín 2, Máx 5)
               </span>
             </div>
             <p className={`text-[11px] mb-3 ${isTechTheme ? 'font-mono text-accent/40' : 'text-text-muted'}`}>
