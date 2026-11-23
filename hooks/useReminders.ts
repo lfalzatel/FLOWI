@@ -5,10 +5,12 @@ import { Reminder } from '@/lib/firestore';
 import { db } from '@/lib/firebase';
 import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
 
+let memo: { uid: string; reminders: Reminder[] } | null = null; // para no volver a "cargar" al cambiar de pantalla
+
 export function useReminders() {
   const { user } = useAuth();
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [reminders, setReminders] = useState<Reminder[]>(() => memo?.reminders ?? []);
+  const [loading, setLoading] = useState(() => !memo);
 
   useEffect(() => {
     if (!user) {
@@ -17,7 +19,7 @@ export function useReminders() {
       return;
     }
 
-    setLoading(true);
+    if (memo?.uid !== user.uid) setLoading(true);
     const ref = collection(db, 'fl_reminders');
     const q = query(ref, where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
 
@@ -33,6 +35,7 @@ export function useReminders() {
       }) as Reminder[];
       
       setReminders(data);
+      memo = { uid: user.uid, reminders: data };
       setLoading(false);
     }, (err) => {
       console.error('Error listening to reminders:', err);

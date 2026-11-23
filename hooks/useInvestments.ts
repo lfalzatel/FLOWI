@@ -6,10 +6,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { Investment } from '@/lib/firestore';
 import { sortInvestments } from '@/lib/investments';
 
+let invMemo: { uid: string; investments: Investment[] } | null = null; // para no volver a "cargar" al cambiar de pantalla
+
 export function useInvestments() {
   const { user } = useAuth();
-  const [investments, setInvestments] = useState<Investment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [investments, setInvestments] = useState<Investment[]>(() => invMemo?.investments ?? []);
+  const [loading, setLoading] = useState(() => !invMemo);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export function useInvestments() {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (invMemo?.uid !== user.uid) setLoading(true);
     // Sin orderBy para no requerir índices compuestos; se ordena en el cliente
     const q = query(collection(db, 'fl_investments'), where('userId', '==', user.uid));
     const unsubscribe = onSnapshot(q, (snap) => {
@@ -31,6 +33,7 @@ export function useInvestments() {
         } as Investment;
       });
       setInvestments(sortInvestments(data));
+      invMemo = { uid: user.uid, investments: sortInvestments(data) };
       setError(null);
       setLoading(false);
     }, (err) => {

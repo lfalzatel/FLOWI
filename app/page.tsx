@@ -105,7 +105,8 @@ export default function DashboardPage() {
     ? demo.debts.filter(d => d.direction !== 'me_deben').reduce((s, d) => s + d.totalAmount - d.paidAmount, 0)
     : realTotalDeudas;
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [mounted, setMounted] = useState(false);
+  // Al volver a Inicio desde otra pantalla (la app ya estaba abierta) se pinta de una vez, sin cuadro en blanco
+  const [mounted, setMounted] = useState(() => splashSession.shown);
   const [showSplash, setShowSplash] = useState(() => !splashSession.shown);
   const [splashMode, setSplashMode] = useState<'login' | 'reload'>('reload');
   const [splashDuration, setSplashDuration] = useState(1000);

@@ -9,10 +9,12 @@ import { useInvestments } from '@/hooks/useInvestments';
 import { investmentValue, kindOf } from '@/lib/investments';
 import { useMemo } from 'react';
 
+let memo: { uid: string; goals: Goal[] } | null = null; // para no volver a "cargar" al cambiar de pantalla
+
 export function useGoals() {
   const { user } = useAuth();
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [goals, setGoals] = useState<Goal[]>(() => memo?.goals ?? []);
+  const [loading, setLoading] = useState(() => !memo);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export function useGoals() {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (memo?.uid !== user.uid) setLoading(true);
     // Sin orderBy para no requerir índices compuestos; se ordena en el cliente
     const q = query(collection(db, 'fl_goals'), where('userId', '==', user.uid));
     const unsubscribe = onSnapshot(q, (snap) => {
@@ -34,6 +36,7 @@ export function useGoals() {
         } as Goal;
       });
       setGoals(sortGoals(data));
+      memo = { uid: user.uid, goals: sortGoals(data) };
       setError(null);
       setLoading(false);
     }, (err) => {

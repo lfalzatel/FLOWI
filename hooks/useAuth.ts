@@ -29,10 +29,13 @@ export interface UserProfile {
   lastTxDay?: string;              // fecha del último movimiento (YYYY-MM-DD)
 }
 
+// Última sesión conocida: al cambiar de pantalla la nueva arranca con ella (sin ruedita ni parpadeo)
+let lastAuth: { user: User | null; profile: UserProfile | null } | null = null;
+
 export function useAuth() {
-  const [user,    setUser]    = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user,    setUser]    = useState<User | null>(() => lastAuth?.user ?? null);
+  const [profile, setProfile] = useState<UserProfile | null>(() => lastAuth?.profile ?? null);
+  const [loading, setLoading] = useState(() => !lastAuth);
 
   useEffect(() => {
     let unsubscribeProfile: () => void;
@@ -44,6 +47,7 @@ export function useAuth() {
         unsubscribeProfile = onSnapshot(doc(db, 'users', firebaseUser.uid), (snap) => {
           if (snap.exists()) {
             setProfile(snap.data() as UserProfile);
+            lastAuth = { user: firebaseUser, profile: snap.data() as UserProfile };
             setLoading(false);
           } else {
             setProfile(null);
@@ -64,6 +68,7 @@ export function useAuth() {
         });
       } else {
         setProfile(null);
+        lastAuth = { user: null, profile: null };
         setLoading(false);
         if (unsubscribeProfile) unsubscribeProfile();
       }
