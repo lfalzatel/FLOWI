@@ -72,9 +72,9 @@
 
 /* Nebulosa (nuevo): violeta con tarjetas de vidrio translúcido */
 [data-theme='nebula'] {
-  --accent:        0 229 160;
-  --accent-dim:    0 179 126;
-  --accent-glow:   rgba(196, 181, 253, 0.15);
+  --accent:        192 132 252;
+  --accent-dim:    168 85 247;
+  --accent-glow:   rgba(192, 132, 252, 0.18);
   --bg-deep:       #0A0618;
   --bg-card:       #1E1040;
   --bg-card-hover: #2A1656;

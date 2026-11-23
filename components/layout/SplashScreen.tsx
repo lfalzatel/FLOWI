@@ -96,6 +96,10 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
     logoOuterColor = '#F0DB4F'; // JS Yellow
     logoInnerColor = '#F97316'; // Orange
     logoDotColor = '#F97316';
+  } else if (theme === 'nebula') {
+    logoOuterColor = '#C4B5FD'; // Lavanda
+    logoInnerColor = '#F0ABFC'; // Rosado
+    logoDotColor = '#F97316';
   } else if (theme === 'light') {
     // Colores originales del diseño en modo día
     logoOuterColor = '#00C4CC'; // Cyan (trazos F)
