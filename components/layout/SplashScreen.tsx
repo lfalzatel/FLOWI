@@ -36,7 +36,7 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
     try {
       if (mode === 'login' || mode === 'reload') {
         audio = new Audio('/assets/sounds/splash-bass.wav'); // 3 s, liviano (132 KB) para que alcance a sonar
-        audio.volume = 0.85;
+        audio.volume = 0.5;
       } else if (mode === 'logout') {
         audio = new Audio('/assets/sounds/73577__cyberpunk64bit__boomstick.mp3');
         audio.volume = 0.5;
