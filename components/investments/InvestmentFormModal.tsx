@@ -17,6 +17,7 @@ import { AccountPicker } from '@/components/accounts/AccountPicker';
 import { Investment, addExpense, addInvestment, updateInvestment } from '@/lib/firestore';
 import { formatAmountInput, parseAmountInput } from '@/components/goals/GoalFormModal';
 import { formatCurrency } from '@/lib/format';
+import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
 import { DEFAULT_WITHHOLDING, addMonthsKey, days360, dayKey, estimateInterest, investmentStatus, parseDay } from '@/lib/investments';
 
 const BANKS = ['Bancolombia', 'BBVA', 'Davivienda', 'Banco de Bogotá', 'Nu', 'Lulo Bank', 'Banco Popular', 'Itaú'];
@@ -317,8 +318,8 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="inv-amount" className={labelClass}>{tr('Monto invertido')}</label>
-                <input autoComplete="off" id="inv-amount" type="text" inputMode="numeric" placeholder="$ 0" value={amount}
-                       onChange={(e) => setAmount(formatAmountInput(e.target.value))} className={`${inputClass} font-bold`} required />
+                <CalcAmountInput id="inv-amount" placeholder="$ 0" value={amount} label="Monto invertido"
+                       onType={(raw) => setAmount(formatAmountInput(raw))} onValue={(n) => setAmount(n ? formatAmountInput(Math.round(n)) : '')} toNum={parseAmountInput} isTech={isTechTheme} className={`${inputClass} font-bold`} required />
               </div>
               <div>
                 <label htmlFor="inv-rate" className={labelClass}>Tasa E.A. (%)</label>
@@ -377,8 +378,8 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
               <div className="space-y-5">
             <div>
                   <label htmlFor="inv-bank-interest" className={labelClass}>Intereses del periodo según el banco (opcional)</label>
-                  <input autoComplete="off" id="inv-bank-interest" type="text" inputMode="numeric" placeholder="$ 0" value={bankInterest}
-                         onChange={(e) => setBankInterest(formatAmountInput(e.target.value))} className={inputClass} />
+                  <CalcAmountInput id="inv-bank-interest" placeholder="$ 0" value={bankInterest} label="Intereses según el banco"
+                         onType={(raw) => setBankInterest(formatAmountInput(raw))} onValue={(n) => setBankInterest(n ? formatAmountInput(Math.round(n)) : '')} toNum={parseAmountInput} isTech={isTechTheme} className={inputClass} />
                   <p className={hint}>{tr('Si el banco te muestra la cifra exacta, ponla aquí y uso esa en vez del cálculo.')}</p>
                 </div>
 

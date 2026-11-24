@@ -283,6 +283,7 @@ export const EN: Record<string, string> = {
   'Tu nombre, foto y datos de la cuenta': 'Your name, photo and account details',
   'Historial y control de préstamos': 'Loan history and tracking',
   'Herramientas para manejar tu dinero': 'Tools to manage your money',
+  'Escribe el monto de la deuda.': 'Enter the debt amount.',
   'Total Pendiente': 'Total outstanding',
   'Suma de todas tus deudas activas': 'Sum of all your active debts',
   'Deudas activas': 'Active debts',

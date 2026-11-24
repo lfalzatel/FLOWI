@@ -14,6 +14,7 @@ import { ReadingOverlay } from '@/components/forms/ReadingTips';
 import { useDebts } from '@/hooks/useDebts';
 import { useAccounts } from '@/hooks/useAccounts';
 import { DictateButton } from '@/components/forms/DictateButton';
+import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
 import { parseDebtSpeech } from '@/lib/formDictation';
 
 interface Props {
@@ -257,6 +258,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
     e.preventDefault();
     if (isReadOnly) { onClose(); return; }
     if (!user) return;
+    // El monto se llena con el teclado-calculadora (no es un campo "required" del navegador)
+    if (!(parseFloat(totalAmount) > 0)) { alert(tr('Escribe el monto de la deuda.')); return; }
 
     setLoading(true);
     try {
@@ -578,8 +581,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           <div className={`grid grid-cols-2 gap-2 ${editCls}`}>
             <div className={compact ? 'col-span-2' : ''}>
               <label className={labelCls}>{isBank ? 'Valor desembolsado' : owedToMe ? '¿Cuánto le prestaste?' : '¿Cuánto te prestó?'}</label>
-              <input autoComplete="off" type="text" inputMode="decimal" required disabled={isReadOnly} value={totalAmount}
-                     onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setTotalAmount(v); }}
+              <CalcAmountInput required disabled={isReadOnly} value={totalAmount} label={isBank ? 'Valor desembolsado' : 'Monto'}
+                     onType={(raw) => { const v = decimal(raw); if (v !== null) setTotalAmount(v); }} onValue={(n) => setTotalAmount(n ? String(n) : '')} toNum={(v) => parseFloat(v) || 0} isTech={isTechTheme}
                      className={inputCls} placeholder="0" />
             </div>
             {!compact && (
@@ -618,8 +621,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             ) : (
               <div>
                 <label className={labelCls}>{owedToMe ? 'Ya te pagó' : 'Ya le pagaste'}</label>
-                <input autoComplete="off" type="text" inputMode="decimal" disabled={isReadOnly || !!debtToEdit} value={paidAmount}
-                       onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setPaidAmount(v); }}
+                <CalcAmountInput disabled={isReadOnly || !!debtToEdit} value={paidAmount} label={owedToMe ? 'Ya te pagó' : 'Ya le pagaste'}
+                       onType={(raw) => { const v = decimal(raw); if (v !== null) setPaidAmount(v); }} onValue={(n) => setPaidAmount(n ? String(n) : '')} toNum={(v) => parseFloat(v) || 0} isTech={isTechTheme}
                        className={inputCls} placeholder="0" />
                 {!!debtToEdit && <p className={hint}>{tr('Los pagos se registran como abonos.')}</p>}
               </div>
@@ -639,16 +642,15 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 {!debtToEdit ? (
                   <div>
                     <label className={labelCls}>{tr('Capital vigente')}</label>
-                    <input autoComplete="off" type="text" inputMode="decimal" value={capitalNow}
-                           onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setCapitalNow(v); }}
+                    <CalcAmountInput value={capitalNow} label="Capital vigente"
+                           onType={(raw) => { const v = decimal(raw); if (v !== null) setCapitalNow(v); }} onValue={(n) => setCapitalNow(n ? String(n) : '')} toNum={(v) => parseFloat(v) || 0} isTech={isTechTheme}
                            className={inputCls} placeholder={totalAmount || 'Igual al desembolsado'} />
                     <p className={hint}>{tr('Solo si ya le has pagado capital.')}</p>
                   </div>
                 ) : (
                   <div>
                     <label className={labelCls}>{tr('Cuota mensual')}</label>
-                    <input autoComplete="off" type="text" inputMode="numeric" value={installment}
-                           onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder={tr('Opcional')} />
+                    <CalcAmountInput value={installment} label="Cuota mensual" onType={(raw) => setInstallment(onlyNum(raw))} onValue={(n) => setInstallment(n ? String(Math.round(n)) : '')} toNum={(v) => Number(v) || 0} isTech={isTechTheme} className={inputCls} placeholder={tr('Opcional')} />
                   </div>
                 )}
               </div>
@@ -658,8 +660,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
               {!debtToEdit && (
                 <div>
                   <label className={labelCls}>{tr('Cuota mensual')}</label>
-                  <input autoComplete="off" type="text" inputMode="numeric" value={installment}
-                         onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder="La que te informó el banco (opcional)" />
+                  <CalcAmountInput value={installment} label="Cuota mensual" onType={(raw) => setInstallment(onlyNum(raw))} onValue={(n) => setInstallment(n ? String(Math.round(n)) : '')} toNum={(v) => Number(v) || 0} isTech={isTechTheme} className={inputCls} placeholder="La que te informó el banco (opcional)" />
                 </div>
               )}
               {suggested > 0 && String(suggested) !== installment && (
@@ -704,7 +705,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                     </div>
                     <div>
                       <label className={labelCls}>{tr('Cuota')}</label>
-                      <input autoComplete="off" type="text" inputMode="numeric" value={installment} onChange={(e) => setInstallment(onlyNum(e.target.value))} className={inputCls} placeholder={suggested ? String(suggested) : 'Valor'} />
+                      <CalcAmountInput value={installment} label="Cuota" onType={(raw) => setInstallment(onlyNum(raw))} onValue={(n) => setInstallment(n ? String(Math.round(n)) : '')} toNum={(v) => Number(v) || 0} isTech={isTechTheme} className={inputCls} placeholder={suggested ? String(suggested) : 'Valor'} />
                     </div>
                   </div>
                   <p className="text-[10px] text-text-muted leading-snug normal-case">
@@ -804,8 +805,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
             <div className={`order-2 p-4 border grid grid-cols-2 gap-3 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
               <div>
                 <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{owedToMe ? 'Abono recibido' : 'Registrar abono'}</label>
-                <input autoComplete="off" type="text" inputMode="decimal" value={abono}
-                       onChange={(e) => { const v = decimal(e.target.value); if (v !== null) setAbono(v); }}
+                <CalcAmountInput value={abono} label={owedToMe ? 'Abono recibido' : 'Abono'}
+                       onType={(raw) => { const v = decimal(raw); if (v !== null) setAbono(v); }} onValue={(n) => setAbono(n ? String(n) : '')} toNum={(v) => parseFloat(v) || 0} isTech={isTechTheme}
                        className={inputCls} placeholder="0" />
               </div>
               <div>

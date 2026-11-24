@@ -17,6 +17,7 @@ import { BankField, BankPickerSheet } from '@/components/accounts/BankPickerShee
 import { formatMoneyInput, parseMoneyInput } from '@/components/accounts/AccountModals';
 import { Investment, InvestmentKind, addInvestment, updateInvestment } from '@/lib/firestore';
 import { KIND_INFO, dayKey } from '@/lib/investments';
+import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
 import { formatCurrency } from '@/lib/format';
 
 // Ahorro que paga intereses (Nu, Lulo…), acciones y fondos (Trii, tyba…) y pensión voluntaria.
@@ -346,8 +347,8 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label htmlFor="sv-amount" className={lbl}>{isSavings ? (investment ? 'Saldo inicial' : 'Saldo de hoy') : isFund ? 'Lo que has depositado' : 'Lo que has invertido'}</label>
-              <input autoComplete="off" id="sv-amount" type="text" inputMode="decimal" placeholder="$ 0" value={amount}
-                     onChange={(e) => setAmount(formatMoneyInput(e.target.value))} className={`${input} font-bold`} />
+              <CalcAmountInput id="sv-amount" placeholder="$ 0" value={amount} label="Monto"
+                     onType={(raw) => setAmount(formatMoneyInput(raw))} onValue={(n) => setAmount(n ? formatMoneyInput(n) : '')} toNum={parseMoneyInput} isTech={isTech} className={`${input} font-bold`} />
             </div>
             {isSavings ? (
               <div>
@@ -358,8 +359,8 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             ) : (
               <div>
                 <label htmlFor="sv-current" className={lbl}>{isFund ? 'Lo que vale hoy' : 'Valor actual'}</label>
-                <input autoComplete="off" id="sv-current" type="text" inputMode="decimal" placeholder={tr('Igual al invertido')} value={current}
-                       onChange={(e) => setCurrent(formatMoneyInput(e.target.value))} className={input} />
+                <CalcAmountInput id="sv-current" placeholder={tr('Igual al invertido')} value={current} label="Valor actual"
+                       onType={(raw) => setCurrent(formatMoneyInput(raw))} onValue={(n) => setCurrent(n ? formatMoneyInput(n) : '')} toNum={parseMoneyInput} isTech={isTech} className={input} />
               </div>
             )}
           </div>
