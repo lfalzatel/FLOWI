@@ -64,9 +64,16 @@ export function privacyEn(email: string): Block[] {
       ],
     },
     {
-      title: '6. How long we keep it',
+      title: '6. How long we keep it and how to delete your account',
       body: [
         'For as long as you have your FLOWI account. If you ask us to delete it, we erase your data within 15 business days, except the record of payments made, which is kept for the time the law requires.',
+        'To delete your FLOWI account yourself:',
+        [
+          'Open FLOWI and sign in.',
+          'Go to Settings → Data and privacy.',
+          'Tap "Delete my account" and confirm. Your profile, expenses, income, debts, accounts, goals, savings, reminders and receipts are deleted right away.',
+        ],
+        `You can also ask for it without opening the app by writing to ${email} from the email you signed up with. Only the record of Premium payments (date, amount and plan) is kept, without your other data, for the time the law requires.`,
       ],
     },
     {

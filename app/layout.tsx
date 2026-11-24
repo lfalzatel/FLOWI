@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   icons: {
     icon:  [{ url: '/icons/icon-192.png' }],
-    apple: [{ url: '/icons/icon-192.png' }],
+    apple: [{ url: '/icons/apple-touch-icon.png' }],
   },
   openGraph: {
     title: 'FLOWI — Gastos Personales',

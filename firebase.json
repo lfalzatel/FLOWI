@@ -5,13 +5,18 @@
     "cleanUrls": true,
     "ignore": [
       "firebase.json",
-      "**/.*",
+      "**/.DS_Store",
+      "**/.git/**",
       "**/node_modules/**"
     ],
     "headers": [
       {
         "source": "**",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/.well-known/assetlinks.json",
+        "headers": [{ "key": "Content-Type", "value": "application/json" }]
       },
       {
         "source": "/_next/static/**",

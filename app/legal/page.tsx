@@ -71,9 +71,16 @@ const PRIVACY: Block[] = [
     ],
   },
   {
-    title: '6. Cuánto tiempo los guardamos',
+    title: '6. Cuánto tiempo los guardamos y cómo borrar tu cuenta',
     body: [
       'Mientras tengas tu cuenta en FLOWI. Si pides borrarla, eliminamos tus datos en máximo 15 días hábiles, salvo el registro de los pagos realizados, que se conserva el tiempo que exige la ley.',
+      'Para eliminar tu cuenta de FLOWI tú mismo:',
+      [
+        'Abre FLOWI e inicia sesión.',
+        'Ve a Configuración → Datos y Privacidad.',
+        'Toca "Eliminar mi cuenta" y confírmalo. Se borran al instante tu perfil, tus gastos, ingresos, deudas, cuentas, metas, ahorros, recordatorios y recibos.',
+      ],
+      'También puedes pedirlo sin entrar a la app escribiendo al correo ' + EMAIL + ' desde el correo con el que te registraste. Solo se conserva el registro de los pagos de Premium (fecha, valor y plan), sin tus otros datos, por el tiempo que exige la ley.',
     ],
   },
   {
