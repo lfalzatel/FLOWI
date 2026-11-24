@@ -46,8 +46,12 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
     return () => window.removeEventListener('absorb-total-impact', handleAbsorb);
   }, []);
 
-  const cardGradient = isLight 
-    ? 'linear-gradient(135deg, var(--bg-card) 0%, #F9FAFB 100%)' 
+  const cardGradient = theme === 'nova'
+    ? 'linear-gradient(135deg, #FFFDF9 0%, #F6EDE1 100%)'
+    : theme === 'carbon'
+    ? 'linear-gradient(135deg, #26221D 0%, #1A1815 55%, #2A2218 100%)'
+    : isLight
+    ? 'linear-gradient(135deg, var(--bg-card) 0%, #F9FAFB 100%)'
     : isCyberpunk
       ? 'linear-gradient(135deg, #0A0A16 0%, #070714 100%)'
       : 'linear-gradient(135deg, #0D2E1F 0%, #0A1929 50%, #150D2E 100%)';

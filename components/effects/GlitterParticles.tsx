@@ -24,6 +24,9 @@ export const GLITTER_THEMES: Record<string, { colors: string[]; light?: boolean;
   // Cyber y Kilo: partículas sobre su fondo de siempre (sin resplandor)
   cyberpunk: { colors: ['#00FF41', '#39FF88', '#0FF0FC', '#B6FFCE', '#FFFFFF'], bg: 'var(--bg-deep)' },
   kiloCode: { colors: ['#F0DB4F', '#FACC15', '#F97316', '#FDE68A', '#FFFFFF'], bg: 'var(--bg-deep)' },
+  // Carbón y oro: chispas doradas sobre carbón
+  carbon: { colors: ['#C9A86A', '#E2C891', '#F3EBDD', '#A8834A', '#FFFFFF'],
+    bg: 'radial-gradient(ellipse at 30% 35%, #2E2924 0%, #1B1917 45%, #0D0C0B 100%)' },
   // Nova: papel crema cálido con polvo cobre y arena
   nova: { colors: ['#A8643C', '#C98B62', '#D9B48F', '#8A5A3B'], light: true,
     bg: 'radial-gradient(ellipse at 30% 30%, #FFFBF5 0%, #F8F2E9 50%, #EFE6D9 100%)' },

@@ -112,6 +112,11 @@ export function Header() {
     logoOuterColor = '#C4B5FD'; // Lavanda
     logoInnerColor = '#F0ABFC'; // Rosado
     logoDotColor = '#F97316';
+  } else if (theme === 'carbon') {
+    // Carbón y oro: dorado apagado con trazo marfil
+    logoOuterColor = '#C9A86A'; // Oro
+    logoInnerColor = '#F3EBDD'; // Marfil
+    logoDotColor = '#C9A86A';
   } else if (theme === 'nova') {
     // Nova: tinta casi negra con cobre (como un papel cálido)
     logoOuterColor = '#1C1917'; // Tinta

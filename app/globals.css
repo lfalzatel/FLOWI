@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Playfair+Display:wght@500;600;700&family=Outfit:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -177,6 +177,33 @@
   --text-muted:    rgba(10, 10, 15, 0.40);
   --red:           #E11D48;
   --yellow:        #D97706;
+}
+
+/* Carbón y oro: fondo carbón, dorado apagado (distinto del amarillo de las deudas) y títulos en serif */
+[data-theme='carbon'] {
+  --accent:        201 168 106;
+  --accent-dim:    168 131 74;
+  --accent-glow:   rgba(201, 168, 106, 0.14);
+  --bg-deep:       #121110;
+  --bg-card:       #1F1D1A;
+  --bg-card-hover: #292622;
+  --glass:         rgba(255, 248, 235, 0.05);
+  --glass-hover:   rgba(255, 248, 235, 0.08);
+  --glass-border:  rgba(255, 248, 235, 0.09);
+  --glass-strong:  rgba(201, 168, 106, 0.30);
+  --text-primary:  rgba(250, 245, 236, 0.95);
+  --text-secondary:rgba(250, 245, 236, 0.60);
+  --text-muted:    rgba(250, 245, 236, 0.34);
+  --red:           #F87171;
+  --yellow:        #F5A623;
+}
+[data-theme='carbon'] .font-syne { font-family: 'Playfair Display', Georgia, serif; letter-spacing: 0; font-variant-numeric: lining-nums tabular-nums; }
+[data-theme='carbon'] .glass-card,
+[data-theme='carbon'] .glass-card-strong {
+  border-radius: 18px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px -14px rgba(0, 0, 0, 0.7);
 }
 
 /* Nova: papel crema, tinta casi negra y cobre. Títulos en Outfit, botones de píldora */

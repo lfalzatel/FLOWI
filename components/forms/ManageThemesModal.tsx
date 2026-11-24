@@ -1,14 +1,14 @@
 'use client';
 import { tr, trTech } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
-import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check, Sparkles, Star } from 'lucide-react';
+import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check, Sparkles, Star, Flame } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 
 interface Props {
   onClose: () => void;
 }
 
-type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'nebula' | 'cyberpunk' | 'kiloCode' | 'nova';
+type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'nebula' | 'cyberpunk' | 'kiloCode' | 'nova' | 'carbon';
 
 export function ManageThemesModal({ onClose }: Props) {
   const { theme, setTheme, allowedThemes, setAllowedThemes } = useTheme();
@@ -52,6 +52,7 @@ export function ManageThemesModal({ onClose }: Props) {
     switch (t) {
       case 'light': return <Sun className="w-4 h-4" />;
       case 'nova': return <Star className="w-4 h-4" />;
+      case 'carbon': return <Flame className="w-4 h-4" />;
       case 'dark': return <Moon className="w-4 h-4" />;
       case 'glassmorphism': return <Layers className="w-4 h-4" />;
       case 'nebula': return <Sparkles className="w-4 h-4" />;
@@ -64,6 +65,7 @@ export function ManageThemesModal({ onClose }: Props) {
     switch (t) {
       case 'light': return isTechTheme ? trTech('DIA', 'Día') : tr('Día');
       case 'nova': return isTechTheme ? trTech('NOVA', 'Nova') : tr('Nova');
+      case 'carbon': return isTechTheme ? trTech('CARBON_Y_ORO', 'Carbón y oro') : tr('Carbón y oro');
       case 'dark': return isTechTheme ? trTech('NOCHE (ORIGINAL)', 'Noche (Original)') : tr('Noche (Original)');
       case 'glassmorphism': return isTechTheme ? trTech('GLASSMORPHISM', 'Glassmorphism') : tr('Glassmorphism');
       case 'nebula': return isTechTheme ? trTech('NEBULOSA', 'Nebulosa') : tr('Nebulosa');
@@ -118,6 +120,10 @@ export function ManageThemesModal({ onClose }: Props) {
                 <Moon className="w-5 h-5 mb-1.5" />
                 <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('ORIG', 'Original') : tr('Original')}</span>
               </button>
+              <button onClick={() => setTheme('carbon')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'carbon' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
+                <Flame className="w-5 h-5 mb-1.5" />
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('CARBON', 'Carbón') : tr('Carbón')}</span>
+              </button>
               <button onClick={() => setTheme('glassmorphism')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'glassmorphism' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Layers className="w-5 h-5 mb-1.5" />
                 <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('GLASS', 'Glass') : tr('Glass')}</span>
@@ -154,7 +160,7 @@ export function ManageThemesModal({ onClose }: Props) {
             </p>
             
             <div className="space-y-2">
-              {(['light', 'nova', 'dark', 'glassmorphism', 'nebula', 'cyberpunk', 'kiloCode'] as ThemeType[]).map(t => {
+              {(['light', 'nova', 'dark', 'carbon', 'glassmorphism', 'nebula', 'cyberpunk', 'kiloCode'] as ThemeType[]).map(t => {
                 const selectedIndex = localAllowed.indexOf(t);
                 const isSelected = selectedIndex !== -1;
                 
