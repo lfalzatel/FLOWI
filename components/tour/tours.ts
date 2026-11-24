@@ -67,13 +67,13 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { title: tr('Tus gastos'), text: tr('Aquí está la lista completa de lo que sale. Arriba ves el total del período y abajo cada gasto, del más reciente al más antiguo.') },
     { target: ADD, title: tr('Registra un gasto'), text: tr('Con el botón + en esta página sale primero "Nuevo gasto". Te muestro el formulario por dentro.') },
     ...EXPENSE_STEPS(),
-    { title: tr('Busca y edita'), text: tr('Usa el buscador por categoría, descripción o valor. Toca un gasto para editarlo, borrarlo o pasarlo a deuda si todavía no lo pagaste.') },
+    { target: 'search', title: tr('Busca y edita'), text: tr('Usa el buscador por categoría, descripción o valor. Toca un gasto para editarlo, borrarlo o pasarlo a deuda si todavía no lo pagaste.') },
   ],
   ingresos: [
     { title: tr('Tus ingresos'), text: tr('Todo lo que entra: sueldo, ventas, pagos que te hacen. Con tus ingresos calculo cuánto puedes gastar cada día.') },
     { target: ADD, title: tr('Registra un ingreso'), text: tr('Con el botón + en esta página sale primero "Nuevo ingreso". Por voz di algo como "me pagaron el sueldo, dos millones".') },
     { title: tr('Con su cuenta'), text: tr('Si tienes tus cuentas en FLOWI, elige a cuál entró la plata y su saldo sube solo. Si es una venta de tu negocio, usa su categoría y aparece en Mi negocio.') },
-    { title: tr('Busca y edita'), text: tr('Busca por categoría, descripción o valor, y toca un ingreso para editarlo o borrarlo.') },
+    { title: tr('Edita o borra'), text: tr('Toca un ingreso de la lista para editarlo o borrarlo.') },
   ],
   deudas: [
     { title: tr('Tus deudas'), text: tr('Lo que debes y lo que te deben, en un solo lugar. Arriba ves el total pendiente y cuánto pagas en cuotas al mes.') },
@@ -128,12 +128,12 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { title: tr('Te aviso a tiempo'), text: tr('Activa las notificaciones y te aviso antes, aunque FLOWI esté cerrada. Los pagos con valor se apartan de lo que puedes gastar.') },
   ],
   recibos: [
-    { title: tr('Mis recibos'), text: tr('Tus compras escaneadas con todos sus productos. Busca por tienda o por producto.') },
+    { target: 'search', title: tr('Mis recibos'), text: tr('Tus compras escaneadas con todos sus productos. Busca por tienda o por producto.') },
     { open: 'quick', target: 'quick-foto', title: tr('Cómo llegan aquí'), text: tr('Escanea un recibo con el botón + y "Foto del recibo", o comparte la foto desde otra app. Necesitas la IA conectada, que es gratis.'), cta: { label: tr('Activar la IA'), href: '/configuracion#ia' } },
     { title: tr('Edita la compra'), text: tr('Toca una compra para ver el detalle, corregir un producto o cambiar su categoría.') },
   ],
   productos: [
-    { title: tr('¿Cuánto gasto en…?'), text: tr('Busca un producto, como huevos, cerveza o gasolina, y mira cuánto se te va al mes.') },
+    { target: 'search', title: tr('¿Cuánto gasto en…?'), text: tr('Busca un producto, como huevos, cerveza o gasolina, y mira cuánto se te va al mes.') },
     { title: tr('¿Subió el precio?'), text: tr('Con tus recibos escaneados te muestro cómo cambia el precio de lo que más compras.') },
     { title: tr('De dónde salen los datos'), text: tr('Busco en los productos de tus recibos escaneados y en la descripción de tus otros gastos. Escanear recibos lo hace más exacto.') },
   ],

@@ -134,7 +134,7 @@ export default function GastosPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-6 items-start">
         <div className="min-w-0 lg:sticky lg:top-24">
           {/* Buscador Universal */}
-          <div className="mb-4 relative lg:hidden">
+          <div className="mb-4 relative lg:hidden" data-tour="search">
             <input autoComplete="off"
               type="text"
               placeholder={isTechTheme ? tr('SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR...') : tr('Buscar por categoría, descripción o monto...')}
@@ -199,7 +199,7 @@ export default function GastosPage() {
         </div>
         <div className="min-w-0">
           {/* Buscador Universal */}
-          <div className="mb-4 relative hidden lg:block">
+          <div className="mb-4 relative hidden lg:block" data-tour="search">
             <input autoComplete="off"
               type="text"
               placeholder={isTechTheme ? tr('SEARCH_QUERY > ESCRIBE CATEGORÍA, DESC O VALOR...') : tr('Buscar por categoría, descripción o monto...')}

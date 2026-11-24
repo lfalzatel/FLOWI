@@ -292,7 +292,7 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
           </Link>
         )}
         <div className="flex items-center justify-between gap-2 mt-4">
-          <span className="text-[11px] text-text-muted">{tr('{a} de {b}', { a: index + 1, b: total })}</span>
+          <span className="text-[11px] text-text-muted">{tr('Paso {a} de {b}', { a: index + 1, b: total })}</span>
           <div className="flex items-center gap-2">
             {index === 0 ? (
               <button type="button" onClick={finish} className="px-3 py-2 text-xs font-semibold text-text-muted hover:text-text-primary">{tr('Omitir')}</button>

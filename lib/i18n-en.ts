@@ -2640,4 +2640,7 @@ export const EN: Record<string, string> = {
   'principal': 'main',
   '¿A qué cuenta llegó la plata?': 'Which account did the money go into?',
   '¿Para cuándo la quieres? (opcional)': 'When do you want it by? (optional)',
+  'Edita o borra': 'Edit or delete',
+  'Toca un ingreso de la lista para editarlo o borrarlo.': 'Tap an income in the list to edit or delete it.',
+  'Paso {a} de {b}': 'Step {a} of {b}',
 };

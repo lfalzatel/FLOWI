@@ -98,7 +98,7 @@ export default function ProductosPage() {
           <PageTourButton id="productos" className="ml-auto" />
         </div>
 
-        <div className="relative">
+        <div className="relative" data-tour="search">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder={tr('Ej. huevos, cerveza, gasolina…')} autoComplete="off"
                  aria-label={tr('Producto a buscar')}

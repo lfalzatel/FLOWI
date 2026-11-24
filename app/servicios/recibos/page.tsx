@@ -66,7 +66,7 @@ export default function RecibosPage() {
           <PageTourButton id="recibos" className="ml-auto" />
         </div>
 
-        <div className="relative">
+        <div className="relative" data-tour="search">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input autoComplete="off" value={query} onChange={e => setQuery(e.target.value)} placeholder={tr('Buscar por tienda o producto…')} aria-label={tr('Buscar recibos')}
                  className={`w-full bg-glass border border-glass-border py-3 pl-10 pr-4 text-text-primary placeholder-text-muted focus:outline-none focus:border-accent ${isTech ? 'rounded-none' : 'rounded-xl'}`} />
