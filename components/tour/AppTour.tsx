@@ -40,7 +40,9 @@ const STEPS: Step[] = lazyT(() => ([
 function findTarget(step: Step): HTMLElement | null {
   if (!step.target) return null;
   for (const t of step.target.split('|')) {
-    const el = document.querySelector<HTMLElement>(t.startsWith('#') ? t : `[data-tour="${t}"]`);
+    // Puede haber dos (una para celular y otra para PC): se usa la que se ve
+    const all = Array.from(document.querySelectorAll<HTMLElement>(t.startsWith('#') ? t : `[data-tour="${t}"]`));
+    const el = all.find(e => e.offsetParent !== null) || all[0] || null;
     if (!el) continue;
     const r = el.getBoundingClientRect();
     if (r.width > 0 && r.height > 0) return el;

@@ -118,6 +118,15 @@ export default function DashboardPage() {
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   const processedUrl = useRef(false);
+  // PC (lg): la gráfica va arriba en la columna derecha; celular: después de "Hoy puedes gastar"
+  const [isWide, setIsWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const on = () => setIsWide(mq.matches);
+    on();
+    mq.addEventListener?.('change', on);
+    return () => mq.removeEventListener?.('change', on);
+  }, []);
 
   // El recorrido explica el mes actual, así que fija el filtro en él
   function startTour(voice: boolean) {
@@ -384,6 +393,9 @@ export default function DashboardPage() {
                          today={isCurrentMonthView ? todayBudget : null} />
             <div data-tour="projection"><BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh}
                               pendingCommitments={commitments.loading ? 0 : commitments.pendingTotal} /></div>
+            {/* Celular: la gráfica del mes va justo después de las cifras del día (cómo vas → qué falta pagar).
+                En PC ya está arriba en la columna derecha. */}
+            {!isWide && <div data-tour="chart"><ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} /></div>}
             {/* Lo que falta por pagar este mes (solo mirando el mes actual) */}
             {isCurrentMonthView && !commitments.loading && (
               <div data-tour="commitments"><CommitmentsCard summary={commitments} currency={profile?.currency} onRefresh={refresh} /></div>
@@ -401,7 +413,7 @@ export default function DashboardPage() {
         <div className="min-w-0 space-y-6">
 
         {/* Chart */}
-        <div data-tour="chart"><ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} /></div>
+        {isWide && <div data-tour="chart"><ExpenseChart transactions={filteredTransactions} filterType={filterType} filterValue={filterValue} /></div>}
 
         {/* Category Budgets (2 Acordeones Inteligentes: Categorías Principales 50/30/20 y Subcategorías) */}
         <div data-tour="budgets"><CategoryBudgets transactions={filteredTransactions} currency={profile?.currency} filterType={filterType} /></div>
