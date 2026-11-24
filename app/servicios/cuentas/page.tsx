@@ -18,7 +18,9 @@ import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { AccountFormModal, AdjustBalanceModal, TransferModal } from '@/components/accounts/AccountModals';
 import { AccountIcon } from '@/components/accounts/AccountIcon';
 import { Account, Debt, Transfer, deleteAccount } from '@/lib/firestore';
-import { AccountState, KIND_LABEL, accountStates, netWorth } from '@/lib/accounts';
+import { AccountState, KIND_LABEL, accountPeriod, accountStates, netWorth } from '@/lib/accounts';
+import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
+import { getLocalMonthString } from '@/lib/dateUtils';
 import { businessMoneyByAccount } from '@/lib/business';
 import { formatCurrency } from '@/lib/format';
 
@@ -50,6 +52,10 @@ export default function CuentasPage() {
   const [editingTransfer, setEditingTransfer] = useState<Transfer | null>(null);
   const [openDebt, setOpenDebt] = useState<Debt | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  // Periodo de los movimientos de cada cuenta (por defecto el mes actual); el saldo de arriba siempre es el de hoy
+  const [periodType, setPeriodType] = useState<FilterType>('month');
+  const [periodValue, setPeriodValue] = useState(getLocalMonthString());
+  const [showAllMoves, setShowAllMoves] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
@@ -155,10 +161,11 @@ export default function CuentasPage() {
                 const a = st.account;
                 const open = expanded === a.id;
                 const credit = a.kind === 'credito';
-                const shown = st.movements.slice(0, 8);
+                const per = open ? accountPeriod(st, periodType, periodValue) : null;
+                const shown = per ? (showAllMoves ? per.movements : per.movements.slice(0, 15)) : [];
                 return (
                   <article key={a.id} className={`${card} p-4`}>
-                    <button type="button" onClick={() => setExpanded(open ? null : a.id!)} className="w-full flex items-center gap-3 text-left">
+                    <button type="button" onClick={() => { setExpanded(open ? null : a.id!); setShowAllMoves(false); }} className="w-full flex items-center gap-3 text-left">
                       <div className={`shrink-0 w-11 h-11 flex items-center justify-center text-2xl bg-glass border ${isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}><AccountIcon account={a} className="w-7 h-7 text-2xl flex items-center justify-center" /></div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -183,6 +190,16 @@ export default function CuentasPage() {
                         <ChevronDown className={`w-4 h-4 ml-auto text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
                       </div>
                     </button>
+
+                    {!credit && st.balance < -0.5 && (
+                      <div className={`mt-3 p-2.5 flex items-center gap-2 border border-red-400/30 bg-red-500/10 ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
+                        <p className="flex-1 text-[11px] text-red-300 leading-snug">{tr('Saldo negativo. Si en el banco no es así, algún movimiento quedó en la cuenta equivocada o falta uno.')}</p>
+                        <button type="button" onClick={() => setAdjusting(st)}
+                                className={`shrink-0 px-2.5 py-1.5 text-[11px] font-semibold border border-red-400/50 text-red-300 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
+                          {tr('Ajustar al saldo del banco')}
+                        </button>
+                      </div>
+                    )}
 
                     {credit && (a.creditLimit || 0) > 0 && (() => {
                       const used = Math.max(0, -st.balance);
@@ -218,7 +235,28 @@ export default function CuentasPage() {
 
                     {open && (
                       <div className={`mt-3 pt-3 border-t ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
-                        <ul className="space-y-1.5">
+                        <DateFilter inline transactions={transactions} filterType={periodType} filterValue={periodValue}
+                                    onChangeType={(t) => { setPeriodType(t); setShowAllMoves(false); }} onChangeValue={(v) => { setPeriodValue(v); setShowAllMoves(false); }} />
+                        {per && (
+                          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                            {[
+                              { l: per.base !== null ? tr('Saldo inicial o ajuste') : tr('Al empezar'), v: per.startBalance + (per.base || 0), c: 'text-text-primary' },
+                              { l: tr('Entró'), v: per.income, c: 'text-emerald-400', s: '+' },
+                              { l: tr('Salió'), v: per.outcome, c: 'text-text-primary', s: '−' },
+                              { l: Math.abs(per.endBalance - st.balance) < 0.5 ? tr('Saldo hoy') : tr('Al terminar'), v: per.endBalance, c: per.endBalance < 0 ? 'text-red-400' : 'text-accent' },
+                            ].map(x => (
+                              <div key={x.l} className={`p-2.5 bg-glass border border-glass-border ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
+                                <p className="text-[10px] text-text-muted">{x.l}</p>
+                                <p className={`font-bold tabular-nums ${x.c}`}>{x.s || (x.v < 0 ? '−' : '')}{fmt(Math.abs(x.v))}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {per && per.base !== null && (
+                          <p className="mt-1.5 text-[10px] text-text-muted">{tr('Lo de antes del saldo inicial o del último ajuste ya está incluido en él.')}</p>
+                        )}
+                        {per && !per.movements.length && <p className="mt-3 text-xs text-text-muted text-center">{tr('Sin movimientos en este periodo.')}</p>}
+                        <ul className="mt-3 space-y-1.5">
                           {shown.map((m, i) => (
                             <li key={i} className="flex items-center gap-2 text-xs">
                               <span className="w-14 shrink-0 text-text-muted">{m.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}</span>
@@ -235,7 +273,11 @@ export default function CuentasPage() {
                             </li>
                           ))}
                         </ul>
-                        {st.movements.length > shown.length && <p className="text-[10px] text-text-muted mt-1">y {st.movements.length - shown.length} movimientos más antiguos</p>}
+                        {per && per.movements.length > shown.length && (
+                          <button type="button" onClick={() => setShowAllMoves(true)} className="mt-1.5 text-[11px] font-semibold text-accent">
+                            {tr('Ver los {n} movimientos', { n: per.movements.length })}
+                          </button>
+                        )}
                         {credit && (() => {
                           const abonos = st.movements.filter(m => m.kind === 'transfer' && m.amount > 0);
                           if (!abonos.length) return null;

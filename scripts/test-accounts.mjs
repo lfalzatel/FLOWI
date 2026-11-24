@@ -83,4 +83,30 @@ const bal = (states, id) => states.find(s => s.account.id === id)?.balance;
   eq('préstamo en tarjeta: no se aparta (va por cuotas)', [r3.cardDebt, r3.cardLoans], [0, 700000]);
 }
 
+// ── Movimientos de una cuenta por periodo ──
+{
+  // Saldo inicial 100.000 el 1-nov; octubre: gasto contado a la fuerza; noviembre: ingreso y gasto; diciembre: gasto
+  const oct = gasto('o1', 5000, { date: d('2026-10-20T12:00:00'), countBefore: 'BBVA' });
+  const nov1 = ingreso('n1', 40000, { date: d('2026-11-10T12:00:00') });
+  const nov2 = gasto('n2', 15000, { date: d('2026-11-12T12:00:00') });
+  const dic = gasto('d1', 7000, { date: d('2026-12-02T12:00:00') });
+  const bbvaLocal = { ...bbva, baseAt: new Date(2026, 10, 1, 8).toISOString() }; // 1-nov en hora local
+  const st = A.accountStates([bbvaLocal], [oct, nov1, nov2, dic], []).find(s => s.account.id === 'BBVA');
+  eq('saldo total cuadra', st.balance, 100000 - 5000 + 40000 - 15000 - 7000);
+  const nov = A.accountPeriod(st, 'month', '2026-11');
+  eq('noviembre: empieza con lo de antes', nov.startBalance, -5000);
+  eq('noviembre: saldo inicial dentro del mes', nov.base, 100000);
+  eq('noviembre: entró y salió', [nov.income, nov.outcome], [40000, 15000]);
+  eq('noviembre: termina', nov.endBalance, 120000);
+  const dec = A.accountPeriod(st, 'month', '2026-12');
+  eq('diciembre arranca donde terminó noviembre', dec.startBalance, nov.endBalance);
+  eq('diciembre termina en el saldo de hoy', dec.endBalance, st.balance);
+  const all = A.accountPeriod(st, 'all', '');
+  eq('todo: termina en el saldo', [all.startBalance, all.endBalance], [0, st.balance]);
+  const day = A.accountPeriod(st, 'day', '2026-11-12');
+  eq('día: solo el gasto de ese día', [day.movements.length, day.outcome], [1, 15000]);
+  const wk = A.accountPeriod(st, 'week', '2026-W46'); // 9 al 15 de noviembre
+  eq('semana: ingreso y gasto', [wk.income, wk.outcome], [40000, 15000]);
+}
+
 done();

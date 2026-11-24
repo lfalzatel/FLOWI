@@ -198,3 +198,55 @@ export function suggestMethods(name: string, kind: AccountKind): string[] {
   const hit = known.find(k => n.includes(normalizeText(k)) || normalizeText(k).includes(n));
   return hit ? [hit] : [];
 }
+
+// ── Movimientos de una cuenta en un periodo (Todo / Mes / Semana / Día) ─────────────────────────
+// El saldo de la cuenta es acumulado (como el del banco). Para un periodo se muestra con cuánto
+// empezó, cuánto entró y salió, y con cuánto terminó. El saldo base (inicial o ajuste) cuenta como
+// un movimiento más: todo lo anterior a él ya no se suma, así que la suma sigue cuadrando.
+
+export function periodRange(type: string, value: string): { start: Date; end: Date } | null {
+  if (type === 'month' && /^\d{4}-\d{2}$/.test(value)) {
+    const [y, m] = value.split('-').map(Number);
+    return { start: new Date(y, m - 1, 1), end: new Date(y, m, 1) };
+  }
+  if (type === 'day' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split('-').map(Number);
+    return { start: new Date(y, m - 1, d), end: new Date(y, m - 1, d + 1) };
+  }
+  if (type === 'week') {
+    const mt = /^(\d{4})-W(\d{1,2})$/.exec(value);
+    if (!mt) return null;
+    const y = Number(mt[1]), w = Number(mt[2]);
+    const jan4 = new Date(y, 0, 4);
+    const monday = new Date(y, 0, 4 - ((jan4.getDay() + 6) % 7) + (w - 1) * 7);
+    return { start: monday, end: new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 7) };
+  }
+  return null; // 'all'
+}
+
+export interface AccountPeriod {
+  startBalance: number;   // saldo al empezar el periodo
+  income: number;         // lo que entró (sin contar el saldo base)
+  outcome: number;        // lo que salió (positivo)
+  base: number | null;    // saldo inicial o ajuste hecho dentro del periodo
+  endBalance: number;     // saldo al terminar el periodo (o hoy, si el periodo no ha terminado)
+  movements: Movement[];  // del más reciente al más antiguo
+}
+
+export function accountPeriod(st: AccountState, type: string, value: string): AccountPeriod {
+  const r = periodRange(type, value);
+  const inside = (m: Movement) => !r || (m.date >= r.start && m.date < r.end);
+  const before = (m: Movement) => !!r && m.date < r.start;
+  let startBalance = 0, income = 0, outcome = 0, base: number | null = null;
+  const movements: Movement[] = [];
+  for (const m of st.movements) {
+    if (before(m)) { startBalance += m.amount; continue; }
+    if (!inside(m)) continue;
+    movements.push(m);
+    if (m.kind === 'base') base = (base || 0) + m.amount;
+    else if (m.amount >= 0) income += m.amount;
+    else outcome += -m.amount;
+  }
+  const endBalance = startBalance + (base || 0) + income - outcome;
+  return { startBalance, income, outcome, base, endBalance, movements };
+}

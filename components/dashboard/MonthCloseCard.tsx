@@ -1,16 +1,23 @@
 'use client';
 import { currentLocale, tr } from '@/lib/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import confetti from 'canvas-confetti';
-import { ArrowDownRight, ArrowUpRight, CalendarCheck2, ChevronRight, X } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, CalendarCheck2, Check, ChevronRight, Scale, X } from 'lucide-react';
+import { useAccounts } from '@/hooks/useAccounts';
+import { useInvestments } from '@/hooks/useInvestments';
+import { useDebts } from '@/hooks/useDebts';
+import { AccountIcon } from '@/components/accounts/AccountIcon';
+import { AdjustBalanceModal } from '@/components/accounts/AccountModals';
+import { AccountState, accountStates } from '@/lib/accounts';
+import { getLocalDateString } from '@/lib/dateUtils';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useGoals } from '@/hooks/useGoals';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { formatAmountInput, parseAmountInput } from '@/components/goals/GoalFormModal';
-import { Transaction, addGoalMovement, closeMonth } from '@/lib/firestore';
+import { Transaction, addGoalMovement, closeMonth, updateAccount } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { isGoalDone } from '@/lib/goals';
 import { MonthReview, getMonthReview, monthLabel } from '@/lib/monthClose';
@@ -57,15 +64,15 @@ export function MonthCloseCard({ month, transactions, pendingCommitments, pendin
       </div>
 
       {open && (
-        <MonthCloseModal review={getMonthReview(transactions, month)} pendingCommitments={pendingCommitments}
+        <MonthCloseModal review={getMonthReview(transactions, month)} transactions={transactions} pendingCommitments={pendingCommitments}
                          pendingCount={pendingCount} currency={currency} onClose={() => setOpen(false)} />
       )}
     </>
   );
 }
 
-function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, onClose }: {
-  review: MonthReview; pendingCommitments: number; pendingCount: number; currency: string; onClose: () => void;
+function MonthCloseModal({ review, transactions, pendingCommitments, pendingCount, currency, onClose }: {
+  review: MonthReview; transactions: Transaction[]; pendingCommitments: number; pendingCount: number; currency: string; onClose: () => void;
 }) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -265,6 +272,7 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
             <p className="text-sm text-text-secondary leading-relaxed">
               Recuerda registrar tus ingresos de {nextLabel} apenas te lleguen, así los cálculos salen bien desde el principio.
             </p>
+            <ReconcileAccounts transactions={transactions} currency={currency} isTech={isTechTheme} />
             {error && <p className="text-xs text-[var(--red)]">{error}</p>}
             <button type="button" onClick={finish} disabled={saving} className={primary}>
               {saving ? tr('Cerrando...') : tr('Cerrar {a}', { a: review.label })}
@@ -274,5 +282,70 @@ function MonthCloseModal({ review, pendingCommitments, pendingCount, currency, o
       </div>
     </div>,
     document.body
+  );
+}
+
+// Cuadre de cuentas al cerrar el mes (solo si la persona usa cuentas): por cada una, el saldo que calcula
+// FLOWI; si coincide con el banco, "Está igual"; si no, se ajusta al del banco. Así el mes nuevo arranca
+// de saldos confirmados y lo que se registre tarde del mes pasado ya no descuadra (ver countBefore).
+function ReconcileAccounts({ transactions, currency, isTech }: { transactions: Transaction[]; currency: string; isTech: boolean }) {
+  const { accounts, transfers } = useAccounts();
+  const { investments } = useInvestments();
+  const { debts } = useDebts();
+  const states = useMemo(() => accountStates(accounts, transactions, transfers, investments, debts), [accounts, transactions, transfers, investments, debts]);
+  const [adjusting, setAdjusting] = useState<AccountState | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  if (!states.length) return null;
+  const today = getLocalDateString();
+  const doneToday = (st: AccountState) => {
+    const last = [st.account.baseAt, st.account.confirmedAt].filter(Boolean).map(v => getLocalDateString(new Date(v!)));
+    return last.includes(today);
+  };
+  const f = (n: number) => formatCurrency(n, currency);
+  const pending = states.filter(st => !doneToday(st)).length;
+  const small = `px-2.5 py-1.5 text-[11px] font-semibold border transition-all active:scale-95 disabled:opacity-50 ${isTech ? 'rounded-none' : 'rounded-lg'}`;
+
+  return (
+    <div className={`p-3 border border-glass-border bg-glass space-y-2 ${isTech ? 'rounded-none' : 'rounded-2xl'}`}>
+      <div>
+        <p className="text-sm font-semibold text-text-primary">{tr('Cuadra tus cuentas')}</p>
+        <p className="text-[11px] text-text-muted leading-snug">
+          {pending ? tr('Compara cada saldo con el de tu banco. Si coincide toca "Está igual"; si no, ajústalo y el mes nuevo arranca cuadrado.') : tr('Todas tus cuentas están cuadradas ✓')}
+        </p>
+      </div>
+      {states.map(st => {
+        const ok = doneToday(st);
+        const credit = st.account.kind === 'credito';
+        return (
+          <div key={st.account.id} className="flex items-center gap-2">
+            <AccountIcon account={st.account} className="w-6 h-6 text-lg flex items-center justify-center shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-text-primary truncate">{st.account.name}</p>
+              <p className={`text-[11px] tabular-nums ${st.balance < 0 && !credit ? 'text-red-400' : 'text-text-muted'}`}>
+                {credit && st.balance < 0 ? `${tr('Debes')} ${f(-st.balance)}` : `${st.balance < 0 ? '−' : ''}${f(Math.abs(st.balance))}`}
+              </p>
+            </div>
+            {ok ? (
+              <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> {tr('Cuadrada')}</span>
+            ) : (
+              <>
+                <button type="button" disabled={busy === st.account.id}
+                        onClick={async () => { setBusy(st.account.id!); try { await updateAccount(st.account.id!, { confirmedAt: new Date().toISOString() }); } finally { setBusy(null); } }}
+                        className={`${small} border-emerald-400/40 text-emerald-400`}>
+                  {tr('Está igual')}
+                </button>
+                <button type="button" onClick={() => setAdjusting(st)} className={`${small} border-glass-border text-text-secondary flex items-center gap-1`}>
+                  <Scale className="w-3 h-3" /> {tr('Ajustar')}
+                </button>
+              </>
+            )}
+          </div>
+        );
+      })}
+      {adjusting && typeof document !== 'undefined' && createPortal(
+        <AdjustBalanceModal account={adjusting.account} current={adjusting.balance} currency={currency} onClose={() => setAdjusting(null)} />,
+        document.body,
+      )}
+    </div>
   );
 }

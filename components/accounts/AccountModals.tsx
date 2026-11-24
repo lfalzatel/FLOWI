@@ -28,6 +28,7 @@ export function parseMoneyInput(value: string): number {
 }
 import { formatCurrency } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
+import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
 import { displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
 import { getLocalDateString } from '@/lib/dateUtils';
 
@@ -310,7 +311,8 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
            footer={<button type="button" disabled={saving} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar saldo'}</button>}>
       <div>
         <label htmlFor="adj" className={s.label}>{credit ? '¿Cuánto debes hoy según el banco?' : '¿Cuánto dice el banco que tienes hoy?'}</label>
-        <input id="adj" type="text" autoComplete="off" inputMode="decimal" value={value} onChange={(e) => setValue(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} autoFocus />
+        <CalcAmountInput id="adj" value={value} isTech={s.isTech} className={`${s.input} font-bold`} label={tr('Saldo según el banco')}
+                         onType={(raw) => setValue(formatMoneyInput(raw))} onValue={(n) => setValue(n ? formatMoneyInput(n) : '')} toNum={parseMoneyInput} />
         <p className={s.hint}>
           FLOWI calculaba {formatCurrency(Math.abs(current), currency)}.
           {diff !== 0 && <> La diferencia ({diff > 0 ? '+' : '−'}{formatCurrency(Math.abs(Math.round(diff)), currency)}) suele ser algo que no registraste, como un cobro del banco o unos intereses.</>}
