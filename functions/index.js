@@ -136,7 +136,11 @@ exports.wompiEventos = onRequest({ secrets: [WOMPI_EVENTS], region: 'us-central1
 // Paddle es el revendedor: cobra (tarjeta, PayPal, Apple/Google Pay), maneja el IVA y paga a FLOWI.
 // La app abre el pago con custom_data { uid }; Paddle avisa aquí "transaction.completed" con una firma
 // (PADDLE_WEBHOOK_SECRET). Se verifica la firma, se mira qué precio se pagó y se suma Premium.
+// Se activa solo cuando existe la cuenta de Paddle: PADDLE_ENABLED=1 en functions/.env y el secreto
+// PADDLE_WEBHOOK_SECRET guardado (firebase functions:secrets:set PADDLE_WEBHOOK_SECRET). Mientras tanto
+// no se declara, para que desplegar las demás funciones no pida un secreto que todavía no existe.
 const { verifyPaddleSignature, planFromTransaction, extendUntil } = require('./paddle');
+if (process.env.PADDLE_ENABLED === '1') {
 const PADDLE_WEBHOOK_SECRET = defineSecret('PADDLE_WEBHOOK_SECRET');
 const PADDLE_PRICE_MENSUAL = defineString('PADDLE_PRICE_MENSUAL', { default: '' });
 const PADDLE_PRICE_ANUAL = defineString('PADDLE_PRICE_ANUAL', { default: '' });
@@ -183,6 +187,7 @@ exports.paddleEventos = onRequest({ secrets: [PADDLE_WEBHOOK_SECRET], region: 'u
     res.status(500).send('error'); // Paddle reintenta
   }
 });
+} // fin de PADDLE_ENABLED
 
 // Pago por transferencia directa (Bre-B): la persona sube el comprobante (fl_manual_payments) y el
 // administrador lo aprueba o rechaza desde Planes. Al aprobar se suman los meses de Premium.
