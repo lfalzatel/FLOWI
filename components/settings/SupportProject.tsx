@@ -6,6 +6,7 @@ import { Heart, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { DONATION_KEYS } from '@/lib/donations';
 import { PlanCard } from '@/components/plans/PlanCard';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 
 async function copyText(text: string): Promise<boolean> {
   try {
@@ -52,9 +53,12 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
           {open ? <ChevronUp className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} /> : <ChevronDown className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-text-muted'}`} />}
         </button>
       ) : (
-      <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>
-        Apoyar a FLOWI
-      </h2>
+      <div className="flex items-center gap-2 pr-8">
+        <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>
+          {tr('Apoyar a FLOWI')}
+        </h2>
+        <PageTourButton id="apoyar" className="ml-auto" />
+      </div>
       )}
       {(!onToggle || open) && (
       <div className={`p-4 space-y-4 ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
@@ -71,7 +75,7 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3" data-tour="sup-keys">
           {DONATION_KEYS.map(group => (
             <div key={group.bank} className="space-y-1.5">
               <div className="flex items-center gap-2">
@@ -100,7 +104,7 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
         </p>
 
         <p className={`text-[11px] text-text-secondary normal-case ${mono}`}>{tr('¿Prefieres apoyar con una suscripción y tener más funciones?')}</p>
-        <PlanCard isTechTheme={isTechTheme} />
+        <div data-tour="sup-plan"><PlanCard isTechTheme={isTechTheme} /></div>
       </div>
       )}
     </section>

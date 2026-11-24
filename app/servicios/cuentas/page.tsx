@@ -67,7 +67,17 @@ export default function CuentasPage() {
       open();
     }
     window.addEventListener('flowi-new-account', open);
-    return () => window.removeEventListener('flowi-new-account', open);
+    // El tutorial abre el formulario para mostrarlo y lo cierra al pasar de paso o terminar
+    let byTour = false;
+    const tourOpen = (e: Event) => { if ((e as CustomEvent).detail === 'account') { byTour = true; open(); } };
+    const tourClose = () => { if (byTour) { byTour = false; setShowForm(false); setEditing(null); } };
+    window.addEventListener('flowi-tour-open', tourOpen);
+    window.addEventListener('flowi-tour-close', tourClose);
+    return () => {
+      window.removeEventListener('flowi-new-account', open);
+      window.removeEventListener('flowi-tour-open', tourOpen);
+      window.removeEventListener('flowi-tour-close', tourClose);
+    };
   }, []);
 
   useEffect(() => {

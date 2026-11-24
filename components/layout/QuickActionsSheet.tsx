@@ -73,7 +73,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
         </div>
 
         {featured && (
-          <button type="button" onClick={() => onAction(featured.id)}
+          <button type="button" data-tour="quick-featured" onClick={() => onAction(featured.id)}
                   className={`w-full flex items-center gap-3 p-4 mb-2 text-left border transition-all active:scale-[0.98] ${featured.cls} ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
             <span className={`w-11 h-11 flex items-center justify-center bg-current/10 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}><featured.icon className="w-6 h-6 stroke-[2.5]" /></span>
             <span className="flex-1 min-w-0">

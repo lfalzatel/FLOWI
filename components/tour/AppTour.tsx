@@ -3,6 +3,7 @@ import { pickAppVoice, appSpeechLang } from '@/lib/voiceParser';
 import { tr } from '@/lib/i18n';
 import Link from 'next/link';
 import { HOME_TOUR, TourStep } from './tours';
+import { ShareIllustration } from './ShareIllustration';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Compass, Volume2, VolumeX, X } from 'lucide-react';
@@ -120,8 +121,8 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
   useLayoutEffect(() => {
     const want = step.open || null;
     if (want !== opened.current) {
+      closeOpened(); // cierra lo anterior (p. ej. el menú) antes de abrir lo del paso
       if (want) { window.dispatchEvent(new CustomEvent('flowi-tour-open', { detail: want })); opened.current = want; }
-      else closeOpened();
     }
     if (!step.target) { target.current = null; setRect(null); return; }
     let tries = 0;
@@ -284,6 +285,7 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
             </button>
           </div>
         </div>
+        {step.illus && <div className="mb-3"><ShareIllustration frame={step.illus} /></div>}
         <p className="text-sm text-text-secondary leading-relaxed">{step.text}</p>
         {step.cta && (
           <Link href={step.cta.href} onClick={finish}

@@ -11,7 +11,9 @@ export interface TourStep {
   text: string;
   cta?: { label: string; href: string };
   // Abre algo antes de señalar: el menú del botón + o el formulario de gasto (se cierra solo)
-  open?: 'quick' | 'expense';
+  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account';
+  // Dibujo de ejemplo dentro del cuadro (p. ej. cómo compartir un comprobante desde el banco)
+  illus?: 'share-1' | 'share-2' | 'share-3';
 }
 
 // Pasos que abren el menú del botón + y señalan sus opciones
@@ -31,13 +33,58 @@ const EXPENSE_STEPS = (): TourStep[] => [
   { open: 'expense', target: 'exp-shared', title: tr('Compartir con amigos'), text: tr('¿Pagaste por varios? Toca aquí, elige con quién y cuánto pone cada uno. A tus amigos de FLOWI les llega para aceptarlo y tú ves quién te debe.') },
 ];
 
+// Cómo empezar a registrar en una página: tocar el + y luego la opción que sale de primera
+const PLUS_STEPS = (option: string, say?: string): TourStep[] => [
+  { target: 'voice|add', title: tr('Toca el botón +'), text: tr('Es el botón redondo con el micrófono, abajo a la derecha. Tócalo una vez y se abre el menú de lo que puedes registrar.') },
+  { open: 'quick', target: 'quick-featured', title: tr('Elige "{a}"', { a: option }), text: tr('En esta página sale de primero, arriba del menú. Tócalo y se abre el formulario.') },
+  { open: 'quick', target: 'quick-voice', title: tr('O dilo con tu voz'), text: say
+      ? tr('Si prefieres hablar, toca aquí y di algo como {a}. Después revisas y guardas.', { a: say })
+      : tr('Si prefieres hablar, toca aquí y dilo con tus palabras. Después revisas y guardas.') },
+];
+
+// Formulario de ingreso, por dentro
+const INCOME_STEPS = (): TourStep[] => [
+  { open: 'income', target: 'exp-keypad', title: tr('¿Cuánto entró?'), text: tr('Escribe el valor con este teclado; también suma, por ejemplo 1500000+200000. Con Siguiente pasas al resto.') },
+  { open: 'income', target: 'exp-voice|exp-photo', title: tr('Voz y foto'), text: tr('Con Voz lo dictas. Con Foto la IA lee el pantallazo del comprobante, por ejemplo una transferencia que te hicieron.') },
+  { open: 'income', target: 'exp-category', title: tr('¿De dónde vino?'), text: tr('Elige la categoría: sueldo, venta, un pago que te hicieron… En "Ver todas" están las demás.') },
+  { open: 'income', target: 'exp-account', title: tr('¿Dónde lo recibiste?'), text: tr('Elige la cuenta donde entró la plata. Si tienes tus cuentas en FLOWI, su saldo sube solo.') },
+  { open: 'income', target: 'exp-save', title: tr('Guarda'), text: tr('Revisa y toca Añadir ingreso. Desde ese momento cuenta para lo que puedes gastar.') },
+];
+
+// Formulario de deuda, por dentro
+const DEBT_STEPS = (): TourStep[] => [
+  { open: 'debt', target: 'debt-kind', title: tr('¿Qué tipo de deuda es?'), text: tr('Crédito de banco (como Crediágil o libre inversión), plata que te prestó una persona, o plata que tú prestaste y te deben.') },
+  { open: 'debt', target: 'debt-voice', title: tr('Díctala'), text: tr('Toca aquí y di los datos de una vez, por ejemplo "mi hermana me prestó un millón ayer". Yo lleno el formulario.') },
+  { open: 'debt', target: 'debt-photo', title: tr('O con pantallazos del banco'), text: tr('Si es un crédito de banco, sube los pantallazos de la app del banco y la IA llena el monto, la tasa, el plazo y la cuota.'), cta: { label: tr('Activar la IA'), href: '/configuracion#ia' } },
+  { open: 'debt', target: 'debt-amount', title: tr('Monto y fecha'), text: tr('Cuánto te prestaron (o prestaste) y cuándo.') },
+  { open: 'debt', target: 'debt-rate', title: tr('Interés y plazo'), text: tr('Si tiene interés, escríbelo; en un crédito de banco, la tasa efectiva anual y los meses. Con eso calculo la cuota y lo que te falta.') },
+  { open: 'debt', target: 'debt-save', title: tr('Guarda'), text: tr('Toca Guardar. Si pusiste día de pago, la cuota aparece en tus pagos del mes y se aparta de lo que puedes gastar.') },
+];
+
+// Formulario de cuenta, por dentro (solo en la página de Cuentas)
+const ACCOUNT_STEPS = (): TourStep[] => [
+  { open: 'account', target: 'acc-kind', title: tr('Tipo de cuenta'), text: tr('Banco, billetera como Nequi o Daviplata, efectivo o tarjeta de crédito.') },
+  { open: 'account', target: 'acc-name', title: tr('Ponle nombre'), text: tr('Como la reconozcas, por ejemplo "Bancolombia ahorros". Nunca escribas el número de cuenta: FLOWI no lo necesita.') },
+  { open: 'account', target: 'acc-balance', title: tr('Saldo de hoy'), text: tr('Mira en la app del banco cuánto tienes hoy y escríbelo. En una tarjeta de crédito, cuánto debes.') },
+  { open: 'account', target: 'acc-methods', title: tr('¿Qué movimientos caen aquí?'), text: tr('Los medios de pago que mueven esta cuenta. Cuando registres un gasto pagado con uno de ellos, el saldo baja solo.') },
+  { open: 'account', target: 'acc-purpose', title: tr('¿Para gastar o ahorro?'), text: tr('"Para gastar" cuenta en lo que puedes gastar hoy. "Ahorro" se guarda aparte y no se toca.') },
+  { open: 'account', target: 'acc-save', title: tr('Crea la cuenta'), text: tr('Toca Crear cuenta. Desde hoy tus gastos e ingresos de esta cuenta van moviendo su saldo.') },
+];
+
+// Compartir un comprobante desde la app del banco (con dibujos de ejemplo)
+const SHARE_STEPS = (): TourStep[] => [
+  { illus: 'share-1', title: tr('1. Abre el comprobante'), text: tr('En la app de tu banco o de Nequi abre el comprobante del pago y toca Compartir.') },
+  { illus: 'share-2', title: tr('2. Elige FLOWI'), text: tr('En la lista de apps elige FLOWI. Si no aparece, desliza la lista: sale cuando FLOWI está instalada en tu celular.') },
+  { illus: 'share-3', title: tr('3. Revisa y guarda'), text: tr('FLOWI abre y la IA lee el comprobante: valor, descripción, fecha y hora. Revisa, elige con qué pagaste y toca Guardar. Necesitas la IA conectada (es gratis).'), cta: { label: tr('Activar la IA'), href: '/configuracion#ia' } },
+];
+
 // ── Inicio: lo esencial para empezar bien ──
 export const HOME_TOUR: TourStep[] = lazyT(() => ([
   { title: tr('¡Hola! Te muestro FLOWI'), text: tr('Te enseño a registrar tu plata, a conectar lo que hace que las cifras sean reales y a leer tu inicio. Lo que ves ahora son datos de ejemplo: tus datos no se tocan. Puedes omitir el recorrido cuando quieras.') },
   { target: 'voice|add', title: tr('1. Registra lo que sea desde aquí'), text: tr('Toca el botón + para ver todo lo que puedes registrar. Si lo mantienes presionado, te escucho de una vez. Mira lo que tiene adentro.') },
   ...QUICK_STEPS(),
   ...EXPENSE_STEPS(),
-  { title: tr('Comparte desde tu banco'), text: tr('Con FLOWI instalada, en la app de tu banco o de Nequi abre el comprobante de un pago, toca Compartir y elige FLOWI. Si compartes una imagen, la IA la lee; si compartes el texto del movimiento, lo convierto en gasto o ingreso. Solo revisas y guardas.') },
+  ...SHARE_STEPS(),
   { title: tr('Agrega tus cuentas'), text: tr('Para que "Dinero disponible" sea la plata que de verdad tienes, ve a Servicios, Cuentas y patrimonio, y agrega tus cuentas: banco, Nequi, efectivo y tarjetas de crédito, con su saldo de hoy. Desde ahí cada gasto o ingreso mueve el saldo de su cuenta.'), cta: { label: tr('Agregar mis cuentas'), href: '/servicios/cuentas' } },
   { target: '#nav-gastos', title: tr('Gastos e ingresos'), text: tr('En estas pestañas ves la lista completa de gastos y de ingresos, buscas, editas o borras. Cada página tiene su propio botón Tutorial arriba, por si quieres ver los detalles.') },
   { target: '#nav-deudas', title: tr('Deudas'), text: tr('Lo que debes y lo que te deben, tus tarjetas de crédito y los gastos compartidos. Cada vez que pagas una parte, registras el abono y la deuda baja.') },
@@ -58,40 +105,44 @@ export const HOME_TOUR: TourStep[] = lazyT(() => ([
 export type PageTourId =
   | 'gastos' | 'ingresos' | 'deudas' | 'cuentas' | 'inversiones' | 'metas' | 'presupuestos'
   | 'amigos' | 'compartidos' | 'hormiga' | 'recordatorios' | 'recibos' | 'productos'
-  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas';
+  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar';
 
-const ADD = 'voice|add';
 
 export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   gastos: [
     { title: tr('Tus gastos'), text: tr('Aquí está la lista completa de lo que sale. Arriba ves el total del período y abajo cada gasto, del más reciente al más antiguo.') },
-    { target: ADD, title: tr('Registra un gasto'), text: tr('Con el botón + en esta página sale primero "Nuevo gasto". Te muestro el formulario por dentro.') },
+    ...PLUS_STEPS(tr('Nuevo gasto'), tr('"almuerzo veinte mil y tinto tres mil"')),
     ...EXPENSE_STEPS(),
+    { open: 'expense', target: 'exp-save', title: tr('Guarda'), text: tr('Revisa y toca Añadir gasto. Con "Guardar y otro" el formulario queda listo para el siguiente.') },
     { target: 'search', title: tr('Busca y edita'), text: tr('Usa el buscador por categoría, descripción o valor. Toca un gasto para editarlo, borrarlo o pasarlo a deuda si todavía no lo pagaste.') },
   ],
   ingresos: [
     { title: tr('Tus ingresos'), text: tr('Todo lo que entra: sueldo, ventas, pagos que te hacen. Con tus ingresos calculo cuánto puedes gastar cada día.') },
-    { target: ADD, title: tr('Registra un ingreso'), text: tr('Con el botón + en esta página sale primero "Nuevo ingreso". Por voz di algo como "me pagaron el sueldo, dos millones".') },
-    { title: tr('Con su cuenta'), text: tr('Si tienes tus cuentas en FLOWI, elige a cuál entró la plata y su saldo sube solo. Si es una venta de tu negocio, usa su categoría y aparece en Mi negocio.') },
+    ...PLUS_STEPS(tr('Nuevo ingreso'), tr('"me pagaron el sueldo, dos millones"')),
+    ...INCOME_STEPS(),
+    { title: tr('Ventas de tu negocio'), text: tr('Si es una venta, usa la categoría de tu negocio y aparece en Mi negocio con su ganancia.') },
     { title: tr('Edita o borra'), text: tr('Toca un ingreso de la lista para editarlo o borrarlo.') },
   ],
   deudas: [
     { title: tr('Tus deudas'), text: tr('Lo que debes y lo que te deben, en un solo lugar. Arriba ves el total pendiente y cuánto pagas en cuotas al mes.') },
-    { target: ADD, title: tr('Registra una deuda o un abono'), text: tr('Con el botón + sale primero "Nueva deuda o abono". Por voz di "le presté cien mil a Juan" o "aboné cincuenta mil al préstamo".') },
-    { title: tr('Intereses y cuotas'), text: tr('Si la deuda tiene intereses o cuotas, agrégalos: te digo cuánto te falta y la cuota aparece en tus pagos del mes.') },
+    ...PLUS_STEPS(tr('Nueva deuda o abono'), tr('"le presté cien mil a Juan"')),
+    ...DEBT_STEPS(),
+    { title: tr('Registra los abonos'), text: tr('Cuando pagues una parte, toca la deuda en la lista y escribe el abono. La deuda baja y el abono queda como gasto (o como ingreso si te pagan a ti).') },
     { title: tr('Tarjetas de crédito'), text: tr('Si agregas tus tarjetas en Cuentas, aquí ves lo que debes en cada una y sus últimas compras, y puedes abonarles.') },
     { title: tr('Gastos compartidos'), text: tr('Lo que divides con amigos también aparece aquí: quién te debe y a quién le debes.') },
   ],
   cuentas: [
     { title: tr('Cuentas y patrimonio'), text: tr('Registra dónde está tu plata: cuentas de banco, Nequi, efectivo y tarjetas de crédito. Así "Dinero disponible" en Inicio es la plata real que tienes.') },
-    { target: ADD, title: tr('Crea una cuenta'), text: tr('Con el botón + en esta página sale primero "Nueva cuenta". Elige el banco, ponle nombre y escribe el saldo que tiene hoy.') },
+    ...PLUS_STEPS(tr('Nueva cuenta')),
+    ...ACCOUNT_STEPS(),
     { title: tr('Cada movimiento mueve su saldo'), text: tr('Cuando registras un gasto o un ingreso y eliges la cuenta, su saldo se actualiza solo. Si mueves plata entre tus cuentas, usa Transferir para no contarla como gasto.') },
-    { title: tr('¿Cuadra con el banco?'), text: tr('De vez en cuando te pregunto si el saldo coincide con la app del banco. Si no, lo ajustas en un toque.') },
+    { title: tr('¿Cuadra con el banco?'), text: tr('De vez en cuando te pregunto si el saldo coincide con la app del banco. Si no, toca la cuenta y usa Ajustar saldo.') },
     { title: tr('Tu patrimonio neto'), text: tr('Arriba sumo lo que tienes en cuentas, ahorros e inversiones y le resto lo que debes. Toca el ícono de información para ver cómo se calcula.') },
   ],
   inversiones: [
     { title: tr('Ahorro e inversiones'), text: tr('Donde tu plata crece: un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria.') },
-    { target: ADD, title: tr('Regístralo'), text: tr('Con el botón + en esta página sale primero "Nueva inversión o ahorro". Elige el tipo y escribe el valor, la tasa y la fecha.') },
+    ...PLUS_STEPS(tr('Nueva inversión o ahorro')),
+    { title: tr('Elige el tipo'), text: tr('Al tocarlo eliges qué es: CDT, ahorro que paga intereses (como Nu o Lulo), acciones y fondos, o pensión. Luego escribes el valor, la tasa y la fecha, o subes pantallazos del banco para que la IA los lea.') },
     { title: tr('Lo que vas ganando'), text: tr('Con la tasa calculo los intereses día a día. Para un CDT te muestro lo que recibes al vencer, después de retención, y te aviso antes de que venza.') },
     { title: tr('Fondos y acciones'), text: tr('No crecen con una tasa fija: anota su valor de vez en cuando y verás tu ganancia real. Te recuerdo si pasa mucho tiempo.') },
     { title: tr('Ahorro, no gasto'), text: tr('Lo que pones aquí no cuenta como gasto: se aparta de lo que puedes gastar y suma a tu patrimonio.') },
@@ -124,7 +175,8 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   ],
   recordatorios: [
     { title: tr('Recordatorios'), text: tr('Tus pagos del mes, pero también citas, fechas importantes y tareas.') },
-    { target: ADD, title: tr('Crea uno'), text: tr('Con el botón + en esta página sale primero "Nuevo recordatorio". Ponle fecha y, si es un pago, el valor.') },
+    ...PLUS_STEPS(tr('Nuevo recordatorio'), tr('"recuérdame pagar el internet el 15"')),
+    { title: tr('Llena el recordatorio'), text: tr('Ponle nombre y fecha, y si se repite (cada mes, cada semana). Si es un pago, escribe el valor: se aparta de lo que puedes gastar.') },
     { title: tr('Te aviso a tiempo'), text: tr('Activa las notificaciones y te aviso antes, aunque FLOWI esté cerrada. Los pagos con valor se apartan de lo que puedes gastar.') },
   ],
   recibos: [
@@ -172,13 +224,17 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { target: 'th-menu', title: tr('Tu menú rápido'), text: tr('Escoge qué temas salen al tocar tu foto, en el orden en que los toques. Así cambias de tema en un toque sin entrar aquí.') },
     { target: 'th-save', title: tr('Guarda'), text: tr('Toca Guardar cambios para que el menú rápido quede como lo dejaste.') },
   ],
-  compartir: [
-    { title: tr('Comparte desde tu banco'), text: tr('No tienes que escribir lo que pagaste: compártelo. Funciona con FLOWI instalada en tu celular.') },
-    { title: tr('Cómo se hace'), text: tr('En la app de tu banco o de Nequi abre el comprobante del pago, toca Compartir y elige FLOWI en la lista.') },
-    { title: tr('Imagen o texto'), text: tr('Si compartes la imagen del comprobante, la IA la lee: conéctala gratis una vez. Si compartes el texto, lo convierto en gasto o ingreso sin IA. Revisas y guardas.'), cta: { label: tr('Activar la IA'), href: '/configuracion#ia' } },
+  compartir: SHARE_STEPS(),
+  apoyar: [
+    { title: tr('Apoyar a FLOWI'), text: tr('FLOWI es gratis y sin publicidad. Si te sirve y quieres que siga creciendo, puedes enviar el aporte que quieras. Es opcional.') },
+    { target: 'sup-keys', title: tr('1. Copia una llave'), text: tr('Toca Copiar en la llave del banco que uses. Funciona desde cualquier banco: no tiene que ser el mismo.') },
+    { title: tr('2. Transfiere desde tu banco'), text: tr('Abre la app de tu banco o de Nequi, elige Transferir, luego "a una llave" (Bre-B), pega la llave y escribe el valor.') },
+    { title: tr('3. Verifica y confirma'), text: tr('Antes de confirmar, tu banco te muestra el nombre del titular para que verifiques que es el correcto. ¡Gracias por tu apoyo!') },
+    { target: 'sup-plan', title: tr('O con Premium'), text: tr('Si prefieres, apoya con el plan Premium: quitas los límites del plan gratis. Toca aquí para ver los planes.') },
   ],
   notas: [
     { title: tr('Notas'), text: tr('Datos que no quieres olvidar: un número de cuenta para transferir, una contraseña de wifi, una lista.') },
-    { target: ADD, title: tr('Crea una nota'), text: tr('Con el botón + en esta página sale primero "Nueva nota".') },
+    ...PLUS_STEPS(tr('Nueva nota')),
+    { title: tr('Escribe y guarda'), text: tr('Ponle un título y el texto, y guárdala. Después la encuentras con el buscador de esta página.') },
   ],
 }));

@@ -1043,7 +1043,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             )}
             <div className="flex gap-2">
               <button
-                type="submit"
+                type="submit" data-tour="exp-save"
                 disabled={loading || !(amountNum > 0) || needsCategory || (!!sharedInfo && sharedMine < 0)}
                 className={`flex-1 py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 uppercase tracking-widest' : `rounded-xl bg-accent text-white hover:bg-accent/90`}`}
               >

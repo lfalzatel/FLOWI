@@ -160,8 +160,8 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
 
   return (
     <Shell title={account ? tr('Editar cuenta') : tr('Nueva cuenta')} onClose={onClose}
-           footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? tr('Guardando...') : account ? tr('Guardar cambios') : tr('Crear cuenta')}</button>}>
-      <div>
+           footer={<button type="button" data-tour="acc-save" disabled={!canSave} onClick={save} className={s.primary}>{saving ? tr('Guardando...') : account ? tr('Guardar cambios') : tr('Crear cuenta')}</button>}>
+      <div data-tour="acc-kind">
         <span className={s.label}>{tr('Tipo')}</span>
         <div className="flex flex-wrap gap-2">
           {(Object.keys(KIND_LABEL) as AccountKind[]).map(k => (
@@ -170,7 +170,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
         </div>
       </div>
 
-      <div>
+      <div data-tour="acc-name">
         <label htmlFor="acc-name" className={s.label}>{tr('Nombre')}</label>
         <input id="acc-name" type="text" autoComplete="off" value={name} maxLength={30} onChange={(e) => setName(e.target.value)}
                placeholder={kind === 'efectivo' ? 'Efectivo' : kind === 'credito' ? tr('Ej: Visa Bancolombia') : kind === 'billetera' ? tr('Ej: Nequi') : tr('Ej: Bancolombia ahorros')}
@@ -179,7 +179,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
       </div>
 
       {!account && (
-        <div>
+        <div data-tour="acc-balance">
           <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? tr('¿Cuánto debes hoy en la tarjeta?') : initial ? `¿Cuánto tenías en ${name || 'esta cuenta'} antes de este movimiento?` : tr('¿Cuánto tienes hoy en esta cuenta?')}</label>
           <input id="acc-balance" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={balance}
                  onChange={(e) => setBalance(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
@@ -220,7 +220,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
         </div>
       )}
 
-      <div>
+      <div data-tour="acc-methods">
         <span className={s.label}>{tr('¿Qué movimientos caen aquí?')}</span>
         <div className="flex flex-wrap gap-1.5">
           {shownMethods.filter(m => !taken.has(m)).map(m => (
@@ -244,7 +244,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
       </div>
 
       {kind !== 'credito' && (
-        <div>
+        <div data-tour="acc-purpose">
           <span className={s.label}>{tr('¿Para qué es esta plata?')}</span>
           <div className="flex gap-2">
             <button type="button" onClick={() => setPurpose('gastar')} className={s.chip(purpose === 'gastar')}>{tr('Para gastar')}</button>

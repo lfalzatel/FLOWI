@@ -489,7 +489,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
 
           {/* ¿Qué tipo de deuda? */}
           {!isReadOnly && (
-            <div className={`grid grid-cols-3 gap-2 ${editCls}`} role="radiogroup" aria-label={tr('Tipo de deuda')}>
+            <div data-tour="debt-kind" className={`grid grid-cols-3 gap-2 ${editCls}`} role="radiogroup" aria-label={tr('Tipo de deuda')}>
               {KINDS.map(k => {
                 const on = kind === k.id;
                 return (
@@ -508,9 +508,9 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
 
           {/* Dictar la deuda completa */}
           {!debtToEdit && !isReadOnly && (
-            <DictateButton isTech={isTechTheme} onText={applySpeech} label={tr('Dictar la deuda')}
+            <div data-tour="debt-voice"><DictateButton isTech={isTechTheme} onText={applySpeech} label={tr('Dictar la deuda')}
                            example={kind === 'banco' ? tr('"Crediágil de 700 mil al 28,17 a 60 meses, pago los 15, desembolso el 5 de noviembre"')
-                             : kind === 'preste' ? tr('"Le presté 500 mil a Claudia al 2 % mensual"') : tr('"Mi hermana me prestó un millón ayer"')} />
+                             : kind === 'preste' ? tr('"Le presté 500 mil a Claudia al 2 % mensual"') : tr('"Mi hermana me prestó un millón ayer"')} /></div>
           )}
 
           {/* Prestaste la plata de un crédito tuyo: copiar sus condiciones */}
@@ -551,7 +551,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                                 onCancel={() => { readId.current++; setAiState('idle'); }} />
               )}
               {(
-                <button type="button"
+                <button type="button" data-tour="debt-photo"
                         onClick={() => (getAiKey() ? shotsRef.current?.click() : setAiState('no-key'))}
                         className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold border transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-accent/40 text-accent bg-accent/5 hover:bg-accent/10'}`}>
                   <Camera className="w-4 h-4" /> {tr('Llenar con pantallazos del banco')}
@@ -578,7 +578,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           </div>
 
           {/* Valor y fecha (en un crédito existente la fecha queda siempre a la vista, más abajo) */}
-          <div className={`grid grid-cols-2 gap-2 ${editCls}`}>
+          <div data-tour="debt-amount" className={`grid grid-cols-2 gap-2 ${editCls}`}>
             <div className={compact ? 'col-span-2' : ''}>
               <label className={labelCls}>{isBank ? tr('Valor desembolsado') : owedToMe ? tr('¿Cuánto le prestaste?') : tr('¿Cuánto te prestó?')}</label>
               <CalcAmountInput required disabled={isReadOnly} value={totalAmount} label={isBank ? tr('Valor desembolsado') : tr('Monto')}
@@ -594,7 +594,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           </div>
 
           {/* Tasa y plazo / lo que ya se pagó */}
-          <div className={`grid grid-cols-2 gap-2 ${editCls}`}>
+          <div data-tour="debt-rate" className={`grid grid-cols-2 gap-2 ${editCls}`}>
             <div>
               <label className={labelCls} title={isBank ? tr('Tasa Efectiva Anual') : ''}>
                 {isBank ? tr('Tasa Efectiva Anual (%)') : tr('Interés (opcional)')}
@@ -859,7 +859,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
                 {tr('Volver / Aceptar')}
               </button>
             ) : (
-              <button type="submit" disabled={loading || aiState === 'loading'}
+              <button type="submit" data-tour="debt-save" disabled={loading || aiState === 'loading'}
                       className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
                 {loading ? tr('Guardando...') : debtToEdit ? tr('Guardar cambios') : isBank ? tr('Guardar crédito') : owedToMe ? tr('Guardar préstamo') : tr('Guardar deuda')}
               </button>
