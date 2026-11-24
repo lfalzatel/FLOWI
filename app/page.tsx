@@ -4,7 +4,7 @@ import { usePlayStore } from '@/hooks/usePlayStore';
 import { premiumEndInfo } from '@/lib/plans';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X, Download } from 'lucide-react';
+import { Plus, X, Download, Compass } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useDebts } from '@/hooks/useDebts';
@@ -335,7 +335,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             {/* Saludo y nombre en la misma línea y del mismo tamaño: el saludo suave, el nombre con el color del tema */}
-            <h1 className={`truncate font-bold text-2xl md:text-3xl ${isTechTheme ? 'font-mono uppercase tracking-wider' : 'font-syne'}`}>
+            <h1 className={`leading-tight break-words font-bold text-2xl md:text-3xl ${isTechTheme ? 'font-mono uppercase tracking-wider' : 'font-syne'}`}>
               <span className={isTechTheme ? 'text-accent/70' : 'text-text-secondary'}>{greeting},</span>{' '}
               <span className="text-accent">{profile?.name?.split(' ')[0] || tr('Usuario')}</span>{' '}
               <WavingHand />
@@ -343,6 +343,20 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Tutorial general de Inicio (el mismo de "Ver tutorial" en el menú de perfil) */}
+            <button
+              onClick={() => startTour(readTourVoicePref())}
+              className={`px-3 py-1.5 flex items-center gap-1.5 border transition-all text-xs font-semibold ${
+                isTechTheme
+                  ? 'rounded-none border-accent/30 hover:border-accent text-accent font-mono uppercase'
+                  : 'rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-text-primary'
+              }`}
+              title={tr('Ver el tutorial de FLOWI')}
+              aria-label={tr('Ver el tutorial de FLOWI')}
+            >
+              <Compass className="w-3.5 h-3.5 text-accent" />
+              <span>{tr('Tutorial')}</span>
+            </button>
             {/* Download Report Button */}
             <button
               onClick={() => setShowExport(true)}

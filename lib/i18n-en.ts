@@ -2723,4 +2723,5 @@ export const EN: Record<string, string> = {
   'O con Premium': 'Or with Premium',
   'Si prefieres, apoya con el plan Premium: quitas los límites del plan gratis. Toca aquí para ver los planes.': 'If you prefer, support it with the Premium plan: you remove the free plan\'s limits. Tap here to see the plans.',
   'Toca Copiar en la llave del banco que uses. Funciona desde cualquier banco: no tiene que ser el mismo.': 'Tap Copy on the key for the bank you use. It works from any bank: it does not have to be the same one.',
+  'Ver el tutorial de FLOWI': 'View the FLOWI tutorial',
 };
