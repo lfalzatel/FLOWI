@@ -241,12 +241,12 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
         <div className={`flex items-center justify-between px-6 py-4 border-b ${isTechTheme ? 'border-accent/30 bg-accent/5' : 'border-white/10 bg-white/5'}`}>
           <div className="flex items-center gap-3">
             <h2 className={`font-bold text-xl sm:text-2xl ${isTechTheme ? 'text-accent uppercase tracking-widest' : 'font-syne text-text-primary'}`}>
-              {view === 'list' ? 'Mis Categorías' : (editingId ? 'Editar Categoría' : 'Nueva Categoría')}
+              {view === 'list' ? tr('Mis Categorías') : (editingId ? tr('Editar Categoría') : tr('Nueva Categoría'))}
             </h2>
             <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border ${
               isTechTheme ? 'border-accent/40 text-accent bg-accent/10' : 'border-glass-border text-text-secondary bg-glass'
             }`}>
-              {view === 'list' ? `${totalFilteredCount} categorías` : (editingId ? 'Edición' : 'Creación')}
+              {view === 'list' ? tr('{n} categorías', { n: totalFilteredCount }) : (editingId ? tr('Edición') : tr('Creación'))}
             </span>
           </div>
 
@@ -331,7 +331,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                           : 'text-text-muted hover:text-text-primary'
                       }`}
                     >
-                      {type === 'all' ? 'Todas' : type === 'custom' ? 'Personalizadas' : 'Por Defecto'}
+                      {type === 'all' ? tr('Todas') : type === 'custom' ? tr('Personalizadas') : tr('Por Defecto')}
                     </button>
                   ))}
                 </div>
@@ -411,7 +411,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                                 {groupName}
                               </h3>
                               <span className={`text-[10px] ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                                {subcats.length} {subcats.length === 1 ? 'subcategoría' : 'subcategorías'}
+                                {subcats.length === 1 ? tr('1 subcategoría') : tr('{n} subcategorías', { n: subcats.length })}
                               </span>
                             </div>
                           </div>
@@ -466,7 +466,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                                           ? 'text-accent/60 border border-accent/30' 
                                           : 'text-text-muted border border-glass-border rounded'
                                       }`}>
-                                        {cat.isCustom ? 'PERSONALIZADA' : 'POR DEFECTO'}
+                                        {cat.isCustom ? tr('PERSONALIZADA') : tr('POR DEFECTO')}
                                       </span>
                                     </div>
                                   </div>
@@ -566,7 +566,7 @@ export function ManageCategoriesModal({ onClose, onCreated, initialView = 'list'
                   <div className="w-full sm:w-2/5 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-y-auto p-2 border-b sm:border-b-0 sm:border-r border-white/10 select-none scrollbar-none">
                     {Object.keys(CATEGORIZED_ICONS).map((tab) => (
                       <button
-                        key={tab}
+                        key={tr(tab)}
                         type="button"
                         onClick={() => setActiveTab(tab as any)}
                         className={`px-3 py-2 text-left text-xs font-bold transition-all truncate whitespace-nowrap ${

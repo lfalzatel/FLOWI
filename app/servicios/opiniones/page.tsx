@@ -49,7 +49,7 @@ export default function OpinionesPage() {
       setSent(true); setType(null); setArea(null); setRating(null); setText('');
       setTimeout(() => setSent(false), 4000);
     } catch (e: any) {
-      setError(e?.code === 'permission-denied' ? 'Todavía no se pueden enviar comentarios. Muy pronto.' : 'No se pudo enviar. Revisa tu conexión.');
+      setError(e?.code === 'permission-denied' ? tr('Todavía no se pueden enviar comentarios. Muy pronto.') : tr('No se pudo enviar. Revisa tu conexión.'));
     } finally { setSending(false); }
   };
 
@@ -90,7 +90,7 @@ export default function OpinionesPage() {
           <div>
             <label htmlFor="fb-text" className="text-xs font-semibold text-text-secondary mb-2 block">{tr('Cuéntanos')}</label>
             <textarea id="fb-text" value={text} onChange={e => setText(e.target.value)} maxLength={1000} rows={4}
-                      placeholder={type === 'error' ? '¿Qué estabas haciendo y qué pasó?' : type === 'idea' ? '¿Qué te gustaría que FLOWI hiciera?' : 'Escribe aquí…'}
+                      placeholder={type === 'error' ? tr('¿Qué estabas haciendo y qué pasó?') : type === 'idea' ? tr('¿Qué te gustaría que FLOWI hiciera?') : tr('Escribe aquí…')}
                       className={`w-full bg-glass border px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent resize-none ${isTech ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-xl'}`} />
           </div>
           <div>
@@ -119,7 +119,7 @@ export default function OpinionesPage() {
               {mine.map(f => (
                 <li key={f.id} className={`glass-card p-3 text-xs space-y-1 ${box}`}>
                   <p className="text-text-muted">{typeOf(f.type).emoji} {tr(typeOf(f.type).label)} · {tr(f.area)}{f.createdAt ? ` · ${f.createdAt.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}
-                    {f.status === 'hecho' ? ' · ✅ Resuelto' : f.status === 'visto' ? ' · 👀 Visto' : ''}</p>
+                    {f.status === 'hecho' ? tr(' · ✅ Resuelto') : f.status === 'visto' ? tr(' · 👀 Visto') : ''}</p>
                   <p className="text-text-primary whitespace-pre-wrap">{f.text}</p>
                   {f.reply && <p className="text-accent">💬 FLOWI: {f.reply}</p>}
                 </li>
@@ -182,7 +182,7 @@ function AdminPanel({ isTech }: { isTech: boolean }) {
   return (
     <section className="space-y-4 pt-2">
       <h2 className={`flex items-center gap-2 text-base font-bold ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}><BarChart3 className="w-5 h-5 text-accent" /> {tr('Panel del administrador')}</h2>
-      {failed && <p className="text-xs text-amber-300">No se pudieron leer las opiniones (faltan las reglas de la base de datos).</p>}
+      {failed && <p className="text-xs text-amber-300">{tr('No se pudieron leer las opiniones (faltan las reglas de la base de datos).')}</p>}
 
       {/* Resumen */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -201,7 +201,7 @@ function AdminPanel({ isTech }: { isTech: boolean }) {
       {/* A favor y en contra por parte de la app */}
       {stats.areas.length > 0 && (
         <div className={`glass-card glass-static p-4 space-y-2 ${box}`}>
-          <p className="text-xs font-semibold text-text-primary">{tr('A favor y en contra por parte de la app')} <span className="font-normal text-text-muted">(arriba lo que más critican)</span></p>
+          <p className="text-xs font-semibold text-text-primary">{tr('A favor y en contra por parte de la app')} <span className="font-normal text-text-muted">{tr('(arriba lo que más critican)')}</span></p>
           {stats.areas.map(([a, v]) => {
             const w = (n: number) => `${(n / maxArea) * 100}%`;
             return (
@@ -252,7 +252,7 @@ function AdminPanel({ isTech }: { isTech: boolean }) {
                 {f.reply && <p className="text-accent">💬 {f.reply}</p>}
                 {replying?.id === f.id ? (
                   <div className="flex gap-1.5">
-                    <input autoComplete="off" value={replying.text} onChange={e => setReplying({ id: f.id, text: e.target.value })} placeholder="Respuesta (la ve la persona)"
+                    <input autoComplete="off" value={replying.text} onChange={e => setReplying({ id: f.id, text: e.target.value })} placeholder={tr('Respuesta (la ve la persona)')}
                            className="flex-1 min-w-0 bg-glass border border-glass-border px-2 py-1 text-xs text-text-primary rounded-lg focus:outline-none focus:border-accent" />
                     <button type="button" onClick={() => { updateFeedback(f.id, { reply: replying.text.trim().slice(0, 500) || null, status: 'visto' }).catch(() => {}); setReplying(null); }} className={pill(true)}>{tr('Enviar')}</button>
                   </div>

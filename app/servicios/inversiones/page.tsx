@@ -155,7 +155,7 @@ export default function InversionesPage() {
           <p className={`font-bold text-[clamp(24px,8vw,34px)] leading-none text-accent ${isTechTheme ? '' : 'font-syne'}`}><AnimatedNumber value={summary.invested} format={fmt} /></p>
           {summary.active.length > 0 && (
             <p className="text-xs text-text-muted mt-1">
-              en {summary.active.length} {summary.active.length === 1 ? 'lugar' : 'lugares'}{summary.avgRate ? ` · tasa promedio ${summary.avgRate.toFixed(2).replace('.', ',')}% E.A.` : ''}
+              {summary.active.length === 1 ? tr('en 1 lugar') : tr('en {n} lugares', { n: summary.active.length })}{summary.avgRate ? tr(' · tasa promedio {a}% E.A.', { a: summary.avgRate.toFixed(2).replace('.', ',') }) : ''}
             </p>
           )}
           {summary.active.length > 0 && (
@@ -230,12 +230,12 @@ export default function InversionesPage() {
                       {header(<>{k === 'fondo' && inv.assetType === 'acciones' ? 'Acciones' : KIND_INFO[k].short}{inv.note ? ` · ${inv.bank}` : ''}</>, k === 'ahorro' && inv.rateEA ? `${String(inv.rateEA).replace('.', ',')}% E.A.` : undefined)}
                       <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
                         <div>
-                          <p className="text-text-muted">{k === 'ahorro' ? 'Saldo hoy (aprox.)' : 'Vale hoy'}</p>
+                          <p className="text-text-muted">{k === 'ahorro' ? tr('Saldo hoy (aprox.)') : tr('Vale hoy')}</p>
                           <p className="font-bold text-base text-text-primary"><AnimatedNumber value={v.value} format={fmt} /></p>
                           {k !== 'ahorro' && inv.valueAt && <p className="text-[10px] text-text-muted">actualizado el {new Date(inv.valueAt).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}</p>}
                         </div>
                         <div>
-                          <p className="text-text-muted">{k === 'ahorro' ? 'Intereses ganados' : loss ? 'Pérdida' : 'Ganancia'}</p>
+                          <p className="text-text-muted">{k === 'ahorro' ? tr('Intereses ganados') : loss ? tr('Pérdida') : tr('Ganancia')}</p>
                           <p className={`font-bold text-base flex items-center gap-1 ${loss ? 'text-red-400' : 'text-emerald-500'}`}>
                             {loss ? <TrendingDown className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
                             {loss ? '−' : '+'}{fmt(Math.abs(v.earned))}
@@ -274,7 +274,7 @@ export default function InversionesPage() {
                 const soon = s.daysLeft <= 3;
                 return (
                   <article key={inv.id} className={`${card} p-4`}>
-                    {header(<><b className="text-text-primary"><AnimatedNumber value={inv.amount} format={fmt} /></b>&nbsp;· {s.termDays} días</>, `${String(inv.rateEA).replace('.', ',')}% E.A.`)}
+                    {header(<><b className="text-text-primary"><AnimatedNumber value={inv.amount} format={fmt} /></b>&nbsp;· {tr('{n} días', { n: s.termDays })}</>, `${String(inv.rateEA).replace('.', ',')}% E.A.`)}
                     {inv.note && <p className="text-[11px] text-text-muted truncate mt-1">{inv.note}</p>}
 
                     <div className="mt-3 flex items-center gap-3">
@@ -291,18 +291,18 @@ export default function InversionesPage() {
                         <p className="font-semibold text-text-primary"><AnimatedNumber value={s.earnedToDate} format={fmt} /></p>
                       </div>
                       <div>
-                        <p className="text-text-muted">Intereses del periodo{s.isEstimate ? ' (aprox.)' : ''}</p>
+                        <p className="text-text-muted">{tr('Intereses del periodo')}{s.isEstimate ? tr(' (aprox.)') : ''}</p>
                         <p className="font-semibold text-text-primary"><AnimatedNumber value={s.interest} format={fmt} /></p>
                       </div>
                       <div>
                         <p className="text-text-muted">{tr('Recibirás al vencer')}</p>
                         <p className="font-semibold text-emerald-500"><AnimatedNumber value={s.netAtMaturity} format={fmt} /></p>
-                        <p className="text-[10px] text-text-muted">menos {fmt(s.withholding)} de retención</p>
+                        <p className="text-[10px] text-text-muted">{tr('menos {a} de retención', { a: fmt(s.withholding) })}</p>
                       </div>
                       <div>
                         <p className="text-text-muted">{tr('Vence')}</p>
                         <p className={`font-semibold ${soon ? 'text-amber-500' : 'text-text-primary'}`}>{formatDay(inv.maturityDate)}</p>
-                        <p className={`text-[10px] ${soon ? 'text-amber-500' : 'text-text-muted'}`}>{whenText(s.daysLeft)}{inv.autoRenew ? ' · se renueva solo' : ''}</p>
+                        <p className={`text-[10px] ${soon ? 'text-amber-500' : 'text-text-muted'}`}>{whenText(s.daysLeft)}{inv.autoRenew ? tr(' · se renueva solo') : ''}</p>
                       </div>
                     </div>
 
@@ -340,7 +340,7 @@ export default function InversionesPage() {
                         <TrendingUp className="w-5 h-5 text-emerald-500 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className={`font-semibold truncate ${isTechTheme ? 'text-accent text-sm uppercase' : 'text-text-primary'}`}>{nameOf(inv)} · {fmt(inv.amount)}</p>
-                          <p className="text-xs text-text-muted">{inv.maturityDate ? `Venció el ${formatDay(inv.maturityDate)}` : 'Cerrado'}{last ? ` · ganó ${fmt(last.interest)}` : ''}</p>
+                          <p className="text-xs text-text-muted">{inv.maturityDate ? `Venció el ${formatDay(inv.maturityDate)}` : tr('Cerrado')}{last ? ` · ganó ${fmt(last.interest)}` : ''}</p>
                         </div>
                       </button>
                     );
@@ -413,11 +413,11 @@ export default function InversionesPage() {
           <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setMoving(null)} aria-hidden="true" />
           <div className={`w-full max-w-sm relative z-10 animate-fade-in-up glass-dropdown p-6 space-y-4 ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}>
             <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>
-              {moving.mode === 'deposito' ? 'Depositar en' : moving.mode === 'retiro' ? 'Retirar de' : kindOf(moving.inv) === 'ahorro' ? 'Ajustar saldo de' : 'Actualizar valor de'} {nameOf(moving.inv)}
+              {moving.mode === 'deposito' ? tr('Depositar en') : moving.mode === 'retiro' ? tr('Retirar de') : kindOf(moving.inv) === 'ahorro' ? tr('Ajustar saldo de') : tr('Actualizar valor de')} {nameOf(moving.inv)}
             </h2>
             <div>
               <label htmlFor="mv-amount" className="text-xs text-text-muted mb-1.5 block">
-                {moving.mode === 'ajuste' ? (kindOf(moving.inv) === 'ahorro' ? '¿Cuánto dice la app que tienes hoy?' : '¿Cuánto vale hoy según la app?') : '¿Cuánto?'}
+                {moving.mode === 'ajuste' ? (kindOf(moving.inv) === 'ahorro' ? tr('¿Cuánto dice la app que tienes hoy?') : tr('¿Cuánto vale hoy según la app?')) : tr('¿Cuánto?')}
               </label>
               <input autoComplete="off" id="mv-amount" type="text" inputMode="decimal" placeholder="$ 0" value={moveAmount} autoFocus
                      onChange={(e) => setMoveAmount(formatMoneyInput(e.target.value))}
@@ -428,9 +428,9 @@ export default function InversionesPage() {
             </div>
             {moving.mode !== 'ajuste' && (
               <AccountPicker accounts={accounts} value={moveAccount} onChange={setMoveAccount}
-                             label={moving.mode === 'deposito' ? '¿De qué cuenta sale?' : '¿A qué cuenta llega?'}
-                             noneLabel={moving.mode === 'deposito' ? 'No descontar' : 'A ninguna'}
-                             hint={moving.mode === 'deposito' ? 'Lo descuento de la cuenta y de lo que puedes gastar este mes (es ahorro, no gasto).' : 'La plata vuelve a esa cuenta; no cuenta como ingreso.'} />
+                             label={moving.mode === 'deposito' ? tr('¿De qué cuenta sale?') : tr('¿A qué cuenta llega?')}
+                             noneLabel={moving.mode === 'deposito' ? tr('No descontar') : tr('A ninguna')}
+                             hint={moving.mode === 'deposito' ? tr('Lo descuento de la cuenta y de lo que puedes gastar este mes (es ahorro, no gasto).') : tr('La plata vuelve a esa cuenta; no cuenta como ingreso.')} />
             )}
             <div className="space-y-2">
               <button onClick={saveMove} disabled={parseMoneyInput(moveAmount) <= 0 || moveSaving || (moving.mode !== 'ajuste' && hasAccounts && moveAccount === undefined)}

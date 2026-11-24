@@ -408,8 +408,8 @@ export function PowerAnimation() {
   let primaryColor = '#00E5A0';
   let secondaryColor = '#00E5FF';
   let shadowRgba = 'rgba(0, 229, 160, 0.75)';
-  let actionText = 'INGRESO REGISTRADO';
-  let actionSubtitle = '¡Tu saldo ha aumentado!';
+  let actionText = tr('INGRESO REGISTRADO');
+  let actionSubtitle = tr('¡Tu saldo ha aumentado!');
   let IconComponent = TrendingUp;
   let badgeEmoji = '⭐';
 
@@ -420,8 +420,8 @@ export function PowerAnimation() {
     primaryColor = '#00E5A0';
     secondaryColor = '#00E5FF';
     shadowRgba = 'rgba(0, 229, 160, 0.75)';
-    actionText = 'INGRESO REGISTRADO';
-    actionSubtitle = '¡Saldo actualizado con éxito!';
+    actionText = tr('INGRESO REGISTRADO');
+    actionSubtitle = tr('¡Saldo actualizado con éxito!');
     IconComponent = TrendingUp;
     badgeEmoji = '✨';
   } else if (data.type === 'abono') {
@@ -431,8 +431,8 @@ export function PowerAnimation() {
     primaryColor = '#00E5FF';
     secondaryColor = '#3B82F6';
     shadowRgba = 'rgba(0, 229, 255, 0.75)';
-    actionText = 'ABONO REGISTRADO';
-    actionSubtitle = '¡Deuda reducida con éxito!';
+    actionText = tr('ABONO REGISTRADO');
+    actionSubtitle = tr('¡Deuda reducida con éxito!');
     IconComponent = RefreshCw;
     badgeEmoji = '💎';
   } else if (data.type === 'edicion') {
@@ -442,12 +442,12 @@ export function PowerAnimation() {
     primaryColor = '#8B5CF6';
     secondaryColor = '#3B82F6';
     shadowRgba = 'rgba(139, 92, 246, 0.75)';
-    actionText = data.customTitle || (data.amount > 0 ? 'TRANSACCIÓN ACTUALIZADA' : 'REGISTRO GUARDADO');
-    actionSubtitle = data.customTitle?.includes('RECORDATORIO')
-      ? '¡Agendado con éxito!'
-      : data.customTitle?.includes('NOTA')
-      ? '¡Nota guardada con éxito!'
-      : '¡Cambios guardados con éxito!';
+    actionText = data.customTitle || (data.amount > 0 ? tr('TRANSACCIÓN ACTUALIZADA') : tr('REGISTRO GUARDADO'));
+    actionSubtitle = data.customTitle?.includes(tr('RECORDATORIO AGENDADO'))
+      ? tr('¡Agendado con éxito!')
+      : data.customTitle?.includes(tr('NOTA GUARDADA'))
+      ? tr('¡Nota guardada con éxito!')
+      : tr('¡Cambios guardados con éxito!');
     IconComponent = CheckCircle2;
     badgeEmoji = '🔮';
   } else if (data.type === 'eliminacion') {
@@ -457,8 +457,8 @@ export function PowerAnimation() {
     primaryColor = '#EF4444';
     secondaryColor = '#F97316';
     shadowRgba = 'rgba(239, 68, 68, 0.75)';
-    actionText = data.customTitle || (data.amount > 0 ? 'TRANSACCIÓN ELIMINADA' : 'REGISTRO ELIMINADO');
-    actionSubtitle = '¡Removido con éxito!';
+    actionText = data.customTitle || (data.amount > 0 ? tr('TRANSACCIÓN ELIMINADA') : tr('REGISTRO ELIMINADO'));
+    actionSubtitle = tr('¡Removido con éxito!');
     IconComponent = Trash2;
     badgeEmoji = '⚡';
   } else {
@@ -470,13 +470,13 @@ export function PowerAnimation() {
     secondaryColor = '#EF4444';
     shadowRgba = 'rgba(255, 46, 99, 0.75)';
     actionText = data.customTitle || 'GASTO REGISTRADO';
-    actionSubtitle = '¡Balance actualizado!';
+    actionSubtitle = tr('¡Balance actualizado!');
     IconComponent = TrendingDown;
     badgeEmoji = '💸';
   }
 
   const fmt = (n: number) => formatCurrency(n, profile?.currency).replace(/\.00$/, '');
-  const formattedText = data.customText || (data.amount > 0 ? `${labelPrefix}${fmt(data.amount)}` : '¡ÉXITO!');
+  const formattedText = data.customText || (data.amount > 0 ? `${labelPrefix}${fmt(data.amount)}` : tr('¡ÉXITO!'));
 
   return createPortal(
     <div 

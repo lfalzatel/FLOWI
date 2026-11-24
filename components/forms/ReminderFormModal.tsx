@@ -153,12 +153,12 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
       if (type === 'budget_alert') data.budgetPercent = budgetPercent;
 
       if (reminder?.id) {
-        triggerPowerAnimation(0, 'edicion', 'RECORDATORIO ACTUALIZADO', '¡ACTUALIZADO!');
+        triggerPowerAnimation(0, 'edicion', tr('RECORDATORIO ACTUALIZADO'), tr('¡ACTUALIZADO!'));
         speakText(tr('Recordatorio actualizado con éxito'), 'es-CO');
         onClose();
         await updateReminder(reminder.id, data);
       } else {
-        triggerPowerAnimation(0, 'edicion', 'RECORDATORIO AGENDADO', '¡AGENDADO!');
+        triggerPowerAnimation(0, 'edicion', tr('RECORDATORIO AGENDADO'), tr('¡AGENDADO!'));
         triggerConfettiWithSynth(3.0);
         speakText(tr('Recordatorio agendado con éxito'), 'es-CO');
         onClose();
@@ -277,7 +277,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                       ? <><CategoryIcon icon={merchantMeta?.icon || merchant} label={merchant} className="w-4 h-4 text-sm flex items-center justify-center shrink-0" /><span className="truncate">{merchant}</span></>
                       : selectedCategoryData
                         ? <><CategoryIcon icon={selectedCategoryData.icon} label={selectedCategoryData.label} className="w-4 h-4 text-sm flex items-center justify-center shrink-0" /><span className="truncate">{selectedCategoryData.label}</span></>
-                        : <span className="text-text-muted truncate">{category || 'Elegir'}</span>}
+                        : <span className="text-text-muted truncate">{category || tr('Elegir')}</span>}
                     <ChevronDown className="w-4 h-4 ml-auto text-text-muted shrink-0" />
                   </button>
                 </div>
@@ -294,7 +294,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
             {type !== 'budget_alert' && isPaymentNow && category && merchantOptions2.length > 0 && (
               <div>
-                <span className={lbl}>{tr('¿Cuál?')} <span className="normal-case opacity-70">(opcional)</span></span>
+                <span className={lbl}>{tr('¿Cuál?')} <span className="normal-case opacity-70">{tr('(opcional)')}</span></span>
                 <div className="flex flex-wrap gap-1.5">
                   {merchantOptions2.slice(0, showAllMerchants ? 60 : 8).map(mLabel => {
                     const meta = findCatalogEntry(mLabel);
@@ -306,7 +306,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                     );
                   })}
                   {merchantOptions2.length > 8 && (
-                    <button type="button" onClick={() => setShowAllMerchants(v => !v)} className={chip(false)}>{showAllMerchants ? 'Menos' : `+${merchantOptions2.length - 8} más`}</button>
+                    <button type="button" onClick={() => setShowAllMerchants(v => !v)} className={chip(false)}>{showAllMerchants ? tr('Menos') : tr('+{n} más', { n: merchantOptions2.length - 8 })}</button>
                   )}
                 </div>
                 {merchant && <p className="text-[11px] text-text-muted mt-1">Busco el último pago de {merchant}, no el de toda la categoría.</p>}
@@ -325,7 +325,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
             {(type === 'once' || type === 'yearly') && (
               <div className="grid grid-cols-[1.4fr_1fr] gap-2">
                 <div>
-                  <label className={lbl} htmlFor="rem-date">{type === 'yearly' ? 'Fecha (cada año)' : 'Fecha'}</label>
+                  <label className={lbl} htmlFor="rem-date">{type === 'yearly' ? tr('Fecha (cada año)') : tr('Fecha')}</label>
                   <input autoComplete="off" id="rem-date" type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={field} />
                 </div>
                 <div><span className={lbl}>{tr('Hora')}</span>{timeInput}</div>
@@ -382,7 +382,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                 <button type="button" onClick={() => setPushEnabled(!pushEnabled)} className={`${chip(pushEnabled)} px-0`}>{tr('Push')}</button>
                 <button type="button" onClick={() => setInAppEnabled(!inAppEnabled)} className={`${chip(inAppEnabled)} px-0`}>{tr('En la app')}</button>
                 <button type="button" onClick={() => setSound(!sound)} className={`${chip(sound)} px-0`}>{tr('Sonido')}</button>
-                <button type="button" onClick={() => setActive(!active)} className={`${chip(active)} px-0`}>{active ? 'Activo' : 'Pausado'}</button>
+                <button type="button" onClick={() => setActive(!active)} className={`${chip(active)} px-0`}>{active ? tr('Activo') : tr('Pausado')}</button>
               </div>
             </div>
 
@@ -462,7 +462,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
           if (!reminder?.id) return;
           setLoading(true);
           try {
-            triggerPowerAnimation(0, 'eliminacion', 'RECORDATORIO ELIMINADO', '¡REMOVIDO!');
+            triggerPowerAnimation(0, 'eliminacion', tr('RECORDATORIO ELIMINADO'), tr('¡REMOVIDO!'));
             speakText(tr('Recordatorio eliminado con éxito'), 'es-CO');
             await deleteReminder(reminder.id);
             setShowConfirmDelete(false);

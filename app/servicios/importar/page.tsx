@@ -108,7 +108,7 @@ export default function ImportarPage() {
     <label className="block">
       <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{label}</span>
       <select className={select} value={value ?? -1} onChange={(e) => { const v = Number(e.target.value); onChange(v < 0 ? null : v); }}>
-        <option value={-1}>{optional ? '— No usar —' : '— Elegir —'}</option>
+        <option value={-1}>{optional ? tr('— No usar —') : tr('— Elegir —')}</option>
         {headers.map((h, i) => <option key={i} value={i}>{h}</option>)}
       </select>
     </label>
@@ -141,7 +141,7 @@ export default function ImportarPage() {
             <div className="w-10 h-10 rounded-2xl bg-accent/15 flex items-center justify-center shrink-0"><FileSpreadsheet className="w-5 h-5 text-accent" /></div>
             <div>
               <p className="text-sm font-semibold text-text-primary">{tr('Sube los movimientos de tu banco')}</p>
-              <p className="text-xs text-text-muted">CSV o Excel (.xlsx, .xls). Revisas todo antes de guardar y los que ya tenías registrados se marcan para no duplicarlos.</p>
+              <p className="text-xs text-text-muted">{tr('CSV o Excel (.xlsx, .xls). Revisas todo antes de guardar y los que ya tenías registrados se marcan para no duplicarlos.')}</p>
             </div>
           </div>
           <input ref={fileRef} type="file" accept=".csv,.txt,.xls,.xlsx,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden"
@@ -156,8 +156,8 @@ export default function ImportarPage() {
           <details className="text-xs text-text-secondary">
             <summary className="cursor-pointer text-accent font-semibold">{tr('¿Dónde descargo mis movimientos?')}</summary>
             <ul className="mt-2 space-y-1.5 list-disc pl-4 leading-relaxed">
-              <li><b>{tr('Bancolombia:')}</b> en la Sucursal Virtual Personas (desde el computador), entra a tu cuenta, consulta los movimientos y usa la opción de descargar o exportar a Excel.</li>
-              <li><b>{tr('Otros bancos:')}</b> busca "descargar movimientos" o "exportar" en la banca en línea; casi todos dan Excel o CSV.</li>
+              <li><b>{tr('Bancolombia:')}</b> {tr('en la Sucursal Virtual Personas (desde el computador), entra a tu cuenta, consulta los movimientos y usa la opción de descargar o exportar a Excel.')}</li>
+              <li><b>{tr('Otros bancos:')}</b> {tr('busca "descargar movimientos" o "exportar" en la banca en línea; casi todos dan Excel o CSV.')}</li>
               <li><b>{tr('Nequi:')}</b> {tr('por ahora solo entrega el extracto en PDF, que aún no se puede importar. Para Nequi usa la voz o la foto del recibo.')}</li>
             </ul>
           </details>
@@ -173,22 +173,22 @@ export default function ImportarPage() {
         {sheet && map && (
           <section className={`${card} p-5 space-y-3`}>
             <p className="text-sm font-semibold text-text-primary">{tr('Columnas del archivo')}</p>
-            <p className="text-xs text-text-muted -mt-2">Las adiviné; cámbialas si algo no cuadra.</p>
+            <p className="text-xs text-text-muted -mt-2">{tr('Las adiviné; cámbialas si algo no cuadra.')}</p>
             <label className="block">
               <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{tr('Fila de encabezados')}</span>
               <select className={select} value={map.headerRow} onChange={(e) => setMap({ ...map, headerRow: Number(e.target.value) })}>
-                {sheet.slice(0, 30).map((r, i) => <option key={i} value={i}>Fila {i + 1}: {r.filter(Boolean).slice(0, 4).join(' · ').slice(0, 50) || '(vacía)'}</option>)}
+                {sheet.slice(0, 30).map((r, i) => <option key={i} value={i}>{tr('Fila {n}:', { n: i + 1 })} {r.filter(Boolean).slice(0, 4).join(' · ').slice(0, 50) || tr('(vacía)')}</option>)}
               </select>
             </label>
             <div className="grid grid-cols-2 gap-2">
               {colSelect('Fecha', map.date >= 0 ? map.date : null, v => setMap({ ...map, date: v ?? -1 }))}
-              {colSelect('Descripción', map.description >= 0 ? map.description : null, v => setMap({ ...map, description: v ?? -1 }))}
+              {colSelect(tr('Descripción'), map.description >= 0 ? map.description : null, v => setMap({ ...map, description: v ?? -1 }))}
             </div>
-            {colSelect('Valor (con signo: negativo = gasto)', map.amount, v => setMap({ ...map, amount: v }), true)}
+            {colSelect(tr('Valor (con signo: negativo = gasto)'), map.amount, v => setMap({ ...map, amount: v }), true)}
             {map.amount === null && (
               <div className="grid grid-cols-2 gap-2">
-                {colSelect('Débito / salidas', map.debit, v => setMap({ ...map, debit: v }), true)}
-                {colSelect('Crédito / entradas', map.credit, v => setMap({ ...map, credit: v }), true)}
+                {colSelect(tr('Débito / salidas'), map.debit, v => setMap({ ...map, debit: v }), true)}
+                {colSelect(tr('Crédito / entradas'), map.credit, v => setMap({ ...map, credit: v }), true)}
               </div>
             )}
           </section>

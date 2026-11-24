@@ -239,10 +239,10 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
   const budget = filterType === 'month' && showGastos && profile?.budget ? profile.budget : 0;
 
   const titleMap = {
-    'all': 'Historial',
+    'all': tr('Historial'),
     'month': tr('Este mes'),
     'week': tr('Esta semana'),
-    'day': 'Hoy'
+    'day': tr('Hoy')
   };
   const detailLabel = filterType === 'day' ? tr('Por hora') : tr('Por día');
   const detailName = type === 'ingreso' ? tr('Ingresos') : tr('Gastos variables');
@@ -292,7 +292,7 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
   return (
     <div className="glass-card p-5 rounded-2xl">
       <div className="flex items-start justify-between gap-3 mb-3">
-        <h3 className="font-syne font-bold text-sm text-text-primary">{titleMap[filterType] || 'Resumen'}</h3>
+        <h3 className="font-syne font-bold text-sm text-text-primary">{titleMap[filterType] || tr('Resumen')}</h3>
         {!isHistory && (
           <div className={`flex p-0.5 border border-glass-border ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
             {toggleButton('acumulado', tr('Acumulado'))}

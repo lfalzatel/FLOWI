@@ -103,7 +103,7 @@ export default function RecordatoriosPage() {
   const confirmDeleteReminder = async () => {
     if (!deletingReminderId) return;
     try {
-      triggerPowerAnimation(0, 'eliminacion', 'RECORDATORIO ELIMINADO', '¡REMOVIDO!');
+      triggerPowerAnimation(0, 'eliminacion', tr('RECORDATORIO ELIMINADO'), tr('¡REMOVIDO!'));
       speakText(tr('Recordatorio eliminado con éxito'), 'es-CO');
       await deleteReminder(deletingReminderId);
       setDeletingReminderId(null);
@@ -169,7 +169,7 @@ export default function RecordatoriosPage() {
 
         {/* Pestañas */}
         <div role="tablist" className={`grid grid-cols-2 p-1 bg-glass border border-glass-border ${isTechTheme ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
-          {([['recordatorios', `Recordatorios${reminders.length ? ` (${reminders.length})` : ''}`], ['pagos', 'Pagos del mes']] as const).map(([k, label]) => (
+          {([['recordatorios', `Recordatorios${reminders.length ? ` (${reminders.length})` : ''}`], ['pagos', tr('Pagos del mes')]] as const).map(([k, label]) => (
             <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
                     className={`py-2 text-sm font-semibold transition-colors ${isTechTheme ? 'rounded-none uppercase text-xs' : 'rounded-xl'} ${
                       tab === k ? (isTechTheme ? 'bg-accent/15 text-accent border border-accent/50' : 'bg-accent text-black') : 'text-text-secondary hover:text-text-primary'}`}>
@@ -187,7 +187,7 @@ export default function RecordatoriosPage() {
             <div className="flex-1 min-w-0">
               <p className="text-sm text-text-primary font-medium">{tr('Alertas del sistema desactivadas')}</p>
               <p className="text-xs text-text-muted mt-0.5">
-                Para recibir avisos en segundo plano (incluso con la app cerrada), activa las notificaciones del navegador.
+                {tr('Para recibir avisos en segundo plano (incluso con la app cerrada), activa las notificaciones del navegador.')}
               </p>
               <button
                 onClick={handleRequestPermission}
@@ -276,7 +276,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
     budget_alert: tr('Alerta presupuesto'),
   }[reminder.type] ?? reminder.type;
 
-  const dayOfWeekNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const dayOfWeekNames = [tr('Domingo'), tr('Lunes'), tr('Martes'), tr('Miércoles'), tr('Jueves'), tr('Viernes'), tr('Sábado')];
 
   const getFrecuenciaDetail = () => {
     if (reminder.type === 'weekly' && reminder.dayOfWeek !== undefined) {
@@ -330,7 +330,7 @@ function ReminderCard({ reminder, onEdit, onToggle, onDelete, isTechTheme, delay
           <p className="text-xs text-text-secondary mt-0.5 truncate">
             {reminder.amount
               ? <b className="text-text-primary">${reminder.amount.toLocaleString(currentLocale())} · </b>
-              : lastPay ? <b className="text-text-primary">${lastPay.amount.toLocaleString(currentLocale())} <span className="font-normal text-text-muted">(último pago, {lastPay.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })})</span> · </b> : null}
+              : lastPay ? <b className="text-text-primary">${lastPay.amount.toLocaleString(currentLocale())} <span className="font-normal text-text-muted">{tr('(último pago, {a})', { a: lastPay.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' }) })}</span> · </b> : null}
             {reminder.description || tr('Sin notas')}
           </p>
           <div className="flex items-center gap-3 mt-2 flex-wrap">

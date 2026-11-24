@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 
 import { useEffect, useRef } from 'react';
 import { formatCurrency } from '@/lib/format';
@@ -35,8 +36,8 @@ export default function PointsBurstAnimation({
     let primaryColor = '#00E5A0';   // Emerald / Mint
     let secondaryColor = '#00E5FF'; // Cyan
     let shadowRgba = 'rgba(0, 229, 160, 0.9)';
-    let actionTitle = 'INGRESO REGISTRADO';
-    let actionSubtitle = '¡Saldo actualizado!';
+    let actionTitle = tr('INGRESO REGISTRADO');
+    let actionSubtitle = tr('¡Saldo actualizado!');
     let signPrefix = '+';
     let isPositive = true;
 
@@ -44,40 +45,40 @@ export default function PointsBurstAnimation({
       primaryColor = '#00E5A0';
       secondaryColor = '#00E5FF';
       shadowRgba = 'rgba(0, 229, 160, 0.9)';
-      actionTitle = 'INGRESO REGISTRADO';
-      actionSubtitle = '¡Tu saldo ha aumentado!';
+      actionTitle = tr('INGRESO REGISTRADO');
+      actionSubtitle = tr('¡Tu saldo ha aumentado!');
       signPrefix = '+';
       isPositive = true;
     } else if (type === 'abono') {
       primaryColor = '#3B82F6';
       secondaryColor = '#00E5A0';
       shadowRgba = 'rgba(59, 130, 246, 0.9)';
-      actionTitle = 'ABONO COMPLETO';
-      actionSubtitle = '¡Deuda reducida con éxito!';
+      actionTitle = tr('ABONO COMPLETO');
+      actionSubtitle = tr('¡Deuda reducida con éxito!');
       signPrefix = '+';
       isPositive = true;
     } else if (type === 'gasto') {
       primaryColor = '#FF2E63';
       secondaryColor = '#EF4444';
       shadowRgba = 'rgba(255, 46, 99, 0.9)';
-      actionTitle = 'GASTO REGISTRADO';
-      actionSubtitle = '¡Balance actualizado!';
+      actionTitle = tr('GASTO REGISTRADO');
+      actionSubtitle = tr('¡Balance actualizado!');
       signPrefix = '-';
       isPositive = false;
     } else if (type === 'edicion') {
       primaryColor = '#8B5CF6';
       secondaryColor = '#3B82F6';
       shadowRgba = 'rgba(139, 92, 246, 0.9)';
-      actionTitle = 'TRANSACCIÓN ACTUALIZADA';
-      actionSubtitle = '¡Cambios guardados!';
+      actionTitle = tr('TRANSACCIÓN ACTUALIZADA');
+      actionSubtitle = tr('¡Cambios guardados!');
       signPrefix = '✓ ';
       isPositive = true;
     } else if (type === 'eliminacion') {
       primaryColor = '#EF4444';
       secondaryColor = '#F97316';
       shadowRgba = 'rgba(239, 68, 68, 0.9)';
-      actionTitle = 'REGISTRO ELIMINADO';
-      actionSubtitle = '¡Registro removido!';
+      actionTitle = tr('REGISTRO ELIMINADO');
+      actionSubtitle = tr('¡Registro removido!');
       signPrefix = '✕ ';
       isPositive = false;
     }

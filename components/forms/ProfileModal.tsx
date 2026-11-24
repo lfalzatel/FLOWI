@@ -120,7 +120,7 @@ export function ProfileModal({ onClose }: Props) {
     setSavingPhone(true);
     try {
       await updateUserProfile(user.uid, { phone });
-      alert('Teléfono actualizado');
+      alert(tr('Teléfono actualizado'));
     } catch (error) {
       console.error('Error saving phone:', error);
       alert('Error al guardar el teléfono');
@@ -135,7 +135,7 @@ export function ProfileModal({ onClose }: Props) {
 
     // Validar tamaño máximo de 500KB para no saturar Firestore
     if (file.size > 500 * 1024) {
-      alert('La imagen es muy pesada. Por favor elige una de menos de 500 KB.');
+      alert(tr('La imagen es muy pesada. Por favor elige una de menos de 500 KB.'));
       return;
     }
 
@@ -145,7 +145,7 @@ export function ProfileModal({ onClose }: Props) {
       reader.onloadend = async () => {
         const base64String = reader.result as string;
         await updateUserProfile(user.uid, { photoURL: base64String });
-        alert('Foto de perfil actualizada correctamente.');
+        alert(tr('Foto de perfil actualizada correctamente.'));
         setUploadingPhoto(false);
       };
       reader.readAsDataURL(file);
@@ -167,12 +167,12 @@ export function ProfileModal({ onClose }: Props) {
 
     try {
       await user.delete();
-      alert('Cuenta eliminada correctamente');
+      alert(tr('Cuenta eliminada correctamente'));
       onClose();
     } catch (error: any) {
       console.error('Error deleting account:', error);
       if (error.code === 'auth/requires-recent-login') {
-        alert('Por seguridad, debes haber iniciado sesión recientemente para realizar esta acción. Por favor, cierra sesión e inicia sesión de nuevo.');
+        alert(tr('Por seguridad, debes haber iniciado sesión recientemente para realizar esta acción. Por favor, cierra sesión e inicia sesión de nuevo.'));
       } else {
         alert('Error al eliminar la cuenta. Por favor, intenta cerrar sesión e iniciar sesión de nuevo.');
       }
@@ -223,7 +223,7 @@ export function ProfileModal({ onClose }: Props) {
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             <div className="min-w-0 flex-1 pr-6">
-              <h3 className={`${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'font-syne text-text-primary'} font-bold text-base truncate`}>{user?.displayName || 'Usuario'}</h3>
+              <h3 className={`${isCyberpunk ? 'font-mono text-accent tracking-wide uppercase' : 'font-syne text-text-primary'} font-bold text-base truncate`}>{user?.displayName || tr('Usuario')}</h3>
               <p className={`truncate ${isCyberpunk ? 'font-mono text-accent/60 text-[11px]' : 'text-text-secondary text-xs'}`}>{user?.email}</p>
               <span className={`inline-block mt-1 bg-accent/15 text-accent border border-accent/40 text-[10px] uppercase font-bold px-2 py-0.5 ${isCyberpunk ? 'rounded-none font-mono tracking-widest' : 'rounded-full'}`}>
                 {profile?.role === 'admin' ? 'Propietario' : 'Usuario'}

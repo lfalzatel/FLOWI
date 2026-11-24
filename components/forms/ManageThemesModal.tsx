@@ -1,4 +1,5 @@
 'use client';
+import { tr, trTech } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check, Sparkles } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -60,12 +61,12 @@ export function ManageThemesModal({ onClose }: Props) {
 
   const getThemeLabel = (t: ThemeType) => {
     switch (t) {
-      case 'light': return isTechTheme ? 'DIA' : 'Día';
-      case 'dark': return isTechTheme ? 'NOCHE (ORIGINAL)' : 'Noche (Original)';
-      case 'glassmorphism': return isTechTheme ? 'GLASSMORPHISM' : 'Glassmorphism';
-      case 'nebula': return isTechTheme ? 'NEBULOSA' : 'Nebulosa';
-      case 'cyberpunk': return isTechTheme ? 'CYBERPUNK' : 'Cyberpunk';
-      case 'kiloCode': return isTechTheme ? 'KILOCODE' : 'KiloCode';
+      case 'light': return isTechTheme ? trTech('DIA', 'Día') : tr('Día');
+      case 'dark': return isTechTheme ? trTech('NOCHE (ORIGINAL)', 'Noche (Original)') : tr('Noche (Original)');
+      case 'glassmorphism': return isTechTheme ? trTech('GLASSMORPHISM', 'Glassmorphism') : tr('Glassmorphism');
+      case 'nebula': return isTechTheme ? trTech('NEBULOSA', 'Nebulosa') : tr('Nebulosa');
+      case 'cyberpunk': return isTechTheme ? trTech('CYBERPUNK', 'Cyberpunk') : tr('Cyberpunk');
+      case 'kiloCode': return isTechTheme ? trTech('KILOCODE', 'KiloCode') : tr('KiloCode');
     }
   };
 
@@ -88,10 +89,10 @@ export function ManageThemesModal({ onClose }: Props) {
           </div>
           <div>
             <h2 className={`${isTechTheme ? 'font-mono font-bold text-accent uppercase tracking-widest text-lg' : 'font-syne font-bold text-text-primary text-xl'}`}>
-              {isTechTheme ? '>_ GESTION_TEMAS' : 'Gestión de Temas'}
+              {isTechTheme ? trTech('>_ GESTION_TEMAS', 'Gestión de Temas') : tr('Gestión de Temas')}
             </h2>
             <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
-              {isTechTheme ? 'PERSONALIZA_LA_APARIENCIA' : 'Personaliza la apariencia'}
+              {isTechTheme ? trTech('PERSONALIZA_LA_APARIENCIA', 'Personaliza la apariencia') : tr('Personaliza la apariencia')}
             </p>
           </div>
         </div>
@@ -100,32 +101,32 @@ export function ManageThemesModal({ onClose }: Props) {
           {/* Tema Activo */}
           <div>
             <p className={`text-sm font-medium text-text-primary mb-3 ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
-              {isTechTheme ? 'TEMA_VISUAL_ACTIVO' : 'Tema Visual Activo'}
+              {isTechTheme ? trTech('TEMA_VISUAL_ACTIVO', 'Tema Visual Activo') : tr('Tema Visual Activo')}
             </p>
             <div className="grid grid-cols-3 gap-2">
               <button onClick={() => setTheme('light')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'light' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Sun className="w-5 h-5 mb-1.5" />
-                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'DIA' : 'Día'}</span>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('DIA', 'Día') : tr('Día')}</span>
               </button>
               <button onClick={() => setTheme('dark')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'dark' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Moon className="w-5 h-5 mb-1.5" />
-                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'ORIG' : 'Original'}</span>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('ORIG', 'Original') : tr('Original')}</span>
               </button>
               <button onClick={() => setTheme('glassmorphism')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'glassmorphism' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Layers className="w-5 h-5 mb-1.5" />
-                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'GLASS' : 'Glass'}</span>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('GLASS', 'Glass') : tr('Glass')}</span>
               </button>
               <button onClick={() => setTheme('nebula')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'nebula' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Sparkles className="w-5 h-5 mb-1.5" />
-                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'NEBULA' : 'Nebulosa'}</span>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('NEBULA', 'Nebulosa') : tr('Nebulosa')}</span>
               </button>
               <button onClick={() => setTheme('cyberpunk')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'cyberpunk' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Terminal className="w-5 h-5 mb-1.5" />
-                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'CYBER' : 'Cyber'}</span>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('CYBER', 'Cyber') : tr('Cyber')}</span>
               </button>
               <button onClick={() => setTheme('kiloCode')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'kiloCode' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Zap className="w-5 h-5 mb-1.5" />
-                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? 'KILO' : 'Kilo'}</span>
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('KILO', 'Kilo') : tr('Kilo')}</span>
               </button>
             </div>
           </div>
@@ -136,14 +137,14 @@ export function ManageThemesModal({ onClose }: Props) {
           <div>
             <div className="flex justify-between items-center mb-1">
               <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
-                {isTechTheme ? 'MODOS_EN_MENU' : 'Modos en Menú Desplegable'}
+                {isTechTheme ? trTech('MODOS_EN_MENU', 'Modos en Menú Desplegable') : tr('Modos en Menú Desplegable')}
               </p>
               <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono border border-accent/20 rounded-none' : 'rounded'} ${isValidCount ? 'text-accent bg-accent/10' : 'text-red-400 bg-red-500/10'}`}>
                 {localAllowed.length} {isTechTheme ? 'SEL' : 'seleccionados'} (Mín 2, Máx 5)
               </span>
             </div>
             <p className={`text-[11px] mb-3 ${isTechTheme ? 'font-mono text-accent/40' : 'text-text-muted'}`}>
-              {isTechTheme ? 'TOCA_LOS_TEMAS_PARA_MODIFICAR_EL_MENU_RAPIDO' : 'Toca los temas en el orden que quieres que aparezcan en el menú rápido.'}
+              {isTechTheme ? trTech('TOCA_LOS_TEMAS_PARA_MODIFICAR_EL_MENU_RAPIDO', 'Toca los temas en el orden que quieres que aparezcan en el menú rápido.') : tr('Toca los temas en el orden que quieres que aparezcan en el menú rápido.')}
             </p>
             
             <div className="space-y-2">
@@ -196,7 +197,7 @@ export function ManageThemesModal({ onClose }: Props) {
             onClick={onClose}
             className={`flex-1 py-3 text-xs font-bold transition-all border ${isTechTheme ? 'border-accent/30 hover:border-accent text-accent rounded-none font-mono uppercase' : 'border-white/10 hover:bg-white/5 text-text-secondary rounded-xl'}`}
           >
-            {isTechTheme ? 'CANCELAR' : 'Cancelar'}
+            {isTechTheme ? trTech('CANCELAR', 'Cancelar') : tr('Cancelar')}
           </button>
           <button
             onClick={handleSave}
@@ -208,7 +209,7 @@ export function ManageThemesModal({ onClose }: Props) {
             }`}
           >
             <Check className="w-4 h-4" />
-            {isTechTheme ? 'GUARDAR_CAMBIOS' : 'Guardar Cambios'}
+            {isTechTheme ? trTech('GUARDAR_CAMBIOS', 'Guardar Cambios') : tr('Guardar Cambios')}
           </button>
         </div>
 

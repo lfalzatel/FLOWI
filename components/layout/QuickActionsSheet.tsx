@@ -71,8 +71,8 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
                   className={`w-full flex items-center gap-3 p-4 mb-2 text-left border transition-all active:scale-[0.98] ${featured.cls} ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
             <span className={`w-11 h-11 flex items-center justify-center bg-current/10 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}><featured.icon className="w-6 h-6 stroke-[2.5]" /></span>
             <span className="flex-1 min-w-0">
-              <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{featured.label}</span>
-              <span className="block text-xs text-text-secondary">{featured.sub}</span>
+              <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{tr(featured.label)}</span>
+              <span className="block text-xs text-text-secondary">{tr(featured.sub)}</span>
             </span>
           </button>
         )}
@@ -83,8 +83,8 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
                   : `p-4 mb-4 bg-gradient-to-br from-accent to-accent-dim shadow-lg shadow-accent/25 ${isLight ? 'text-white' : 'text-black'} ${isTechTheme ? 'rounded-none border-2 border-black' : 'rounded-2xl'}`}`}>
           <span className={`flex items-center justify-center ${featured ? 'w-9 h-9 bg-accent/15 text-accent' : 'w-11 h-11 bg-black/10'} ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}><Mic className={`${featured ? 'w-5 h-5' : 'w-6 h-6'} stroke-[2.5]`} /></span>
           <span className="flex-1 min-w-0">
-            <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{featured ? 'Dictarlo' : 'Hablar'}</span>
-            <span className={`block text-xs ${featured ? 'text-text-secondary' : 'opacity-80'}`}>{featured ? featured.say : '"Gasté 20 mil en almuerzo"'} · varias cosas a la vez</span>
+            <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{featured ? tr('Dictarlo') : tr('Hablar')}</span>
+            <span className={`block text-xs ${featured ? 'text-text-secondary' : 'opacity-80'}`}>{featured ? tr(featured.say) : tr('"Gasté 20 mil en almuerzo"')} · {tr('varias cosas a la vez')}</span>
           </span>
         </button>
 
@@ -108,7 +108,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
               <span className={`w-11 h-11 flex items-center justify-center ${a.color} ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
                 <a.icon className="w-5 h-5" />
               </span>
-              <span className={`text-[11px] leading-tight text-center ${isTechTheme ? 'text-accent uppercase text-[9px]' : 'text-text-secondary font-medium'}`}>{a.label}</span>
+              <span className={`text-[11px] leading-tight text-center ${isTechTheme ? 'text-accent uppercase text-[9px]' : 'text-text-secondary font-medium'}`}>{tr(a.label)}</span>
             </button>
           ))}
         </div>

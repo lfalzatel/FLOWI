@@ -70,12 +70,12 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
     setLoading(true);
     try {
       if (note?.id) {
-        triggerPowerAnimation(0, 'edicion', 'NOTA ACTUALIZADA', '¡ACTUALIZADA!');
+        triggerPowerAnimation(0, 'edicion', tr('NOTA ACTUALIZADA'), tr('¡ACTUALIZADA!'));
         speakText(tr('Nota actualizada con éxito'), 'es-CO');
         onClose();
         await updateNote(note.id, { title, content, color });
       } else {
-        triggerPowerAnimation(0, 'edicion', 'NOTA GUARDADA', '¡GUARDADA!');
+        triggerPowerAnimation(0, 'edicion', tr('NOTA GUARDADA'), tr('¡GUARDADA!'));
         triggerConfettiWithSynth(3.0);
         speakText(tr('Nota guardada con éxito'), 'es-CO');
         onClose();
@@ -104,7 +104,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
 
     setLoading(true);
     try {
-      triggerPowerAnimation(0, 'eliminacion', 'NOTA ELIMINADA', '¡REMOVIDA!');
+      triggerPowerAnimation(0, 'eliminacion', tr('NOTA ELIMINADA'), tr('¡REMOVIDA!'));
       speakText(tr('Nota eliminada con éxito'), 'es-CO');
       await deleteNote(note.id);
       setShowConfirmDelete(false);
@@ -120,7 +120,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`${title}\n\n${content}`.trim());
-    alert('Nota copiada al portapapeles');
+    alert(tr('Nota copiada al portapapeles'));
   };
 
   return (

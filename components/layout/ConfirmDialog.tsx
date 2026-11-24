@@ -1,4 +1,5 @@
 'use client';
+import { tr, trTech } from '@/lib/i18n';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -99,7 +100,7 @@ export function ConfirmDialog({
                   ? 'text-red-600 font-syne'
                   : 'text-red-400 font-syne'
             }`}>
-              {isTechTheme ? 'SYS_WARN :: CRITICAL' : 'Acción Crítica'}
+              {isTechTheme ? trTech('SYS_WARN :: CRITICAL', 'Acción Crítica') : tr('Acción Crítica')}
             </span>
             <h3 className={`text-base font-bold leading-tight ${
               isTechTheme

@@ -51,9 +51,9 @@ export function MonthCloseCard({ month, transactions, pendingCommitments, pendin
           </div>
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-bold ${isTechTheme ? 'text-accent uppercase font-mono' : 'font-syne text-text-primary'}`}>
-              Cierra {label}
+              {tr('Cierra {a}', { a: label })}
             </p>
-            <p className="text-xs text-text-secondary">Revisa cómo te fue y empieza el mes en orden (2 minutos)</p>
+            <p className="text-xs text-text-secondary">{tr('Revisa cómo te fue y empieza el mes en orden (2 minutos)')}</p>
           </div>
           <ChevronRight className="w-4 h-4 text-accent shrink-0" />
         </button>
@@ -142,9 +142,9 @@ function MonthCloseModal({ review, transactions, pendingCommitments, pendingCoun
            onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Paso {step + 1} de 3</p>
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{tr('Paso {n} de 3', { n: step + 1 })}</p>
             <h3 className={`font-bold ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-lg text-text-primary'}`}>
-              {step === 0 ? `Así te fue en ${review.label}` : step === 1 ? (surplus ? 'Lo que te sobró' : 'Para el próximo mes') : `Listo para ${nextLabel}`}
+              {step === 0 ? tr('Así te fue en {a}', { a: review.label }) : step === 1 ? (surplus ? tr('Lo que te sobró') : tr('Para el próximo mes')) : tr('Listo para {a}', { a: nextLabel })}
             </h3>
           </div>
           <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
@@ -157,7 +157,7 @@ function MonthCloseModal({ review, transactions, pendingCommitments, pendingCoun
           <div className="space-y-4">
             <div className={`p-4 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'} ${surplus ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
               <p className={`text-xs font-bold uppercase tracking-wider ${surplus ? 'text-emerald-400' : 'text-red-400'}`}>
-                {review.ingresos === 0 ? 'Sin ingresos registrados' : surplus ? 'Te sobró' : 'Te faltó'}
+                {review.ingresos === 0 ? tr('Sin ingresos registrados') : surplus ? tr('Te sobró') : tr('Te faltó')}
               </p>
               <p className={`text-3xl font-bold mt-1 ${surplus ? 'text-emerald-400' : 'text-red-400'} ${isTechTheme ? '' : 'font-syne'}`}>{f(Math.abs(review.result))}</p>
               <p className="text-xs text-text-secondary mt-1">
@@ -233,7 +233,7 @@ function MonthCloseModal({ review, transactions, pendingCommitments, pendingCoun
                            className="flex-1 min-w-0 bg-transparent outline-none text-text-primary font-bold" />
                   </div>
                 </label>
-                <p className="text-[11px] text-text-muted -mt-2">Solo queda anotado en tu meta; no se registra como gasto.</p>
+                <p className="text-[11px] text-text-muted -mt-2">{tr('Solo queda anotado en tu meta; no se registra como gasto.')}</p>
                 {error && <p className="text-xs text-[var(--red)]">{error}</p>}
                 <button type="button" onClick={saveToGoal} disabled={saving || !parseAmountInput(amount) || !goalId} className={primary}>
                   {saving ? tr('Guardando...') : tr('Guardar en la meta')}

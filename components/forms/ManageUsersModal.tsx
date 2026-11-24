@@ -257,7 +257,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                 on ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary hover:text-text-primary'}`;
               const fmtDay = (d?: Date | null) => d ? d.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
               const last = userStats.lastTx ?? (selectedUser.lastTxDay ? new Date(selectedUser.lastTxDay + 'T12:00:00') : null);
-              const periodLabel = filterType === 'all' ? 'Todo el tiempo' : filterType === 'month' ? 'Este periodo (mes)' : filterType === 'week' ? 'Este periodo (semana)' : 'Este día';
+              const periodLabel = filterType === 'all' ? tr('Todo el tiempo') : filterType === 'month' ? tr('Este periodo (mes)') : filterType === 'week' ? tr('Este periodo (semana)') : tr('Este día');
 
               return (
                 <div className="space-y-3">
@@ -281,7 +281,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                   <div className={`${box} flex items-center justify-between gap-2`}>
                     <span className={lbl}>{tr('Rol')}</span>
                     {isMe ? (
-                      <span className={`text-xs px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>Tú (Administrador)</span>
+                      <span className={`text-xs px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>{tr('Tú (Administrador)')}</span>
                     ) : (
                       <div className="flex gap-1.5">
                         <button type="button" disabled={savingId === selectedUser.id || !isAdmin} onClick={() => handleChangeRole(selectedUser.id!, 'Usuario')} className={roleChip(!isAdmin)}>{tr('Usuario')}</button>

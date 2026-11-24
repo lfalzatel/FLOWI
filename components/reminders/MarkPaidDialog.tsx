@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CalendarCheck, CheckCircle2, Receipt, Trash2, X } from 'lucide-react';
@@ -36,7 +36,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
       onClose();
     } catch (err) {
       console.error('Error deleting reminder:', err);
-      setError('No se pudo eliminar. Revisa tu conexión e inténtalo de nuevo.');
+      setError(tr('No se pudo eliminar. Revisa tu conexión e inténtalo de nuevo.'));
       setSaving(false);
     }
   }
@@ -98,19 +98,19 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
               <p className={`text-xs ${daysLeft < 0 ? 'text-[var(--red)]' : 'text-text-muted'}`}>{isPayment ? `Vence el ${dueText} · ${dueLabel(daysLeft)}` : `${dueText} · ${eventDueLabel(daysLeft)}`}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 -mr-1 text-text-secondary hover:text-text-primary">
+          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 -mr-1 text-text-secondary hover:text-text-primary">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <p className="text-sm text-text-secondary mb-4">
           {confirmDelete
-            ? `¿Eliminar "${reminder.title}"? Ya no te volveré a avisar${reminder.type !== 'once' ? ' en ninguna fecha' : ''}. No se puede deshacer.`
+            ? (reminder.type !== 'once' ? tr('¿Eliminar "{a}"? Ya no te volveré a avisar en ninguna fecha. No se puede deshacer.', { a: reminder.title }) : tr('¿Eliminar "{a}"? Ya no te volveré a avisar. No se puede deshacer.', { a: reminder.title }))
             : isPayment
-              ? `Lo marco como pagado solo por esta vez${reminder.type !== 'once' ? '; te vuelvo a avisar en el próximo vencimiento' : ''}.`
+              ? (reminder.type !== 'once' ? tr('Lo marco como pagado solo por esta vez; te vuelvo a avisar en el próximo vencimiento.') : tr('Lo marco como pagado solo por esta vez.'))
               : reminder.type !== 'once'
-                ? 'Lo marco como hecho por esta vez; te vuelvo a avisar en la próxima fecha.'
-                : '¿Ya pasó o está en curso? Márcalo como hecho y deja de aparecer.'}
+                ? tr('Lo marco como hecho por esta vez; te vuelvo a avisar en la próxima fecha.')
+                : tr('¿Ya pasó o está en curso? Márcalo como hecho y deja de aparecer.')}
         </p>
 
         {error && <p className="text-xs text-[var(--red)] mb-3">{error}</p>}
@@ -119,11 +119,11 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
         <div className="space-y-2">
           <button type="button" onClick={remove} disabled={saving}
                   className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 bg-red-500 text-white ${isTechTheme ? 'rounded-none uppercase text-xs tracking-wider' : 'rounded-xl text-sm'}`}>
-            <Trash2 className="w-4 h-4" /> {saving ? 'Eliminando...' : 'Sí, eliminar'}
+            <Trash2 className="w-4 h-4" /> {saving ? tr('Eliminando...') : tr('Sí, eliminar')}
           </button>
           <button type="button" onClick={() => setConfirmDelete(false)} disabled={saving}
                   className={`w-full py-3 text-sm font-semibold border border-glass-border text-text-primary hover:bg-glass ${isTechTheme ? 'rounded-none uppercase text-xs' : 'rounded-xl'}`}>
-            No, volver
+            {tr('No, volver')}
           </button>
         </div>
         ) : (
@@ -131,7 +131,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
           {!isPayment ? (
             <button type="button" onClick={() => markPaid(false)} disabled={saving}
                     className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs tracking-wider' : 'rounded-xl bg-accent text-white hover:bg-accent/90 text-sm'}`}>
-              <CheckCircle2 className="w-4 h-4" /> {saving ? 'Guardando...' : 'Marcar como hecho'}
+              <CheckCircle2 className="w-4 h-4" /> {saving ? tr('Guardando...') : tr('Marcar como hecho')}
             </button>
           ) : (<>
           <button type="button" onClick={() => markPaid(true)} disabled={saving}
@@ -140,7 +140,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
           </button>
           <button type="button" onClick={() => markPaid(false)} disabled={saving}
                   className={`w-full py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-glass-border text-text-primary hover:bg-glass'}`}>
-            {saving ? 'Guardando...' : 'Solo marcar como pagado'}
+            {saving ? tr('Guardando...') : tr('Solo marcar como pagado')}
           </button>
           </>)}
           <button type="button" onClick={() => setConfirmDelete(true)} disabled={saving}
