@@ -52,3 +52,14 @@ flowi-9af82-*.json
 
 # servidor de pagos
 /functions/node_modules
+
+# Paquete Android (Bubblewrap): la llave de firma y lo compilado NUNCA van a GitHub
+/android/*.keystore
+/android/*.jks
+/android/*.aab
+/android/*.apk
+/android/*.idsig
+/android/build/
+/android/app/build/
+/android/.gradle/
+/android/local.properties

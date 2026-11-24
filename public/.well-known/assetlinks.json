@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.flowi.gastos",
+      "sha256_cert_fingerprints": [
+        "C3:CE:F9:C0:59:1A:B3:0C:89:66:AC:AB:A5:70:A3:F0:02:AF:CD:58:36:50:C0:D2:85:51:80:72:CE:A6:01:F7"
+      ]
+    }
+  }
+]
