@@ -2348,4 +2348,13 @@ export const EN: Record<string, string> = {
   'Suma de productos': 'Sum of products',
   // ── Compromisos ──
   'Para agregar uno nuevo, crea un recordatorio en la pestaña': 'To add a new one, create a reminder in the tab',
+  // ── Explicación de Hoy puedes gastar y Límite diario ──
+  'Resultado de la resta': 'Result of the subtraction',
+  'Lo que debes supera lo que tienes por {a}. Tus {b} sí están en tus cuentas, pero ya están comprometidos: si los gastas, te faltarán para esos pagos. Por eso lo libre queda en $0.': 'What you owe is {a} more than what you have. Your {b} are in your accounts, but they are already committed: if you spend them, you will be short for those payments. That is why what is free stays at $0.',
+  'Este mes has gastado {a} más de lo que te ha entrado. Por eso lo libre queda en $0.': 'This month you have spent {a} more than you earned. That is why what is free stays at $0.',
+  'Compromisos por pagar': 'Commitments to pay',
+  'Te queda para el mes': 'Left for the month',
+  'Cuota diaria': 'Daily quota',
+  'Este mes ya gastaste {a} más de lo que te entró. Como no queda nada para repartir, la cuota es $0: cada gasto nuevo aumenta lo que te falta.': 'This month you already spent {a} more than you earned. Since there is nothing left to split, the quota is $0: every new expense increases what you are short.',
+  'Tus {a} están apartados para tarjetas y pagos · toca para ver': 'Your {a} are set aside for cards and payments · tap to see',
 };

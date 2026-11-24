@@ -128,7 +128,20 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         {today.savedMonth > 0 && (
           <Row label="Ahorrado en CDT este mes" hint="Plata que salió de tus cuentas hacia un CDT: no es gasto, pero ya no está disponible" value={f(today.savedMonth)} sign="−" />
         )}
-        <Row label="Libre ahora" value={f(Math.max(0, freeNow))} strong />
+        {freeNow < 0 ? (
+          <>
+            {/* La resta completa: así se ve por qué no queda nada libre */}
+            <Row label="Resultado de la resta" value={`−${f(-freeNow)}`} strong />
+            <p className="text-[11px] text-amber-300 leading-snug py-1">
+              {today.mode === 'cuentas'
+                ? tr('Lo que debes supera lo que tienes por {a}. Tus {b} sí están en tus cuentas, pero ya están comprometidos: si los gastas, te faltarán para esos pagos. Por eso lo libre queda en $0.', { a: f(-freeNow), b: f(today.cash) })
+                : tr('Este mes has gastado {a} más de lo que te ha entrado. Por eso lo libre queda en $0.', { a: f(-freeNow) })}
+            </p>
+            <Row label="Libre ahora" value={f(0)} strong />
+          </>
+        ) : (
+          <Row label="Libre ahora" value={f(freeNow)} strong />
+        )}
         {today.tomorrowAllowance !== null && (
           <>
             <Row label={tr('Repartido en {a} días', { a: today.daysLeft - 1 })}

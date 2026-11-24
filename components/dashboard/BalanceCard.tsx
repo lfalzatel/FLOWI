@@ -119,6 +119,9 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
                 <p className={`text-[10px] mb-3 leading-tight ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
                   {!today.hasBase
                     ? tr('Registra tus ingresos del mes')
+                    : today.mode === 'cuentas' && today.cash > 0 && today.freeAtStartOfDay <= 0 && today.spentToday === 0
+                      // Hay plata en las cuentas, pero ya está comprometida: se dice para que no parezca un error
+                      ? tr('Tus {a} están apartados para tarjetas y pagos · toca para ver', { a: formatCurrency(today.cash, currency) })
                     : today.spentToday > 0
                       ? tr('Llevas {a} de {b}', { a: formatCurrency(today.spentToday, currency), b: formatCurrency(today.todayAllowance, currency) })
                       : tr('Cuota de hoy · quedan {n} días', { n: today.daysLeft })}

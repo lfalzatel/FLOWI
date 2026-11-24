@@ -476,6 +476,35 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                   </p>
                 </div>
 
+                {/* Así se calcula: la resta completa, para entender de dónde sale la cuota (y por qué puede ser $0) */}
+                {(() => {
+                  const fm = (n: number) => formatCurrency(n, profile?.currency);
+                  const result = disponibleParaGastar - compromisos;
+                  const line = (label: string, value: string, cls = 'text-text-primary', strong = false) => (
+                    <div className={`flex justify-between items-baseline gap-3 text-xs py-1 ${strong ? 'border-t border-glass-border pt-2 mt-1 font-bold' : ''}`}>
+                      <span className={strong ? 'text-text-primary' : 'text-text-secondary'}>{label}</span>
+                      <span className={`tabular-nums whitespace-nowrap ${cls}`}>{value}</span>
+                    </div>
+                  );
+                  return (
+                    <div className={`p-3 ${isTechTheme ? 'rounded-none bg-accent/5 border border-accent/20' : 'rounded-2xl bg-white/5 border border-white/5'}`}>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">{tr('Así se calcula')}</p>
+                      {line(totalIngresos > 0 ? tr('Ingresos del mes') : tr('Tu presupuesto del mes'), `+ ${fm(baseLimit)}`, 'text-emerald-400')}
+                      {line(tr('Gastos fijos'), `− ${fm(gastosFijos)}`, 'text-orange-400')}
+                      {line(tr('Gastos variables'), `− ${fm(gastosVariables)}`, 'text-red-400')}
+                      {compromisos > 0 && line(tr('Compromisos por pagar'), `− ${fm(compromisos)}`, 'text-orange-400')}
+                      {line(tr('Te queda para el mes'), result < 0 ? `−${fm(-result)}` : fm(result), result < 0 ? 'text-red-400' : 'text-accent', true)}
+                      {line(tr('Repartido en {a} días', { a: diasRestantes }), `÷ ${diasRestantes}`)}
+                      {line(tr('Cuota diaria'), tr('{a} / día', { a: fm(cuotaDiaria) }), 'text-accent', true)}
+                      {result < 0 && (
+                        <p className="text-[11px] text-amber-300 leading-snug mt-1.5">
+                          {tr('Este mes ya gastaste {a} más de lo que te entró. Como no queda nada para repartir, la cuota es $0: cada gasto nuevo aumenta lo que te falta.', { a: fm(-result) })}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* Métricas secundarias */}
                 <div className="grid grid-cols-2 gap-2">
                   <div className={`p-3 rounded-xl ${isTechTheme ? 'bg-accent/5 border border-accent/20' : 'bg-white/5 border border-white/5'}`}>
