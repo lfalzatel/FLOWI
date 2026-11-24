@@ -2165,6 +2165,7 @@ export const EN: Record<string, string> = {
   'NOTA ELIMINADA': 'NOTE DELETED',
   'Nebulosa': 'Nebula',
   'Nova': 'Nova',
+  'Más temas': 'More themes',
   'Carbón': 'Charcoal',
   'Carbón y oro': 'Charcoal & gold',
   'No descontar': 'Do not take out',

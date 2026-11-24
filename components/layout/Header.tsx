@@ -185,7 +185,7 @@ export function Header() {
           </svg>
 
           {/* Logo Container */}
-          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-[#0D1527] flex items-center justify-center">
+          <div className="absolute inset-[15%] rounded-full overflow-hidden border border-glass-border bg-[var(--logo-disc,#0D1527)] flex items-center justify-center">
             <svg className="w-full h-full drop-shadow-md relative z-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               {/* Vertical stem */}
               <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />
@@ -415,7 +415,7 @@ export function Header() {
                 strokeLinecap="round"
               />
             </svg>
-            <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[#0D1527] flex items-center justify-center shadow-2xl">
+            <div className="absolute inset-[15%] rounded-full overflow-hidden border border-white/10 bg-[var(--logo-disc,#0D1527)] flex items-center justify-center shadow-2xl">
               <svg className="w-full h-full drop-shadow-lg relative z-0" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 {/* Vertical stem */}
                 <line x1="28" y1="25" x2="28" y2="75" stroke={logoOuterColor} strokeWidth="14" strokeLinecap="round" className="transition-colors duration-500" />

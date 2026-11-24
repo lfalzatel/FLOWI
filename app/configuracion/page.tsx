@@ -62,12 +62,21 @@ export default function ConfigPage() {
   });
 
   // Desde el menú de perfil se llega con #apoyar, y desde el aviso "Activa la IA" con #ia: abrir esa sección
+  // Con #temas (enlace "Más temas" del menú de perfil) se abre directo la ventana de temas
   useEffect(() => {
-    const target = window.location.hash.slice(1);
-    if (target === 'apoyar' || target === 'ia') {
-      setOpenSections(prev => ({ ...prev, [target]: true }));
-      setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 300);
-    }
+    const open = () => {
+      const target = window.location.hash.slice(1);
+      if (target === 'apoyar' || target === 'ia') {
+        setOpenSections(prev => ({ ...prev, [target]: true }));
+        setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 300);
+      } else if (target === 'temas') {
+        setIsThemesModalOpen(true);
+        history.replaceState(null, '', window.location.pathname);
+      }
+    };
+    open();
+    window.addEventListener('hashchange', open);
+    return () => window.removeEventListener('hashchange', open);
   }, []);
 
   const [openSoundSubSections, setOpenSoundSubSections] = useState({

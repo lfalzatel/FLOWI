@@ -316,6 +316,17 @@ export function ProfileCapsule() {
                   );
                 })}
               </div>
+              {/* Más temas: abre la ventana de temas en Configuración, donde cada quien arma su menú */}
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  if (window.location.pathname.startsWith('/configuracion')) window.location.hash = 'temas';
+                  else router.push('/configuracion#temas');
+                }}
+                className={`w-full mt-1 py-1 text-[10px] font-semibold text-accent hover:underline ${isTechTheme ? 'font-mono uppercase' : ''}`}
+              >
+                {tr('Más temas')} ›
+              </button>
             </div>
           )}
 

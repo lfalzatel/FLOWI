@@ -224,6 +224,8 @@
   --red:           #C2410C;
   --yellow:        #B45309;
 }
+/* Disco del logo en papel crema: la F en tinta se ve sobre él */
+[data-theme='nova'] { --logo-disc: #FFFDF9; }
 [data-theme='nova'] .font-syne { font-family: 'Outfit', 'DM Sans', sans-serif; letter-spacing: -0.02em; }
 [data-theme='nova'] .glass-card,
 [data-theme='nova'] .glass-card-strong {
