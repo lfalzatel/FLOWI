@@ -30,6 +30,13 @@ export const PLANS: PlanOption[] = [
   { id: 'anual', label: 'Anual', months: 12, price: 50000, best: true },
 ];
 
+// Fuera de Colombia (Paddle, en euros o dólares; el precio incluye el IVA que corresponda)
+export interface IntlPlanOption { id: 'mensual' | 'anual'; label: string; months: number; eur: number; usd: number; best?: boolean }
+export const INTL_PLANS: IntlPlanOption[] = [
+  { id: 'mensual', label: 'Mensual', months: 1, eur: 4.99, usd: 4.99 },
+  { id: 'anual', label: 'Anual', months: 12, eur: 39.99, usd: 39.99, best: true },
+];
+
 // Regalo de lanzamiento: quien ya usaba FLOWI antes de los planes tiene un mes de Premium
 const LAUNCH = new Date('2026-11-09T00:00:00-05:00');
 const GIFT_END = new Date('2026-12-09T23:59:59-05:00');

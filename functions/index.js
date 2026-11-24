@@ -132,6 +132,58 @@ exports.wompiEventos = onRequest({ secrets: [WOMPI_EVENTS], region: 'us-central1
   }
 });
 
+// ── Pagos internacionales con Paddle (fuera de Colombia, en euros o dólares) ──────────────────────
+// Paddle es el revendedor: cobra (tarjeta, PayPal, Apple/Google Pay), maneja el IVA y paga a FLOWI.
+// La app abre el pago con custom_data { uid }; Paddle avisa aquí "transaction.completed" con una firma
+// (PADDLE_WEBHOOK_SECRET). Se verifica la firma, se mira qué precio se pagó y se suma Premium.
+const { verifyPaddleSignature, planFromTransaction, extendUntil } = require('./paddle');
+const PADDLE_WEBHOOK_SECRET = defineSecret('PADDLE_WEBHOOK_SECRET');
+const PADDLE_PRICE_MENSUAL = defineString('PADDLE_PRICE_MENSUAL', { default: '' });
+const PADDLE_PRICE_ANUAL = defineString('PADDLE_PRICE_ANUAL', { default: '' });
+
+exports.paddleEventos = onRequest({ secrets: [PADDLE_WEBHOOK_SECRET], region: 'us-central1' }, async (req, res) => {
+  if (req.method !== 'POST') { res.status(405).send('Método no permitido'); return; }
+  if (!verifyPaddleSignature(req.get('paddle-signature'), req.rawBody, PADDLE_WEBHOOK_SECRET.value())) {
+    logger.warn('Aviso de Paddle con firma inválida');
+    res.status(401).send('Firma inválida');
+    return;
+  }
+  const body = req.body || {};
+  if (body.event_type !== 'transaction.completed') { res.status(200).send('ok'); return; }
+  const data = body.data || {};
+  const uid = String(data.custom_data?.uid || '');
+  const bought = planFromTransaction(data, { mensual: PADDLE_PRICE_MENSUAL.value(), anual: PADDLE_PRICE_ANUAL.value() });
+  if (!data.id || !uid || !bought) {
+    logger.error('Pago de Paddle sin persona o con un precio desconocido', { id: data.id, uid, price: data.items?.[0]?.price?.id });
+    res.status(200).send('ok'); // no se reintenta: no hay nada que activar
+    return;
+  }
+
+  try {
+    const payRef = db.collection('fl_payments').doc(`paddle_${data.id}`);
+    const userRef = db.collection('users').doc(uid);
+    await db.runTransaction(async (t) => {
+      const pay = await t.get(payRef);
+      if (pay.exists && pay.data().status === 'APPROVED') return; // Paddle puede repetir el aviso
+      const user = await t.get(userRef);
+      if (!user.exists) { logger.error('Pago de Paddle para una persona que no existe', { uid, id: data.id }); return; }
+      const current = user.data().premiumUntil ? user.data().premiumUntil.toDate() : null;
+      const until = extendUntil(current, bought.months);
+      t.set(userRef, { premiumUntil: admin.firestore.Timestamp.fromDate(until), plan: bought.plan }, { merge: true });
+      t.set(payRef, {
+        userId: uid, plan: bought.plan, months: bought.months, provider: 'paddle', paddleId: data.id,
+        currency: data.currency_code || null, total: data.details?.totals?.grand_total || null,
+        status: 'APPROVED', premiumUntil: admin.firestore.Timestamp.fromDate(until),
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    });
+    res.status(200).send('ok');
+  } catch (e) {
+    logger.error('Error procesando aviso de Paddle', e);
+    res.status(500).send('error'); // Paddle reintenta
+  }
+});
+
 // Pago por transferencia directa (Bre-B): la persona sube el comprobante (fl_manual_payments) y el
 // administrador lo aprueba o rechaza desde Planes. Al aprobar se suman los meses de Premium.
 exports.revisarPagoManual = onCall({ region: 'us-central1' }, async (req) => {

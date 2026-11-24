@@ -2285,4 +2285,12 @@ export const EN: Record<string, string> = {
   'Clave del PDF': 'PDF password',
   'Abrir': 'Open',
   'en la app entra a tu perfil (arriba a la izquierda), busca "Extractos" o "Certificados", elige el mes y descarga el PDF.': 'in the app open your profile (top left), look for "Statements" or "Certificates", choose the month and download the PDF.',
+  // ── Pago internacional (Paddle) ──
+  '¡Pago recibido! Premium se activa en unos segundos.': 'Payment received! Premium turns on in a few seconds.',
+  '¿Estás en Colombia? Paga en pesos': 'In Colombia? Pay in pesos',
+  '¿Estás fuera de Colombia? Paga en euros o dólares': 'Outside Colombia? Pay in euros or dollars',
+  '4 meses gratis': '4 months free',
+  '{a}/mes': '{a}/month',
+  'por mes': 'per month',
+  'Pagas una sola vez con tarjeta, PayPal, Apple Pay o Google Pay a través de Paddle, nuestro revendedor, que cobra en tu moneda e incluye los impuestos de tu país. No es un cobro automático: te avisamos para renovar.': 'You pay once by card, PayPal, Apple Pay or Google Pay through Paddle, our reseller, which charges in your currency and includes your country’s taxes. It is not an automatic charge: we remind you to renew.',
 };

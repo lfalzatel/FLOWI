@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale, tr, lazyT } from '@/lib/i18n';
+import { currentLocale, tr, lazyT, useT } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -13,7 +13,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { LinkAccountModal } from '@/components/layout/GuestBanner';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
-import { FREE_LIMITS, PLANS, PlanOption, usePlan } from '@/lib/plans';
+import { FREE_LIMITS, INTL_PLANS, PLANS, PlanOption, usePlan } from '@/lib/plans';
+import { openPaddleCheckout, paddleReady } from '@/lib/paddle';
 import { confirmPayment, payPlan } from '@/lib/wompi';
 import { formatCurrency } from '@/lib/format';
 
@@ -45,6 +46,33 @@ export default function PlanesPage() {
   const [paying, setPaying] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [needLink, setNeedLink] = useState(false); // invitado: para pagar necesita su cuenta de Google
+  // Fuera de Colombia se paga en euros o dólares con Paddle (si está configurado). Se propone según la
+  // moneda del perfil y el idioma, y la persona puede cambiarlo.
+  const { lang } = useT();
+  const intlAvailable = paddleReady();
+  const [intl, setIntl] = useState(false);
+  useEffect(() => { if (intlAvailable && profile) setIntl((profile.currency && profile.currency !== 'COP') || lang === 'en'); }, [intlAvailable, profile?.currency, lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [intlSelected, setIntlSelected] = useState<'mensual' | 'anual'>('anual');
+  const intlPlan = INTL_PLANS.find(p => p.id === intlSelected)!;
+  // Euros como en Europa (4,99 € / €4.99); dólares según el idioma (US$ 4,99 / $4.99)
+  const money = (n: number, c: 'EUR' | 'USD') => new Intl.NumberFormat(c === 'EUR' ? (lang === 'en' ? 'en-IE' : 'es-ES') : currentLocale(), { style: 'currency', currency: c }).format(n);
+  const payIntl = async () => {
+    if (user?.isAnonymous) { setNeedLink(true); return; }
+    if (!user) return;
+    setPaying(true);
+    setMessage(null);
+    try {
+      await openPaddleCheckout({
+        plan: intlSelected, uid: user.uid, email: user.email, lang,
+        onDone: () => setMessage({ ok: true, text: tr('¡Pago recibido! Premium se activa en unos segundos.') }),
+      });
+    } catch (e) {
+      console.error('Pago Paddle:', e);
+      setMessage({ ok: false, text: tr('No se pudo abrir el pago. Revisa tu conexión e intenta de nuevo.') });
+    } finally {
+      setPaying(false);
+    }
+  };
 
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 
@@ -133,7 +161,43 @@ export default function PlanesPage() {
           </p>
         )}
 
-        {!playStore && (<>
+        {!playStore && intlAvailable && (
+          <button type="button" onClick={() => { setIntl(v => !v); setMessage(null); }} className="w-full text-xs text-accent font-semibold underline">
+            {intl ? tr('¿Estás en Colombia? Paga en pesos') : tr('¿Estás fuera de Colombia? Paga en euros o dólares')}
+          </button>
+        )}
+
+        {!playStore && intl && intlAvailable && (<>
+        {/* Fuera de Colombia: Paddle */}
+        <div className="grid grid-cols-2 gap-2">
+          {INTL_PLANS.map(p => {
+            const on = p.id === intlSelected;
+            return (
+              <button key={p.id} type="button" onClick={() => setIntlSelected(p.id)}
+                      className={`relative p-3 text-center border transition-all active:scale-[0.97] ${isTech ? 'rounded-none' : 'rounded-2xl'} ${on ? 'border-accent bg-accent/10' : 'border-glass-border bg-glass'}`}>
+                {p.best && <span className={`absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-bold uppercase px-2 py-0.5 bg-amber-400 text-black ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('4 meses gratis')}</span>}
+                <p className="text-[11px] font-semibold text-text-secondary">{tr(p.label)}</p>
+                <p className={`text-base font-bold ${on ? 'text-accent' : 'text-text-primary'}`}>{money(p.eur, 'EUR')}</p>
+                <p className="text-[10px] text-text-muted">{money(p.usd, 'USD')}{p.months > 1 ? ` · ${tr('{a}/mes', { a: money(Math.round((p.eur / p.months) * 100) / 100, 'EUR') })}` : ` · ${tr('por mes')}`}</p>
+              </button>
+            );
+          })}
+        </div>
+        <button type="button" onClick={payIntl} disabled={paying}
+                className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-wider text-sm' : `rounded-2xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+          {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+          {premium ? tr('Renovar') : tr('Pagar')} {tr(intlPlan.label).toLowerCase()} · {money(intlPlan.eur, 'EUR')}
+        </button>
+        {message && (
+          <p className={`text-sm text-center ${message.ok ? 'text-accent' : 'text-red-400'}`}>{message.text}</p>
+        )}
+        <p className="text-[11px] text-text-muted text-center leading-relaxed">
+          {tr('Pagas una sola vez con tarjeta, PayPal, Apple Pay o Google Pay a través de Paddle, nuestro revendedor, que cobra en tu moneda e incluye los impuestos de tu país. No es un cobro automático: te avisamos para renovar.')}
+          {' '}<Link href="/legal#terminos" className="underline hover:text-text-secondary">{tr('términos de uso')}</Link>
+        </p>
+        </>)}
+
+        {!playStore && !(intl && intlAvailable) && (<>
         {/* Planes de pago */}
         <div className="grid grid-cols-3 gap-2">
           {PLANS.map(p => {

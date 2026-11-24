@@ -44,6 +44,7 @@ export function privacyEn(email: string): Block[] {
         [
           'Google Firebase: sign-in, data storage and notifications. Its servers may be outside Colombia (for example, in the United States), which means an international data transfer that you authorize by using FLOWI.',
           'Wompi (Bancolombia): processes payments by card, Nequi, PSE or Bancolombia.',
+          'Paddle (Paddle.com Market Limited): for payments from outside Colombia it is the reseller of FLOWI Premium; it receives your email, country and payment details to charge you and issue the invoice, and FLOWI never sees your card.',
           'OpenRouter: only if you connect the AI assistant. The phrase you dictate or the photo of the receipt is sent to the free model so it can understand it; those photos are not stored in FLOWI. The connection key stays only on your phone.',
         ],
       ],
@@ -124,6 +125,7 @@ export function termsEn(email: string): Block[] {
           'If you renew before it ends, the new period is added to the time you have left.',
           'You can pay with Wompi (card, Nequi, PSE or Bancolombia), and Premium is activated as soon as Wompi approves the payment. You can also pay by bank transfer and upload the receipt; in that case it is activated when we verify the money arrived.',
           'People who were already using FLOWI before November 9, 2026 get Premium as a gift until December 9, 2026.',
+          'Outside Colombia, Premium is sold through Paddle (Paddle.com Market Limited), which acts as reseller and merchant of record: it charges in euros or dollars, includes your country’s taxes (such as VAT) and its own buyer terms apply to that payment. Prices: monthly €4.99 / US$4.99 and yearly €39.99 / US$39.99, one-time payment with no automatic renewal.',
         ],
       ],
     },
