@@ -17,6 +17,7 @@ import { formatQty, groupByCategory } from '@/lib/receiptItems';
 import { matchesProduct } from '@/lib/productSpend';
 import type { Transaction } from '@/lib/firestore';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 const toDate = (d: Transaction['date']) => (d instanceof Date ? d : d.toDate());
 const monthTitle = (d: Date) => {
   const s = d.toLocaleDateString(currentLocale(), { month: 'long', year: 'numeric' });
@@ -62,6 +63,7 @@ export default function RecibosPage() {
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mis recibos')}</h1>
             <p className="text-xs text-text-muted">{tr('Tus compras con todos sus productos. Toca una para ver el detalle.')}</p>
           </div>
+          <PageTourButton id="recibos" className="ml-auto" />
         </div>
 
         <div className="relative">

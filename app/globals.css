@@ -497,3 +497,16 @@ body {
 [data-theme='kiloCode'] :is(.rounded-t-md, .rounded-t-lg, .rounded-t-xl, .rounded-t-2xl, .rounded-t-3xl, .rounded-b-xl, .rounded-b-2xl) {
   border-radius: 0 !important;
 }
+
+/* Saludo de Inicio: la mano 👋 saluda cada vez que se entra a la página */
+@keyframes flowi-wave {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(16deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(16deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(12deg); }
+  60%, 100% { transform: rotate(0deg); }
+}
+.animate-wave { animation: flowi-wave 1.6s ease-in-out 0.4s 1 both; transform-origin: 70% 80%; }
+@media (prefers-reduced-motion: reduce) { .animate-wave { animation: none; } }

@@ -89,6 +89,8 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
                     if (isTip) onUsed?.();
                     // "Foto del recibo" abre el menú del botón + en vez de navegar
                     if (action.href.startsWith('/?accion=')) { e.preventDefault(); window.dispatchEvent(new CustomEvent('flowi-open-quick-actions')); }
+                    // Un tutorial corto (p. ej. compartir desde el banco) se abre ahí mismo
+                    if (action.href.startsWith('/?tutorial=')) { e.preventDefault(); window.dispatchEvent(new CustomEvent('flowi-page-tour', { detail: action.href.split('=')[1] })); }
                   }}>{body}</Link>
           : <button type="button" onClick={() => (action.kind === 'notify' ? askForNotifications({ force: true }) : setOpen(true))} className={inner}>{body}</button>}
         <button type="button" onClick={onSkip} title={tr('Saltar por hoy')} aria-label={tr('Saltar esta sugerencia por hoy')}

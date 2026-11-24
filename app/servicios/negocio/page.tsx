@@ -21,6 +21,7 @@ import { formatCurrency } from '@/lib/format';
 import { usePlan } from '@/lib/plans';
 import type { Transaction } from '@/lib/firestore';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 // Mi negocio: ventas − costos = ganancia del mes, aparte de la plata personal.
 // Gratis: el mes en curso. Premium: otros meses, comparación, desglose y movimientos.
 export default function NegocioPage() {
@@ -69,6 +70,7 @@ export default function NegocioPage() {
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Mi negocio')}</h1>
             <p className="text-xs text-text-muted">{tr('Tus ventas aparte de tu plata personal')}</p>
           </div>
+          <PageTourButton id="negocio" className="ml-auto" />
         </div>
 
         {/* Selector de mes (otros meses: Premium) */}

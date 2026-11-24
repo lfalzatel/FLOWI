@@ -1,6 +1,8 @@
 'use client';
 import { pickAppVoice, appSpeechLang } from '@/lib/voiceParser';
-import { tr, lazyT } from '@/lib/i18n';
+import { tr } from '@/lib/i18n';
+import Link from 'next/link';
+import { HOME_TOUR, TourStep } from './tours';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Compass, Volume2, VolumeX, X } from 'lucide-react';
@@ -12,31 +14,11 @@ import { usePopupHold } from '@/lib/tourGate';
 // la síntesis del propio navegador: no tiene costo ni necesita internet. Las partes que no
 // estén en pantalla (p. ej. el menú inferior en computador) se saltan.
 
-export const TOUR_DONE_KEY = 'flowi_tour_done';
+// v2: el recorrido se renovó (IA, compartir desde el banco, cuentas, servicios): se ofrece otra vez
+export const TOUR_DONE_KEY = 'flowi_tour_done_v2';
 const VOICE_KEY = 'flowi_tour_voice';
 
-// target admite alternativas separadas por "|" (la primera que esté en pantalla)
-interface Step { target?: string; title: string; text: string }
-
-const STEPS: Step[] = lazyT(() => ([
-  { title: tr('¡Hola! Te muestro FLOWI'), text: tr('Primero te enseño a registrar tu plata y después a leer tu pantalla de inicio. Lo que ves ahora son datos de ejemplo: tus datos no se tocan. Puedes omitir el recorrido cuando quieras.') },
-  { target: 'voice|add', title: '1. Registra lo que sea desde aquí', text: tr('Toca este botón y verás todo lo que puedes registrar: hablar, un gasto, un ingreso, la foto de un recibo, un extracto del banco, una deuda, un recordatorio, una nota o un CDT. Lo más rápido es hablar: di "gasté veinte mil en almuerzo" o "me pagaron el sueldo". Si mantienes presionado el botón, te escucho de una vez.') },
-  { target: '#nav-gastos', title: '2. Gastos e ingresos', text: tr('En estas pestañas ves la lista completa de gastos y de ingresos, y puedes editar o borrar. Cuando un gasto se repite cada mes, como el arriendo o los servicios, márcalo como gasto fijo; los demás son tus gastos del día a día.') },
-  { target: '#nav-deudas', title: '3. Deudas', text: tr('Aquí registras lo que debes y también lo que te deben, con intereses si aplica. Cada vez que pagas una parte, registras el abono y la deuda va bajando.') },
-  { target: 'filter', title: tr('Ahora, tu inicio: el período'), text: tr('Aquí escoges si ves todo, el mes, la semana o un día. Con las flechas cambias de mes. Todas las cifras de abajo dependen de lo que elijas aquí.') },
-  { target: '#balance-card', title: tr('Dinero disponible'), text: tr('Es lo que entró menos lo que salió en el período. En el ejemplo entraron tres millones y medio de sueldo y ya salió el arriendo. Si sale en rojo, gastaste más de lo que entró. Debajo, el balance neto también descuenta tus deudas.') },
-  { target: 'totals', title: tr('Gastos e ingresos del período'), text: tr('En rojo, todo lo que salió. En verde, todo lo que entró.') },
-  { target: 'debts', title: tr('Deudas pendientes'), text: tr('Lo que te falta por pagar de tus deudas. En el ejemplo, del préstamo de Juan ya se abonaron doscientos mil y faltan cuatrocientos mil. Tócala para ver el detalle.') },
-  { target: 'today', title: tr('Hoy puedes gastar'), text: tr('La cifra más útil del día: cuánto puedes gastar hoy sin quedarte corto a fin de mes. Ya aparta los pagos fijos que faltan, como el internet. Si te pasas, se pone en rojo y te dice cuánto puedes gastar desde mañana. Tócala para ver la cuenta.') },
-  { target: 'next-action', title: tr('Tu siguiente acción'), text: tr('Lo más útil que puedes hacer ahora. En el ejemplo, pagar el internet que vence pronto. Tócala para registrarlo, o sáltala por hoy con la X. Al empezar cada mes aquí te invito a cerrar el mes anterior.') },
-  { target: 'projection', title: tr('Control y proyección'), text: tr('Tus gastos fijos, el dinero libre que te queda y tu límite diario. Cada cuadro se puede tocar para ver el desglose.') },
-  { target: 'commitments', title: tr('Próximos compromisos'), text: tr('Los pagos fijos que te faltan este mes, con el valor que pagaste el mes pasado. Cuando pagues uno, tócalo para registrarlo.') },
-  { target: 'goals', title: tr('Metas de ahorro'), text: tr('Tu meta principal y cuánto llevas. Toca para ver todas tus metas y cuándo las lograrías.') },
-  { target: 'chart', title: tr('Gráfica del período'), text: tr('Muestra cómo se movió tu plata día a día en el período que elegiste.') },
-  { target: 'budgets', title: tr('Gastos por categoría'), text: tr('Compara en qué gastas con una guía sana: necesidades, gustos y ahorro. Toca cada grupo para ver sus categorías.') },
-  { target: 'profile', title: tr('Personaliza FLOWI'), text: tr('En tu foto cambias el tema y los colores: Cyber, Día, Noche y más. Ahí mismo está "Ver tutorial" para repetir este recorrido cuando quieras.') },
-  { title: tr('¡Listo!'), text: tr('Ya sabes registrar y leer tu inicio. Al cerrar vuelven tus datos reales. ¡A llevar tus cuentas claras!') },
-]));
+type Step = TourStep;
 
 function findTarget(step: Step): HTMLElement | null {
   if (!step.target) return null;
@@ -72,7 +54,7 @@ export function TourOffer({ onStart, onSkip }: { onStart: (voice: boolean) => vo
           <Compass className="w-7 h-7 text-accent" />
         </div>
         <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('¿Te muestro cómo usar FLOWI?')}</h2>
-        <p className="text-sm text-text-secondary mt-1 mb-5">{tr('Un recorrido de un minuto por tu pantalla de inicio: qué significa cada cifra y cómo aprovecharla.')}</p>
+        <p className="text-sm text-text-secondary mt-1 mb-5">{tr('Un recorrido corto: cómo registrar, escanear recibos con IA, compartir desde tu banco, conectar tus cuentas y leer tu inicio.')}</p>
         <div className="space-y-2">
           <button type="button" onClick={() => onStart(true)} className={primary}><Volume2 className="w-4 h-4" /> {tr('Sí, con voz')}</button>
           <button type="button" onClick={() => onStart(false)} className={secondary}>{tr('Sí, solo leyendo')}</button>
@@ -84,14 +66,16 @@ export function TourOffer({ onStart, onSkip }: { onStart: (voice: boolean) => vo
   );
 }
 
-export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice: boolean; demo?: boolean; onClose: () => void }) {
+export function AppTour({ voice: initialVoice, demo = false, steps: source = HOME_TOUR, markDone = true, onClose }: {
+  voice: boolean; demo?: boolean; steps?: Step[]; markDone?: boolean; onClose: () => void;
+}) {
   const { theme } = useTheme();
   usePopupHold(); // ni avisos ni otras ventanas encima del recorrido
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   // Solo los pasos cuya parte está en pantalla; se calcula después de pintar, cuando Inicio
   // ya muestra los datos de ejemplo
   const [steps, setSteps] = useState<Step[] | null>(null);
-  useLayoutEffect(() => { setSteps(STEPS.filter(s => !s.target || findTarget(s))); }, []);
+  useLayoutEffect(() => { setSteps(source.filter(s => !s.target || findTarget(s))); }, [source]);
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [voice, setVoice] = useState(initialVoice);
@@ -100,13 +84,13 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [cardH, setCardH] = useState(240); // alto real del cuadro (cambia con el texto y el tema)
   const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window;
-  const step = steps?.[index] ?? STEPS[0];
+  const step = steps?.[index] ?? source[0];
 
   const finish = useCallback(() => {
     if (canSpeak) window.speechSynthesis.cancel();
-    try { localStorage.setItem(TOUR_DONE_KEY, 'true'); } catch { /* sin almacenamiento */ }
+    if (markDone) try { localStorage.setItem(TOUR_DONE_KEY, 'true'); } catch { /* sin almacenamiento */ }
     onClose();
-  }, [canSpeak, onClose]);
+  }, [canSpeak, onClose, markDone]);
 
   // Ubica la parte del paso; si no está en pantalla, pasa a la siguiente en la misma dirección
   useLayoutEffect(() => {
@@ -259,18 +243,24 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
           </div>
         </div>
         <p className="text-sm text-text-secondary leading-relaxed">{step.text}</p>
+        {step.cta && (
+          <Link href={step.cta.href} onClick={finish}
+                className={`mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold border ${isTechTheme ? 'rounded-none border-accent text-accent uppercase' : 'rounded-xl border-accent/50 text-accent bg-accent/10 hover:bg-accent/20'}`}>
+            {step.cta.label} <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        )}
         <div className="flex items-center justify-between gap-2 mt-4">
-          <span className="text-[11px] text-text-muted">{index + 1} de {total}</span>
+          <span className="text-[11px] text-text-muted">{tr('{a} de {b}', { a: index + 1, b: total })}</span>
           <div className="flex items-center gap-2">
             {index === 0 ? (
               <button type="button" onClick={finish} className="px-3 py-2 text-xs font-semibold text-text-muted hover:text-text-primary">{tr('Omitir')}</button>
             ) : (
               <button type="button" onClick={() => go(-1)} className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold border ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-primary'}`}>
-                <ChevronLeft className="w-3.5 h-3.5" /> Atrás
+                <ChevronLeft className="w-3.5 h-3.5" /> {tr('Atrás')}
               </button>
             )}
             <button type="button" onClick={() => go(1)} className={`flex items-center gap-1 px-4 py-2 text-xs font-bold ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
-              {isLast ? 'Terminar' : 'Siguiente'} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
+              {isLast ? tr('Terminar') : tr('Siguiente')} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>

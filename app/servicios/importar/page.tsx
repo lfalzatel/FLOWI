@@ -16,6 +16,7 @@ import { formatCurrency } from '@/lib/format';
 import { Cell, ColumnMap, StatementRow, buildRows, guessColumns, rowToTransaction } from '@/lib/statementImport';
 import { readPdfTable } from '@/lib/pdfTable';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 const MAX_ROWS = 1000;
 
 export default function ImportarPage() {
@@ -153,6 +154,7 @@ export default function ImportarPage() {
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <h1 className={`text-2xl font-bold leading-tight ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Importar extracto')}</h1>
+          <PageTourButton id="importar" className="ml-auto" />
         </div>
 
         {imported !== null && (

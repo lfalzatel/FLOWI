@@ -25,6 +25,7 @@ import { businessMoneyByAccount } from '@/lib/business';
 import { formatCurrency } from '@/lib/format';
 
 import { MONEY_TEXT, toneOf } from '@/lib/moneyTone';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 export default function CuentasPage() {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -58,6 +59,16 @@ export default function CuentasPage() {
   const [periodValue, setPeriodValue] = useState(getLocalMonthString());
   const [showAllMoves, setShowAllMoves] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  // "Nueva cuenta" desde el botón + (en esta página) o desde otra página (?nueva=1)
+  useEffect(() => {
+    const open = () => { setEditing(null); setShowForm(true); };
+    if (new URLSearchParams(window.location.search).get('nueva') === '1') {
+      window.history.replaceState(null, '', window.location.pathname);
+      open();
+    }
+    window.addEventListener('flowi-new-account', open);
+    return () => window.removeEventListener('flowi-new-account', open);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/login');
@@ -90,6 +101,7 @@ export default function CuentasPage() {
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <h1 className={`text-2xl font-bold leading-tight truncate ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Cuentas y patrimonio')}</h1>
+            <PageTourButton id="cuentas" className="ml-auto" />
           </div>
           {states.length > 0 && <button onClick={() => { setEditing(null); setShowForm(true); }} className={btn}><Plus className="w-4 h-4" /> {tr('Cuenta')}</button>}
         </div>

@@ -31,6 +31,7 @@ import { getUserTransactions, Transaction } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { getLocalDateString, getLocalMonthString, getISOWeekString } from '@/lib/dateUtils';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 export default function PresupuestosPage() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -211,6 +212,7 @@ export default function PresupuestosPage() {
                 {tr('Centro de Presupuestos')}
               </h1>
             </div>
+            <PageTourButton id="presupuestos" className="ml-auto" />
           </div>
 
           {/* Botón de Exportar */}

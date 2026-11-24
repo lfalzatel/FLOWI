@@ -24,6 +24,8 @@ import { MonthCloseCard } from '@/components/dashboard/MonthCloseCard';
 import { monthToClose } from '@/lib/monthClose';
 import { useSkippedActions } from '@/components/dashboard/NextActionCard';
 import { NextActionCarousel } from '@/components/dashboard/NextActionCarousel';
+import { useFriends } from '@/components/FriendsProvider';
+import { getAiKey } from '@/lib/aiAssist';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useReminders } from '@/hooks/useReminders';
 import { useCategories } from '@/hooks/useCategories';
@@ -42,6 +44,7 @@ import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/no
 import { getCommitments } from '@/lib/commitments';
 import { formatCurrency } from '@/lib/format';
 import { AppTour, TourOffer, TOUR_DONE_KEY, readTourVoicePref } from '@/components/tour/AppTour';
+import { PAGE_TOURS, PageTourId } from '@/components/tour/tours';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
@@ -64,6 +67,7 @@ export default function DashboardPage() {
   const { skipped: skippedActions, skip: skipAction } = useSkippedActions();
   const { accounts: myAccounts } = useAccounts();
   const { reminders: myReminders } = useReminders();
+  const { friends: friendList, ready: friendsReady } = useFriends();
   const { allCategories: myCategories } = useCategories();
   // Ideas de "Descubre FLOWI" ya tocadas: no vuelven a salir (en este dispositivo)
   const [seenTips, setSeenTips] = useState<string[]>([]);
@@ -135,6 +139,17 @@ export default function DashboardPage() {
     setShowTourOffer(false);
     setTourVoice(voice);
   }
+
+  // Tutorial corto pedido desde una tarjeta de sugerencias (p. ej. compartir desde el banco)
+  const [pageTour, setPageTour] = useState<PageTourId | null>(null);
+  useEffect(() => {
+    const onPageTour = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail as PageTourId;
+      if (id in PAGE_TOURS) setPageTour(id);
+    };
+    window.addEventListener('flowi-page-tour', onPageTour);
+    return () => window.removeEventListener('flowi-page-tour', onPageTour);
+  }, []);
 
   // "Ver tutorial" desde el menú de perfil estando ya en Inicio
   useEffect(() => {
@@ -288,7 +303,7 @@ export default function DashboardPage() {
     summary: monthRecap,
     discover: demo ? undefined : {
       hasAccounts: myAccounts.some(a => !a.archived), hasInvestments: investments.some(i => i.status === 'activo'),
-      reminders: myReminders.length, seenTips,
+      reminders: myReminders.length, seenTips, hasAi: !!getAiKey(), hasFriends: friendsReady ? friendList.length > 0 : undefined,
     },
     showSupport: !demo && !playStore && (profile?.activeDays ?? 0) >= 5,
     premiumEnd: demo || playStore ? null : premiumEndInfo(profile),
@@ -322,7 +337,7 @@ export default function DashboardPage() {
             <h1 className={`truncate font-bold text-2xl md:text-3xl ${isTechTheme ? 'font-mono uppercase tracking-wider' : 'font-syne'}`}>
               <span className={isTechTheme ? 'text-accent/70' : 'text-text-secondary'}>{greeting},</span>{' '}
               <span className="text-accent">{profile?.name?.split(' ')[0] || tr('Usuario')}</span>{' '}
-              <span className="text-[0.85em]">👋</span>
+              <span className="text-[0.85em] inline-block animate-wave" aria-hidden="true">👋</span>
             </h1>
           </div>
 
@@ -478,6 +493,7 @@ export default function DashboardPage() {
           onSkip={() => { setShowTourOffer(false); try { localStorage.setItem(TOUR_DONE_KEY, 'true'); } catch (e) {} }}
         />
       )}
+      {pageTour && <AppTour voice={readTourVoicePref()} steps={PAGE_TOURS[pageTour]} markDone={false} onClose={() => setPageTour(null)} />}
       {!loading && tourVoice !== null && (
         <AppTour voice={tourVoice} demo onClose={() => { setTourVoice(null); setTimeout(() => askForNotifications(), 600); }} />
       )}

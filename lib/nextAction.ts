@@ -18,7 +18,7 @@ export type NextAction =
   | { id: string; kind: 'support'; title: string; detail: string; tone: 'normal' };
 
 // Ideas para descubrir funciones que la persona aún no usa (se ocultan para siempre al tocarlas)
-export const TIP_IDS = ['tip:cuentas', 'tip:inversiones', 'tip:recibo', 'tip:extracto', 'tip:recordatorios', 'tip:hormiga'] as const;
+export const TIP_IDS = ['tip:cuentas', 'tip:ia', 'tip:inversiones', 'tip:recibo', 'tip:compartir', 'tip:amigos', 'tip:extracto', 'tip:recordatorios', 'tip:hormiga', 'tip:presupuestos', 'tip:productos', 'tip:negocio', 'tip:resumen'] as const;
 
 interface Input {
   transactions: Transaction[];
@@ -31,7 +31,7 @@ interface Input {
   toReconcile?: { id: string; name: string; balance: number }[];
   staleFunds?: { id: string; name: string; days: number }[]; // fondos, acciones o pensión con valor viejo
   summary?: { month: string; name: string; hint?: string } | null; // resumen del mes pasado listo (días 1 a 10)
-  discover?: { hasAccounts: boolean; hasInvestments: boolean; reminders: number; seenTips: string[] };
+  discover?: { hasAccounts: boolean; hasInvestments: boolean; reminders: number; seenTips: string[]; hasAi?: boolean; hasFriends?: boolean };
   showSupport?: boolean;
   premiumEnd?: { until: Date; gift: boolean } | null; // fin del Premium (aviso para renovar)
   formatMoney: (n: number) => string;
@@ -193,11 +193,18 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   if (discover) {
     const tips: NextAction[] = [];
     if (!discover.hasAccounts) tips.push({ id: 'tip:cuentas', kind: 'link', href: '/servicios/cuentas', tone: 'normal', title: tr('Agrega tus cuentas y mira tu patrimonio'), detail: tr('Bancolombia, Nequi, efectivo… y tu "Dinero disponible" será la plata real que tienes.') });
+    if (discover.hasAi === false) tips.push({ id: 'tip:ia', kind: 'link', href: '/configuracion#ia', tone: 'normal', title: tr('Conecta la IA gratis'), detail: tr('Lee tus recibos y facturas con una foto y entiende mejor lo que dictas. Es gratis y nunca te pedirá pagar.') });
     if (!discover.hasInvestments) tips.push({ id: 'tip:inversiones', kind: 'link', href: '/servicios/inversiones', tone: 'normal', title: tr('¿Ahorras en Nu o tienes un CDT?'), detail: tr('Regístralo y te digo cuánto vas ganando con su tasa.') });
     tips.push({ id: 'tip:recibo', kind: 'link', href: '/?accion=foto', tone: 'normal', title: tr('Registra un gasto con la foto del recibo'), detail: tr('Toca el botón + y elige "Foto del recibo": la IA lee el total por ti.') });
+    tips.push({ id: 'tip:compartir', kind: 'link', href: '/?tutorial=compartir', tone: 'normal', title: tr('Comparte tus pagos desde el banco'), detail: tr('En el comprobante de tu banco o Nequi toca Compartir y elige FLOWI: lo registro por ti. Toca para ver cómo.') });
+    if (discover.hasFriends === false) tips.push({ id: 'tip:amigos', kind: 'link', href: '/amigos', tone: 'normal', title: tr('Agrega a tus amigos'), detail: tr('Dividan gastos y cada uno ve en su FLOWI lo que debe. Cobra por WhatsApp en un toque.') });
     tips.push({ id: 'tip:extracto', kind: 'link', href: '/servicios/importar', tone: 'normal', title: tr('Importa el extracto de tu banco'), detail: tr('Sube el Excel y registro todos los movimientos de una vez.') });
     tips.push({ id: 'tip:hormiga', kind: 'link', href: '/servicios/hormiga', tone: 'normal', title: tr('¿Cuánto se te va en gastos hormiga?'), detail: tr('Mira tus suscripciones y las compras pequeñas que se repiten, y cuánto suman al año.') });
     if (discover.reminders < 3) tips.push({ id: 'tip:recordatorios', kind: 'link', href: '/servicios/recordatorios', tone: 'normal', title: tr('Crea recordatorios para tus pagos fijos'), detail: tr('Te aviso antes de que venzan y los reservo en lo que puedes gastar.') });
+    tips.push({ id: 'tip:presupuestos', kind: 'link', href: '/servicios/presupuestos', tone: 'normal', title: tr('Ponle límite a tus gastos'), detail: tr('Define cuánto quieres gastar al mes y por categoría, y te aviso antes de pasarte.') });
+    tips.push({ id: 'tip:productos', kind: 'link', href: '/servicios/productos', tone: 'normal', title: tr('¿Cuánto gastas en café o gasolina?'), detail: tr('Busca un producto y mira cuánto se te va al mes y si subió de precio.') });
+    tips.push({ id: 'tip:negocio', kind: 'link', href: '/servicios/negocio', tone: 'normal', title: tr('¿Vendes algo? Lleva tu negocio aparte'), detail: tr('Tus ventas, costos y ganancia del mes, sin mezclarlos con tu plata personal.') });
+    tips.push({ id: 'tip:resumen', kind: 'link', href: '/servicios/resumen', tone: 'normal', title: tr('Mira en qué se te va la plata'), detail: tr('El resumen del mes con tus categorías, comparado con el mes anterior.') });
     out.push(...tips.filter(t => !discover.seenTips.includes(t.id)));
   }
 
@@ -206,7 +213,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     out.push({ id: 'support', kind: 'support', tone: 'normal', title: tr('¿Te sirve FLOWI? Apoya el proyecto'), detail: tr('Es gratis y sin publicidad. Toca para ver cómo ayudar a que siga creciendo.') });
   }
 
-  // Orden: lo urgente primero; luego ideas para descubrir y al final el apoyo. Máximo 6 tarjetas.
+  // Orden: lo urgente primero; luego ideas para descubrir y al final el apoyo. Máximo 9 tarjetas.
   const rank = (a: NextAction) => {
     const id = a.id;
     if (id.startsWith('pay:')) return a.tone === 'alert' ? 0 : 1;
@@ -225,7 +232,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
   };
   const visible = out.filter(a => !skipped.includes(a.id)).sort((a, b) => rank(a) - rank(b));
   const main = visible.filter(a => !a.id.startsWith('tip:') && a.id !== 'support').slice(0, 5);
-  const tips = visible.filter(a => a.id.startsWith('tip:')).slice(0, Math.max(0, 5 - main.length));
+  const tips = visible.filter(a => a.id.startsWith('tip:')).slice(0, Math.max(3, 8 - main.length));
   const support = visible.filter(a => a.id === 'support');
   return [...main, ...tips, ...support];
 }

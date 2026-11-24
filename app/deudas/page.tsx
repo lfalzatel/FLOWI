@@ -26,6 +26,7 @@ import { useInvestments } from '@/hooks/useInvestments';
 import { accountStates, type AccountState } from '@/lib/accounts';
 import { TransferModal } from '@/components/accounts/AccountModals';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 const toDate = (value: any): Date | null => {
   if (!value) return null;
   if (value instanceof Date) return value;
@@ -136,6 +137,7 @@ export default function DeudasPage() {
             <p className={`mt-1 ${isCyberpunk ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>{tr('Historial y control de préstamos')}</p>
           </div>
           <div className="flex items-center gap-2">
+            <PageTourButton id="deudas" />
             {/* Download Report Button */}
             <button
               onClick={() => setShowExport(true)}

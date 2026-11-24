@@ -17,6 +17,7 @@ import { DateFilter } from '@/components/dashboard/DateFilter';
 import { useTheme } from '@/components/ThemeProvider';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 export default function GastosPage() {
   const { user, loading: authLoading } = useAuth();
   const { transactions, loading: expensesLoading, refresh } = useExpenses('gasto');
@@ -94,6 +95,7 @@ export default function GastosPage() {
             <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-xs uppercase' : 'text-text-secondary text-sm'}`}>{tr('Historial completo de tus salidas')}</p>
           </div>
           <div className="flex items-center gap-2">
+            <PageTourButton id="gastos" />
             {/* Download Report Button */}
             <button
               onClick={() => setShowExport(true)}

@@ -26,6 +26,7 @@ import { KIND_INFO, dayKey, formatDay, investmentStatus, investmentValue, kindOf
 
 
 import { MONEY_TEXT, toneOf } from '@/lib/moneyTone';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 const nameOf = (inv: Investment) => kindOf(inv) === 'cdt' ? `CDT ${inv.bank}` : inv.note ? `${inv.note}` : inv.bank;
 
 export default function InversionesPage() {
@@ -134,6 +135,7 @@ export default function InversionesPage() {
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <h1 className={`text-2xl font-bold leading-tight truncate ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Ahorro e inversiones')}</h1>
+            <PageTourButton id="inversiones" className="ml-auto" />
           </div>
           {investments.length > 0 && <button onClick={() => setChoosingKind(true)} className={primaryBtn}><Plus className="w-4 h-4" /> {tr('Nueva')}</button>}
         </div>

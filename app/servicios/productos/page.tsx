@@ -16,6 +16,7 @@ import { productCatalog, productSpend } from '@/lib/productSpend';
 import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
 import { getDateFromISOWeek, getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 const monthShort = (k: string) => {
   const s = new Date(Number(k.slice(0, 4)), Number(k.slice(5, 7)) - 1, 1).toLocaleDateString(currentLocale(), { month: 'short' }).replace('.', '');
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -94,6 +95,7 @@ export default function ProductosPage() {
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('¿Cuánto gasto en…?')}</h1>
             <p className="text-xs text-text-muted">{tr('Busca un producto y mira cuánto se te va al mes y cómo cambia su precio.')}</p>
           </div>
+          <PageTourButton id="productos" className="ml-auto" />
         </div>
 
         <div className="relative">

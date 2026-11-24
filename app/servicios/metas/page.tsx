@@ -16,6 +16,7 @@ import { GoalFormModal } from '@/components/goals/GoalFormModal';
 import { GoalMovementSheet } from '@/components/goals/GoalMovementSheet';
 import { Goal, deleteGoal } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 import {
   PRIORITY_LABEL, allocateCapacity, formatMonthYear, formatMonthsText,
   getSavingCapacity, goalProgress, isGoalDone, projectGoal,
@@ -62,6 +63,7 @@ export default function MetasPage() {
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <h1 className={`text-2xl font-bold leading-tight ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Metas')}</h1>
+            <PageTourButton id="metas" className="ml-auto" />
           </div>
           {goals.length > 0 && (
             <button onClick={openNew}

@@ -20,6 +20,7 @@ import { findCatalogEntry } from '@/lib/categories';
 import { formatCurrency } from '@/lib/format';
 import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import type { Transaction } from '@/lib/firestore';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 import {
   ANT_MAX_AMOUNT, HistoryTarget, detectAntExpenses, detectSubscriptions, insightsInPeriod, subscriptionsMonthly,
 } from '@/lib/spendingInsights';
@@ -139,6 +140,7 @@ export default function HormigaPage() {
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Suscripciones y gastos hormiga')}</h1>
             <p className="text-xs text-text-muted">{tr('Lo pequeño que se repite y, sumado, pesa. Toca uno para ver su historial.')}</p>
           </div>
+          <PageTourButton id="hormiga" className="ml-auto" />
         </div>
 
         <DateFilter transactions={transactions} filterType={filterType} filterValue={filterValue}

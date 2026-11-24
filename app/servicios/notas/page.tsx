@@ -10,6 +10,7 @@ import { useNotes } from '@/hooks/useNotes';
 import { NoteModal } from '@/components/notes/NoteModal';
 import { Note } from '@/lib/firestore';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 export default function NotasPage() {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -46,6 +47,7 @@ export default function NotasPage() {
             <h1 className={`text-2xl font-bold leading-tight ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
               {tr('Mis Notas')}
             </h1>
+            <PageTourButton id="notas" className="ml-auto" />
           </div>
           <button
             onClick={handleCreate}

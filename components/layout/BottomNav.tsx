@@ -21,7 +21,7 @@ import { InvestmentFormModal } from '@/components/investments/InvestmentFormModa
 import { SavingsFormModal } from '@/components/investments/SavingsFormModal';
 import { InvestmentKindSheet } from '@/components/investments/InvestmentKindSheet';
 import type { InvestmentKind } from '@/lib/firestore';
-import { QuickAction, QuickActionsSheet } from '@/components/layout/QuickActionsSheet';
+import { QuickAction, QuickActionsSheet, QuickContext } from '@/components/layout/QuickActionsSheet';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Inicio',        href: '/',          id: 'nav-inicio' },
@@ -34,8 +34,12 @@ const navItems = [
 export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const pathname        = usePathname();
   // En Gastos, Ingresos y Deudas el botón + destaca lo de esa página (y el dictado lo entiende)
-  const pageContext: 'gasto' | 'ingreso' | 'deuda' | null =
-    pathname === '/gastos' ? 'gasto' : pathname === '/ingresos' ? 'ingreso' : pathname === '/deudas' ? 'deuda' : null;
+  const sheetContext: QuickContext | null =
+    pathname === '/gastos' ? 'gasto' : pathname === '/ingresos' ? 'ingreso' : pathname === '/deudas' ? 'deuda'
+    : pathname.startsWith('/servicios/inversiones') ? 'inversion' : pathname.startsWith('/servicios/cuentas') ? 'cuenta'
+    : pathname.startsWith('/servicios/recordatorios') ? 'recordatorio' : pathname.startsWith('/servicios/notas') ? 'nota' : null;
+  // El dictado solo entiende gastos, ingresos y deudas
+  const pageContext = sheetContext === 'gasto' || sheetContext === 'ingreso' || sheetContext === 'deuda' ? sheetContext : null;
   const [showAdd, setShowAdd] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
   const [parsedVoiceData, setParsedVoiceData] = useState<ParsedVoiceResult | null>(null);
@@ -57,6 +61,11 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     setShowSheet(false);
     if (a === 'voz') openVoice();
     else if (a === 'extracto') router.push('/servicios/importar');
+    else if (a === 'cuenta') {
+      // La página de Cuentas abre su propio formulario; desde otra página se va allá
+      if (pathname.startsWith('/servicios/cuentas')) window.dispatchEvent(new Event('flowi-new-account'));
+      else router.push('/servicios/cuentas?nueva=1');
+    }
     else setQuick(a);
   };
   const [investKind, setInvestKind] = useState<InvestmentKind | null>(null);
@@ -214,7 +223,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
       {showSheet && (
         <QuickActionsSheet
-          context={pageContext}
+          context={sheetContext}
           onClose={() => setShowSheet(false)}
           onAction={onQuickAction}
           onReceipt={(file) => { setShowSheet(false); openVoice(file); }}

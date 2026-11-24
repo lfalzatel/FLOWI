@@ -4,11 +4,13 @@ import { receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark } from 'lucide-react';
+import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark, Wallet } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { getAiKey } from '@/lib/aiAssist';
 
-export type QuickAction = 'voz' | 'gasto' | 'ingreso' | 'deuda' | 'recordatorio' | 'nota' | 'inversion' | 'extracto';
+export type QuickAction = 'voz' | 'gasto' | 'ingreso' | 'deuda' | 'recordatorio' | 'nota' | 'inversion' | 'extracto' | 'cuenta';
+// Página donde está la persona: el menú destaca lo de esa página
+export type QuickContext = 'gasto' | 'ingreso' | 'deuda' | 'inversion' | 'cuenta' | 'recordatorio' | 'nota';
 
 const ACTIONS: { id: Exclude<QuickAction, 'voz'> | 'foto'; label: string; icon: any; color: string }[] = [
   { id: 'gasto',        label: 'Gasto',            icon: TrendingDown,    color: 'text-rose-400 bg-rose-500/10' },
@@ -26,10 +28,14 @@ const FEATURED = {
   gasto:   { id: 'gasto' as const,   label: 'Nuevo gasto',          sub: 'Valor, categoría y listo', icon: TrendingDown, cls: 'bg-rose-500/15 border-rose-500/40 text-rose-400', say: '"Almuerzo 20 mil y tinto 3 mil"' },
   ingreso: { id: 'ingreso' as const, label: 'Nuevo ingreso',        sub: 'Sueldo, venta, pago que te hicieron', icon: TrendingUp, cls: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400', say: '"Me pagaron 500 mil"' },
   deuda:   { id: 'deuda' as const,   label: 'Nueva deuda o abono',  sub: 'Lo que debes o lo que te deben', icon: CreditCard, cls: 'bg-orange-500/15 border-orange-500/40 text-orange-400', say: '"Le presté 100 mil a Juan"' },
+  inversion: { id: 'inversion' as const, label: 'Nueva inversión o ahorro', sub: 'CDT, Nu, fondos, acciones o pensión', icon: Landmark, cls: 'bg-teal-500/15 border-teal-500/40 text-teal-400', say: '' },
+  cuenta:  { id: 'cuenta' as const,  label: 'Nueva cuenta',         sub: 'Banco, Nequi, efectivo o tarjeta de crédito', icon: Wallet, cls: 'bg-lime-500/15 border-lime-500/40 text-lime-500', say: '' },
+  recordatorio: { id: 'recordatorio' as const, label: 'Nuevo recordatorio', sub: 'Un pago, una cita o una tarea', icon: Bell, cls: 'bg-pink-500/15 border-pink-500/40 text-pink-400', say: '' },
+  nota:    { id: 'nota' as const,    label: 'Nueva nota',           sub: 'Un dato que no quieres olvidar', icon: StickyNote, cls: 'bg-blue-500/15 border-blue-500/40 text-blue-400', say: '' },
 };
 
 interface Props {
-  context?: 'gasto' | 'ingreso' | 'deuda' | null;
+  context?: QuickContext | null;
   onClose: () => void;
   onAction: (action: QuickAction) => void;
   onReceipt: (file: File | File[] | 'no-key') => void;
@@ -83,8 +89,8 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
                   : `p-4 mb-4 bg-gradient-to-br from-accent to-accent-dim shadow-lg shadow-accent/25 ${isLight ? 'text-white' : 'text-black'} ${isTechTheme ? 'rounded-none border-2 border-black' : 'rounded-2xl'}`}`}>
           <span className={`flex items-center justify-center ${featured ? 'w-9 h-9 bg-accent/15 text-accent' : 'w-11 h-11 bg-black/10'} ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}><Mic className={`${featured ? 'w-5 h-5' : 'w-6 h-6'} stroke-[2.5]`} /></span>
           <span className="flex-1 min-w-0">
-            <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{featured ? tr('Dictarlo') : tr('Hablar')}</span>
-            <span className={`block text-xs ${featured ? 'text-text-secondary' : 'opacity-80'}`}>{featured ? tr(featured.say) : tr('"Gasté 20 mil en almuerzo"')} · {tr('varias cosas a la vez')}</span>
+            <span className={`block font-bold ${isTechTheme ? 'uppercase' : 'font-syne'}`}>{featured?.say ? tr('Dictarlo') : tr('Hablar')}</span>
+            <span className={`block text-xs ${featured ? 'text-text-secondary' : 'opacity-80'}`}>{featured?.say ? tr(featured.say) : tr('"Gasté 20 mil en almuerzo"')} · {tr('varias cosas a la vez')}</span>
           </span>
         </button>
 

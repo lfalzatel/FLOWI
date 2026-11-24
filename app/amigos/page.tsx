@@ -12,6 +12,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { Avatar } from '@/components/friends/Avatar';
 import { LinkAccountModal } from '@/components/layout/GuestBanner';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 import {
   PublicProfile, answerFriendRequest, friendWhatsapp, getPublicProfile, inviteLink, removeFriendship, searchPeople, sendFriendRequest,
 } from '@/lib/friends';
@@ -160,6 +161,7 @@ export default function AmigosPage() {
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Amigos')}</h1>
             <p className="text-xs text-text-muted">{tr('Busca a tus amigos para compartir gastos. Solo ven tu nombre y tu foto.')}</p>
           </div>
+          <PageTourButton id="amigos" className="ml-auto" />
         </div>
 
         {noRules && (

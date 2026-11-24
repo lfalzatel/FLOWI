@@ -26,6 +26,7 @@ import { triggerPowerAnimation } from '@/components/dashboard/PowerAnimation';
 import { speakText } from '@/lib/voiceParser';
 import { CommitmentsView } from '@/components/payments/CommitmentsView';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 export default function RecordatoriosPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { reminders, loading: remindersLoading, refresh } = useReminders();
@@ -140,6 +141,7 @@ export default function RecordatoriosPage() {
                 {tr('Citas, fechas importantes y tus pagos del mes')}
               </p>
             </div>
+            <PageTourButton id="recordatorios" className="ml-auto" />
           </div>
           <div className="flex gap-2 shrink-0">
             {profile?.role === 'admin' && (

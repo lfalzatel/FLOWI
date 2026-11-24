@@ -17,6 +17,7 @@ import { updateExpense, type Transaction } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { PersonBalance, chargeMessage, sharedBalances, whatsappUrl, withSettled } from '@/lib/shared';
 
+import { PageTourButton } from '@/components/tour/PageTourButton';
 // Gastos compartidos: el saldo con cada persona (quién te debe y a quién le debes) a partir de los gastos
 // que marcaste como compartidos. "Ya me pagó" / "Ya le pagué" los salda; "Cobrar" arma el mensaje de WhatsApp.
 export default function CompartidosPage() {
@@ -164,6 +165,7 @@ export default function CompartidosPage() {
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Gastos compartidos')}</h1>
             <p className="text-xs text-text-muted">{tr('Quién te debe, a quién le debes y cobra con un mensaje.')}</p>
           </div>
+          <PageTourButton id="compartidos" className="ml-auto" />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
