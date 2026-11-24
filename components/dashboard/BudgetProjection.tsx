@@ -490,12 +490,12 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
                     <div className={`p-3 ${isTechTheme ? 'rounded-none bg-accent/5 border border-accent/20' : 'rounded-2xl bg-white/5 border border-white/5'}`}>
                       <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">{tr('Así se calcula')}</p>
                       {line(totalIngresos > 0 ? tr('Ingresos del mes') : tr('Tu presupuesto del mes'), `+ ${fm(baseLimit)}`, 'text-emerald-400')}
-                      {line(tr('Gastos fijos'), `− ${fm(gastosFijos)}`, 'text-orange-400')}
+                      {line(tr('Gastos fijos'), `− ${fm(gastosFijos)}`, 'text-red-400')}
                       {line(tr('Gastos variables'), `− ${fm(gastosVariables)}`, 'text-red-400')}
-                      {compromisos > 0 && line(tr('Compromisos por pagar'), `− ${fm(compromisos)}`, 'text-orange-400')}
-                      {line(tr('Te queda para el mes'), result < 0 ? `−${fm(-result)}` : fm(result), result < 0 ? 'text-red-400' : 'text-accent', true)}
+                      {compromisos > 0 && line(tr('Compromisos por pagar'), `− ${fm(compromisos)}`, 'text-amber-400')}
+                      {line(tr('Te queda para el mes'), result < 0 ? `−${fm(-result)}` : fm(result), result < 0 ? 'text-red-400' : 'text-emerald-400', true)}
                       {line(tr('Repartido en {a} días', { a: diasRestantes }), `÷ ${diasRestantes}`)}
-                      {line(tr('Cuota diaria'), tr('{a} / día', { a: fm(cuotaDiaria) }), 'text-accent', true)}
+                      {line(tr('Cuota diaria'), tr('{a} / día', { a: fm(cuotaDiaria) }), cuotaDiaria > 0 ? 'text-emerald-400' : 'text-text-primary', true)}
                       {result < 0 && (
                         <p className="text-[11px] text-amber-300 leading-snug mt-1.5">
                           {tr('Este mes ya gastaste {a} más de lo que te entró. Como no queda nada para repartir, la cuota es $0: cada gasto nuevo aumenta lo que te falta.', { a: fm(-result) })}

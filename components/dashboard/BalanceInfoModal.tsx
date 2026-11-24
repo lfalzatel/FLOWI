@@ -60,14 +60,20 @@ export function BalanceInfoModal(props: Props) {
   );
 }
 
-function Row({ label, hint, value, sign, strong }: { label: string; hint?: string; value: string; sign?: '+' | '−' | '='; strong?: boolean }) {
+// Colores de los números en toda la app: plata que tienes o te entra en verde, gastos y negativos en rojo,
+// deudas en amarillo y ahorros en azul.
+type Tone = 'pos' | 'neg' | 'debt' | 'save' | 'plain';
+const TONE: Record<Tone, string> = { pos: 'text-emerald-400', neg: 'text-red-400', debt: 'text-amber-400', save: 'text-sky-400', plain: 'text-text-primary' };
+
+function Row({ label, hint, value, sign, strong, tone }: { label: string; hint?: string; value: string; sign?: '+' | '−' | '='; strong?: boolean; tone?: Tone }) {
+  const color = TONE[tone ?? (sign === '+' ? 'pos' : sign === '−' ? 'neg' : 'plain')];
   return (
     <div className={`flex items-start justify-between gap-3 py-2 ${strong ? 'border-t border-glass-border' : ''}`}>
       <div className="min-w-0">
         <p className={`text-sm ${strong ? 'font-bold text-text-primary' : 'text-text-secondary'}`}>{label}</p>
         {hint && <p className="text-[11px] text-text-muted leading-snug">{hint}</p>}
       </div>
-      <p className={`text-sm shrink-0 tabular-nums ${strong ? 'font-bold text-text-primary' : 'text-text-primary'}`}>
+      <p className={`text-sm shrink-0 tabular-nums ${strong ? 'font-bold' : ''} ${color}`}>
         {sign && sign !== '=' ? `${sign} ` : ''}{value}
       </p>
     </div>
@@ -108,8 +114,8 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
           <>
             <Row label="Plata en tus cuentas para gastar" hint="Saldo de hoy en Cuentas y patrimonio (sin las cuentas de ahorro)" value={f(today.cash)} sign="+" />
             {today.cardDebt > 0 && (today.anyFixed
-              ? <Row label="Lo que pagas de tus tarjetas este mes" hint={tr('Debes {a} en total; aparto solo el pago de este mes', { a: f(today.cardOwed || 0) })} value={f(today.cardDebt)} sign="−" />
-              : <Row label="Lo que debes en tarjetas" hint="Lo aparto para pagarlas completas" value={f(today.cardDebt)} sign="−" />)}
+              ? <Row label="Lo que pagas de tus tarjetas este mes" hint={tr('Debes {a} en total; aparto solo el pago de este mes', { a: f(today.cardOwed || 0) })} value={f(today.cardDebt)} sign="−" tone="debt" />
+              : <Row label="Lo que debes en tarjetas" hint="Lo aparto para pagarlas completas" value={f(today.cardDebt)} sign="−" tone="debt" />)}
             {!today.anyFixed && today.cardDebt > today.cash && (
               <p className="text-[11px] text-amber-300 leading-snug py-1">
                 Debes en tarjetas más de lo que tienes. Si no las pagas completas cada mes, en <Link href="/servicios/cuentas" className="underline font-semibold">{tr('Cuentas')}</Link> {tr('edita la tarjeta y elige')} <b>{tr('Un pago fijo al mes')}</b>: así solo aparto ese pago.
@@ -123,24 +129,24 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
           </>
         )}
         {today.pendingCommitments > 0 && (
-          <Row label="Compromisos por pagar" hint="Pagos fijos que aún faltan este mes (los reservo primero)" value={f(today.pendingCommitments)} sign="−" />
+          <Row label="Compromisos por pagar" hint="Pagos fijos que aún faltan este mes (los reservo primero)" value={f(today.pendingCommitments)} sign="−" tone="debt" />
         )}
         {today.savedMonth > 0 && (
-          <Row label="Ahorrado en CDT este mes" hint="Plata que salió de tus cuentas hacia un CDT: no es gasto, pero ya no está disponible" value={f(today.savedMonth)} sign="−" />
+          <Row label="Ahorrado en CDT este mes" hint="Plata que salió de tus cuentas hacia un CDT: no es gasto, pero ya no está disponible" value={f(today.savedMonth)} sign="−" tone="save" />
         )}
         {freeNow < 0 ? (
           <>
             {/* La resta completa: así se ve por qué no queda nada libre */}
-            <Row label="Resultado de la resta" value={`−${f(-freeNow)}`} strong />
+            <Row label="Resultado de la resta" value={`−${f(-freeNow)}`} strong tone="neg" />
             <p className="text-[11px] text-amber-300 leading-snug py-1">
               {today.mode === 'cuentas'
                 ? tr('Lo que debes supera lo que tienes por {a}. Tus {b} sí están en tus cuentas, pero ya están comprometidos: si los gastas, te faltarán para esos pagos. Por eso lo libre queda en $0.', { a: f(-freeNow), b: f(today.cash) })
                 : tr('Este mes has gastado {a} más de lo que te ha entrado. Por eso lo libre queda en $0.', { a: f(-freeNow) })}
             </p>
-            <Row label="Libre ahora" value={f(0)} strong />
+            <Row label="Libre ahora" value={f(0)} strong tone="plain" />
           </>
         ) : (
-          <Row label="Libre ahora" value={f(freeNow)} strong />
+          <Row label="Libre ahora" value={f(freeNow)} strong tone={freeNow > 0 ? 'pos' : 'plain'} />
         )}
         {today.tomorrowAllowance !== null && (
           <>
@@ -149,7 +155,7 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
                    ? `Desde mañana hasta tu próximo ingreso (${today.nextIncome.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}), según cuándo te llegó el último`
                    : tr('Los días que faltan del mes, desde mañana')}
                  value={`÷ ${today.daysLeft - 1}`} />
-            <Row label="Desde mañana puedes gastar" value={tr('{a} / día', { a: f(today.tomorrowAllowance) })} strong />
+            <Row label="Desde mañana puedes gastar" value={tr('{a} / día', { a: f(today.tomorrowAllowance) })} strong tone={today.tomorrowAllowance > 0 ? 'pos' : 'plain'} />
           </>
         )}
       </div>
@@ -198,10 +204,10 @@ function DebtsContent({ balance, currency, onClose }: { balance: number; currenc
       ) : (
         <div>
           {owe.slice(0, 6).map(d => (
-            <Row key={d.id} label={d.title} hint={d.hint} value={f(d.left)} />
+            <Row key={d.id} label={d.title} hint={d.hint} value={f(d.left)} tone="debt" />
           ))}
           {owe.length > 6 && <p className="text-[11px] text-text-muted py-1">y {owe.length - 6} más…</p>}
-          <Row label="Total que debes" value={f(totalDeudas)} strong />
+          <Row label="Total que debes" value={f(totalDeudas)} strong tone="debt" />
         </div>
       )}
 

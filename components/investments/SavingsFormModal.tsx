@@ -66,6 +66,8 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
   const [amount, setAmount] = useState(investment ? formatMoneyInput(investment.amount) : '');
   const [current, setCurrent] = useState(investment?.currentValue ? formatMoneyInput(investment.currentValue) : '');
   const [rate, setRate] = useState(investment?.rateEA ? String(investment.rateEA).replace('.', ',') : '');
+  // Ahorro: desde cuándo tiene ese saldo; los intereses se calculan día a día desde esa fecha
+  const [since, setSince] = useState(investment?.startDate || dayKey(new Date()));
   // De dónde salió la plata al abrirlo; al editar se puede corregir (p. ej. si se marcó "no descontar" por error)
   const opening = investment?.fundings?.find(f => f.kind === 'apertura');
   const [from, setFrom] = useState<string | null | undefined>(investment ? (opening?.accountId ?? null) : undefined);
@@ -208,6 +210,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
     const base = {
       bank: bank.trim().slice(0, 30), note: note.trim(), amount: amountN,
       rateEA: isSavings ? parseRate(rate) : 0,
+      ...(isSavings && investment?.id ? { startDate: since } : {}),
       currentValue: isSavings ? null : (currentN > 0 ? currentN : amountN),
       valueAt: isSavings ? null : now.toISOString(),
       ...(isFund ? fundFields({
@@ -225,8 +228,9 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       } else {
         await addInvestment({
           userId: user.uid, kind, status: 'activo', closedAt: null, history: [], payouts: [],
-          ...base, startDate: dayKey(now), maturityDate: '', bankInterest: null, withholdingPct: 0, autoRenew: false,
-          fundings: [{ at: now.toISOString(), amount: amountN, accountId: from ?? null, kind: 'apertura' }],
+          ...base, startDate: isSavings ? since : dayKey(now), maturityDate: '', bankInterest: null, withholdingPct: 0, autoRenew: false,
+          // La plata salió de la cuenta el día en que se abrió (si fue antes de crear la cuenta en FLOWI, ya está en su saldo)
+          fundings: [{ at: isSavings && since !== dayKey(now) ? new Date(`${since}T12:00:00`).toISOString() : now.toISOString(), amount: amountN, accountId: from ?? null, kind: 'apertura' }],
         });
       }
       onClose();
@@ -364,9 +368,16 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
               </div>
             )}
           </div>
+          {isSavings && (
+            <div className="-mt-1">
+              <label htmlFor="sv-since" className={lbl}>{investment ? tr('Ese saldo es del') : tr('¿Desde cuándo tienes ese saldo?')}</label>
+              <input id="sv-since" type="date" value={since} max={dayKey(new Date())}
+                     onChange={(e) => e.target.value && setSince(e.target.value)} className={input} />
+            </div>
+          )}
           <p className={`${hint} -mt-3`}>
             {isSavings
-              ? tr('Calculo los intereses día a día con la tasa. Si el saldo de la app no cuadra, usa "Ajustar saldo".')
+              ? tr('Calculo los intereses día a día con la tasa desde esa fecha. Si el saldo de la app no cuadra, usa "Ajustar saldo".')
               : tr('El valor sube y baja: actualízalo cuando quieras con lo que dice la app y te muestro cuánto ganas o pierdes.')}
           </p>
 

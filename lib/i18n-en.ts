@@ -2357,4 +2357,8 @@ export const EN: Record<string, string> = {
   'Cuota diaria': 'Daily quota',
   'Este mes ya gastaste {a} más de lo que te entró. Como no queda nada para repartir, la cuota es $0: cada gasto nuevo aumenta lo que te falta.': 'This month you already spent {a} more than you earned. Since there is nothing left to split, the quota is $0: every new expense increases what you are short.',
   'Tus {a} están apartados para tarjetas y pagos · toca para ver': 'Your {a} are set aside for cards and payments · tap to see',
+  // ── Ahorros: fecha de inicio ──
+  'Ese saldo es del': 'That balance is from',
+  '¿Desde cuándo tienes ese saldo?': 'Since when have you had that balance?',
+  'Calculo los intereses día a día con la tasa desde esa fecha. Si el saldo de la app no cuadra, usa "Ajustar saldo".': 'I calculate interest day by day with the rate from that date. If the app balance does not match, use "Adjust balance".',
 };
