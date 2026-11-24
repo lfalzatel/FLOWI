@@ -292,7 +292,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                         <div className="flex justify-between items-center text-[10px]">
                           <span className={isOverBudget ? 'text-red-400 font-bold flex items-center gap-1' : 'text-text-muted'}>
                             {isOverBudget && <AlertTriangle className="w-3 h-3" />}
-                            Gastado: <strong><AnimatedNumber value={percentage} format={(n: number) => `${Math.round(n)}%`} /></strong>
+                            {tr('Gastado:')} <strong><AnimatedNumber value={percentage} format={(n: number) => `${Math.round(n)}%`} /></strong>
                           </span>
                           <span className="text-text-muted">
                             {isOverBudget
@@ -365,7 +365,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                                   onClick={() => setShowAllTransactions(!showAllTransactions)}
                                   className="w-full text-center text-[11px] font-semibold text-accent pt-1"
                                 >
-                                  {showAllTransactions ? 'Ver menos' : tr('Ver todos ({a})', { a: detail.transactions.length })}
+                                  {showAllTransactions ? tr('Ver menos') : tr('Ver todos ({a})', { a: detail.transactions.length })}
                                 </button>
                               )}
                             </div>
@@ -404,7 +404,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                   {tr('Todas las Subcategorías Detalladas')}
                 </p>
                 <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>
-                  {allSubcategoryNames.length} subcategorías usadas en tu historial (Con metas editables)
+                  {tr('{n} subcategorías usadas en tu historial (con metas editables)', { n: allSubcategoryNames.length })}
                 </p>
               </div>
             </div>
@@ -413,7 +413,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                 openSubAccordion ? 'bg-purple-500/20 text-purple-400' : 'bg-white/10 text-text-muted'
               }`}>
-                {openSubAccordion ? 'Desplegado' : 'Ver Todas'}
+                {openSubAccordion ? tr('Desplegado') : tr('Ver Todas')}
               </span>
               {openSubAccordion ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
             </div>
@@ -473,7 +473,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                               {subcatName}
                             </span>
                             <span className="text-[9px] text-text-muted">
-                              {isManual ? '🎯 Meta Manual' : `Est. ${mainCatName}`}
+                              {isManual ? tr('🎯 Meta Manual') : tr('Est. {a}', { a: tr(mainCatName) })}
                             </span>
                           </div>
                         </div>
@@ -529,7 +529,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                           <div className="flex justify-between items-center text-[10px]">
                             <span className={isOverBudget ? 'text-red-400 font-bold flex items-center gap-1' : 'text-text-muted'}>
                               {isOverBudget && <AlertTriangle className="w-3 h-3" />}
-                              Gastado: <strong><AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} /></strong> (<AnimatedNumber value={percentage} format={(n: number) => `${Math.round(n)}%`} />)
+                              {tr('Gastado:')} <strong><AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} /></strong> (<AnimatedNumber value={percentage} format={(n: number) => `${Math.round(n)}%`} />)
                             </span>
                             <span className="text-text-muted">
                               {isOverBudget

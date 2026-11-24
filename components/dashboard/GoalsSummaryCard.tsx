@@ -43,7 +43,7 @@ export function GoalsSummaryCard({ currency = 'COP', demoGoals }: { currency?: s
     <Link href="/servicios/metas" className={`${card} block p-4 hover:-translate-y-0.5 transition-transform`}>
       <div className="flex items-center justify-between mb-2">
         <span className={`text-xs font-medium ${isTechTheme ? 'text-accent/70 uppercase font-mono tracking-wide' : 'text-text-secondary'}`}>
-          Metas de ahorro{active.length > 1 ? ` · ${active.length} activas` : ''}
+          {tr('Metas de ahorro')}{active.length > 1 ? tr(' · {n} activas', { n: active.length }) : ''}
         </span>
         <ChevronRight className="w-4 h-4 text-text-muted" />
       </div>
@@ -57,7 +57,7 @@ export function GoalsSummaryCard({ currency = 'COP', demoGoals }: { currency?: s
           <div className={`mt-1.5 h-2 overflow-hidden bg-glass ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}>
             <div className={`h-full bg-gradient-to-r from-accent-dim to-accent ${isTechTheme ? '' : 'rounded-full'}`} style={{ width: `${pct}%` }} />
           </div>
-          <p className="text-[11px] text-text-muted mt-1">{formatCurrency(top.savedAmount, currency)} de <AnimatedNumber value={top.targetAmount} format={(n: number) => formatCurrency(n, currency)} /></p>
+          <p className="text-[11px] text-text-muted mt-1">{formatCurrency(top.savedAmount, currency)} {tr('de')} <AnimatedNumber value={top.targetAmount} format={(n: number) => formatCurrency(n, currency)} /></p>
         </div>
       </div>
     </Link>

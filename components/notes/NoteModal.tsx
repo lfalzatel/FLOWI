@@ -71,13 +71,13 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
     try {
       if (note?.id) {
         triggerPowerAnimation(0, 'edicion', 'NOTA ACTUALIZADA', '¡ACTUALIZADA!');
-        speakText('Nota actualizada con éxito', 'es-CO');
+        speakText(tr('Nota actualizada con éxito'), 'es-CO');
         onClose();
         await updateNote(note.id, { title, content, color });
       } else {
         triggerPowerAnimation(0, 'edicion', 'NOTA GUARDADA', '¡GUARDADA!');
         triggerConfettiWithSynth(3.0);
-        speakText('Nota guardada con éxito', 'es-CO');
+        speakText(tr('Nota guardada con éxito'), 'es-CO');
         onClose();
         await addNote({
           userId: user.uid,
@@ -105,7 +105,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
     setLoading(true);
     try {
       triggerPowerAnimation(0, 'eliminacion', 'NOTA ELIMINADA', '¡REMOVIDA!');
-      speakText('Nota eliminada con éxito', 'es-CO');
+      speakText(tr('Nota eliminada con éxito'), 'es-CO');
       await deleteNote(note.id);
       setShowConfirmDelete(false);
       onSuccess();

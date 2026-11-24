@@ -1,4 +1,4 @@
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { Investment, InvestmentFunding, InvestmentKind } from './firestore';
 
 // Cálculos de "Mis inversiones" (CDT).
@@ -193,8 +193,8 @@ export function formatDay(s: string): string {
 }
 
 export function whenText(daysLeft: number): string {
-  if (daysLeft < 0) return `venció hace ${-daysLeft} ${daysLeft === -1 ? 'día' : 'días'}`;
-  if (daysLeft === 0) return 'vence hoy';
-  if (daysLeft === 1) return 'vence mañana';
-  return `vence en ${daysLeft} días`;
+  if (daysLeft < 0) return daysLeft === -1 ? tr('venció hace 1 día') : tr('venció hace {n} días', { n: -daysLeft });
+  if (daysLeft === 0) return tr('vence hoy');
+  if (daysLeft === 1) return tr('vence mañana');
+  return tr('vence en {n} días', { n: daysLeft });
 }

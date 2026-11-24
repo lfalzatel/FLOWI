@@ -131,7 +131,7 @@ export default function PresupuestosPage() {
     const over = pillar !== 'ahorro' && pillarBase > 0 && spent > pillarBase * target;
     return (
       <div className="pt-2 mt-2 border-t border-white/10">
-        <span className="text-[10px] text-text-muted block">{pillar === 'ahorro' ? 'Llevas ahorrado' : 'Llevas gastado'}{pct !== null ? ` (${pct}% de ${totalIncomeFiltered > 0 ? 'tus ingresos' : 'tu presupuesto'})` : ''}:</span>
+        <span className="text-[10px] text-text-muted block">{pillar === 'ahorro' ? tr('Llevas ahorrado') : tr('Llevas gastado')}{pct !== null ? (totalIncomeFiltered > 0 ? tr(' ({n}% de tus ingresos)', { n: pct }) : tr(' ({n}% de tu presupuesto)', { n: pct })) : ''}:</span>
         <span className={`text-sm font-bold ${over ? 'text-red-400' : color}`}><AnimatedNumber value={spent} format={(n: number) => formatCurrency(n, currency)} /></span>
       </div>
     );
@@ -276,7 +276,7 @@ export default function PresupuestosPage() {
             {/* 1. Ingresos Totales (Al principio) */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-emerald-500/30' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
               <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-emerald-400 font-mono' : 'text-emerald-500'}`}>
-                {filterType === 'all' ? 'Ingresos Totales' : filterType === 'month' ? 'Ingresos este mes' : filterType === 'week' ? 'Ingresos esta semana' : 'Ingresos este día'}
+                {filterType === 'all' ? tr('Ingresos Totales') : filterType === 'month' ? tr('Ingresos este mes') : filterType === 'week' ? tr('Ingresos esta semana') : tr('Ingresos este día')}
               </span>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-emerald-400 font-mono' : 'text-emerald-400'}`}>
                 <AnimatedNumber value={totalIncomeFiltered} format={(n: number) => formatCurrency(n, currency)} />
@@ -286,7 +286,7 @@ export default function PresupuestosPage() {
             {/* 2. Gastado */}
             <div className={`p-3.5 rounded-2xl border ${isTechTheme ? 'bg-black/50 border-accent/20' : 'bg-white/5 border-white/10'}`}>
               <span className={`text-[10px] uppercase font-semibold ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
-                {filterType === 'all' ? 'Gastado Histórico' : filterType === 'month' ? 'Gastado este mes' : filterType === 'week' ? 'Gastado esta semana' : 'Gastado este día'}
+                {filterType === 'all' ? tr('Gastado Histórico') : filterType === 'month' ? tr('Gastado este mes') : filterType === 'week' ? tr('Gastado esta semana') : tr('Gastado este día')}
               </span>
               <p className={`text-lg font-bold mt-0.5 ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>
                 <AnimatedNumber value={totalSpentFiltered} format={(n: number) => formatCurrency(n, currency)} />
@@ -345,7 +345,7 @@ export default function PresupuestosPage() {
 
               <div className="flex items-center justify-between text-xs">
                 <span className="text-text-muted">
-                  Días restantes del mes: <strong>{remainingDays} días</strong>
+                  {tr('Días restantes del mes:')} <strong>{tr('{n} días', { n: remainingDays })}</strong>
                 </span>
                 {dailyRecommendedBudget > 0 && !isOverGlobalBudget && (
                   <span className="text-emerald-400 font-semibold flex items-center gap-1">
@@ -433,7 +433,7 @@ export default function PresupuestosPage() {
                   <div key={item.name} className="flex items-center justify-between text-xs p-2 rounded-xl bg-white/5 border border-white/5">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                      <span className={`font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{item.name}</span>
+                      <span className={`font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tr(item.name)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-text-muted"><AnimatedNumber value={item.percentage} format={(n: number) => `${Math.round(n)}%`} /></span>
@@ -456,7 +456,7 @@ export default function PresupuestosPage() {
             </div>
             <div>
               <h2 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
-                ¿Cómo Repartir tu Salario? (Regla 50 / 30 / 20)
+                {tr('¿Cómo Repartir tu Salario? (Regla 50 / 30 / 20)')}
               </h2>
               <p className={`text-xs ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`}>
                 {tr('Fórmula dorada recomendada por economistas e instituciones financieras')}
@@ -527,7 +527,7 @@ export default function PresupuestosPage() {
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">{tr('Futuro')}</span>
               </div>
               <p className="text-[11px] text-text-muted mb-2">
-                Fondo de emergencia (3-6 meses), CDT, inversiones, pensión voluntaria y abonos extra a deudas.
+                {tr('Fondo de emergencia (3-6 meses), CDT, inversiones, pensión voluntaria y abonos extra a deudas.')}
               </p>
               {globalBudget > 0 && (
                 <div className="pt-2 border-t border-emerald-500/20">
@@ -543,7 +543,7 @@ export default function PresupuestosPage() {
           <div className="pt-4 border-t border-white/10 space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-text-secondary uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4 text-cyan-400" />
-              <span>Fuentes & Referencias Económicas Prestigiadas</span>
+              <span>{tr('Fuentes y referencias económicas')}</span>
             </div>
             <ul className="text-[11px] text-text-muted space-y-1.5 pl-1">
               <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
@@ -554,7 +554,7 @@ export default function PresupuestosPage() {
               </li>
               <li className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
                 <div>
-                  <strong className="text-text-primary">Banco Interamericano de Desarrollo (BID):</strong>
+                  <strong className="text-text-primary">{tr('Banco Interamericano de Desarrollo (BID):')}</strong>
                   <span className="block text-[10px] text-text-muted">{tr('Guías oficiales de Educación y Salud Financiera para hogares de Latinoamérica.')}</span>
                 </div>
               </li>
@@ -576,7 +576,7 @@ export default function PresupuestosPage() {
           <div className="flex items-center gap-2.5 mb-4">
             <Sparkles className="w-5 h-5 text-amber-400" />
             <h3 className={`font-bold text-base ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>
-              Diagnóstico de Gastos e Inteligencia IA
+              {tr('Diagnóstico de Gastos e Inteligencia IA')}
             </h3>
           </div>
 
@@ -587,7 +587,7 @@ export default function PresupuestosPage() {
                 <div>
                   <p className="text-xs font-bold text-red-400 uppercase">{tr('Alerta de Presupuesto Global Excedido')}</p>
                   <p className="text-xs text-text-muted mt-0.5">
-                    Has superado tu límite mensual proyectado por <AnimatedNumber value={Math.abs(globalRemaining)} format={(n: number) => formatCurrency(n, currency)} />. Intenta moderar los gastos variables en los {remainingDays} días restantes.
+                    {tr('Has superado tu límite mensual proyectado por')} <AnimatedNumber value={Math.abs(globalRemaining)} format={(n: number) => formatCurrency(n, currency)} />. {tr('Intenta moderar los gastos variables en los {n} días restantes.', { n: remainingDays })}
                   </p>
                 </div>
               </div>

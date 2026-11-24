@@ -1,4 +1,5 @@
 'use client';
+import { pickAppVoice, appSpeechLang } from '@/lib/voiceParser';
 import { tr, lazyT } from '@/lib/i18n';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -50,11 +51,6 @@ function findTarget(step: Step): HTMLElement | null {
   return null;
 }
 
-function pickSpanishVoice(): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis?.getVoices() || [];
-  const es = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
-  return es.find(v => /es-(co|419|us|mx)/i.test(v.lang)) || es[0] || null;
-}
 
 export function readTourVoicePref(): boolean {
   try { return localStorage.getItem(VOICE_KEY) !== 'false'; } catch { return true; }
@@ -170,9 +166,9 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
     const speak = () => {
       // En mayúsculas la voz lo deletrea ("F, L, O…"); así lo lee como palabra
       const u = new SpeechSynthesisUtterance(`${step.title}. ${step.text}`.replace(/FLOWI/g, 'Flowi'));
-      const v = pickSpanishVoice();
+      const v = pickAppVoice();
       if (v) u.voice = v;
-      u.lang = v?.lang || 'es-CO';
+      u.lang = v?.lang || (appSpeechLang() === 'en' ? 'en-US' : 'es-CO');
       u.rate = 1;
       synth.speak(u);
     };

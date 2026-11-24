@@ -41,6 +41,23 @@ export interface ParsedVoiceCommand {
 /**
  * Síntesis de voz nativa del navegador para responder al usuario en voz alta
  */
+/** Idioma de la app (lo pone LanguageProvider en <html lang>): 'en' o 'es'. */
+export function appSpeechLang(): 'en' | 'es' {
+  return typeof document !== 'undefined' && document.documentElement.lang === 'en' ? 'en' : 'es';
+}
+
+/** Mejor voz del celular para el idioma de la app: en inglés una de EE. UU.; en español, de Colombia o Latinoamérica. */
+export function pickAppVoice(): SpeechSynthesisVoice | null {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+  const voices = window.speechSynthesis.getVoices() || [];
+  if (appSpeechLang() === 'en') {
+    const en = voices.filter(v => v.lang.toLowerCase().startsWith('en'));
+    return en.find(v => /en-us/i.test(v.lang)) || en[0] || null;
+  }
+  const es = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
+  return es.find(v => /es-(co|419|us|mx)/i.test(v.lang)) || es[0] || null;
+}
+
 export function speakText(text: string, lang: string = 'es-CO', onDone?: () => void, ignoreToggle: boolean = false) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     if (onDone) onDone();
@@ -54,7 +71,10 @@ export function speakText(text: string, lang: string = 'es-CO', onDone?: () => v
   try {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
+    // Con la app en inglés se habla en inglés (los textos ya vienen traducidos con tr)
+    const voice = pickAppVoice();
+    if (voice) utterance.voice = voice;
+    utterance.lang = appSpeechLang() === 'en' ? (voice?.lang || 'en-US') : lang;
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
 

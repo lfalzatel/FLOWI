@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -664,11 +665,11 @@ export function triggerPowerAnimation(
 
     // Síntesis de voz hablada automática en registros manuales y por voz
     let spokenText = '';
-    if (type === 'ingreso') spokenText = 'Ingreso registrado con éxito';
-    else if (type === 'gasto') spokenText = 'Gasto registrado con éxito';
-    else if (type === 'abono') spokenText = 'Abono registrado con éxito';
-    else if (type === 'edicion') spokenText = 'Transacción actualizada con éxito';
-    else if (type === 'eliminacion' && amount > 0) spokenText = 'Transacción eliminada con éxito';
+    if (type === 'ingreso') spokenText = tr('Ingreso registrado con éxito');
+    else if (type === 'gasto') spokenText = tr('Gasto registrado con éxito');
+    else if (type === 'abono') spokenText = tr('Abono registrado con éxito');
+    else if (type === 'edicion') spokenText = tr('Transacción actualizada con éxito');
+    else if (type === 'eliminacion' && amount > 0) spokenText = tr('Transacción eliminada con éxito');
 
     if (spokenText) {
       speakText(spokenText, 'es-CO');

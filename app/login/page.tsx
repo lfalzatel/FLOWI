@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { FlowLines } from '@/components/FlowLines';
-import { useT } from '@/lib/i18n';
+import { useT, tr } from '@/lib/i18n';
 
 // Página de entrada (landing): explica qué hace FLOWI y deja entrar con Google.
 // Todas las pantallas mandan aquí a quien no ha iniciado sesión.
@@ -73,9 +73,9 @@ function GuestButton({ onClick }: { onClick: () => void }) {
   return (
     <div className="mt-3 text-center">
       <button onClick={onClick} className="text-sm font-semibold text-white/80 underline underline-offset-4 hover:text-white">
-        Probar sin cuenta
+        {tr('Probar sin cuenta')}
       </button>
-      <p className="mt-1 text-[11px] text-white/40">Tus datos se guardan solo en este celular hasta que vincules tu cuenta.</p>
+      <p className="mt-1 text-[11px] text-white/40">{tr('Tus datos se guardan solo en este celular hasta que vincules tu cuenta.')}</p>
     </div>
   );
 }

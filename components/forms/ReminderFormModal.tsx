@@ -154,13 +154,13 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
       if (reminder?.id) {
         triggerPowerAnimation(0, 'edicion', 'RECORDATORIO ACTUALIZADO', '¡ACTUALIZADO!');
-        speakText('Recordatorio actualizado con éxito', 'es-CO');
+        speakText(tr('Recordatorio actualizado con éxito'), 'es-CO');
         onClose();
         await updateReminder(reminder.id, data);
       } else {
         triggerPowerAnimation(0, 'edicion', 'RECORDATORIO AGENDADO', '¡AGENDADO!');
         triggerConfettiWithSynth(3.0);
-        speakText('Recordatorio agendado con éxito', 'es-CO');
+        speakText(tr('Recordatorio agendado con éxito'), 'es-CO');
         onClose();
         await addReminder(data);
         // Momento natural para pedir los avisos: acaba de crear algo que quiere que le recuerden
@@ -463,7 +463,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
           setLoading(true);
           try {
             triggerPowerAnimation(0, 'eliminacion', 'RECORDATORIO ELIMINADO', '¡REMOVIDO!');
-            speakText('Recordatorio eliminado con éxito', 'es-CO');
+            speakText(tr('Recordatorio eliminado con éxito'), 'es-CO');
             await deleteReminder(reminder.id);
             setShowConfirmDelete(false);
             onSuccess();

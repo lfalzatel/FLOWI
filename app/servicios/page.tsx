@@ -178,7 +178,7 @@ export default function ServiciosPage() {
           </button>
 
           <button
-            onClick={() => speakText('Transacción guardada con éxito en FLOWI', 'es-CO', undefined, true)}
+            onClick={() => speakText(tr('Transacción guardada con éxito en FLOWI'), 'es-CO', undefined, true)}
             className={`flex flex-col items-center justify-center p-2.5 text-center transition-all active:scale-95 ${
               isTechTheme
                 ? 'border border-purple-500/40 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20'

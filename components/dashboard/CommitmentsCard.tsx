@@ -66,8 +66,8 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
               </h3>
               <p className="text-xs text-text-muted">
                 {pending.length
-                  ? `${pending.length} por pagar en ${monthName}${paidCount ? ` · ${paidCount} ya pagados` : ''}`
-                  : `Ya pagaste tus ${paidCount} compromisos de ${monthName}`}
+                  ? tr('{n} por pagar en {m}', { n: pending.length, m: monthName }) + (paidCount ? tr(' · {n} ya pagados', { n: paidCount }) : '')
+                  : tr('Ya pagaste tus {n} compromisos de {m}', { n: paidCount, m: monthName })}
               </p>
             </div>
           </div>
@@ -81,7 +81,7 @@ export function CommitmentsCard({ summary, currency = 'COP', onRefresh }: Props)
 
         {!pending.length ? (
           <div className="flex items-center gap-2 text-sm text-emerald-400">
-            <CheckCircle2 className="w-4 h-4" /> Todo al día este mes.
+            <CheckCircle2 className="w-4 h-4" /> {tr('Todo al día este mes.')}
           </div>
         ) : (
           <ul className="space-y-1.5">

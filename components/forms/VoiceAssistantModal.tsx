@@ -150,10 +150,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     }
     setReceiptStatus(read.reason === 'no-key' ? 'no-key' : 'error');
     setReceiptError(
-      read.reason === 'unreadable' ? 'No pude leer el total en la foto. Prueba con más luz, el recibo derecho y completo en la imagen.'
-      : read.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
-      : read.reason === 'timeout' ? 'La IA gratuita está lenta ahora y no alcanzó a leerlo. Inténtalo otra vez en un momento, o díctalo.'
-      : read.reason === 'busy' ? 'La IA gratuita está ocupada en este momento. Inténtalo en un minuto, o díctalo.'
+      read.reason === 'unreadable' ? tr('No pude leer el total en la foto. Prueba con más luz, el recibo derecho y completo en la imagen.')
+      : read.reason === 'no-model' ? tr('Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.')
+      : read.reason === 'timeout' ? tr('La IA gratuita está lenta ahora y no alcanzó a leerlo. Inténtalo otra vez en un momento, o díctalo.')
+      : read.reason === 'busy' ? tr('La IA gratuita está ocupada en este momento. Inténtalo en un minuto, o díctalo.')
       : tr('No pude conectar con la IA. Revisa tu conexión e inténtalo de nuevo.')
     );
   };
@@ -177,7 +177,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setErrorMsg('El micrófono nativo no está disponible en este navegador. Puedes usar el modo teclado.');
+      setErrorMsg(tr('El micrófono nativo no está disponible en este navegador. Puedes usar el modo teclado.'));
       return;
     }
 
@@ -214,11 +214,11 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       console.warn('Error en voz:', event.error);
       setIsListening(false);
       if (event.error === 'no-speech') {
-        setErrorMsg('No se escuchó nada. Toca el micrófono y vuelve a hablar.');
+        setErrorMsg(tr('No se escuchó nada. Toca el micrófono y vuelve a hablar.'));
       } else if (event.error === 'not-allowed') {
-        setErrorMsg('Permiso de micrófono denegado en tu dispositivo.');
+        setErrorMsg(tr('Permiso de micrófono denegado en tu dispositivo.'));
       } else if (event.error !== 'aborted') {
-        setErrorMsg('Toca el botón de micrófono para comenzar a dictar.');
+        setErrorMsg(tr('Toca el botón de micrófono para comenzar a dictar.'));
       }
     };
 
@@ -232,7 +232,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       rec.start();
     } catch (err) {
       console.error('Error al iniciar micrófono:', err);
-      setErrorMsg('Toca el micrófono para iniciar el dictado.');
+      setErrorMsg(tr('Toca el micrófono para iniciar el dictado.'));
     }
   };
 
@@ -257,7 +257,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     const { item, changed } = applyVoiceCorrection(cur, text, allCategories, payOptions);
     if (changed.length) { replace(item, changed); setCorrecting('idle'); return; }
     if (!getAiKey()) {
-      setErrorMsg('No entendí qué cambiar. Prueba: "eran 25 mil", "ponlo en Nequi" o "fue ayer".');
+      setErrorMsg(tr('No entendí qué cambiar. Prueba: "eran 25 mil", "ponlo en Nequi" o "fue ayer".'));
       setCorrecting('idle');
       return;
     }
@@ -266,9 +266,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       .then(out => {
         const keys = out ? (['amount', 'category', 'description', 'date', 'paymentMethod', 'type'] as const).filter(k => (out as any)[k] !== (cur as any)[k]) : [];
         if (out && keys.length) replace(out, [...keys]);
-        else setErrorMsg('No entendí qué cambiar. Prueba: "eran 25 mil", "ponlo en Nequi" o "fue ayer".');
+        else setErrorMsg(tr('No entendí qué cambiar. Prueba: "eran 25 mil", "ponlo en Nequi" o "fue ayer".'));
       })
-      .catch(() => setErrorMsg('La IA no respondió. Corrige el dato tocándolo.'))
+      .catch(() => setErrorMsg(tr('La IA no respondió. Corrige el dato tocándolo.')))
       .finally(() => setCorrecting('idle'));
   };
 
@@ -286,9 +286,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
 
   useEffect(() => {
     const locale = detectUserLocaleAndCurrency(profile?.currency);
-    const greetingText = context === 'gasto' ? '¿Qué gasto quieres registrar?'
-      : context === 'ingreso' ? '¿Qué ingreso quieres registrar?'
-      : context === 'deuda' ? '¿Qué deuda o abono quieres registrar?'
+    const greetingText = context === 'gasto' ? tr('¿Qué gasto quieres registrar?')
+      : context === 'ingreso' ? tr('¿Qué ingreso quieres registrar?')
+      : context === 'deuda' ? tr('¿Qué deuda o abono quieres registrar?')
       : "¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.";
     
     if (receipt === 'no-key') setReceiptStatus('no-key');
@@ -660,10 +660,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       const isMultipleTx = parsedResults.length > 1;
 
       if (isReminder) {
-        triggerPowerAnimation(0, 'edicion', 'RECORDATORIO AGENDADO', '¡AGENDADO!');
+        triggerPowerAnimation(0, 'edicion', tr('RECORDATORIO AGENDADO'), tr('¡AGENDADO!'));
         triggerConfettiWithSynth(3.0);
       } else if (isNote) {
-        triggerPowerAnimation(0, 'edicion', 'NOTA GUARDADA', '¡GUARDADA!');
+        triggerPowerAnimation(0, 'edicion', tr('NOTA GUARDADA'), tr('¡GUARDADA!'));
         triggerConfettiWithSynth(3.0);
       } else if (isMultipleTx) {
         triggerConfettiWithSynth(3.0);
@@ -674,9 +674,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
       }
 
-      let spokenMsg = 'Transacciones guardadas con éxito';
-      if (isReminder) spokenMsg = 'Recordatorio agendado con éxito';
-      else if (isNote) spokenMsg = 'Nota guardada con éxito';
+      let spokenMsg = tr('Transacciones guardadas con éxito');
+      if (isReminder) spokenMsg = tr('Recordatorio agendado con éxito');
+      else if (isNote) spokenMsg = tr('Nota guardada con éxito');
 
       const locale = detectUserLocaleAndCurrency(profile?.currency);
       
@@ -689,7 +689,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       });
     } catch (err) {
       console.error('Error guardando por voz:', err);
-      setErrorMsg('Error al guardar. Intenta nuevamente.');
+      setErrorMsg(tr('Error al guardar. Intenta nuevamente.'));
     } finally {
       setSavingBulk(false);
     }
@@ -796,7 +796,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         <div className="my-2 min-h-[2.5rem] flex flex-col items-center justify-center">
           {isListening ? (
             <span className={`text-xs font-bold animate-pulse ${isTechTheme ? 'text-accent' : 'text-accent'}`}>
-              🎙️ Escuchando... {context === 'ingreso' ? 'Di "Me pagaron 500 mil"' : context === 'deuda' ? 'Di "Le presté 100 mil a Juan"' : context === 'gasto' ? 'Di "Almuerzo 20 mil y tinto 3 mil"' : 'Di "Estadísticas" o "Gasté 9000 en cerveza"'}
+              🎙️ {tr('Escuchando...')} {context === 'ingreso' ? tr('Di "Me pagaron 500 mil"') : context === 'deuda' ? tr('Di "Le presté 100 mil a Juan"') : context === 'gasto' ? tr('Di "Almuerzo 20 mil y tinto 3 mil"') : tr('Di "Estadísticas" o "Gasté 9000 en cerveza"')}
             </span>
           ) : transcript ? (
             <span className={`text-xs font-medium italic max-w-xs ${isTechTheme ? 'text-accent/90' : 'text-text-primary'}`}>
@@ -836,7 +836,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                       onClick={() => { if (!getAiKey()) { setReceiptStatus('no-key'); return; } retakeNextRef.current = receiptStatus === 'done'; receiptInputRef.current?.click(); }}
                       className={`py-2.5 px-2 text-xs font-semibold flex items-center justify-center gap-1.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase' : 'rounded-xl border-glass-border text-text-primary hover:bg-white/10'}`}>
                 <Camera className="w-4 h-4 text-accent" />
-                {receiptStatus === 'done' ? 'Otra foto' : 'Usar foto'}
+                {receiptStatus === 'done' ? tr('Otra foto') : tr('Usar foto')}
               </button>
             </div>
             {isListening && correctingRef.current && (
@@ -886,9 +886,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             {aiStatus !== 'idle' && (
               <p className={`text-[10px] px-1 flex items-center gap-1.5 normal-case ${aiStatus === 'failed' ? 'text-text-muted' : 'text-accent'}`}>
                 <Sparkles className={`w-3 h-3 ${aiStatus === 'loading' ? 'animate-pulse' : ''}`} />
-                {aiStatus === 'loading' && 'Consultando la IA para entender mejor…'}
-                {aiStatus === 'done' && 'Ajustado con IA. Revisa antes de guardar.'}
-                {aiStatus === 'failed' && 'La IA no respondió; se usa el resultado local.'}
+                {aiStatus === 'loading' && tr('Consultando la IA para entender mejor…')}
+                {aiStatus === 'done' && tr('Ajustado con IA. Revisa antes de guardar.')}
+                {aiStatus === 'failed' && tr('La IA no respondió; se usa el resultado local.')}
               </p>
             )}
             {receiptStatus === 'done' && aiStatus === 'idle' && (
@@ -899,8 +899,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                     ? `Leí ${parsedResults.length} movimiento${parsedResults.length === 1 ? '' : 's'} de tu banco. Revisa y borra los que no quieras; la foto no se guarda.`
                     : tr('Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.')}
                   {receiptsLeft !== null && (receiptsLeft === 0
-                    ? ' Este era tu último recibo de hoy; mañana se renuevan.'
-                    : ` Te ${receiptsLeft === 1 ? 'queda 1 recibo' : `quedan ${receiptsLeft} recibos`} hoy.`)}
+                    ? tr(' Este era tu último recibo de hoy; mañana se renuevan.')
+                    : (receiptsLeft === 1 ? tr(' Te queda 1 recibo hoy.') : tr(' Te quedan {n} recibos hoy.', { n: receiptsLeft })))}
                 </span>
               </p>
             )}
@@ -1060,8 +1060,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             {cmd.action === 'navigate' ? <Compass className="w-3 h-3 text-blue-400" /> : <Bell className="w-3 h-3 text-amber-400 animate-pulse" />}
                             <span>
                               {cmd.action === 'ask_followup' 
-                                ? (cmd.prompt?.includes('anotar') ? '📝 NUEVA NOTA (ESCUCHANDO DETALLES)' : '🔔 NUEVO RECORDATORIO (ESCUCHANDO DETALLES)')
-                                : 'COMANDO DE VOZ IA'}
+                                ? (cmd.prompt?.includes('anotar') ? tr('📝 NUEVA NOTA (ESCUCHANDO DETALLES)') : tr('🔔 NUEVO RECORDATORIO (ESCUCHANDO DETALLES)'))
+                                : tr('COMANDO DE VOZ IA')}
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
@@ -1112,7 +1112,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                               date: res.date ? new Date(`${res.date}T12:00:00`) : new Date() }, transactions);
                             return prev ? <span className="block text-amber-400 font-semibold mb-0.5">⚠ {repeatedPaymentText(prev)} ¿Es otro pago? Si no, bórralo con 🗑.</span> : null;
                           })()}
-                          💡 Toca para convertir a {res.type === 'gasto' ? 'Ingreso 🟢' : 'Gasto 🔴'}
+                          💡 {tr('Toca para convertir a')} {res.type === 'gasto' ? tr('Ingreso 🟢') : tr('Gasto 🔴')}
                         </span>
                         <div className="flex items-center gap-2">
                           <button
@@ -1130,7 +1130,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 : 'text-red-400 bg-red-500/15 border-red-500/40 hover:bg-red-500/25'
                             }`}
                           >
-                            <span>{res.type === 'deuda' && res.debtDirection === 'me_deben' ? 'ME DEBEN' : res.type.toUpperCase()} DETECTADO</span>
+                            <span>{res.type === 'deuda' && res.debtDirection === 'me_deben' ? tr('ME DEBEN') : tr(res.type === 'gasto' ? 'Gasto' : res.type === 'ingreso' ? 'Ingreso' : 'Deuda').toUpperCase()} {tr('DETECTADO')}</span>
                             <RefreshCw className="w-2.5 h-2.5 opacity-70" />
                           </button>
                           {res.isFixed && res.type === 'gasto' && (
@@ -1174,7 +1174,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                             >
                               <span className="flex items-center gap-1.5 truncate">
                                 <CategoryIcon icon={res.category} label={res.category} className="w-3.5 h-3.5 text-accent shrink-0" />
-                                <span className="truncate font-semibold">{res.category || 'Seleccionar'}</span>
+                                <span className="truncate font-semibold">{res.category || tr('Seleccionar')}</span>
                               </span>
                               <ChevronDown className="w-3.5 h-3.5 opacity-60 shrink-0" />
                             </button>
@@ -1201,8 +1201,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                           return (
                             <div className={`p-2 border border-amber-400/50 bg-amber-400/10 normal-case space-y-1.5 ${hl('date')} ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
                               <p className="text-[11px] text-amber-300 font-semibold leading-snug">
-                                📅 Se guardará con fecha del {new Date(`${res.date}T12:00:00`).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long', ...(res.date.slice(0, 4) !== today.slice(0, 4) ? { year: 'numeric' } : {}) })}
-                                {days > 0 ? ` (hace ${days} ${days === 1 ? 'día' : 'días'})` : ''}{receiptStatus === 'done' && readKind === 'recibo' ? ', la que dice el recibo.' : '.'}
+                                📅 {tr('Se guardará con fecha del')} {new Date(`${res.date}T12:00:00`).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long', ...(res.date.slice(0, 4) !== today.slice(0, 4) ? { year: 'numeric' } : {}) })}
+                                {days > 0 ? (days === 1 ? tr(' (hace 1 día)') : tr(' (hace {n} días)', { n: days })) : ''}{receiptStatus === 'done' && readKind === 'recibo' ? tr(', la que dice el recibo.') : '.'}
                               </p>
                               <div className="flex items-center gap-2">
                                 <input autoComplete="off" type="date" value={res.date} max={today}
@@ -1244,7 +1244,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                         {(res.type === 'gasto' || res.type === 'ingreso') && (
                           <div className="space-y-1">
                             <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-                              {res.type === 'gasto' ? '¿Con qué pagaste?' : '¿Dónde lo recibiste?'}
+                              {res.type === 'gasto' ? tr('¿Con qué pagaste?') : tr('¿Dónde lo recibiste?')}
                             </span>
                             <div className={`flex flex-wrap gap-1.5 p-0.5 -m-0.5 ${hl('paymentMethod')}`}>
                               {payOptions.map(m => {
@@ -1289,7 +1289,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                   <span>
                     {parsedResults.some(r => 'kind' in r && r.kind === 'command')
                       ? tr('Ejecutar Comando')
-                      : `Guardar ${parsedResults.length === 1 ? 'Transacción' : `Todas (${parsedResults.length})`}`}
+                      : (parsedResults.length === 1 ? tr('Guardar transacción') : tr('Guardar todas ({n})', { n: parsedResults.length }))}
                   </span>
                 </>
               )}

@@ -104,7 +104,7 @@ export default function RecordatoriosPage() {
     if (!deletingReminderId) return;
     try {
       triggerPowerAnimation(0, 'eliminacion', 'RECORDATORIO ELIMINADO', '¡REMOVIDO!');
-      speakText('Recordatorio eliminado con éxito', 'es-CO');
+      speakText(tr('Recordatorio eliminado con éxito'), 'es-CO');
       await deleteReminder(deletingReminderId);
       setDeletingReminderId(null);
       refresh();
