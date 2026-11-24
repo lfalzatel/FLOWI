@@ -12,7 +12,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { formatCurrency } from '@/lib/format';
 import type { Transaction } from '@/lib/firestore';
-import { frequentProducts, productSpend } from '@/lib/productSpend';
+import { productCatalog, productSpend } from '@/lib/productSpend';
 import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
 import { getDateFromISOWeek, getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 
@@ -33,11 +33,21 @@ export default function ProductosPage() {
 
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Transaction | null>(null);
-  const suggestions = useMemo(() => frequentProducts(transactions), [transactions]);
+  // Todos los productos de los recibos: los más comprados arriba y el resto por categoría (nombres completos)
+  const catalog = useMemo(() => productCatalog(transactions), [transactions]);
+  const topProducts = catalog.slice(0, 6);
+  const byCategory = useMemo(() => {
+    const g = new Map<string, typeof catalog>();
+    for (const p of catalog.slice(6)) {
+      const c = p.category || 'Otros';
+      g.set(c, [...(g.get(c) || []), p]);
+    }
+    return Array.from(g.entries()).sort((a, b) => b[1].length - a[1].length);
+  }, [catalog]);
   const q = query.trim();
   const data = useMemo(() => (q.length >= 2 ? productSpend(transactions, q) : null), [transactions, q]);
   // Filtro de fechas, igual que en Gastos y Gastos hormiga: la gráfica y la lista se ajustan al periodo
-  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterType, setFilterType] = useState<FilterType>('month'); // por defecto el mes actual, como en Gastos
   const [filterValue, setFilterValue] = useState(getLocalMonthString());
   const view = useMemo(() => {
     if (!data) return null;
@@ -100,12 +110,35 @@ export default function ProductosPage() {
 
         {!data && (
           <div className="space-y-3">
-            {suggestions.length > 0 && (
+            {topProducts.length > 0 && (
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-2">{tr('Lo que más compras')}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {suggestions.map(s => <button key={s} type="button" onClick={() => setQuery(s)} className={chip}>{s}</button>)}
+                <div className="grid grid-cols-2 gap-2">
+                  {topProducts.map(p => (
+                    <button key={p.query} type="button" onClick={() => setQuery(p.query)}
+                            className={`text-left p-3 border border-glass-border bg-glass hover:border-accent/40 transition-colors ${box}`}>
+                      <p className="text-sm font-semibold text-text-primary leading-snug break-words">{p.name}</p>
+                      <p className="text-[11px] text-text-muted mt-1">{tr('{n} veces', { n: p.n })} · {fmt(p.total)}</p>
+                    </button>
+                  ))}
                 </div>
+              </div>
+            )}
+            {byCategory.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('Todos tus productos')} ({catalog.length})</p>
+                {byCategory.map(([cat, list]) => (
+                  <div key={cat}>
+                    <p className="text-xs font-semibold text-text-secondary mb-1.5">{tr(cat)}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {list.map(p => (
+                        <button key={p.query} type="button" onClick={() => setQuery(p.query)} className={`${chip} normal-case`}>
+                          {p.name}{p.n > 1 && <span className="ml-1 text-text-muted">×{p.n}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             <div className={`flex gap-2.5 p-3 border border-accent/20 bg-accent/5 ${box}`}>
@@ -133,8 +166,9 @@ export default function ProductosPage() {
               {filterType === 'all' ? (
                 <>
                   <div className={card}>
-                    <p className="text-[10px] text-text-muted">{tr('Este mes')}</p>
-                    <p className="text-sm font-bold text-text-primary truncate">{fmt(data.thisMonth)}</p>
+                    <p className="text-[10px] text-text-muted">{tr('En total')}</p>
+                    <p className="text-sm font-bold text-text-primary truncate">{fmt(view.total)}</p>
+                    <p className="text-[10px] text-text-muted truncate">{tr('Este mes')}: {fmt(data.thisMonth)}</p>
                   </div>
                   <div className={card}>
                     <p className="text-[10px] text-text-muted">{tr('Promedio al mes')}</p>

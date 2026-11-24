@@ -117,3 +117,44 @@ export function frequentProducts(transactions: Transaction[], limit = 12): strin
   }
   return Array.from(count.values()).sort((a, b) => b.n - a.n).slice(0, limit).map(c => c.label.charAt(0).toUpperCase() + c.label.slice(1));
 }
+
+export interface CatalogProduct {
+  query: string;     // lo que se busca al tocarlo (la palabra clave, así encuentra todas sus variantes)
+  name: string;      // el nombre completo más usado, sin recortar
+  n: number;         // cuántas veces aparece en los recibos
+  total: number;     // cuánto se ha gastado en total
+  category?: string; // categoría más usada para ese producto
+}
+
+const niceName = (s: string) => {
+  const t = s.replace(/\s+/g, ' ').trim();
+  // Casi todo en mayúsculas (como salen en el recibo: "ATUN MUA 170g") → en minúsculas para que se lea mejor
+  const letters = t.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '');
+  const upper = letters.replace(/[^A-ZÁÉÍÓÚÑ]/g, '').length;
+  const fixed = letters.length && upper / letters.length > 0.7 ? t.toLowerCase() : t;
+  return fixed.charAt(0).toUpperCase() + fixed.slice(1);
+};
+
+/** Todos los productos de los recibos, agrupados por su palabra clave, del más comprado al menos comprado. */
+export function productCatalog(transactions: Transaction[]): CatalogProduct[] {
+  const map = new Map<string, { names: Map<string, number>; cats: Map<string, number>; n: number; total: number; first: string }>();
+  for (const t of transactions) {
+    if (t.type !== 'gasto' || !t.items?.length) continue;
+    for (const it of t.items) {
+      const key = words(it.name).find(w => w.length >= 3 && !/^\d/.test(w));
+      if (!key) continue;
+      const g = map.get(key) || { names: new Map(), cats: new Map(), n: 0, total: 0, first: it.name.split(/\s+/)[0].toLowerCase() };
+      const nm = niceName(it.name);
+      g.names.set(nm, (g.names.get(nm) || 0) + 1);
+      const cat = it.category || t.category;
+      if (cat) g.cats.set(cat, (g.cats.get(cat) || 0) + 1);
+      g.n++;
+      g.total += Number(it.total) || 0;
+      map.set(key, g);
+    }
+  }
+  const top = (m: Map<string, number>) => Array.from(m.entries()).sort((a, b) => b[1] - a[1])[0]?.[0];
+  return Array.from(map.values())
+    .map(g => ({ query: g.first, name: top(g.names) || g.first, n: g.n, total: Math.round(g.total), category: top(g.cats) }))
+    .sort((a, b) => b.n - a.n || b.total - a.total);
+}
