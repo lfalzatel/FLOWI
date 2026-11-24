@@ -30,7 +30,7 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
       <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center shrink-0"><Wallet className="w-5 h-5 text-accent" /></div>
       <div className="flex-1 min-w-0">
         <p className="text-[11px] text-text-muted">{tr('Tu patrimonio neto')}</p>
-        <p className={`text-sm font-bold ${worth.total < 0 ? 'text-[var(--red)]' : isTech ? 'text-accent' : 'text-text-primary'} ${isTech ? 'uppercase font-mono' : 'font-syne'}`}>
+        <p className={`text-sm font-bold ${worth.total < 0 ? 'text-money-neg' : 'text-money-pos'} ${isTech ? 'uppercase font-mono' : 'font-syne'}`}>
           {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
         </p>
         <p className="text-[11px] text-text-muted truncate">

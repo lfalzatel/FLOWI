@@ -9,6 +9,7 @@ import { AccountIcon } from '@/components/accounts/AccountIcon';
 import { RealMoneyInfo } from '@/hooks/useRealMoney';
 import { formatCurrency } from '@/lib/format';
 
+import { MONEY_TEXT, toneOf } from '@/lib/moneyTone';
 // Al tocar "Dinero disponible": la plata que hay en cada cuenta y el atajo para ajustarlas
 export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currency = 'COP', onClose }: {
   real: RealMoneyInfo; pendingCommitments: number; monthBalance?: number; currency?: string; onClose: () => void;
@@ -28,7 +29,10 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
         <AccountIcon account={s.account} className="w-5 h-5 text-lg flex items-center justify-center" />
       </span>
       <span className="flex-1 min-w-0 text-sm text-text-secondary truncate">{s.account.name}</span>
-      <span className={`text-sm font-semibold tabular-nums ${s.balance < 0 ? 'text-red-400' : 'text-text-primary'}`}>
+      <span className={`text-sm font-semibold tabular-nums ${
+        // Tarjeta que se debe: amarillo (deuda); cuenta de ahorro: azul; saldo para gastar: verde o rojo
+        s.account.kind === 'credito' && s.balance < 0 ? MONEY_TEXT.debt
+          : MONEY_TEXT[toneOf(s.balance, s.account.purpose === 'ahorro' ? 'save' : 'pos')]}`}>
         {s.account.kind === 'credito' && s.balance < 0 ? `Debes ${f(-s.balance)}` : `${s.balance < 0 ? '−' : ''}${f(Math.abs(s.balance))}`}
       </span>
     </li>
@@ -50,15 +54,15 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
         <ul className={`divide-y ${isTech ? 'divide-accent/15' : 'divide-glass-border'}`}>{spend.map(row)}</ul>
         <div className={`flex justify-between pt-2 mt-1 border-t ${isTech ? 'border-accent/30' : 'border-glass-border'}`}>
           <span className="text-sm font-bold text-text-primary">{tr('Total para gastar')}</span>
-          <span className="text-sm font-bold text-accent tabular-nums"><AnimatedNumber value={real.cash} format={f} /></span>
+          <span className={`text-sm font-bold tabular-nums ${MONEY_TEXT[toneOf(real.cash)]}`}><AnimatedNumber value={real.cash} format={f} /></span>
         </div>
 
         {(pendingCommitments > 0 || real.cardDebt > 0) && (
           <div className={`mt-4 p-3 text-xs space-y-1 ${isTech ? 'rounded-none bg-accent/5 border border-accent/20' : 'rounded-2xl bg-white/5 border border-glass-border'}`}>
-            {pendingCommitments > 0 && <p className="flex justify-between text-text-secondary"><span>{tr('Compromisos por pagar este mes')}</span><span className="tabular-nums">− {f(pendingCommitments)}</span></p>}
-            {real.cardDebt > 0 && <p className="flex justify-between text-text-secondary"><span>{real.anyFixed ? tr('Lo que pagas de tus tarjetas este mes') : tr('Lo que debes en tarjetas')}</span><span className="tabular-nums">− {f(real.cardDebt)}</span></p>}
+            {pendingCommitments > 0 && <p className="flex justify-between text-text-secondary"><span>{tr('Compromisos por pagar este mes')}</span><span className={`tabular-nums ${MONEY_TEXT.debt}`}>− {f(pendingCommitments)}</span></p>}
+            {real.cardDebt > 0 && <p className="flex justify-between text-text-secondary"><span>{real.anyFixed ? tr('Lo que pagas de tus tarjetas este mes') : tr('Lo que debes en tarjetas')}</span><span className={`tabular-nums ${MONEY_TEXT.debt}`}>− {f(real.cardDebt)}</span></p>}
             {real.cardLoans > 0 && <p className="text-[10px] text-text-muted leading-snug">Los préstamos en tarjetas ({f(real.cardLoans)}) no se restan aquí: se pagan por cuotas, que ya van en tus compromisos.</p>}
-            <p className="flex justify-between font-bold text-text-primary pt-1"><span>{tr('Te queda libre')}</span><span className={`tabular-nums ${free < 0 ? 'text-red-400' : ''}`}>{free < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(free)} format={f} /></span></p>
+            <p className="flex justify-between font-bold text-text-primary pt-1"><span>{tr('Te queda libre')}</span><span className={`tabular-nums ${MONEY_TEXT[toneOf(free)]}`}>{free < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(free)} format={f} /></span></p>
           </div>
         )}
 

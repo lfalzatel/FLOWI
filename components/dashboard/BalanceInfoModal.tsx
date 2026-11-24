@@ -11,6 +11,7 @@ import { useDebtTotals } from '@/hooks/useDebtTotals';
 import { formatCurrency } from '@/lib/format';
 import { DailyBudget } from '@/lib/dailyBudget';
 
+import { MONEY_TEXT, MoneyTone } from '@/lib/moneyTone';
 type Props =
   | { kind: 'today'; today: DailyBudget; currency?: string; onClose: () => void }
   | { kind: 'debts'; balance: number; currency?: string; onClose: () => void };
@@ -62,8 +63,8 @@ export function BalanceInfoModal(props: Props) {
 
 // Colores de los números en toda la app: plata que tienes o te entra en verde, gastos y negativos en rojo,
 // deudas en amarillo y ahorros en azul.
-type Tone = 'pos' | 'neg' | 'debt' | 'save' | 'plain';
-const TONE: Record<Tone, string> = { pos: 'text-emerald-400', neg: 'text-red-400', debt: 'text-amber-400', save: 'text-sky-400', plain: 'text-text-primary' };
+type Tone = MoneyTone;
+const TONE = MONEY_TEXT;
 
 function Row({ label, hint, value, sign, strong, tone }: { label: string; hint?: string; value: string; sign?: '+' | '−' | '='; strong?: boolean; tone?: Tone }) {
   const color = TONE[tone ?? (sign === '+' ? 'pos' : sign === '−' ? 'neg' : 'plain')];

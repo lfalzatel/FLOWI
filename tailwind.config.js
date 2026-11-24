@@ -14,6 +14,13 @@ module.exports = {
       },
       colors: {
         accent: 'rgb(var(--accent) / <alpha-value>)',
+        // Colores del dinero (ver app/globals.css): plata/ingresos, gastos/negativos, deudas, ahorros
+        money: {
+          pos: 'rgb(var(--money-pos) / <alpha-value>)',
+          neg: 'rgb(var(--money-neg) / <alpha-value>)',
+          debt: 'rgb(var(--money-debt) / <alpha-value>)',
+          save: 'rgb(var(--money-save) / <alpha-value>)',
+        },
         'accent-dim': 'rgb(var(--accent-dim) / <alpha-value>)',
         deep: 'var(--bg-deep)',
         card: 'var(--bg-card)',

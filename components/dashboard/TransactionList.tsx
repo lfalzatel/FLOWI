@@ -103,7 +103,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
                 </div>
               </div>
               <p className={`text-[13px] font-bold flex-shrink-0 font-mono tracking-widest ml-4
-                             ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
+                             ${t.type === 'gasto' ? 'text-money-neg' : 'text-money-pos'}`}>
                 <AnimatedNumber value={t.amount} prefix={t.type === 'gasto' ? '-' : '+'} delay={i * 0.1} />
               </p>
             </div>
@@ -133,7 +133,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
             </div>
             {/* Amount */}
             <p className={`text-[13px] font-bold flex-shrink-0
-                           ${t.type === 'gasto' ? 'text-[var(--red)]' : 'text-accent'}`}>
+                           ${t.type === 'gasto' ? 'text-money-neg' : 'text-money-pos'}`}>
               <AnimatedNumber value={t.amount} prefix={t.type === 'gasto' ? '-' : '+'} delay={i * 0.1} />
             </p>
           </div>

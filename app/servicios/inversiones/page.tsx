@@ -25,6 +25,7 @@ import { formatCurrency } from '@/lib/format';
 import { KIND_INFO, dayKey, formatDay, investmentStatus, investmentValue, kindOf, parseDay, portfolioSummary, whenText } from '@/lib/investments';
 
 
+import { MONEY_TEXT, toneOf } from '@/lib/moneyTone';
 const nameOf = (inv: Investment) => kindOf(inv) === 'cdt' ? `CDT ${inv.bank}` : inv.note ? `${inv.note}` : inv.bank;
 
 export default function InversionesPage() {
@@ -162,7 +163,7 @@ export default function InversionesPage() {
             <div className={`mt-4 pt-4 border-t ${isTechTheme ? 'border-accent/20' : 'border-glass-border'} grid grid-cols-2 gap-3`}>
               <div>
                 <p className="text-[11px] text-text-muted">{tr('Llevas ganado')}</p>
-                <p className={`font-bold ${summary.earnedToDate < 0 ? 'text-red-400' : 'text-text-primary'}`}>{summary.earnedToDate < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(summary.earnedToDate)} format={fmt} /></p>
+                <p className={`font-bold ${summary.earnedToDate < 0 ? MONEY_TEXT.neg : MONEY_TEXT.save}`}>{summary.earnedToDate < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(summary.earnedToDate)} format={fmt} /></p>
               </div>
               {hasCdt && (
                 <div>
@@ -236,11 +237,11 @@ export default function InversionesPage() {
                         </div>
                         <div>
                           <p className="text-text-muted">{k === 'ahorro' ? tr('Intereses ganados') : loss ? tr('Pérdida') : tr('Ganancia')}</p>
-                          <p className={`font-bold text-base flex items-center gap-1 ${loss ? 'text-red-400' : 'text-emerald-500'}`}>
+                          <p className={`font-bold text-base flex items-center gap-1 ${loss ? MONEY_TEXT.neg : MONEY_TEXT.save}`}>
                             {loss ? <TrendingDown className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
                             {loss ? '−' : '+'}{fmt(Math.abs(v.earned))}
                           </p>
-                          {k !== 'ahorro' && v.invested > 0 && <p className={`text-[10px] ${loss ? 'text-red-400' : 'text-text-muted'}`}>{pctGain >= 0 ? '+' : ''}{pctGain.toFixed(1).replace('.', ',')}% sobre {fmt(v.invested)}</p>}
+                          {k !== 'ahorro' && v.invested > 0 && <p className={`text-[10px] ${loss ? MONEY_TEXT.neg : 'text-text-muted'}`}>{pctGain >= 0 ? '+' : ''}{pctGain.toFixed(1).replace('.', ',')}% sobre {fmt(v.invested)}</p>}
                           {k === 'ahorro' && <p className="text-[10px] text-text-muted">desde el {formatDay(inv.startDate)}</p>}
                         </div>
                       </div>

@@ -93,7 +93,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
                 <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>{tr('Dinero disponible')}</span>
                 {real && !today && <span className="text-[10px] text-text-muted">{tr('· en tus cuentas · toca para ver')}</span>}
               </div>
-              <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold tracking-wider' : 'font-syne font-bold'} ${today ? 'text-[clamp(16px,5vw,30px)]' : 'text-[clamp(24px,8vw,44px)]'} ${balance < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
+              <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold tracking-wider' : 'font-syne font-bold'} ${today ? 'text-[clamp(16px,5vw,30px)]' : 'text-[clamp(24px,8vw,44px)]'} ${balance < 0 ? 'text-money-neg' : 'text-money-pos'}`}>
                 <AnimatedNumber value={balance} delay={0.05} />
               </p>
               <p className={`text-[10px] mb-3 ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
@@ -113,7 +113,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
                     {today.remainingToday < 0 ? tr('Hoy te pasaste') : tr('Hoy puedes gastar')}
                   </span>
                 </div>
-                <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono tracking-wider' : 'font-syne'} font-bold text-[clamp(16px,5vw,30px)] ${today.remainingToday < 0 ? 'text-[var(--red)]' : 'text-accent'}`}>
+                <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono tracking-wider' : 'font-syne'} font-bold text-[clamp(16px,5vw,30px)] ${today.remainingToday < 0 ? 'text-money-neg' : 'text-money-pos'}`}>
                   <AnimatedNumber value={Math.abs(today.remainingToday)} delay={0.1} />
                 </p>
                 <p className={`text-[10px] mb-3 leading-tight ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
@@ -135,7 +135,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
             <span className={`text-[10px] ${isCyberpunk ? 'font-mono text-accent/50 uppercase tracking-wider' : 'text-text-muted'}`}>
               {tr('Balance Neto (Con Deudas)')}
             </span>
-            <span className={`text-xs font-bold ${isCyberpunk ? 'font-mono' : 'font-syne'} ${(balance - totalDeudas) < 0 ? 'text-red-400' : 'text-accent/80'}`}>
+            <span className={`text-xs font-bold ${isCyberpunk ? 'font-mono' : 'font-syne'} ${(balance - totalDeudas) < 0 ? 'text-money-neg' : 'text-money-pos'}`}>
               ${(balance - totalDeudas).toLocaleString(currentLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
@@ -158,7 +158,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--red)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>{tr('Gastos')}</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)] tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-[var(--red)]'} ${absorbingId === 'total-gastos-card' ? 'drop-shadow-[0_0_12px_rgba(239,68,68,0.9)]' : ''}`}>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-money-neg tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-money-neg'} ${absorbingId === 'total-gastos-card' ? 'drop-shadow-[0_0_12px_rgba(239,68,68,0.9)]' : ''}`}>
             <AnimatedNumber value={totalGastos} delay={0.15} />
           </p>
         </div>
@@ -177,7 +177,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>{tr('Ingresos')}</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-accent tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-accent'} ${absorbingId === 'total-ingresos-card' ? 'drop-shadow-[0_0_12px_rgba(0,229,160,0.9)]' : ''}`}>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(11px,3.8vw,18px)] text-money-pos tracking-wider' : 'font-syne font-bold text-[clamp(11px,3.8vw,18px)] text-money-pos'} ${absorbingId === 'total-ingresos-card' ? 'drop-shadow-[0_0_12px_rgba(0,229,160,0.9)]' : ''}`}>
             <AnimatedNumber value={totalIngresos} delay={0.25} />
           </p>
         </div>
@@ -199,7 +199,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
             </div>
             <span className={`text-[11px] font-medium ${isCyberpunk ? 'font-mono text-[var(--yellow)]/70 uppercase tracking-wider' : 'text-text-secondary'}`}>{tr('Deudas Pendientes')}</span>
           </div>
-          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)] tracking-wider' : 'font-syne font-bold text-[clamp(12px,5vw,18px)] text-[var(--yellow)]'} ${absorbingId === 'total-deudas-card' ? 'drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]' : ''}`}>
+          <p className={`${isCyberpunk ? 'font-mono font-bold text-[clamp(12px,5vw,18px)] text-money-debt tracking-wider' : 'font-syne font-bold text-[clamp(12px,5vw,18px)] text-money-debt'} ${absorbingId === 'total-deudas-card' ? 'drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]' : ''}`}>
             <AnimatedNumber value={totalDeudas} delay={0.35} />
           </p>
           <p className={`text-[10px] mt-0.5 ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Toca para ver el detalle')}</p>

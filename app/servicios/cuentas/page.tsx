@@ -24,6 +24,7 @@ import { getLocalMonthString } from '@/lib/dateUtils';
 import { businessMoneyByAccount } from '@/lib/business';
 import { formatCurrency } from '@/lib/format';
 
+import { MONEY_TEXT, toneOf } from '@/lib/moneyTone';
 export default function CuentasPage() {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
@@ -71,12 +72,12 @@ export default function CuentasPage() {
   const btn = `flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTech ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`;
   const ghost = `flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold border transition-all active:scale-95 ${isTech ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-secondary hover:text-text-primary hover:bg-glass'}`;
 
-  const rows: { label: string; value: number; sign: 1 | -1; href?: string; icon: any }[] = [
-    { label: tr('En tus cuentas'), value: worth.accounts, sign: 1, icon: Wallet },
-    { label: tr('En CDT'), value: worth.investments, sign: 1, href: '/servicios/inversiones', icon: Landmark },
-    { label: tr('Te deben'), value: worth.owedToMe, sign: 1, href: '/deudas', icon: HandCoins },
-    { label: tr('Debes en tarjetas'), value: worth.cards, sign: -1, icon: CreditCard },
-    { label: tr('Debes en préstamos'), value: worth.debts, sign: -1, href: '/deudas', icon: CreditCard },
+  const rows: { label: string; value: number; sign: 1 | -1; href?: string; icon: any; tone: 'pos' | 'save' | 'debt' }[] = [
+    { label: tr('En tus cuentas'), value: worth.accounts, sign: 1, icon: Wallet, tone: 'pos' },
+    { label: tr('En CDT'), value: worth.investments, sign: 1, href: '/servicios/inversiones', icon: Landmark, tone: 'save' },
+    { label: tr('Te deben'), value: worth.owedToMe, sign: 1, href: '/deudas', icon: HandCoins, tone: 'pos' },
+    { label: tr('Debes en tarjetas'), value: worth.cards, sign: -1, icon: CreditCard, tone: 'debt' },
+    { label: tr('Debes en préstamos'), value: worth.debts, sign: -1, href: '/deudas', icon: CreditCard, tone: 'debt' },
   ];
 
   return (
@@ -105,7 +106,7 @@ export default function CuentasPage() {
             <span className={`text-xs font-medium ${isTech ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>{tr('Tu patrimonio neto')}</span>
             <button onClick={() => setShowHelp(v => !v)} aria-label={tr('¿Qué es el patrimonio neto?')} className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
           </div>
-          <p className={`font-bold text-[clamp(26px,9vw,38px)] leading-none ${worth.total >= 0 ? 'text-accent' : 'text-[var(--red)]'} ${isTech ? '' : 'font-syne'}`}>
+          <p className={`font-bold text-[clamp(26px,9vw,38px)] leading-none ${worth.total >= 0 ? 'text-money-pos' : 'text-money-neg'} ${isTech ? '' : 'font-syne'}`}>
             {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
           </p>
           <p className="text-xs text-text-muted mt-1">{tr('Tienes {a} · debes {b}', { a: fmt(worth.assets), b: fmt(worth.liabilities) })}</p>
@@ -114,9 +115,9 @@ export default function CuentasPage() {
             {rows.filter(r => r.value > 0 || r.label === 'En tus cuentas').map(r => {
               const content = (
                 <>
-                  <r.icon className={`w-4 h-4 shrink-0 ${r.sign > 0 ? 'text-accent' : 'text-red-400'}`} />
+                  <r.icon className={`w-4 h-4 shrink-0 ${MONEY_TEXT[r.tone]}`} />
                   <span className="flex-1 text-sm text-text-secondary">{r.label}</span>
-                  <span className={`text-sm font-semibold ${r.sign > 0 ? 'text-text-primary' : 'text-red-400'}`}>{r.sign < 0 ? '−' : ''}<AnimatedNumber value={r.value} format={fmt} /></span>
+                  <span className={`text-sm font-semibold ${MONEY_TEXT[r.tone]}`}>{r.sign < 0 ? '−' : ''}<AnimatedNumber value={r.value} format={fmt} /></span>
                 </>
               );
               return r.href
@@ -170,7 +171,7 @@ export default function CuentasPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className={`font-bold truncate ${isTech ? 'text-accent uppercase text-sm' : 'text-text-primary'}`}>{a.name}</h3>
-                          {a.purpose === 'ahorro' && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Ahorro')}</span>}
+                          {a.purpose === 'ahorro' && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-money-save/15 text-money-save ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Ahorro')}</span>}
                           {a.isDefault && <span className={`shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-accent/15 text-accent ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Principal')}</span>}
                         </div>
                         <p className="text-[11px] text-text-muted truncate">{tr(KIND_LABEL[a.kind])}{a.methods.length ? ` · ${a.methods.join(', ')}` : ''}</p>
@@ -182,7 +183,7 @@ export default function CuentasPage() {
                         )}
                       </div>
                       <div className="text-right shrink-0">
-                        <p className={`font-bold ${st.balance < 0 ? 'text-red-400' : 'text-text-primary'} ${isTech ? '' : 'font-syne'}`}>
+                        <p className={`font-bold ${credit && st.balance < 0 ? MONEY_TEXT.debt : MONEY_TEXT[toneOf(st.balance, a.purpose === 'ahorro' ? 'save' : 'pos')]} ${isTech ? '' : 'font-syne'}`}>
                           {credit && st.balance < 0
                             ? <>{tr('Debes')} <AnimatedNumber value={-st.balance} format={fmt} /></>
                             : <>{st.balance < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(st.balance)} format={fmt} /></>}
@@ -241,9 +242,9 @@ export default function CuentasPage() {
                           <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                             {[
                               { l: per.base !== null ? tr('Saldo inicial o ajuste') : tr('Al empezar'), v: per.startBalance + (per.base || 0), c: 'text-text-primary' },
-                              { l: tr('Entró'), v: per.income, c: 'text-emerald-400', s: '+' },
-                              { l: tr('Salió'), v: per.outcome, c: 'text-text-primary', s: '−' },
-                              { l: Math.abs(per.endBalance - st.balance) < 0.5 ? tr('Saldo hoy') : tr('Al terminar'), v: per.endBalance, c: per.endBalance < 0 ? 'text-red-400' : 'text-accent' },
+                              { l: tr('Entró'), v: per.income, c: MONEY_TEXT.pos, s: '+' },
+                              { l: tr('Salió'), v: per.outcome, c: MONEY_TEXT.neg, s: '−' },
+                              { l: Math.abs(per.endBalance - st.balance) < 0.5 ? tr('Saldo hoy') : tr('Al terminar'), v: per.endBalance, c: MONEY_TEXT[toneOf(per.endBalance)] },
                             ].map(x => (
                               <div key={x.l} className={`p-2.5 bg-glass border border-glass-border ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
                                 <p className="text-[10px] text-text-muted">{x.l}</p>
@@ -263,7 +264,7 @@ export default function CuentasPage() {
                               <span className="flex-1 min-w-0 truncate text-text-secondary">{m.label}</span>
                               {m.kind === 'base'
                                 ? <span className="text-text-muted"><AnimatedNumber value={m.amount} format={fmt} /></span>
-                                : <span className={m.amount >= 0 ? 'text-emerald-400 font-semibold' : 'text-text-primary'}>{m.amount >= 0 ? '+' : '−'}<AnimatedNumber value={Math.abs(m.amount)} format={fmt} /></span>}
+                                : <span className={m.amount >= 0 ? `${MONEY_TEXT.pos} font-semibold` : MONEY_TEXT.neg}>{m.amount >= 0 ? '+' : '−'}<AnimatedNumber value={Math.abs(m.amount)} format={fmt} /></span>}
                               {m.kind === 'debt' && (
                                 <button type="button" onClick={() => setOpenDebt(m.debt)} aria-label={tr('Ver la deuda')} className="text-text-muted hover:text-accent px-1"><Pencil className="w-3 h-3" /></button>
                               )}

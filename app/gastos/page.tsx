@@ -182,7 +182,7 @@ export default function GastosPage() {
                 <span className={`text-xs font-medium ${isTechTheme ? 'font-mono text-accent/70 tracking-wide uppercase' : 'text-text-secondary'}`}>{tr('Total Gastado')}</span>
               </div>
 
-              <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-[var(--red)] tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-[var(--red)]'}`}>
+              <p className={`mb-1 leading-none ${isTechTheme ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-money-neg tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-money-neg'}`}>
                 <AnimatedNumber value={filteredTransactions.reduce((sum, e) => sum + e.amount, 0)} prefix="$" />
               </p>
               <p className={`text-xs ${isTechTheme ? 'font-mono text-accent/50 uppercase tracking-widest' : 'text-text-muted'}`}>{filterType === 'all' ? tr('Total') : filterType === 'month' ? tr('Este mes') : tr('Este día')}</p>

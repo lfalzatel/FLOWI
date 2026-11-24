@@ -177,12 +177,12 @@ export default function DeudasPage() {
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-7 h-7 rounded-xl bg-orange-500/15 flex items-center justify-center">
-                <CreditCard className="w-3.5 h-3.5 text-orange-400" />
+                <CreditCard className="w-3.5 h-3.5 text-money-debt" />
               </div>
               <span className={`text-xs font-medium ${isCyberpunk ? 'font-mono text-orange-400/70 tracking-wide uppercase' : 'text-text-secondary'}`}>{tr('Total Pendiente')}</span>
             </div>
 
-            <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-orange-400 tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-orange-400'}`}>
+            <p className={`mb-1 leading-none ${isCyberpunk ? 'font-mono font-bold text-[clamp(24px,8vw,36px)] text-money-debt tracking-wider' : 'font-syne font-bold text-[clamp(24px,8vw,36px)] text-money-debt'}`}>
               <AnimatedNumber value={totalDeudasConInteres} prefix="$" />
             </p>
             <p className={`text-xs ${isCyberpunk ? 'font-mono text-orange-400/50 uppercase tracking-widest' : 'text-text-muted'}`}>{tr('Suma de todas tus deudas activas')}</p>
@@ -194,8 +194,8 @@ export default function DeudasPage() {
           <div className={`grid grid-cols-3 gap-2 ${isCyberpunk ? 'font-mono' : ''}`}>
             {[
               { label: tr('Deudas activas'), value: String(iOweCount), tone: 'text-text-primary' },
-              { label: tr('Cuotas al mes'), value: monthlyInstallments ? fmt(monthlyInstallments) : '—', tone: 'text-orange-400' },
-              { label: tr('Me deben'), value: owedToMe + sharedPending.toMe ? fmt(owedToMe + sharedPending.toMe) : '—', tone: 'text-emerald-400' },
+              { label: tr('Cuotas al mes'), value: monthlyInstallments ? fmt(monthlyInstallments) : '—', tone: 'text-money-debt' },
+              { label: tr('Me deben'), value: owedToMe + sharedPending.toMe ? fmt(owedToMe + sharedPending.toMe) : '—', tone: 'text-money-pos' },
             ].map(c => (
               <div key={c.label} className={`glass-card p-3 ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}>
                 <p className="text-[10px] text-text-muted leading-tight">{c.label}</p>
@@ -235,7 +235,7 @@ export default function DeudasPage() {
                     {e.paid > 0 ? ` · ${tr('abonado {m} de {t}', { m: fmt(e.paid), t: fmt(e.amount) })}` : ''}
                   </p>
                 </div>
-                <span className={`text-xs font-semibold tabular-nums shrink-0 ${e.toMe ? 'text-emerald-400' : 'text-[var(--red)]'}`}>{fmt(e.pending)}</span>
+                <span className={`text-xs font-semibold tabular-nums shrink-0 ${e.toMe ? 'text-money-pos' : 'text-money-debt'}`}>{fmt(e.pending)}</span>
                 <button type="button" onClick={() => setSharedPay({ tx: e.tx, index: e.index })}
                         className={`h-7 px-2.5 text-[11px] font-semibold border border-accent/40 text-accent shrink-0 ${isCyberpunk ? 'rounded-none' : 'rounded-full'}`}>
                   {tr('Abonar')}
@@ -279,10 +279,10 @@ export default function DeudasPage() {
                       <div key={a.id} className={`glass-card p-4 space-y-2 ${isCyberpunk ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            <CreditCard className="w-4 h-4 text-orange-400 shrink-0" />
+                            <CreditCard className="w-4 h-4 text-money-debt shrink-0" />
                             <p className="text-sm font-semibold text-text-primary truncate">{a.name}</p>
                           </div>
-                          <p className="text-sm font-bold text-orange-400 shrink-0">{tr('Debes {m}', { m: fmt(owed) })}</p>
+                          <p className="text-sm font-bold text-money-debt shrink-0">{tr('Debes {m}', { m: fmt(owed) })}</p>
                         </div>
                         {a.creditLimit ? (
                           <div>

@@ -15,6 +15,23 @@
   }
 }
 
+/* ─── Colores del dinero (en toda la app) ─────────────────────────────────────
+   Verde: plata que tienes o te entra · Rojo: gastos y negativos · Amarillo: deudas · Azul: ahorros.
+   Se usan con las clases text-money-pos / -neg / -debt / -save (tailwind.config.js). En el tema claro
+   son un tono más oscuro para que se lean sobre fondo blanco. */
+:root {
+  --money-pos:  52 211 153;
+  --money-neg:  248 113 113;
+  --money-debt: 251 191 36;
+  --money-save: 56 189 248;
+}
+[data-theme='light'] {
+  --money-pos:  5 150 105;
+  --money-neg:  220 38 38;
+  --money-debt: 202 138 4;
+  --money-save: 2 132 199;
+}
+
 /* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root, [data-theme='glassmorphism'] {
   --accent:        0 229 160;
