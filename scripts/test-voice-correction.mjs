@@ -16,8 +16,9 @@ const transpile = (file, out, replace) => {
   for (const [from, to] of replace) js = js.replace(from, to);
   fs.writeFileSync(path.join(outDir, out), js);
 };
-const fix = [[/from ['"]\.\/firestore['"]/, "from './firestore.mjs'"], [/from ['"]\.\/categories['"]/g, "from './categories.mjs'"], [/from ['"]\.\/voiceParser['"]/, "from './voiceParser.mjs'"]];
+const fix = [[/from ['"]\.\/firestore['"]/, "from './firestore.mjs'"], [/from ['"]\.\/categories['"]/g, "from './categories.mjs'"], [/from ['"]\.\/voiceParser['"]/, "from './voiceParser.mjs'"], [/from ['"]\.\/voiceEnglish['"]/, "from './voiceEnglish.mjs'"]];
 transpile('lib/categories.ts', 'categories.mjs', []);
+transpile('lib/voiceEnglish.ts', 'voiceEnglish.mjs', []);
 transpile('lib/voiceParser.ts', 'voiceParser.mjs', fix);
 transpile('lib/voiceCorrection.ts', 'voiceCorrection.mjs', fix);
 fs.writeFileSync(path.join(outDir, 'firestore.mjs'), 'export function isFixedExpenseCategory() { return false; }\n');

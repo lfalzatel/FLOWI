@@ -1,6 +1,7 @@
 import type { ReceiptItem } from '@/lib/receiptItems';
 import { isFixedExpenseCategory } from './firestore';
 import { detectMerchantInText, normalizeText } from './categories';
+import { englishCategoryHints } from './voiceEnglish';
 
 export interface ParsedVoiceResult {
   kind?: 'transaction';
@@ -390,7 +391,11 @@ function matchesLabel(normalized: string, label: string) {
   return new RegExp(`(?:^|\\s)${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\s|$)`).test(normalized);
 }
 
-function detectCategory(normalized: string, type: TxType, categories: VoiceCategory[]): { category: string; merchant?: string } {
+function detectCategory(rawNormalized: string, type: TxType, categories: VoiceCategory[]): { category: string; merchant?: string } {
+  // Dictado en inglés: palabras en español solo para encontrar la categoría ("lunch" → almuerzo)
+  // (las pistas van primero: así ganan sobre una palabra en inglés que en español es otra cosa, como "gas")
+  const hints = englishCategoryHints(rawNormalized);
+  const normalized = hints ? `${hints.trim()} ${rawNormalized}` : rawNormalized;
   const merchant = type === 'gasto' ? detectMerchantInText(normalized) : undefined;
   const usable = categories
     .filter(c => !c.type || c.type === type)
@@ -432,8 +437,10 @@ const LEADING_FILLERS = new Set([
   'transfirieron', 'dieron', 'recibi', 'ingreso', 'ingresos', 'debo', 'debe', 'deben', 'preste', 'prestaron', 'presto',
   'tambien', 'ademas', 'luego', 'despues', 'pero', 'hoy', 'ayer', 'costo', 'cobraron', 'gane', 'cobre', 'vendi',
   'al', 'a', 'total', 'todo', 'fue', 'sali', 'salio', 'pesos', 'cada', 'uno', 'quedo', 'debiendo',
+  // relleno del dictado en inglés
+  'the', 'my', 'some', 'an', 'of', 'i', 'just', 'it', 'was',
 ]);
-const TRAILING_FILLERS = new Set(['de', 'del', 'en', 'por', 'el', 'la', 'los', 'las', 'a', 'al', 'y', 'e', 'con', 'para', 'cada', 'uno', 'una', 'que', 'pesos', 'me', 'le']);
+const TRAILING_FILLERS = new Set(['de', 'del', 'en', 'por', 'el', 'la', 'los', 'las', 'a', 'al', 'y', 'e', 'con', 'para', 'cada', 'uno', 'una', 'que', 'pesos', 'me', 'le', 'the', 'my', 'of', 'hoy', 'ayer', 'anoche', 'antier']);
 
 function cleanDescription(text: string): string {
   let words = text

@@ -264,7 +264,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
 
             {!renewing && !investment && (
               <DictateButton isTech={isTechTheme} onText={applySpeech} label="Dictar el CDT"
-                             example='"CDT de 5 millones en Bancolombia al 11 % a 6 meses"' />
+                             example={tr('"CDT de 5 millones en Bancolombia al 11 % a 6 meses"')} />
             )}
 
             {!renewing && !investment && (

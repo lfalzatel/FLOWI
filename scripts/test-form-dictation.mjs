@@ -13,10 +13,11 @@ const transpile = (file, out) => {
   let js = ts.transpileModule(fs.readFileSync(path.join(root, file), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
   }).outputText;
-  js = js.replace(/from ['"]\.\/firestore['"]/, "from './firestore.mjs'").replace(/from ['"]\.\/categories['"]/g, "from './categories.mjs'").replace(/from ['"]\.\/voiceParser['"]/, "from './voiceParser.mjs'");
+  js = js.replace(/from ['"]\.\/firestore['"]/, "from './firestore.mjs'").replace(/from ['"]\.\/categories['"]/g, "from './categories.mjs'").replace(/from ['"]\.\/voiceParser['"]/, "from './voiceParser.mjs'").replace(/from ['"]\.\/voiceEnglish['"]/, "from './voiceEnglish.mjs'");
   fs.writeFileSync(path.join(outDir, out), js);
 };
 transpile('lib/categories.ts', 'categories.mjs');
+transpile('lib/voiceEnglish.ts', 'voiceEnglish.mjs');
 transpile('lib/voiceParser.ts', 'voiceParser.mjs');
 transpile('lib/formDictation.ts', 'formDictation.mjs');
 fs.writeFileSync(path.join(outDir, 'firestore.mjs'), 'export function isFixedExpenseCategory() { return false; }\n');

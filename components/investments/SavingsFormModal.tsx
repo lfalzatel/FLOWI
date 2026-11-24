@@ -258,7 +258,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-5">
           {!investment && (
             <DictateButton isTech={isTech} onText={applySpeech}
-                           example={isFund ? '"Fondo en Skandia, invertí 3 millones y ya tiene 3,4 millones"' : isSavings ? '"Cajita de Nu con 2 millones al 9 %"' : '"Pensión en Porvenir con 15 millones"'} />
+                           example={isFund ? tr('"Fondo en Skandia, invertí 3 millones y ya tiene 3,4 millones"') : isSavings ? tr('"Cajita de Nu con 2 millones al 9 %"') : tr('"Pensión en Porvenir con 15 millones"')} />
           )}
           {!investment && (
             <div>

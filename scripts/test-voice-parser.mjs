@@ -22,7 +22,9 @@ transpile('lib/categories.ts', 'categories.mjs', []);
 transpile('lib/voiceParser.ts', 'voiceParser.mjs', [
   [/from ['"]\.\/firestore['"]/, "from './firestore.mjs'"],
   [/from ['"]\.\/categories['"]/, "from './categories.mjs'"],
+  [/from ['"]\.\/voiceEnglish['"]/, "from './voiceEnglish.mjs'"],
 ]);
+transpile('lib/voiceEnglish.ts', 'voiceEnglish.mjs', []);
 fs.writeFileSync(path.join(outDir, 'firestore.mjs'), 'export function isFixedExpenseCategory() { return false; }\n');
 
 const { parseMultiVoiceTransaction } = await import(pathToFileURL(path.join(outDir, 'voiceParser.mjs')).href);

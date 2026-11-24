@@ -1,5 +1,7 @@
 'use client';
 import { tr } from '@/lib/i18n';
+import { appSpeechLang } from '@/lib/voiceParser';
+import { englishToParserText } from '@/lib/voiceEnglish';
 import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 
@@ -21,10 +23,10 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
 
   const start = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { setMsg('Este navegador no permite dictar. Escríbelo en los campos.'); return; }
+    if (!SR) { setMsg(tr('Este navegador no permite dictar. Escríbelo en los campos.')); return; }
     try { window.speechSynthesis?.cancel(); } catch { /* nada */ }
     const rec = new SR();
-    rec.lang = 'es-CO';
+    rec.lang = appSpeechLang() === 'en' ? 'en-US' : 'es-CO';
     rec.continuous = false;
     rec.interimResults = true;
     textRef.current = '';
@@ -39,18 +41,20 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
     };
     rec.onerror = (e: any) => {
       setListening(false);
-      if (e.error === 'not-allowed') setMsg('Permiso de micrófono denegado.');
-      else if (e.error === 'no-speech') setMsg('No se escuchó nada. Toca y vuelve a hablar.');
+      if (e.error === 'not-allowed') setMsg(tr('Permiso de micrófono denegado.'));
+      else if (e.error === 'no-speech') setMsg(tr('No se escuchó nada. Toca y vuelve a hablar.'));
     };
     rec.onend = () => {
       setListening(false);
-      const t = textRef.current.trim();
+      const heardText = textRef.current.trim();
+      // En inglés se pasa a la forma que entienden los formularios (montos, fechas y verbos en español)
+      const t = appSpeechLang() === 'en' ? englishToParserText(heardText) : heardText;
       if (!t) return;
       const summary = onText(t);
       setMsg(summary || tr('Listo. Revisa los datos antes de guardar.'));
     };
     recRef.current = rec;
-    try { rec.start(); } catch { setMsg('No pude encender el micrófono.'); }
+    try { rec.start(); } catch { setMsg(tr('No pude encender el micrófono.')); }
   };
   const stop = () => { try { recRef.current?.stop(); } catch { /* nada */ } };
 

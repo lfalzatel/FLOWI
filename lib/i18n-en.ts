@@ -2263,4 +2263,16 @@ export const EN: Record<string, string> = {
   '4. Omite otra vez': '4. Skip again',
   '5. Toca "Authorize"': '5. Tap "Authorize"',
   '6. ¡Listo!': '6. Done!',
+  // ── Dictado en inglés ──
+  'Este navegador no permite dictar. Escríbelo en los campos.': 'This browser does not allow dictation. Type it in the fields.',
+  'Permiso de micrófono denegado.': 'Microphone permission denied.',
+  'No se escuchó nada. Toca y vuelve a hablar.': 'Nothing was heard. Tap and speak again.',
+  'No pude encender el micrófono.': 'I could not turn on the microphone.',
+  '"Crediágil de 700 mil al 28,17 a 60 meses, pago los 15, desembolso el 5 de noviembre"': '"Credit line of 700 thousand at 28.17 percent for 60 months, I pay on the 15th"',
+  '"Le presté 500 mil a Claudia al 2 % mensual"': '"I lent 500 thousand to Claudia at 2 percent a month"',
+  '"Mi hermana me prestó un millón ayer"': '"My sister lent me one million yesterday"',
+  '"CDT de 5 millones en Bancolombia al 11 % a 6 meses"': '"CDT of 5 million at Bancolombia at 11 percent for 6 months"',
+  '"Fondo en Skandia, invertí 3 millones y ya tiene 3,4 millones"': '"Fund at Skandia, I invested 3 million and it now has 3.4 million"',
+  '"Cajita de Nu con 2 millones al 9 %"': '"Nu savings pot with 2 million at 9 percent"',
+  '"Pensión en Porvenir con 15 millones"': '"Pension at Porvenir with 15 million"',
 };

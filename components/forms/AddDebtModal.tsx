@@ -509,8 +509,8 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           {/* Dictar la deuda completa */}
           {!debtToEdit && !isReadOnly && (
             <DictateButton isTech={isTechTheme} onText={applySpeech} label={tr('Dictar la deuda')}
-                           example={kind === 'banco' ? '"Crediágil de 700 mil al 28,17 a 60 meses, pago los 15, desembolso el 5 de noviembre"'
-                             : kind === 'preste' ? '"Le presté 500 mil a Claudia al 2 % mensual"' : '"Mi hermana me prestó un millón ayer"'} />
+                           example={kind === 'banco' ? tr('"Crediágil de 700 mil al 28,17 a 60 meses, pago los 15, desembolso el 5 de noviembre"')
+                             : kind === 'preste' ? tr('"Le presté 500 mil a Claudia al 2 % mensual"') : tr('"Mi hermana me prestó un millón ayer"')} />
           )}
 
           {/* Prestaste la plata de un crédito tuyo: copiar sus condiciones */}

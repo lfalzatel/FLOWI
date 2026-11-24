@@ -28,7 +28,8 @@ import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
-import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle } from '@/lib/voiceParser';
+import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle, appSpeechLang } from '@/lib/voiceParser';
+import { englishDescription, englishToParserText, setVoiceEnglish } from '@/lib/voiceEnglish';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
 import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi } from '@/lib/aiAssist';
 import { formatCurrency } from '@/lib/format';
@@ -195,7 +196,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     const rec = new SpeechRecognition();
     rec.continuous = false;
     rec.interimResults = true;
-    rec.lang = locale.language || 'es-CO';
+    // Con la app en inglés, el micrófono escucha en inglés
+    rec.lang = appSpeechLang() === 'en' ? 'en-US' : (locale.language || 'es-CO');
 
     rec.onstart = () => {
       setIsListening(true);
@@ -315,9 +317,18 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   // Al finalizar la transcripción de un dictado, parsear automáticamente
   useEffect(() => {
     if (transcript.trim() && !isListening) {
-      const text = transcript.trim();
-      if (processedTranscriptRef.current === text) return;
-      processedTranscriptRef.current = text;
+      const heard = transcript.trim();
+      if (processedTranscriptRef.current === heard) return;
+      processedTranscriptRef.current = heard;
+      // Dictado en inglés: se pasa a la forma que entiende el analizador (montos, verbos, fechas en español)
+      const english = appSpeechLang() === 'en';
+      setVoiceEnglish(english);
+      const text = english ? englishToParserText(heard) : heard;
+      const fromEnglish = (rs: ParsedVoiceItem[]): ParsedVoiceItem[] => !english ? rs : rs.map(r => {
+        if ('kind' in r && r.kind !== 'transaction') return r;
+        const tx = r as ParsedVoiceResult;
+        return { ...tx, description: tx.description === tx.category ? tr(tx.category) : englishDescription(tx.description) };
+      });
 
       if (correctingRef.current) {
         correctingRef.current = false;
@@ -328,7 +339,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       // Si había un estado conversacional pendiente (creación de recordatorio, nota, ingreso o gasto):
       if (pendingAction) {
         if (pendingAction === 'create_income') {
-          const results = parseMultiVoiceTransaction(text, allCategories);
+          const results = fromEnglish(parseMultiVoiceTransaction(text, allCategories));
           results.forEach(r => {
             if (!('kind' in r) || r.kind === 'transaction') {
               const tx = r as ParsedVoiceResult;
@@ -346,7 +357,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
 
         if (pendingAction === 'create_expense') {
-          const results = parseMultiVoiceTransaction(text, allCategories);
+          const results = fromEnglish(parseMultiVoiceTransaction(text, allCategories));
           results.forEach(r => {
             if (!('kind' in r) || r.kind === 'transaction') {
               const tx = r as ParsedVoiceResult;
@@ -452,14 +463,14 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
       }
 
-      const results = parseMultiVoiceTransaction(text, allCategories, context === 'ingreso' ? 'ingreso' : 'gasto');
+      const results = fromEnglish(parseMultiVoiceTransaction(text, allCategories, context === 'ingreso' ? 'ingreso' : 'gasto'));
       setParsedResults(results);
 
       const requestId = ++aiRequestRef.current;
       setAiStatus('idle');
       if (getAiKey() && needsAiHelp(results)) {
         setAiStatus('loading');
-        improveWithAi(text, allCategories)
+        improveWithAi(heard, allCategories)
           .then(aiResults => {
             if (requestId !== aiRequestRef.current) return;
             if (aiResults) {
