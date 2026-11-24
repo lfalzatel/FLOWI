@@ -60,7 +60,7 @@ export function ReceiptItemsList({
   const { sum, diff, ok } = itemsCheck(items || [], total);
   const fine = autoSum || ok;
   const canAddToTotal = !!onAddToTotal && !autoSum;
-  const sumIt = addToTotal ?? (ok || !items?.length);
+  const sumIt = addToTotal ?? false; // desmarcado por defecto: solo se suma al total si la persona lo marca
 
   const update = (k: number, patch: Partial<ReceiptItem>) => {
     onChange?.(items.map((it, i) => {
