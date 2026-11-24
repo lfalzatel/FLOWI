@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NextAction } from '@/lib/nextAction';
 import { DailyBudget } from '@/lib/dailyBudget';
 import { NextActionCard } from './NextActionCard';
+import { tr } from '@/lib/i18n';
 
 // "Tu siguiente acción" como carrusel: pasa sola cada 6 s, se desliza con el dedo y tiene puntos.
 // Al tocarla o deslizarla se detiene un rato para que se pueda leer. Todas las tarjetas quedan
@@ -88,7 +89,7 @@ export function NextActionCarousel({ actions, today, currency, onSkip, onRefresh
           ))}
         </div>
       </div>
-      <div className="mt-1.5 flex justify-center gap-1.5" role="tablist" aria-label="Acciones sugeridas">
+      <div className="mt-1.5 flex justify-center gap-1.5" role="tablist" aria-label={tr('Acciones sugeridas')}>
         {actions.map((a, i) => (
           <button key={a.id} type="button" role="tab" aria-selected={i === index} aria-label={`Ver ${i + 1} de ${n}`}
                   onClick={() => { pause(); setIndex(i); }}

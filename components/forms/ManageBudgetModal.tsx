@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useTheme } from '@/components/ThemeProvider';
 import { formatCurrency } from '@/lib/format';
+import { tr } from '@/lib/i18n';
 
 interface Props {
   onClose: () => void;
@@ -72,8 +73,8 @@ export function ManageBudgetModal({ onClose }: Props) {
               <Wallet className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h2 className={`font-bold ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : 'font-syne text-xl text-text-primary'}`}>Presupuesto</h2>
-              <p className={`text-xs mt-0.5 ${isTechTheme ? 'font-mono text-accent/60 uppercase tracking-wider' : 'text-text-secondary'}`}>Límite mensual</p>
+              <h2 className={`font-bold ${isTechTheme ? 'font-mono text-accent uppercase tracking-widest' : 'font-syne text-xl text-text-primary'}`}>{tr('Presupuesto')}</h2>
+              <p className={`text-xs mt-0.5 ${isTechTheme ? 'font-mono text-accent/60 uppercase tracking-wider' : 'text-text-secondary'}`}>{tr('Límite mensual')}</p>
             </div>
           </div>
           <button onClick={onClose} className={`p-2 rounded-xl transition-colors ${isTechTheme ? 'hover:bg-accent/10 text-accent/70' : 'hover:bg-white/10 text-text-muted hover:text-text-primary'}`}>
@@ -84,7 +85,7 @@ export function ManageBudgetModal({ onClose }: Props) {
         {/* Content */}
         <div className="p-5 sm:p-6 overflow-y-auto">
           <label className={`block text-xs font-medium mb-2 ${isTechTheme ? 'font-mono text-accent/80 uppercase tracking-widest' : 'text-text-secondary'}`}>
-            Monto de tu presupuesto mensual
+            {tr('Monto de tu presupuesto mensual')}
           </label>
           <div className="relative">
             <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold ${isTechTheme ? 'text-accent font-mono' : 'text-text-muted'}`}>$</span>
@@ -97,7 +98,7 @@ export function ManageBudgetModal({ onClose }: Props) {
             />
           </div>
           <p className={`mt-2 text-xs ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>
-            Se usará para proyectar si cerrarás el mes gastando más de la cuenta.
+            {tr('Se usará para proyectar si cerrarás el mes gastando más de la cuenta.')}
           </p>
           {budget && !isNaN(parseFloat(budget)) && (
             <div className={`mt-4 p-3 rounded-xl text-sm ${isTechTheme ? 'bg-accent/10 border border-accent/20 text-accent font-mono' : 'bg-emerald-500/10 text-emerald-500'}`}>

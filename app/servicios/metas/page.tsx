@@ -68,7 +68,7 @@ export default function MetasPage() {
           {goals.length > 0 && (
             <button onClick={openNew}
                     className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`}>
-              <Plus className="w-4 h-4" /> Nueva
+              <Plus className="w-4 h-4" /> {tr('Nueva')}
             </button>
           )}
         </div>
@@ -111,7 +111,7 @@ export default function MetasPage() {
             <p className="text-sm text-text-secondary mb-5">{tr('Una moto, un viaje, la prima del apartamento o un fondo para emergencias. Crea tu meta y te digo cuándo la lograrías.')}</p>
             <button onClick={openNew}
                     className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
-              <Plus className="w-5 h-5" /> Crear mi primera meta
+              <Plus className="w-5 h-5" /> {tr('Crear mi primera meta')}
             </button>
           </section>
         ) : (
@@ -180,7 +180,7 @@ export default function MetasPage() {
                     ) : (
                       <button onClick={() => setMoving(goal)}
                               className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs tracking-wider' : 'rounded-xl bg-accent/15 text-accent hover:bg-accent/25'}`}>
-                        <PiggyBank className="w-4 h-4" /> Registrar ahorro
+                        <PiggyBank className="w-4 h-4" /> {tr('Registrar ahorro')}
                       </button>
                     )}
                   </article>

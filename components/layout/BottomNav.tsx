@@ -194,7 +194,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
           }}
           aria-label={tr('Registrar: toca para ver opciones, mantén presionado para hablar')}
           data-tour="voice"
-          title="Registrar (mantén presionado para hablar)"
+          title={tr('Registrar (mantén presionado para hablar)')}
           className={`pointer-events-auto flex-shrink-0 flex items-center justify-center
                       w-14 h-14
                       bg-gradient-to-br from-accent to-accent-dim

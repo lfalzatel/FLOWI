@@ -508,7 +508,7 @@ export function CategoryBudgets({ transactions: rawTransactions, currency = 'COP
                               </span>
                             ) : (
                               <span className="text-[11px] italic underline flex items-center gap-1">
-                                <Plus className="w-3 h-3" /> Fichar Meta
+                                <Plus className="w-3 h-3" /> {tr('Fichar Meta')}
                               </span>
                             )}
                             <Edit3 className="w-3.5 h-3.5 opacity-70 hover:opacity-100" />

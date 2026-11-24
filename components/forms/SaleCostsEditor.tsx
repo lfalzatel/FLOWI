@@ -1,6 +1,7 @@
 'use client';
 import { X, Plus } from 'lucide-react';
 import { SALE_COST_KINDS } from '@/lib/business';
+import { tr } from '@/lib/i18n';
 
 // Costos de una venta del negocio (producto, envío, comisión, empaque) y lo que te queda.
 // Cada costo se guarda como un gasto del negocio unido a la venta.
@@ -25,14 +26,14 @@ export function SaleCostsEditor({ costs, saleAmount, isTech, fmt, onChange }: Pr
 
   return (
     <div className={`border border-orange-400/30 bg-orange-400/5 p-3 space-y-2.5 normal-case ${box}`}>
-      <p className="text-xs font-bold text-orange-300">Costos de esta venta (opcional)</p>
+      <p className="text-xs font-bold text-orange-300">{tr('Costos de esta venta (opcional)')}</p>
       {costs.map((c, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="w-24 shrink-0 text-xs text-text-secondary">{costLabel(c.category)}</span>
           <input value={c.amount} inputMode="numeric" placeholder="0" autoComplete="off" aria-label={`Costo de ${costLabel(c.category)}`}
                  onChange={e => onChange(costs.map((x, j) => (j === i ? { ...x, amount: e.target.value.replace(/[^0-9.,]/g, '') } : x)))}
                  className={`${input} flex-1 min-w-0 text-right`} />
-          <button type="button" aria-label="Quitar costo" onClick={() => onChange(costs.filter((_, j) => j !== i))}
+          <button type="button" aria-label={tr('Quitar costo')} onClick={() => onChange(costs.filter((_, j) => j !== i))}
                   className="p-1 text-text-muted hover:text-red-400"><X className="w-4 h-4" /></button>
         </div>
       ))}

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { usePopupBusy } from '@/lib/tourGate';
+import { tr } from '@/lib/i18n';
 
 // Mantiene la app instalada al día. El service worker nuevo se activa solo (skipWaiting), pero la
 // página abierta sigue con el código viejo hasta recargar. Aquí:
@@ -51,9 +52,9 @@ export function UpdateWatcher() {
     <div className="fixed inset-x-0 bottom-28 md:bottom-6 z-[120] flex justify-center px-4 pointer-events-none">
       <div className="pointer-events-auto w-full max-w-[380px] animate-fade-in-up glass-dropdown bg-[color-mix(in_srgb,var(--bg-deep)_95%,transparent)] rounded-2xl border border-accent/40 p-3 flex items-center gap-3 shadow-xl">
         <RefreshCw className="w-5 h-5 text-accent shrink-0" />
-        <p className="flex-1 min-w-0 text-xs text-text-secondary">Hay una versión nueva de FLOWI.</p>
+        <p className="flex-1 min-w-0 text-xs text-text-secondary">{tr('Hay una versión nueva de FLOWI.')}</p>
         <button type="button" onClick={() => window.location.reload()}
-                className="shrink-0 px-3 py-1.5 rounded-xl bg-accent text-black text-xs font-bold">Actualizar</button>
+                className="shrink-0 px-3 py-1.5 rounded-xl bg-accent text-black text-xs font-bold">{tr('Actualizar')}</button>
       </div>
     </div>
   );

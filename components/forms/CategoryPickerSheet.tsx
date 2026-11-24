@@ -160,7 +160,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
       <div className="relative z-10 w-full sm:max-w-lg animate-fade-in-up">
       <div
         role="dialog"
-        aria-label="Elegir categoría"
+        aria-label={tr('Elegir categoría')}
         className={`w-full h-[88vh] sm:h-[80vh] flex flex-col overflow-hidden ${surface} border border-glass-border shadow-2xl ${
           isTechTheme ? 'rounded-none border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'
         }`}
@@ -173,7 +173,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
             <h3 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase tracking-wide' : 'font-syne text-text-primary'}`}>
               {type === 'gasto' ? tr('Categoría del gasto') : tr('Categoría del ingreso')}
             </h3>
-            <button type="button" onClick={onClose} aria-label="Cerrar" className="p-2 -mr-2 text-text-secondary hover:text-text-primary">
+            <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-2 -mr-2 text-text-secondary hover:text-text-primary">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -195,7 +195,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
               }`}
             />
             {query && (
-              <button type="button" onClick={() => setQuery('')} aria-label="Limpiar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text-primary">
+              <button type="button" onClick={() => setQuery('')} aria-label={tr('Limpiar búsqueda')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text-primary">
                 <X className="w-4 h-4" />
               </button>
             )}
@@ -271,10 +271,10 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
         {/* Pie */}
         {onCreate && onManage && <div className="flex border-t border-glass-border">
           <button type="button" onClick={onCreate} className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-accent hover:bg-glass">
-            <Plus className="w-4 h-4" /> Crear categoría
+            <Plus className="w-4 h-4" /> {tr('Crear categoría')}
           </button>
           <button type="button" onClick={onManage} className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-medium text-text-secondary hover:bg-glass border-l border-glass-border">
-            <Settings2 className="w-4 h-4" /> Gestionar
+            <Settings2 className="w-4 h-4" /> {tr('Gestionar')}
           </button>
         </div>}
       </div>

@@ -223,7 +223,7 @@ export default function PlanesPage() {
         {/* Pagar por transferencia directa y enviar el comprobante */}
         <button type="button" onClick={() => (user?.isAnonymous ? setNeedLink(true) : setManualOpen(true))}
                 className={`w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 ${isTech ? 'rounded-none uppercase text-xs tracking-wider' : 'rounded-2xl'}`}>
-          <Receipt className="w-4 h-4 text-accent" /> Pagar por transferencia y enviar comprobante
+          <Receipt className="w-4 h-4 text-accent" /> {tr('Pagar por transferencia y enviar comprobante')}
         </button>
         {lastManual && (
           <p className={`text-xs text-center ${lastManual.status === 'APPROVED' ? 'text-emerald-400' : lastManual.status === 'REJECTED' ? 'text-red-400' : 'text-amber-400'}`}>

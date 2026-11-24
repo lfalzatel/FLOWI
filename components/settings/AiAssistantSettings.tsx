@@ -72,14 +72,14 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
         {connected ? (
           <div className="flex items-center justify-between gap-2">
             <span className={`flex items-center gap-1.5 text-[11px] text-emerald-400 ${mono}`}>
-              <Check className="w-3.5 h-3.5" /> Activa en este dispositivo
+              <Check className="w-3.5 h-3.5" /> {tr('Activa en este dispositivo')}
             </span>
             <button
               type="button"
               onClick={handleDisconnect}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold border border-glass-border text-text-secondary hover:text-text-primary ${isTechTheme ? 'rounded-none font-mono' : 'rounded-lg'}`}
             >
-              <Unplug className="w-3.5 h-3.5" /> Desconectar
+              <Unplug className="w-3.5 h-3.5" /> {tr('Desconectar')}
             </button>
           </div>
         ) : (

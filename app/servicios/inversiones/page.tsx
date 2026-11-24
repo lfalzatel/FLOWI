@@ -196,7 +196,7 @@ export default function InversionesPage() {
             <h2 className={`font-bold text-lg mb-1 ${isTechTheme ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('¿Dónde crece tu plata?')}</h2>
             <p className="text-sm text-text-secondary mb-5">{tr('Un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria. Regístralo y te digo cuánto vas ganando.')}</p>
             <button onClick={() => setChoosingKind(true)} className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
-              <Plus className="w-5 h-5" /> Registrar la primera
+              <Plus className="w-5 h-5" /> {tr('Registrar la primera')}
             </button>
           </section>
         ) : (
@@ -313,11 +313,11 @@ export default function InversionesPage() {
                       <div className="mt-4 grid grid-cols-2 gap-2">
                         <button onClick={() => setRenewing(inv)}
                                 className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : 'rounded-xl bg-accent/15 text-accent hover:bg-accent/25'}`}>
-                          <RefreshCw className="w-4 h-4" /> Lo renové
+                          <RefreshCw className="w-4 h-4" /> {tr('Lo renové')}
                         </button>
                         <button onClick={() => setClosing(inv)}
                                 className={`flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border border-emerald-500 text-emerald-500 uppercase text-xs' : 'rounded-xl bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500/25'}`}>
-                          <CheckCircle2 className="w-4 h-4" /> Me lo pagaron
+                          <CheckCircle2 className="w-4 h-4" /> {tr('Me lo pagaron')}
                         </button>
                       </div>
                     ) : soon ? (
@@ -394,7 +394,7 @@ export default function InversionesPage() {
             {hasAccounts && (
               <div className="mb-4">
                 <AccountPicker accounts={accounts} value={closeAccount} onChange={setCloseAccount}
-                               label="¿A qué cuenta llegó la plata?" noneLabel="A ninguna de mis cuentas" />
+                               label={tr('¿A qué cuenta llegó la plata?')} noneLabel="A ninguna de mis cuentas" />
               </div>
             )}
             <div className="space-y-2">

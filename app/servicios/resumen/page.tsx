@@ -68,7 +68,7 @@ export default function ResumenPage() {
           <PageTourButton id="resumen" />
           <button type="button" onClick={() => setShowExport(true)} aria-label={tr('Exportar el mes')}
                   className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold ${isTech ? 'bg-accent/10 text-accent border border-accent/30 rounded-none uppercase' : 'bg-accent/10 text-accent rounded-full hover:bg-accent/20'}`}>
-            <Download className="w-4 h-4" /> Exportar
+            <Download className="w-4 h-4" /> {tr('Exportar')}
           </button>
         </div>
 

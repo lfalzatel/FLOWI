@@ -352,7 +352,7 @@ export default function PresupuestosPage() {
                 {dailyRecommendedBudget > 0 && !isOverGlobalBudget && (
                   <span className="text-emerald-400 font-semibold flex items-center gap-1">
                     <TrendingUp className="w-3.5 h-3.5" />
-                    Sugerido diario: <AnimatedNumber value={dailyRecommendedBudget} format={(n: number) => formatCurrency(n, currency)} />/día
+                    {tr('Sugerido diario:')} <AnimatedNumber value={dailyRecommendedBudget} format={(n: number) => formatCurrency(n, currency)} />/día
                   </span>
                 )}
               </div>

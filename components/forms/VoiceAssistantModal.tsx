@@ -725,7 +725,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       )}
 
       <div 
-        className={`w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center overflow-hidden ${
+        className={`voice-modal w-full max-w-md relative z-10 animate-fade-in-up p-6 glass-dropdown flex flex-col items-center text-center overflow-hidden ${
           isTechTheme ? 'rounded-none border border-accent bg-deep uppercase' : 'rounded-3xl shadow-2xl'
         }`}
       >
@@ -843,7 +843,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                       onClick={isListening ? stopListening : (canCorrect ? startCorrection : startListening)}
                       className={`py-2.5 px-2 text-xs font-semibold flex items-center justify-center gap-1.5 border transition-colors disabled:opacity-60 ${isListening ? 'border-red-500/60 bg-red-500/15 text-red-400' : isTechTheme ? 'border-accent/40 text-accent hover:bg-accent/10' : 'border-glass-border text-text-primary hover:bg-white/10'} ${isTechTheme ? 'rounded-none font-mono uppercase' : 'rounded-xl'}`}>
                 {isListening ? <MicOff className="w-4 h-4 animate-pulse" /> : correcting === 'ai' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4 text-accent" />}
-                {isListening ? 'Escuchando…' : correcting === 'ai' ? 'Corrigiendo…' : canCorrect ? 'Corregir con la voz' : 'Dictar de nuevo'}
+                {isListening ? tr('Escuchando…') : correcting === 'ai' ? tr('Corrigiendo…') : canCorrect ? tr('Corregir con la voz') : tr('Dictar de nuevo')}
               </button>
               <button type="button"
                       onClick={() => { if (!getAiKey()) { setReceiptStatus('no-key'); return; } retakeNextRef.current = receiptStatus === 'done'; receiptInputRef.current?.click(); }}
@@ -914,7 +914,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                 <Camera className="w-3 h-3 shrink-0" />
                 <span>
                   {readKind === 'movimientos'
-                    ? `Leí ${parsedResults.length} movimiento${parsedResults.length === 1 ? '' : 's'} de tu banco. Revisa y borra los que no quieras; la foto no se guarda.`
+                    ? (parsedResults.length === 1 ? tr('Leí 1 movimiento de tu banco. Revisa y borra los que no quieras; la foto no se guarda.') : tr('Leí {n} movimientos de tu banco. Revisa y borra los que no quieras; la foto no se guarda.', { n: parsedResults.length }))
                     : tr('Leído del recibo con IA. Revisa el valor antes de guardar; la foto no se guarda.')}
                   {receiptsLeft !== null && (receiptsLeft === 0
                     ? tr(' Este era tu último recibo de hoy; mañana se renuevan.')
@@ -1114,21 +1114,21 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                       handleRemoveResult(idx);
                                     }}
                                     className={`w-full text-left mb-1 p-2.5 border-2 border-accent bg-accent/10 normal-case ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
-                              <span className="block text-xs font-bold text-accent">🤝 ¿Es un abono de {first}?</span>
+                              <span className="block text-xs font-bold text-accent">🤝 {tr('¿Es un abono de {a}?', { a: first })}</span>
                               <span className="block text-[11px] text-text-secondary">
-                                Te debe {formatCurrency(m.entry.pending, 'COP')} de «{m.entry.tx.description?.trim() || m.entry.tx.category}». Toca para registrarlo como abono.
+                                {tr('Te debe {a} de «{b}». Toca para registrarlo como abono.', { a: formatCurrency(m.entry.pending, 'COP'), b: m.entry.tx.description?.trim() || m.entry.tx.category })}
                               </span>
                             </button>
                           );
                         })()}
                         <span className="text-[9px] text-amber-300 font-medium leading-tight">
                           {(res as any)._dup && (
-                            <span className="block text-amber-400 font-semibold mb-0.5">⚠ Parece que ya lo registraste el {(res as any)._dup}. Bórralo con 🗑 si es el mismo.</span>
+                            <span className="block text-amber-400 font-semibold mb-0.5">⚠ {tr('Parece que ya lo registraste el {a}. Bórralo con 🗑 si es el mismo.', { a: (res as any)._dup })}</span>
                           )}
                           {!(res as any)._dup && (() => {
                             const prev = findRepeatedPayment({ type: res.type, category: res.category, merchant: res.merchant, isFixed: res.isFixed,
                               date: res.date ? new Date(`${res.date}T12:00:00`) : new Date() }, transactions);
-                            return prev ? <span className="block text-amber-400 font-semibold mb-0.5">⚠ {repeatedPaymentText(prev)} ¿Es otro pago? Si no, bórralo con 🗑.</span> : null;
+                            return prev ? <span className="block text-amber-400 font-semibold mb-0.5">⚠ {repeatedPaymentText(prev)} {tr('¿Es otro pago? Si no, bórralo con 🗑.')}</span> : null;
                           })()}
                           💡 {tr('Toca para convertir a')} {res.type === 'gasto' ? tr('Ingreso 🟢') : tr('Gasto 🔴')}
                         </span>

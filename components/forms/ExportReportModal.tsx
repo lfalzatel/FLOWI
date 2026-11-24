@@ -263,7 +263,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           <div class="header-container">
             <div>
               <div class="brand">flowi<span>.</span></div>
-              <div style="font-size: 11px; color: #6B7280; font-weight: 500;">Tu dinero, en flujo.</div>
+              <div style="font-size: 11px; color: #6B7280; font-weight: 500;">{tr('Tu dinero, en flujo.')}</div>
             </div>
             <div class="report-meta">
               <div class="report-title">Reporte de ${title}</div>
@@ -287,7 +287,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
           </table>
           
           <div class="footer">
-            Este reporte fue generado de manera segura desde tu aplicación de finanzas FLOWI.
+            {tr('Este reporte fue generado de manera segura desde tu aplicación de finanzas FLOWI.')}
           </div>
         </body>
       </html>
@@ -619,7 +619,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                 <div className="flex justify-between items-start border-b-2 border-emerald-500 pb-2.5">
                   <div>
                     <span className="text-xl font-black text-emerald-500 tracking-tight font-sans">flowi<span className="text-blue-500">.</span></span>
-                    <p className="text-[8px] text-slate-400 font-medium -mt-1">Tu dinero, en flujo.</p>
+                    <p className="text-[8px] text-slate-400 font-medium -mt-1">{tr('Tu dinero, en flujo.')}</p>
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] text-slate-800 font-extrabold block">Reporte de {title}</span>
@@ -723,7 +723,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                 <button
                   onClick={handleShare}
                   className={`py-3 px-4 text-xs font-bold transition-all border flex items-center justify-center gap-2 ${isTechTheme ? 'border-accent/30 hover:border-accent text-accent rounded-none' : 'border-white/10 hover:bg-white/5 text-text-secondary rounded-xl'}`}
-                  title="Compartir Reporte"
+                  title={tr('Compartir Reporte')}
                 >
                   <Share2 className="w-4 h-4" />
                 </button>
@@ -732,7 +732,7 @@ export function ExportReportModal({ onClose, title, transactions = [], debts = [
                   className={`flex-[2] py-3 text-xs font-bold transition-all flex items-center justify-center gap-2 ${isTechTheme ? 'bg-accent/20 border border-accent text-accent hover:bg-accent hover:text-black rounded-none font-mono uppercase' : 'bg-gradient-to-r from-accent to-accent-dim text-white rounded-xl hover:opacity-90'}`}
                 >
                   <Download className="w-4 h-4" />
-                  Descargar
+                  {tr('Descargar')}
                 </button>
               </div>
             </div>

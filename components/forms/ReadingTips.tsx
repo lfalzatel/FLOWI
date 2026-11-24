@@ -97,13 +97,13 @@ export function ReadingTips({ isTech, label = 'Leyendo el recibo…' }: { isTech
   };
   const tip = TIPS[i];
   const pct = Math.min(95, Math.round(95 * (1 - Math.exp(-2.3 * elapsed / expected.current))));
-  const slow = elapsed > expected.current * 2.5 ? ' Está tardando más de lo normal…' : elapsed > expected.current * 1.3 ? ' Ya casi…' : '';
+  const slow = elapsed > expected.current * 2.5 ? ' ' + tr('Está tardando más de lo normal…') : elapsed > expected.current * 1.3 ? ' ' + tr('Ya casi…') : '';
   const arrow = `shrink-0 w-8 h-8 flex items-center justify-center text-text-secondary hover:text-accent hover:bg-accent/10 transition-colors ${isTech ? 'rounded-none' : 'rounded-full'}`;
   return (
     <div className="w-full space-y-3 my-2" role="status" aria-live="polite">
       <div className="space-y-1.5">
         <div className="flex items-baseline justify-between gap-2">
-          <p className="text-xs font-semibold text-accent text-left normal-case">{label}{slow}</p>
+          <p className="text-xs font-semibold text-accent text-left normal-case">{tr(label)}{slow}</p>
           <span className="text-[11px] font-bold text-accent tabular-nums shrink-0">≈ {pct} %</span>
         </div>
         {/* La barra crece con el avance y por dentro sigue pasando un brillo: avanza y sigue trabajando */}

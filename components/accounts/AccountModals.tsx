@@ -230,7 +230,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
             </span>
           ))}
           <button type="button" onClick={() => setMethodsSheet(true)} className={`${s.chip(false)} inline-flex items-center gap-1`}>
-            <Plus className="w-3.5 h-3.5" /> Agregar
+            <Plus className="w-3.5 h-3.5" /> {tr('Agregar')}
           </button>
         </div>
         {methodsSheet && (
@@ -269,7 +269,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
       {account && onDelete && (
         <button type="button" onClick={() => onDelete(account)}
                 className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${s.isTech ? 'rounded-none uppercase' : 'rounded-xl'}`}>
-          <Trash2 className="w-4 h-4" /> Eliminar cuenta
+          <Trash2 className="w-4 h-4" /> {tr('Eliminar cuenta')}
         </button>
       )}
     </Shell>

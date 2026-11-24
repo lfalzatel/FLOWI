@@ -77,7 +77,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
     <div className={`border p-3 space-y-3 ${box} ${isTech ? 'border-accent/30 bg-accent/5' : 'border-accent/30 bg-accent/5'}`}>
       <div className="flex items-center justify-between gap-2">
         <span className={`flex items-center gap-1.5 text-xs font-bold text-accent ${isTech ? 'font-mono uppercase tracking-wider' : ''}`}>
-          <Users className="w-4 h-4" /> Gasto compartido
+          <Users className="w-4 h-4" /> {tr('Gasto compartido')}
         </span>
         {total > 0 && <span className="ml-auto text-xs text-text-muted">{tr('Total')} <b className="text-text-primary">{fmt(r(total))}</b></span>}
         <button type="button" onClick={onRemove} aria-label={tr('Quitar gasto compartido')} className="p-1 text-text-muted hover:text-text-primary">
@@ -182,7 +182,7 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
         {draft.paidByMe && (
           <button type="button" onClick={() => onChange({ ...draft, people: [...draft.people, { name: '', amount: '' }] })}
                   className={`flex items-center gap-1 text-xs font-semibold text-accent ${isTech ? 'font-mono' : ''}`}>
-            <Plus className="w-3.5 h-3.5" /> Agregar persona
+            <Plus className="w-3.5 h-3.5" /> {tr('Agregar persona')}
           </button>
         )}
       </div>
@@ -192,12 +192,12 @@ export function SharedExpenseEditor({ draft, total, knownNames, friends = [], li
           {draft.paidByMe ? (
             <>
               <p className="flex justify-between"><span className="text-text-muted">{tr('Te deben')}</span><b className="text-accent">{fmt(others)}</b></p>
-              <p className="flex justify-between"><span className="text-text-muted">Tu parte (va a tus gastos)</span>
+              <p className="flex justify-between"><span className="text-text-muted">{tr('Tu parte (va a tus gastos)')}</span>
                 <b className={mine < 0 ? 'text-red-400' : 'text-text-primary'}>{fmt(mine)}</b></p>
               {mine < 0 && <p className="text-red-400">{tr('Lo de las demás personas suma más que el total.')}</p>}
             </>
           ) : (
-            <p className="flex justify-between"><span className="text-text-muted">Le debes (y va a tus gastos)</span><b className="text-text-primary">{fmt(mine)}</b></p>
+            <p className="flex justify-between"><span className="text-text-muted">{tr('Le debes (y va a tus gastos)')}</span><b className="text-text-primary">{fmt(mine)}</b></p>
           )}
         </div>
       )}

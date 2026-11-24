@@ -263,7 +263,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             )}
 
             {!renewing && !investment && (
-              <DictateButton isTech={isTechTheme} onText={applySpeech} label="Dictar el CDT"
+              <DictateButton isTech={isTechTheme} onText={applySpeech} label={tr('Dictar el CDT')}
                              example={tr('"CDT de 5 millones en Bancolombia al 11 % a 6 meses"')} />
             )}
 
@@ -415,7 +415,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             {investment && onDelete && (
               <button type="button" onClick={() => onDelete(investment)}
                       className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${isTechTheme ? 'rounded-none uppercase' : 'rounded-xl'}`}>
-                <Trash2 className="w-4 h-4" /> Eliminar CDT
+                <Trash2 className="w-4 h-4" /> {tr('Eliminar CDT')}
               </button>
             )}
           </div>

@@ -97,7 +97,7 @@ export default function AmigosPage() {
     if (rel.kind === 'outgoing') return <span className={`${btn} border-glass-border text-text-muted`}><Clock className="w-3.5 h-3.5" /> {tr('Enviada')}</span>;
     if (rel.kind === 'incoming') return (
       <button type="button" disabled={!!busy} onClick={() => answer(rel.r.id, true)} className={`${btn} border-accent bg-accent/15 text-accent`}>
-        <Check className="w-3.5 h-3.5" /> Aceptar
+        <Check className="w-3.5 h-3.5" /> {tr('Aceptar')}
       </button>
     );
     return (

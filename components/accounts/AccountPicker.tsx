@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Account } from '@/lib/firestore';
 import { AccountIcon } from '@/components/accounts/AccountIcon';
+import { tr } from '@/lib/i18n';
 
 // Elegir una de mis cuentas (o ninguna). Mientras no se haya elegido nada, viene marcada la cuenta principal
 // (como en los gastos), para que la plata se descuente de algún lado sin tener que pensarlo.
@@ -38,7 +39,7 @@ export function AccountPicker({ accounts, value, onChange, label, noneLabel, hin
           <button key={a.id} type="button" onClick={() => onChange(a.id!)} aria-pressed={value === a.id}
                   className={`${chip(value === a.id)} inline-flex items-center gap-1.5`}>
             <AccountIcon account={a} className="w-4 h-4 text-sm flex items-center justify-center" /> {a.name}
-            {a.id === main?.id && <span className="text-[9px] opacity-60 font-normal">principal</span>}
+            {a.id === main?.id && <span className="text-[9px] opacity-60 font-normal">{tr('principal')}</span>}
           </button>
         ))}
         {noneLabel && <button type="button" onClick={() => onChange(null)} aria-pressed={value === null} className={chip(value === null)}>{noneLabel}</button>}

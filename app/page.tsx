@@ -472,7 +472,7 @@ export default function DashboardPage() {
       {showExport && (
         <ExportReportModal
           onClose={() => setShowExport(false)}
-          title="General (Inicio)"
+          title={tr('General (Inicio)')}
           transactions={filteredTransactions}
           filterType={filterType}
           filterValue={filterValue}

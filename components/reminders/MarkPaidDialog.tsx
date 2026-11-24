@@ -136,7 +136,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
           ) : (<>
           <button type="button" onClick={() => markPaid(true)} disabled={saving}
                   className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs tracking-wider' : 'rounded-xl bg-accent text-white hover:bg-accent/90 text-sm'}`}>
-            <Receipt className="w-4 h-4" /> Pagado y registrar el gasto
+            <Receipt className="w-4 h-4" /> {tr('Pagado y registrar el gasto')}
           </button>
           <button type="button" onClick={() => markPaid(false)} disabled={saving}
                   className={`w-full py-3 text-sm font-semibold border transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-glass-border text-text-primary hover:bg-glass'}`}>
@@ -145,7 +145,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
           </>)}
           <button type="button" onClick={() => setConfirmDelete(true)} disabled={saving}
                   className="w-full flex items-center justify-center gap-1.5 pt-2 text-xs text-text-muted hover:text-[var(--red)]">
-            <Trash2 className="w-3.5 h-3.5" /> Eliminar recordatorio
+            <Trash2 className="w-3.5 h-3.5" /> {tr('Eliminar recordatorio')}
           </button>
         </div>
         )}

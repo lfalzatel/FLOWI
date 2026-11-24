@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { Delete, Fingerprint } from 'lucide-react';
+import { tr } from '@/lib/i18n';
 
 export const PIN_LENGTH = 4;
 
@@ -61,12 +62,12 @@ export function PinPad({ onComplete, error, disabled = false, onBiometric }: {
           <button key={d} type="button" disabled={disabled} onClick={() => press(d)} className={key}>{d}</button>
         ))}
         {onBiometric ? (
-          <button type="button" onClick={onBiometric} aria-label="Usar huella o rostro" className={`${key} text-accent`}>
+          <button type="button" onClick={onBiometric} aria-label={tr('Usar huella o rostro')} className={`${key} text-accent`}>
             <Fingerprint className="w-7 h-7" />
           </button>
         ) : <span />}
         <button type="button" disabled={disabled} onClick={() => press('0')} className={key}>0</button>
-        <button type="button" onClick={back} aria-label="Borrar" className={`${key} !bg-transparent !border-transparent`}>
+        <button type="button" onClick={back} aria-label={tr('Borrar')} className={`${key} !bg-transparent !border-transparent`}>
           <Delete className="w-6 h-6" />
         </button>
       </div>

@@ -523,3 +523,26 @@ body {
   background: #2A2722 !important;
   border: 1px solid rgba(201, 168, 106, 0.35) !important;
 }
+
+/* Asistente de voz / lector de recibos en temas claros: los campos y avisos estaban pensados
+   para fondo oscuro (fondo negro translúcido, texto blanco y ámbar claro) y no se leían */
+[data-theme='light'] .voice-modal,
+[data-theme='nova'] .voice-modal {
+  background: color-mix(in srgb, var(--bg-card) 96%, transparent) !important;
+}
+[data-theme='light'] .voice-modal .bg-black\/40,
+[data-theme='nova'] .voice-modal .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+[data-theme='light'] .voice-modal .border-white\/20,
+[data-theme='nova'] .voice-modal .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+[data-theme='light'] .voice-modal .bg-black\/40.text-white,
+[data-theme='nova'] .voice-modal .bg-black\/40.text-white {
+  color: var(--text-primary) !important;
+}
+[data-theme='light'] .voice-modal :is(.text-amber-300, .text-amber-400, .text-yellow-400),
+[data-theme='nova'] .voice-modal :is(.text-amber-300, .text-amber-400, .text-yellow-400) {
+  color: #B45309 !important;
+}

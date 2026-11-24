@@ -183,7 +183,7 @@ export default function CompartidosPage() {
 
         <button type="button" onClick={() => setAdding(true)}
                 className={`w-full py-3 text-sm font-bold inline-flex items-center justify-center gap-2 ${isTech ? 'rounded-none bg-accent/15 border border-accent text-accent uppercase tracking-wider' : 'rounded-xl bg-accent text-white'}`}>
-          <Plus className="w-4 h-4" /> Nuevo gasto compartido
+          <Plus className="w-4 h-4" /> {tr('Nuevo gasto compartido')}
         </button>
 
         {loadingTransactions ? (

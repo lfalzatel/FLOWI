@@ -5,6 +5,7 @@ import {
   LayoutDashboard, TrendingDown, TrendingUp,
   PieChart, Wallet, Settings,
 } from 'lucide-react';
+import { tr } from '@/lib/i18n';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard',   href: '/',            color: '#00E5A0' },
@@ -29,7 +30,7 @@ export function SideNav() {
         </div>
         <div>
           <span className="font-syne font-bold text-xl text-white block leading-none">flowi</span>
-          <span className="text-[10px] text-white/30 leading-none">Tu dinero, en flujo</span>
+          <span className="text-[10px] text-white/30 leading-none">{tr('Tu dinero, en flujo')}</span>
         </div>
       </div>
 

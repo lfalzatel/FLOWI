@@ -153,12 +153,12 @@ export function ReceiptItemsList({
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-0.5">
                       <button type="button" onClick={() => remove(k)} className="flex items-center gap-1 text-[11px] text-rose-400 font-semibold">
-                        <Trash2 className="w-3.5 h-3.5" /> Quitar
+                        <Trash2 className="w-3.5 h-3.5" /> {tr('Quitar')}
                       </button>
                       {showChips && chip(it.category || fallback, () => setPickerFor(k), tr('Cambiar categoría'))}
                       <button type="button" onClick={() => setEditing(null)}
                               className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-full'}`}>
-                        <Check className="w-3.5 h-3.5" /> Listo
+                        <Check className="w-3.5 h-3.5" /> {tr('Listo')}
                       </button>
                     </div>
                   </div>
@@ -207,7 +207,7 @@ export function ReceiptItemsList({
                 </div>
                 <button type="button" onClick={addDraft} aria-label={tr('Agregar producto')}
                         className={`shrink-0 h-[30px] px-3 flex items-center gap-1 text-[11px] font-bold bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
-                  <Plus className="w-3.5 h-3.5" /> Agregar
+                  <Plus className="w-3.5 h-3.5" /> {tr('Agregar')}
                 </button>
               </div>
               {showChips && draft.name.trim().length >= 3 && (

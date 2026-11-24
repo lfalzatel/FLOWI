@@ -838,7 +838,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                     ? (isTechTheme ? 'bg-orange-500/20 border border-orange-400 text-orange-300 font-mono' : 'bg-orange-500/20 border border-orange-500/40 text-orange-400')
                     : (isTechTheme ? 'bg-white/5 border border-white/10 text-accent/50 font-mono' : 'bg-white/5 border border-white/10 text-text-muted')
                 }`}
-                title="Separar este movimiento como de tu negocio (Mi negocio en Servicios)"
+                title={tr('Separar este movimiento como de tu negocio (Mi negocio en Servicios)')}
               >
                 <span>🏪 {t('Negocio')}:</span>
                 <span className={isBusiness ? 'font-black underline' : ''}>{isBusiness ? t('Sí') : t('No')}</span>

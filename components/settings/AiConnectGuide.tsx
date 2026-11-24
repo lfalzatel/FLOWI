@@ -111,7 +111,7 @@ export function AiConnectGuide({ onClose }: { onClose: () => void }) {
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={() => setI(Math.max(0, i - 1))} disabled={i === 0}
                   className={`py-3 font-semibold border border-glass-border text-text-secondary disabled:opacity-40 flex items-center justify-center gap-1 ${btn}`}>
-            <ChevronLeft className="w-4 h-4" /> Atrás
+            <ChevronLeft className="w-4 h-4" /> {tr('Atrás')}
           </button>
           {last ? (
             <button type="button" onClick={connect}

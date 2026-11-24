@@ -425,7 +425,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
             {reminder?.id && (
               <button type="button" onClick={() => setShowConfirmDelete(true)} disabled={loading}
                       className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${isTechTheme ? 'rounded-none uppercase' : 'rounded-xl'}`}>
-                <Trash2 className="w-4 h-4" /> Eliminar recordatorio
+                <Trash2 className="w-4 h-4" /> {tr('Eliminar recordatorio')}
               </button>
             )}
           </div>

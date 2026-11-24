@@ -310,7 +310,7 @@ export function ExpenseChart({ transactions, filterType = 'all', filterValue = '
             {!isHistory && budget > 0 && (
               <span className="flex items-center gap-1 text-[10px] text-text-secondary normal-case">
                 <span className="w-3 border-t border-dashed border-text-secondary inline-block" />
-                Presupuesto <strong className="text-text-primary font-semibold"><AnimatedNumber value={budget} format={formatCompactCOP} /></strong>
+                {tr('Presupuesto')} <strong className="text-text-primary font-semibold"><AnimatedNumber value={budget} format={formatCompactCOP} /></strong>
               </span>
             )}
           </>

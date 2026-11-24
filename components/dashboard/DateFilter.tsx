@@ -261,8 +261,8 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
           </div>
           
           <div className="mt-4 flex items-center justify-center gap-4 text-[10px] font-medium text-text-secondary">
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-accent" /> Ingresos</div>
-            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[var(--red)]" /> Gastos</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-accent" /> {tr('Ingresos')}</div>
+            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[var(--red)]" /> {tr('Gastos')}</div>
           </div>
         </div>
       )}

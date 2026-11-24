@@ -177,7 +177,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
             </div>
 
             <div>
-              <label htmlFor="goal-deadline" className={labelClass}>¿Para cuándo la quieres? (opcional)</label>
+              <label htmlFor="goal-deadline" className={labelClass}>{tr('¿Para cuándo la quieres? (opcional)')}</label>
               <div className="flex gap-2">
                 <input autoComplete="off" id="goal-deadline" type="month" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
                 {deadline && (
@@ -193,7 +193,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
             {goal && onDelete && (
               <button type="button" onClick={() => onDelete(goal)}
                       className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${isTechTheme ? 'rounded-none uppercase' : 'rounded-xl'}`}>
-                <Trash2 className="w-4 h-4" /> Eliminar meta
+                <Trash2 className="w-4 h-4" /> {tr('Eliminar meta')}
               </button>
             )}
           </div>

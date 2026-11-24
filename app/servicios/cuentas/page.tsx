@@ -159,7 +159,7 @@ export default function CuentasPage() {
             </p>
             <button onClick={() => { setEditing(null); setShowForm(true); }}
                     className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTech ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
-              <Plus className="w-5 h-5" /> Agregar mi primera cuenta
+              <Plus className="w-5 h-5" /> {tr('Agregar mi primera cuenta')}
             </button>
           </section>
         ) : (

@@ -2,13 +2,14 @@
 import { useEffect } from 'react';
 import { useInAppNotifications, InAppNotif } from '@/hooks/useInAppNotifications';
 import { Bell, X } from 'lucide-react';
+import { tr } from '@/lib/i18n';
 
 export function InAppToastStack() {
   const { notifications, dismiss } = useInAppNotifications();
 
   return (
     <div className="fixed top-16 right-3 z-[200] flex flex-col gap-2 w-[min(320px,90vw)]"
-         aria-live="polite" aria-label="Notificaciones">
+         aria-live="polite" aria-label={tr('Notificaciones')}>
       {notifications.slice(0, 4).map((n) => (
         <InAppToast key={n.id} notif={n} onDismiss={() => dismiss(n.id)} />
       ))}

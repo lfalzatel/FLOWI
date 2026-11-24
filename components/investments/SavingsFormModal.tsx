@@ -426,7 +426,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
           {investment && onDelete && (
             <button type="button" onClick={() => onDelete(investment)}
                     className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${isTech ? 'rounded-none uppercase' : 'rounded-xl'}`}>
-              <Trash2 className="w-4 h-4" /> Eliminar
+              <Trash2 className="w-4 h-4" /> {tr('Eliminar')}
             </button>
           )}
         </div>

@@ -124,7 +124,7 @@ export function ManualPayModal({ plan: initialPlan, onClose }: { plan: PlanOptio
                   <span className="text-xs">{tr('Toca para elegir la captura')}</span>
                 </button>
               )}
-              <input autoComplete="off" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="Nota (opcional): desde qué cuenta enviaste"
+              <input autoComplete="off" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder={tr('Nota (opcional): desde qué cuenta enviaste')}
                      className={`mt-2 w-full bg-glass border border-glass-border px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-accent ${isTech ? 'rounded-none' : 'rounded-xl'}`} />
             </div>
 

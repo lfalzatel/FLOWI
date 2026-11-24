@@ -60,7 +60,7 @@ export function ManualPaymentsReview({ isTech }: { isTech: boolean }) {
                 </button>
                 <button type="button" disabled={busy === p.id} onClick={() => review(p, false)}
                         className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-bold bg-red-500/10 border border-red-500/40 text-red-400 disabled:opacity-50 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
-                  <X className="w-3.5 h-3.5" /> Rechazar
+                  <X className="w-3.5 h-3.5" /> {tr('Rechazar')}
                 </button>
               </div>
             </div>

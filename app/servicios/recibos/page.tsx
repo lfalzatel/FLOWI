@@ -139,7 +139,7 @@ export default function RecibosPage() {
                             </button>
                             <Link href="/servicios/productos"
                                   className={`flex-1 py-2 text-xs font-semibold border border-glass-border text-text-secondary text-center inline-flex items-center justify-center gap-1 ${isTech ? 'rounded-none' : 'rounded-xl'}`}>
-                              <ShoppingBasket className="w-3.5 h-3.5" /> ¿Cuánto gasto en…?
+                              <ShoppingBasket className="w-3.5 h-3.5" /> {tr('¿Cuánto gasto en…?')}
                             </Link>
                           </div>
                         </div>

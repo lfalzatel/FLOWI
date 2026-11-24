@@ -115,10 +115,10 @@ export default function NegocioPage() {
 
             <div className="flex gap-2">
               <button type="button" onClick={() => setAdding('ingreso')} className={`${btn} border-emerald-500/40 text-emerald-500 bg-emerald-500/5`}>
-                <Plus className="w-4 h-4" /> Registrar venta
+                <Plus className="w-4 h-4" /> {tr('Registrar venta')}
               </button>
               <button type="button" onClick={() => setAdding('gasto')} className={`${btn} border-red-400/40 text-red-400 bg-red-500/5`}>
-                <Plus className="w-4 h-4" /> Registrar costo
+                <Plus className="w-4 h-4" /> {tr('Registrar costo')}
               </button>
             </div>
 
@@ -153,7 +153,7 @@ export default function NegocioPage() {
             {bizByAccount.length > 0 && (
               <section className={`${card} p-5`}>
                 <h2 className={`text-sm font-bold mb-1 flex items-center gap-1.5 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}><Wallet className="w-4 h-4" /> {tr('Plata del negocio en tus cuentas')}</h2>
-                <p className="text-[11px] text-text-muted mb-3">Ventas menos costos que entraron o salieron por cada cuenta. El resto del saldo es tuyo (sueldo y demás).</p>
+                <p className="text-[11px] text-text-muted mb-3">{tr('Ventas menos costos que entraron o salieron por cada cuenta. El resto del saldo es tuyo (sueldo y demás).')}</p>
                 <ul className="space-y-1.5">
                   {bizByAccount.map(a => (
                     <li key={a.name} className="flex justify-between text-sm">
@@ -206,7 +206,7 @@ export default function NegocioPage() {
                 <p className="text-sm font-bold text-text-primary">{tr('Más de tu negocio con Premium')}</p>
                 <p className="text-xs text-text-secondary leading-relaxed">{tr('Meses anteriores, comparación con el mes pasado, en qué vendes y gastas más, y la lista de movimientos del negocio.')}</p>
                 <Link href="/planes" className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
-                  <Crown className="w-4 h-4" /> Ver planes
+                  <Crown className="w-4 h-4" /> {tr('Ver planes')}
                 </Link>
               </section>
             )}

@@ -71,7 +71,7 @@ export default function CompartidoPage() {
 
             {loading ? null : user ? (
               <div className="text-center space-y-2">
-                <p className="text-xs text-white/50">{tr('Toca')} <b>{tr('Anotar')}</b> para guardarlo en tus gastos; puedes revisarlo antes de guardar.</p>
+                <p className="text-xs text-white/50">{tr('Toca')} <b>{tr('Anotar')}</b> {tr('para guardarlo en tus gastos; puedes revisarlo antes de guardar.')}</p>
                 <Link href="/" className="text-xs text-emerald-400/80 hover:text-emerald-300">{tr('Ir a FLOWI')}</Link>
               </div>
             ) : (

@@ -92,7 +92,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
                 </button>
                 <button type="button" disabled={busy} onClick={() => run(async () => tr('Listo: {a} registros descargados.', { a: await exportJson(uid) }))}
                         className={`${btn} border border-glass-border text-text-primary hover:bg-glass`}>
-                  <FileJson className="w-4 h-4 text-accent" /> Todo (perfil, deudas, cuentas, metas…)
+                  <FileJson className="w-4 h-4 text-accent" /> {tr('Todo (perfil, deudas, cuentas, metas…)')}
                 </button>
                 <p className="text-[11px] text-text-muted">{tr('“Todo” es un archivo JSON: sirve como copia de seguridad o para llevar tus datos a otra app.')}</p>
               </>
