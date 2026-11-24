@@ -29,9 +29,10 @@ interface Props {
   required?: boolean;
   isTech: boolean;
   label?: string;          // se muestra arriba del teclado para saber qué se está llenando
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>; // computador: Enter para seguir
 }
 
-export function CalcAmountInput({ id, value, onType, onValue, toNum, className, placeholder, disabled, required, isTech, label }: Props) {
+export function CalcAmountInput({ id, value, onType, onValue, toNum, className, placeholder, disabled, required, isTech, label, onKeyDown }: Props) {
   const { profile } = useAuth();
   const [isTouch] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches);
   const [open, setOpen] = useState(false);
@@ -40,7 +41,7 @@ export function CalcAmountInput({ id, value, onType, onValue, toNum, className, 
   if (!isTouch) {
     return (
       <input autoComplete="off" id={id} type="text" inputMode="decimal" required={required} disabled={disabled}
-             value={value} onChange={(e) => onType(e.target.value)} className={className} placeholder={placeholder} />
+             value={value} onChange={(e) => onType(e.target.value)} onKeyDown={onKeyDown} className={className} placeholder={placeholder} />
     );
   }
 

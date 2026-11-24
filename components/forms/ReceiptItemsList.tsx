@@ -5,6 +5,7 @@ import { ChevronDown, ReceiptText, Plus, Trash2, Check, Lightbulb } from 'lucide
 import { ReceiptItem, itemsCheck, formatQty, groupByCategory, shortCategory } from '@/lib/receiptItems';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
+import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
 import type { CategoryOption } from '@/hooks/useCategories';
 
 const money = (n: number) => `$ ${Math.round(n).toLocaleString(currentLocale())}`;
@@ -141,13 +142,13 @@ export function ReceiptItemsList({
                       </div>
                       <div>
                         <label className={lbl}>{tr('Precio c/u')}</label>
-                        <input autoComplete="off" className={field} inputMode="numeric" value={pesosText(it.price)} placeholder="—"
-                               onChange={e => update(k, { price: toPesos(e.target.value) || undefined })} />
+                        <CalcAmountInput className={field} value={pesosText(it.price)} placeholder="—" isTech={isTech} label={`${it.name} · ${tr('Precio c/u')}`}
+                                         onType={raw => update(k, { price: toPesos(raw) || undefined })} onValue={n => update(k, { price: n || undefined })} toNum={toPesos} />
                       </div>
                       <div>
                         <label className={lbl}>{tr('Total')}</label>
-                        <input autoComplete="off" className={field} inputMode="numeric" value={pesosText(it.total)}
-                               onChange={e => update(k, { total: toPesos(e.target.value) })} />
+                        <CalcAmountInput className={field} value={pesosText(it.total)} isTech={isTech} label={`${it.name} · Total`}
+                                         onType={raw => update(k, { total: toPesos(raw) })} onValue={n => update(k, { total: n })} toNum={toPesos} />
                       </div>
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-0.5">
@@ -199,8 +200,10 @@ export function ReceiptItemsList({
                 </div>
                 <div className="flex-1 min-w-0">
                   <label className={lbl}>{tr('Precio c/u')}</label>
-                  <input autoComplete="off" className={field} inputMode="numeric" placeholder="$" value={draft.price ? toPesos(draft.price).toLocaleString(currentLocale()) : ''} enterKeyHint="done"
-                         onChange={e => setDraft(d => ({ ...d, price: e.target.value }))} onKeyDown={onEnter} />
+                  <CalcAmountInput className={field} placeholder="$" isTech={isTech} label={draft.name ? `${draft.name} · ${tr('Precio c/u')}` : tr('Precio c/u')}
+                                   value={draft.price ? toPesos(draft.price).toLocaleString(currentLocale()) : ''}
+                                   onType={raw => setDraft(d => ({ ...d, price: raw }))} onValue={n => setDraft(d => ({ ...d, price: n ? String(n) : '' }))}
+                                   toNum={toPesos} onKeyDown={onEnter} />
                 </div>
                 <button type="button" onClick={addDraft} aria-label={tr('Agregar producto')}
                         className={`shrink-0 h-[30px] px-3 flex items-center gap-1 text-[11px] font-bold bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
