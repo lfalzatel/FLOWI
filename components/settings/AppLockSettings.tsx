@@ -54,7 +54,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
       go(isNew && bioAvail ? 'bio' : null);
       return;
     }
-    if (!(await checkPin(uid, pin))) { fail('PIN incorrecto'); return; }
+    if (!(await checkPin(uid, pin))) { fail(tr('PIN incorrecto')); return; }
     if (step === 'verify-off') { removeLock(uid); go(null); }
     else if (step === 'verify-change') go('new');
   };
@@ -65,10 +65,10 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
     setBioError(null);
     try {
       const ok = await enableBiometric(uid, profile?.name || user?.displayName || 'FLOWI');
-      if (!ok) setBioError('No se pudo activar. Intenta de nuevo.');
+      if (!ok) setBioError(tr('No se pudo activar. Intenta de nuevo.'));
       else if (step === 'bio') go(null);
     } catch {
-      setBioError('No se activó. Revisa que tu celular tenga huella o rostro configurado.');
+      setBioError(tr('No se activó. Revisa que tu celular tenga huella o rostro configurado.'));
     } finally { setBusy(false); }
   };
 
@@ -110,7 +110,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
                     <div className={icon}><Fingerprint className="w-4 h-4 text-accent" /></div>
                     <div className={`text-left ${mono}`}>
                       <p className="text-sm font-medium text-text-primary">{tr('Usar huella o rostro')}</p>
-                      <p className="text-[10px] text-text-muted">{bioError || 'Desbloquea sin escribir el PIN'}</p>
+                      <p className="text-[10px] text-text-muted">{bioError || tr('Desbloquea sin escribir el PIN')}</p>
                     </div>
                   </div>
                   {sw(!!lock.credId)}

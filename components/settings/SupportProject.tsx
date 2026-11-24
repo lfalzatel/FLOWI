@@ -66,7 +66,7 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
             <p className="text-sm font-medium text-text-primary normal-case">{tr('¿Te sirve FLOWI? Puedes apoyar el proyecto')}</p>
             <p className="text-[11px] text-text-muted normal-case leading-relaxed mt-0.5">
               {tr('FLOWI es gratis y sin publicidad. Si quieres ayudar a que siga creciendo, envía el aporte que quieras desde')}
-              Nequi, Bancolombia, BBVA o cualquier banco: en tu app elige Transferir → a una llave (Bre-B) y pega una de estas llaves.
+              {' '}{tr('Nequi, Bancolombia, BBVA o cualquier banco: en tu app elige Transferir → a una llave (Bre-B) y pega una de estas llaves.')}
             </p>
           </div>
         </div>

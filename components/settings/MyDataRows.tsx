@@ -50,7 +50,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
           <div className={icon('blue')}><Download className="w-4 h-4 text-blue-400" /></div>
           <div className={mono}>
             <p className="text-sm font-medium text-text-primary">{tr('Descargar mis datos')}</p>
-            <p className="text-[10px] text-text-muted">Excel (CSV) con tus movimientos o todo en un archivo</p>
+            <p className="text-[10px] text-text-muted">{tr('Excel (CSV) con tus movimientos o todo en un archivo')}</p>
           </div>
         </div>
       </button>

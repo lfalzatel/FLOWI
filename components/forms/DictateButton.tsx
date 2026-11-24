@@ -68,7 +68,7 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
           ? (heard ? <span className="italic text-text-secondary">"{heard}"</span> : <>Di algo como: {example}</>)
           : msg
             ? <span className="text-text-secondary">{heard && <span className="italic">"{heard}" · </span>}{msg}</span>
-            : <>Ejemplo: {example}</>}
+            : <>{tr('Ejemplo:')} {example}</>}
       </p>
     </div>
   );

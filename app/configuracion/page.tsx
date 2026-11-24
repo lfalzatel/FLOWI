@@ -29,7 +29,7 @@ import {
   ChevronRight, ChevronDown, ChevronUp, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
   FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass, Languages } from 'lucide-react';
-import { useT, tr } from '@/lib/i18n';
+import { useT, tr, trTech } from '@/lib/i18n';
 
 export default function ConfigPage() {
   const router = useRouter();
@@ -99,7 +99,7 @@ export default function ConfigPage() {
 
   const handleRestoreBaseCategories = async () => {
     if (!user) return;
-    if (!window.confirm('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?')) return;
+    if (!window.confirm(tr('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?'))) return;
     
     setRestoring(true);
     try {
@@ -107,10 +107,10 @@ export default function ConfigPage() {
       await updateDoc(userRef, {
         hiddenCategories: []
       });
-      alert('Categorías base restauradas con éxito. Recarga la página si es necesario.');
+      alert(tr('Categorías base restauradas con éxito. Recarga la página si es necesario.'));
     } catch (e) {
       console.error(e);
-      alert('Error al restaurar categorías.');
+      alert(tr('Error al restaurar categorías.'));
     } finally {
       setRestoring(false);
     }
@@ -326,7 +326,7 @@ export default function ConfigPage() {
 
   const handleClearData = async () => {
     if (!user) return;
-    if (!window.confirm('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?')) return;
+    if (!window.confirm(tr('¿Quieres restaurar todas las categorías base que habías ocultado o reemplazado?'))) return;
     
     setRestoring(true);
     try {
@@ -334,10 +334,10 @@ export default function ConfigPage() {
       await updateDoc(userRef, {
         hiddenCategories: []
       });
-      alert('Categorías base restauradas con éxito. Recarga la página si es necesario.');
+      alert(tr('Categorías base restauradas con éxito. Recarga la página si es necesario.'));
     } catch (e) {
       console.error(e);
-      alert('Error al restaurar categorías.');
+      alert(tr('Error al restaurar categorías.'));
     } finally {
       setRestoring(false);
     }
@@ -388,8 +388,8 @@ export default function ConfigPage() {
                   <User className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-accent'}`} />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'MI_PERFIL' : 'Mi perfil'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'EDITAR_NOMBRE_FOTO_Y_TELEFONO' : 'Editar nombre, foto y teléfono'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('MI_PERFIL', 'Mi perfil') : tr('Mi perfil')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('EDITAR_NOMBRE_FOTO_Y_TELEFONO', 'Editar nombre, foto y teléfono') : tr('Editar nombre, foto y teléfono')}</p>
                 </div>
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
@@ -401,8 +401,8 @@ export default function ConfigPage() {
                   <Compass className="w-4 h-4 text-accent" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'VER_TUTORIAL' : 'Ver tutorial 🔊'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'REGISTRAR_Y_LEER_TU_INICIO' : 'Cómo registrar y leer tu inicio, con voz opcional'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('VER_TUTORIAL', 'Ver tutorial 🔊') : tr('Ver tutorial 🔊')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('REGISTRAR_Y_LEER_TU_INICIO', 'Cómo registrar y leer tu inicio, con voz opcional') : tr('Cómo registrar y leer tu inicio, con voz opcional')}</p>
                 </div>
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
@@ -414,8 +414,8 @@ export default function ConfigPage() {
                   <Key className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'CAMBIAR_CONTRASENA' : 'Cambiar contraseña'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'ENVIAR_EMAIL_DE_RECUPERACION' : 'Enviar email de recuperación'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('CAMBIAR_CONTRASENA', 'Cambiar contraseña') : tr('Cambiar contraseña')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('ENVIAR_EMAIL_DE_RECUPERACION', 'Enviar email de recuperación') : tr('Enviar email de recuperación')}</p>
                 </div>
               </div>
               <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
@@ -426,11 +426,11 @@ export default function ConfigPage() {
                   <Shield className="w-4 h-4 text-purple-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-purple-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ROL_DE_LA_CUENTA' : 'Rol de la cuenta'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-purple-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'NIVEL_DE_ACCESO_ACTUAL' : 'Nivel de acceso actual'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-purple-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('ROL_DE_LA_CUENTA', 'Rol de la cuenta') : tr('Rol de la cuenta')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-purple-400/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('NIVEL_DE_ACCESO_ACTUAL', 'Nivel de acceso actual') : tr('Nivel de acceso actual')}</p>
                 </div>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono bg-accent/10 text-accent border border-accent/20 rounded-none' : 'bg-glass-strong text-text-secondary rounded-full'}`}>{profile?.role || 'Usuario'}</span>
+              <span className={`text-[10px] px-2 py-0.5 ${isTechTheme ? 'font-mono bg-accent/10 text-accent border border-accent/20 rounded-none' : 'bg-glass-strong text-text-secondary rounded-full'}`}>{profile?.role || tr('Usuario')}</span>
             </div>
           </div>
           )}
@@ -455,8 +455,8 @@ export default function ConfigPage() {
                   <Bell className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'ACTIVAR_NOTIFICACIONES' : 'Activar Notificaciones'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'TODOS_LOS_AVISOS_EN_ESTE_CELULAR' : 'Todos los avisos en este celular'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('ACTIVAR_NOTIFICACIONES', 'Activar Notificaciones') : tr('Activar Notificaciones')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('TODOS_LOS_AVISOS_EN_ESTE_CELULAR', 'Todos los avisos en este celular') : tr('Todos los avisos en este celular')}</p>
                 </div>
               </div>
               <button 
@@ -474,8 +474,8 @@ export default function ConfigPage() {
                   <Smartphone className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'NOTIFICACION_PUSH' : 'Notificación Push'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'EN_LA_BARRA_AUN_CON_LA_APP_CERRADA' : 'En la barra del celular, aun con FLOWI cerrada'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('NOTIFICACION_PUSH', 'Notificación Push') : tr('Notificación Push')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('EN_LA_BARRA_AUN_CON_LA_APP_CERRADA', 'En la barra del celular, aun con FLOWI cerrada') : tr('En la barra del celular, aun con FLOWI cerrada')}</p>
                 </div>
               </div>
               <button 
@@ -494,8 +494,8 @@ export default function ConfigPage() {
                   <MessageSquare className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'NOTIFICACION_IN_APP' : 'Notificación In-App'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'MENSAJE_Y_CAMPANA_CON_LA_APP_ABIERTA' : 'Mensaje y campana con FLOWI abierta'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('NOTIFICACION_IN_APP', 'Notificación In-App') : tr('Notificación In-App')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('MENSAJE_Y_CAMPANA_CON_LA_APP_ABIERTA', 'Mensaje y campana con FLOWI abierta') : tr('Mensaje y campana con FLOWI abierta')}</p>
                 </div>
               </div>
               <button 
@@ -520,7 +520,7 @@ export default function ConfigPage() {
                   <Music className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TONO_DE_ALERTA' : 'Tono de Alerta'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('TONO_DE_ALERTA', 'Tono de Alerta') : tr('Tono de Alerta')}</p>
                   <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{getSoundName(notificationSound)}</p>
                 </div>
               </div>
@@ -768,8 +768,8 @@ export default function ConfigPage() {
                   <PieChart className="w-4 h-4 text-[var(--yellow)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'GESTIONAR_CATEGORIAS' : 'Gestionar Categorías'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'COLORES_E_ICONOS_DE_GASTOS' : 'Colores e iconos de gastos'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('GESTIONAR_CATEGORIAS', 'Gestionar Categorías') : tr('Gestionar Categorías')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('COLORES_E_ICONOS_DE_GASTOS', 'Colores e iconos de gastos') : tr('Colores e iconos de gastos')}</p>
                 </div>
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
@@ -784,8 +784,8 @@ export default function ConfigPage() {
                       <Shield className="w-4 h-4 text-red-500" />
                     </div>
                     <div className="text-left">
-                      <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-red-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'GESTIONAR_USUARIOS' : 'Gestionar Usuarios'}</p>
-                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-red-400/60' : 'text-text-muted'}`}>{isTechTheme ? 'CAMBIAR_ROLES_Y_ADMINISTRAR_ACCESOS' : 'Cambiar roles y administrar accesos'}</p>
+                      <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-red-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('GESTIONAR_USUARIOS', 'Gestionar Usuarios') : tr('Gestionar Usuarios')}</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-red-400/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('CAMBIAR_ROLES_Y_ADMINISTRAR_ACCESOS', 'Cambiar roles y administrar accesos') : tr('Cambiar roles y administrar accesos')}</p>
                     </div>
                   </div>
                   <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
@@ -801,8 +801,8 @@ export default function ConfigPage() {
                       <RefreshCw className={`w-4 h-4 text-cyan-400 ${restoring ? 'animate-spin' : ''}`} />
                     </div>
                     <div className="text-left">
-                      <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-cyan-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'RESTAURAR_CATEGORIAS_BASE' : 'Restaurar Categorías Base'}</p>
-                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-cyan-400/60' : 'text-text-muted'}`}>{isTechTheme ? 'VOLVER_A_VER_LAS_CATEGORIAS_POR_DEFECTO_OCULTAS' : 'Volver a ver las categorías por defecto ocultas'}</p>
+                      <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-cyan-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('RESTAURAR_CATEGORIAS_BASE', 'Restaurar Categorías Base') : tr('Restaurar Categorías Base')}</p>
+                      <p className={`text-[10px] ${isTechTheme ? 'font-mono text-cyan-400/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('VOLVER_A_VER_LAS_CATEGORIAS_POR_DEFECTO_OCULTAS', 'Volver a ver las categorías por defecto ocultas') : tr('Volver a ver las categorías por defecto ocultas')}</p>
                     </div>
                   </div>
                   <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
@@ -835,8 +835,8 @@ export default function ConfigPage() {
                   <Palette className="w-4 h-4 text-pink-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TEMAS' : 'Temas'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? 'TEMA_ACTIVO_Y_MENU_DESPLEGABLE' : 'Tema activo y menú desplegable'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('TEMAS', 'Temas') : tr('Temas')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{isTechTheme ? trTech('TEMA_ACTIVO_Y_MENU_DESPLEGABLE', 'Tema activo y menú desplegable') : tr('Tema activo y menú desplegable')}</p>
                 </div>
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
@@ -870,8 +870,8 @@ export default function ConfigPage() {
                   <Type className="w-4 h-4 text-orange-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-orange-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'TAMANO_DE_TEXTO' : 'Tamaño de texto'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'COMPACTO_/_NORMAL_/_GRANDE' : 'Tamaño: Compacto / Normal / Grande'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-orange-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('TAMANO_DE_TEXTO', 'Tamaño de texto') : tr('Tamaño de texto')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-orange-400/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('COMPACTO_/_NORMAL_/_GRANDE', 'Tamaño: Compacto / Normal / Grande') : tr('Tamaño: Compacto / Normal / Grande')}</p>
                 </div>
               </div>
               <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-orange-500/30 text-orange-400 bg-orange-500/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
@@ -902,8 +902,8 @@ export default function ConfigPage() {
                   <Wallet className="w-4 h-4 text-accent" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'PRESUPUESTO_MENSUAL' : 'Presupuesto mensual'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{isTechTheme ? 'DEFINE_UN_LIMITE_DE_GASTOS' : 'Define un límite de gastos'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-accent/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('PRESUPUESTO_MENSUAL', 'Presupuesto mensual') : tr('Presupuesto mensual')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('DEFINE_UN_LIMITE_DE_GASTOS', 'Define un límite de gastos') : tr('Define un límite de gastos')}</p>
                 </div>
               </div>
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
@@ -916,8 +916,8 @@ export default function ConfigPage() {
                   <Globe className="w-4 h-4 text-green-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-green-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'MONEDA_GLOBAL' : 'Moneda Global'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-green-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'SELECCIONA_EL_FORMATO' : 'Selecciona el formato'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-green-400 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('MONEDA_GLOBAL', 'Moneda Global') : tr('Moneda Global')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-green-400/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('SELECCIONA_EL_FORMATO', 'Selecciona el formato') : tr('Selecciona el formato')}</p>
                 </div>
               </div>
               <select
@@ -930,7 +930,7 @@ export default function ConfigPage() {
                 className={`px-3 py-1.5 text-xs focus:outline-none transition-all ${isTechTheme ? 'bg-black/40 border border-accent/40 text-accent font-mono rounded-none uppercase' : 'bg-white/5 border border-white/10 text-text-primary rounded-xl'}`}
               >
                 {CURRENCIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.code} - {c.name}</option>
+                  <option key={c.code} value={c.code}>{c.code} - {tr(c.name)}</option>
                 ))}
               </select>
             </div>
@@ -941,8 +941,8 @@ export default function ConfigPage() {
                   <Calendar className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'DIA_DE_INICIO_DE_MES' : 'Día de inicio de mes'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'EJ_DIA_15_O_DIA_30' : 'Ej: Día 15 o Día 30'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-blue-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('DIA_DE_INICIO_DE_MES', 'Día de inicio de mes') : tr('Día de inicio de mes')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-blue-400/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('EJ_DIA_15_O_DIA_30', 'Ej: Día 15 o Día 30') : tr('Ej: Día 15 o Día 30')}</p>
                 </div>
               </div>
               <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-blue-500/30 text-blue-400 bg-blue-500/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
@@ -953,8 +953,8 @@ export default function ConfigPage() {
                   <FileText className="w-4 h-4 text-[var(--red)]" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-[var(--red)]/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'GASTOS_RECURRENTES' : 'Gastos recurrentes'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-[var(--red)]/50' : 'text-text-muted'}`}>{isTechTheme ? 'NETFLIX_INTERNET_ETC' : 'Netflix, Internet, etc.'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-[var(--red)]/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('GASTOS_RECURRENTES', 'Gastos recurrentes') : tr('Gastos recurrentes')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-[var(--red)]/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('NETFLIX_INTERNET_ETC', 'Netflix, Internet, etc.') : tr('Netflix, Internet, etc.')}</p>
                 </div>
               </div>
               <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${isTechTheme ? 'font-mono border border-[var(--red)]/30 text-[var(--red)] bg-[var(--red)]/5' : 'bg-glass-strong text-text-muted'}`}>{tr('Pronto')}</span>
@@ -982,8 +982,8 @@ export default function ConfigPage() {
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div className="text-left">
-                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-emerald-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? 'PRIVACIDAD_Y_TERMINOS' : 'Política de privacidad y términos'}</p>
-                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-emerald-400/50' : 'text-text-muted'}`}>{isTechTheme ? 'COMO_CUIDAMOS_TUS_DATOS' : 'Cómo cuidamos tus datos y las reglas del plan'}</p>
+                  <p className={`text-sm font-medium ${isTechTheme ? 'font-mono text-emerald-400/80 uppercase tracking-wider' : 'text-text-primary'}`}>{isTechTheme ? trTech('PRIVACIDAD_Y_TERMINOS', 'Política de privacidad y términos') : tr('Política de privacidad y términos')}</p>
+                  <p className={`text-[10px] ${isTechTheme ? 'font-mono text-emerald-400/50' : 'text-text-muted'}`}>{isTechTheme ? trTech('COMO_CUIDAMOS_TUS_DATOS', 'Cómo cuidamos tus datos y las reglas del plan') : tr('Cómo cuidamos tus datos y las reglas del plan')}</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-text-muted" />
@@ -1001,7 +1001,7 @@ export default function ConfigPage() {
           {' · '}
           <a href="/legal#terminos" className="underline hover:text-accent">{tr('Términos de uso')}</a>
           <br />
-          {'Soporte: '}
+          {tr('Soporte:')}{' '}
           <a href="mailto:soporteflowiapp@gmail.com" className="underline hover:text-accent">soporteflowiapp@gmail.com</a>
         </p>
 

@@ -1,5 +1,5 @@
 'use client';
-import { tr } from '@/lib/i18n';
+import { tr, lazyT } from '@/lib/i18n';
 import { usePlanGate } from '@/lib/plans';
 import { useInvestments } from '@/hooks/useInvestments';
 import { useRef, useState } from 'react';
@@ -21,9 +21,9 @@ import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
 import { DEFAULT_WITHHOLDING, addMonthsKey, days360, dayKey, estimateInterest, investmentStatus, parseDay } from '@/lib/investments';
 
 const BANKS = ['Bancolombia', 'BBVA', 'Davivienda', 'Banco de Bogotá', 'Nu', 'Lulo Bank', 'Banco Popular', 'Itaú'];
-const TERMS: { label: string; months?: number; days?: number }[] = [
-  { label: '90 días', days: 90 }, { label: '3 meses', months: 3 }, { label: '6 meses', months: 6 }, { label: '12 meses', months: 12 },
-];
+const TERMS: { label: string; months?: number; days?: number }[] = lazyT(() => [
+  { label: tr('90 días'), days: 90 }, { label: tr('3 meses'), months: 3 }, { label: tr('6 meses'), months: 6 }, { label: tr('12 meses'), months: 12 },
+]);
 
 // Tasas con coma o punto ("9,9" o "9.9")
 const parseRate = (s: string) => Number(String(s).replace(',', '.')) || 0;
@@ -89,14 +89,14 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
   const [aiMsg, setAiMsg] = useState('');
   // Dictado: "CDT de 5 millones en Bancolombia al 11 % a 6 meses"
   const applySpeech = (text: string) => {
-    const list = (xs: unknown[]) => { const f = xs.filter((x): x is string => typeof x === 'string' && !!x); return f.length ? `Llené: ${f.join(', ')}. Revisa antes de guardar.` : 'No entendí los datos. Prueba con el ejemplo o escríbelos.'; };
+    const list = (xs: unknown[]) => { const f = xs.filter((x): x is string => typeof x === 'string' && !!x); return f.length ? tr('Llené: {a}. Revisa antes de guardar.', { a: f.join(', ') }) : tr('No entendí los datos. Prueba con el ejemplo o escríbelos.'); };
     const d = parseInvestmentSpeech(text);
     if (d.bank) setBank(d.bank);
     if (d.amount) setAmount(formatAmountInput(d.amount));
     if (d.rateEA) setRate(rateText(d.rateEA));
     if (d.startDate) setStart(d.startDate);
     if (d.maturityDate) setMaturity(d.maturityDate);
-    return list([d.bank && tr('banco ({a})', { a: d.bank }), d.amount && 'monto', d.rateEA && 'tasa', d.startDate && 'apertura', d.maturityDate && 'vencimiento']);
+    return list([d.bank && tr('banco ({a})', { a: d.bank }), d.amount && tr('monto'), d.rateEA && tr('tasa'), d.startDate && tr('apertura'), d.maturityDate && tr('vencimiento')]);
   };
 
   async function readShots(files: File[]) {
@@ -109,13 +109,13 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
     if (id !== readId.current) return;
     if (r.ok && r.data.isLoan) {
       setAiState('loan');
-      setAiMsg('Estas capturas son de un crédito (dicen desembolso, cuota o seguro de vida deudor), no de un CDT. Un crédito es una deuda: ahí sí se registran el seguro y los intereses que cobra el banco.');
+      setAiMsg(tr('Estas capturas son de un crédito (dicen desembolso, cuota o seguro de vida deudor), no de un CDT. Un crédito es una deuda: ahí sí se registran el seguro y los intereses que cobra el banco.'));
       return;
     }
     if (!r.ok) {
       setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
-      setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos del CDT. Prueba con capturas donde se vea el monto, la tasa y las fechas.'
-        : r.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
+      setAiMsg(r.reason === 'unreadable' ? tr('No pude leer los datos del CDT. Prueba con capturas donde se vea el monto, la tasa y las fechas.')
+        : r.reason === 'no-model' ? tr('Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.')
         : tr('La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'));
       return;
     }
@@ -129,7 +129,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
     if (d.bankInterest) setBankInterest(formatAmountInput(d.bankInterest));
     if (d.bankInterest || d.nominalRate) setShowMore(true);
     if (d.autoRenew) setAutoRenew(true);
-    const missing = [!d.amount && 'monto', !d.rateEA && 'tasa E.A.', !d.startDate && 'fecha de apertura', !d.maturityDate && 'vencimiento'].filter(Boolean);
+    const missing = [!d.amount && tr('monto'), !d.rateEA && tr('tasa E.A.'), !d.startDate && tr('fecha de apertura'), !d.maturityDate && tr('vencimiento')].filter(Boolean);
     // Si la captura dice el plazo en días, se revisa que las fechas leídas coincidan
     // (los bancos cuentan meses de 30 días; se acepta también el conteo real)
     let warn = '';
@@ -318,11 +318,11 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="inv-amount" className={labelClass}>{tr('Monto invertido')}</label>
-                <CalcAmountInput id="inv-amount" placeholder="$ 0" value={amount} label="Monto invertido"
+                <CalcAmountInput id="inv-amount" placeholder="$ 0" value={amount} label={tr('Monto invertido')}
                        onType={(raw) => setAmount(formatAmountInput(raw))} onValue={(n) => setAmount(n ? formatAmountInput(Math.round(n)) : '')} toNum={parseAmountInput} isTech={isTechTheme} className={`${inputClass} font-bold`} required />
               </div>
               <div>
-                <label htmlFor="inv-rate" className={labelClass}>Tasa E.A. (%)</label>
+                <label htmlFor="inv-rate" className={labelClass}>{tr('Tasa E.A. (%)')}</label>
                 <input autoComplete="off" id="inv-rate" type="text" inputMode="decimal" placeholder="9,9" value={rate}
                        onChange={(e) => setRate(e.target.value.replace(/[^\d.,]/g, ''))} className={`${inputClass} font-bold`} required />
               </div>
@@ -330,7 +330,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="inv-start" className={labelClass}>{renewing ? 'Se renueva el' : 'Fecha de apertura'}</label>
+                <label htmlFor="inv-start" className={labelClass}>{renewing ? tr('Se renueva el') : tr('Fecha de apertura')}</label>
                 <input autoComplete="off" id="inv-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} required />
               </div>
               <div>
@@ -377,20 +377,20 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             {showMore && (
               <div className="space-y-5">
             <div>
-                  <label htmlFor="inv-bank-interest" className={labelClass}>Intereses del periodo según el banco (opcional)</label>
-                  <CalcAmountInput id="inv-bank-interest" placeholder="$ 0" value={bankInterest} label="Intereses según el banco"
+                  <label htmlFor="inv-bank-interest" className={labelClass}>{tr('Intereses del periodo según el banco (opcional)')}</label>
+                  <CalcAmountInput id="inv-bank-interest" placeholder="$ 0" value={bankInterest} label={tr('Intereses según el banco')}
                          onType={(raw) => setBankInterest(formatAmountInput(raw))} onValue={(n) => setBankInterest(n ? formatAmountInput(Math.round(n)) : '')} toNum={parseAmountInput} isTech={isTechTheme} className={inputClass} />
                   <p className={hint}>{tr('Si el banco te muestra la cifra exacta, ponla aquí y uso esa en vez del cálculo.')}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="inv-nominal" className={labelClass}>Tasa nominal (opcional)</label>
+                    <label htmlFor="inv-nominal" className={labelClass}>{tr('Tasa nominal (opcional)')}</label>
                     <input autoComplete="off" id="inv-nominal" type="text" inputMode="decimal" placeholder="9,61" value={nominal}
                            onChange={(e) => setNominal(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
                   </div>
                   <div>
-                    <label htmlFor="inv-wh" className={labelClass}>Retención (%)</label>
+                    <label htmlFor="inv-wh" className={labelClass}>{tr('Retención (%)')}</label>
                     <input autoComplete="off" id="inv-wh" type="text" inputMode="decimal" value={withholding}
                            onChange={(e) => setWithholding(e.target.value.replace(/[^\d.,]/g, ''))} className={inputClass} />
                   </div>
@@ -402,7 +402,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
                 </label>
 
                 <div>
-                  <label htmlFor="inv-note" className={labelClass}>Nota (opcional)</label>
+                  <label htmlFor="inv-note" className={labelClass}>{tr('Nota (opcional)')}</label>
                   <input autoComplete="off" id="inv-note" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)}
                          placeholder={tr('Ej: para la prima del carro')} className={inputClass} />
                   <p className={hint}>{tr('No escribas números de CDT ni de cuenta: FLOWI no los necesita.')}</p>

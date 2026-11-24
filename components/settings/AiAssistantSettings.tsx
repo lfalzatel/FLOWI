@@ -44,7 +44,7 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
         </button>
       ) : (
       <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide border-b border-accent/20 pb-1' : 'font-syne font-semibold text-sm text-text-secondary ml-2'}`}>
-        Asistente de voz con IA
+        {tr('Asistente de voz con IA')}
       </h2>
       )}
       {(!onToggle || open) && (
@@ -101,7 +101,7 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
           onClick={() => setShowGuide(true)}
           className={`w-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider text-xs' : 'rounded-xl'}`}
         >
-          <PlayCircle className="w-4 h-4 text-accent" /> {connected ? 'Ver el paso a paso con voz' : '¿Cómo se conecta? Ver paso a paso con voz'}
+          <PlayCircle className="w-4 h-4 text-accent" /> {connected ? tr('Ver el paso a paso con voz') : tr('¿Cómo se conecta? Ver paso a paso con voz')}
         </button>
         {showGuide && <AiConnectGuide onClose={() => setShowGuide(false)} />}
 

@@ -22,7 +22,7 @@ export function PlanCard({ isTechTheme }: { isTechTheme: boolean }) {
         </span>
         <span className="block text-[11px] text-text-muted normal-case leading-snug">
           {premium
-            ? (untilText ? tr('Activo hasta el {a}.{b}', { a: untilText, b: playStore ? '' : ' Toca para renovar o ver tu plan.' }) : tr('Activo.'))
+            ? (untilText ? tr('Activo hasta el {a}.{b}', { a: untilText, b: playStore ? '' : tr(' Toca para renovar o ver tu plan.') }) : tr('Activo.'))
             : playStore ? tr('Mira qué incluye cada plan.') : tr('Pásate a Premium desde $4.167 al mes: inversiones, metas y recibos sin límite.')}
         </span>
       </span>

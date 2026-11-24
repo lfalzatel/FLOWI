@@ -37,6 +37,15 @@ export function tr(es: string, vars?: Vars): string {
 }
 
 /**
+ * Texto "técnico" de los temas Cyber y Kilo (MI_PERFIL). En español se usa tal cual; en inglés se arma
+ * desde la traducción del texto normal: 'Mi perfil' → 'My profile' → 'MY_PROFILE'.
+ */
+export function trTech(tech: string, es: string, vars?: Vars): string {
+  if (current !== 'en') return fill(tech, vars);
+  return translate('en', es, vars).toUpperCase().replace(/[\s,.:;]+/g, '_').replace(/_+$/, '');
+}
+
+/**
  * Lista o tabla de textos definida fuera de un componente (se evalúa una sola vez al cargar). Con lazyT se
  * vuelve a armar con el idioma actual cada vez que se usa: const TIPS = lazyT(() => [{ title: tr('…') }]).
  */

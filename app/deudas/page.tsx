@@ -476,7 +476,7 @@ export default function DeudasPage() {
 
               {hiddenPaidCount > 0 && (
                 <p className={`text-[11px] text-center text-text-muted ${isCyberpunk ? 'font-mono' : ''}`}>
-                  {hiddenPaidCount} {hiddenPaidCount === 1 ? 'deuda liquidada' : 'deudas liquidadas'} en otros periodos. Cambia el filtro para verlas.
+                  {hiddenPaidCount === 1 ? tr('1 deuda liquidada en otros periodos. Cambia el filtro para verla.') : tr('{n} deudas liquidadas en otros periodos. Cambia el filtro para verlas.', { n: hiddenPaidCount })}
                 </p>
               )}
             </div>

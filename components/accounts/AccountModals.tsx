@@ -160,7 +160,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
 
   return (
     <Shell title={account ? tr('Editar cuenta') : tr('Nueva cuenta')} onClose={onClose}
-           footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? 'Guardando...' : account ? 'Guardar cambios' : 'Crear cuenta'}</button>}>
+           footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? tr('Guardando...') : account ? tr('Guardar cambios') : tr('Crear cuenta')}</button>}>
       <div>
         <span className={s.label}>{tr('Tipo')}</span>
         <div className="flex flex-wrap gap-2">
@@ -173,14 +173,14 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
       <div>
         <label htmlFor="acc-name" className={s.label}>{tr('Nombre')}</label>
         <input id="acc-name" type="text" autoComplete="off" value={name} maxLength={30} onChange={(e) => setName(e.target.value)}
-               placeholder={kind === 'efectivo' ? 'Efectivo' : kind === 'credito' ? 'Ej: Visa Bancolombia' : kind === 'billetera' ? 'Ej: Nequi' : 'Ej: Bancolombia ahorros'}
+               placeholder={kind === 'efectivo' ? 'Efectivo' : kind === 'credito' ? tr('Ej: Visa Bancolombia') : kind === 'billetera' ? tr('Ej: Nequi') : tr('Ej: Bancolombia ahorros')}
                className={s.input} />
         <p className={s.hint}>{tr('No escribas números de cuenta: FLOWI no los necesita.')}</p>
       </div>
 
       {!account && (
         <div>
-          <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? '¿Cuánto debes hoy en la tarjeta?' : initial ? `¿Cuánto tenías en ${name || 'esta cuenta'} antes de este movimiento?` : '¿Cuánto tienes hoy en esta cuenta?'}</label>
+          <label htmlFor="acc-balance" className={s.label}>{kind === 'credito' ? tr('¿Cuánto debes hoy en la tarjeta?') : initial ? `¿Cuánto tenías en ${name || 'esta cuenta'} antes de este movimiento?` : tr('¿Cuánto tienes hoy en esta cuenta?')}</label>
           <input id="acc-balance" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={balance}
                  onChange={(e) => setBalance(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>{tr('Míralo en la app del banco. Desde hoy, tus gastos e ingresos de esta cuenta lo van moviendo.')}</p>
@@ -189,7 +189,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
 
       {kind === 'credito' && (
         <div>
-          <label htmlFor="acc-limit" className={s.label}>Cupo de la tarjeta (opcional)</label>
+          <label htmlFor="acc-limit" className={s.label}>{tr('Cupo de la tarjeta (opcional)')}</label>
           <input id="acc-limit" type="text" autoComplete="off" inputMode="decimal" placeholder="$ 0" value={limit}
                  onChange={(e) => setLimit(formatMoneyInput(e.target.value))} className={`${s.input} font-bold`} />
           <p className={s.hint}>{tr('Con el cupo, FLOWI te muestra cuánto te queda disponible para usar.')}</p>
@@ -260,7 +260,7 @@ function AccountFormModalInner({ account, accounts, onClose, onDelete, initial, 
         <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[var(--accent)]" />
         <span className="text-sm text-text-secondary">
           {tr('Cuenta principal')}
-          <span className="block text-[11px] text-text-muted">Recibe los gastos e ingresos que no dicen con qué se pagaron (la mayoría de los que dictas por voz).</span>
+          <span className="block text-[11px] text-text-muted">{tr('Recibe los gastos e ingresos que no dicen con qué se pagaron (la mayoría de los que dictas por voz).')}</span>
         </span>
       </label>
 
@@ -308,9 +308,9 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
 
   return (
     <Shell title={tr('Ajustar {a}', { a: account.name })} onClose={onClose}
-           footer={<button type="button" disabled={saving} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar saldo'}</button>}>
+           footer={<button type="button" disabled={saving} onClick={save} className={s.primary}>{saving ? tr('Guardando...') : tr('Guardar saldo')}</button>}>
       <div>
-        <label htmlFor="adj" className={s.label}>{credit ? '¿Cuánto debes hoy según el banco?' : '¿Cuánto dice el banco que tienes hoy?'}</label>
+        <label htmlFor="adj" className={s.label}>{credit ? tr('¿Cuánto debes hoy según el banco?') : tr('¿Cuánto dice el banco que tienes hoy?')}</label>
         <CalcAmountInput id="adj" value={value} isTech={s.isTech} className={`${s.input} font-bold`} label={tr('Saldo según el banco')}
                          onType={(raw) => setValue(formatMoneyInput(raw))} onValue={(n) => setValue(n ? formatMoneyInput(n) : '')} toNum={parseMoneyInput} />
         <p className={s.hint}>
@@ -381,21 +381,21 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
       <button type="button" onClick={() => setChoosing(which)}
               className={`w-full flex flex-col items-center gap-1.5 px-2 py-3 bg-glass border transition-colors ${s.isTech ? 'rounded-none border-accent/30 hover:border-accent' : 'rounded-2xl border-glass-border hover:border-accent/60'}`}>
         {acc ? <AccountIcon account={acc} className="w-8 h-8 text-2xl flex items-center justify-center" /> : <span className="w-8 h-8 rounded-full border border-dashed border-glass-border" />}
-        <span className={`text-xs font-semibold truncate max-w-full ${acc ? 'text-text-primary' : 'text-text-muted'}`}>{acc ? acc.name : 'Elegir'}</span>
+        <span className={`text-xs font-semibold truncate max-w-full ${acc ? 'text-text-primary' : 'text-text-muted'}`}>{acc ? acc.name : tr('Elegir')}</span>
       </button>
     );
   };
 
   return (
-    <Shell title={editing ? (toAcc?.kind === 'credito' ? 'Editar abono' : 'Editar transferencia') : payCard ? `Abonar a ${toAcc?.name || 'la tarjeta'}` : 'Mover plata entre cuentas'} onClose={onClose}
-           footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? 'Guardando...' : 'Guardar'}</button>}>
+    <Shell title={editing ? (toAcc?.kind === 'credito' ? tr('Editar abono') : tr('Editar transferencia')) : payCard ? `Abonar a ${toAcc?.name || 'la tarjeta'}` : tr('Mover plata entre cuentas')} onClose={onClose}
+           footer={<button type="button" disabled={!canSave} onClick={save} className={s.primary}>{saving ? tr('Guardando...') : tr('Guardar')}</button>}>
       <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
         <div><span className={s.label}>{tr('Sale de')}</span>{accField(from, 'from')}</div>
         {payCard
           ? <span className="mb-5 p-2 text-accent" aria-hidden="true"><ArrowRightLeft className="w-5 h-5" /></span>
           : <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label={tr('Intercambiar')}
                 className="mb-5 p-2 rounded-full text-accent hover:bg-accent/10"><ArrowRightLeft className="w-5 h-5" /></button>}
-        <div><span className={s.label}>{payCard ? 'Abono a' : 'Llega a'}</span>{payCard
+        <div><span className={s.label}>{payCard ? tr('Abono a') : tr('Llega a')}</span>{payCard
           ? <div className={`w-full flex flex-col items-center gap-1.5 px-2 py-3 bg-glass border ${s.isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>
               {toAcc && <AccountIcon account={toAcc} className="w-8 h-8 text-2xl flex items-center justify-center" />}
               <span className="text-xs font-semibold truncate max-w-full text-text-primary">{toAcc?.name}</span>
@@ -406,7 +406,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
         <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center">
           <div className={`absolute inset-0 ${s.theme === 'light' ? 'bg-black/20' : 'bg-black/60'}`} onClick={() => setChoosing(null)} aria-hidden="true" />
           <div className={`relative w-full max-w-md max-h-[70dvh] overflow-y-auto p-4 border animate-fade-in-up ${s.isTech ? 'bg-deep rounded-none border-accent/50 font-mono' : 'bg-card rounded-t-[28px] sm:rounded-3xl border-glass-border'}`}>
-            <h3 className={`mb-3 px-1 ${s.isTech ? 'font-bold text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}`}>{choosing === 'from' ? '¿De dónde sale?' : '¿A dónde llega?'}</h3>
+            <h3 className={`mb-3 px-1 ${s.isTech ? 'font-bold text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}`}>{choosing === 'from' ? tr('¿De dónde sale?') : tr('¿A dónde llega?')}</h3>
             <div className="space-y-1.5">
               {active.filter(a => a.id !== (choosing === 'from' ? to : from)).map(a => {
                 const on = (choosing === 'from' ? from : to) === a.id;
@@ -473,20 +473,20 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
         ) : null;
       })()}
       <div>
-        <label htmlFor="tr-note" className={s.label}>Nota (opcional)</label>
+        <label htmlFor="tr-note" className={s.label}>{tr('Nota (opcional)')}</label>
         <input id="tr-note" type="text" autoComplete="off" value={note} maxLength={50} onChange={(e) => setNote(e.target.value)}
-               placeholder={toAcc?.kind === 'credito' ? 'Pago de la tarjeta' : toAcc?.kind === 'efectivo' ? 'Retiro en cajero' : 'Ej: paso a Nequi'} className={s.input} />
+               placeholder={toAcc?.kind === 'credito' ? tr('Pago de la tarjeta') : toAcc?.kind === 'efectivo' ? tr('Retiro en cajero') : tr('Ej: paso a Nequi')} className={s.input} />
       </div>
       <p className="text-[11px] text-text-muted">{payCard
         ? tr('El abono baja lo que debes en la tarjeta y descuenta la plata de la cuenta de donde sale. No es un gasto: las compras ya las registraste como gastos.')
-        : <>No es un gasto ni un ingreso: la plata sigue siendo tuya, solo cambia de lugar{toAcc?.kind === 'credito' ? ' (pagar la tarjeta baja lo que debes en ella)' : ''}.</>}</p>
+        : <>{tr('No es un gasto ni un ingreso: la plata sigue siendo tuya, solo cambia de lugar')}{toAcc?.kind === 'credito' ? tr(' (pagar la tarjeta baja lo que debes en ella)') : ''}.</>}</p>
       {editing?.id && (confirmDelete
         ? <div className="flex gap-2">
             <button type="button" onClick={() => setConfirmDelete(false)} className={`flex-1 py-2.5 text-xs font-semibold border border-glass-border text-text-secondary ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>{tr('No borrar')}</button>
             <button type="button" onClick={async () => { await deleteTransfer(editing.id!); onClose(); }} className={`flex-1 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/40 bg-red-500/10 ${s.isTech ? 'rounded-none' : 'rounded-xl'}`}>{tr('Sí, borrar')}</button>
           </div>
         : <button type="button" onClick={() => setConfirmDelete(true)} className={`w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold text-[var(--red)] border border-red-500/30 hover:bg-red-500/10 ${s.isTech ? 'rounded-none uppercase' : 'rounded-xl'}`}>
-            <Trash2 className="w-4 h-4" /> {toAcc?.kind === 'credito' ? 'Borrar abono' : 'Borrar transferencia'}
+            <Trash2 className="w-4 h-4" /> {toAcc?.kind === 'credito' ? tr('Borrar abono') : tr('Borrar transferencia')}
           </button>)}
       {active.length < 2 && <p className="text-xs text-amber-500">{tr('Necesitas al menos dos cuentas para mover plata entre ellas.')}</p>}
       {error && <p className="text-xs text-[var(--red)]">{error}</p>}

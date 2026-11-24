@@ -82,7 +82,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
   const [aiMsg, setAiMsg] = useState('');
   // Dictado: "Cajita de Nu con 2 millones al 9 %" o "fondo en Skandia, invertí 3 millones y ya tiene 3,4"
   const applySpeech = (text: string) => {
-    const list = (xs: unknown[]) => { const f = xs.filter((x): x is string => typeof x === 'string' && !!x); return f.length ? `Llené: ${f.join(', ')}. Revisa antes de guardar.` : 'No entendí los datos. Prueba con el ejemplo o escríbelos.'; };
+    const list = (xs: unknown[]) => { const f = xs.filter((x): x is string => typeof x === 'string' && !!x); return f.length ? tr('Llené: {a}. Revisa antes de guardar.', { a: f.join(', ') }) : tr('No entendí los datos. Prueba con el ejemplo o escríbelos.'); };
     const d = parseInvestmentSpeech(text);
     if (d.bank) setBank(d.bank);
     if (d.amount) setAmount(formatMoneyInput(d.amount));
@@ -103,8 +103,8 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       if (id !== readId.current) return;
       if (!rf.ok) {
         setAiState(rf.reason === 'no-key' ? 'no-key' : 'error');
-        setAiMsg(rf.reason === 'unreadable' ? 'No pude leer los datos. Prueba con la captura donde se vea lo que vale hoy y lo depositado.'
-          : rf.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
+        setAiMsg(rf.reason === 'unreadable' ? tr('No pude leer los datos. Prueba con la captura donde se vea lo que vale hoy y lo depositado.')
+          : rf.reason === 'no-model' ? tr('Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.')
           : tr('La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'));
         return;
       }
@@ -123,8 +123,8 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
     if (id !== readId.current) return;
     if (!r.ok) {
       setAiState(r.reason === 'no-key' ? 'no-key' : 'error');
-      setAiMsg(r.reason === 'unreadable' ? 'No pude leer los datos. Prueba con una captura donde se vea el saldo y, si la hay, la tasa.'
-        : r.reason === 'no-model' ? 'Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.'
+      setAiMsg(r.reason === 'unreadable' ? tr('No pude leer los datos. Prueba con una captura donde se vea el saldo y, si la hay, la tasa.')
+        : r.reason === 'no-model' ? tr('Ahora no hay un modelo gratuito que lea imágenes. Inténtalo más tarde.')
         : tr('La IA no respondió a tiempo. Revisa tu conexión e inténtalo de nuevo.'));
       return;
     }
@@ -139,8 +139,8 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       if (d.balance) setCurrent(formatMoneyInput(String(d.balance)));
     }
     const missing = isSavings
-      ? [!d.balance && 'saldo', !d.rateEA && 'tasa E.A.'].filter(Boolean)
-      : [!d.balance && 'valor actual', !d.invested && 'lo invertido'].filter(Boolean);
+      ? [!d.balance && tr('saldo'), !d.rateEA && tr('tasa E.A.')].filter(Boolean)
+      : [!d.balance && tr('valor actual'), !d.invested && tr('lo invertido')].filter(Boolean);
     setAiState('done');
     setAiMsg(missing.length ? tr('Listo. Revisa y completa: {a}.', { a: missing.join(', ') }) : tr('Listo. Revisa los datos antes de guardar.'));
   }
@@ -249,7 +249,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
       <div className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[88dvh] flex flex-col overflow-hidden glass-dropdown ${isTech ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}>
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 pt-5 pb-3 ${isTech ? 'border-b border-accent/20' : ''}`}>
           <div>
-            <h2 className={isTech ? 'font-bold text-xl text-accent uppercase' : 'font-syne font-bold text-xl text-text-primary'}>{investment ? 'Editar' : 'Nuevo'}: {info.short}</h2>
+            <h2 className={isTech ? 'font-bold text-xl text-accent uppercase' : 'font-syne font-bold text-xl text-text-primary'}>{investment ? tr('Editar') : tr('Nuevo')}: {info.short}</h2>
             <p className="text-[11px] text-text-muted">{info.examples}</p>
           </div>
           <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className={isTech ? 'text-accent' : 'text-text-secondary hover:text-text-primary'}><X className="w-5 h-5" /></button>
@@ -278,7 +278,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
               )}
               <p className={hint}>
                 {aiState === 'no-key'
-                  ? <>Para leer capturas necesitas la IA gratuita (gratis siempre). <a href="/configuracion" className="text-accent font-semibold underline">{tr('Conéctala en Configuración')}</a>.</>
+                  ? <>{tr('Para leer capturas necesitas la IA gratuita (gratis siempre).')} <a href="/configuracion" className="text-accent font-semibold underline">{tr('Conéctala en Configuración')}</a>.</>
                   : aiMsg
                     ? <span className={aiState === 'error' ? 'text-red-400' : 'text-text-secondary'}>{aiMsg}</span>
                     : isFund
@@ -292,9 +292,9 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
                     return (
                       <div key={i} className="flex items-center justify-between gap-3 px-3 py-2.5">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-text-primary truncate">{it.name || it.symbol || `Inversión ${i + 1}`}</p>
+                          <p className="text-sm font-semibold text-text-primary truncate">{it.name || it.symbol || tr('Inversión {a}', { a: i + 1 })}</p>
                           <p className="text-[11px] text-text-muted truncate">
-                            {it.assetType === 'acciones' ? `Acciones${it.units ? ` · ${it.units}` : ''}` : 'Fondo'}
+                            {it.assetType === 'acciones' ? `${tr('Acciones')}${it.units ? ` · ${it.units}` : ''}` : tr('Fondo')}
                             {it.value ? tr(' · vale {a}', { a: formatCurrency(it.value, 'COP') }) : ''}
                             {gain !== null ? ` · ${gain >= 0 ? '+' : '−'}${formatCurrency(Math.abs(gain), 'COP')}` : ''}
                           </p>
@@ -314,7 +314,7 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
                 {(['fondo', 'acciones'] as const).map(t => (
                   <button key={t} type="button" onClick={() => setAssetType(t)}
                           className={`py-2.5 text-sm font-semibold border transition-colors ${isTech ? 'rounded-none' : 'rounded-xl'} ${assetType === t ? 'border-accent bg-accent/10 text-accent' : 'border-glass-border text-text-secondary hover:bg-glass'}`}>
-                    {t === 'fondo' ? 'Fondo de inversión' : 'Acciones o ETF'}
+                    {t === 'fondo' ? tr('Fondo de inversión') : tr('Acciones o ETF')}
                   </button>
                 ))}
               </div>
@@ -329,37 +329,37 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
             </>
           )}
           <div>
-            <span className={lbl}>{kind === 'fondo' ? 'Plataforma o entidad' : 'Entidad'}</span>
+            <span className={lbl}>{kind === 'fondo' ? tr('Plataforma o entidad') : 'Entidad'}</span>
             <BankField value={bank} placeholder={tr('Elegir')} onClick={() => setBankSheet(true)} />
             {bankSheet && (
-              <BankPickerSheet title={kind === 'fondo' ? '¿Dónde inviertes?' : '¿Dónde está esta plata?'} selected={bank ? [bank] : []}
+              <BankPickerSheet title={kind === 'fondo' ? tr('¿Dónde inviertes?') : tr('¿Dónde está esta plata?')} selected={bank ? [bank] : []}
                                onlyBanks={kind !== 'ahorro'} allowCustom extra={PLACES[kind]} favorites={PLACES[kind]}
                                onChange={(v) => setBank(v[0] || '')} onClose={() => setBankSheet(false)} />
             )}
           </div>
 
           <div>
-            <label htmlFor="sv-note" className={lbl}>Nombre (opcional)</label>
+            <label htmlFor="sv-note" className={lbl}>{tr('Nombre (opcional)')}</label>
             <input autoComplete="off" id="sv-note" value={note} maxLength={40} onChange={(e) => setNote(e.target.value)} className={input}
-                   placeholder={isSavings ? 'Ej: Cajita viaje, fondo de emergencia' : kind === 'fondo' ? 'Ej: Acciones Ecopetrol, ETF' : 'Ej: Pensión voluntaria'} />
+                   placeholder={isSavings ? tr('Ej: Cajita viaje, fondo de emergencia') : kind === 'fondo' ? tr('Ej: Acciones Ecopetrol, ETF') : tr('Ej: Pensión voluntaria')} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="sv-amount" className={lbl}>{isSavings ? (investment ? 'Saldo inicial' : 'Saldo de hoy') : isFund ? 'Lo que has depositado' : 'Lo que has invertido'}</label>
-              <CalcAmountInput id="sv-amount" placeholder="$ 0" value={amount} label="Monto"
+              <label htmlFor="sv-amount" className={lbl}>{isSavings ? (investment ? tr('Saldo inicial') : tr('Saldo de hoy')) : isFund ? tr('Lo que has depositado') : tr('Lo que has invertido')}</label>
+              <CalcAmountInput id="sv-amount" placeholder="$ 0" value={amount} label={tr('Monto')}
                      onType={(raw) => setAmount(formatMoneyInput(raw))} onValue={(n) => setAmount(n ? formatMoneyInput(n) : '')} toNum={parseMoneyInput} isTech={isTech} className={`${input} font-bold`} />
             </div>
             {isSavings ? (
               <div>
-                <label htmlFor="sv-rate" className={lbl}>Tasa E.A. (%)</label>
+                <label htmlFor="sv-rate" className={lbl}>{tr('Tasa E.A. (%)')}</label>
                 <input autoComplete="off" id="sv-rate" type="text" inputMode="decimal" placeholder="9,25" value={rate}
                        onChange={(e) => setRate(e.target.value.replace(/[^\d.,]/g, ''))} className={`${input} font-bold`} />
               </div>
             ) : (
               <div>
-                <label htmlFor="sv-current" className={lbl}>{isFund ? 'Lo que vale hoy' : 'Valor actual'}</label>
-                <CalcAmountInput id="sv-current" placeholder={tr('Igual al invertido')} value={current} label="Valor actual"
+                <label htmlFor="sv-current" className={lbl}>{isFund ? tr('Lo que vale hoy') : tr('Valor actual')}</label>
+                <CalcAmountInput id="sv-current" placeholder={tr('Igual al invertido')} value={current} label={tr('Valor actual')}
                        onType={(raw) => setCurrent(formatMoneyInput(raw))} onValue={(n) => setCurrent(n ? formatMoneyInput(n) : '')} toNum={parseMoneyInput} isTech={isTech} className={input} />
               </div>
             )}
@@ -388,9 +388,9 @@ function SavingsFormModalInner({ kind, investment, onClose, onDelete }: SavingsF
           )}
           {isFund && !isStock && (
             <div>
-              <label htmlFor="sv-yr" className={lbl}>Rentabilidad último año (%) · opcional</label>
+              <label htmlFor="sv-yr" className={lbl}>{tr('Rentabilidad último año (%) · opcional')}</label>
               <input autoComplete="off" id="sv-yr" type="text" inputMode="decimal" value={yearReturn} onChange={(e) => setYearReturn(e.target.value.replace(/[^\d.,-]/g, ''))} className={input} placeholder="26,22" />
-              <p className={hint}>Solo para que la recuerdes; la ganancia se calcula con el valor de hoy.</p>
+              <p className={hint}>{tr('Solo para que la recuerdes; la ganancia se calcula con el valor de hoy.')}</p>
             </div>
           )}
 
