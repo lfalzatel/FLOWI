@@ -284,6 +284,7 @@ export const EN: Record<string, string> = {
   'Historial y control de préstamos': 'Loan history and tracking',
   'Herramientas para manejar tu dinero': 'Tools to manage your money',
   'Escribe el monto de la deuda.': 'Enter the debt amount.',
+  'Usar la suma de los productos como total': 'Use the sum of the items as the total',
   'Total Pendiente': 'Total outstanding',
   'Suma de todas tus deudas activas': 'Sum of all your active debts',
   'Deudas activas': 'Active debts',
