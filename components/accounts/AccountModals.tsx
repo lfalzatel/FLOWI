@@ -341,7 +341,8 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
   const [date, setDate] = useState(getLocalDateString(editDate));
   const [time, setTime] = useState(`${String(editDate.getHours()).padStart(2, '0')}:${String(editDate.getMinutes()).padStart(2, '0')}`);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [countBefore, setCountBefore] = useState(editing ? editing.countBefore !== false : true);
+  // Igual que en los gastos: lo anterior al saldo inicial (o al último ajuste) ya está incluido en ese saldo
+  const [countBefore, setCountBefore] = useState(editing ? !!editing.countBefore : false);
   const [note, setNote] = useState(editing?.note || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -465,7 +466,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
         return early ? (
           <label className="flex items-start gap-2 cursor-pointer text-[11px] text-text-secondary">
             <input type="checkbox" checked={countBefore} onChange={(e) => setCountBefore(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--accent)]" />
-            <span>Es de antes de que creaste o ajustaste {early.name}. Contarlo en los saldos (desmárcalo si el saldo que escribiste ya lo incluía).</span>
+            <span>Es de antes de que creaste o ajustaste {early.name}: el saldo que escribiste ya lo incluye, así que no se vuelve a contar. Márcalo solo si ese saldo no lo incluía.</span>
           </label>
         ) : null;
       })()}

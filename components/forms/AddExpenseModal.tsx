@@ -217,7 +217,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const [countBeforeChoice, setCountBeforeChoice] = useState<boolean | null>(null);
   const txWhen = (() => { const [y, mo, d] = date.split('-').map(Number); const [h, mi] = (time || '12:00').split(':').map(Number); return new Date(y, mo - 1, d, h, mi); })();
   const beforeBase = !!targetAccount && txWhen.getTime() < new Date(targetAccount.baseAt).getTime();
-  const countBefore = countBeforeChoice ?? (transactionToEdit?.countBefore ? transactionToEdit.countBefore === targetAccount?.id : true);
+  // Por defecto NO: el saldo que se escribió al crear (o ajustar) la cuenta ya incluye lo anterior.
+  // Así, corregir la cuenta de un gasto de meses pasados no cambia el saldo de hoy.
+  const countBefore = countBeforeChoice ?? (transactionToEdit?.countBefore ? transactionToEdit.countBefore === targetAccount?.id : false);
   const [creatingAccount, setCreatingAccount] = useState(false);
   useEffect(() => {
     if (paymentTouched.current || paymentMethod || initialVoiceParsed?.paymentMethod) return;
@@ -973,7 +975,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   {beforeBase && (
                     <label className="mt-1.5 flex items-start gap-2 cursor-pointer text-text-secondary">
                       <input type="checkbox" checked={countBefore} onChange={(e) => setCountBeforeChoice(e.target.checked)} className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--accent)]" />
-                      <span>{t('Es de antes de que creaste o ajustaste {a}. Contarlo en su saldo (desmárcalo si el saldo que escribiste ya lo incluía).', { a: targetAccount!.name })}</span>
+                      <span>{t('Es de antes de que creaste o ajustaste {a}: el saldo que escribiste ya lo incluye, así que no se vuelve a restar. Márcalo solo si ese saldo no lo incluía.', { a: targetAccount!.name })}</span>
                     </label>
                   )}
                 </p>

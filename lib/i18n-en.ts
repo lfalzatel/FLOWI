@@ -238,7 +238,7 @@ export const EN: Record<string, string> = {
   'Abonar a {p}': 'Pay toward {p}',
   'Abonar a la tarjeta': 'Pay the card',
   'Ver': 'View',
-  'Es de antes de que creaste o ajustaste {a}. Contarlo en su saldo (desmárcalo si el saldo que escribiste ya lo incluía).': 'It is from before you created or adjusted {a}. Count it in its balance (uncheck it if the balance you entered already included it).',
+  'Es de antes de que creaste o ajustaste {a}: el saldo que escribiste ya lo incluye, así que no se vuelve a restar. Márcalo solo si ese saldo no lo incluía.': 'It is from before you created or adjusted {a}: the balance you entered already includes it, so it is not subtracted again. Check it only if that balance did not include it.',
   'Le debes a {p}': 'You owe {p}',
   'Pagó {p} · ya le pagaste': '{p} paid · you paid back',
   'Sin transacciones aún': 'No transactions yet',
