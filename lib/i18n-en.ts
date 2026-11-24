@@ -2275,4 +2275,14 @@ export const EN: Record<string, string> = {
   '"Fondo en Skandia, invertí 3 millones y ya tiene 3,4 millones"': '"Fund at Skandia, I invested 3 million and it now has 3.4 million"',
   '"Cajita de Nu con 2 millones al 9 %"': '"Nu savings pot with 2 million at 9 percent"',
   '"Pensión en Porvenir con 15 millones"': '"Pension at Porvenir with 15 million"',
+  // ── Importar PDF ──
+  'Esa clave no abre el PDF. Revísala e inténtalo de nuevo.': 'That password does not open the PDF. Check it and try again.',
+  'No encontré movimientos en este PDF. Si es una foto escaneada, descarga el extracto original desde la app del banco.': 'I found no transactions in this PDF. If it is a scanned photo, download the original statement from your bank app.',
+  'No pude abrir el PDF. Revisa tu conexión (la primera vez se descarga el lector) e inténtalo de nuevo.': 'I could not open the PDF. Check your connection (the reader downloads the first time) and try again.',
+  'PDF (como el de Nequi), CSV o Excel. Revisas todo antes de guardar y los que ya tenías registrados se marcan para no duplicarlos.': 'PDF (like Nequi’s), CSV or Excel. You review everything before saving, and the ones you already had are marked so they are not duplicated.',
+  'Archivo:': 'File:',
+  'Este PDF tiene clave. En Nequi suele ser tu número de documento. Solo se usa para abrirlo aquí en tu celular.': 'This PDF has a password. On Nequi it is usually your ID number. It is only used to open it here on your phone.',
+  'Clave del PDF': 'PDF password',
+  'Abrir': 'Open',
+  'en la app entra a tu perfil (arriba a la izquierda), busca "Extractos" o "Certificados", elige el mes y descarga el PDF.': 'in the app open your profile (top left), look for "Statements" or "Certificates", choose the month and download the PDF.',
 };

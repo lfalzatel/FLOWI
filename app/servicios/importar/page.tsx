@@ -14,6 +14,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { addExpense } from '@/lib/firestore';
 import { formatCurrency } from '@/lib/format';
 import { Cell, ColumnMap, StatementRow, buildRows, guessColumns, rowToTransaction } from '@/lib/statementImport';
+import { readPdfTable } from '@/lib/pdfTable';
 
 const MAX_ROWS = 1000;
 
@@ -37,6 +38,9 @@ export default function ImportarPage() {
   const [reading, setReading] = useState(false);
   const [saving, setSaving] = useState<{ done: number; total: number } | null>(null);
   const [imported, setImported] = useState<number | null>(null);
+  // PDF con clave (Nequi suele pedir el número de documento): se pide aquí y solo se usa para abrirlo en el celular
+  const [pdfNeedsPass, setPdfNeedsPass] = useState<File | null>(null);
+  const [pdfPass, setPdfPass] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/login');
@@ -51,8 +55,37 @@ export default function ImportarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheet, map]);
 
+  // La tabla leída (de Excel, CSV o PDF) pasa por el mismo camino: se adivinan las columnas y se arman las filas
+  function applyTable(table: Cell[][]) {
+    const guess = guessColumns(table);
+    setSheet(table);
+    setMap(guess || { headerRow: 0, date: -1, description: -1, amount: null, debit: null, credit: null });
+    if (!guess) setError(tr('No reconocí las columnas de este archivo. Elige abajo cuál es la fecha, la descripción y el valor.'));
+  }
+
+  async function handlePdf(file: File, password?: string) {
+    setError(''); setImported(null); setReading(true); setFileName(file.name);
+    try {
+      const r = await readPdfTable(file, password);
+      if (r.ok) { setPdfNeedsPass(null); setPdfPass(''); applyTable(r.table); return; }
+      setSheet(null); setMap(null);
+      if (r.reason === 'password' || r.reason === 'wrong-password') {
+        setPdfNeedsPass(file);
+        if (r.reason === 'wrong-password') setError(tr('Esa clave no abre el PDF. Revísala e inténtalo de nuevo.'));
+      } else {
+        setError(r.reason === 'empty'
+          ? tr('No encontré movimientos en este PDF. Si es una foto escaneada, descarga el extracto original desde la app del banco.')
+          : tr('No pude abrir el PDF. Revisa tu conexión (la primera vez se descarga el lector) e inténtalo de nuevo.'));
+      }
+    } finally {
+      setReading(false);
+    }
+  }
+
   async function handleFile(file: File | undefined) {
     if (!file) return;
+    if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') { setPdfPass(''); return handlePdf(file); }
+    setPdfNeedsPass(null);
     setError(''); setImported(null); setReading(true); setFileName(file.name);
     try {
       const XLSX = await import('xlsx');
@@ -60,10 +93,7 @@ export default function ImportarPage() {
       const wb = XLSX.read(data, { cellDates: true, raw: true, codepage: 65001 });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const table = XLSX.utils.sheet_to_json<Cell[]>(ws, { header: 1, raw: true, defval: null });
-      const guess = guessColumns(table);
-      setSheet(table);
-      setMap(guess || { headerRow: 0, date: -1, description: -1, amount: null, debit: null, credit: null });
-      if (!guess) setError(tr('No reconocí las columnas de este archivo. Elige abajo cuál es la fecha, la descripción y el valor.'));
+      applyTable(table);
     } catch (err) {
       console.error('Error reading statement:', err);
       setSheet(null); setMap(null);
@@ -141,10 +171,10 @@ export default function ImportarPage() {
             <div className="w-10 h-10 rounded-2xl bg-accent/15 flex items-center justify-center shrink-0"><FileSpreadsheet className="w-5 h-5 text-accent" /></div>
             <div>
               <p className="text-sm font-semibold text-text-primary">{tr('Sube los movimientos de tu banco')}</p>
-              <p className="text-xs text-text-muted">{tr('CSV o Excel (.xlsx, .xls). Revisas todo antes de guardar y los que ya tenías registrados se marcan para no duplicarlos.')}</p>
+              <p className="text-xs text-text-muted">{tr('PDF (como el de Nequi), CSV o Excel. Revisas todo antes de guardar y los que ya tenías registrados se marcan para no duplicarlos.')}</p>
             </div>
           </div>
-          <input ref={fileRef} type="file" accept=".csv,.txt,.xls,.xlsx,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden"
+          <input ref={fileRef} type="file" accept=".csv,.txt,.xls,.xlsx,.pdf,text/csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden"
                  onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ''; }} />
           <button type="button" onClick={() => fileRef.current?.click()} disabled={reading || !!saving}
                   className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs tracking-wider' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} text-sm`}`}>
@@ -152,10 +182,26 @@ export default function ImportarPage() {
             {reading ? tr('Leyendo…') : fileName ? tr('Elegir otro archivo') : tr('Elegir archivo')}
           </button>
           {reading && <ReadingOverlay isTech={isTechTheme} title={tr('Leyendo tu extracto')} label="Leyendo tus movimientos…" />}
-          {fileName && <p className="text-[11px] text-text-muted truncate">Archivo: {fileName}</p>}
+          {fileName && <p className="text-[11px] text-text-muted truncate">{tr('Archivo:')} {fileName}</p>}
+          {pdfNeedsPass && (
+            <form onSubmit={(e) => { e.preventDefault(); if (pdfPass.trim()) handlePdf(pdfNeedsPass, pdfPass.trim()); }}
+                  className={`p-3 space-y-2 border border-accent/30 bg-accent/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+              <p className="text-xs text-text-secondary">{tr('Este PDF tiene clave. En Nequi suele ser tu número de documento. Solo se usa para abrirlo aquí en tu celular.')}</p>
+              <div className="flex gap-2">
+                <input type="password" inputMode="numeric" autoComplete="off" value={pdfPass} onChange={(e) => setPdfPass(e.target.value)}
+                       placeholder={tr('Clave del PDF')} aria-label={tr('Clave del PDF')}
+                       className={`flex-1 min-w-0 bg-glass border border-glass-border px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
+                <button type="submit" disabled={!pdfPass.trim() || reading}
+                        className={`px-4 py-2 text-sm font-bold bg-accent disabled:opacity-50 ${theme === 'light' ? 'text-white' : 'text-black'} ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
+                  {tr('Abrir')}
+                </button>
+              </div>
+            </form>
+          )}
           <details className="text-xs text-text-secondary">
             <summary className="cursor-pointer text-accent font-semibold">{tr('¿Dónde descargo mis movimientos?')}</summary>
             <ul className="mt-2 space-y-1.5 list-disc pl-4 leading-relaxed">
+              <li><b>Nequi:</b> {tr('en la app entra a tu perfil (arriba a la izquierda), busca "Extractos" o "Certificados", elige el mes y descarga el PDF.')}</li>
               <li><b>{tr('Bancolombia:')}</b> {tr('en la Sucursal Virtual Personas (desde el computador), entra a tu cuenta, consulta los movimientos y usa la opción de descargar o exportar a Excel.')}</li>
               <li><b>{tr('Otros bancos:')}</b> {tr('busca "descargar movimientos" o "exportar" en la banca en línea; casi todos dan Excel o CSV.')}</li>
               <li><b>{tr('Nequi:')}</b> {tr('por ahora solo entrega el extracto en PDF, que aún no se puede importar. Para Nequi usa la voz o la foto del recibo.')}</li>
