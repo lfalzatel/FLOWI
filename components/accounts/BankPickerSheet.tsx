@@ -60,7 +60,8 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
     const base = onlyBanks ? all.filter(l => !WALLETS.includes(l) && !OTHERS.includes(l)) : all;
     const q = normalizeText(query);
     const match = (l: string) => !q || normalizeText(l).includes(q);
-    const fav = favorites.filter(f => base.includes(f) && match(f));
+    // Tus cuentas salen todas, aunque su medio de pago no esté en el catálogo (tarjetas o nombres propios)
+    const fav = Array.from(new Set(favorites)).filter(f => (base.includes(f) || !onlyBanks) && match(f));
     const rest = base.filter(l => !fav.includes(l) && match(l));
     const out: { name: string; items: string[] }[] = [];
     if (fav.length) out.push({ name: tr('Tus cuentas'), items: fav });

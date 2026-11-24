@@ -18,7 +18,7 @@ const pesosText = (n?: number) => (n ? n.toLocaleString(currentLocale()) : '');
  * `autoSum`: el monto sigue a la suma (gasto escrito a mano), así que no hay aviso de "no cuadra".
  */
 export function ReceiptItemsList({
-  items, total, isTech, defaultOpen = false, onChange, categories, recent = [], fallbackCategory, onUseSum, suggest, autoSum = false, onAddToTotal,
+  items, total, isTech, defaultOpen = false, onChange, categories, recent = [], fallbackCategory, onUseSum, suggest, autoSum = false, onAutoSum, onAddToTotal,
 }: {
   items: ReceiptItem[];
   total: number | null | undefined;
@@ -31,6 +31,7 @@ export function ReceiptItemsList({
   onUseSum?: (sum: number) => void;
   suggest?: (name: string) => string | null;
   autoSum?: boolean;
+  onAutoSum?: (on: boolean) => void; // interruptor siempre visible: el total sigue (o no) la suma de los productos
   onAddToTotal?: (amount: number) => void; // sumar el producto nuevo al total del gasto (otro recibo de la misma compra)
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -233,9 +234,20 @@ export function ReceiptItemsList({
           )}
 
           {items.length > 0 && (
-            <div className="flex justify-between pt-1.5 mt-1.5 border-t border-white/10 text-xs">
-              <span className="text-text-muted">{autoSum ? 'Total (se suma solo)' : 'Suma de productos'}</span>
-              <span className="font-bold tabular-nums text-text-primary">{money(sum)}</span>
+            <div className="pt-1.5 mt-1.5 border-t border-white/10 text-xs space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-text-muted">{autoSum ? 'Total (se suma solo)' : 'Suma de productos'}</span>
+                <span className="font-bold tabular-nums text-text-primary">{money(sum)}</span>
+              </div>
+              {onAutoSum && (
+                <label className="flex items-center justify-between gap-3 cursor-pointer select-none">
+                  <span className="text-[11px] text-text-secondary normal-case">{tr('Usar la suma de los productos como total')}</span>
+                  <button type="button" role="switch" aria-checked={autoSum} onClick={() => onAutoSum(!autoSum)}
+                          className={`relative w-10 h-6 shrink-0 transition-colors ${isTech ? 'rounded-none' : 'rounded-full'} ${autoSum ? 'bg-accent' : 'bg-white/15'}`}>
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white shadow transition-transform ${isTech ? 'rounded-none' : 'rounded-full'} ${autoSum ? 'translate-x-4' : ''}`} />
+                  </button>
+                </label>
+              )}
             </div>
           )}
           {!fine && items.length > 0 && (

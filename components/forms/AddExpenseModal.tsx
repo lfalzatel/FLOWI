@@ -21,7 +21,7 @@ import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { useAccounts } from '@/hooks/useAccounts';
 import { AccountFormModal } from '@/components/accounts/AccountModals';
-import { BankPickerSheet } from '@/components/accounts/BankPickerSheet';
+import { BankPickerSheet, BankLogo } from '@/components/accounts/BankPickerSheet';
 import { AccountKind } from '@/lib/firestore';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
@@ -63,7 +63,7 @@ function toTimeString(d: Date): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 const VISIBLE_MERCHANTS = 8;
-const VISIBLE_PAYMENTS = 4;
+const VISIBLE_PAYMENTS = 5;
 
 export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTarget, initialType = 'gasto', initialVoiceParsed, initialBusiness = false, initialShared = false, initialValues }: AddExpenseModalProps) {
   // Desde un informe puede llegar una parte de un recibo (expandByItems): se edita el gasto completo
@@ -238,7 +238,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   };
 
   const paymentOptions = useMemo(() => {
-    const labels = Array.from(new Set([...accountMethods, ...getFrequent('payment'), ...PAYMENT_METHODS.map(p => p.label)]));
+    // Primero tus cuentas (la principal de primera, una opción por cuenta), luego las más usadas y el catálogo
+    const byAccount = [...activeAccounts].sort((a, b) => Number(!!b.isDefault) - Number(!!a.isDefault)).map(a => a.methods[0]).filter(Boolean);
+    const labels = Array.from(new Set([...byAccount, ...accountMethods, ...getFrequent('payment'), ...PAYMENT_METHODS.map(p => p.label)]));
     if (paymentMethod && !labels.slice(0, VISIBLE_PAYMENTS).includes(paymentMethod)) {
       return [paymentMethod, ...labels.filter(l => l !== paymentMethod)];
     }
@@ -787,6 +789,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                                   suggest={(n) => suggestItemCategory(n, transactions, typedCategories)}
                                   onChange={changeItems}
                                   onUseSum={(s) => { setAmount(String(s)); setAutoSum(true); }}
+                                  onAutoSum={(on) => { setAutoSum(on); if (on) { const t = itemsSum(items); setAmount(t ? String(t) : ''); } }}
                                   onAddToTotal={(v) => setAmount(String(amountNum + v))} />
                 {mixed && (
                   <ItemsByCategory items={cleanItems(items)} total={amountNum} fallbackCategory={category || 'Otros'} isTech={isTechTheme}
@@ -942,7 +945,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 const meta = findCatalogEntry(label);
                 return (
                   <button key={label} type="button" onClick={() => choosePayment(paymentMethod === label ? '' : label)} className={`${chipClass(paymentMethod === label)} normal-case`}>
-                    {meta && <CategoryIcon icon={meta.icon} label={label} className="w-4 h-4 text-sm flex items-center justify-center" />}
+                    {meta ? <CategoryIcon icon={meta.icon} label={label} className="w-4 h-4 text-sm flex items-center justify-center" />
+                          : <BankLogo label={label} className="w-4 h-4 text-sm flex items-center justify-center" />}
                     {label}
                   </button>
                 );
