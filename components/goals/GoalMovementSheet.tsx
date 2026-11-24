@@ -89,7 +89,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
 
             <div>
               <label htmlFor="goal-move-amount" className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>
-                {mode === 'ahorro' ? '¿Cuánto apartaste?' : '¿Cuánto sacaste?'}
+                {mode === 'ahorro' ? tr('¿Cuánto apartaste?') : tr('¿Cuánto sacaste?')}
               </label>
               <div className="relative">
                 <span className={`absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold ${isTechTheme ? 'text-accent/70' : 'text-text-secondary'}`}>$</span>
@@ -106,14 +106,14 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
                   <button key={q} type="button" onClick={() => setAmount(formatAmountInput(q))}
                           className={`px-3 py-1.5 text-xs font-medium border transition-all active:scale-95 ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${value === q ? 'bg-accent/15 border-accent text-accent' : 'border-glass-border text-text-secondary hover:bg-glass'}`}>
                     {formatCurrency(q, currency)}
-                    {mode === 'ahorro' && q === roundedSuggested && q !== remaining ? ' · tu cuota' : ''}
-                    {mode === 'ahorro' && q === remaining ? ' · lo que falta' : ''}
+                    {mode === 'ahorro' && q === roundedSuggested && q !== remaining ? tr(' · tu cuota') : ''}
+                    {mode === 'ahorro' && q === remaining ? tr(' · lo que falta') : ''}
                   </button>
                 ))}
               </div>
             )}
 
-            <input autoComplete="off" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)} placeholder="Nota (opcional): prima, quincena, CDT…"
+            <input autoComplete="off" type="text" value={note} maxLength={60} onChange={(e) => setNote(e.target.value)} placeholder={tr('Nota (opcional): prima, quincena, CDT…')}
                    className={`w-full bg-glass border px-4 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-xl focus:border-accent'}`} />
 
             {error && <p className="text-xs text-[var(--red)]">{error}</p>}
@@ -122,7 +122,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
           <div className={`shrink-0 px-5 pt-3 pb-4 border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             <button type="submit" disabled={!value || tooMuch || loading}
                     className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : 'rounded-xl bg-accent text-white hover:bg-accent/90'}`}>
-              {loading ? 'Guardando...' : mode === 'ahorro' ? 'Registrar ahorro' : 'Registrar retiro'}
+              {loading ? 'Guardando...' : mode === 'ahorro' ? tr('Registrar ahorro') : tr('Registrar retiro')}
             </button>
           </div>
         </form>

@@ -248,11 +248,14 @@ exports.avisarComprobante = onDocumentCreated({ document: 'fl_manual_payments/{i
 
 // ── Amigos: aviso al celular ─────────────────────────────────────────
 // Envía una notificación push a una persona (a todos sus celulares con FLOWI) y limpia los que ya no sirven.
-async function pushTo(uid, data) {
+// `make` puede ser el mensaje o una función que lo arma en el idioma de la persona (users/{uid}.lang).
+async function pushTo(uid, make) {
   const ref = db.collection('users').doc(uid);
   const user = await ref.get();
   const tokens = ((user.exists && user.get('pushTokens')) || []).filter(Boolean);
   if (!tokens.length) return;
+  const lang = (user.exists && user.get('lang')) === 'en' ? 'en' : 'es';
+  const data = typeof make === 'function' ? make(lang) : make;
   const res = await admin.messaging().sendEachForMulticast({ tokens, data, webpush: { headers: { Urgency: 'high', TTL: '86400' } } });
   const dead = tokens.filter((_, i) => {
     const code = res.responses[i].error?.code || '';
@@ -260,18 +263,19 @@ async function pushTo(uid, data) {
   });
   if (dead.length) await ref.update({ pushTokens: admin.firestore.FieldValue.arrayRemove(...dead) });
 }
-const firstName = (n) => String(n || 'Alguien').trim().split(/\s+/)[0];
+const { t: msg, locale: msgLocale } = require('./messages');
+const firstName = (n, lang = 'es') => String(n || msg(lang, 'Alguien')).trim().split(/\s+/)[0];
 
 // Alguien te envió una solicitud de amistad
 exports.avisarSolicitudAmistad = onDocumentCreated({ document: 'fl_friend_requests/{id}', region: 'us-central1' }, async (event) => {
   const r = event.data?.data();
   if (!r || r.status !== 'pending' || !r.to) return;
-  await pushTo(r.to, {
-    title: `👋 ${firstName(r.fromName)} quiere ser tu amigo`,
-    body: 'Acepta la solicitud en FLOWI para compartir gastos.',
+  await pushTo(r.to, (lang) => ({
+    title: msg(lang, '👋 {a} quiere ser tu amigo', { a: firstName(r.fromName, lang) }),
+    body: msg(lang, 'Acepta la solicitud en FLOWI para compartir gastos.'),
     url: '/amigos',
     tag: `amistad-${event.params.id}`,
-  });
+  }));
 });
 
 // Aceptaron tu solicitud
@@ -279,25 +283,27 @@ exports.avisarAmistadAceptada = onDocumentUpdated({ document: 'fl_friend_request
   const before = event.data?.before.data();
   const after = event.data?.after.data();
   if (!before || !after || before.status === 'accepted' || after.status !== 'accepted') return;
-  await pushTo(after.from, {
-    title: `🤝 ${firstName(after.toName)} aceptó tu solicitud`,
-    body: 'Ya son amigos en FLOWI.',
+  await pushTo(after.from, (lang) => ({
+    title: msg(lang, '🤝 {a} aceptó tu solicitud', { a: firstName(after.toName, lang) }),
+    body: msg(lang, 'Ya son amigos en FLOWI.'),
     url: '/amigos',
     tag: `amistad-ok-${event.params.id}`,
-  });
+  }));
 });
 
 // Un amigo te compartió un gasto (lib/sharedLinks.ts)
 exports.avisarGastoCompartido = onDocumentCreated({ document: 'fl_shared_links/{id}', region: 'us-central1' }, async (event) => {
   const l = event.data?.data();
   if (!l || l.status !== 'pending' || !l.friend) return;
-  const share = Math.round(Number(l.share || 0)).toLocaleString('es-CO');
-  await pushTo(l.friend, {
-    title: `👥 ${firstName(l.ownerName)} compartió un gasto contigo`,
-    body: `${String(l.description || 'Un gasto').slice(0, 60)}: te toca $${share}. Acéptalo en FLOWI.`,
+  await pushTo(l.friend, (lang) => ({
+    title: msg(lang, '👥 {a} compartió un gasto contigo', { a: firstName(l.ownerName, lang) }),
+    body: msg(lang, '{a}: te toca ${b}. Acéptalo en FLOWI.', {
+      a: String(l.description || msg(lang, 'Un gasto')).slice(0, 60),
+      b: Math.round(Number(l.share || 0)).toLocaleString(msgLocale(lang)),
+    }),
     url: '/servicios/compartidos',
     tag: `compartido-${event.params.id}`,
-  });
+  }));
 });
 
 // Tu amigo aceptó el gasto que le compartiste, o te registró un abono
@@ -306,12 +312,12 @@ exports.avisarCambioCompartido = onDocumentUpdated({ document: 'fl_shared_links/
   const after = event.data?.after.data();
   if (!before || !after) return;
   if (before.status === 'pending' && after.status === 'accepted') {
-    await pushTo(after.owner, {
-      title: `🤝 ${firstName(after.friendName)} aceptó el gasto compartido`,
-      body: `${String(after.description || '').slice(0, 60)} ya está en su FLOWI.`,
+    await pushTo(after.owner, (lang) => ({
+      title: msg(lang, '🤝 {a} aceptó el gasto compartido', { a: firstName(after.friendName, lang) }),
+      body: msg(lang, '{a} ya está en su FLOWI.', { a: String(after.description || '').slice(0, 60) }),
       url: '/servicios/compartidos',
       tag: `compartido-ok-${event.params.id}`,
-    });
+    }));
     return;
   }
   // Abono nuevo anotado por el amigo: avisarle a quien pagó
@@ -319,12 +325,12 @@ exports.avisarCambioCompartido = onDocumentUpdated({ document: 'fl_shared_links/
   const added = (after.payments || []).filter((p) => !prev.has(p.id) && p.by === after.friend);
   if (added.length) {
     const total = added.reduce((s, p) => s + Number(p.amount || 0), 0);
-    await pushTo(after.owner, {
-      title: `💸 ${firstName(after.friendName)} te abonó $${Math.round(total).toLocaleString('es-CO')}`,
-      body: `De ${String(after.description || 'un gasto compartido').slice(0, 60)}.`,
+    await pushTo(after.owner, (lang) => ({
+      title: msg(lang, '💸 {a} te abonó ${b}', { a: firstName(after.friendName, lang), b: Math.round(total).toLocaleString(msgLocale(lang)) }),
+      body: msg(lang, 'De {a}.', { a: String(after.description || msg(lang, 'un gasto compartido')).slice(0, 60) }),
       url: '/servicios/compartidos',
       tag: `abono-${event.params.id}-${added[0].id}`,
-    });
+    }));
   }
 });
 

@@ -112,7 +112,7 @@ export function ReceiptItemsList({
           {items.length ? `${items.length} ${items.length === 1 ? 'producto' : 'productos'}` : 'Productos'}
           {items.length > 0 && (
             <span className={`ml-1.5 font-medium ${fine ? 'text-emerald-400' : 'text-amber-400'}`}>
-              {autoSum ? `· ${money(sum)}` : ok ? '· la suma cuadra ✓' : '· revisa la suma'}
+              {autoSum ? `· ${money(sum)}` : ok ? tr('· la suma cuadra ✓') : tr('· revisa la suma')}
             </span>
           )}
         </span>
@@ -155,7 +155,7 @@ export function ReceiptItemsList({
                       <button type="button" onClick={() => remove(k)} className="flex items-center gap-1 text-[11px] text-rose-400 font-semibold">
                         <Trash2 className="w-3.5 h-3.5" /> Quitar
                       </button>
-                      {showChips && chip(it.category || fallback, () => setPickerFor(k), 'Cambiar categoría')}
+                      {showChips && chip(it.category || fallback, () => setPickerFor(k), tr('Cambiar categoría'))}
                       <button type="button" onClick={() => setEditing(null)}
                               className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-accent text-black ${isTech ? 'rounded-none' : 'rounded-full'}`}>
                         <Check className="w-3.5 h-3.5" /> Listo
@@ -183,7 +183,7 @@ export function ReceiptItemsList({
           {editable && !adding && (
             <button type="button" onClick={() => { setAdding(true); setTimeout(() => nameRef.current?.focus(), 50); }}
                     className={`mt-2 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-accent border border-dashed border-accent/50 hover:bg-accent/10 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
-              <Plus className="w-3.5 h-3.5" /> {items?.length ? 'Agregar otro producto' : 'Agregar producto'}
+              <Plus className="w-3.5 h-3.5" /> {items?.length ? tr('Agregar otro producto') : tr('Agregar producto')}
             </button>
           )}
           {editable && adding && (
@@ -214,7 +214,7 @@ export function ReceiptItemsList({
                 <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
                   <Lightbulb className="w-3 h-3 text-accent shrink-0" />
                   <span>{draftCat ? tr('Categoría:') : suggested ? tr('Categoría sugerida:') : tr('Categoría:')}</span>
-                  {chip(newCat, () => setPickerFor(-1), 'Cambiar categoría')}
+                  {chip(newCat, () => setPickerFor(-1), tr('Cambiar categoría'))}
                   <span className="truncate">{tr('toca para cambiarla')}</span>
                 </div>
               )}
@@ -239,7 +239,7 @@ export function ReceiptItemsList({
           {items.length > 0 && (
             <div className="pt-1.5 mt-1.5 border-t border-white/10 text-xs space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-text-muted">{autoSum ? 'Total (se suma solo)' : 'Suma de productos'}</span>
+                <span className="text-text-muted">{autoSum ? tr('Total (se suma solo)') : tr('Suma de productos')}</span>
                 <span className="font-bold tabular-nums text-text-primary">{money(sum)}</span>
               </div>
               {onAutoSum && (

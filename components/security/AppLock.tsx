@@ -1,4 +1,5 @@
 'use client';
+import { tr } from '@/lib/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -124,7 +125,7 @@ export function AppLock() {
   };
 
   const forgot = async () => {
-    if (!confirm('Para entrar sin el PIN debes volver a iniciar sesión con tu cuenta de Google. Se quitará el bloqueo de este celular y podrás crear un PIN nuevo en Configuración. ¿Continuar?')) return;
+    if (!confirm(tr('Para entrar sin el PIN debes volver a iniciar sesión con tu cuenta de Google. Se quitará el bloqueo de este celular y podrás crear un PIN nuevo en Configuración. ¿Continuar?'))) return;
     removeLock(uid);
     const { signOut } = await import('@/lib/auth');
     await signOut();
@@ -141,14 +142,14 @@ export function AppLock() {
         <div className="w-16 h-16 rounded-3xl bg-accent/15 flex items-center justify-center">
           <Lock className="w-8 h-8 text-accent" />
         </div>
-        <h1 className="text-xl font-bold font-syne text-text-primary">{firstName ? `Hola, ${firstName}` : 'FLOWI está bloqueada'}</h1>
+        <h1 className="text-xl font-bold font-syne text-text-primary">{firstName ? `Hola, ${firstName}` : tr('FLOWI está bloqueada')}</h1>
         <p className="text-sm text-text-muted">
-          {waiting ? `Espera ${secondsLeft} s para intentar de nuevo` : hasBio ? 'Usa tu huella o escribe tu PIN' : 'Escribe tu PIN para entrar'}
+          {waiting ? `Espera ${secondsLeft} s para intentar de nuevo` : hasBio ? tr('Usa tu huella o escribe tu PIN') : tr('Escribe tu PIN para entrar')}
         </p>
       </div>
       <PinPad onComplete={onPin} error={error} disabled={waiting} onBiometric={hasBio ? tryBiometric : undefined} />
       <button type="button" onClick={forgot} className="mt-8 text-sm text-text-muted hover:text-text-primary underline">
-        Olvidé mi PIN
+        {tr('Olvidé mi PIN')}
       </button>
      </div>
     </div>

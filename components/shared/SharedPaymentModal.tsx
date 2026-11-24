@@ -62,7 +62,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
       await updateExpense(tx.id!, { shared: next, ...extra });
       onClose();
     } catch (e) {
-      console.error('No se pudo guardar el abono', e);
+      console.error(tr('No se pudo guardar el abono'), e);
       setError(tr('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'));
       setBusy(false);
     }
@@ -124,7 +124,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
       {pending > 0 && (
         <>
           <div>
-            <span className={s.label}>¿Cuánto {toMe ? 'te abonó' : 'le abonaste'}?</span>
+            <span className={s.label}>{toMe ? tr('¿Cuánto te abonó?') : tr('¿Cuánto le abonaste?')}</span>
             <div className={`${s.input} text-2xl font-bold tabular-nums ${over ? '!border-red-500' : ''}`}>
               {amount ? displayExpr(amount) : <span className="text-text-muted">0</span>}
               {amount && /[+\-×÷]/.test(amount.replace(/^-/, '')) && <span className="ml-2 text-sm text-text-muted">= {fmt(value)}</span>}
@@ -156,7 +156,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
 
           {active.length > 0 && (
             <div>
-              <span className={s.label}>{toMe ? '¿A qué cuenta te llegó?' : '¿De qué cuenta salió?'}</span>
+              <span className={s.label}>{toMe ? tr('¿A qué cuenta te llegó?') : tr('¿De qué cuenta salió?')}</span>
               <div className="flex flex-wrap gap-1.5">
                 {active.map(a => (
                   <button key={a.id} type="button" onClick={() => setAccountId(a.id!)} className={s.chip(acc === a.id)}>{a.name}</button>

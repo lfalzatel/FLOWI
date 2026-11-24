@@ -52,6 +52,7 @@ import { DataProvider } from '@/components/DataProvider';
 import { FriendsProvider } from '@/components/FriendsProvider';
 import { ThemedBackground } from '@/components/effects/ThemedBackground';
 import { BootSplash } from '@/components/layout/BootSplash';
+import { LangSync } from '@/components/layout/LangSync';
 import { SharedLinksProvider } from '@/components/SharedLinksProvider';
 import { WelcomeTour } from '@/components/layout/WelcomeTour';
 import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
@@ -98,6 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <UsageTracker />
               <AppLock />
               <BootSplash />
+              <LangSync />
               <PlayStoreDetector />
             </SharedLinksProvider>
             </FriendsProvider>

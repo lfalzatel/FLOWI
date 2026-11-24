@@ -56,7 +56,7 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
         {(pendingCommitments > 0 || real.cardDebt > 0) && (
           <div className={`mt-4 p-3 text-xs space-y-1 ${isTech ? 'rounded-none bg-accent/5 border border-accent/20' : 'rounded-2xl bg-white/5 border border-glass-border'}`}>
             {pendingCommitments > 0 && <p className="flex justify-between text-text-secondary"><span>{tr('Compromisos por pagar este mes')}</span><span className="tabular-nums">− {f(pendingCommitments)}</span></p>}
-            {real.cardDebt > 0 && <p className="flex justify-between text-text-secondary"><span>{real.anyFixed ? 'Lo que pagas de tus tarjetas este mes' : 'Lo que debes en tarjetas'}</span><span className="tabular-nums">− {f(real.cardDebt)}</span></p>}
+            {real.cardDebt > 0 && <p className="flex justify-between text-text-secondary"><span>{real.anyFixed ? tr('Lo que pagas de tus tarjetas este mes') : tr('Lo que debes en tarjetas')}</span><span className="tabular-nums">− {f(real.cardDebt)}</span></p>}
             {real.cardLoans > 0 && <p className="text-[10px] text-text-muted leading-snug">Los préstamos en tarjetas ({f(real.cardLoans)}) no se restan aquí: se pagan por cuotas, que ya van en tus compromisos.</p>}
             <p className="flex justify-between font-bold text-text-primary pt-1"><span>{tr('Te queda libre')}</span><span className={`tabular-nums ${free < 0 ? 'text-red-400' : ''}`}>{free < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(free)} format={f} /></span></p>
           </div>
@@ -73,7 +73,7 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
           <p className={`mt-4 p-3 text-[11px] text-text-secondary leading-snug ${isTech ? 'rounded-none bg-white/5 border border-glass-border' : 'rounded-2xl bg-white/5 border border-glass-border'}`}>
             Con tus registros de este mes (ingresos − gastos) te quedarían <b className="text-text-primary">{monthBalance < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(monthBalance)} format={f} /></b>;
             en tus cuentas hay <b className="text-text-primary"><AnimatedNumber value={real.cash} format={f} /></b>. La diferencia ({f(Math.abs(real.cash - monthBalance))}) suele ser
-            {real.cash > monthBalance ? ' plata que ya tenías antes del mes o un ingreso sin registrar.' : ' un gasto sin registrar o plata que pasaste a una cuenta de ahorro.'}
+            {real.cash > monthBalance ? tr(' plata que ya tenías antes del mes o un ingreso sin registrar.') : tr(' un gasto sin registrar o plata que pasaste a una cuenta de ahorro.')}
           </p>
         )}
 

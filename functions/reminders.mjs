@@ -15,6 +15,9 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
+import messages from './messages.js'; // textos en el idioma de cada persona (users/{uid}.lang)
+const { t: msg, locale: msgLocale } = messages;
+const langOf = (u) => (u?.get?.('lang') === 'en' ? 'en' : 'es');
 
 const OFFSET_HOURS = -5;          // Colombia (sin horario de verano)
 const SUMMARY_HOUR = 7;           // resumen diario de pagos y fechas
@@ -106,7 +109,7 @@ function isCoveredByExpense(r, occDate, expenses, shared) {
   });
 }
 
-async function morningSummary(uid, reminders, investments, todayLocal) {
+async function morningSummary(uid, reminders, investments, todayLocal, lang = 'es') {
   const today = Date.UTC(todayLocal.getUTCFullYear(), todayLocal.getUTCMonth(), todayLocal.getUTCDate());
   // Solo pagos (no eventos ni tareas): igual que isPaymentReminder en lib/reminderDue.ts
   const isPayment = (r) => typeof r.isPayment === 'boolean' ? r.isPayment : ((r.amount || 0) > 0 || !!r.category || !!r.merchant);
@@ -139,19 +142,20 @@ async function morningSummary(uid, reminders, investments, todayLocal) {
           if (isCoveredByExpense(r, fromLocalParts(y, m, d), expenses, shared)) continue;
         }
       }
-      items.push({ title: r.amount ? `${r.title} $${Number(r.amount).toLocaleString('es-CO')}` : r.title, daysLeft, isPayment });
+      items.push({ title: r.amount ? `${r.title} $${Number(r.amount).toLocaleString(msgLocale(lang))}` : r.title, daysLeft, isPayment });
       break;
     }
   }
   if (!items.length) return null;
   items.sort((a, b) => a.daysLeft - b.daysLeft);
-  const when = (n) => (n === 0 ? 'hoy' : n === 1 ? 'mañana' : `en ${n} días`);
-  const when2 = (i) => (i.isCdt ? `vence ${when(i.daysLeft)}` : when(i.daysLeft));
+  const when = (n) => (n === 0 ? msg(lang, 'hoy') : n === 1 ? msg(lang, 'mañana') : msg(lang, 'en {a} días', { a: n }));
+  const when2 = (i) => (i.isCdt ? msg(lang, 'vence {a}', { a: when(i.daysLeft) }) : when(i.daysLeft));
   const body = items.map(i => `${i.isCdt ? '🏦' : i.isPayment ? '💳' : '🎉'} ${i.title} (${when2(i)})`).join(' · ');
   const payments = items.filter(i => i.isPayment).length;
   const onlyCdt = items.every(i => i.isCdt);
   return {
-    title: payments ? (payments === 1 ? 'Tienes 1 pago por hacer' : `Tienes ${payments} pagos por hacer`) : onlyCdt ? 'Tu CDT está por vencer' : 'Fechas importantes',
+    title: payments ? (payments === 1 ? msg(lang, 'Tienes 1 pago por hacer') : msg(lang, 'Tienes {a} pagos por hacer', { a: payments }))
+      : onlyCdt ? msg(lang, 'Tu CDT está por vencer') : msg(lang, 'Fechas importantes'),
     body,
     url: onlyCdt ? '/servicios/inversiones' : '/servicios/recordatorios',
     tag: `summary-${dateKey(todayLocal.getUTCFullYear(), todayLocal.getUTCMonth(), todayLocal.getUTCDate())}`,
@@ -159,7 +163,7 @@ async function morningSummary(uid, reminders, investments, todayLocal) {
 }
 
 // Resumen del mes que terminó: gastos, cambio frente al anterior y la categoría que más se llevó
-async function monthlyRecap(uid, todayLocal) {
+async function monthlyRecap(uid, todayLocal, lang = 'es') {
   const y = todayLocal.getUTCFullYear(), m = todayLocal.getUTCMonth();
   const key = (yy, mm) => { const d = new Date(Date.UTC(yy, mm, 1)); return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`; };
   const last = key(y, m - 1), before = key(y, m - 2);
@@ -176,19 +180,19 @@ async function monthlyRecap(uid, todayLocal) {
     } else if (k === before && t.type === 'gasto') prevGastos += t.amount;
   }
   if (!gastos && !ingresos) return null;
-  const money = (n) => `$${Math.round(n).toLocaleString('es-CO')}`;
-  const monthName = new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString('es-CO', { month: 'long', timeZone: 'UTC' });
-  const parts = [`Gastaste ${money(gastos)}`];
+  const money = (n) => `$${Math.round(n).toLocaleString(msgLocale(lang))}`;
+  const monthName = new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString(msgLocale(lang), { month: 'long', timeZone: 'UTC' });
+  const parts = [msg(lang, 'Gastaste {a}', { a: money(gastos) })];
   if (prevGastos > 0) {
     const ch = Math.round(((gastos - prevGastos) / prevGastos) * 100);
-    if (Math.abs(ch) >= 3) parts[0] += ` (${Math.abs(ch)} % ${ch > 0 ? 'más' : 'menos'} que el mes anterior)`;
+    if (Math.abs(ch) >= 3) parts[0] += msg(lang, ch > 0 ? ' ({a} % más que el mes anterior)' : ' ({a} % menos que el mes anterior)', { a: Math.abs(ch) });
   }
-  if (ingresos > 0) parts.push(ingresos >= gastos ? `te sobraron ${money(ingresos - gastos)}` : `gastaste ${money(gastos - ingresos)} más de lo que te ingresó`);
+  if (ingresos > 0) parts.push(ingresos >= gastos ? msg(lang, 'te sobraron {a}', { a: money(ingresos - gastos) }) : msg(lang, 'gastaste {a} más de lo que te ingresó', { a: money(gastos - ingresos) }));
   const top = Array.from(cats.entries()).sort((a, b) => b[1] - a[1])[0];
-  if (top) parts.push(`lo que más se llevó: ${top[0]}`);
+  if (top) parts.push(msg(lang, 'lo que más se llevó: {a}', { a: top[0] }));
   return {
-    title: `📊 Tu resumen de ${monthName}`,
-    body: `${parts.join('; ')}. Toca para verlo completo.`,
+    title: msg(lang, '📊 Tu resumen de {a}', { a: monthName }),
+    body: msg(lang, '{a}. Toca para verlo completo.', { a: parts.join('; ') }),
     url: `/servicios/resumen?mes=${last}`,
     tag: `recap-${last}`,
   };
@@ -231,12 +235,13 @@ function premiumNotice(u, todayLocal) {
   const dayOf = (d) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
   const left = Math.round((dayOf(endLocal) - dayOf(todayLocal)) / 86400000);
   if (![3, 0, -1].includes(left)) return null;
-  const what = end.gift ? 'Tu mes de Premium de regalo' : 'Tu FLOWI Premium';
+  const lang = langOf(u);
+  const what = msg(lang, end.gift ? 'Tu mes de Premium de regalo' : 'Tu FLOWI Premium');
   return {
-    title: left === 3 ? `⏳ ${what} vence en 3 días` : left === 0 ? `⏳ ${what} vence hoy` : `${what} terminó`,
-    body: left >= 0
+    title: msg(lang, left === 3 ? '⏳ {a} vence en 3 días' : left === 0 ? '⏳ {a} vence hoy' : '{a} terminó', { a: what }),
+    body: msg(lang, left >= 0
       ? 'Renuévalo para seguir sin límites. Si renuevas antes, los días se suman. Toca para ver los planes.'
-      : 'Volviste al plan gratis: tus datos siguen ahí. Toca para renovar cuando quieras.',
+      : 'Volviste al plan gratis: tus datos siguen ahí. Toca para renovar cuando quieras.'),
     url: '/planes',
     tag: `premium-${dayOf(endLocal)}-${left}`,
   };
@@ -258,10 +263,12 @@ export async function runReminders({ now = new Date(), dryRun = false, credentia
 
   let sent = 0;
   const tokenCache = new Map();
+  const langCache = new Map();
   const tokensOf = async (uid) => {
     if (!tokenCache.has(uid)) {
       const u = await db.collection('users').doc(uid).get();
       tokenCache.set(uid, (u.get('pushTokens') || []).filter(Boolean));
+      langCache.set(uid, langOf(u));
     }
     return tokenCache.get(uid);
   };
@@ -275,10 +282,11 @@ export async function runReminders({ now = new Date(), dryRun = false, credentia
     if (!hits.length) continue;
     const tokens = await tokensOf(r.userId);
     if (!tokens.length && !DRY_RUN) continue;
+    const lang = langCache.get(r.userId) || 'es';
     for (const hit of hits) {
       sent += await send(r.userId, tokens, {
-        title: hit.isAlert ? `Pronto: ${r.title}` : r.title,
-        body: r.description || 'Recordatorio de Flowi',
+        title: hit.isAlert ? msg(lang, 'Pronto: {a}', { a: r.title }) : r.title,
+        body: r.description || msg(lang, 'Recordatorio de Flowi'),
         url: '/servicios/recordatorios',
         tag: `reminder-${r.id}-${hit.event.getTime()}-${hit.isAlert ? 'a' : 'e'}`,
       });
@@ -295,10 +303,11 @@ export async function runReminders({ now = new Date(), dryRun = false, credentia
       const reminders = remSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.active);
       const invSnap = await db.collection('fl_investments').where('userId', '==', u.id).get();
       const investments = invSnap.docs.map(d => d.data()).filter(i => i.status === 'activo');
-      const summary = await morningSummary(u.id, reminders, investments, todayLocal);
+      const lang = langOf(u);
+      const summary = await morningSummary(u.id, reminders, investments, todayLocal, lang);
       if (summary) sent += await send(u.id, tokens, summary);
       if (todayLocal.getUTCDate() === 1) {
-        const recap = await monthlyRecap(u.id, todayLocal);
+        const recap = await monthlyRecap(u.id, todayLocal, lang);
         if (recap) sent += await send(u.id, tokens, recap);
       }
       const renew = premiumNotice(u, todayLocal);

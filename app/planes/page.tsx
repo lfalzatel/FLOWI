@@ -83,8 +83,8 @@ export default function PlanesPage() {
       setMessage({ ok: true, text: tr('Estamos confirmando tu pago con Wompi…') });
       window.history.replaceState({}, '', '/planes');
       confirmPayment(id).then(s => setMessage(
-        s === 'APPROVED' ? { ok: true, text: '¡Pago aprobado! Ya tienes FLOWI Premium.' }
-        : s === 'PENDING' ? { ok: true, text: 'Tu pago está en proceso. Premium se activa apenas Wompi lo apruebe.' }
+        s === 'APPROVED' ? { ok: true, text: tr('¡Pago aprobado! Ya tienes FLOWI Premium.') }
+        : s === 'PENDING' ? { ok: true, text: tr('Tu pago está en proceso. Premium se activa apenas Wompi lo apruebe.') }
         : s ? { ok: false, text: tr('El pago no se aprobó. No se te cobró nada.') }
         : { ok: true, text: tr('Estamos confirmando tu pago. Premium se activa solo apenas Wompi lo apruebe.') }));
     }
@@ -97,8 +97,8 @@ export default function PlanesPage() {
     try {
       const r = await payPlan(selected, user?.email);
       if (!r) setMessage(null);
-      else if (r.status === 'APPROVED') setMessage({ ok: true, text: '¡Pago aprobado! Premium se activa en unos segundos.' });
-      else if (r.status === 'PENDING') setMessage({ ok: true, text: 'Tu pago está en proceso. Premium se activa apenas Wompi lo apruebe.' });
+      else if (r.status === 'APPROVED') setMessage({ ok: true, text: tr('¡Pago aprobado! Premium se activa en unos segundos.') });
+      else if (r.status === 'PENDING') setMessage({ ok: true, text: tr('Tu pago está en proceso. Premium se activa apenas Wompi lo apruebe.') });
       else setMessage({ ok: false, text: tr('El pago no se aprobó. No se te cobró nada; puedes intentar de nuevo.') });
     } catch (e: any) {
       console.error('Pago Wompi:', e);
@@ -228,7 +228,7 @@ export default function PlanesPage() {
         {lastManual && (
           <p className={`text-xs text-center ${lastManual.status === 'APPROVED' ? 'text-emerald-400' : lastManual.status === 'REJECTED' ? 'text-red-400' : 'text-amber-400'}`}>
             {lastManual.status === 'PENDING' && `Tu comprobante (${formatCurrency(lastManual.amount, 'COP')}) está en revisión. Te activamos Premium apenas lo confirmemos.`}
-            {lastManual.status === 'APPROVED' && '¡Tu pago por transferencia fue aprobado! Premium ya está activo.'}
+            {lastManual.status === 'APPROVED' && tr('¡Tu pago por transferencia fue aprobado! Premium ya está activo.')}
             {lastManual.status === 'REJECTED' && `No pudimos confirmar tu último comprobante.${lastManual.reviewNote ? ` ${lastManual.reviewNote}` : ''} Escríbenos por WhatsApp si ya transferiste.`}
           </p>
         )}
@@ -241,8 +241,8 @@ export default function PlanesPage() {
 
         <p className="text-[11px] text-text-muted text-center leading-relaxed">
           {tr('Pagas una sola vez con Nequi, PSE, Bancolombia o tarjeta a través de Wompi. No es un cobro automático:')}
-          cuando se acerque el fin de tu plan te avisamos para renovar. FLOWI no ve ni guarda los datos de tu pago.
-          {' '}Al pagar aceptas los <Link href="/legal#terminos" className="underline hover:text-text-secondary">{tr('términos de uso')}</Link>.
+          {' '}{tr('cuando se acerque el fin de tu plan te avisamos para renovar. FLOWI no ve ni guarda los datos de tu pago.')}
+          {' '}{tr('Al pagar aceptas los')} <Link href="/legal#terminos" className="underline hover:text-text-secondary">{tr('términos de uso')}</Link>.
         </p>
         </>)}
       </main>

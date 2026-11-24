@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useMemo, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -70,7 +70,7 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
     const c = findCatalogEntry(p.category) || { label: p.category, icon: '🧾', color: '#10B981' };
     const when = p.paidAt
       ? `Pagado el ${p.paidAt.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}`
-      : 'Marcado con "Ya lo pagué"';
+      : tr('Marcado con "Ya lo pagué"');
     return (
       <li key={p.key} className="flex items-center gap-3 py-2">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c.color}18` }}>
@@ -78,7 +78,7 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-text-primary truncate">{p.title}</p>
-          <p className="text-[11px] text-text-muted truncate">{when}{p.how === 'abono' ? ' · abono a la deuda' : ''}</p>
+          <p className="text-[11px] text-text-muted truncate">{when}{p.how === 'abono' ? tr(' · abono a la deuda') : ''}</p>
           {p.repeats?.length ? (
             <p className="text-[11px] text-amber-400 font-semibold leading-snug whitespace-normal">
               ⚠ Pagado {p.repeats.length} veces este mes: {p.repeats.map(r => `${fmt(r.amount)} el ${r.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}`).join(' y ')}. Si fue un error, pide el reembolso o borra el que sobra en Gastos.
@@ -110,14 +110,14 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
                     <CommitmentsCard summary={{ ...summary, paidCount: summary.paid.length }} currency={currency} onRefresh={() => {}} />
                   ) : (
                     <div className={`${card} p-5 text-sm text-text-secondary`}>
-                      {summary.paid.length ? '¡Todo pagado en este periodo! 🎉' : 'No hay compromisos en este periodo.'}
+                      {summary.paid.length ? tr('¡Todo pagado en este periodo! 🎉') : tr('No hay compromisos en este periodo.')}
                     </div>
                   )}
                 </div>
                 {summary.paid.length > 0 && (
                   <div className={`${card} p-4 min-w-0`}>
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className={`text-sm font-bold ${isTech ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>Ya pagados</h3>
+                      <h3 className={`text-sm font-bold ${isTech ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('Ya pagados')}</h3>
                       <p className="text-xs text-emerald-500 font-semibold">
                         {fmt(summary.paid.reduce((a, p) => a + (p.amount || 0), 0))}
                       </p>
@@ -131,8 +131,8 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
         )}
 
         <p className="text-[11px] text-text-muted text-center leading-relaxed">
-          Salen de tus recordatorios de pago, de los gastos fijos del mes pasado y de las cuotas de tus deudas.
-          Para agregar uno nuevo, crea un recordatorio en la pestaña <button type="button" onClick={onOpenReminders} className="text-accent underline">Recordatorios</button>.
+          {tr('Salen de tus recordatorios de pago, de los gastos fijos del mes pasado y de las cuotas de tus deudas.')}
+          {' '}{tr('Para agregar uno nuevo, crea un recordatorio en la pestaña')} <button type="button" onClick={onOpenReminders} className="text-accent underline">{tr('Recordatorios')}</button>.
         </p>
     </div>
   );

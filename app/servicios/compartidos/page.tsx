@@ -58,7 +58,7 @@ export default function CompartidosPage() {
         await updateExpense(tx.id!, { shared: withSettled(tx.shared!, idx, value) });
       }
     } catch (err) {
-      console.error('No se pudo actualizar el gasto compartido', err);
+      console.error(tr('No se pudo actualizar el gasto compartido'), err);
     } finally {
       setBusy(false);
     }
@@ -102,12 +102,12 @@ export default function CompartidosPage() {
                   <button type="button" onClick={() => setEditing(e.tx)} className="flex-1 min-w-0 text-left">
                     <p className={`text-xs truncate ${e.settled ? 'text-text-muted line-through' : 'text-text-primary'}`}>{e.tx.description?.trim() || e.tx.category}</p>
                     <p className="text-[10px] text-text-muted">
-                      {e.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {e.toMe ? 'pagaste tú' : `pagó ${b.name.split(/\s+/)[0]}`}
+                      {e.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })} · {e.toMe ? tr('pagaste tú') : tr('pagó {a}', { a: b.name.split(/\s+/)[0] })}
                       {(() => {
                         // Con un amigo de FLOWI: si ya lo aceptó en su app
                         const fu = e.tx.shared?.people[e.index]?.friendUid;
                         const st = e.toMe && fu && e.tx.id ? linkFor(e.tx.id, fu)?.status : e.tx.sharedLinkId ? 'friend' : undefined;
-                        return st === 'accepted' ? ' · 🔗 en su FLOWI' : st === 'pending' ? ' · 🔗 esperando que lo acepte' : st === 'rejected' ? ' · no lo aceptó en su FLOWI' : st === 'friend' ? ' · 🔗 compartido por FLOWI' : '';
+                        return st === 'accepted' ? tr(' · 🔗 en su FLOWI') : st === 'pending' ? tr(' · 🔗 esperando que lo acepte') : st === 'rejected' ? tr(' · no lo aceptó en su FLOWI') : st === 'friend' ? tr(' · 🔗 compartido por FLOWI') : '';
                       })()}
                     </p>
                   </button>
