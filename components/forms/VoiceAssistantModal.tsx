@@ -289,7 +289,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     const greetingText = context === 'gasto' ? tr('¿Qué gasto quieres registrar?')
       : context === 'ingreso' ? tr('¿Qué ingreso quieres registrar?')
       : context === 'deuda' ? tr('¿Qué deuda o abono quieres registrar?')
-      : "¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.";
+      : tr('¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.');
     
     if (receipt === 'no-key') setReceiptStatus('no-key');
     else if (receipt) handleReceiptFile(receipt);
@@ -490,7 +490,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
           }
 
           const locale = detectUserLocaleAndCurrency(profile?.currency);
-          speakText(cmd.prompt, locale.language, () => {
+          speakText(tr(cmd.prompt), locale.language, () => {
             startListening();
           });
         }
@@ -1073,7 +1073,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                                 {cmd.title}
                               </p>
                               <p className="text-[11px] text-amber-300 font-medium truncate">
-                                {cmd.action === 'ask_followup' ? cmd.prompt : (cmd.content || cmd.rawText)}
+                                {cmd.action === 'ask_followup' ? tr(cmd.prompt || '') : (cmd.content || cmd.rawText)}
                               </p>
                             </div>
                           </div>

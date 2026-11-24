@@ -2248,4 +2248,19 @@ export const EN: Record<string, string> = {
   'en {n} lugares': 'in {n} places',
   ' · tasa promedio {a}% E.A.': ' · average rate {a}% EAR',
   'menos {a} de retención': 'minus {a} withholding',
+  // ── Saludo y preguntas del asistente de voz ──
+  '¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.': 'Hi! What do you want to log today? An expense, income, a debt, a note or a reminder.',
+  '¿Qué deseas recordar, a qué hora y con qué frecuencia?': 'What do you want to be reminded of, at what time and how often?',
+  '¿Cuál es el título y contenido de tu nota?': 'What is the title and content of your note?',
+  '¿A quién le debes o quién te debe, y de cuánto es el monto?': 'Who do you owe or who owes you, and how much is it?',
+  '¿Cuál es el porcentaje de interés mensual de esta deuda?': 'What is the monthly interest rate of this debt?',
+  '¿De cuánto fue el gasto y en qué lo usaste?': 'How much was the expense and what was it for?',
+  '¿De cuánto fue el ingreso y por qué concepto?': 'How much was the income and what was it for?',
+  // ── Guía para conectar la IA ──
+  '1. Toca "Conectar IA gratis"': '1. Tap "Connect free AI"',
+  '2. Entra con Google': '2. Sign in with Google',
+  '3. Si te pide tarjeta, NO la pongas': '3. If it asks for a card, do NOT add it',
+  '4. Omite otra vez': '4. Skip again',
+  '5. Toca "Authorize"': '5. Tap "Authorize"',
+  '6. ¡Listo!': '6. Done!',
 };
