@@ -40,7 +40,7 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <div className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[88dvh] overflow-y-auto glass-dropdown p-5 ${isTech ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
            onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -85,7 +85,7 @@ export function MoneyInfoModal({ real, pendingCommitments, monthBalance, currenc
           {tr('Si algún saldo no coincide con tu banco, ajústalo en Cuentas y patrimonio. Desde ahí, tus gastos e ingresos lo mantienen al día.')}
         </p>
         <Link href="/servicios/cuentas" onClick={onClose}
-              className={`mt-3 w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-sm' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+              className={`mt-3 w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-sm' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
           Ver y ajustar mis cuentas <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

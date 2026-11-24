@@ -235,7 +235,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <div className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[88dvh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
            onClick={(e) => e.stopPropagation()}>
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>

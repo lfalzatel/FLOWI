@@ -42,7 +42,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
   const { canAdd } = usePlan();
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const isLight = theme === 'light';
+  const isLight = (theme === 'light' || theme === 'nova');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

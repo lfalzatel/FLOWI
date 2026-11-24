@@ -154,7 +154,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
 
   return createPortal(
     <div className={`fixed inset-0 z-[120] flex items-end sm:items-center justify-center sm:p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/20' : 'bg-black/50'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/20' : 'bg-black/50'}`} onClick={onClose} aria-hidden="true" />
 
       {/* La animación de entrada va en el contenedor para no pisar el transform del arrastre */}
       <div className="relative z-10 w-full sm:max-w-lg animate-fade-in-up">

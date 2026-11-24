@@ -112,6 +112,11 @@ export function Header() {
     logoOuterColor = '#C4B5FD'; // Lavanda
     logoInnerColor = '#F0ABFC'; // Rosado
     logoDotColor = '#F97316';
+  } else if (theme === 'nova') {
+    // Nova: tinta casi negra con cobre (como un papel cálido)
+    logoOuterColor = '#1C1917'; // Tinta
+    logoInnerColor = '#A8643C'; // Cobre
+    logoDotColor = '#A8643C';
   } else if (theme === 'light') {
     // Colores originales del diseño en modo día
     logoOuterColor = '#00C4CC'; // Cyan (trazos F)
@@ -431,7 +436,7 @@ export function Header() {
             </h2>
             <p 
               className={`text-xs mt-2 tracking-widest ${isTechTheme ? 'font-mono' : ''}`}
-              style={{ color: theme === 'light' ? '#475569' : '#A1A1AA' }}
+              style={{ color: (theme === 'light' || theme === 'nova') ? '#475569' : '#A1A1AA' }}
             >
               {tr('Tu dinero, en flujo.')}
             </p>

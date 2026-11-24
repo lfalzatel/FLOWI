@@ -29,7 +29,7 @@ export function LimitPrompter() {
     ? { title: tr('Ya leíste muchos recibos hoy'), text: tr('Por seguridad, hasta {a} recibos al día. Mañana sigues; mientras tanto puedes dictarlo o escribirlo.', { a: PREMIUM_RECEIPTS_PER_DAY }) }
     : LIMIT_TEXT[kind];
   const btn = `py-3 text-sm font-semibold border border-glass-border text-text-secondary ${isTech ? 'rounded-none uppercase text-xs' : 'rounded-xl'}`;
-  const primary = `py-3 text-sm font-bold ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`;
+  const primary = `py-3 text-sm font-bold ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`;
   return createPortal(
     <div className={`fixed inset-0 z-[130] flex items-end sm:items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setKind(null)} aria-hidden="true" />

@@ -105,7 +105,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const isLight = theme === 'light';
+  const isLight = (theme === 'light' || theme === 'nova');
 
   return (
     <>

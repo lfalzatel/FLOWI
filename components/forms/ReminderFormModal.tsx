@@ -33,7 +33,7 @@ function ToggleSwitch({ checked, onChange, label, theme }: { checked: boolean; o
       <div
         onClick={() => onChange(!checked)}
         className={`w-11 h-6 rounded-full transition-colors relative border
-                    ${checked ? 'bg-accent border-accent' : (theme === 'light' ? 'bg-gray-200 border-gray-300' : 'bg-white/10 border-transparent')}`}
+                    ${checked ? 'bg-accent border-accent' : ((theme === 'light' || theme === 'nova') ? 'bg-gray-200 border-gray-300' : 'bg-white/10 border-transparent')}`}
       >
         <div className={`absolute top-[1px] w-5 h-5 rounded-full bg-white transition-transform shadow-sm
                          ${checked ? 'translate-x-[22px]' : 'translate-x-[2px]'}`} />
@@ -217,7 +217,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div onClick={onClose} className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} />
+      <div onClick={onClose} className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} />
 
       <div className={`relative w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden z-10 glass-dropdown animate-fade-in-up ${isTechTheme ? 'border border-accent/50 rounded-none' : 'rounded-3xl'}`}>
         <div className={`shrink-0 flex items-center justify-between px-5 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
@@ -432,7 +432,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
           <div className={`shrink-0 px-5 pt-3 pb-4 border-t ${isTechTheme ? 'bg-deep border-accent/20' : 'bg-card border-glass-border'}`}>
             <button type="submit" disabled={loading}
-                    className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                    className={`w-full py-3.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-br from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
               {loading ? tr('Guardando...') : reminder ? tr('Guardar cambios') : tr('Crear recordatorio')}
             </button>
           </div>

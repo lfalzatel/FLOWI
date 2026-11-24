@@ -203,7 +203,7 @@ export default function NegocioPage() {
                 <div className="flex justify-center"><span className="w-11 h-11 flex items-center justify-center rounded-2xl bg-amber-400/15"><Lock className="w-5 h-5 text-amber-400" /></span></div>
                 <p className="text-sm font-bold text-text-primary">{tr('Más de tu negocio con Premium')}</p>
                 <p className="text-xs text-text-secondary leading-relaxed">{tr('Meses anteriores, comparación con el mes pasado, en qué vendes y gastas más, y la lista de movimientos del negocio.')}</p>
-                <Link href="/planes" className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                <Link href="/planes" className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
                   <Crown className="w-4 h-4" /> Ver planes
                 </Link>
               </section>

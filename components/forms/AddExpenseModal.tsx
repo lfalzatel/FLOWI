@@ -616,7 +616,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       {createPortal(
         <div className={`fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}
              style={kb ? { bottom: kb } : undefined}>
-          <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
+          <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
           <div
             // dvh = alto visible real en el celular (sin la barra del navegador), para que no se desborde
             className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[min(92dvh,100%)] sm:max-h-[90vh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}

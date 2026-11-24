@@ -148,7 +148,7 @@ export default function DeudasPage() {
               onClick={() => setShowAdd(true)}
               className={`flex items-center justify-center w-10 h-10 transition-all
                           bg-gradient-to-br from-accent to-accent-dim
-                          ${theme === 'light' ? 'text-white' : 'text-black'}
+                          ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
                           hover:opacity-90 active:scale-[0.97]
                           ${isCyberpunk ? 'rounded-none' : 'rounded-2xl'}`}

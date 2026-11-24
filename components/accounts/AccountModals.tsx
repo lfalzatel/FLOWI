@@ -52,7 +52,7 @@ export function Shell({ title, onClose, children, footer }: { title: string; onC
   if (typeof document === 'undefined') return null;
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <div className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[88dvh] flex flex-col overflow-hidden glass-dropdown ${isTech ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
            onClick={(e) => e.stopPropagation()}>
         <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTech ? 'border-b border-accent/20' : ''}`}>
@@ -404,7 +404,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
       </div>
       {choosing && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center">
-          <div className={`absolute inset-0 ${s.theme === 'light' ? 'bg-black/20' : 'bg-black/60'}`} onClick={() => setChoosing(null)} aria-hidden="true" />
+          <div className={`absolute inset-0 ${(s.theme === 'light' || s.theme === 'nova') ? 'bg-black/20' : 'bg-black/60'}`} onClick={() => setChoosing(null)} aria-hidden="true" />
           <div className={`relative w-full max-w-md max-h-[70dvh] overflow-y-auto p-4 border animate-fade-in-up ${s.isTech ? 'bg-deep rounded-none border-accent/50 font-mono' : 'bg-card rounded-t-[28px] sm:rounded-3xl border-glass-border'}`}>
             <h3 className={`mb-3 px-1 ${s.isTech ? 'font-bold text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}`}>{choosing === 'from' ? tr('¿De dónde sale?') : tr('¿A dónde llega?')}</h3>
             <div className="space-y-1.5">

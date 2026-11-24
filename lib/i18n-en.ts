@@ -2164,6 +2164,7 @@ export const EN: Record<string, string> = {
   'NOTA ACTUALIZADA': 'NOTE UPDATED',
   'NOTA ELIMINADA': 'NOTE DELETED',
   'Nebulosa': 'Nebula',
+  'Nova': 'Nova',
   'No descontar': 'Do not take out',
   'No se pudieron leer las opiniones (faltan las reglas de la base de datos).': 'The feedback could not be read (database rules are missing).',
   'No se pudo eliminar. Revisa tu conexión e inténtalo de nuevo.': 'It could not be deleted. Check your connection and try again.',

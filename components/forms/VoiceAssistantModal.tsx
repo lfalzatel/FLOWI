@@ -717,7 +717,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       {/* Backdrop (mientras la IA lee la foto: el fondo animado del tema) */}
       {receiptStatus === 'loading' ? <ReadingBackdrop /> : (
         <div 
-          className={`absolute inset-0 ${theme === 'light' ? 'bg-black/40 backdrop-blur-xs' : 'bg-black/75 backdrop-blur-md'}`} 
+          className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/40 backdrop-blur-xs' : 'bg-black/75 backdrop-blur-md'}`} 
           onClick={onClose} 
         />
       )}

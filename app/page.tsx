@@ -347,7 +347,7 @@ export default function DashboardPage() {
               onClick={() => window.dispatchEvent(new CustomEvent('flowi-open-quick-actions'))}
               data-tour="add"
               className={`hidden sm:flex items-center gap-2 px-4 py-2.5 transition-all
-                         ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
+                         ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent hover:bg-accent/30 font-mono uppercase tracking-widest text-xs font-bold' : `rounded-2xl bg-gradient-to-r from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} font-semibold text-sm shadow-lg shadow-accent/20 hover:opacity-90 active:scale-[0.97]`}`}
             >
               <Plus className="w-4 h-4" />
               {tr('Nueva transacción')}

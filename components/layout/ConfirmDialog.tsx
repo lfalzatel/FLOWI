@@ -26,7 +26,7 @@ export function ConfirmDialog({
 }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const isLight = theme === 'light';
+  const isLight = (theme === 'light' || theme === 'nova');
 
   useEffect(() => {
     if (isOpen) {

@@ -68,7 +68,7 @@ export function ManualPayModal({ plan: initialPlan, onClose }: { plan: PlanOptio
             <div className="text-4xl">✅</div>
             <p className="text-sm font-bold text-text-primary">{tr('¡Recibimos tu comprobante!')}</p>
             <p className="text-xs text-text-secondary leading-relaxed">{tr('Lo revisamos y activamos tu Premium, normalmente el mismo día. Verás el estado en esta página.')}</p>
-            <button type="button" onClick={onClose} className={`w-full py-3 font-bold bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} ${btn}`}>{tr('Entendido')}</button>
+            <button type="button" onClick={onClose} className={`w-full py-3 font-bold bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} ${btn}`}>{tr('Entendido')}</button>
           </div>
         ) : (
           <>
@@ -131,7 +131,7 @@ export function ManualPayModal({ plan: initialPlan, onClose }: { plan: PlanOptio
             {state === 'error' && <p className="text-xs text-red-400">{tr('No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.')}</p>}
 
             <button type="button" onClick={send} disabled={!image || state === 'sending'}
-                    className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 disabled:opacity-50 ${isTech ? 'bg-accent/20 border border-accent text-accent' : `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`} ${btn}`}>
+                    className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 disabled:opacity-50 ${isTech ? 'bg-accent/20 border border-accent text-accent' : `bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`} ${btn}`}>
               {state === 'sending' && <Loader2 className="w-4 h-4 animate-spin" />}
               {tr('Enviar comprobante')}
             </button>

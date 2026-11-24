@@ -177,7 +177,7 @@ export default function ImportarPage() {
           <input ref={fileRef} type="file" accept=".csv,.txt,.xls,.xlsx,.pdf,text/csv,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden"
                  onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ''; }} />
           <button type="button" onClick={() => fileRef.current?.click()} disabled={reading || !!saving}
-                  className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs tracking-wider' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} text-sm`}`}>
+                  className={`w-full flex items-center justify-center gap-2 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase text-xs tracking-wider' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} text-sm`}`}>
             {reading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             {reading ? tr('Leyendo…') : fileName ? tr('Elegir otro archivo') : tr('Elegir archivo')}
           </button>
@@ -192,7 +192,7 @@ export default function ImportarPage() {
                        placeholder={tr('Clave del PDF')} aria-label={tr('Clave del PDF')}
                        className={`flex-1 min-w-0 bg-glass border border-glass-border px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`} />
                 <button type="submit" disabled={!pdfPass.trim() || reading}
-                        className={`px-4 py-2 text-sm font-bold bg-accent disabled:opacity-50 ${theme === 'light' ? 'text-white' : 'text-black'} ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
+                        className={`px-4 py-2 text-sm font-bold bg-accent disabled:opacity-50 ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} ${isTechTheme ? 'rounded-none' : 'rounded-lg'}`}>
                   {tr('Abrir')}
                 </button>
               </div>
@@ -291,7 +291,7 @@ export default function ImportarPage() {
 
             <div className="sticky bottom-24 z-10">
               <button type="button" onClick={importSelected} disabled={!selected.length || !!saving}
-                      className={`w-full flex items-center justify-center gap-2 py-3.5 font-bold shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-deep border border-accent text-accent uppercase text-xs tracking-wider' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} text-sm`}`}>
+                      className={`w-full flex items-center justify-center gap-2 py-3.5 font-bold shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-deep border border-accent text-accent uppercase text-xs tracking-wider' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} text-sm`}`}>
                 {saving ? <><RefreshCw className="w-4 h-4 animate-spin" /> Guardando {saving.done} de {saving.total}…</> : `Importar ${selected.length} movimientos`}
               </button>
             </div>

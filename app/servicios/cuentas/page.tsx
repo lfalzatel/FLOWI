@@ -69,7 +69,7 @@ export default function CuentasPage() {
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
 
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
-  const btn = `flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTech ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`;
+  const btn = `flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTech ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`;
   const ghost = `flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold border transition-all active:scale-95 ${isTech ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-secondary hover:text-text-primary hover:bg-glass'}`;
 
   const rows: { label: string; value: number; sign: 1 | -1; href?: string; icon: any; tone: 'pos' | 'save' | 'debt' }[] = [
@@ -146,7 +146,7 @@ export default function CuentasPage() {
               Agrega tus cuentas (Bancolombia, Nequi, efectivo…) con lo que tienes hoy. Desde ahí tus gastos e ingresos las van moviendo y ves tu patrimonio completo.
             </p>
             <button onClick={() => { setEditing(null); setShowForm(true); }}
-                    className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTech ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                    className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTech ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
               <Plus className="w-5 h-5" /> Agregar mi primera cuenta
             </button>
           </section>

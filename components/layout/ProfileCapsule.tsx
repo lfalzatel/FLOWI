@@ -20,7 +20,7 @@ import {
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
   Sun, Monitor, Terminal, Moon, Layers, Heart, Compass,
-  Crown, ShieldCheck, Sparkles } from 'lucide-react';
+  Crown, ShieldCheck, Sparkles, Star } from 'lucide-react';
 
 const menuItems = [
   { icon: User,       label: 'Mi perfil',         href: '#',              divider: false, soon: false },
@@ -280,6 +280,9 @@ export function ProfileCapsule() {
                   if (t === 'light') {
                     icon = <Sun className="w-4 h-4 mb-1" />;
                     label = 'Día';
+                  } else if (t === 'nova') {
+                    icon = <Star className="w-4 h-4 mb-1" />;
+                    label = 'Nova';
                   } else if (t === 'dark') {
                     icon = <Moon className="w-4 h-4 mb-1" />;
                     label = 'Noche';

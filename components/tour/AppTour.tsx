@@ -66,7 +66,7 @@ export function TourOffer({ onStart, onSkip }: { onStart: (voice: boolean) => vo
   const secondary = `w-full py-3 text-sm font-semibold border transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border-accent/40 text-accent uppercase text-xs' : 'rounded-xl border-glass-border text-text-primary hover:bg-glass'}`;
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/20' : 'bg-black/60'} backdrop-blur-sm`} onClick={onSkip} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/20' : 'bg-black/60'} backdrop-blur-sm`} onClick={onSkip} aria-hidden="true" />
       <div className={`w-full max-w-sm relative z-10 animate-fade-in-up p-6 glass-dropdown text-center ${isTechTheme ? 'rounded-none border border-accent/50 bg-deep' : 'rounded-3xl'}`}>
         <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-accent/15 flex items-center justify-center">
           <Compass className="w-7 h-7 text-accent" />
@@ -269,7 +269,7 @@ export function AppTour({ voice: initialVoice, demo = false, onClose }: { voice:
                 <ChevronLeft className="w-3.5 h-3.5" /> Atrás
               </button>
             )}
-            <button type="button" onClick={() => go(1)} className={`flex items-center gap-1 px-4 py-2 text-xs font-bold ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+            <button type="button" onClick={() => go(1)} className={`flex items-center gap-1 px-4 py-2 text-xs font-bold ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
               {isLast ? 'Terminar' : 'Siguiente'} {!isLast && <ChevronRight className="w-3.5 h-3.5" />}
             </button>
           </div>

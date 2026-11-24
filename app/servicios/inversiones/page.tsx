@@ -62,7 +62,7 @@ export default function InversionesPage() {
 
   const card = isTechTheme ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
   const fmt = (n: number) => formatCurrency(n, currency);
-  const primaryBtn = `flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`;
+  const primaryBtn = `flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`;
   const ghost = `flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold border transition-all active:scale-95 ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-glass-border text-text-secondary hover:text-text-primary hover:bg-glass'}`;
   const openEdit = (inv: Investment) => { setEditing(inv); setNewKind(null); };
 
@@ -193,7 +193,7 @@ export default function InversionesPage() {
             </div>
             <h2 className={`font-bold text-lg mb-1 ${isTechTheme ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('¿Dónde crece tu plata?')}</h2>
             <p className="text-sm text-text-secondary mb-5">{tr('Un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria. Regístralo y te digo cuánto vas ganando.')}</p>
-            <button onClick={() => setChoosingKind(true)} className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+            <button onClick={() => setChoosingKind(true)} className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
               <Plus className="w-5 h-5" /> Registrar la primera
             </button>
           </section>
@@ -383,7 +383,7 @@ export default function InversionesPage() {
 
       {closing && typeof document !== 'undefined' && createPortal(
         <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-          <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setClosing(null)} aria-hidden="true" />
+          <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setClosing(null)} aria-hidden="true" />
           <div className={`w-full max-w-sm relative z-10 animate-fade-in-up glass-dropdown p-6 ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}>
             <h2 className={`font-bold text-lg mb-2 ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>CDT {closing.bank} pagado</h2>
             <p className="text-sm text-text-secondary mb-5">
@@ -411,7 +411,7 @@ export default function InversionesPage() {
 
       {moving && typeof document !== 'undefined' && createPortal(
         <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-          <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setMoving(null)} aria-hidden="true" />
+          <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setMoving(null)} aria-hidden="true" />
           <div className={`w-full max-w-sm relative z-10 animate-fade-in-up glass-dropdown p-6 space-y-4 ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}>
             <h2 className={`font-bold text-lg ${isTechTheme ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>
               {moving.mode === 'deposito' ? tr('Depositar en') : moving.mode === 'retiro' ? tr('Retirar de') : kindOf(moving.inv) === 'ahorro' ? tr('Ajustar saldo de') : tr('Actualizar valor de')} {nameOf(moving.inv)}

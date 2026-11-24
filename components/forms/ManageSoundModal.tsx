@@ -133,7 +133,7 @@ export function ManageSoundModal({ actionType, currentValue, onClose, onSelect }
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
       <div 
-        className={`absolute inset-0 transition-opacity ${theme === 'light' ? 'bg-black/20 backdrop-blur-sm' : 'bg-black/60 backdrop-blur-md'}`} 
+        className={`absolute inset-0 transition-opacity ${(theme === 'light' || theme === 'nova') ? 'bg-black/20 backdrop-blur-sm' : 'bg-black/60 backdrop-blur-md'}`} 
         onClick={onClose} 
         aria-hidden="true" 
       />

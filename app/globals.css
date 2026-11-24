@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -25,7 +25,7 @@
   --money-debt: 251 191 36;
   --money-save: 56 189 248;
 }
-[data-theme='light'] {
+[data-theme='light'], [data-theme='nova'] {
   --money-pos:  5 150 105;
   --money-neg:  220 38 38;
   --money-debt: 202 138 4;
@@ -179,6 +179,31 @@
   --yellow:        #D97706;
 }
 
+/* Nova: papel crema, tinta casi negra y cobre. Títulos en Outfit, botones de píldora */
+[data-theme='nova'] {
+  --accent:        168 100 60;
+  --accent-dim:    138 78 44;
+  --accent-glow:   rgba(168, 100, 60, 0.14);
+  --bg-deep:       #F8F2E9;
+  --bg-card:       #FFFDF9;
+  --bg-card-hover: #F6EFE4;
+  --glass:         rgba(255, 253, 249, 0.78);
+  --glass-hover:   rgba(255, 253, 249, 0.95);
+  --glass-border:  rgba(28, 25, 23, 0.08);
+  --glass-strong:  rgba(28, 25, 23, 0.16);
+  --text-primary:  rgba(28, 25, 23, 0.95);
+  --text-secondary:rgba(28, 25, 23, 0.64);
+  --text-muted:    rgba(28, 25, 23, 0.42);
+  --red:           #C2410C;
+  --yellow:        #B45309;
+}
+[data-theme='nova'] .font-syne { font-family: 'Outfit', 'DM Sans', sans-serif; letter-spacing: -0.02em; }
+[data-theme='nova'] .glass-card,
+[data-theme='nova'] .glass-card-strong {
+  border-radius: 24px;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.04), 0 8px 24px -12px rgba(120, 72, 40, 0.18);
+}
+
 [data-theme='cyberpunk'] {
   --accent:        0 255 178;
   --accent-dim:    0 204 142;
@@ -294,7 +319,8 @@ body {
   transition: background 0.2s, border-color 0.2s;
 }
 
-[data-theme='light'] .glass-dropdown {
+[data-theme='light'] .glass-dropdown,
+[data-theme='nova'] .glass-dropdown {
   background: rgba(255, 255, 255, 0.5) !important;
   border: 1px solid rgba(255, 255, 255, 0.5) !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;

@@ -27,7 +27,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
   const [showMoney, setShowMoney] = useState(false);
   const { theme } = useTheme();
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
-  const isLight = theme === 'light';
+  const isLight = (theme === 'light' || theme === 'nova');
 
   const [absorbingId, setAbsorbingId] = useState<string | null>(null);
   const [info, setInfo] = useState<'today' | 'debts' | null>(null);

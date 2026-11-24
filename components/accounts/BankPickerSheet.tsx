@@ -84,7 +84,7 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
   if (typeof document === 'undefined') return null;
   return createPortal(
     <div className={`fixed inset-0 z-[110] flex items-end sm:items-center justify-center ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/20' : 'bg-black/60'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/20' : 'bg-black/60'}`} onClick={onClose} aria-hidden="true" />
       <div className={`relative w-full max-w-md max-h-[85dvh] flex flex-col overflow-hidden ${surface} border animate-fade-in-up ${isTech ? 'rounded-none border-accent/50' : 'rounded-t-[28px] sm:rounded-3xl border-glass-border'}`}>
         <div className={`shrink-0 px-5 pt-4 pb-3 border-b ${isTech ? 'border-accent/20' : 'border-glass-border'}`}>
           <div className="flex items-center justify-between mb-3">

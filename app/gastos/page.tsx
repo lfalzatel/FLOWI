@@ -109,7 +109,7 @@ export default function GastosPage() {
                 : setShowAdd(true))}
               className={`flex items-center gap-2 px-4 py-2.5 transition-all
                           bg-gradient-to-br from-accent to-accent-dim
-                          ${theme === 'light' ? 'text-white' : 'text-black'}
+                          ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
                           hover:opacity-90 active:scale-[0.97]
                           ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}
@@ -142,13 +142,13 @@ export default function GastosPage() {
                 w-full py-2.5 pl-10 pr-4 text-xs focus:outline-none transition-all
                 ${isTechTheme
                   ? 'bg-white/5 text-white placeholder-white/35 border-accent/20 rounded-none focus:border-accent font-mono'
-                  : theme === 'light'
+                  : (theme === 'light' || theme === 'nova')
                     ? 'bg-black/[0.04] text-black placeholder-black/40 border-black/10 rounded-2xl focus:border-accent focus:bg-white'
                     : 'bg-white/5 text-white placeholder-white/35 border-white/5 rounded-2xl focus:border-accent/40 focus:bg-white/10'
                 }
               `}
             />
-            <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'light' ? 'text-black/40' : 'text-white/40'}`}>
+            <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${(theme === 'light' || theme === 'nova') ? 'text-black/40' : 'text-white/40'}`}>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -156,7 +156,7 @@ export default function GastosPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${theme === 'light' ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${(theme === 'light' || theme === 'nova') ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -207,13 +207,13 @@ export default function GastosPage() {
                 w-full py-2.5 pl-10 pr-4 text-xs focus:outline-none transition-all
                 ${isTechTheme
                   ? 'bg-white/5 text-white placeholder-white/35 border-accent/20 rounded-none focus:border-accent font-mono'
-                  : theme === 'light'
+                  : (theme === 'light' || theme === 'nova')
                     ? 'bg-black/[0.04] text-black placeholder-black/40 border-black/10 rounded-2xl focus:border-accent focus:bg-white'
                     : 'bg-white/5 text-white placeholder-white/35 border-white/5 rounded-2xl focus:border-accent/40 focus:bg-white/10'
                 }
               `}
             />
-            <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'light' ? 'text-black/40' : 'text-white/40'}`}>
+            <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${(theme === 'light' || theme === 'nova') ? 'text-black/40' : 'text-white/40'}`}>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -221,7 +221,7 @@ export default function GastosPage() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${theme === 'light' ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${(theme === 'light' || theme === 'nova') ? 'text-black/40 hover:text-black' : 'text-white/40 hover:text-white'}`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />

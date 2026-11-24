@@ -184,7 +184,7 @@ export default function PlanesPage() {
           })}
         </div>
         <button type="button" onClick={payIntl} disabled={paying}
-                className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-wider text-sm' : `rounded-2xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-wider text-sm' : `rounded-2xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
           {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
           {premium ? tr('Renovar') : tr('Pagar')} {tr(intlPlan.label).toLowerCase()} · {money(intlPlan.eur, 'EUR')}
         </button>
@@ -215,7 +215,7 @@ export default function PlanesPage() {
         </div>
 
         <button type="button" onClick={pay} disabled={paying}
-                className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-wider text-sm' : `rounded-2xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-wider text-sm' : `rounded-2xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
           {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
           {premium ? tr('Renovar') : tr('Pagar')} {plan.label.toLowerCase()} · {formatCurrency(plan.price, 'COP')}
         </button>

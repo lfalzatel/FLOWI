@@ -85,7 +85,7 @@ export function MarkPaidDialog({ due, amount = null, onClose }: Props) {
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <div className={`w-full max-w-sm relative z-10 animate-fade-in-up glass-dropdown p-5 ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
            onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3 mb-4">

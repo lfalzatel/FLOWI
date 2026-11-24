@@ -126,7 +126,7 @@ export function NoteModal({ note, onClose, onSuccess }: Props) {
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200 ${isTechTheme ? 'font-mono' : ''}`}>
       {/* Backdrop */}
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10 backdrop-blur-[2px]' : 'bg-black/40 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10 backdrop-blur-[2px]' : 'bg-black/40 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
 
       {/* Modal */}
       <div 

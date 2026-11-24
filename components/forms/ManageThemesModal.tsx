@@ -1,14 +1,14 @@
 'use client';
 import { tr, trTech } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
-import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check, Sparkles } from 'lucide-react';
+import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check, Sparkles, Star } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 
 interface Props {
   onClose: () => void;
 }
 
-type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'nebula' | 'cyberpunk' | 'kiloCode';
+type ThemeType = 'light' | 'dark' | 'glassmorphism' | 'nebula' | 'cyberpunk' | 'kiloCode' | 'nova';
 
 export function ManageThemesModal({ onClose }: Props) {
   const { theme, setTheme, allowedThemes, setAllowedThemes } = useTheme();
@@ -51,6 +51,7 @@ export function ManageThemesModal({ onClose }: Props) {
   const getThemeIcon = (t: ThemeType) => {
     switch (t) {
       case 'light': return <Sun className="w-4 h-4" />;
+      case 'nova': return <Star className="w-4 h-4" />;
       case 'dark': return <Moon className="w-4 h-4" />;
       case 'glassmorphism': return <Layers className="w-4 h-4" />;
       case 'nebula': return <Sparkles className="w-4 h-4" />;
@@ -62,6 +63,7 @@ export function ManageThemesModal({ onClose }: Props) {
   const getThemeLabel = (t: ThemeType) => {
     switch (t) {
       case 'light': return isTechTheme ? trTech('DIA', 'Día') : tr('Día');
+      case 'nova': return isTechTheme ? trTech('NOVA', 'Nova') : tr('Nova');
       case 'dark': return isTechTheme ? trTech('NOCHE (ORIGINAL)', 'Noche (Original)') : tr('Noche (Original)');
       case 'glassmorphism': return isTechTheme ? trTech('GLASSMORPHISM', 'Glassmorphism') : tr('Glassmorphism');
       case 'nebula': return isTechTheme ? trTech('NEBULOSA', 'Nebulosa') : tr('Nebulosa');
@@ -74,7 +76,7 @@ export function ManageThemesModal({ onClose }: Props) {
 
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10 backdrop-blur-[2px]' : 'bg-black/40 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10 backdrop-blur-[2px]' : 'bg-black/40 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
       <div 
         className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
@@ -103,10 +105,14 @@ export function ManageThemesModal({ onClose }: Props) {
             <p className={`text-sm font-medium text-text-primary mb-3 ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
               {isTechTheme ? trTech('TEMA_VISUAL_ACTIVO', 'Tema Visual Activo') : tr('Tema Visual Activo')}
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               <button onClick={() => setTheme('light')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'light' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Sun className="w-5 h-5 mb-1.5" />
                 <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('DIA', 'Día') : tr('Día')}</span>
+              </button>
+              <button onClick={() => setTheme('nova')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'nova' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
+                <Star className="w-5 h-5 mb-1.5" />
+                <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('NOVA', 'Nova') : tr('Nova')}</span>
               </button>
               <button onClick={() => setTheme('dark')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'dark' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Moon className="w-5 h-5 mb-1.5" />
@@ -148,7 +154,7 @@ export function ManageThemesModal({ onClose }: Props) {
             </p>
             
             <div className="space-y-2">
-              {(['light', 'dark', 'glassmorphism', 'nebula', 'cyberpunk', 'kiloCode'] as ThemeType[]).map(t => {
+              {(['light', 'nova', 'dark', 'glassmorphism', 'nebula', 'cyberpunk', 'kiloCode'] as ThemeType[]).map(t => {
                 const selectedIndex = localAllowed.indexOf(t);
                 const isSelected = selectedIndex !== -1;
                 

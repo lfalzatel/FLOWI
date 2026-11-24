@@ -157,7 +157,7 @@ export default function RecordatoriosPage() {
               onClick={() => { setEditingReminder(null); setShowForm(true); }}
               aria-label={tr('Nuevo recordatorio')} title={tr('Nuevo recordatorio')}
               className={`flex items-center justify-center w-10 h-10 bg-gradient-to-br from-accent to-accent-dim
-                          ${theme === 'light' ? 'text-white' : 'text-black'}
+                          ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
                           hover:opacity-90 active:scale-[0.97] transition-all
                           ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}

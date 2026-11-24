@@ -127,7 +127,7 @@ export function NextActionCard({ action, today, currency, onSkip, onRefresh, onU
       )}
       {open && action.kind === 'reconcile' && reconcileAccount && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setOpen(false)} aria-hidden="true" />
+          <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={() => setOpen(false)} aria-hidden="true" />
           <div className={`w-full max-w-sm relative z-10 animate-fade-in-up glass-dropdown p-6 ${isTechTheme ? 'rounded-none border border-accent/50 font-mono' : 'rounded-3xl'}`}>
             <div className="flex items-center gap-3 mb-3">
               <span className="w-10 h-10 rounded-2xl bg-glass border border-glass-border flex items-center justify-center">

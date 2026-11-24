@@ -65,7 +65,7 @@ export default function MetasPage() {
           </div>
           {goals.length > 0 && (
             <button onClick={openNew}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`}>
+                    className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`}>
               <Plus className="w-4 h-4" /> Nueva
             </button>
           )}
@@ -108,7 +108,7 @@ export default function MetasPage() {
             <h2 className={`font-bold text-lg mb-1 ${isTechTheme ? 'text-accent uppercase' : 'text-text-primary'}`}>{tr('¿Para qué quieres ahorrar?')}</h2>
             <p className="text-sm text-text-secondary mb-5">{tr('Una moto, un viaje, la prima del apartamento o un fondo para emergencias. Crea tu meta y te digo cuándo la lograrías.')}</p>
             <button onClick={openNew}
-                    className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                    className={`inline-flex items-center gap-2 px-6 py-3 font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-sm' : `rounded-xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
               <Plus className="w-5 h-5" /> Crear mi primera meta
             </button>
           </section>

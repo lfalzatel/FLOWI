@@ -32,7 +32,7 @@ export function BalanceInfoModal(props: Props) {
   const isToday = props.kind === 'today';
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/20 backdrop-blur-xs' : 'bg-black/60 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/20 backdrop-blur-xs' : 'bg-black/60 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
       <div className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[88dvh] overflow-y-auto p-5 sm:p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50 bg-deep' : 'rounded-3xl'}`}
            onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between pb-4 border-b border-glass-border mb-4">

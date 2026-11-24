@@ -94,7 +94,7 @@ export default function IngresosPage() {
                 : setShowAdd(true))}
               className={`flex items-center gap-2 px-4 py-2.5 transition-all
                           bg-gradient-to-br from-accent to-accent-dim
-                          ${theme === 'light' ? 'text-white' : 'text-black'}
+                          ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}
                           font-semibold text-sm shadow-lg shadow-accent/20
                           hover:opacity-90 active:scale-[0.97]
                           ${isTechTheme ? 'rounded-none font-mono uppercase tracking-widest' : 'rounded-2xl'}`}

@@ -56,12 +56,12 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
   if (typeof document === 'undefined') return null;
 
   const tabClass = (active: boolean) => `flex-1 py-2 text-sm font-bold transition-all ${isTechTheme ? 'rounded-none uppercase' : 'rounded-lg'} ${
-    active ? `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'} shadow-md` : isTechTheme ? 'text-accent' : 'text-text-secondary'
+    active ? `bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} shadow-md` : isTechTheme ? 'text-accent' : 'text-text-secondary'
   }`;
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <div
         className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[88dvh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}

@@ -380,7 +380,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
   // Estilos comunes
   const labelCls = `${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-[11px] font-medium mb-1 block truncate`;
   const inputCls = `w-full bg-glass border py-2 px-3 text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-75 text-sm ${isTechTheme ? 'border-accent/30 rounded-none focus:border-accent font-mono' : 'border-glass-border rounded-xl focus:border-accent'}`;
-  const dateCls = `${inputCls} ${theme === 'light' && !isTechTheme ? '[color-scheme:light]' : '[color-scheme:dark]'}`;
+  const dateCls = `${inputCls} ${(theme === 'light' || theme === 'nova') && !isTechTheme ? '[color-scheme:light]' : '[color-scheme:dark]'}`;
   const hint = 'text-[10px] text-text-muted leading-snug mt-1 normal-case';
   const chip = (on: boolean) => `px-2 py-0.5 text-[10px] font-semibold border ${isTechTheme ? 'rounded-none' : 'rounded-full'} ${on ? 'border-accent bg-accent/15 text-accent' : 'border-glass-border text-text-secondary'}`;
 
@@ -434,7 +434,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
 
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
       <ConfirmDialog
         isOpen={showConfirmDelete}
         onCancel={() => setShowConfirmDelete(false)}
@@ -855,12 +855,12 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           <div className={`${compact ? 'order-6' : ''} pt-2 space-y-2`}>
             {isReadOnly ? (
               <button type="button" onClick={onClose}
-                      className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                      className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
                 {tr('Volver / Aceptar')}
               </button>
             ) : (
               <button type="submit" disabled={loading || aiState === 'loading'}
-                      className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${theme === 'light' ? 'text-white' : 'text-black'}`}`}>
+                      className={`w-full font-bold py-3.5 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 text-sm ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-widest' : `rounded-xl bg-gradient-to-r from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
                 {loading ? tr('Guardando...') : debtToEdit ? tr('Guardar cambios') : isBank ? tr('Guardar crédito') : owedToMe ? tr('Guardar préstamo') : tr('Guardar deuda')}
               </button>
             )}

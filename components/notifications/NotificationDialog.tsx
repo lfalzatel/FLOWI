@@ -25,7 +25,7 @@ const COPY: Record<NotificationDialogKind, { badge: string; title: string; confi
 export function NotificationDialog({ kind, context, onConfirm, onCancel }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const isLight = theme === 'light';
+  const isLight = (theme === 'light' || theme === 'nova');
   const copy = COPY[kind];
   const Icon = kind === 'enabled' ? CheckCircle2 : kind === 'blocked' ? BellOff : kind === 'ios-install' ? Smartphone : BellRing;
 

@@ -294,7 +294,7 @@ export function BudgetProjection({ filterType, filterValue, transactions, onRefr
         <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono text-sm' : ''}`}>
           {/* Backdrop */}
           <div 
-            className={`absolute inset-0 ${theme === 'light' ? 'bg-black/20 backdrop-blur-xs' : 'bg-black/60 backdrop-blur-sm'}`} 
+            className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/20 backdrop-blur-xs' : 'bg-black/60 backdrop-blur-sm'}`} 
             onClick={() => setActiveModal(null)} 
           />
 

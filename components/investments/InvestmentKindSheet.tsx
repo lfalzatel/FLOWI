@@ -15,7 +15,7 @@ export function InvestmentKindSheet({ onPick, onClose }: { onPick: (k: Investmen
   if (typeof document === 'undefined') return null;
   return createPortal(
     <div className={`fixed inset-0 z-[100] flex items-end sm:items-center justify-center ${isTechTheme ? 'font-mono' : ''}`}>
-      <div className={`absolute inset-0 ${theme === 'light' ? 'bg-black/20' : 'bg-black/60'}`} onClick={onClose} aria-hidden="true" />
+      <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/20' : 'bg-black/60'}`} onClick={onClose} aria-hidden="true" />
       <div className={`relative w-full max-w-md p-5 pb-7 border animate-fade-in-up ${isTechTheme ? 'bg-deep rounded-none border-accent/50' : 'bg-card rounded-t-[28px] sm:rounded-3xl border-glass-border'}`}>
         <h2 className={`mb-3 ${isTechTheme ? 'font-bold text-accent uppercase' : 'font-syne font-bold text-lg text-text-primary'}`}>{tr('¿Qué vas a registrar?')}</h2>
         <div className="space-y-2">

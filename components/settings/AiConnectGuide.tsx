@@ -115,12 +115,12 @@ export function AiConnectGuide({ onClose }: { onClose: () => void }) {
           </button>
           {last ? (
             <button type="button" onClick={connect}
-                    className={`py-3 font-bold ${isTech ? 'bg-accent/20 border border-accent text-accent' : `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`} ${btn}`}>
+                    className={`py-3 font-bold ${isTech ? 'bg-accent/20 border border-accent text-accent' : `bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`} ${btn}`}>
               {tr('Conectar ahora')}
             </button>
           ) : (
             <button type="button" onClick={() => setI(i + 1)}
-                    className={`py-3 font-bold flex items-center justify-center gap-1 ${isTech ? 'bg-accent/20 border border-accent text-accent' : `bg-accent ${theme === 'light' ? 'text-white' : 'text-black'}`} ${btn}`}>
+                    className={`py-3 font-bold flex items-center justify-center gap-1 ${isTech ? 'bg-accent/20 border border-accent text-accent' : `bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`} ${btn}`}>
               Siguiente <ChevronRight className="w-4 h-4" />
             </button>
           )}
