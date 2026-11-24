@@ -508,5 +508,18 @@ body {
   50% { transform: rotate(12deg); }
   60%, 100% { transform: rotate(0deg); }
 }
-.animate-wave { animation: flowi-wave 1.6s ease-in-out 0.4s 1 both; transform-origin: 70% 80%; }
+.animate-wave { animation: flowi-wave 1.6s ease-in-out 0.3s 1 both; transform-origin: 70% 80%; }
 @media (prefers-reduced-motion: reduce) { .animate-wave { animation: none; } }
+
+/* Cuadro del tutorial: en los temas claros, casi sólido y blanco (sobre la pantalla oscurecida
+   el vidrio translúcido se veía gris); en Carbón, un tono más claro que el fondo */
+[data-theme='light'] .tour-card,
+[data-theme='nova'] .tour-card {
+  background: color-mix(in srgb, var(--bg-card) 97%, transparent) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25) !important;
+}
+[data-theme='carbon'] .tour-card {
+  background: #2A2722 !important;
+  border: 1px solid rgba(201, 168, 106, 0.35) !important;
+}

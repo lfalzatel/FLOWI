@@ -34,6 +34,18 @@ function findTarget(step: Step): HTMLElement | null {
 }
 
 
+// Centra la parte dentro de su ventana con scroll (el formulario), sin mover la página de atrás
+function scrollWithin(el: HTMLElement) {
+  for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+    const oy = getComputedStyle(p).overflowY;
+    if ((oy === 'auto' || oy === 'scroll') && p.scrollHeight > p.clientHeight) {
+      const r = el.getBoundingClientRect(), pr = p.getBoundingClientRect();
+      p.scrollTop += (r.top - pr.top) - Math.max(0, (pr.height - r.height) / 3);
+      return;
+    }
+  }
+}
+
 export function readTourVoicePref(): boolean {
   try { return localStorage.getItem(VOICE_KEY) !== 'false'; } catch { return true; }
 }
@@ -71,11 +83,12 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
 }) {
   const { theme } = useTheme();
   usePopupHold(); // ni avisos ni otras ventanas encima del recorrido
+  const isLight = theme === 'light' || theme === 'nova';
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   // Solo los pasos cuya parte está en pantalla; se calcula después de pintar, cuando Inicio
   // ya muestra los datos de ejemplo
   const [steps, setSteps] = useState<Step[] | null>(null);
-  useLayoutEffect(() => { setSteps(source.filter(s => !s.target || findTarget(s))); }, [source]);
+  useLayoutEffect(() => { setSteps(source.filter(s => !s.target || s.open || findTarget(s))); }, [source]);
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [voice, setVoice] = useState(initialVoice);
@@ -89,21 +102,46 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
   const finish = useCallback(() => {
     if (canSpeak) window.speechSynthesis.cancel();
     if (markDone) try { localStorage.setItem(TOUR_DONE_KEY, 'true'); } catch { /* sin almacenamiento */ }
+    closeOpened();
     onClose();
   }, [canSpeak, onClose, markDone]);
 
-  // Ubica la parte del paso; si no está en pantalla, pasa a la siguiente en la misma dirección
+  // Lo que el paso abre para mostrarlo (el menú del + o el formulario de gasto). Se cierra al
+  // pasar a un paso que no lo necesita y al terminar.
+  const opened = useRef<TourStep['open'] | null>(null);
+  const closeOpened = () => {
+    if (opened.current) window.dispatchEvent(new Event('flowi-tour-close'));
+    opened.current = null;
+  };
+  useEffect(() => () => closeOpened(), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ubica la parte del paso; si no está en pantalla, pasa a la siguiente en la misma dirección.
+  // Si el paso abre algo, espera un momento a que aparezca.
   useLayoutEffect(() => {
-    if (!step.target) { target.current = null; setRect(null); return; }
-    const el = findTarget(step);
-    if (!el) {
-      const next = index + dir.current;
-      if (steps && next >= 0 && next < steps.length) setIndex(next);
-      return;
+    const want = step.open || null;
+    if (want !== opened.current) {
+      if (want) { window.dispatchEvent(new CustomEvent('flowi-tour-open', { detail: want })); opened.current = want; }
+      else closeOpened();
     }
-    target.current = el;
-    setRect(el.getBoundingClientRect());
-  }, [index, step, steps]);
+    if (!step.target) { target.current = null; setRect(null); return; }
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const locate = () => {
+      const el = findTarget(step);
+      if (!el) {
+        if (want && tries++ < 15) { timer = setTimeout(locate, 120); return; }
+        const next = index + dir.current;
+        if (steps && next >= 0 && next < steps.length) setIndex(next);
+        return;
+      }
+      if (want) scrollWithin(el);
+      target.current = el;
+      setRect(el.getBoundingClientRect());
+    };
+    if (want) { target.current = null; setRect(null); timer = setTimeout(locate, 60); }
+    else locate();
+    return () => { if (timer) clearTimeout(timer); };
+  }, [index, step, steps]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Mide el cuadro después de pintarlo, para ubicarlo sin tapar la parte explicada
   useLayoutEffect(() => {
@@ -115,8 +153,12 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
   useEffect(() => {
     const el = target.current;
     if (!el || !steps) return;
-    const pos = getComputedStyle(el).position;
-    if (pos === 'fixed' || pos === 'sticky' || el.closest('header')) return;
+    // Lo que está fijo en pantalla (el botón +, la barra de abajo, un formulario abierto) no se alcanza bajando la página
+    for (let p: HTMLElement | null = el; p; p = p.parentElement) {
+      const pos = getComputedStyle(p).position;
+      if (pos === 'fixed' || pos === 'sticky') return;
+    }
+    if (el.closest('header') || step.open) return;
     const r = el.getBoundingClientRect();
     const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
     const filter = document.querySelector<HTMLElement>('[data-tour="filter"]');
@@ -216,9 +258,9 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
       <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
       {rect ? (
         <div className={`absolute pointer-events-none transition-all duration-300 ring-2 ring-accent ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}
-             style={{ top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2, boxShadow: '0 0 0 9999px rgba(0,0,0,0.72)' }} />
+             style={{ top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2, boxShadow: `0 0 0 9999px rgba(0,0,0,${isLight ? 0.5 : 0.72})` }} />
       ) : (
-        <div className="absolute inset-0 bg-black/70 pointer-events-none" />
+        <div className={`absolute inset-0 ${isLight ? 'bg-black/50' : 'bg-black/70'} pointer-events-none`} />
       )}
 
       {demo && (
@@ -227,7 +269,7 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
         </div>
       )}
 
-      <div ref={cardRef} className={`absolute glass-dropdown p-4 shadow-2xl animate-fade-in-up ${isTechTheme ? 'rounded-none border border-accent/50 bg-deep' : 'rounded-2xl'}`} style={cardStyle}>
+      <div ref={cardRef} className={`absolute glass-dropdown tour-card p-4 shadow-2xl animate-fade-in-up ${isTechTheme ? 'rounded-none border border-accent/50 bg-deep' : 'rounded-2xl'}`} style={cardStyle}>
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <h3 className={`font-bold ${isTechTheme ? 'text-accent uppercase text-sm' : 'font-syne text-text-primary'}`}>{step.title}</h3>
           <div className="flex items-center gap-1 -mr-1 -mt-1 shrink-0">

@@ -35,6 +35,7 @@ import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi 
 import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
+import { AiConnectGuide } from '@/components/settings/AiConnectGuide';
 
 interface VoiceAssistantModalProps {
   onClose: () => void;
@@ -88,6 +89,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   // Gasto por foto del recibo (usa la misma IA gratuita, con un modelo que lee imágenes)
   const receiptInputRef = useRef<HTMLInputElement>(null);
   const [receiptStatus, setReceiptStatus] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
+  const [showAiGuide, setShowAiGuide] = useState(false); // tutorial de cómo conectar la IA
   const [receiptError, setReceiptError] = useState('');
   // Recibos que le quedan hoy (plan gratis); null = no mostrar
   const [receiptsLeft, setReceiptsLeft] = useState<number | null>(null);
@@ -876,7 +878,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
             >
               <Sparkles className="w-4 h-4" /> {tr('Conectar IA gratis')}
             </button>
+            <button type="button" onClick={() => setShowAiGuide(true)}
+                    className={`w-full mt-2 py-2.5 text-xs font-bold border border-accent/50 text-accent flex items-center justify-center gap-1.5 hover:bg-accent/10 ${isTechTheme ? 'rounded-none uppercase font-mono' : 'rounded-xl'}`}>
+              <Compass className="w-4 h-4" /> {tr('Tutorial: cómo conectarla paso a paso')}
+            </button>
             <p className="text-[10px] text-text-muted mt-2 text-center">{tr('Después vuelve a tomar o compartir la foto.')}</p>
+            {showAiGuide && <AiConnectGuide onClose={() => setShowAiGuide(false)} />}
           </div>
         )}
         {receiptStatus === 'error' && (

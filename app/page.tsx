@@ -24,6 +24,7 @@ import { MonthCloseCard } from '@/components/dashboard/MonthCloseCard';
 import { monthToClose } from '@/lib/monthClose';
 import { useSkippedActions } from '@/components/dashboard/NextActionCard';
 import { NextActionCarousel } from '@/components/dashboard/NextActionCarousel';
+import { WavingHand } from '@/components/dashboard/WavingHand';
 import { useFriends } from '@/components/FriendsProvider';
 import { getAiKey } from '@/lib/aiAssist';
 import { useAccounts } from '@/hooks/useAccounts';
@@ -337,7 +338,7 @@ export default function DashboardPage() {
             <h1 className={`truncate font-bold text-2xl md:text-3xl ${isTechTheme ? 'font-mono uppercase tracking-wider' : 'font-syne'}`}>
               <span className={isTechTheme ? 'text-accent/70' : 'text-text-secondary'}>{greeting},</span>{' '}
               <span className="text-accent">{profile?.name?.split(' ')[0] || tr('Usuario')}</span>{' '}
-              <span className="text-[0.85em] inline-block animate-wave" aria-hidden="true">👋</span>
+              <WavingHand />
             </h1>
           </div>
 

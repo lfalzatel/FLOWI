@@ -100,7 +100,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
 
         <div className="grid grid-cols-4 gap-2">
           {ACTIONS.filter(a => a.id !== featured?.id).map(a => (
-            <button key={a.id} type="button"
+            <button key={a.id} type="button" data-tour={`quick-${a.id}`}
                     onClick={() => {
                       if (a.id === 'foto') {
                         if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }

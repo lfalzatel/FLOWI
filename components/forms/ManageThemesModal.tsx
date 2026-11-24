@@ -3,6 +3,7 @@ import { tr, trTech } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { X, Sun, Moon, Terminal, Layers, Zap, Palette, Check, Sparkles, Star, Flame } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 
 interface Props {
   onClose: () => void;
@@ -99,6 +100,7 @@ export function ManageThemesModal({ onClose }: Props) {
               {isTechTheme ? trTech('PERSONALIZA_LA_APARIENCIA', 'Personaliza la apariencia') : tr('Personaliza la apariencia')}
             </p>
           </div>
+          <PageTourButton id="temas" className="ml-auto mr-8" />
         </div>
 
         <div className="space-y-6">
@@ -107,7 +109,7 @@ export function ManageThemesModal({ onClose }: Props) {
             <p className={`text-sm font-medium text-text-primary mb-3 ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
               {isTechTheme ? trTech('TEMA_VISUAL_ACTIVO', 'Tema Visual Activo') : tr('Tema Visual Activo')}
             </p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2" data-tour="th-grid">
               <button onClick={() => setTheme('light')} className={`flex flex-col items-center justify-center py-3 border transition-all ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${theme === 'light' ? 'bg-accent/10 border-accent text-accent' : 'border-glass-border hover:bg-glass text-text-secondary'}`}>
                 <Sun className="w-5 h-5 mb-1.5" />
                 <span className={`text-xs font-medium ${isTechTheme ? 'font-mono' : ''}`}>{isTechTheme ? trTech('DIA', 'Día') : tr('Día')}</span>
@@ -146,7 +148,7 @@ export function ManageThemesModal({ onClose }: Props) {
           <div className={`h-px w-full ${isTechTheme ? 'bg-accent/20' : 'bg-glass-border'}`} />
 
           {/* Selector rápido en menú */}
-          <div>
+          <div data-tour="th-menu">
             <div className="flex justify-between items-center mb-1">
               <p className={`text-sm font-medium text-text-primary ${isTechTheme ? 'font-mono text-accent/70 uppercase' : ''}`}>
                 {isTechTheme ? trTech('MODOS_EN_MENU', 'Modos en Menú Desplegable') : tr('Modos en Menú Desplegable')}
@@ -211,7 +213,7 @@ export function ManageThemesModal({ onClose }: Props) {
           >
             {isTechTheme ? trTech('CANCELAR', 'Cancelar') : tr('Cancelar')}
           </button>
-          <button
+          <button data-tour="th-save"
             onClick={handleSave}
             disabled={!isValidCount}
             className={`flex-[2] py-3 text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed ${

@@ -45,7 +45,7 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
   if (playStore) return null;
 
   return (
-    <section id="apoyar" className="space-y-3 scroll-mt-24">
+    <section id="apoyar" className="space-y-3 scroll-mt-24" data-tour="cfg-apoyar">
       {onToggle ? (
         <button onClick={onToggle} className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}>
           <h2 className={`${isTechTheme ? 'font-mono font-bold text-sm text-accent uppercase tracking-wide' : 'font-syne font-semibold text-sm text-text-secondary'}`}>{tr('Apoyar a FLOWI')}</h2>

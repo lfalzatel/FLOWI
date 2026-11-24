@@ -659,12 +659,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             </div>
             {!transactionToEdit && !initialVoiceParsed && (
               <>
-                <button type="button" aria-label={t('Dictar')} title={t('Dictar')}
+                <button type="button" aria-label={t('Dictar')} title={t('Dictar')} data-tour="exp-voice"
                         onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice')); }}
                         className={`w-12 shrink-0 flex flex-col items-center justify-center gap-0.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
                   <Mic className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">{t('Voz')}</span>
                 </button>
-                <button type="button" aria-label={t('Foto o pantallazo')} title={t('Foto o pantallazo')}
+                <button type="button" aria-label={t('Foto o pantallazo')} title={t('Foto o pantallazo')} data-tour="exp-photo"
                         onClick={() => {
                           if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
                           // El selector se abre dentro del mismo toque, para que el celular lo permita
@@ -812,7 +812,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                                      fmt={fmt} cents={cents} onChange={setShared} onRemove={() => setShared(null)} />
               </div>
             ) : (
-              <button type="button" onClick={() => setShared(emptySharedDraft())}
+              <button type="button" onClick={() => setShared(emptySharedDraft())} data-tour="exp-shared"
                       className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
                 <Users className="w-4 h-4" /> {t('Compartir este gasto (opcional)')}
               </button>
@@ -854,6 +854,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                       : (isTechTheme ? 'bg-white/5 border border-white/10 text-accent/50 font-mono' : 'bg-white/5 border border-white/10 text-text-muted')
                   }`}
                   title={tr('Cambiar entre Gasto Fijo o Variable')}
+                  data-tour="exp-fixed"
                 >
                   <span>📌 {t('Gasto Fijo')}:</span>
                   <span className={isFixed ? 'font-black underline' : ''}>{isFixed ? t('Sí') : t('No')}</span>
@@ -862,7 +863,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-4 gap-1.5" data-tour="exp-category">
               {quickCategories.map(cat => {
                 const active = cat.label === category;
                 return (
@@ -936,7 +937,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           )}
 
           {/* Payment method */}
-          <div ref={paymentRef} className={`scroll-mt-2 ${step === 'payment' ? 'outline outline-1 outline-accent/60 outline-offset-4' : ''}`}>
+          <div ref={paymentRef} data-tour="exp-account" className={`scroll-mt-2 ${step === 'payment' ? 'outline outline-1 outline-accent/60 outline-offset-4' : ''}`}>
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className={labelClass}>
                 {type === 'gasto' ? t('Pagaste con') : t('Lo recibiste en')} <span className="opacity-70">{t('(opcional)')}</span>
@@ -1059,9 +1060,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
             </div>
           </div>}
           {step === 'amount' && (
-            <AmountKeypad value={amount} isTech={isTechTheme} decimals={cents} nextLabel={t('Siguiente')}
+            <div data-tour="exp-keypad"><AmountKeypad value={amount} isTech={isTechTheme} decimals={cents} nextLabel={t('Siguiente')}
                           onChange={(v) => { setAmount(v); if (items?.length) setAutoSum(false); }}
-                          onNext={afterAmount} />
+                          onNext={afterAmount} /></div>
           )}
             </form>
           </div>

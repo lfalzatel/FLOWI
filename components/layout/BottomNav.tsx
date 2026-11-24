@@ -99,12 +99,24 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     const debtShots = (e: Event) => { setDebtFiles((e as CustomEvent<{ files?: File[] }>).detail?.files || null); setShowSheet(false); setQuick('deuda'); };
     window.addEventListener('flowi-open-debt', debtShots);
     const manual = () => { setShowVoice(false); setReceipt(null); setParsedVoiceData(null); setShowSheet(false); setShowAdd(true); };
+    // El tutorial abre el menú o el formulario de gasto para señalar sus botones, y luego los cierra
+    const tourOpen = (e: Event) => {
+      const what = (e as CustomEvent<'quick' | 'expense'>).detail;
+      setShowVoice(false); setShowAdd(false);
+      if (what === 'quick') { setQuick(null); setShowSheet(true); }
+      else { setShowSheet(false); setQuick('gasto'); }
+    };
+    const tourClose = () => { setShowSheet(false); setQuick(null); };
+    window.addEventListener('flowi-tour-open', tourOpen);
+    window.addEventListener('flowi-tour-close', tourClose);
     window.addEventListener('flowi-open-quick-actions', open);
     window.addEventListener('flowi-open-voice', voice);
     window.addEventListener('flowi-dictate', dictate);
     window.addEventListener('flowi-open-add', manual);
     return () => {
       window.removeEventListener('flowi-open-quick-actions', open);
+      window.removeEventListener('flowi-tour-open', tourOpen);
+      window.removeEventListener('flowi-tour-close', tourClose);
       window.removeEventListener('flowi-open-voice', voice);
       window.removeEventListener('flowi-dictate', dictate);
       window.removeEventListener('flowi-open-add', manual);

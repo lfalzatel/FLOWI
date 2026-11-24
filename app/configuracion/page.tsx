@@ -12,6 +12,7 @@ import { ManageUsersModal } from '@/components/forms/ManageUsersModal';
 import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoundModal';
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 import { SupportProject } from '@/components/settings/SupportProject';
 import { AppLockSettings } from '@/components/settings/AppLockSettings';
 import { removePushToken, syncPushToken } from '@/lib/push';
@@ -371,16 +372,17 @@ export default function ConfigPage() {
             <span className={`text-xs font-medium uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{tr('Centro de Control')}</span>
             <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>{tr('Configuración')}</h1>
           </div>
+          <PageTourButton id="configuracion" className="ml-auto" />
         </div>
 
         {/* Tu plan (Gratis / Premium) con acceso a Planes */}
-        <PlanCard isTechTheme={isTechTheme} />
+        <div data-tour="cfg-plan"><PlanCard isTechTheme={isTechTheme} /></div>
 
         {/* En PC, las secciones en dos columnas; en el celular, una sola en el mismo orden */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div className="min-w-0 space-y-6">
         {/* 1. Cuenta y Perfil */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="cfg-cuenta">
           <button 
             onClick={() => toggleSection('cuenta')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
@@ -446,7 +448,7 @@ export default function ConfigPage() {
         </section>
 
         {/* 1.5 Notificaciones (Simplificada) */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="cfg-notificaciones">
           <button 
             onClick={() => toggleSection('notificaciones')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
@@ -542,7 +544,7 @@ export default function ConfigPage() {
         <AppLockSettings isTechTheme={isTechTheme} open={openSections.seguridad} onToggle={() => toggleSection('seguridad')} />
 
         {/* 1.8 SECCIÓN DEDICADA: Sonidos y Animaciones (Organizada en Acordeones) */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="cfg-sonidos">
           <button 
             onClick={() => toggleSection('sonidos')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
@@ -760,7 +762,7 @@ export default function ConfigPage() {
         </section>
 
         {/* 2. Gestión */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="cfg-gestion">
           <button 
             onClick={() => toggleSection('gestion')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
@@ -825,7 +827,7 @@ export default function ConfigPage() {
         </div>
         <div className="min-w-0 space-y-6">
         {/* 3. Apariencia */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="cfg-apariencia">
           <button 
             onClick={() => toggleSection('apariencia')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
@@ -894,7 +896,7 @@ export default function ConfigPage() {
         <SupportProject isTechTheme={isTechTheme} open={openSections.apoyar} onToggle={() => toggleSection('apoyar')} />
 
         {/* 4. Finanzas */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="cfg-finanzas">
           <button 
             onClick={() => toggleSection('finanzas')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-accent/20 pb-1' : 'ml-2 pr-2'}`}
@@ -973,7 +975,7 @@ export default function ConfigPage() {
         </section>
 
         {/* 6. Datos y Privacidad */}
-        <section className="space-y-3">
+        <section className="space-y-3" data-tour="cfg-privacidad">
           <button 
             onClick={() => toggleSection('privacidad')}
             className={`w-full flex items-center justify-between ${isTechTheme ? 'border-b border-red-500/20 pb-1' : 'ml-2 pr-2'}`}
