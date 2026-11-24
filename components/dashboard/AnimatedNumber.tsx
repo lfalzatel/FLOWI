@@ -20,6 +20,7 @@ export function AnimatedNumber({ value, delay = 0, prefix = '', format, duration
   const [visible, setVisible] = useState(false);
   const [display, setDisplay] = useState(0);
   const current = useRef(0);
+  const [startFrom, setStartFrom] = useState(0); // desde dónde cuenta (para reservar el ancho más grande)
   const frame = useRef<number | null>(null);
 
   const fmt = format || ((n: number) => formatCurrency(n, profile?.currency));
@@ -51,6 +52,7 @@ export function AnimatedNumber({ value, delay = 0, prefix = '', format, duration
     const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const from = current.current;
     const diff = value - from;
+    setStartFrom(from);
     if (reduce || diff === 0) { current.current = value; setDisplay(value); return; }
 
     let start: number | null = null;
@@ -77,6 +79,18 @@ export function AnimatedNumber({ value, delay = 0, prefix = '', format, duration
     };
   }, [visible, value, delay, duration]);
 
-  const text = fmt(visible ? display : 0);
-  return <span ref={ref} className="tabular-nums">{prefix === '$' ? text : `${prefix}${text}`}</span>;
+  const withPrefix = (t: string) => (prefix === '$' ? t : `${prefix}${t}`);
+  const text = withPrefix(fmt(visible ? display : 0));
+  // El espacio del número se reserva desde el principio con el valor final (o el de partida, si es más
+  // ancho): mientras cuenta solo cambian los dígitos y nada alrededor se mueve (antes la ventana "vibraba"
+  // porque el texto se reacomodaba en cada cuadro).
+  const finalText = withPrefix(fmt(value));
+  const fromText = withPrefix(fmt(startFrom));
+  const sizer = fromText.length > finalText.length ? fromText : finalText;
+  return (
+    <span ref={ref} className="tabular-nums inline-grid">
+      <span aria-hidden="true" className="invisible [grid-area:1/1] whitespace-nowrap">{sizer}</span>
+      <span className="[grid-area:1/1] whitespace-nowrap">{text}</span>
+    </span>
+  );
 }
