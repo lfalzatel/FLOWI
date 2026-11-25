@@ -21,6 +21,14 @@
 }
 @media (min-width: 640px) { .ui-sheet { border-radius: 1.5rem; } }
 
+/* Tarjeta de vidrio centrada (avisos y formularios cortos). El vidrio lo pone .glass-dropdown */
+.ui-dialog { position: relative; width: 100%; max-width: 24rem; padding: 1.25rem; border-radius: 1.5rem; }
+.ui-dialog.max-w-md { max-width: 28rem; }
+
+/* Botón X de cerrar en la esquina */
+.ui-close { position: absolute; top: 1rem; right: 1rem; color: var(--text-muted); }
+.ui-close:hover { color: var(--text-primary); }
+
 /* Título de una ventana */
 .ui-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.125rem; color: var(--text-primary); }
 
@@ -57,8 +65,11 @@
 .ui-btn-ghost:hover { color: var(--text-primary); }
 
 /* ── Temas tecnológicos (Cyber y Kilo): esquinas rectas, letra monoespaciada y bordes de acento ── */
-[data-theme='cyberpunk'] :is(.ui-sheet, .ui-option, .ui-icon-box, .ui-btn),
-[data-theme='kiloCode'] :is(.ui-sheet, .ui-option, .ui-icon-box, .ui-btn) { border-radius: 0; }
+[data-theme='cyberpunk'] :is(.ui-sheet, .ui-dialog, .ui-option, .ui-icon-box, .ui-btn),
+[data-theme='kiloCode'] :is(.ui-sheet, .ui-dialog, .ui-option, .ui-icon-box, .ui-btn) { border-radius: 0; }
+[data-theme='cyberpunk'] .ui-dialog, [data-theme='kiloCode'] .ui-dialog {
+  border: 1px solid rgb(var(--accent) / 0.5); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 [data-theme='cyberpunk'] .ui-sheet, [data-theme='kiloCode'] .ui-sheet {
   background: var(--bg-deep); border-color: rgb(var(--accent) / 0.5);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

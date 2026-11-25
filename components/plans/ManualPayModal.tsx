@@ -1,7 +1,6 @@
 'use client';
 import { tr } from '@/lib/i18n';
 import { useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Check, Copy, ImagePlus, Loader2, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +9,7 @@ import { DONATION_KEYS } from '@/lib/donations';
 import { PLANS, PlanOption } from '@/lib/plans';
 import { compressProof, submitManualPayment } from '@/lib/manualPay';
 import { formatCurrency } from '@/lib/format';
+import { Sheet } from '@/components/ui';
 
 // Pagar un plan por transferencia (Bre-B) y enviar el comprobante para que el administrador lo active.
 export function ManualPayModal({ plan: initialPlan, onClose }: { plan: PlanOption['id']; onClose: () => void }) {
@@ -51,17 +51,10 @@ export function ManualPayModal({ plan: initialPlan, onClose }: { plan: PlanOptio
 
   if (typeof document === 'undefined') return null;
   const btn = isTech ? 'rounded-none uppercase text-xs tracking-wider' : 'rounded-xl text-sm';
-  return createPortal(
-    <div className={`fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className={`relative w-full max-w-md max-h-[90dvh] overflow-y-auto p-5 space-y-4 animate-fade-in-up glass-dropdown ${isTech ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className={`text-base font-bold text-text-primary ${isTech ? 'uppercase tracking-wide' : 'font-syne'}`}>{tr('Pagar por transferencia')}</h3>
-            <p className="text-xs text-text-muted">{tr('Envías la plata desde tu banco y nos mandas el comprobante.')}</p>
-          </div>
-          <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
-        </div>
+  return (
+    <Sheet variant="dialog" showClose onClose={onClose} z={120} className="max-w-md max-h-[90dvh] overflow-y-auto space-y-4"
+           title={<span className="text-base">{tr('Pagar por transferencia')}</span>}
+           subtitle={tr('Envías la plata desde tu banco y nos mandas el comprobante.')}>
 
         {state === 'sent' ? (
           <div className="text-center space-y-3 py-4">
@@ -137,8 +130,6 @@ export function ManualPayModal({ plan: initialPlan, onClose }: { plan: PlanOptio
             </button>
           </>
         )}
-      </div>
-    </div>,
-    document.body,
+    </Sheet>
   );
 }

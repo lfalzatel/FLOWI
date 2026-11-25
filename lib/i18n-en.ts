@@ -2821,4 +2821,6 @@ export const EN: Record<string, string> = {
   'Tu seguridad': 'Your security',
   'Volver a Configuración': 'Back to Settings',
   'Puedes cambiar el tema y los colores cuando quieras tocando tu foto de perfil (arriba a la derecha).': 'You can change the theme and colors anytime by tapping your profile photo (top right).',
+  'Con Premium lees recibos sin límite': 'With Premium you read unlimited receipts',
+  'Escribirlo': 'Type it',
 };
