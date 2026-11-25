@@ -161,6 +161,7 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   amigos: [
     { title: tr('Amigos'), text: tr('Busca a tus amigos en FLOWI por nombre o @usuario y envíales una solicitud. Solo ven tu nombre y tu foto, nunca tus cuentas.') },
     { title: tr('Invita con un enlace'), text: tr('Si tu amigo aún no usa FLOWI, copia tu enlace y mándaselo. Al entrar quedan conectados.') },
+    { target: 'friends-repeat', title: tr('La celebración'), text: tr('Cuando haces un amigo nuevo sale una celebración. Cada 20 días vuelve a salir con tu último amigo; si no la quieres, desmarca esta casilla. Un amigo nuevo la vuelve a activar.') },
     { open: 'expense', target: 'exp-shared', title: tr('Compartan gastos'), text: tr('Con amigos agregados, al registrar un gasto toca "Compartir este gasto" y elige con quién. A ellos les llega a su FLOWI y cada uno ve lo que debe.') },
   ],
   compartidos: [

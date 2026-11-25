@@ -5,6 +5,8 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
 import { FriendRequest, PublicProfile, getPublicProfile, otherSide, publishProfile, usernameFor } from '@/lib/friends';
+import { getCelebrated, markCelebrationShown, repeatDue, setCelebrated, setFriendRepeatOn } from '@/lib/friendCelebrate';
+import { isPopupBusy } from '@/lib/tourGate';
 
 // Amigos de la persona en vivo: amigos, solicitudes recibidas y enviadas. También mantiene al día su perfil
 // público (nombre, foto y @usuario) para que la puedan encontrar.
@@ -50,17 +52,40 @@ export function FriendsProvider({ children }: { children: ReactNode }) {
     return () => { alive = false; };
   }, [user?.uid, name, photo]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Amistad nueva durante la sesión (la primera carga no cuenta): celebración
-  const knownFriends = useRef<Set<string> | null>(null);
+  // Amistades nuevas: se celebran una vez (lo celebrado queda guardado en este celular; la primera vez en
+  // un celular, los amigos que ya existían se guardan sin celebrar). Y cada 20 días vuelve a salir la
+  // misma celebración con el último amigo, salvo que se desactive en Amigos; un amigo nuevo la reactiva.
+  const repeatTried = useRef(false);
   useEffect(() => {
-    if (!ready || !user) return;
+    if (!ready || !user || user.isAnonymous) return;
     const accepted = all.filter(r => r.status === 'accepted');
-    const ids = new Set(accepted.map(r => r.id));
-    if (knownFriends.current) {
-      const fresh = accepted.find(r => !knownFriends.current!.has(r.id));
-      if (fresh) { const o = otherSide(fresh, user.uid); triggerFriendCelebration({ name: o.name, photo: o.photo }); }
+    const ids = accepted.map(r => r.id);
+    const saved = getCelebrated(user.uid);
+    if (saved === null) { setCelebrated(user.uid, ids); return; }
+    const fresh = accepted.filter(r => !saved.includes(r.id));
+    if (fresh.length) {
+      setCelebrated(user.uid, [...saved, ...fresh.map(r => r.id)]);
+      const o = otherSide(fresh[fresh.length - 1], user.uid);
+      triggerFriendCelebration({ name: o.name, photo: o.photo });
+      setFriendRepeatOn(true); // un amigo nuevo vuelve a activar la repetición
+      markCelebrationShown(user.uid);
+      return;
     }
-    knownFriends.current = ids;
+    // Repetición cada 20 días con el último amigo (unos segundos después de entrar, sin tapar otras ventanas)
+    if (repeatTried.current || !accepted.length || !repeatDue(user.uid)) return;
+    repeatTried.current = true;
+    const lastId = [...saved].reverse().find(id => ids.includes(id)) || ids[ids.length - 1];
+    const last = accepted.find(r => r.id === lastId);
+    if (!last) return;
+    const o = otherSide(last, user.uid);
+    let tries = 0;
+    const attempt = () => {
+      if (isPopupBusy() && tries++ < 8) { setTimeout(attempt, 15000); return; }
+      if (!repeatDue(user.uid)) return;
+      markCelebrationShown(user.uid);
+      triggerFriendCelebration({ name: o.name, photo: o.photo });
+    };
+    setTimeout(attempt, 12000);
   }, [all, ready, user]);
 
   // Solicitudes donde está la persona (enviadas o recibidas)

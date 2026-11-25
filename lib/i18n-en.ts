@@ -2763,4 +2763,10 @@ export const EN: Record<string, string> = {
   'Toca un nivel y pruébalo abriendo el menú del botón +. Se guarda en este celular, así que en otro celular puedes escoger otro.': 'Tap a level and try it by opening the + button menu. It is saved on this phone, so on another phone you can choose a different one.',
   'Todo aparece al instante, sin movimiento.': 'Everything appears instantly, with no motion.',
   'Ver cómo cambiarlo': 'See how to change it',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Cuando haces un amigo nuevo sale una celebración. Cada 20 días vuelve a salir con tu último amigo; si no la quieres, desmarca esta casilla. Un amigo nuevo la vuelve a activar.': 'When you make a new friend a celebration appears. Every 20 days it shows again with your latest friend; if you do not want it, uncheck this box. A new friend turns it back on.',
+  'La celebración': 'The celebration',
+  'Repetir la celebración de mi último amigo cada {a} días. Si la apagas y haces un amigo nuevo, se vuelve a activar.': 'Repeat the celebration of my latest friend every {a} days. If you turn it off and make a new friend, it turns back on.',
+  'Tú y {a} ya pueden compartir gastos en FLOWI.': 'You and {a} can now share expenses in FLOWI.',
+  '{a} ya no estará en tus amigos. No se le avisa.': '{a} will no longer be in your friends. They are not notified.',
 };

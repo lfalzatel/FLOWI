@@ -1,6 +1,7 @@
 'use client';
 import { tr } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { REPEAT_DAYS, friendRepeatOn, setFriendRepeatOn } from '@/lib/friendCelebrate';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Search, UserPlus, Check, X, MessageCircle, Share2, Clock, UserMinus, Users } from 'lucide-react';
@@ -25,6 +26,9 @@ export default function AmigosPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { me, friends, incoming, outgoing, all, ready, unavailable, setSearchable } = useFriends();
+  // Repetir la celebración del último amigo cada 20 días (en este celular)
+  const [repeatOn, setRepeatOn] = useState(true);
+  useEffect(() => { setRepeatOn(friendRepeatOn()); }, []);
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 
   const [q, setQ] = useState('');
@@ -275,12 +279,16 @@ export default function AmigosPage() {
               <input type="checkbox" checked={me.searchable} onChange={e => setSearchable(e.target.checked).catch(() => {})} className="mt-0.5 w-4 h-4 accent-[var(--accent)]" />
               <span>{tr('Que me encuentren por mi nombre. Si lo apagas, solo te pueden agregar con tu enlace.')}</span>
             </label>
+            <label className="flex items-start gap-2 text-xs text-text-secondary cursor-pointer" data-tour="friends-repeat">
+              <input type="checkbox" checked={repeatOn} onChange={e => { setFriendRepeatOn(e.target.checked); setRepeatOn(e.target.checked); }} className="mt-0.5 w-4 h-4 accent-[var(--accent)]" />
+              <span>{tr('Repetir la celebración de mi último amigo cada {a} días. Si la apagas y haces un amigo nuevo, se vuelve a activar.', { a: REPEAT_DAYS })}</span>
+            </label>
           </section>
         )}
       </main>
       <BottomNav />
-      <ConfirmDialog isOpen={!!removing} title={tr('Eliminar amigo')} confirmText="Sí, eliminar"
-                     message={removing ? `${removing.name.split(/\s+/)[0]} ya no estará en tus amigos. No se le avisa.` : ''}
+      <ConfirmDialog isOpen={!!removing} title={tr('Eliminar amigo')} confirmText={tr('Sí, eliminar')}
+                     message={removing ? tr('{a} ya no estará en tus amigos. No se le avisa.', { a: removing.name.split(/\s+/)[0] }) : ''}
                      onCancel={() => setRemoving(null)}
                      onConfirm={async () => { const r = removing; setRemoving(null); if (r) await removeFriendship(r.id).catch(() => setError(tr('No se pudo eliminar.'))); }} />
     </div>

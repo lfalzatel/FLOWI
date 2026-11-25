@@ -94,7 +94,7 @@ export function FriendCelebration() {
         </div>
         <div className={`transition-all duration-500 ${met ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
           <p className={`text-2xl font-bold ${isTech ? 'text-accent uppercase tracking-wider' : 'text-white font-syne'}`}>{tr('¡Ahora son amigos!')}</p>
-          <p className="text-sm text-white/80 mt-1">Tú y {first} ya pueden compartir gastos en FLOWI.</p>
+          <p className="text-sm text-white/80 mt-1">{tr('Tú y {a} ya pueden compartir gastos en FLOWI.', { a: first })}</p>
         </div>
       </div>
     </div>,
