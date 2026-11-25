@@ -49,8 +49,8 @@ jobs:
           NEXT_PUBLIC_FIREBASE_APP_ID: 1:501090670275:web:1ebfd5841ec8afabc33476
           # Clave pública de push web (Cloud Messaging → Certificados push web)
           NEXT_PUBLIC_FIREBASE_VAPID_KEY: BGugTA8YUa_WOpoiYPW7FGgw9SfD3VBSjmIKJ0oZ73zWEtDLrDOzW5aXD2NL5-lXd_8wLhgt3RHNPocvdv8r5Do
-          # Aviso de mudanza: vacío = apagado. Se enciende con la dirección nueva cuando todo esté listo.
-          NEXT_PUBLIC_MOVE_TO: ''
+          # Aviso de mudanza encendido (2026-11-25): la dirección vieja ofrece "Mudarme" a flowi-9af82.web.app
+          NEXT_PUBLIC_MOVE_TO: https://flowi-9af82.web.app
 
       - name: Publicar en el sitio flowi-gastos
         uses: FirebaseExtended/action-hosting-deploy@v0
