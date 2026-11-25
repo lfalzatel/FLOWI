@@ -25,11 +25,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'FLOWI — Gastos Personales',
     description: 'Registra tus gastos por voz 🎙️, controla tu presupuesto 50/30/20 🎯 y mira tus finanzas en tiempo real 📊.',
-    url: 'https://flowi-gastos.web.app/',
+    url: 'https://flowi-9af82.web.app/',
     siteName: 'FLOWI',
     images: [
       {
-        url: 'https://flowi-gastos.web.app/icons/icon-512.png',
+        url: 'https://flowi-9af82.web.app/icons/icon-512.png',
         width: 512,
         height: 512,
         alt: 'FLOWI App Icon',

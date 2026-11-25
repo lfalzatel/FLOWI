@@ -18,7 +18,7 @@ eq('a lo sumo 80 prefijos', F.searchPrefixes('a'.repeat(40) + ' ' + 'b'.repeat(4
 const req = { id: 'a_b', from: 'a', to: 'b', users: ['a', 'b'], status: 'accepted', fromName: 'Ana', fromPhoto: null, fromUsername: 'ana', toName: 'Beto', toPhoto: 'f.jpg', toUsername: 'beto' };
 eq('el otro, visto desde quien envió', F.otherSide(req, 'a').name, 'Beto');
 eq('el otro, visto desde quien recibió', F.otherSide(req, 'b').name, 'Ana');
-eq('enlace de invitación', F.inviteLink('xyz'), 'https://flowi-gastos.web.app/amigos?u=xyz');
+eq('enlace de invitación', F.inviteLink('xyz'), 'https://flowi-9af82.web.app/amigos?u=xyz');
 eq('WhatsApp trae el enlace', decodeURIComponent(F.friendWhatsapp('Luis Alzate', 'xyz', 'Leidy', true)).includes('/amigos?u=xyz'), true);
 eq('WhatsApp de invitación saluda por el nombre', decodeURIComponent(F.friendWhatsapp('Luis', 'xyz', 'Leidy Marín', false)).includes('Hola Leidy'), true);
 

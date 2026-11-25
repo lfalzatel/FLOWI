@@ -226,7 +226,6 @@ export function withAbsorbed(info: SharedInfo, index: number, when = new Date())
 export interface ShareLinkItem { d: string; a: number; c: string; f: string } // descripción, monto, categoría, fecha YYYY-MM-DD
 export interface ShareLinkData { p?: string; i: ShareLinkItem[] }             // p: nombre de quien cobra
 
-const APP_URL = 'https://flowi-gastos.web.app';
 
 function toBase64Url(s: string) {
   const bytes = new TextEncoder().encode(s);
@@ -242,6 +241,9 @@ function fromBase64Url(s: string) {
 }
 
 const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+// Misma dirección que lib/appUrl.ts (aquí sin importar, para que las pruebas lo carguen solo)
+const APP_URL = 'https://flowi-9af82.web.app';
 
 export function shareLink(data: ShareLinkData, base = APP_URL): string {
   const compact: ShareLinkData = {

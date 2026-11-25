@@ -8,7 +8,8 @@ import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, where 
 import { deleteDoc, setDoc, updateDoc } from './db';
 import { db } from '@/lib/firebase';
 
-export const APP_URL = 'https://flowi-gastos.web.app';
+// Misma dirección que lib/appUrl.ts (aquí sin importar, para que las pruebas lo carguen solo)
+export const APP_URL = 'https://flowi-9af82.web.app';
 
 export interface PublicProfile {
   uid: string;

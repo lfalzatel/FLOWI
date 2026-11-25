@@ -17,7 +17,7 @@ const db = admin.firestore();
 const WOMPI_INTEGRITY = defineSecret('WOMPI_INTEGRITY');
 const WOMPI_EVENTS = defineSecret('WOMPI_EVENTS');
 const WOMPI_PUBLIC_KEY = defineString('WOMPI_PUBLIC_KEY');
-const APP_URL = defineString('APP_URL', { default: 'https://flowi-gastos.web.app' });
+const APP_URL = defineString('APP_URL', { default: 'https://flowi-9af82.web.app' });
 
 // Deben coincidir con lib/plans.ts
 const PLANS = {

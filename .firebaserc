@@ -9,6 +9,13 @@
           "flowi-gastos"
         ]
       }
+    },
+    "flowi-9af82": {
+      "hosting": {
+        "flowi": [
+          "flowi-9af82"
+        ]
+      }
     }
   },
   "etags": {}

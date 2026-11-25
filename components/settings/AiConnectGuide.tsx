@@ -27,7 +27,7 @@ const STEPS: GuideStep[] = lazyT(() => ([
     text: tr('Si aparece otra pantalla preguntando algo más, como créditos o tu uso, vuelve a tocar "Skip".'),
     tip: tr('Otra vez: Skip') },
   { emoji: '✅', title: tr('5. Toca "Authorize"'),
-    text: tr('Verás una pantalla que pide permiso para FLOWI. Revisa que diga flowi-gastos punto web punto app y toca el botón morado "Authorize". No cambies nada más.'),
+    text: tr('Verás una pantalla que pide permiso para FLOWI. Revisa que diga la dirección de FLOWI, que termina en web punto app, y toca el botón morado "Authorize". No cambies nada más.'),
     tip: tr('Botón morado: Authorize') },
   { emoji: '🎉', title: tr('6. ¡Listo!'),
     text: tr('Vuelves a FLOWI y verás "IA conectada". Desde ahí ya puedes dictar con más precisión y llenar con fotos los recibos y tus CDT. Y recuerda: es gratis, no tienes que pagar nada ni ahora ni después.') },

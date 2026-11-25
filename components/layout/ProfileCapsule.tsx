@@ -1,4 +1,5 @@
 'use client';
+import { APP_URL } from '@/lib/appUrl';
 import { tr } from '@/lib/i18n';
 import { usePlayStore } from '@/hooks/usePlayStore';
 import { useState, useRef, useEffect } from 'react';
@@ -185,7 +186,7 @@ export function ProfileCapsule() {
 
   const handleShare = () => {
     const shareMessage = tr('¡Organizar tus finanzas nunca fue tan fácil! 🚀 Con FLOWI puedes registrar tus gastos dictando por voz 🎙️, controlar tu presupuesto con la regla 50/30/20 🎯 y ver estadísticas en tiempo real 📊 sin enredos. ¡Pruébala gratis aquí!');
-    const shareUrl = 'https://flowi-gastos.web.app/';
+    const shareUrl = `${APP_URL}/`;
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({

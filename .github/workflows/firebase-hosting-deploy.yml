@@ -1,4 +1,8 @@
-# Publica FLOWI en Firebase Hosting (sitio flowi-gastos) cada vez que llega un cambio a main.
+# Publica FLOWI cada vez que llega un cambio a main, en sus dos direcciones:
+#  - flowi-9af82.web.app: la casa nueva, dentro del proyecto propio de FLOWI (ahí el inicio de sesión
+#    con Google funciona también en iPhone, porque la página y el inicio de sesión son del mismo sitio).
+#  - flowi-gastos.web.app: la dirección vieja (proyecto tienda-38d40). Sigue funcionando y muestra el
+#    aviso "Mudarme" cuando NEXT_PUBLIC_MOVE_TO tiene la dirección nueva (lib/move.ts).
 # También se puede lanzar a mano desde la pestaña Actions de GitHub ("Run workflow").
 name: Publicar en Firebase Hosting
 
@@ -45,6 +49,8 @@ jobs:
           NEXT_PUBLIC_FIREBASE_APP_ID: 1:501090670275:web:1ebfd5841ec8afabc33476
           # Clave pública de push web (Cloud Messaging → Certificados push web)
           NEXT_PUBLIC_FIREBASE_VAPID_KEY: BGugTA8YUa_WOpoiYPW7FGgw9SfD3VBSjmIKJ0oZ73zWEtDLrDOzW5aXD2NL5-lXd_8wLhgt3RHNPocvdv8r5Do
+          # Aviso de mudanza: vacío = apagado. Se enciende con la dirección nueva cuando todo esté listo.
+          NEXT_PUBLIC_MOVE_TO: ''
 
       - name: Publicar en el sitio flowi-gastos
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -52,5 +58,48 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIENDA_38D40 }}
           projectId: tienda-38d40
+          target: flowi
+          channelId: live
+
+  # Casa nueva: el mismo código compilado con el inicio de sesión en su propia dirección
+  nueva_casa:
+    runs-on: ubuntu-latest
+    env:
+      TIENE_LLAVE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLOWI_9AF82 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Pruebas
+        run: npm test
+
+      - name: Compilar (exportación estática a out/)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyBjLK7qZ_2GOIJW-4oUEwnrU6sev21XJB4
+          # La página y el inicio de sesión en el MISMO sitio (así funciona en iPhone)
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: flowi-9af82.web.app
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: flowi-9af82
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: flowi-9af82.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '501090670275'
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:501090670275:web:1ebfd5841ec8afabc33476
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY: BGugTA8YUa_WOpoiYPW7FGgw9SfD3VBSjmIKJ0oZ73zWEtDLrDOzW5aXD2NL5-lXd_8wLhgt3RHNPocvdv8r5Do
+
+      # Necesita el secreto FIREBASE_SERVICE_ACCOUNT_FLOWI_9AF82 (cuenta de servicio con permiso de
+      # Firebase Hosting en flowi-9af82). Sin él, este paso se salta y se publica a mano.
+      - name: Publicar en flowi-9af82.web.app
+        if: env.TIENE_LLAVE == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLOWI_9AF82 }}
+          projectId: flowi-9af82
           target: flowi
           channelId: live
