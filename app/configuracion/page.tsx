@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -14,6 +14,8 @@ import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoun
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
 import { PageTourButton } from '@/components/tour/PageTourButton';
 import { MotionSetting } from '@/components/settings/MotionSetting';
+import { SettingsHub, CfgKey } from '@/components/settings/SettingsHub';
+import type { PageTourId } from '@/components/tour/tours';
 import { SupportProject } from '@/components/settings/SupportProject';
 import { AppLockSettings } from '@/components/settings/AppLockSettings';
 import { removePushToken, syncPushToken } from '@/lib/push';
@@ -32,6 +34,17 @@ import {
   Calendar, PieChart, Download, Trash2, 
   FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass, Languages } from 'lucide-react';
 import { useT, tr, trTech } from '@/lib/i18n';
+
+// Título y tutorial de cada sección de Configuración
+const CFG_TITLE: Record<CfgKey, string> = {
+  cuenta: 'Cuenta y perfil', seguridad: 'Seguridad', notificaciones: 'Notificaciones', apariencia: 'Apariencia',
+  sonidos: 'Sonidos y animaciones', ia: 'Asistente con IA', finanzas: 'Finanzas', gestion: 'Categorías',
+  privacidad: 'Datos y privacidad', apoyar: 'Apoyar a FLOWI',
+};
+const CFG_TOUR: Record<CfgKey, PageTourId> = {
+  cuenta: 'cfgCuenta', seguridad: 'seguridad', notificaciones: 'cfgNotificaciones', apariencia: 'cfgApariencia',
+  sonidos: 'cfgSonidos', ia: 'cfgIa', finanzas: 'cfgFinanzas', gestion: 'cfgCategorias', privacidad: 'cfgPrivacidad', apoyar: 'apoyar',
+};
 
 export default function ConfigPage() {
   const router = useRouter();
@@ -63,26 +76,44 @@ export default function ConfigPage() {
     seguridad: false
   });
 
-  // Desde el menú de perfil se llega con #apoyar, y desde el aviso "Activa la IA" con #ia: abrir esa sección
-  // Con #temas (enlace "Más temas" del menú de perfil) se abre directo la ventana de temas
+  // Configuración se muestra en mosaicos; cada mosaico abre su sección sola. La sección abierta va en la
+  // dirección (#seguridad, #ia…), así el botón atrás del celular regresa a los mosaicos y los enlaces
+  // de otras partes (menú de perfil, avisos) llegan directo. #temas abre la ventana de temas y
+  // #animaciones abre Apariencia en la fila de animaciones.
+  const [active, setActive] = useState<CfgKey | null>(null);
   useEffect(() => {
+    const keys: CfgKey[] = ['cuenta', 'seguridad', 'notificaciones', 'apariencia', 'sonidos', 'ia', 'finanzas', 'gestion', 'privacidad', 'apoyar'];
     const open = () => {
       const target = window.location.hash.slice(1);
-      if (target === 'apoyar' || target === 'ia') {
-        setOpenSections(prev => ({ ...prev, [target]: true }));
-        setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 300);
-      } else if (target === 'animaciones') {
-        setOpenSections(prev => ({ ...prev, apariencia: true }));
+      const only = (k: CfgKey) => {
+        setActive(k);
+        setOpenSections(prev => {
+          const closed = Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: false }), {} as typeof prev);
+          return { ...closed, [k]: true };
+        });
+        window.scrollTo({ top: 0 });
+      };
+      if ((keys as string[]).includes(target)) only(target as CfgKey);
+      else if (target === 'animaciones') {
+        only('apariencia');
         setTimeout(() => document.getElementById('animaciones')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
       } else if (target === 'temas') {
         setIsThemesModalOpen(true);
         history.replaceState(null, '', window.location.pathname);
-      }
+      } else setActive(null);
     };
     open();
     window.addEventListener('hashchange', open);
     return () => window.removeEventListener('hashchange', open);
   }, []);
+  // Si se entró a la sección desde un mosaico, volver usa el historial (igual que el botón atrás del
+  // celular); si se llegó con un enlace directo, se quita el #sección y se muestran los mosaicos
+  const fromTile = useRef(false);
+  const openTile = (k: CfgKey) => { fromTile.current = true; window.location.hash = k; };
+  const backToTiles = () => {
+    if (fromTile.current) { fromTile.current = false; window.history.back(); }
+    else { history.replaceState(null, '', window.location.pathname); setActive(null); }
+  };
 
   const [openSoundSubSections, setOpenSoundSubSections] = useState({
     acciones: true,
@@ -368,6 +399,18 @@ export default function ConfigPage() {
       <Header />
       <main className="relative flex-1 max-w-2xl lg:max-w-6xl mx-auto w-full space-y-6 animate-fade-in-up p-4 pb-24">
         {/* Header section */}
+        {active ? (
+          <div className="flex items-center gap-3">
+            <button onClick={backToTiles} aria-label={tr('Volver a Configuración')} className={`p-2 -ml-2 rounded-xl transition-colors ${isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-secondary hover:bg-glass'}`}>
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <div className="min-w-0">
+              <span className={`text-xs font-medium uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{tr('Configuración')}</span>
+              <h1 className={`truncate ${isTechTheme ? 'font-mono font-bold text-2xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-2xl text-text-primary'}`}>{tr(CFG_TITLE[active])}</h1>
+            </div>
+            <PageTourButton id={CFG_TOUR[active]} className="ml-auto" />
+          </div>
+        ) : (
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className={`p-2 -ml-2 rounded-xl transition-colors ${isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-secondary hover:bg-glass'}`}>
             <ArrowLeft className="w-6 h-6" />
@@ -378,12 +421,18 @@ export default function ConfigPage() {
           </div>
           <PageTourButton id="configuracion" className="ml-auto" />
         </div>
+        )}
 
         {/* Tu plan (Gratis / Premium) con acceso a Planes */}
-        <div data-tour="cfg-plan"><PlanCard isTechTheme={isTechTheme} /></div>
+        {!active && <div data-tour="cfg-plan"><PlanCard isTechTheme={isTechTheme} /></div>}
+        {!active && <SettingsHub onOpen={openTile} isTech={isTechTheme} />}
 
         {/* En PC, las secciones en dos columnas; en el celular, una sola en el mismo orden */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {active && (
+          <style>{`.cfg-detail [data-tour^="cfg-"]:not([data-tour="cfg-${active}"]) { display: none !important; }
+                   .cfg-detail [data-tour="cfg-${active}"] > button:first-child { display: none !important; }`}</style>
+        )}
+        <div className={`cfg-detail ${active ? 'max-w-2xl' : 'hidden'}`}>
         <div className="min-w-0 space-y-6">
         {/* 1. Cuenta y Perfil */}
         <section className="space-y-3" data-tour="cfg-cuenta">
@@ -829,7 +878,7 @@ export default function ConfigPage() {
         </section>
 
         </div>
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0 space-y-6 mt-6">
         {/* 3. Apariencia */}
         <section className="space-y-3" data-tour="cfg-apariencia">
           <button 

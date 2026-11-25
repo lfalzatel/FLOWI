@@ -105,7 +105,8 @@ export const HOME_TOUR: TourStep[] = lazyT(() => ([
 export type PageTourId =
   | 'gastos' | 'ingresos' | 'deudas' | 'cuentas' | 'inversiones' | 'metas' | 'presupuestos'
   | 'amigos' | 'compartidos' | 'hormiga' | 'recordatorios' | 'recibos' | 'productos'
-  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar' | 'planes' | 'animaciones';
+  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar' | 'planes' | 'animaciones'
+  | 'seguridad' | 'cfgCuenta' | 'cfgNotificaciones' | 'cfgApariencia' | 'cfgSonidos' | 'cfgIa' | 'cfgFinanzas' | 'cfgCategorias' | 'cfgPrivacidad';
 
 
 export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
@@ -206,19 +207,11 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { title: tr('Al empezar el mes'), text: tr('Del 1 al 10 te invito en Inicio a revisar el resumen del mes pasado.') },
   ],
   configuracion: [
-    { title: tr('Configuración'), text: tr('Aquí ajustas FLOWI a tu gusto. Toca el nombre de cada sección para abrirla o cerrarla. Te muestro qué hay en cada una.') },
-    { target: 'cfg-plan', title: tr('Tu plan'), text: tr('Si usas el plan gratis o Premium, y hasta cuándo. Tócalo para ver los planes y lo que incluye cada uno.') },
-    { target: 'cfg-cuenta', title: tr('Cuenta y perfil'), text: tr('Tu nombre, foto y teléfono. Aquí también está "Ver tutorial" para repetir el recorrido de Inicio.') },
-    { target: 'cfg-notificaciones', title: tr('Notificaciones'), text: tr('Actívalas para que te avise de tus pagos y recordatorios, aunque FLOWI esté cerrada. Puedes escoger el tono de la alerta.') },
-    { target: 'cfg-seguridad', title: tr('Seguridad'), text: tr('Bloquea FLOWI con un PIN de 4 números y, si tu celular lo permite, con huella o rostro. Así nadie ve tu plata si toma tu celular.') },
-    { target: 'cfg-sonidos', title: tr('Sonidos y animaciones'), text: tr('Escoge el sonido de cada acción (gastos, ingresos, ediciones) o apágalos.') },
-    { target: 'cfg-gestion', title: tr('Categorías'), text: tr('Cambia los colores e íconos de tus categorías, crea las tuyas o recupera las que ocultaste.') },
-    { target: 'cfg-apariencia', title: tr('Apariencia e idioma'), text: tr('Elige el tema de colores y cuáles salen en el menú rápido de tu foto. También cambias el idioma entre español e inglés.') },
-    { target: 'motion-row', title: tr('Animaciones'), text: tr('Escoge animaciones completas, suaves o apagadas. Si tu celular se siente lento, elige Suaves.') },
-    { target: '#ia', title: tr('Asistente con IA'), text: tr('Conecta la IA gratis para leer recibos con una foto y entender mejor lo que dictas. El botón "Ver paso a paso con voz" te guía en cada pantalla.') },
-    { target: 'cfg-apoyar', title: tr('Apoyar a FLOWI'), text: tr('Si FLOWI te sirve, aquí ves cómo apoyar el proyecto. Es opcional.') },
-    { target: 'cfg-finanzas', title: tr('Finanzas'), text: tr('Tu presupuesto mensual y la moneda en la que ves tus cifras.') },
-    { target: 'cfg-privacidad', title: tr('Datos y privacidad'), text: tr('Descarga tus datos en Excel, borra lo registrado para empezar de cero o elimina tu cuenta. También están la política de privacidad y los términos.') },
+    { title: tr('Configuración'), text: tr('Aquí ajustas FLOWI a tu gusto. Cada mosaico abre una parte, y cada parte tiene su propio botón Tutorial.') },
+    { target: 'cfg-plan', title: tr('Tu plan'), text: tr('Si usas el plan gratis o Premium, y hasta cuándo. Tócalo para ver los planes.') },
+    { target: 'cfg-security-status', title: tr('Tu seguridad'), text: tr('Lo más importante: si el bloqueo con PIN y huella está activo. Si dice Activar, tócalo y te guío.') },
+    { target: 'cfg-search', title: tr('Busca'), text: tr('Escribe lo que necesitas, como huella, tema o moneda, y te muestro dónde está.') },
+    { target: 'cfg-tiles', title: tr('Cada parte, un mosaico'), text: tr('Toca un mosaico para abrir esa parte. Debajo del nombre ves su estado: en verde lo que ya está listo y en ámbar lo que te recomiendo activar.') },
   ],
   temas: [
     { title: tr('Temas'), text: tr('Cambia los colores de toda la app. Prueba varios: el cambio se ve al instante.') },
@@ -227,6 +220,40 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { target: 'th-save', title: tr('Guarda'), text: tr('Toca Guardar cambios para que el menú rápido quede como lo dejaste.') },
   ],
   compartir: SHARE_STEPS(),
+  seguridad: [
+    { title: tr('Protege tu FLOWI'), text: tr('Con el bloqueo, FLOWI pide tu PIN o tu huella al abrirse. Así, si alguien toma tu celular, no puede ver tu plata. Solo funciona en este celular.') },
+    { target: 'lock-pin', title: tr('1. Crea tu PIN'), text: tr('Toca aquí y escribe 4 números que recuerdes; luego repítelos. Desde ese momento FLOWI queda con bloqueo.') },
+    { target: 'lock-bio|lock-pin', title: tr('2. Usa tu huella o tu rostro'), text: tr('Con el PIN creado, activa esto para desbloquear con la huella o el rostro, sin escribir nada. Si tu celular no lo permite, sigues usando el PIN.') },
+    { target: 'lock-delay|lock-pin', title: tr('3. ¿Cuándo volver a pedirlo?'), text: tr('Elige después de cuánto tiempo fuera de FLOWI se vuelve a pedir el PIN o la huella. Si dejas la app un momento, no te lo pide de nuevo.') },
+    { target: 'lock-change|lock-pin', title: tr('Cambiar el PIN'), text: tr('Para cambiarlo, primero escribes el actual. Para quitar el bloqueo, toca de nuevo el interruptor de arriba.') },
+  ],
+  cfgCuenta: [
+    { target: 'cfg-cuenta', title: tr('Cuenta y perfil'), text: tr('Toca Mi perfil para cambiar tu nombre, tu foto y tu teléfono. Aquí también está Ver tutorial, para repetir el recorrido de Inicio.') },
+  ],
+  cfgNotificaciones: [
+    { target: 'cfg-notificaciones', title: tr('Notificaciones'), text: tr('Activa los avisos para que FLOWI te recuerde tus pagos y recordatorios, aunque la app esté cerrada. Si tu celular pregunta, toca Permitir.') },
+    { target: 'cfg-notificaciones', title: tr('Dentro y fuera de la app'), text: tr('Puedes recibirlos en la barra del celular, dentro de FLOWI o ambos, y escoger el tono de la alerta.') },
+  ],
+  cfgApariencia: [
+    { target: 'cfg-apariencia', title: tr('Apariencia'), text: tr('Aquí cambias el tema de colores, el idioma (español o inglés) y las animaciones.') },
+    { target: 'motion-row', title: tr('Animaciones'), text: tr('Completas, suaves o apagadas. Si tu celular se siente lento, elige Suaves.') },
+  ],
+  cfgSonidos: [
+    { target: 'cfg-sonidos', title: tr('Sonidos y animaciones'), text: tr('Escoge el sonido de cada acción (gastos, ingresos, ediciones) o apágalos, y si quieres efectos como el confeti.') },
+  ],
+  cfgIa: [
+    { target: 'cfg-ia', title: tr('Asistente con IA'), text: tr('Conecta la IA gratis para leer recibos con una foto y entender mejor lo que dictas. Nunca te pedirá pagar.') },
+    { target: 'cfg-ia', title: tr('Paso a paso con voz'), text: tr('Toca "Conectar IA gratis" y, si te pierdes, el botón del paso a paso te guía en cada pantalla. Si te pide tarjeta, no la pongas: toca Later o Skip.') },
+  ],
+  cfgFinanzas: [
+    { target: 'cfg-finanzas', title: tr('Finanzas'), text: tr('Tu presupuesto mensual (cuánto quieres gastar como máximo) y la moneda en la que ves tus cifras.') },
+  ],
+  cfgCategorias: [
+    { target: 'cfg-gestion', title: tr('Categorías'), text: tr('Cambia los colores e íconos de tus categorías, crea las tuyas o recupera las que ocultaste.') },
+  ],
+  cfgPrivacidad: [
+    { target: 'cfg-privacidad', title: tr('Datos y privacidad'), text: tr('Descarga tus datos en Excel, borra lo registrado para empezar de cero o elimina tu cuenta. Eliminar la cuenta no se puede deshacer.') },
+  ],
   animaciones: [
     { title: tr('Animaciones'), text: tr('Escoge cuánto movimiento quieres en FLOWI. Solo cambia la apariencia: tus datos y funciones son los mismos.') },
     { target: 'motion-options', title: tr('Elige un nivel'), text: tr('Completas: las ventanas nacen del botón que tocas, con un pequeño rebote. Suaves: más livianas, ideales si tu celular se siente lento. Apagadas: todo aparece al instante.') },

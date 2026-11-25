@@ -20,10 +20,12 @@ import {
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
   Sun, Monitor, Terminal, Moon, Layers, Heart, Compass,
-  Crown, ShieldCheck, Sparkles, Star, Flame, Gem } from 'lucide-react';
+  Crown, ShieldCheck, Sparkles, Star, Flame, Gem, Fingerprint } from 'lucide-react';
+import { getLock, LOCK_EVENT } from '@/lib/appLock';
 
 const menuItems = [
   { icon: User,       label: 'Mi perfil',         href: '#',              divider: false, soon: false },
+  { icon: Fingerprint, label: 'Bloqueo con huella', href: '/configuracion#seguridad', divider: false, soon: false },
 
   { icon: Download,   label: 'Instalar app',      href: '#',              divider: false, soon: false },
   { icon: Share2,     label: 'Compartir app',     href: '#',              divider: false, soon: false },
@@ -39,6 +41,14 @@ export function ProfileCapsule() {
   const { user, profile } = useAuth();
   const { theme, setTheme, allowedThemes } = useTheme();
   const playStore = usePlayStore();
+  // ¿Tiene el bloqueo con PIN/huella activo en este celular? (para el aviso del menú)
+  const [lockOn, setLockOn] = useState(false);
+  useEffect(() => {
+    const read = () => setLockOn(!!getLock(user?.uid));
+    read();
+    window.addEventListener(LOCK_EVENT, read);
+    return () => window.removeEventListener(LOCK_EVENT, read);
+  }, [user?.uid]);
   const [open, setOpen]   = useState(false);
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -444,6 +454,12 @@ export function ProfileCapsule() {
                       <item.icon className="w-3.5 h-3.5" />
                     </div>
                     <span className={`text-sm ${isTechTheme ? 'font-mono text-accent uppercase tracking-wide' : ''}`}>{tr(item.label)}</span>
+                    {/* Bloqueo: se ve de un vistazo si está activo o conviene activarlo */}
+                    {item.href === '/configuracion#seguridad' && (
+                      <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] font-bold ${lockOn ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-400 text-black'}`}>
+                        {lockOn ? tr('Activo') : tr('Activar')}
+                      </span>
+                    )}
                     {item.href === '/planes' && pendingReceipts > 0 && (
                       <span className="ml-auto px-1.5 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-bold">{pendingReceipts} por revisar</span>
                     )}

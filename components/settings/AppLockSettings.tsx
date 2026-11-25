@@ -91,7 +91,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
       )}
       {(!onToggle || open) && (
         <div className={`overflow-hidden animate-fade-in ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
-          <button type="button" onClick={() => go(lock ? 'verify-off' : 'new')} className={row}>
+          <button type="button" data-tour="lock-pin" onClick={() => go(lock ? 'verify-off' : 'new')} className={row}>
             <div className="flex items-center gap-3">
               <div className={icon}><Lock className="w-4 h-4 text-accent" /></div>
               <div className={`text-left ${mono}`}>
@@ -105,7 +105,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
           {lock && (
             <>
               {bioAvail && (
-                <button type="button" disabled={busy} onClick={() => lock.credId ? disableBiometric(uid!) : turnOnBio()} className={row}>
+                <button type="button" data-tour="lock-bio" disabled={busy} onClick={() => lock.credId ? disableBiometric(uid!) : turnOnBio()} className={row}>
                   <div className="flex items-center gap-3">
                     <div className={icon}><Fingerprint className="w-4 h-4 text-accent" /></div>
                     <div className={`text-left ${mono}`}>
@@ -125,7 +125,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
                     <p className="text-[10px] text-text-muted">{tr('Después de estar fuera de FLOWI')}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" data-tour="lock-delay">
                   {DELAYS.map(d => (
                     <button key={d.sec} type="button" onClick={() => uid && setDelay(uid, d.sec)}
                             className={`px-2 py-2 text-xs font-medium border transition-colors ${isTechTheme ? 'rounded-none' : 'rounded-xl'} ${lock.delaySec === d.sec ? 'border-accent bg-accent/10 text-accent' : 'border-glass-border text-text-secondary hover:bg-glass'}`}>
@@ -135,7 +135,7 @@ export function AppLockSettings({ isTechTheme, open = true, onToggle }: { isTech
                 </div>
               </div>
 
-              <button type="button" onClick={() => go('verify-change')} className={`${row} border-b-0`}>
+              <button type="button" data-tour="lock-change" onClick={() => go('verify-change')} className={`${row} border-b-0`}>
                 <div className="flex items-center gap-3">
                   <div className={icon}><KeyRound className="w-4 h-4 text-accent" /></div>
                   <p className={`text-sm font-medium text-text-primary ${mono}`}>{tr('Cambiar el PIN')}</p>
