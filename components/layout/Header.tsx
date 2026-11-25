@@ -147,10 +147,13 @@ export function Header() {
     <header
       ref={headerRef}
       className={`
-        sticky top-0 z-[60] w-full px-4 py-3
+        sticky top-0 z-[60] w-full px-4 pb-3
         flex items-center justify-between
         transition-all duration-300 ease-out bg-transparent
       `}
+      // En celulares con cámara en la pantalla (iPhone con isla, Android con agujero) el sistema dice
+      // cuánto ocupa arriba (safe-area-inset-top): el encabezado baja eso y nada queda debajo de la cámara
+      style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
     >
       {/* Background that appears on scroll */}
       <div 

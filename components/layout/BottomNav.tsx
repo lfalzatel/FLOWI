@@ -168,7 +168,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       `}</style>
 
       {/* Main Container for Nav and FAB (Side by Side) */}
-      <div className="md:hidden fixed bottom-5 left-0 right-0 z-50 flex items-center justify-between pointer-events-none px-2 w-full max-w-[100vw]">
+      <div className="md:hidden fixed left-0 right-0 z-50 flex items-center justify-between pointer-events-none px-2 w-full max-w-[100vw]" style={{ bottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}>
         
         {/* Navigation Menu */}
         <nav

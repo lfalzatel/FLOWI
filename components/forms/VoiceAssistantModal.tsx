@@ -1,5 +1,6 @@
 'use client';
 import { ModalBackdrop } from '@/components/effects/ModalBackdrop';
+import { MAX_LISTEN_MS, SILENCE_MS, transcriptFromEvent } from '@/lib/speechInput';
 import { currentLocale, tr } from '@/lib/i18n';
 
 import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
@@ -216,21 +217,39 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     // Con la app en inglés, el micrófono escucha en inglés
     rec.lang = appSpeechLang() === 'en' ? 'en-US' : (locale.language || 'es-CO');
 
+    // En iPhone el micrófono no se cierra solo: se cierra tras un silencio corto (o a los 15 s).
+    // Cuando termina, se ignora todo lo que llegue después (en iPhone seguía llegando texto y
+    // volvía a armar la lista, con registros repetidos que reaparecían al borrarlos).
+    let finished = false;
+    let silenceTimer: ReturnType<typeof setTimeout> | undefined;
+    let maxTimer: ReturnType<typeof setTimeout> | undefined;
+    const clearTimers = () => { clearTimeout(silenceTimer); clearTimeout(maxTimer); };
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      clearTimers();
+      try { rec.stop(); } catch (e) {}
+      setIsListening(false);
+    };
+
     rec.onstart = () => {
       setIsListening(true);
       setErrorMsg(null);
+      maxTimer = setTimeout(finish, MAX_LISTEN_MS);
     };
 
     rec.onresult = (event: any) => {
-      let currentTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        currentTranscript += event.results[i][0].transcript;
-      }
-      setTranscript(currentTranscript);
+      if (finished || recognitionRef.current !== rec) return;
+      setTranscript(transcriptFromEvent(event));
+      clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(finish, SILENCE_MS);
     };
 
     rec.onerror = (event: any) => {
       console.warn('Error en voz:', event.error);
+      if (recognitionRef.current !== rec) return;
+      finished = true;
+      clearTimers();
       setIsListening(false);
       if (event.error === 'no-speech') {
         setErrorMsg(tr('No se escuchó nada. Toca el micrófono y vuelve a hablar.'));
@@ -242,6 +261,9 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     };
 
     rec.onend = () => {
+      if (recognitionRef.current !== rec) return;
+      finished = true;
+      clearTimers();
       setIsListening(false);
     };
 

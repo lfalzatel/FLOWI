@@ -3,6 +3,7 @@ import { tr } from '@/lib/i18n';
 import { appSpeechLang } from '@/lib/voiceParser';
 import { englishToParserText } from '@/lib/voiceEnglish';
 import { useEffect, useRef, useState } from 'react';
+import { MAX_LISTEN_MS, SILENCE_MS, transcriptFromEvent } from '@/lib/speechInput';
 import { Mic, MicOff } from 'lucide-react';
 
 // Botón para dictar dentro de un formulario: escucha, muestra lo que va entendiendo y entrega el texto.
@@ -32,20 +33,32 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
     textRef.current = '';
     setHeard('');
     setMsg('');
-    rec.onstart = () => setListening(true);
+    // En iPhone el micrófono no se cierra solo y repite frases: se cierra tras un silencio corto
+    // (o a los 15 s), se limpia la frase y se usa UNA sola vez.
+    let done = false;
+    let silenceTimer: ReturnType<typeof setTimeout> | undefined;
+    let maxTimer: ReturnType<typeof setTimeout> | undefined;
+    const clearTimers = () => { clearTimeout(silenceTimer); clearTimeout(maxTimer); };
+    rec.onstart = () => { setListening(true); maxTimer = setTimeout(() => { try { rec.stop(); } catch { /* nada */ } }, MAX_LISTEN_MS); };
     rec.onresult = (e: any) => {
-      let t = '';
-      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      if (done) return;
+      const t = transcriptFromEvent(e);
       textRef.current = t;
       setHeard(t);
+      clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => { try { rec.stop(); } catch { /* nada */ } }, SILENCE_MS);
     };
     rec.onerror = (e: any) => {
+      clearTimers();
       setListening(false);
       if (e.error === 'not-allowed') setMsg(tr('Permiso de micrófono denegado.'));
       else if (e.error === 'no-speech') setMsg(tr('No se escuchó nada. Toca y vuelve a hablar.'));
     };
     rec.onend = () => {
+      clearTimers();
       setListening(false);
+      if (done) return;
+      done = true;
       const heardText = textRef.current.trim();
       // En inglés se pasa a la forma que entienden los formularios (montos, fechas y verbos en español)
       const t = appSpeechLang() === 'en' ? englishToParserText(heardText) : heardText;
