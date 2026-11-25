@@ -70,7 +70,7 @@ autorización del dueño.
 ## 5. Estado del orden (plan en curso)
 
 - [x] Sitio de pruebas (staging) antes de publicar.
-- [ ] Kit de componentes en `components/ui/` (tarjeta, botón, ventana, menú de abajo).
+- [~] Kit de componentes en `components/ui/` + estilos por tema en `app/ui-kit.css`: listo `Sheet`, `Button`, `OptionRow`, `Card` y `useThemeKind()`. Migradas: `InvestmentKindSheet`. Faltan las demás ventanas y botones.
 - [ ] Temas solo por variables (quitar las ramas `theme === …` de las pantallas).
 - [ ] Dividir los archivos más grandes: `VoiceAssistantModal`, `AddExpenseModal`, `configuracion/page`, `AddDebtModal`.
 - [ ] Pruebas automáticas de pantallas (Playwright) con un usuario invitado.
