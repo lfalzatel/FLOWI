@@ -36,19 +36,24 @@ import { formatCurrency } from '@/lib/format';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
 import { AiConnectGuide } from '@/components/settings/AiConnectGuide';
+import { VoiceDraft, clearDraft, clearReceiptPhotos, saveDraft, saveReceiptPhotos } from '@/lib/drafts';
 
 interface VoiceAssistantModalProps {
   onClose: () => void;
   onSelectParsed: (result: ParsedVoiceResult) => void;
   onOpenManual: () => void;
   onSuccessBulk?: () => void;
+  // Recuperar lo que la IA ya había leído antes de una recarga (lib/drafts.ts)
+  restore?: VoiceDraft | null;
+  // La foto viene de un borrador: se vuelve a leer sin contar como un recibo más del día
+  resumeRead?: boolean;
   // Desde el menú del botón flotante: abrir directo con la foto de un recibo (sin saludo ni micrófono)
   receipt?: File | File[] | 'no-key' | null;
   // Página desde donde se abrió: cambia el saludo, el ejemplo y lo que se asume si no se dice
   context?: 'gasto' | 'ingreso' | 'deuda' | null;
 }
 
-export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk, receipt = null, context = null }: VoiceAssistantModalProps) {
+export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onSuccessBulk, receipt = null, context = null, restore = null, resumeRead = false }: VoiceAssistantModalProps) {
   const router = useRouter();
   const { theme } = useTheme();
   const { user, profile } = useAuth();
@@ -93,6 +98,12 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const [receiptError, setReceiptError] = useState('');
   // Recibos que le quedan hoy (plan gratis); null = no mostrar
   const [receiptsLeft, setReceiptsLeft] = useState<number | null>(null);
+  // Borrador de lo leído con IA: se guarda mientras se revisa y se borra al cerrar la ventana
+  // (si la app se recarga, la ventana no alcanza a cerrarse y se puede recuperar al volver)
+  useEffect(() => {
+    if (receiptStatus === 'done' && parsedResults.length) saveDraft<VoiceDraft>('voice', { results: parsedResults, readKind });
+  }, [receiptStatus, parsedResults, readKind]);
+  useEffect(() => () => { clearDraft('voice'); clearReceiptPhotos().catch(() => {}); }, []);
   // "Otra foto" sobre un recibo ya leído no gasta otro recibo (hasta 3 veces por apertura)
   const retakeNextRef = useRef(false);
   const freeRetakesRef = useRef(0);
@@ -127,7 +138,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     setReceiptStatus('loading');
     aiRequestRef.current++; // descarta respuestas de IA de un dictado anterior
     setAiStatus('idle');
+    // La foto queda guardada en el celular mientras la IA lee: si la app se recarga, se retoma sin volver a tomarla
+    saveReceiptPhotos(Array.isArray(file) ? file : [file]).catch(() => {});
     const read = await readReceiptWithAi(file, allCategories);
+    clearReceiptPhotos().catch(() => {});
     if (read.ok) {
       // Movimientos del banco: la cuenta del pantallazo queda marcada y se avisa lo que ya estaba registrado
       const bankKey = read.bank ? normalizeText(read.bank) : '';
@@ -295,8 +309,13 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       : context === 'deuda' ? tr('¿Qué deuda o abono quieres registrar?')
       : tr('¡Hola! ¿Qué deseas registrar hoy? Un gasto, un ingreso, una deuda, una nota o un recordatorio.');
     
-    if (receipt === 'no-key') setReceiptStatus('no-key');
-    else if (receipt) handleReceiptFile(receipt);
+    if (restore?.results?.length) {
+      // Vuelve lo que la IA había leído (con las correcciones), tal cual quedó antes de la recarga
+      setReadKind(restore.readKind);
+      setParsedResults(restore.results as any);
+      setReceiptStatus('done');
+    } else if (receipt === 'no-key') setReceiptStatus('no-key');
+    else if (receipt) handleReceiptFile(receipt, resumeRead);
     else {
       // Encender el micrófono ÚNICAMENTE cuando la voz parlante termine de hablar (0 solapamiento)
       speakText(greetingText, locale.language, () => {

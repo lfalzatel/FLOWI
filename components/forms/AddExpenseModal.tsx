@@ -45,6 +45,7 @@ import { cleanExpr, displayExpr, evalAmount, hasOperator } from '@/lib/amountExp
 import { CalendarDays, ChevronDown } from 'lucide-react';
 import { useT, currentLocale, tr } from '@/lib/i18n';
 import { SaleCostsEditor, SaleCostDraft, costLabel } from '@/components/forms/SaleCostsEditor';
+import { ExpenseDraft, clearDraft, saveDraft } from '@/lib/drafts';
 
 interface AddExpenseModalProps {
   onClose: () => void;
@@ -52,6 +53,8 @@ interface AddExpenseModalProps {
   transactionToEdit?: Transaction;
   initialType?: 'gasto' | 'ingreso';
   initialVoiceParsed?: ParsedVoiceResult;
+  // Gasto a medio llenar que se recupera después de una recarga (lib/drafts.ts)
+  restoreDraft?: ExpenseDraft | null;
   initialBusiness?: boolean; // abrir ya marcado como del negocio (desde Mi negocio)
   initialShared?: boolean;   // abrir ya con "Gasto compartido" (desde Cuentas compartidas)
   initialValues?: { amount?: number; description?: string; category?: string; date?: string }; // p. ej. desde un enlace compartido
@@ -65,7 +68,7 @@ function toTimeString(d: Date): string {
 const VISIBLE_MERCHANTS = 8;
 const VISIBLE_PAYMENTS = 5;
 
-export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTarget, initialType = 'gasto', initialVoiceParsed, initialBusiness = false, initialShared = false, initialValues }: AddExpenseModalProps) {
+export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTarget, initialType = 'gasto', initialVoiceParsed, initialBusiness = false, initialShared = false, initialValues, restoreDraft = null }: AddExpenseModalProps) {
   // Desde un informe puede llegar una parte de un recibo (expandByItems): se edita el gasto completo
   const { transactions: allTx } = useData();
   const transactionToEdit = editTarget?._partOf ? allTx.find(t => t.id === editTarget._partOf) || editTarget : editTarget;
@@ -75,30 +78,30 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const { expenseCategories, incomeCategories } = useCategories();
   const { transactions } = useData();
 
-  const [type, setType] = useState<'gasto' | 'ingreso'>(initialVoiceParsed?.type === 'ingreso' ? 'ingreso' : initialType);
-  const [amount, setAmount] = useState(initialVoiceParsed?.amount ? initialVoiceParsed.amount.toString() : initialValues?.amount ? String(initialValues.amount) : '');
-  const [description, setDescription] = useState(initialVoiceParsed?.description || initialValues?.description || '');
-  const [category, setCategory] = useState(initialVoiceParsed?.category || initialValues?.category || '');
+  const [type, setType] = useState<'gasto' | 'ingreso'>(restoreDraft?.type || (initialVoiceParsed?.type === 'ingreso' ? 'ingreso' : initialType));
+  const [amount, setAmount] = useState(restoreDraft?.amount || (initialVoiceParsed?.amount ? initialVoiceParsed.amount.toString() : initialValues?.amount ? String(initialValues.amount) : ''));
+  const [description, setDescription] = useState(restoreDraft?.description || initialVoiceParsed?.description || initialValues?.description || '');
+  const [category, setCategory] = useState(restoreDraft?.category || initialVoiceParsed?.category || initialValues?.category || '');
   // Mi negocio: costos de esta venta (producto, envío…); se guardan como gastos del negocio unidos a la venta
   const [saleCosts, setSaleCosts] = useState<SaleCostDraft[]>([]);
   // Gasto compartido (null = no se compartió)
   const [shared, setShared] = useState<SharedDraft | null>(initialShared ? emptySharedDraft() : null);
-  const [merchant, setMerchant] = useState('');
+  const [merchant, setMerchant] = useState(restoreDraft?.merchant || '');
   const [items, setItems] = useState<ReceiptItem[] | undefined>(undefined); // productos de la compra (undefined = sin lista)
   const [autoSum, setAutoSum] = useState(false); // el monto sigue a la suma de los productos
   const [split, setSplit] = useState(false);     // un recibo es una sola compra: no se reparte en varios gastos
-  const [paymentMethod, setPaymentMethod] = useState('');
-  const [isFixed, setIsFixed] = useState(initialVoiceParsed?.isFixed || false);
+  const [paymentMethod, setPaymentMethod] = useState(restoreDraft?.paymentMethod || '');
+  const [isFixed, setIsFixed] = useState(restoreDraft?.isFixed ?? (initialVoiceParsed?.isFixed || false));
   // Modo negocio: se marca solo con categorías de negocio (Venta, Inventario…) y se puede cambiar
   const [isBusiness, setIsBusiness] = useState(() => initialBusiness ||
     (initialVoiceParsed?.category ? isBusinessCategory(initialVoiceParsed.category, initialVoiceParsed.type === 'ingreso' ? 'ingreso' : initialType) : false));
-  const [date, setDate] = useState(initialValues?.date || getLocalDateString());
+  const [date, setDate] = useState(restoreDraft?.date || initialValues?.date || getLocalDateString());
   const [showDate, setShowDate] = useState(false);
   // Registro rápido en el celular: monto (teclado propio) → en qué fue (opcional) → categoría → con qué pagaste.
   // Cada paso lleva la pantalla a lo que toca. "Añadir" aparece al llegar a la forma de pago (ya con categoría),
   // para que no se guarden gastos sin categoría por tocarlo antes de tiempo.
   const [isTouch] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches);
-  const prefilled = !!(editTarget || initialVoiceParsed?.amount || initialValues?.amount);
+  const prefilled = !!(editTarget || initialVoiceParsed?.amount || initialValues?.amount || restoreDraft?.amount);
   type Step = 'amount' | 'description' | 'category' | 'payment' | null;
   const [step, setStep] = useState<Step>(() => (isTouch && !prefilled ? 'amount' : null));
   const amountRef = useRef<HTMLDivElement>(null);
@@ -121,7 +124,16 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     return () => { v.removeEventListener('resize', on); v.removeEventListener('scroll', on); };
   }, []);
   // Hora local "HH:MM"; por defecto la actual y editable para gastos pasados o futuros
-  const [time, setTime] = useState(() => toTimeString(new Date()));
+  const [time, setTime] = useState(() => restoreDraft?.time || toTimeString(new Date()));
+
+  // Borrador: si la app se recarga mientras se llena un gasto nuevo, se puede recuperar al volver.
+  // Al cerrar el formulario (guardar o cancelar) el borrador se borra.
+  useEffect(() => {
+    if (editTarget) return;
+    if (!amount && !description.trim()) { clearDraft('expense'); return; }
+    saveDraft<ExpenseDraft>('expense', { type, amount, description, category, merchant, paymentMethod, isFixed, date, time });
+  }, [editTarget, type, amount, description, category, merchant, paymentMethod, isFixed, date, time]);
+  useEffect(() => () => { if (!editTarget) clearDraft('expense'); }, [editTarget]);
   const [loading, setLoading] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [showAllMerchants, setShowAllMerchants] = useState(false);
@@ -800,7 +812,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 )}
               </div>
             ) : (
-              <button type="button" onClick={() => { setItems([]); setAutoSum(!amountNum); }}
+              <button type="button" data-tour="exp-items" onClick={() => { setItems([]); setAutoSum(!amountNum); }}
                       className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
                 <ReceiptText className="w-4 h-4" /> {t('Agregar productos (opcional)')}
               </button>

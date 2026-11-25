@@ -22,6 +22,8 @@ import { SavingsFormModal } from '@/components/investments/SavingsFormModal';
 import { InvestmentKindSheet } from '@/components/investments/InvestmentKindSheet';
 import type { InvestmentKind } from '@/lib/firestore';
 import { QuickAction, QuickActionsSheet, QuickContext } from '@/components/layout/QuickActionsSheet';
+import { DraftRecovery } from '@/components/layout/DraftRecovery';
+import type { ExpenseDraft, VoiceDraft } from '@/lib/drafts';
 import { AppTour, readTourVoicePref } from '@/components/tour/AppTour';
 import { PAGE_TOURS, PageTourId } from '@/components/tour/tours';
 
@@ -50,6 +52,10 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [pageTour, setPageTour] = useState<PageTourId | null>(null); // tutorial corto pedido desde el menú o una tarjeta
   const [quick, setQuick] = useState<Exclude<QuickAction, 'voz' | 'extracto'> | null>(null);
   const [receipt, setReceipt] = useState<File | File[] | 'no-key' | null>(null);
+  // Lo que se retoma después de una recarga (components/layout/DraftRecovery)
+  const [voiceRestore, setVoiceRestore] = useState<VoiceDraft | null>(null);
+  const [resumeRead, setResumeRead] = useState(false);
+  const [expenseRestore, setExpenseRestore] = useState<ExpenseDraft | null>(null);
   const router = useRouter();
   const { profile, user } = useAuth();
   // Mantener presionado = hablar directo (como antes)
@@ -231,7 +237,9 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
         <VoiceAssistantModal
           receipt={receipt}
           context={pageContext}
-          onClose={() => { setShowVoice(false); setReceipt(null); }}
+          restore={voiceRestore}
+          resumeRead={resumeRead}
+          onClose={() => { setShowVoice(false); setReceipt(null); setVoiceRestore(null); setResumeRead(false); }}
           onSuccessBulk={onSuccess}
           onSelectParsed={(result) => {
             setShowVoice(false);
@@ -248,6 +256,12 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
       {pageTour && <AppTour voice={readTourVoicePref()} steps={PAGE_TOURS[pageTour]} markDone={false} onClose={() => setPageTour(null)} />}
 
+      <DraftRecovery
+        onVoice={(d) => { setParsedVoiceData(null); setReceipt(null); setVoiceRestore(d); setShowVoice(true); }}
+        onPhotos={(files) => { setVoiceRestore(null); setResumeRead(true); setReceipt(files); setShowVoice(true); }}
+        onExpense={(d) => { setExpenseRestore(d); setQuick(d.type === 'ingreso' ? 'ingreso' : 'gasto'); }}
+      />
+
       {showSheet && (
         <QuickActionsSheet
           context={sheetContext}
@@ -259,7 +273,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
       {/* Formularios abiertos desde el menú del botón */}
       {(quick === 'gasto' || quick === 'ingreso') && (
-        <AddExpenseModal initialType={quick} onClose={closeQuick} onSuccess={onSuccess} />
+        <AddExpenseModal initialType={quick} restoreDraft={expenseRestore} onClose={() => { setExpenseRestore(null); closeQuick(); }} onSuccess={onSuccess} />
       )}
       {quick === 'deuda' && <AddDebtModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} initialShots={debtFiles} />}
       {quick === 'recordatorio' && <ReminderFormModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}
