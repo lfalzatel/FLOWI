@@ -674,3 +674,16 @@ textarea:-webkit-autofill {
 [data-motion='off'] :is(.flow-lines-pulse, .flow-lines-coin, .flow-lines-drift) { animation: none !important; }
 [data-motion='soft'] .flow-lines-coin, [data-motion='off'] .flow-lines-coin { filter: none; opacity: 0; }
 [data-motion='soft'] .animate-pulse-glow { animation: none; }
+
+/* Mantener presionado un botón (p. ej. el micrófono) no debe seleccionar texto ni abrir el menú de copiar
+   del celular. Los campos de texto siguen permitiendo seleccionar y pegar. */
+button, [role='button'], a, h1, h2, h3, .voice-modal, .ui-sheet, .ui-dialog, nav {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, [contenteditable='true'], .voice-modal input, .voice-modal textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
