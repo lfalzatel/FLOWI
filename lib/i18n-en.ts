@@ -2962,4 +2962,6 @@ export const EN: Record<string, string> = {
   // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
   'Entrando…': 'Signing in…',
   'Elige tu cuenta de Google. En un momento abrimos tu FLOWI.': 'Choose your Google account. We will open your FLOWI in a moment.',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Activar avisos de pagos y recordatorios': 'Turn on payment and reminder alerts',
 };

@@ -2,10 +2,11 @@
 import { useEffect, useState } from 'react';
 import { signInWithCustomToken } from 'firebase/auth';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { CheckCircle2, Loader2, Share, MoreVertical, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Loader2, Share, MoreVertical, AlertTriangle, Bell } from 'lucide-react';
 import { app, auth } from '@/lib/firebase';
 import { tr } from '@/lib/i18n';
 import { applyPrefs } from '@/lib/move';
+import { askForNotifications, notificationsState } from '@/lib/notifPrompt';
 
 // Llegada a la nueva dirección (lib/move.ts): canjea el código de un solo uso por la sesión de la
 // misma cuenta, guarda los ajustes que trajo y explica cómo instalar FLOWI aquí.
@@ -68,6 +69,12 @@ export default function MudanzaPage() {
               <p className="text-xs text-text-secondary">{tr('Después borra el ícono viejo de FLOWI para no confundirte.')}</p>
               <p className="text-xs text-text-muted">{tr('La IA y el bloqueo con huella se configuran de nuevo aquí, por seguridad.')}</p>
             </div>
+            {/* El permiso de avisos es de cada dirección: aquí hay que darlo otra vez para no perder los recordatorios */}
+            {!['enabled', 'unsupported'].includes(notificationsState()) && (
+              <button type="button" onClick={() => askForNotifications({ force: true })} className="ui-btn ui-btn-secondary w-full flex items-center justify-center gap-2">
+                <Bell className="w-4 h-4" />{tr('Activar avisos de pagos y recordatorios')}
+              </button>
+            )}
             <a href="/" className="ui-btn ui-btn-primary block">{tr('Ir a mi FLOWI')}</a>
           </>
         )}
