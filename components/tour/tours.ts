@@ -108,7 +108,7 @@ export type PageTourId =
   | 'gastos' | 'ingresos' | 'deudas' | 'cuentas' | 'inversiones' | 'metas' | 'presupuestos'
   | 'amigos' | 'compartidos' | 'hormiga' | 'recordatorios' | 'recibos' | 'productos'
   | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar' | 'planes' | 'animaciones'
-  | 'seguridad' | 'cfgCuenta' | 'cfgNotificaciones' | 'cfgApariencia' | 'cfgSonidos' | 'cfgIa' | 'cfgFinanzas' | 'cfgCategorias' | 'cfgPrivacidad';
+  | 'calendario' | 'seguridad' | 'cfgCuenta' | 'cfgNotificaciones' | 'cfgApariencia' | 'cfgSonidos' | 'cfgIa' | 'cfgFinanzas' | 'cfgCategorias' | 'cfgPrivacidad';
 
 
 export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
@@ -222,6 +222,12 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { target: 'th-save', title: tr('Guarda'), text: tr('Toca Guardar cambios para que el menú rápido quede como lo dejaste.') },
   ],
   compartir: SHARE_STEPS(),
+  calendario: [
+    { title: tr('Calendario de tu plata'), text: tr('Te muestro cuánto tendrías cada día de hoy a fin de mes, para saber con tiempo si te alcanza.') },
+    { target: 'cal-summary', title: tr('¿Te alcanza?'), text: tr('Aquí ves con cuánto terminarías el mes y, si en algún día te quedarías en rojo, cuál es ese día. Así puedes frenar o mover un pago a tiempo.') },
+    { target: 'cal-days', title: tr('Cada día'), text: tr('Cada cuadro es un día con la plata que tendrías. El punto rojo es un pago (arriendo, servicios, cuotas) y el verde un ingreso que esperas, como tu sueldo. Toca un día para ver el detalle.') },
+    { target: 'cal-detail', title: tr('De dónde sale'), text: tr('Uso tu plata de hoy, tus pagos del mes, los ingresos del mes pasado que aún no llegan y tu gasto diario normal. Mientras más registres, más exacto.') },
+  ],
   seguridad: [
     { title: tr('Protege tu FLOWI'), text: tr('Con el bloqueo, FLOWI pide tu PIN o tu huella al abrirse. Así, si alguien toma tu celular, no puede ver tu plata. Solo funciona en este celular.') },
     { target: 'lock-pin', title: tr('1. Crea tu PIN'), text: tr('Toca aquí y escribe 4 números que recuerdes; luego repítelos. Desde ese momento FLOWI queda con bloqueo.') },

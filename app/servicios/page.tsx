@@ -1,7 +1,7 @@
 'use client';
 import { tr } from '@/lib/i18n';
 import { useTheme } from '@/components/ThemeProvider';
-import { Bug, Store, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, FileSpreadsheet, Landmark, Wallet, ShoppingBasket, UserPlus, MessageSquareHeart } from 'lucide-react';
+import { Bug, Store, Bell, StickyNote, Target, PieChart, Users, Receipt, ChevronRight, Settings, User, FileSpreadsheet, Landmark, Wallet, ShoppingBasket, UserPlus, MessageSquareHeart, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
@@ -28,6 +28,8 @@ const SERVICES: ServiceItem[] = [
     icon: UserPlus, href: '/amigos', color: 'text-cyan-500', bgColor: 'bg-cyan-500/10', isNew: true },
   { id: 'recordatorios', group: 'Lo más usado', title: 'Recordatorios', description: 'Citas, fechas importantes y tus pagos del mes',
     icon: Bell, href: '/servicios/recordatorios', color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+  { id: 'calendario', group: 'Lo más usado', title: 'Calendario de tu plata', description: '¿Te alcanza hasta fin de mes? Cuánto tendrías cada día',
+    icon: CalendarDays, href: '/servicios/calendario', color: 'text-sky-500', bgColor: 'bg-sky-500/10', isNew: true },
   { id: 'resumen', group: 'Lo más usado', title: 'Resumen y estadísticas', description: 'Qué pasó este mes y en qué se te va la plata',
     icon: Sparkles, href: '/servicios/resumen', color: 'text-amber-500', bgColor: 'bg-amber-500/10', isNew: true },
   { id: 'presupuestos', group: 'Tu plata', title: 'Presupuestos', description: 'Cuánto quieres gastar por categoría (50/30/20)',
