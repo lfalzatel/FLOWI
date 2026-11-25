@@ -797,7 +797,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               </button>
             )}
             {type === 'gasto' && (items ? (
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-2" data-tour="exp-items">
                 <ReceiptItemsList items={items} total={amountNum} isTech={isTechTheme} defaultOpen={!items.length}
                                   autoSum={autoSum}
                                   categories={typedCategories} recent={recentCategories} fallbackCategory={category || 'Otros'}
