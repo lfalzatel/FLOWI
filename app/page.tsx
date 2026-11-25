@@ -310,7 +310,7 @@ export default function DashboardPage() {
             <div>
                <h3 className={`font-bold mb-1 ${isTechTheme ? 'text-accent font-mono uppercase tracking-widest text-sm' : 'text-text-primary'}`}>{tr('¡Bienvenido a Flowi!')}</h3>
                <p className={`text-sm ${isTechTheme ? 'text-accent/80 font-mono' : 'text-text-secondary'}`}>
-                 El modo por defecto es <b>{tr('Cyberpunk')}</b>. Puedes cambiar el diseño y los colores de la aplicación en cualquier momento tocando tu foto de perfil (arriba a la derecha).
+                 {tr('Puedes cambiar el tema y los colores cuando quieras tocando tu foto de perfil (arriba a la derecha).')}
                </p>
             </div>
             <button onClick={() => setShowNewUserMsg(false)} className={`ml-4 mt-0.5 ${isTechTheme ? 'text-accent hover:text-accent/70' : 'text-text-muted hover:text-text-primary'}`}>

@@ -2820,4 +2820,5 @@ export const EN: Record<string, string> = {
   'Tu presupuesto mensual (cuánto quieres gastar como máximo) y la moneda en la que ves tus cifras.': 'Your monthly budget (the most you want to spend) and the currency your numbers are shown in.',
   'Tu seguridad': 'Your security',
   'Volver a Configuración': 'Back to Settings',
+  'Puedes cambiar el tema y los colores cuando quieras tocando tu foto de perfil (arriba a la derecha).': 'You can change the theme and colors anytime by tapping your profile photo (top right).',
 };

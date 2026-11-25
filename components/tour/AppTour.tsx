@@ -137,7 +137,10 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
         if (steps && next >= 0 && next < steps.length) setIndex(next);
         return;
       }
-      if (want) scrollWithin(el);
+      // Si está fuera de la vista dentro de una ventana con scroll propio (p. ej. el botón Guardar al
+      // final de la ventana de temas), se desplaza esa ventana hasta mostrarlo
+      const rr = el.getBoundingClientRect();
+      if (want || rr.bottom > window.innerHeight - 8 || rr.top < 8) scrollWithin(el);
       target.current = el;
       setRect(el.getBoundingClientRect());
     };
@@ -247,7 +250,8 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
       : above >= 12 ? above
       : (vh - rect.bottom > rect.top ? vh - cardH - 12 : 12);
     const left = Math.min(Math.max(16, rect.left + rect.width / 2 - cardW / 2), vw - cardW - 16);
-    cardStyle = { top, left, width: cardW };
+    // Seguro: el cuadro siempre queda dentro de la pantalla (si no, se veía solo el fondo oscuro)
+    cardStyle = { top: Math.min(Math.max(12, top), Math.max(12, vh - cardH - 12)), left, width: cardW };
   } else {
     // Posición explícita: la animación de entrada usa transform y anularía un translate de centrado
     cardStyle = { top: Math.max(16, (vh - cardH) / 2), left: (vw - cardW) / 2, width: cardW };

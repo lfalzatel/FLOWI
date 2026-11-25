@@ -54,7 +54,6 @@ import { ThemedBackground } from '@/components/effects/ThemedBackground';
 import { BootSplash } from '@/components/layout/BootSplash';
 import { LangSync } from '@/components/layout/LangSync';
 import { SharedLinksProvider } from '@/components/SharedLinksProvider';
-import { WelcomeTour } from '@/components/layout/WelcomeTour';
 import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
 import { ReminderWatcher } from '@/components/reminders/ReminderWatcher';
 import { NotificationPrompter } from '@/components/notifications/NotificationPrompter';
@@ -89,7 +88,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <FriendsProvider>
             <SharedLinksProvider>
               {children}
-              <WelcomeTour />
               <InAppToastStack />
               <ReminderWatcher />
               <NotificationPrompter />
