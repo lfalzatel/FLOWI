@@ -1,0 +1,59 @@
+# Sitio de PRUEBAS (staging): cada cambio que llega a la rama "staging" se publica en una dirección
+# privada del mismo sitio (canal de vista previa "staging" de Firebase Hosting), sin tocar la versión
+# que usan las personas. Se revisa ahí y, si está bien, se pasa a main (que publica en flowi-gastos.web.app).
+# La dirección del canal no cambia mientras exista: flowi-gastos--staging-XXXX.web.app (se ve en el
+# resumen de esta tarea en GitHub → Actions, y con: firebase hosting:channel:list --site flowi-gastos).
+name: Publicar en el sitio de pruebas (staging)
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+concurrency:
+  group: firebase-hosting-staging
+  cancel-in-progress: true
+
+jobs:
+  build_and_deploy_staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Las mismas pruebas que antes de publicar de verdad
+      - name: Pruebas
+        run: npm test
+
+      - name: Compilar (exportación estática a out/)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          # Misma configuración pública que la publicación real (no son secretos)
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyBjLK7qZ_2GOIJW-4oUEwnrU6sev21XJB4
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: flowi-9af82.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: flowi-9af82
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: flowi-9af82.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '501090670275'
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:501090670275:web:1ebfd5841ec8afabc33476
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY: BGugTA8YUa_WOpoiYPW7FGgw9SfD3VBSjmIKJ0oZ73zWEtDLrDOzW5aXD2NL5-lXd_8wLhgt3RHNPocvdv8r5Do
+
+      - name: Publicar en el canal de pruebas
+        id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIENDA_38D40 }}
+          projectId: tienda-38d40
+          target: flowi
+          channelId: staging
+          expires: 30d
+
+      - name: Dirección del sitio de pruebas
+        run: echo "Sitio de pruebas -> ${{ steps.deploy.outputs.details_url }}" >> "$GITHUB_STEP_SUMMARY"
