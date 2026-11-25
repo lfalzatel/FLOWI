@@ -1,4 +1,5 @@
 'use client';
+import { useTourEdit } from '@/components/tour/useTourEdit';
 import { currentLocale, tr } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -42,6 +43,9 @@ export default function RecibosPage() {
     .filter(t => t.type === 'gasto' && t.items?.length)
     .filter(t => !query.trim() || matchesProduct(`${t.description || ''} ${t.merchant || ''} ${t.items!.map(i => i.name).join(' ')}`, query))
     .sort((a, b) => toDate(b.date).getTime() - toDate(a.date).getTime()), [transactions, query]);
+
+  // Tutorial: abre la primera compra para mostrar cómo se edita
+  useTourEdit(() => { if (!receipts[0]) return false; setEditing(receipts[0]); return true; }, () => setEditing(null));
 
   const byMonth = useMemo(() => {
     const m = new Map<string, Transaction[]>();
@@ -94,7 +98,7 @@ export default function RecibosPage() {
                   const isOpen = open === t.id;
                   const c = findCatalogEntry(t.category);
                   return (
-                    <li key={t.id} className={`glass-card overflow-hidden ${box}`}>
+                    <li key={t.id} data-tour="receipt-item" className={`glass-card overflow-hidden ${box}`}>
                       <button type="button" onClick={() => setOpen(isOpen ? null : t.id || null)} aria-expanded={isOpen}
                               className="w-full flex items-center gap-3 p-3 text-left">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c?.color || '#10B981'}18` }}>

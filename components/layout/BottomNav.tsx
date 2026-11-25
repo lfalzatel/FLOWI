@@ -110,14 +110,14 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     const manual = () => { setShowVoice(false); setReceipt(null); setParsedVoiceData(null); setShowSheet(false); setShowAdd(true); };
     // El tutorial abre el menú o el formulario de gasto para señalar sus botones, y luego los cierra
     const tourOpen = (e: Event) => {
-      const what = (e as CustomEvent<'quick' | 'expense' | 'income' | 'debt' | 'account'>).detail;
+      const what = (e as CustomEvent<'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit'>).detail;
       setShowVoice(false); setShowAdd(false);
       if (what === 'quick') { setQuick(null); setShowSheet(true); return; }
       setShowSheet(false);
       if (what === 'expense') setQuick('gasto');
       else if (what === 'income') setQuick('ingreso');
       else if (what === 'debt') setQuick('deuda');
-      else setQuick(null); // la cuenta la abre la página de Cuentas
+      else setQuick(null); // la cuenta la abre la página de Cuentas; 'edit' lo abre cada página
     };
     const tourClose = () => { setShowSheet(false); setQuick(null); };
     window.addEventListener('flowi-tour-open', tourOpen);

@@ -1,4 +1,5 @@
 'use client';
+import { useTourEdit } from '@/components/tour/useTourEdit';
 import { tr } from '@/lib/i18n';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -10,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useExpenses } from '@/hooks/useExpenses';
 import { Transaction } from '@/lib/firestore';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TrendingUp, Plus, Download } from 'lucide-react';
 import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { DateFilter } from '@/components/dashboard/DateFilter';
@@ -42,6 +43,11 @@ export default function IngresosPage() {
     }
   }, [user, authLoading, router]);
 
+  // Tutorial: abre el primer movimiento de la lista para mostrar cómo se edita o se borra
+  // (va antes de cualquier "return" temprano: React pide los hooks siempre en el mismo orden)
+  const firstTx = useRef<Transaction | null>(null);
+  useTourEdit(() => { if (!firstTx.current) return false; setEditingTransaction(firstTx.current); return true; }, () => setEditingTransaction(null));
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-deep flex flex-col items-center justify-center">
@@ -68,6 +74,8 @@ export default function IngresosPage() {
       return dateStr === filterValue;
     }
   });
+
+  firstTx.current = filteredTransactions[0] || null;
 
   return (
     <div className="relative min-h-screen bg-deep flex flex-col">

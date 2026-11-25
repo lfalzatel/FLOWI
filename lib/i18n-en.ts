@@ -2964,4 +2964,20 @@ export const EN: Record<string, string> = {
   'Elige tu cuenta de Google. En un momento abrimos tu FLOWI.': 'Choose your Google account. We will open your FLOWI in a moment.',
   // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
   'Activar avisos de pagos y recordatorios': 'Turn on payment and reminder alerts',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Al tocar Editar se abre así. Toca la lista de productos para corregir un nombre o un precio.': 'When you tap Edit it opens like this. Tap the product list to fix a name or a price.',
+  'Al tocar un gasto de la lista se abre así, con sus datos. Cambia lo que necesites y toca Guardar Cambios.': 'When you tap an expense in the list it opens like this, with its details. Change what you need and tap Save Changes.',
+  'Al tocar un ingreso de la lista se abre así, con sus datos. Cambia lo que necesites y toca Guardar Cambios.': 'When you tap an income in the list it opens like this, with its details. Change what you need and tap Save Changes.',
+  'Bórralo o pásalo a deuda': 'Delete it or turn it into a debt',
+  'Cambia la categoría': 'Change the category',
+  'Corrige los productos': 'Fix the products',
+  'Edita un gasto': 'Edit an expense',
+  'Edita un ingreso': 'Edit an income',
+  'Elige otra categoría si la IA no acertó. Al terminar toca Guardar Cambios.': 'Pick another category if the AI got it wrong. When you finish, tap Save Changes.',
+  'Mira el detalle': 'See the details',
+  'O bórralo': 'Or delete it',
+  'Si lo registraste por error, toca Eliminar. Te pido confirmar antes de borrarlo.': 'If you recorded it by mistake, tap Delete. I\'ll ask you to confirm before deleting it.',
+  'Toca Eliminar si fue un error (te pido confirmar), o pásalo a deuda si todavía no lo pagaste.': 'Tap Delete if it was a mistake (I\'ll ask you to confirm), or turn it into a debt if you haven\'t paid it yet.',
+  'Toca una compra para ver sus productos. Ahí está el botón Editar.': 'Tap a purchase to see its products. The Edit button is there.',
+  'Usa el buscador por categoría, descripción o valor para encontrar un gasto.': 'Use the search by category, description or amount to find an expense.',
 };

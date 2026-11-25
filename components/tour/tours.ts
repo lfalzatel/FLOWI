@@ -11,7 +11,7 @@ export interface TourStep {
   text: string;
   cta?: { label: string; href: string };
   // Abre algo antes de señalar: el menú del botón + o el formulario de gasto (se cierra solo)
-  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account';
+  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit'; // 'edit': la página abre su ventana de editar (useTourEdit)
   // Dibujo de ejemplo dentro del cuadro (p. ej. cómo compartir un comprobante desde el banco)
   illus?: 'share-1' | 'share-2' | 'share-3';
 }
@@ -117,14 +117,17 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     ...PLUS_STEPS(tr('Nuevo gasto'), tr('"almuerzo veinte mil y tinto tres mil"')),
     ...EXPENSE_STEPS(),
     { open: 'expense', target: 'exp-save', title: tr('Guarda'), text: tr('Revisa y toca Añadir gasto. Con "Guardar y otro" el formulario queda listo para el siguiente.') },
-    { target: 'search', title: tr('Busca y edita'), text: tr('Usa el buscador por categoría, descripción o valor. Toca un gasto para editarlo, borrarlo o pasarlo a deuda si todavía no lo pagaste.') },
+    { target: 'search', title: tr('Busca'), text: tr('Usa el buscador por categoría, descripción o valor para encontrar un gasto.') },
+    { open: 'edit', target: 'exp-save', title: tr('Edita un gasto'), text: tr('Al tocar un gasto de la lista se abre así, con sus datos. Cambia lo que necesites y toca Guardar Cambios.') },
+    { open: 'edit', target: 'exp-edit-actions|exp-delete', title: tr('Bórralo o pásalo a deuda'), text: tr('Toca Eliminar si fue un error (te pido confirmar), o pásalo a deuda si todavía no lo pagaste.') },
   ],
   ingresos: [
     { title: tr('Tus ingresos'), text: tr('Todo lo que entra: sueldo, ventas, pagos que te hacen. Con tus ingresos calculo cuánto puedes gastar cada día.') },
     ...PLUS_STEPS(tr('Nuevo ingreso'), tr('"me pagaron el sueldo, dos millones"')),
     ...INCOME_STEPS(),
     { title: tr('Ventas de tu negocio'), text: tr('Si es una venta, usa la categoría de tu negocio y aparece en Mi negocio con su ganancia.') },
-    { title: tr('Edita o borra'), text: tr('Toca un ingreso de la lista para editarlo o borrarlo.') },
+    { open: 'edit', target: 'exp-save', title: tr('Edita un ingreso'), text: tr('Al tocar un ingreso de la lista se abre así, con sus datos. Cambia lo que necesites y toca Guardar Cambios.') },
+    { open: 'edit', target: 'exp-delete', title: tr('O bórralo'), text: tr('Si lo registraste por error, toca Eliminar. Te pido confirmar antes de borrarlo.') },
   ],
   deudas: [
     { title: tr('Tus deudas'), text: tr('Lo que debes y lo que te deben, en un solo lugar. Arriba ves el total pendiente y cuánto pagas en cuotas al mes.') },
@@ -186,7 +189,9 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   recibos: [
     { target: 'search', title: tr('Mis recibos'), text: tr('Tus compras escaneadas con todos sus productos. Busca por tienda o por producto.') },
     { open: 'quick', target: 'quick-foto', title: tr('Cómo llegan aquí'), text: tr('Escanea un recibo con el botón + y "Foto del recibo", o comparte la foto desde otra app. Necesitas la IA conectada, que es gratis.'), cta: { label: tr('Activar la IA'), href: '/configuracion#ia' } },
-    { title: tr('Edita la compra'), text: tr('Toca una compra para ver el detalle, corregir un producto o cambiar su categoría.') },
+    { target: 'receipt-item|search', title: tr('Mira el detalle'), text: tr('Toca una compra para ver sus productos. Ahí está el botón Editar.') },
+    { open: 'edit', target: 'exp-items', title: tr('Corrige los productos'), text: tr('Al tocar Editar se abre así. Toca la lista de productos para corregir un nombre o un precio.') },
+    { open: 'edit', target: 'exp-category', title: tr('Cambia la categoría'), text: tr('Elige otra categoría si la IA no acertó. Al terminar toca Guardar Cambios.') },
   ],
   productos: [
     { target: 'search', title: tr('¿Cuánto gasto en…?'), text: tr('Busca un producto, como huevos, cerveza o gasolina, y mira cuánto se te va al mes.') },

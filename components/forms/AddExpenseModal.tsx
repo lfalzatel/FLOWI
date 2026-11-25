@@ -1005,9 +1005,9 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
           </div>
 
           {transactionToEdit && (
-            <div className="flex gap-2">
+            <div className="flex gap-2" data-tour="exp-edit-actions">
               <button
-                type="button"
+                type="button" data-tour="exp-delete"
                 onClick={() => setShowConfirmDelete(true)}
                 disabled={loading}
                 className={`flex-1 py-3 font-bold transition-all active:scale-[0.98] disabled:opacity-50 ${isTechTheme ? 'rounded-none bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 uppercase tracking-wider text-xs' : 'rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs'}`}
