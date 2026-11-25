@@ -2741,4 +2741,7 @@ export const EN: Record<string, string> = {
   'Toca aquí para pagar en euros o dólares con tarjeta, PayPal, Apple Pay o Google Pay.': 'Tap here to pay in euros or dollars with card, PayPal, Apple Pay or Google Pay.',
   'Tu comprobante ({a}) está en revisión. Te activamos Premium apenas lo confirmemos.': 'Your receipt ({a}) is under review. We will turn on Premium as soon as we confirm it.',
   '¿Estás fuera de Colombia?': 'Are you outside Colombia?',
+  'Desde el comprobante de tu banco o Nequi, sin escribir nada.': 'From your bank or Nequi receipt, without typing anything.',
+  'Ver cómo': 'See how',
+  '¿Pagaste desde el banco? Compártelo a FLOWI': 'Paid from your bank? Share it to FLOWI',
 };

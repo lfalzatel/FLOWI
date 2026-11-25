@@ -45,7 +45,6 @@ import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/no
 import { getCommitments } from '@/lib/commitments';
 import { formatCurrency } from '@/lib/format';
 import { AppTour, TourOffer, TOUR_DONE_KEY, readTourVoicePref } from '@/components/tour/AppTour';
-import { PAGE_TOURS, PageTourId } from '@/components/tour/tours';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
 import { Header } from '@/components/layout/Header';
@@ -140,17 +139,6 @@ export default function DashboardPage() {
     setShowTourOffer(false);
     setTourVoice(voice);
   }
-
-  // Tutorial corto pedido desde una tarjeta de sugerencias (p. ej. compartir desde el banco)
-  const [pageTour, setPageTour] = useState<PageTourId | null>(null);
-  useEffect(() => {
-    const onPageTour = (e: Event) => {
-      const id = (e as CustomEvent<string>).detail as PageTourId;
-      if (id in PAGE_TOURS) setPageTour(id);
-    };
-    window.addEventListener('flowi-page-tour', onPageTour);
-    return () => window.removeEventListener('flowi-page-tour', onPageTour);
-  }, []);
 
   // "Ver tutorial" desde el menú de perfil estando ya en Inicio
   useEffect(() => {
@@ -508,7 +496,6 @@ export default function DashboardPage() {
           onSkip={() => { setShowTourOffer(false); try { localStorage.setItem(TOUR_DONE_KEY, 'true'); } catch (e) {} }}
         />
       )}
-      {pageTour && <AppTour voice={readTourVoicePref()} steps={PAGE_TOURS[pageTour]} markDone={false} onClose={() => setPageTour(null)} />}
       {!loading && tourVoice !== null && (
         <AppTour voice={tourVoice} demo onClose={() => { setTourVoice(null); setTimeout(() => askForNotifications(), 600); }} />
       )}

@@ -4,7 +4,7 @@ import { receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark, Wallet } from 'lucide-react';
+import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark, Wallet, Share2, Compass } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { getAiKey } from '@/lib/aiAssist';
 
@@ -118,7 +118,18 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
             </button>
           ))}
         </div>
-        <p className="mt-4 text-center text-[10px] text-text-muted">{tr('Consejo: mantén presionado el botón para hablar directo.')}</p>
+        {/* Tutorial corto: compartir el comprobante desde la app del banco */}
+        <button type="button" data-tour="quick-share-help"
+                onClick={() => { onClose(); setTimeout(() => window.dispatchEvent(new CustomEvent('flowi-page-tour', { detail: 'compartir' })), 150); }}
+                className={`mt-3 w-full flex items-center gap-2.5 p-3 text-left border border-dashed border-accent/40 hover:bg-accent/5 transition-colors ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
+          <Share2 className="w-5 h-5 text-accent shrink-0" />
+          <span className="flex-1 min-w-0">
+            <span className="block text-xs font-bold text-text-primary">{tr('¿Pagaste desde el banco? Compártelo a FLOWI')}</span>
+            <span className="block text-[11px] text-text-secondary">{tr('Desde el comprobante de tu banco o Nequi, sin escribir nada.')}</span>
+          </span>
+          <span className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-accent"><Compass className="w-3.5 h-3.5" /> {tr('Ver cómo')}</span>
+        </button>
+        <p className="mt-3 text-center text-[10px] text-text-muted">{tr('Consejo: mantén presionado el botón para hablar directo.')}</p>
       </div>
     </div>,
     document.body,

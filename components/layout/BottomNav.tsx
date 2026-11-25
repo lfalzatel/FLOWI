@@ -22,6 +22,8 @@ import { SavingsFormModal } from '@/components/investments/SavingsFormModal';
 import { InvestmentKindSheet } from '@/components/investments/InvestmentKindSheet';
 import type { InvestmentKind } from '@/lib/firestore';
 import { QuickAction, QuickActionsSheet, QuickContext } from '@/components/layout/QuickActionsSheet';
+import { AppTour, readTourVoicePref } from '@/components/tour/AppTour';
+import { PAGE_TOURS, PageTourId } from '@/components/tour/tours';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Inicio',        href: '/',          id: 'nav-inicio' },
@@ -45,6 +47,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [parsedVoiceData, setParsedVoiceData] = useState<ParsedVoiceResult | null>(null);
   // Menú del botón flotante y el formulario que se abrió desde él
   const [showSheet, setShowSheet] = useState(false);
+  const [pageTour, setPageTour] = useState<PageTourId | null>(null); // tutorial corto pedido desde el menú o una tarjeta
   const [quick, setQuick] = useState<Exclude<QuickAction, 'voz' | 'extracto'> | null>(null);
   const [receipt, setReceipt] = useState<File | File[] | 'no-key' | null>(null);
   const router = useRouter();
@@ -112,6 +115,11 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     };
     const tourClose = () => { setShowSheet(false); setQuick(null); };
     window.addEventListener('flowi-tour-open', tourOpen);
+    const pageTourEv = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail as PageTourId;
+      if (id in PAGE_TOURS) setPageTour(id);
+    };
+    window.addEventListener('flowi-page-tour', pageTourEv);
     window.addEventListener('flowi-tour-close', tourClose);
     window.addEventListener('flowi-open-quick-actions', open);
     window.addEventListener('flowi-open-voice', voice);
@@ -120,6 +128,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     return () => {
       window.removeEventListener('flowi-open-quick-actions', open);
       window.removeEventListener('flowi-tour-open', tourOpen);
+      window.removeEventListener('flowi-page-tour', pageTourEv);
       window.removeEventListener('flowi-tour-close', tourClose);
       window.removeEventListener('flowi-open-voice', voice);
       window.removeEventListener('flowi-dictate', dictate);
@@ -236,6 +245,8 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
           }}
         />
       )}
+
+      {pageTour && <AppTour voice={readTourVoicePref()} steps={PAGE_TOURS[pageTour]} markDone={false} onClose={() => setPageTour(null)} />}
 
       {showSheet && (
         <QuickActionsSheet
