@@ -2877,4 +2877,7 @@ export const EN: Record<string, string> = {
   // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
   'Escoger fecha': 'Pick a date',
   'Arriba eliges Mes, Semana o Día. Muévete con las flechas, o toca la fecha del medio para saltar a cualquier día o mes. El botón Hoy te devuelve a hoy.': 'At the top you choose Month, Week or Day. Move with the arrows, or tap the date in the middle to jump to any day or month. The Today button brings you back to today.',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Es el mismo filtro de las otras páginas: elige Mes, Semana o Día y muévete con las flechas. Toca DÍA otra vez para escoger cualquier día en el calendario.': 'It is the same filter as on the other pages: choose Month, Week or Day and move with the arrows. Tap DAY again to pick any day on the calendar.',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
 };

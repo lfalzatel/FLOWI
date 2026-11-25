@@ -17,9 +17,10 @@ interface Props {
   transactions?: Transaction[];
   inline?: boolean; // dentro de un modal: sin quedarse pegado arriba ni márgenes de página
   tight?: boolean;  // Inicio en el celular: más pegado a lo de arriba y lo de abajo
+  hideAll?: boolean; // sin la pestaña TODO (p. ej. el calendario de tu plata)
 }
 
-export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [], inline = false, tight = false }: Props) {
+export function DateFilter({ filterType, filterValue, onChangeType, onChangeValue, transactions = [], inline = false, tight = false, hideAll = false }: Props) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
   const { theme } = useTheme();
@@ -152,7 +153,7 @@ export function DateFilter({ filterType, filterValue, onChangeType, onChangeValu
         </div>
 
         <div className="relative z-10 flex w-full gap-1">
-          {(['all', 'month', 'week', 'day'] as FilterType[]).map((type) => (
+          {((hideAll ? ['month', 'week', 'day'] : ['all', 'month', 'week', 'day']) as FilterType[]).map((type) => (
             <button
               key={type}
               onClick={() => {
