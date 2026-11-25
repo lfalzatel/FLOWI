@@ -11,7 +11,7 @@ export interface TourStep {
   text: string;
   cta?: { label: string; href: string };
   // Abre algo antes de señalar: el menú del botón + o el formulario de gasto (se cierra solo)
-  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit' | 'inv-kind' | 'inv-form'; // los demás los abre cada página (useTourAction)
+  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit' | 'inv-kind' | 'inv-form' | 'debt-pay' | 'acc-expand' | 'goal-form' | 'goal-move'; // los demás los abre cada página (useTourAction)
   // Dibujo de ejemplo dentro del cuadro (p. ej. cómo compartir un comprobante desde el banco)
   illus?: 'share-1' | 'share-2' | 'share-3';
 }
@@ -130,20 +130,22 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { open: 'edit', target: 'exp-delete', title: tr('O bórralo'), text: tr('Si lo registraste por error, toca Eliminar. Te pido confirmar antes de borrarlo.') },
   ],
   deudas: [
-    { title: tr('Tus deudas'), text: tr('Lo que debes y lo que te deben, en un solo lugar. Arriba ves el total pendiente y cuánto pagas en cuotas al mes.') },
+    { target: 'debt-summary', title: tr('Tus deudas'), text: tr('Lo que debes y lo que te deben, en un solo lugar. Aquí ves cuántas deudas tienes activas, cuánto pagas en cuotas al mes y cuánto te deben.') },
     ...PLUS_STEPS(tr('Nueva deuda o abono'), tr('"le presté cien mil a Juan"')),
     ...DEBT_STEPS(),
-    { title: tr('Registra los abonos'), text: tr('Cuando pagues una parte, toca la deuda en la lista y escribe el abono. La deuda baja y el abono queda como gasto (o como ingreso si te pagan a ti).') },
-    { title: tr('Tarjetas de crédito'), text: tr('Si agregas tus tarjetas en Cuentas, aquí ves lo que debes en cada una y sus últimas compras, y puedes abonarles.') },
-    { title: tr('Gastos compartidos'), text: tr('Lo que divides con amigos también aparece aquí: quién te debe y a quién le debes.') },
+    { target: 'list-item', title: tr('Tus deudas activas'), text: tr('Cada una muestra cuánto falta y cuánto has pagado. Tócala para ver el detalle o registrar un abono.') },
+    { open: 'debt-pay', target: 'debt-abono|transfer-amount', title: tr('Registra los abonos'), text: tr('Escribe cuánto pagaste y de qué cuenta salió. La deuda baja y el abono queda como gasto (o como ingreso si te pagan a ti).') },
+    { target: 'debt-cards', title: tr('Tarjetas de crédito'), text: tr('Lo que debes en cada tarjeta y sus últimas compras. Desde aquí también les abonas.') },
+    { target: 'debt-shared', title: tr('Gastos compartidos'), text: tr('Lo que divides con amigos también aparece aquí: quién te debe y a quién le debes. Toca para ver el detalle.') },
   ],
   cuentas: [
-    { title: tr('Cuentas y patrimonio'), text: tr('Registra dónde está tu plata: cuentas de banco, Nequi, efectivo y tarjetas de crédito. Así "Dinero disponible" en Inicio es la plata real que tienes.') },
+    { target: 'acc-networth', title: tr('Cuentas y patrimonio'), text: tr('Registra dónde está tu plata: cuentas de banco, Nequi, efectivo y tarjetas de crédito. Así "Dinero disponible" en Inicio es la plata real que tienes.') },
     ...PLUS_STEPS(tr('Nueva cuenta')),
     ...ACCOUNT_STEPS(),
-    { title: tr('Cada movimiento mueve su saldo'), text: tr('Cuando registras un gasto o un ingreso y eliges la cuenta, su saldo se actualiza solo. Si mueves plata entre tus cuentas, usa Transferir para no contarla como gasto.') },
-    { title: tr('¿Cuadra con el banco?'), text: tr('De vez en cuando te pregunto si el saldo coincide con la app del banco. Si no, toca la cuenta y usa Ajustar saldo.') },
-    { title: tr('Tu patrimonio neto'), text: tr('Arriba sumo lo que tienes en cuentas, ahorros e inversiones y le resto lo que debes. Toca el ícono de información para ver cómo se calcula.') },
+    { target: 'list-item', title: tr('Cada movimiento mueve su saldo'), text: tr('Cuando registras un gasto o un ingreso y eliges la cuenta, su saldo se actualiza solo. Toca una cuenta para ver sus movimientos.') },
+    { target: 'acc-transfer', title: tr('Mover plata entre cuentas'), text: tr('Si pasas plata de una cuenta a otra, usa este botón. Así no la cuento como gasto ni como ingreso.') },
+    { open: 'acc-expand', target: 'acc-actions', title: tr('¿Cuadra con el banco?'), text: tr('Si el saldo no coincide con la app del banco, toca Ajustar saldo y escribe el que dice el banco. Aquí también editas la cuenta.') },
+    { target: 'acc-networth', title: tr('Tu patrimonio neto'), text: tr('Sumo lo que tienes en cuentas, ahorros e inversiones y le resto lo que debes. Toca el ícono de información para ver cómo se calcula.') },
   ],
   inversiones: [
     { target: 'inv-summary', title: tr('Ahorro e inversiones'), text: tr('Aquí ves cuánto tienes ahorrado e invertido: un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria.') },
@@ -158,10 +160,14 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { target: 'inv-summary', title: tr('Ahorro, no gasto'), text: tr('Lo que pones aquí no cuenta como gasto: se aparta de lo que puedes gastar y suma a tu patrimonio.') },
   ],
   metas: [
-    { title: tr('Metas'), text: tr('¿Para qué ahorras? Una moto, un viaje, la prima del apartamento o un fondo para emergencias.') },
-    { title: tr('Crea una meta'), text: tr('Ponle nombre, valor y si quieres una fecha. Con tu ritmo real de ahorro te digo cuándo la lograrías.') },
-    { title: tr('Abona a tu meta'), text: tr('Cada vez que apartes plata, toca "Registrar ahorro" en la meta y verás la barra avanzar. Si al final del mes te sobra, te sugiero guardarlo.') },
-    { title: tr('Empieza por emergencias'), text: tr('La primera meta que conviene tener es un fondo de unos 3 meses de tus gastos fijos para cualquier imprevisto.') },
+    { target: 'goal-summary', title: tr('Metas'), text: tr('¿Para qué ahorras? Una moto, un viaje, la prima del apartamento o un fondo para emergencias. Aquí ves cuánto llevas en total.') },
+    { target: 'goal-new', title: tr('Crea una meta'), text: tr('Toca Nueva para empezar.') },
+    { open: 'goal-form', target: 'goal-name', title: tr('¿Para qué ahorras?'), text: tr('Escríbelo o toca una de las ideas, como fondo de emergencia o viaje.') },
+    { open: 'goal-form', target: 'goal-amounts', title: tr('Cuánto y cuánto llevas'), text: tr('El valor de la meta y lo que ya tienes ahorrado para ella.') },
+    { open: 'goal-form', target: 'goal-deadline', title: tr('¿Para cuándo?'), text: tr('Si pones una fecha, te digo cuánto apartar al mes. Si no, con tu ritmo real de ahorro te digo cuándo la lograrías.') },
+    { target: 'goal-save-btn|list-item', title: tr('Abona a tu meta'), text: tr('Cada vez que apartes plata, toca "Registrar ahorro" en la meta y verás la barra avanzar.') },
+    { open: 'goal-move', target: 'goal-move-amount', title: tr('¿Cuánto apartaste?'), text: tr('Escribe el valor o toca una de las sugerencias. Si sacas plata de la meta, usa Retiré.') },
+    { target: 'goal-new', title: tr('Empieza por emergencias'), text: tr('La primera meta que conviene tener es un fondo de unos 3 meses de tus gastos fijos para cualquier imprevisto.') },
   ],
   presupuestos: [
     { title: tr('Presupuestos'), text: tr('Decide cuánto quieres gastar en el mes y por categoría, y mira cuánto llevas.') },
@@ -181,7 +187,9 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   ],
   hormiga: [
     { title: tr('Suscripciones y gastos hormiga'), text: tr('Lo pequeño que se repite y, sumado, pesa: suscripciones como Netflix o Spotify, y compras pequeñas como el tinto o el snack.') },
-    { title: tr('Cuánto te cuestan al año'), text: tr('Te muestro cuánto suman al mes y al año. Toca uno para ver su historial.') },
+    { target: 'ant-subs', title: tr('Tus suscripciones'), text: tr('Los cobros que se repiten cada mes, con cuánto te cuestan al año.') },
+    { target: 'ant-ants', title: tr('Tus gastos hormiga'), text: tr('Las compras pequeñas que más se repiten y cuánto suman al mes y al año.') },
+    { target: 'list-item', title: tr('Mira su historial'), text: tr('Toca uno para ver cuánto has gastado en eso mes a mes.') },
     { title: tr('Solo con registrar'), text: tr('No tienes que hacer nada especial: los encuentro en los gastos que ya registras. Mientras más registres, más exacto.') },
   ],
   recordatorios: [
@@ -208,9 +216,11 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { title: tr('Revisa antes de guardar'), text: tr('Ves todos los movimientos antes de guardar. Los que ya tenías registrados se marcan para no duplicarlos.') },
   ],
   negocio: [
-    { title: tr('Mi negocio'), text: tr('Tus ventas, costos y ganancia, aparte de tu plata personal.') },
-    { title: tr('Registra tus ventas'), text: tr('Registra cada venta como ingreso con la categoría de negocio. Agrégale el costo del producto y el envío para saber cuánto te quedó.') },
-    { title: tr('Ganancia del mes'), text: tr('Aquí ves cuánto vendiste, cuánto te costó y la ganancia de cada mes. Cambia de mes con las flechas.') },
+    { target: 'biz-profit', title: tr('Mi negocio'), text: tr('Tus ventas, costos y ganancia, aparte de tu plata personal.') },
+    { open: 'income', target: 'exp-category', title: tr('Registra tus ventas'), text: tr('Registra cada venta como ingreso y elige la categoría de tu negocio. Agrégale el costo del producto y el envío para saber cuánto te quedó.') },
+    { target: 'biz-month', title: tr('Cambia de mes'), text: tr('Con las flechas ves otros meses de tu negocio.') },
+    { target: 'biz-profit', title: tr('Ganancia del mes'), text: tr('Cuánto vendiste, cuánto te costó y la ganancia del mes.') },
+    { target: 'biz-sales', title: tr('Lo que dejó cada venta'), text: tr('El detalle de cada venta con su costo y lo que te quedó.') },
   ],
   resumen: [
     { title: tr('Resumen y estadísticas'), text: tr('Qué pasó en el mes: cuánto entró, cuánto salió y en qué se fue tu plata.') },

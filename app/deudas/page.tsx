@@ -1,4 +1,5 @@
 'use client';
+import { useTourAction } from '@/components/tour/useTourEdit';
 import { currentLocale, tr } from '@/lib/i18n';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -95,6 +96,14 @@ export default function DeudasPage() {
 
   // Las pendientes se ven siempre (siguen vigentes); las liquidadas, solo en el periodo en que se pagaron
   const activeDebts = debts.filter(d => d.status !== 'paid' && !inCard.has(d.id)); // las de tarjeta se ven dentro de la tarjeta
+  // Tutorial: abre la primera deuda para mostrar dónde se registra el abono
+  useTourAction('debt-pay', () => {
+    const d = activeDebts[0] || debts.find(x => x.status !== 'paid');
+    if (d) { setSelectedDebt(d); return true; }
+    const card = cardStates[0];
+    if (card) { setPayingCard(card); return true; }
+    return false;
+  }, () => { setSelectedDebt(null); setPayingCard(null); });
   const paidDebts = debts.filter(d => d.status === 'paid' && isInPeriod(settledDate(d)));
   const hiddenPaidCount = debts.filter(d => d.status === 'paid').length - paidDebts.length;
   const pendingOf = (d: Debt) => d.totalAmount - d.paidAmount + calculateDebtInterest(d).accumulatedInterest;
@@ -193,7 +202,7 @@ export default function DeudasPage() {
 
         {/* Resumen rápido */}
         {!debtsLoading && debts.length > 0 && (
-          <div className={`grid grid-cols-3 gap-2 ${isCyberpunk ? 'font-mono' : ''}`}>
+          <div data-tour="debt-summary" className={`grid grid-cols-3 gap-2 ${isCyberpunk ? 'font-mono' : ''}`}>
             {[
               { label: tr('Deudas activas'), value: String(iOweCount), tone: 'text-text-primary' },
               { label: tr('Cuotas al mes'), value: monthlyInstallments ? fmt(monthlyInstallments) : '—', tone: 'text-money-debt' },
@@ -209,7 +218,7 @@ export default function DeudasPage() {
 
         {/* Gastos compartidos: lo que te deben (o debes) de cuentas divididas */}
         {sharedPending.people > 0 && (
-          <Link href="/servicios/compartidos"
+          <Link href="/servicios/compartidos" data-tour="debt-shared"
                 className={`glass-card flex items-center gap-3 p-3 ${isCyberpunk ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
             <div className={`w-9 h-9 flex items-center justify-center shrink-0 ${isCyberpunk ? 'rounded-none border border-orange-500/30' : 'rounded-xl bg-orange-500/15'}`}>
               <Users className="w-4 h-4 text-orange-400" />
@@ -269,7 +278,7 @@ export default function DeudasPage() {
             <div className="space-y-6">
               {/* Tarjetas de crédito: cada una es una deuda; los préstamos vinculados van adentro */}
               {cardStates.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2" data-tour="debt-cards">
                   <h3 className={`text-xs font-semibold mb-2 uppercase tracking-widest ${isCyberpunk ? 'text-orange-400' : 'text-text-secondary'}`}>{tr('Tarjetas de crédito')} ({cardStates.length})</h3>
                   {cardStates.map(st => {
                     const a = st.account;
@@ -360,7 +369,7 @@ export default function DeudasPage() {
 
                     return (
                       <div
-                        key={debt.id}
+                        key={debt.id} data-tour="list-item"
                         onClick={() => setSelectedDebt(debt)}
                         className="glass-card p-4 rounded-2xl hover:bg-white/[0.04] transition-colors cursor-pointer animate-card-mix"
                         style={{ animationDelay: `${i * 0.1}s` }}

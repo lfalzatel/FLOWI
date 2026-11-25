@@ -74,7 +74,7 @@ export default function NegocioPage() {
         </div>
 
         {/* Selector de mes (otros meses: Premium) */}
-        <div className={`${card} flex items-center justify-between p-2`}>
+        <div className={`${card} flex items-center justify-between p-2`} data-tour="biz-month">
           <button onClick={() => premium && setMonth(shiftMonth(month, -1))} disabled={!premium} aria-label={tr('Mes anterior')}
                   className="p-2 text-text-secondary hover:text-accent disabled:opacity-30"><ChevronLeft className="w-5 h-5" /></button>
           <p className={`font-bold capitalize ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>{monthNameOf(month)} {month.slice(0, 4)}</p>
@@ -87,7 +87,7 @@ export default function NegocioPage() {
         ) : (
           <>
             {/* Ventas − costos = ganancia */}
-            <section className={`${card} p-5 space-y-4`}>
+            <section className={`${card} p-5 space-y-4`} data-tour="biz-profit">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[11px] text-text-muted flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> {tr('Vendiste')}</p>
@@ -124,7 +124,7 @@ export default function NegocioPage() {
 
             {/* Lo que dejó cada venta (producto, envío y demás costos que se le pusieron) */}
             {sales.length > 0 && (
-              <section className={`${card} p-5`}>
+              <section className={`${card} p-5`} data-tour="biz-sales">
                 <h2 className={`text-sm font-bold mb-1 ${isTech ? 'text-accent uppercase' : 'text-text-primary font-syne'}`}>{tr('Lo que te dejó cada venta')}</h2>
                 <p className="text-[11px] text-text-muted mb-3">{tr('Al registrar una venta, agrégale el costo del producto y el envío para ver cuánto te quedó.')}</p>
                 <ul className="divide-y divide-glass-border">

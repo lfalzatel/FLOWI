@@ -1,4 +1,5 @@
 'use client';
+import { useTourAction } from '@/components/tour/useTourEdit';
 import { tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
@@ -44,6 +45,9 @@ export default function MetasPage() {
   const shares = useMemo(() => allocateCapacity(goals, capacity.monthly), [goals, capacity.monthly]);
 
   const activeGoals = goals.filter(g => !isGoalDone(g));
+  // Tutorial: abre el formulario de meta nueva y el de registrar ahorro para mostrarlos
+  useTourAction('goal-form', () => { setEditing(null); setShowForm(true); return true; }, () => setShowForm(false));
+  useTourAction('goal-move', () => { const g = activeGoals.find(x => !x.linkedName) || null; if (!g) return false; setMoving(g); return true; }, () => setMoving(null));
   const doneGoals = goals.filter(isGoalDone);
   const totalSaved = goals.reduce((s, g) => s + g.savedAmount, 0);
   const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
@@ -66,7 +70,7 @@ export default function MetasPage() {
             <PageTourButton id="metas" className="ml-auto" />
           </div>
           {goals.length > 0 && (
-            <button onClick={openNew}
+            <button onClick={openNew} data-tour="goal-new"
                     className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold active:scale-95 transition-all ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs' : `rounded-2xl bg-gradient-to-br from-accent to-accent-dim ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'} shadow-lg shadow-accent/20`}`}>
               <Plus className="w-4 h-4" /> {tr('Nueva')}
             </button>
@@ -80,7 +84,7 @@ export default function MetasPage() {
         )}
 
         {/* Resumen y ritmo de ahorro */}
-        <section className={`${card} p-5`}>
+        <section className={`${card} p-5`} data-tour="goal-summary">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center"><PiggyBank className="w-4 h-4 text-accent" /></div>
             <span className={`text-xs font-medium ${isTechTheme ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>{tr('Ahorrado en tus metas')}</span>
@@ -122,7 +126,7 @@ export default function MetasPage() {
                 const p = projectGoal(goal, share);
                 const pct = Math.round(goalProgress(goal) * 100);
                 return (
-                  <article key={goal.id} className={`${card} p-4`}>
+                  <article key={goal.id} data-tour="list-item" className={`${card} p-4`}>
                     <div className="flex items-start gap-3">
                       <div className={`shrink-0 w-11 h-11 flex items-center justify-center text-2xl bg-glass border ${isTechTheme ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>{goal.emoji}</div>
                       <div className="flex-1 min-w-0">
@@ -178,7 +182,7 @@ export default function MetasPage() {
                         <PiggyBank className="w-4 h-4" /> Guardada en {goal.linkedName} · depositar
                       </Link>
                     ) : (
-                      <button onClick={() => setMoving(goal)}
+                      <button onClick={() => setMoving(goal)} data-tour="goal-save-btn"
                               className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none border border-accent text-accent bg-accent/10 uppercase text-xs tracking-wider' : 'rounded-xl bg-accent/15 text-accent hover:bg-accent/25'}`}>
                         <PiggyBank className="w-4 h-4" /> {tr('Registrar ahorro')}
                       </button>

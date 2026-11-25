@@ -426,7 +426,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
         document.body,
       )}
       <div className="space-y-3">
-        <div>
+        <div data-tour="transfer-amount">
           <span className={s.label}>{tr('Monto')}</span>
           <button type="button" onClick={() => setShowKeys(v => !v)} aria-label={tr('Monto')}
                   className={`${s.input} text-left text-xl font-bold tabular-nums ${showKeys ? '!border-accent' : ''}`}>

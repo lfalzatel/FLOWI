@@ -802,7 +802,7 @@ export function AddDebtModal({ onClose, onSuccess, debtToEdit, initialAbono, ini
           })()}
 
           {debtToEdit && !isReadOnly && (
-            <div className={`order-2 p-4 border grid grid-cols-2 gap-3 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
+            <div data-tour="debt-abono" className={`order-2 p-4 border grid grid-cols-2 gap-3 ${isTechTheme ? 'bg-deep border-accent/20 rounded-none' : 'bg-glass border-glass-border rounded-2xl'}`}>
               <div>
                 <label className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>{owedToMe ? tr('Abono recibido') : tr('Registrar abono')}</label>
                 <CalcAmountInput value={abono} label={owedToMe ? tr('Abono recibido') : tr('Abono')}

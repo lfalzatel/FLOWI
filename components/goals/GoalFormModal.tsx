@@ -113,7 +113,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
 
         <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 pb-5 space-y-5">
-            <div>
+            <div data-tour="goal-name">
               <label htmlFor="goal-name" className={labelClass}>{tr('¿Para qué estás ahorrando?')}</label>
               <div className="flex gap-2">
                 <span className={`shrink-0 w-12 flex items-center justify-center text-2xl bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-xl'}`}>{emoji}</span>
@@ -130,7 +130,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3" data-tour="goal-amounts">
               <div>
                 <label htmlFor="goal-target" className={labelClass}>{tr('Valor de la meta')}</label>
                 <input autoComplete="off" id="goal-target" type="text" inputMode="numeric" placeholder="$ 0" value={target}
@@ -176,7 +176,7 @@ function GoalFormModalInner({ goal, onClose, onDelete }: Props) {
               <p className="text-[11px] text-text-muted mt-1.5">{tr('Las de prioridad alta reciben una parte mayor de lo que ahorras cada mes.')}</p>
             </div>
 
-            <div>
+            <div data-tour="goal-deadline">
               <label htmlFor="goal-deadline" className={labelClass}>{tr('¿Para cuándo la quieres? (opcional)')}</label>
               <div className="flex gap-2">
                 <input autoComplete="off" id="goal-deadline" type="month" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />

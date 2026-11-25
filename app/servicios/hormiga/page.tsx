@@ -73,7 +73,7 @@ export default function HormigaPage() {
     const c = icon(category);
     return (
       <li key={key}>
-        <button type="button" onClick={() => setTarget({ kind: 'sub', key, label: name, category })} className={row}>
+        <button type="button" data-tour="list-item" onClick={() => setTarget({ kind: 'sub', key, label: name, category })} className={row}>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c.color}18` }}>
             <CategoryIcon icon={c.icon} label={c.label} className="w-5 h-5 text-lg" />
           </div>
@@ -92,7 +92,7 @@ export default function HormigaPage() {
     const c = icon(label);
     return (
       <li key={key}>
-        <button type="button" onClick={() => setTarget({ kind: 'ant', key, label, category: label, note: unit ? `${fmt(amount)} ${unit} (promedio de los últimos ${ant.days} días)` : `${fmt(amount)} en este periodo` })} className={`${row} flex-col !items-stretch !gap-1.5`}>
+        <button type="button" data-tour="list-item" onClick={() => setTarget({ kind: 'ant', key, label, category: label, note: unit ? `${fmt(amount)} ${unit} (promedio de los últimos ${ant.days} días)` : `${fmt(amount)} en este periodo` })} className={`${row} flex-col !items-stretch !gap-1.5`}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c.color}18` }}>
               <CategoryIcon icon={c.icon} label={c.label} className="w-5 h-5 text-lg" />
@@ -151,7 +151,7 @@ export default function HormigaPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
             {/* Suscripciones */}
-            <section className={`${card} p-5 space-y-4 min-w-0`}>
+            <section className={`${card} p-5 space-y-4 min-w-0`} data-tour="ant-subs">
               {head(Repeat, 'bg-rose-500/10 text-rose-500', 'Tus suscripciones')}
               {period ? (
                 period.subs.length === 0 ? (
@@ -191,7 +191,7 @@ export default function HormigaPage() {
             </section>
 
             {/* Gastos hormiga */}
-            <section className={`${card} p-5 space-y-4 min-w-0`}>
+            <section className={`${card} p-5 space-y-4 min-w-0`} data-tour="ant-ants">
               {head(Bug, 'bg-amber-500/10 text-amber-500', 'Gastos hormiga')}
               {period ? (
                 period.ants.length === 0 ? (

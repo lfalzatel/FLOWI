@@ -1,4 +1,5 @@
 'use client';
+import { useTourAction } from '@/components/tour/useTourEdit';
 import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
@@ -85,6 +86,8 @@ export default function CuentasPage() {
   }, [authLoading, user, router]);
 
   const states = useMemo(() => accountStates(accounts, transactions, transfers, investments, debts), [accounts, transactions, transfers, investments, debts]);
+  // Tutorial: despliega la primera cuenta para mostrar Ajustar saldo, Mover y Editar
+  useTourAction('acc-expand', () => { const id = states[0]?.account.id; if (!id) return false; setExpanded(id); return true; }, () => setExpanded(null));
   // Parte del saldo que es plata del negocio (ventas − costos por esa cuenta); el resto es personal
   const bizMap = useMemo(() => businessMoneyByAccount(accounts, transactions), [accounts, transactions]);
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
@@ -123,7 +126,7 @@ export default function CuentasPage() {
         )}
 
         {/* Patrimonio neto */}
-        <section className={`${card} p-5`}>
+        <section className={`${card} p-5`} data-tour="acc-networth">
           <div className="flex items-center justify-between mb-3">
             <span className={`text-xs font-medium ${isTech ? 'text-accent/70 uppercase tracking-wide' : 'text-text-secondary'}`}>{tr('Tu patrimonio neto')}</span>
             <button onClick={() => setShowHelp(v => !v)} aria-label={tr('¿Qué es el patrimonio neto?')} className="p-1 text-text-muted hover:text-text-primary"><Info className="w-4 h-4" /></button>
@@ -175,7 +178,7 @@ export default function CuentasPage() {
         ) : (
           <>
             {states.length > 1 && (
-              <button onClick={() => setTransferFrom('')} className={`w-full ${ghost} py-3 text-sm`}>
+              <button data-tour="acc-transfer" onClick={() => setTransferFrom('')} className={`w-full ${ghost} py-3 text-sm`}>
                 <ArrowLeftRight className="w-4 h-4" /> {tr('Mover plata entre cuentas')}
               </button>
             )}
@@ -187,7 +190,7 @@ export default function CuentasPage() {
                 const per = open ? accountPeriod(st, periodType, periodValue) : null;
                 const shown = per ? (showAllMoves ? per.movements : per.movements.slice(0, 15)) : [];
                 return (
-                  <article key={a.id} className={`${card} p-4`}>
+                  <article key={a.id} data-tour="list-item" className={`${card} p-4`}>
                     <button type="button" onClick={() => { setExpanded(open ? null : a.id!); setShowAllMoves(false); }} className="w-full flex items-center gap-3 text-left">
                       <div className={`shrink-0 w-11 h-11 flex items-center justify-center text-2xl bg-glass border ${isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}><AccountIcon account={a} className="w-7 h-7 text-2xl flex items-center justify-center" /></div>
                       <div className="flex-1 min-w-0">
@@ -321,7 +324,7 @@ export default function CuentasPage() {
                             </div>
                           );
                         })()}
-                        <div className="mt-3 flex gap-2">
+                        <div className="mt-3 flex gap-2" data-tour="acc-actions">
                           <button type="button" onClick={() => setAdjusting(st)} className={ghost}><Scale className="w-3.5 h-3.5" /> {tr('Ajustar saldo')}</button>
                           {states.length > 1 && <button type="button" onClick={() => setTransferFrom(a.id!)} className={ghost}><ArrowLeftRight className="w-3.5 h-3.5" /> {tr('Mover')}</button>}
                           <button type="button" onClick={() => { setEditing(a); setShowForm(true); }} className={ghost}><Pencil className="w-3.5 h-3.5" /> {tr('Editar')}</button>

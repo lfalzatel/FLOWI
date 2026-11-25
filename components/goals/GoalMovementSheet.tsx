@@ -87,7 +87,7 @@ export function GoalMovementSheet({ goal, suggested = 0, currency = 'COP', onClo
               {remaining > 0 ? <> {tr('· te faltan')} <b className="text-text-primary">{formatCurrency(remaining, currency)}</b></> : <> {tr('· ¡meta cumplida!')}</>}
             </p>
 
-            <div>
+            <div data-tour="goal-move-amount">
               <label htmlFor="goal-move-amount" className={`${isTechTheme ? 'text-accent/70' : 'text-text-muted'} text-xs font-medium mb-1.5 block`}>
                 {mode === 'ahorro' ? tr('¿Cuánto apartaste?') : tr('¿Cuánto sacaste?')}
               </label>
