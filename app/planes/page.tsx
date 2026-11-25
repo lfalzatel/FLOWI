@@ -17,6 +17,7 @@ import { FREE_LIMITS, INTL_PLANS, PLANS, PlanOption, usePlan } from '@/lib/plans
 import { openPaddleCheckout, paddleReady } from '@/lib/paddle';
 import { confirmPayment, payPlan } from '@/lib/wompi';
 import { formatCurrency } from '@/lib/format';
+import { PageTourButton } from '@/components/tour/PageTourButton';
 
 const ROWS: { label: string; free: string | boolean; premium: string | boolean }[] = lazyT(() => ([
   { label: tr('Gastos, ingresos y deudas'), free: tr('Ilimitados'), premium: tr('Ilimitados') },
@@ -125,22 +126,23 @@ export default function PlanesPage() {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Planes de FLOWI')}</h1>
+          <PageTourButton id="planes" className="ml-auto" />
         </div>
 
         {premium && (
-          <div className={`${card} p-4 flex items-center gap-3 border-accent/50`}>
+          <div data-tour="plans-status" className={`${card} p-4 flex items-center gap-3 border-accent/50`}>
             <Crown className="w-6 h-6 text-amber-400 shrink-0" />
             <div>
               <p className="text-sm font-bold text-text-primary">{tr('Tienes FLOWI Premium')}</p>
               <p className="text-xs text-text-muted">
-                {until ? `Activo hasta el ${until.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long', year: 'numeric' })}. Puedes renovar antes y se suma a tu tiempo.` : tr('Activo.')}
+                {until ? tr('Activo hasta el {a}. Puedes renovar antes y se suma a tu tiempo.', { a: until.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'long', year: 'numeric' }) }) : tr('Activo.')}
               </p>
             </div>
           </div>
         )}
 
         {/* Comparación */}
-        <div className={`${card} overflow-hidden`}>
+        <div data-tour="plans-compare" className={`${card} overflow-hidden`}>
           <div className="grid grid-cols-[1fr_80px_90px] text-[11px] font-bold uppercase tracking-wider px-4 py-3 border-b border-glass-border">
             <span className="text-text-muted">{tr('Incluye')}</span>
             <span className="text-center text-text-secondary">{tr('Gratis')}</span>
@@ -162,14 +164,14 @@ export default function PlanesPage() {
         )}
 
         {!playStore && intlAvailable && (
-          <button type="button" onClick={() => { setIntl(v => !v); setMessage(null); }} className="w-full text-xs text-accent font-semibold underline">
+          <button type="button" data-tour="plans-intl" onClick={() => { setIntl(v => !v); setMessage(null); }} className="w-full text-xs text-accent font-semibold underline">
             {intl ? tr('¿Estás en Colombia? Paga en pesos') : tr('¿Estás fuera de Colombia? Paga en euros o dólares')}
           </button>
         )}
 
         {!playStore && intl && intlAvailable && (<>
         {/* Fuera de Colombia: Paddle */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2" data-tour="plans-options">
           {INTL_PLANS.map(p => {
             const on = p.id === intlSelected;
             return (
@@ -183,7 +185,7 @@ export default function PlanesPage() {
             );
           })}
         </div>
-        <button type="button" onClick={payIntl} disabled={paying}
+        <button type="button" data-tour="plans-pay" onClick={payIntl} disabled={paying}
                 className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-wider text-sm' : `rounded-2xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
           {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
           {premium ? tr('Renovar') : tr('Pagar')} {tr(intlPlan.label).toLowerCase()} · {money(intlPlan.eur, 'EUR')}
@@ -199,37 +201,37 @@ export default function PlanesPage() {
 
         {!playStore && !(intl && intlAvailable) && (<>
         {/* Planes de pago */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2" data-tour="plans-options">
           {PLANS.map(p => {
             const on = p.id === selected;
             return (
               <button key={p.id} type="button" onClick={() => setSelected(p.id)}
                       className={`relative p-3 text-center border transition-all active:scale-[0.97] ${isTech ? 'rounded-none' : 'rounded-2xl'} ${on ? 'border-accent bg-accent/10' : 'border-glass-border bg-glass'}`}>
                 {p.best && <span className={`absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-bold uppercase px-2 py-0.5 bg-amber-400 text-black ${isTech ? 'rounded-none' : 'rounded-full'}`}>{tr('Recomendado')}</span>}
-                <p className="text-[11px] font-semibold text-text-secondary">{p.label}</p>
+                <p className="text-[11px] font-semibold text-text-secondary">{tr(p.label)}</p>
                 <p className={`text-base font-bold ${on ? 'text-accent' : 'text-text-primary'}`}>{formatCurrency(p.price, 'COP')}</p>
-                <p className="text-[10px] text-text-muted">{p.months > 1 ? `${formatCurrency(Math.round(p.price / p.months), 'COP')}/mes` : 'por mes'}</p>
+                <p className="text-[10px] text-text-muted">{p.months > 1 ? tr('{a}/mes', { a: formatCurrency(Math.round(p.price / p.months), 'COP') }) : tr('por mes')}</p>
               </button>
             );
           })}
         </div>
 
-        <button type="button" onClick={pay} disabled={paying}
+        <button type="button" data-tour="plans-pay" onClick={pay} disabled={paying}
                 className={`w-full py-3.5 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${isTech ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase tracking-wider text-sm' : `rounded-2xl bg-accent ${(theme === 'light' || theme === 'nova') ? 'text-white' : 'text-black'}`}`}>
           {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
-          {premium ? tr('Renovar') : tr('Pagar')} {plan.label.toLowerCase()} · {formatCurrency(plan.price, 'COP')}
+          {premium ? tr('Renovar') : tr('Pagar')} {tr(plan.label).toLowerCase()} · {formatCurrency(plan.price, 'COP')}
         </button>
 
         {/* Pagar por transferencia directa y enviar el comprobante */}
-        <button type="button" onClick={() => (user?.isAnonymous ? setNeedLink(true) : setManualOpen(true))}
+        <button type="button" data-tour="plans-transfer" onClick={() => (user?.isAnonymous ? setNeedLink(true) : setManualOpen(true))}
                 className={`w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 ${isTech ? 'rounded-none uppercase text-xs tracking-wider' : 'rounded-2xl'}`}>
           <Receipt className="w-4 h-4 text-accent" /> {tr('Pagar por transferencia y enviar comprobante')}
         </button>
         {lastManual && (
           <p className={`text-xs text-center ${lastManual.status === 'APPROVED' ? 'text-emerald-400' : lastManual.status === 'REJECTED' ? 'text-red-400' : 'text-amber-400'}`}>
-            {lastManual.status === 'PENDING' && `Tu comprobante (${formatCurrency(lastManual.amount, 'COP')}) está en revisión. Te activamos Premium apenas lo confirmemos.`}
+            {lastManual.status === 'PENDING' && tr('Tu comprobante ({a}) está en revisión. Te activamos Premium apenas lo confirmemos.', { a: formatCurrency(lastManual.amount, 'COP') })}
             {lastManual.status === 'APPROVED' && tr('¡Tu pago por transferencia fue aprobado! Premium ya está activo.')}
-            {lastManual.status === 'REJECTED' && `No pudimos confirmar tu último comprobante.${lastManual.reviewNote ? ` ${lastManual.reviewNote}` : ''} Escríbenos por WhatsApp si ya transferiste.`}
+            {lastManual.status === 'REJECTED' && `${tr('No pudimos confirmar tu último comprobante.')}${lastManual.reviewNote ? ` ${lastManual.reviewNote}` : ''} ${tr('Escríbenos por WhatsApp si ya transferiste.')}`}
           </p>
         )}
 

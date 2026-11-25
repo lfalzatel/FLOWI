@@ -105,7 +105,7 @@ export const HOME_TOUR: TourStep[] = lazyT(() => ([
 export type PageTourId =
   | 'gastos' | 'ingresos' | 'deudas' | 'cuentas' | 'inversiones' | 'metas' | 'presupuestos'
   | 'amigos' | 'compartidos' | 'hormiga' | 'recordatorios' | 'recibos' | 'productos'
-  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar';
+  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar' | 'planes';
 
 
 export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
@@ -225,6 +225,15 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { target: 'th-save', title: tr('Guarda'), text: tr('Toca Guardar cambios para que el menú rápido quede como lo dejaste.') },
   ],
   compartir: SHARE_STEPS(),
+  planes: [
+    { title: tr('Planes de FLOWI'), text: tr('FLOWI es gratis para siempre. Premium quita los límites del plan gratis y ayuda a que FLOWI siga creciendo.') },
+    { target: 'plans-status', title: tr('Tu plan'), text: tr('Si ya tienes Premium, aquí ves hasta cuándo. Si renuevas antes de que se acabe, los días se suman.') },
+    { target: 'plans-compare', title: tr('Qué incluye cada uno'), text: tr('Gastos, ingresos, deudas, cuentas, recordatorios y notas son ilimitados en los dos. Con Premium no tienes límite de inversiones, metas ni recibos leídos con foto, y ves todos los meses de tu negocio.') },
+    { target: 'plans-intl', title: tr('¿Estás fuera de Colombia?'), text: tr('Toca aquí para pagar en euros o dólares con tarjeta, PayPal, Apple Pay o Google Pay.') },
+    { target: 'plans-options', title: tr('Elige el tiempo'), text: tr('Mensual, 3 meses o anual. El anual sale más barato por mes. Toca el que quieras.') },
+    { target: 'plans-pay', title: tr('Paga'), text: tr('Pagas una sola vez con Nequi, PSE, Bancolombia o tarjeta. No es un cobro automático: te avisamos antes de que se acabe. Premium se activa apenas se apruebe el pago.') },
+    { target: 'plans-transfer', title: tr('O por transferencia'), text: tr('Si prefieres, transfiere directo y sube el comprobante. Lo revisamos y te activamos Premium apenas lo confirmemos.') },
+  ],
   apoyar: [
     { title: tr('Apoyar a FLOWI'), text: tr('FLOWI es gratis y sin publicidad. Si te sirve y quieres que siga creciendo, puedes enviar el aporte que quieras. Es opcional.') },
     { target: 'sup-keys', title: tr('1. Copia una llave'), text: tr('Toca Copiar en la llave del banco que uses. Funciona desde cualquier banco: no tiene que ser el mismo.') },
