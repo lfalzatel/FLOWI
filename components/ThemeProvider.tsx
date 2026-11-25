@@ -22,6 +22,25 @@ const ThemeContext = createContext<ThemeContextType>({
   setAllowedThemes: () => null,
 });
 
+// Color que FLOWI le da al celular para la barra de arriba (hora, batería) y la de navegación: el del
+// fondo de cada tema, para que se vean integradas (antes era el verde de la marca en todos los temas)
+const BAR_COLOR: Record<Theme, string> = {
+  glassmorphism: '#05202E', obsidiana: '#07080A', nova: '#F8F2E9', light: '#F8FAFC', carbon: '#121110',
+  dark: '#0A0A0F', nebula: '#0A0618', cyberpunk: '#0A0A16', kiloCode: '#0A0A16',
+};
+function applyBarColor(t: Theme) {
+  if (typeof document === 'undefined') return;
+  const color = BAR_COLOR[t] || '#0A0A0F';
+  let metas = Array.from(document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]'));
+  if (!metas.length) {
+    const m = document.createElement('meta');
+    m.name = 'theme-color';
+    document.head.appendChild(m);
+    metas = [m];
+  }
+  metas.forEach(m => { m.removeAttribute('media'); m.content = color; });
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('glassmorphism');
   const [allowedThemes, setAllowedThemesState] = useState<Theme[]>(DEFAULT_ALLOWED);
@@ -31,8 +50,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (savedTheme && ['light', 'dark', 'glassmorphism', 'nebula', 'cyberpunk', 'kiloCode', 'nova', 'carbon', 'obsidiana'].includes(savedTheme)) {
       setThemeState(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
+      applyBarColor(savedTheme);
     } else {
       document.documentElement.setAttribute('data-theme', 'glassmorphism');
+      applyBarColor('glassmorphism');
     }
 
     // Con los temas nuevos (Nova y Carbón) el menú por defecto cambió: se aplica una vez a todos
@@ -55,6 +76,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(newTheme);
     localStorage.setItem('flowi-theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+    applyBarColor(newTheme);
   };
 
   const setAllowedThemes = (themes: Theme[]) => {

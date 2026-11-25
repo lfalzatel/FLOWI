@@ -95,6 +95,7 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
   const [rect, setRect] = useState<DOMRect | null>(null);
   const [voice, setVoice] = useState(initialVoice);
   const dir = useRef(1);
+  const openedAt = useRef(Date.now());
   const target = useRef<HTMLElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [cardH, setCardH] = useState(240); // alto real del cuadro (cambia con el texto y el tema)
@@ -256,8 +257,9 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
 
   return createPortal(
     <div className={`fixed inset-0 z-[200] ${isTechTheme ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('Recorrido por FLOWI')}>
-      {/* Bloquea la pantalla de abajo; el hueco del resaltado es solo visual */}
-      <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
+      {/* Tapa la pantalla de abajo (el hueco del resaltado es solo visual). Tocar fuera del cuadro cierra
+          el recorrido, para que nunca quede la app bloqueada (se ignora el toque que lo abrió) */}
+      <div className="absolute inset-0" onClick={(e) => { e.stopPropagation(); if (Date.now() - openedAt.current > 700) finish(); }} />
       {rect ? (
         <div className={`absolute pointer-events-none transition-all duration-300 ring-2 ring-accent ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}
              style={{ top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2, boxShadow: `0 0 0 9999px rgba(0,0,0,${isLight ? 0.5 : 0.72})` }} />

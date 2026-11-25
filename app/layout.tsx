@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor:          '#00E5A0',
+  themeColor:          '#05202E', // fondo del tema Glass; al cargar, ThemeProvider pone el del tema elegido
   width:               'device-width',
   initialScale:        1,
   maximumScale:        1,
