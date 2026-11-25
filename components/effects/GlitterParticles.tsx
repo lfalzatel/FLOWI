@@ -27,6 +27,9 @@ export const GLITTER_THEMES: Record<string, { colors: string[]; light?: boolean;
   // Carbón y oro: chispas doradas sobre carbón
   carbon: { colors: ['#C9A86A', '#E2C891', '#F3EBDD', '#A8834A', '#FFFFFF'],
     bg: 'radial-gradient(ellipse at 30% 35%, #2E2924 0%, #1B1917 45%, #0D0C0B 100%)' },
+  // Obsidiana: vidrio negro con polvo de plata y hielo, y una aurora azul y violeta muy tenue
+  obsidiana: { colors: ['#E5E7EB', '#C7D2FE', '#9BD7FF', '#FFFFFF'],
+    bg: 'radial-gradient(ellipse at 18% 12%, rgba(64, 132, 255, 0.16) 0%, transparent 46%), radial-gradient(ellipse at 88% 85%, rgba(150, 110, 255, 0.13) 0%, transparent 50%), linear-gradient(180deg, #08090C 0%, #050608 100%)' },
   // Nova: papel crema cálido con polvo cobre y arena
   nova: { colors: ['#A8643C', '#C98B62', '#D9B48F', '#8A5A3B'], light: true,
     bg: 'radial-gradient(ellipse at 30% 30%, #FFFBF5 0%, #F8F2E9 50%, #EFE6D9 100%)' },

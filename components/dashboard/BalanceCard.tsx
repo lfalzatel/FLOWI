@@ -48,6 +48,8 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
 
   const cardGradient = theme === 'nova'
     ? 'linear-gradient(135deg, #FFFDF9 0%, #F6EDE1 100%)'
+    : theme === 'obsidiana'
+    ? 'linear-gradient(135deg, #16181D 0%, #0C0D10 55%, #141722 100%)'
     : theme === 'carbon'
     ? 'linear-gradient(135deg, #26221D 0%, #1A1815 55%, #2A2218 100%)'
     : isLight

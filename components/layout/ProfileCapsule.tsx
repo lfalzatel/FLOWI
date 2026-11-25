@@ -20,7 +20,7 @@ import {
   HelpCircle, LogOut, ChevronDown,
   BarChart2, Shield, Share2, Download,
   Sun, Monitor, Terminal, Moon, Layers, Heart, Compass,
-  Crown, ShieldCheck, Sparkles, Star, Flame } from 'lucide-react';
+  Crown, ShieldCheck, Sparkles, Star, Flame, Gem } from 'lucide-react';
 
 const menuItems = [
   { icon: User,       label: 'Mi perfil',         href: '#',              divider: false, soon: false },
@@ -283,6 +283,9 @@ export function ProfileCapsule() {
                   } else if (t === 'nova') {
                     icon = <Star className="w-4 h-4 mb-1" />;
                     label = 'Nova';
+                  } else if (t === 'obsidiana') {
+                    icon = <Gem className="w-4 h-4 mb-1" />;
+                    label = 'Obsidiana';
                   } else if (t === 'carbon') {
                     icon = <Flame className="w-4 h-4 mb-1" />;
                     label = 'Carbón';

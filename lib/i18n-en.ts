@@ -2769,4 +2769,5 @@ export const EN: Record<string, string> = {
   'Repetir la celebración de mi último amigo cada {a} días. Si la apagas y haces un amigo nuevo, se vuelve a activar.': 'Repeat the celebration of my latest friend every {a} days. If you turn it off and make a new friend, it turns back on.',
   'Tú y {a} ya pueden compartir gastos en FLOWI.': 'You and {a} can now share expenses in FLOWI.',
   '{a} ya no estará en tus amigos. No se le avisa.': '{a} will no longer be in your friends. They are not notified.',
+  'Obsidiana': 'Obsidian',
 };

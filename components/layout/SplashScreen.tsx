@@ -107,6 +107,11 @@ export function SplashScreen({ duration = 2500, mode = 'login', onComplete }: Sp
     logoOuterColor = '#C4B5FD'; // Lavanda
     logoInnerColor = '#F0ABFC'; // Rosado
     logoDotColor = '#F97316';
+  } else if (theme === 'obsidiana') {
+    // Obsidiana: plata con un toque de azul hielo
+    logoOuterColor = '#E5E7EB'; // Plata
+    logoInnerColor = '#9BD7FF'; // Hielo
+    logoDotColor = '#9BD7FF';
   } else if (theme === 'carbon') {
     // Carbón y oro: dorado apagado con trazo marfil
     logoOuterColor = '#C9A86A'; // Oro
