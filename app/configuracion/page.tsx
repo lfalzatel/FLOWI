@@ -447,7 +447,7 @@ export default function ConfigPage() {
           
           {openSections.cuenta && (
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
-            <button onClick={() => setIsProfileModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <button data-tour="set-perfil" onClick={() => setIsProfileModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/30 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
                   <User className={`w-4 h-4 ${isTechTheme ? 'text-accent' : 'text-accent'}`} />
@@ -460,7 +460,7 @@ export default function ConfigPage() {
               <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
             </button>
 
-            <a href="/?tour=1" className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <a data-tour="set-tutorial" href="/?tour=1" className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/30 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
                   <Compass className="w-4 h-4 text-accent" />
@@ -514,7 +514,7 @@ export default function ConfigPage() {
           {openSections.notificaciones && (
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
             {/* Activar Notificaciones (Master) */}
-            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <div data-tour="set-noti-on" className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
                   <Bell className="w-4 h-4 text-[var(--yellow)]" />
@@ -533,7 +533,7 @@ export default function ConfigPage() {
             </div>
 
             {/* Notificación Push */}
-            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div data-tour="set-noti-push" className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
                   <Smartphone className="w-4 h-4 text-[var(--yellow)]" />
@@ -553,7 +553,7 @@ export default function ConfigPage() {
             </div>
 
             {/* Notificación In-App */}
-            <div className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div data-tour="set-noti-inapp" className={`w-full flex items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'} ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
                   <MessageSquare className="w-4 h-4 text-[var(--yellow)]" />
@@ -575,7 +575,7 @@ export default function ConfigPage() {
             <NotificationTest isTechTheme={isTechTheme} />
 
             {/* Tono de Alerta de Notificación (Abre Modal) */}
-            <button 
+            <button data-tour="set-noti-tono" 
               onClick={() => setSoundModalAction('notification')}
               disabled={!notificationsEnabled}
               className={`w-full flex items-center justify-between p-4 transition-colors ${!notificationsEnabled ? 'opacity-50 pointer-events-none' : 'hover:bg-white/[0.02]'}`}
@@ -613,7 +613,7 @@ export default function ConfigPage() {
               <div className={`overflow-hidden border transition-all ${
                 isTechTheme ? 'border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'
               }`}>
-                <button 
+                <button data-tour="set-son-acciones" 
                   onClick={() => toggleSoundSubSection('acciones')}
                   className={`w-full flex items-center justify-between p-4 text-left transition-colors ${
                     openSoundSubSections.acciones ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
@@ -684,7 +684,7 @@ export default function ConfigPage() {
               <div className={`overflow-hidden border transition-all ${
                 isTechTheme ? 'border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'
               }`}>
-                <button 
+                <button data-tour="set-son-nav" 
                   onClick={() => toggleSoundSubSection('navegacion')}
                   className={`w-full flex items-center justify-between p-4 text-left transition-colors ${
                     openSoundSubSections.navegacion ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
@@ -733,7 +733,7 @@ export default function ConfigPage() {
               <div className={`overflow-hidden border transition-all ${
                 isTechTheme ? 'border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'
               }`}>
-                <button 
+                <button data-tour="set-son-anim" 
                   onClick={() => toggleSoundSubSection('animaciones')}
                   className={`w-full flex items-center justify-between p-4 text-left transition-colors ${
                     openSoundSubSections.animaciones ? 'bg-white/5 border-b border-white/10' : 'hover:bg-white/[0.02]'
@@ -827,7 +827,7 @@ export default function ConfigPage() {
 
           {openSections.gestion && (
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
-            <button onClick={() => setIsCategoriesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <button data-tour="set-cat-gestionar" onClick={() => setIsCategoriesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-[var(--yellow)]/30 rounded-none bg-[var(--yellow)]/5' : 'rounded-xl bg-[var(--yellow)]/10'}`}>
                   <PieChart className="w-4 h-4 text-[var(--yellow)]" />
@@ -856,7 +856,7 @@ export default function ConfigPage() {
                   <ChevronRight className={`w-4 h-4 ${isTechTheme ? 'text-accent/60' : 'text-text-muted'}`} />
                 </button>
 
-                <button 
+                <button data-tour="set-cat-restaurar" 
                   onClick={handleRestoreBaseCategories} 
                   disabled={restoring}
                   className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b disabled:opacity-50 ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}
@@ -894,7 +894,7 @@ export default function ConfigPage() {
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
             
             {/* Botón de Temas */}
-            <button onClick={() => setIsThemesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <button data-tour="set-temas" onClick={() => setIsThemesModalOpen(true)} className={`w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-pink-500/30 rounded-none bg-pink-500/5' : 'rounded-xl bg-pink-500/10'}`}>
                   <Palette className="w-4 h-4 text-pink-400" />
@@ -908,7 +908,7 @@ export default function ConfigPage() {
             </button>
 
             {/* Idioma: rotulado en los dos idiomas para que se encuentre aunque la app esté en el otro */}
-            <div className={`w-full flex items-center justify-between gap-3 p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <div data-tour="set-idioma" className={`w-full flex items-center justify-between gap-3 p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3 min-w-0">
                 <div className={`w-8 h-8 shrink-0 flex items-center justify-center ${isTechTheme ? 'border border-sky-500/30 rounded-none bg-sky-500/5' : 'rounded-xl bg-sky-500/10'}`}>
                   <Languages className="w-4 h-4 text-sky-400" />
@@ -963,7 +963,7 @@ export default function ConfigPage() {
 
           {openSections.finanzas && (
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep animate-fade-in' : 'glass-card rounded-2xl animate-fade-in'}`}>
-            <button onClick={() => setIsBudgetModalOpen(true)} className={`w-full flex items-center justify-between p-4 border-b hover:bg-white/[0.02] transition-colors ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <button data-tour="set-presupuesto" onClick={() => setIsBudgetModalOpen(true)} className={`w-full flex items-center justify-between p-4 border-b hover:bg-white/[0.02] transition-colors ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-accent/20 rounded-none bg-accent/5' : 'rounded-xl bg-accent/10'}`}>
                   <Wallet className="w-4 h-4 text-accent" />
@@ -977,7 +977,7 @@ export default function ConfigPage() {
             </button>
             
             {/* Moneda Global */}
-            <div className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
+            <div data-tour="set-moneda" className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3 mb-2 sm:mb-0">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-green-500/20 rounded-none bg-green-500/5' : 'rounded-xl bg-green-500/10'}`}>
                   <Globe className="w-4 h-4 text-green-400" />
@@ -1042,7 +1042,7 @@ export default function ConfigPage() {
 
           {openSections.privacidad && (
             <div className={`overflow-hidden transition-all ${isTechTheme ? 'border border-red-500/20 rounded-none bg-deep animate-fade-in' : 'glass-card border-red-500/20 rounded-2xl animate-fade-in'}`}>
-            <button type="button" onClick={() => router.push('/legal')}
+            <button data-tour="set-legal" type="button" onClick={() => router.push('/legal')}
                     className={`w-full flex items-center justify-between p-4 border-b hover:bg-white/5 transition-colors ${isTechTheme ? 'border-accent/15' : 'border-glass-border'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 flex items-center justify-center ${isTechTheme ? 'border border-emerald-500/20 rounded-none bg-emerald-500/5' : 'rounded-xl bg-emerald-500/10'}`}>

@@ -84,7 +84,7 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
           </div>
         ) : (
           <>
-          <button
+          <button data-tour="set-ia-conectar"
             type="button"
             onClick={() => startOpenRouterConnect()}
             className={`w-full py-2.5 text-sm font-bold bg-accent/15 border border-accent text-accent hover:bg-accent/25 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider' : 'rounded-xl'}`}
@@ -96,7 +96,7 @@ export function AiAssistantSettings({ isTechTheme, open = true, onToggle }: { is
           </p>
           </>
         )}
-        <button
+        <button data-tour="set-ia-guia"
           type="button"
           onClick={() => setShowGuide(true)}
           className={`w-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2 border border-glass-border text-text-primary hover:bg-white/5 transition-colors ${isTechTheme ? 'rounded-none font-mono uppercase tracking-wider text-xs' : 'rounded-xl'}`}

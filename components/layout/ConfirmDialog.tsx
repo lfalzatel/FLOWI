@@ -3,6 +3,7 @@ import { tr, trTech } from '@/lib/i18n';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
+import { ModalBackdrop } from '@/components/effects/ModalBackdrop';
 import { AlertTriangle, Terminal, X } from 'lucide-react';
 
 interface Props {
@@ -43,9 +44,9 @@ export function ConfirmDialog({
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-      {/* Backdrop overlay closer */}
-      <div className="absolute inset-0" onClick={onCancel} />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* Fondo con partículas y ondas del tema (lo toca y se cierra) */}
+      <ModalBackdrop onClick={onCancel} />
 
       <div
         className={`

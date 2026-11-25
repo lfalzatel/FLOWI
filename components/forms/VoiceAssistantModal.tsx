@@ -1,4 +1,5 @@
 'use client';
+import { ModalBackdrop } from '@/components/effects/ModalBackdrop';
 import { currentLocale, tr } from '@/lib/i18n';
 
 import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
@@ -737,10 +738,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono text-sm' : ''}`}>
       {/* Backdrop (mientras la IA lee la foto: el fondo animado del tema) */}
       {receiptStatus === 'loading' ? <ReadingBackdrop /> : (
-        <div 
-          className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/40 backdrop-blur-xs' : 'bg-black/75 backdrop-blur-md'}`} 
-          onClick={onClose} 
-        />
+        <ModalBackdrop onClick={onClose} />
       )}
 
       <div 

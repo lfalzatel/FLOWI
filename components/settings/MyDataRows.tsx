@@ -45,7 +45,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
 
   return (
     <>
-      <button type="button" onClick={() => show('export')} className={row()}>
+      <button data-tour="set-datos-descargar" type="button" onClick={() => show('export')} className={row()}>
         <div className="flex items-center gap-3">
           <div className={icon('blue')}><Download className="w-4 h-4 text-blue-400" /></div>
           <div className={mono}>
@@ -54,7 +54,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
           </div>
         </div>
       </button>
-      <button type="button" onClick={() => show('records')} className={row()}>
+      <button data-tour="set-datos-borrar" type="button" onClick={() => show('records')} className={row()}>
         <div className="flex items-center gap-3">
           <div className={icon('orange')}><Trash2 className="w-4 h-4 text-orange-400" /></div>
           <div className={mono}>
@@ -63,7 +63,7 @@ export function MyDataRows({ isTechTheme }: { isTechTheme: boolean }) {
           </div>
         </div>
       </button>
-      <button type="button" onClick={() => show('account')} className={row(true)}>
+      <button data-tour="set-datos-eliminar" type="button" onClick={() => show('account')} className={row(true)}>
         <div className="flex items-center gap-3">
           <div className={icon('red')}><Lock className="w-4 h-4 text-red-500" /></div>
           <div className={mono}>

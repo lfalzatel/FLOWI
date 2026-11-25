@@ -67,9 +67,11 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
 
   return createPortal(
-    <div className="fixed inset-0 z-[9000] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()}
-           className={`relative w-full sm:max-w-lg bg-deep border border-glass-border max-h-[92vh] flex flex-col ${isTech ? 'rounded-none font-mono' : 'rounded-t-3xl sm:rounded-3xl'}`}>
+    <div className="fixed inset-0 z-[9000] flex items-end sm:items-center justify-center" onClick={onClose}>
+      {/* Mismo fondo que las demás ventanas: se opaca y las luces del tema pasan difuminadas */}
+      <div className="ui-backdrop backdrop-blur-md" aria-hidden="true" />
+      <div onClick={e => e.stopPropagation()} data-drag-close
+           className={`relative w-full sm:max-w-lg glass-dropdown border border-glass-border max-h-[92vh] flex flex-col animate-fade-in-up ${isTech ? 'rounded-none font-mono' : 'rounded-t-3xl sm:rounded-3xl'}`}>
         {/* Encabezado */}
         <div className="flex items-center gap-3 p-5 pb-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${c.color}18` }}>
