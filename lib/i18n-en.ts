@@ -2959,4 +2959,7 @@ export const EN: Record<string, string> = {
   'Ábrela en su nueva dirección. Ahí el inicio de sesión funciona en todos los celulares, también en iPhone.': 'Open it at its new address. There sign-in works on every phone, iPhone too.',
   // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
   'Verás una pantalla que pide permiso para FLOWI. Revisa que diga la dirección de FLOWI, que termina en web punto app, y toca el botón morado "Authorize". No cambies nada más.': 'You will see a screen asking for permission for FLOWI. Check that it shows the FLOWI address, ending in web dot app, and tap the purple "Authorize" button. Do not change anything else.',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Entrando…': 'Signing in…',
+  'Elige tu cuenta de Google. En un momento abrimos tu FLOWI.': 'Choose your Google account. We will open your FLOWI in a moment.',
 };

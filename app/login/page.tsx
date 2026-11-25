@@ -133,6 +133,9 @@ export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
   const [isSplashDone, setIsSplashDone] = useState(false);
   const [authDoneUrl, setAuthDoneUrl] = useState<string | null>(null);
+  // Mientras se elige la cuenta en Google y FLOWI termina de recibir la sesión, se muestra "Entrando…"
+  // (en el celular Google se abre en otra pestaña y, al volver, se alcanzaba a ver la portada otra vez)
+  const [entering, setEntering] = useState(false);
   const takeNext = () => {
     const n = sessionStorage.getItem('login_next');
     sessionStorage.removeItem('login_next');
@@ -191,6 +194,7 @@ export default function LoginPage() {
       googleProvider.setCustomParameters({ prompt: 'select_account' });
       // Evita que el aviso de "sesión abierta" salte a Inicio antes de crear el perfil
       sessionStorage.setItem('login_in_progress', 'true');
+      setEntering(true);
       const result = await signInWithPopup(auth, googleProvider);
 
       setMode('login');
@@ -217,6 +221,7 @@ export default function LoginPage() {
         console.error('No se pudo terminar el ingreso:', e);
       }
       sessionStorage.removeItem('login_in_progress');
+      setEntering(false);
       setShowSplash(false);
     }
   };
@@ -239,6 +244,22 @@ export default function LoginPage() {
   };
 
   const section = 'relative z-10 w-full max-w-5xl mx-auto px-5';
+
+  if (entering) {
+    return (
+      <div className="fixed inset-0 bg-[#050B14] text-white flex flex-col items-center justify-center gap-5 px-6 text-center">
+        <FlowLines className="absolute inset-x-0 top-0 h-[40%]" />
+        <FlowLines className="absolute inset-x-0 bottom-0 h-[40%] -scale-y-100" />
+        <div className="relative w-12 h-12 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
+        <div className="relative space-y-1">
+          <p className="text-lg font-bold font-syne">{t('Entrando…')}</p>
+          <p className="text-sm text-white/60">{t('Elige tu cuenta de Google. En un momento abrimos tu FLOWI.')}</p>
+        </div>
+        <button type="button" onClick={() => { sessionStorage.removeItem('login_in_progress'); setEntering(false); }}
+                className="relative text-xs text-white/50 underline">{t('Cancelar')}</button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-[#050B14] text-white overflow-x-hidden">
