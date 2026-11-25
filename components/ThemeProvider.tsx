@@ -11,9 +11,9 @@ interface ThemeContextType {
 }
 
 // Menú rápido por defecto; cada quien lo cambia en Configuración → Temas
-const DEFAULT_ALLOWED: Theme[] = ['glassmorphism', 'nova', 'light', 'dark', 'carbon'];
+const DEFAULT_ALLOWED: Theme[] = ['glassmorphism', 'obsidiana', 'nova', 'light', 'carbon'];
 // Sube este número cuando cambie el menú por defecto: la lista guardada antes se reemplaza una vez
-const ALLOWED_VERSION = '2';
+const ALLOWED_VERSION = '3';
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'glassmorphism',

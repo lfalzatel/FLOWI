@@ -63,27 +63,65 @@ export function MotionManager() {
       );
     };
 
-    // Obsidiana: destello que cruza cada tarjeta de vidrio una vez al aparecer (animación aparte, que
-    // no pisa la animación de entrada propia de la tarjeta)
+    // Brillo que cruza cada tarjeta una vez al aparecer, en todos los temas. Se pone una capa encima
+    // (.flowi-sheen) y se quita al terminar: no pisa la animación de entrada de la tarjeta.
+    const CARD = '.glass-card, .glass-card-strong, .animate-card-mix, #balance-card, [data-sheen]';
+    let queued = 0;
     const sheen = (el: HTMLElement) => {
-      if (el.dataset.sheen) return;
-      el.dataset.sheen = '1';
-      if (document.documentElement.dataset.theme !== 'obsidiana' || currentMotion() !== 'full') return;
-      el.animate([{ backgroundPosition: '160% 0' }, { backgroundPosition: '-60% 0' }],
-        { duration: 1500, delay: 250, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+      if (el.dataset.sheened) return;
+      el.dataset.sheened = '1';
+      if (currentMotion() !== 'full' || el.closest('.flowi-sheen, [data-no-sheen]')) return;
+      const delay = 650 + Math.min(queued++, 6) * 90; // después de que la tarjeta aparezca, de arriba abajo
+      setTimeout(() => { queued = Math.max(0, queued - 1); }, delay);
+      setTimeout(() => {
+        if (!el.isConnected) return;
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        // Si está fuera de la pantalla, brilla cuando la persona llega a ella; y se vigila para que
+        // brille de nuevo cada vez que vuelva a entrar en pantalla (bajando o subiendo)
+        const visible = !(r.top > window.innerHeight || r.bottom < 0);
+        if (visible) play(el); else el.dataset.sheenPending = '1';
+        io.observe(el);
+      }, delay);
     };
-    setTimeout(() => document.querySelectorAll<HTMLElement>('.glass-card').forEach(sheen), 400); // cuando el tema ya está aplicado
+    const io = new IntersectionObserver(entries => entries.forEach(en => {
+      const el = en.target as HTMLElement;
+      if (!el.isConnected) { io.unobserve(el); return; }
+      if (!en.isIntersecting) { el.dataset.sheenOut = '1'; return; }
+      if (el.dataset.sheenPending) { delete el.dataset.sheenPending; delete el.dataset.sheenOut; play(el); return; }
+      // Cada vez que vuelve a entrar en pantalla (bajando o subiendo) brilla otra vez
+      if (el.dataset.sheenOut) { delete el.dataset.sheenOut; play(el); }
+    }), { threshold: 0.35 });
+    const play = (el: HTMLElement) => {
+        if (!el.isConnected || currentMotion() !== 'full') return;
+        if (el.querySelector(':scope > .flowi-sheen')) return; // ya está brillando
+        const now = Date.now();
+        if (now - Number(el.dataset.sheenAt || 0) < 2000) return; // no titilar al subir y bajar rápido
+        el.dataset.sheenAt = String(now);
+        const pos = getComputedStyle(el).position;
+        const fixPos = pos === 'static';
+        if (fixPos) el.style.position = 'relative';
+        const layer = document.createElement('span');
+        layer.className = 'flowi-sheen';
+        layer.setAttribute('aria-hidden', 'true');
+        el.appendChild(layer);
+        const a = layer.animate([{ backgroundPosition: '160% 0' }, { backgroundPosition: '-60% 0' }],
+          { duration: 1400, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        const done = () => { layer.remove(); if (fixPos) el.style.position = ''; };
+        a.onfinish = done; a.oncancel = done;
+    };
+    setTimeout(() => document.querySelectorAll<HTMLElement>(CARD).forEach(sheen), 300);
 
     const scan = (node: Node) => {
       if (!(node instanceof HTMLElement)) return;
-      if (node.matches('.glass-card')) sheen(node);
-      node.querySelectorAll<HTMLElement>('.glass-card').forEach(sheen);
+      if (node.matches(CARD)) sheen(node);
+      node.querySelectorAll<HTMLElement>(CARD).forEach(sheen);
       if (node.matches('.animate-fade-in-up, .animate-scale-in')) animate(node);
       node.querySelectorAll<HTMLElement>('.animate-fade-in-up, .animate-scale-in').forEach(animate);
     };
     const obs = new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(scan)));
     obs.observe(document.body, { childList: true, subtree: true });
-    return () => { window.removeEventListener('pointerdown', onDown, true); obs.disconnect(); };
+    return () => { window.removeEventListener('pointerdown', onDown, true); obs.disconnect(); io.disconnect(); };
   }, []);
 
   // Menús de abajo (marcados con data-drag-close): se cierran arrastrándolos hacia abajo con el dedo.
