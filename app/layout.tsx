@@ -68,6 +68,7 @@ import { AppLock } from '@/components/security/AppLock';
 import { PlayStoreDetector } from '@/components/layout/PlayStoreDetector';
 import { MotionManager } from '@/components/layout/MotionManager';
 import { OfflineBanner } from '@/components/layout/OfflineBanner';
+import { MoveBanner } from '@/components/layout/MoveBanner';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <PlayStoreDetector />
               <MotionManager />
               <OfflineBanner />
+              <MoveBanner />
             </SharedLinksProvider>
             </FriendsProvider>
             </DataProvider>

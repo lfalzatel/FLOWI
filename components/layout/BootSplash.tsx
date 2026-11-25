@@ -10,7 +10,7 @@ export function BootSplash() {
 
   useEffect(() => {
     if (splashSession.shown) return;
-    if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/prueba') || pathname.startsWith('/legal')) return;
+    if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/prueba') || pathname.startsWith('/legal') || pathname.startsWith('/mudanza')) return;
     splashSession.shown = true;
     setShow(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps

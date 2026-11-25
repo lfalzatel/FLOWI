@@ -472,3 +472,38 @@ exports.probarNotificacion = onCall({ region: 'us-central1' }, async (req) => {
     return { ok: false, reason: code, registered: tokens.length };
   }
 });
+
+// ── Mudanza a la nueva dirección (lib/move.ts) ──────────────────────────────────────────────
+// La app vieja pide un código de un solo uso (válido 10 min) con la sesión de quien lo pide y sus
+// ajustes; la app nueva lo canjea por un "token" de esa MISMA cuenta (sirve también para invitados).
+// En la base solo se guarda la huella (sha256) del código, nunca el código.
+exports.crearMudanza = onCall({ region: 'us-central1' }, async (req) => {
+  if (!req.auth) throw new HttpsError('unauthenticated', 'Inicia sesión para mudarte.');
+  const prefs = req.data?.prefs && typeof req.data.prefs === 'object' ? req.data.prefs : {};
+  if (JSON.stringify(prefs).length > 70000) throw new HttpsError('invalid-argument', 'Demasiados ajustes.');
+  const code = crypto.randomBytes(24).toString('base64url');
+  await db.collection('fl_moves').doc(sha256(code)).set({
+    uid: req.auth.uid,
+    prefs,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    expiresAt: admin.firestore.Timestamp.fromMillis(Date.now() + 10 * 60 * 1000),
+  });
+  return { code };
+});
+
+exports.usarMudanza = onCall({ region: 'us-central1' }, async (req) => {
+  const code = String(req.data?.code || '');
+  if (code.length < 20 || code.length > 80) throw new HttpsError('invalid-argument', 'Código no válido.');
+  const ref = db.collection('fl_moves').doc(sha256(code));
+  const move = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return null;
+    tx.delete(ref); // un solo uso
+    return snap.data();
+  });
+  if (!move) throw new HttpsError('not-found', 'Este enlace ya se usó o no existe. Vuelve a tocar Mudarme.');
+  if (move.expiresAt.toMillis() < Date.now()) throw new HttpsError('deadline-exceeded', 'El enlace venció. Vuelve a tocar Mudarme.');
+  const token = await admin.auth().createCustomToken(move.uid);
+  logger.info('Mudanza', { uid: move.uid });
+  return { token, prefs: move.prefs || {} };
+});

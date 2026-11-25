@@ -630,11 +630,12 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
              style={kb ? { bottom: kb } : undefined}>
           <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10' : 'bg-black/40'}`} onClick={onClose} aria-hidden="true" />
           <div
-            // dvh = alto visible real en el celular (sin la barra del navegador), para que no se desborde
-            className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[min(92dvh,100%)] sm:max-h-[90vh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}
+            // dvh = alto visible real en el celular (sin la barra del navegador). Ocupa casi toda la pantalla,
+            // pero nunca sube hasta la cámara o la isla del celular (safe-area-inset-top + un respiro)
+            className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[min(calc(100dvh_-_max(0.75rem,env(safe-area-inset-top))_-_0.5rem),100%)] sm:max-h-[90vh] flex flex-col overflow-hidden glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-t-3xl sm:rounded-3xl'}`}
             onClick={(e) => e.stopPropagation()}
           >
-        <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-5 pb-3 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
+        <div className={`shrink-0 flex items-center justify-between gap-3 px-5 sm:px-6 pt-4 pb-2 ${isTechTheme ? 'border-b border-accent/20' : ''}`}>
           <h2 className={`${isTechTheme ? 'font-bold text-xl text-accent tracking-wide' : 'font-syne font-bold text-xl text-text-primary'}`}>
             {transactionToEdit ? t('Editar Transacción') : t('Nueva Transacción')}
           </h2>
@@ -653,7 +654,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
               }}>
           {/* Campos con scroll; el botón de guardar queda fijo abajo */}
           {/* En el registro guiado sobra espacio abajo, para que el paso que toca pueda quedar arriba de todo */}
-          <div ref={scrollRef} className={`flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-3 space-y-4 pb-5`}>
+          <div ref={scrollRef} className={`flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pt-2 space-y-3 pb-5`}>
           {/* Una sola fila: Gasto/Ingreso y, al lado, los atajos de voz y foto (recibo, comprobante de Nequi o del banco) */}
           <div className="flex gap-2 items-stretch">
             <div className={`flex-1 flex p-1 ${isTechTheme ? 'bg-glass backdrop-blur-3xl border border-glass-border shadow-2xl shadow-black/10 rounded-none' : 'bg-glass border border-glass-border rounded-xl'}`}>
