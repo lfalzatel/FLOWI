@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import './ui-kit.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { LanguageProvider } from '@/lib/i18n';
 

@@ -1,0 +1,75 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Kit de diseño de FLOWI (components/ui/). Aquí vive el estilo de las piezas
+   comunes y CÓMO CAMBIA EN CADA TEMA, para que las pantallas no tengan que
+   preguntar "¿qué tema es?". Regla: si una pieza se ve distinta en un tema,
+   el cambio va aquí, con [data-theme='…'], no en el componente.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Capa que oscurece el fondo detrás de una ventana */
+.ui-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); }
+[data-theme='light'] .ui-backdrop, [data-theme='nova'] .ui-backdrop { background: rgba(0, 0, 0, 0.2); }
+
+/* Ventana que sale desde abajo en el celular (centrada en el computador) */
+.ui-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  padding: 1.25rem 1.25rem 1.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px 28px 0 0;
+}
+@media (min-width: 640px) { .ui-sheet { border-radius: 1.5rem; } }
+
+/* Título de una ventana */
+.ui-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.125rem; color: var(--text-primary); }
+
+/* Fila de opción (ícono + título + detalle) */
+.ui-option {
+  width: 100%; display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem;
+  text-align: left; border: 1px solid var(--glass-border); border-radius: 1rem;
+  transition: background-color 0.15s, transform 0.1s;
+}
+.ui-option:hover { background: rgba(255, 255, 255, 0.05); }
+.ui-option:active { transform: scale(0.99); }
+.ui-option-title { display: block; font-weight: 600; color: var(--text-primary); }
+.ui-option-detail { display: block; font-size: 11px; color: var(--text-muted); }
+
+/* Cuadro de ícono con el color del tema */
+.ui-icon-box {
+  width: 2.5rem; height: 2.5rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  border-radius: 0.75rem; background: rgb(var(--accent) / 0.15); color: rgb(var(--accent));
+}
+
+/* Botones */
+.ui-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 700; border-radius: 0.75rem;
+  transition: opacity 0.15s, transform 0.1s, background-color 0.15s;
+}
+.ui-btn:active { transform: scale(0.98); }
+.ui-btn:disabled { opacity: 0.5; pointer-events: none; }
+.ui-btn-primary { background: rgb(var(--accent)); color: #000; }
+[data-theme='light'] .ui-btn-primary, [data-theme='nova'] .ui-btn-primary { color: #fff; }
+.ui-btn-secondary { border: 1px solid var(--glass-border); color: var(--text-primary); }
+.ui-btn-secondary:hover { background: var(--glass); }
+.ui-btn-ghost { color: var(--text-secondary); }
+.ui-btn-ghost:hover { color: var(--text-primary); }
+
+/* ── Temas tecnológicos (Cyber y Kilo): esquinas rectas, letra monoespaciada y bordes de acento ── */
+[data-theme='cyberpunk'] :is(.ui-sheet, .ui-option, .ui-icon-box, .ui-btn),
+[data-theme='kiloCode'] :is(.ui-sheet, .ui-option, .ui-icon-box, .ui-btn) { border-radius: 0; }
+[data-theme='cyberpunk'] .ui-sheet, [data-theme='kiloCode'] .ui-sheet {
+  background: var(--bg-deep); border-color: rgb(var(--accent) / 0.5);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+[data-theme='cyberpunk'] .ui-title, [data-theme='kiloCode'] .ui-title {
+  font-family: inherit; color: rgb(var(--accent)); text-transform: uppercase; font-size: 1rem;
+}
+[data-theme='cyberpunk'] .ui-option, [data-theme='kiloCode'] .ui-option { border-color: rgb(var(--accent) / 0.3); }
+[data-theme='cyberpunk'] .ui-option:hover, [data-theme='kiloCode'] .ui-option:hover { background: rgb(var(--accent) / 0.1); }
+[data-theme='cyberpunk'] .ui-option-title, [data-theme='kiloCode'] .ui-option-title { color: rgb(var(--accent)); }
+[data-theme='cyberpunk'] .ui-btn-primary, [data-theme='kiloCode'] .ui-btn-primary {
+  background: rgb(var(--accent) / 0.2); border: 1px solid rgb(var(--accent)); color: rgb(var(--accent));
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
