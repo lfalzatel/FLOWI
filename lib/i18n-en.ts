@@ -3027,4 +3027,10 @@ export const EN: Record<string, string> = {
   '¿Para cuándo?': 'By when?',
   '¿Para qué ahorras?': 'What are you saving for?',
   '¿Para qué ahorras? Una moto, un viaje, la prima del apartamento o un fondo para emergencias. Aquí ves cuánto llevas en total.': 'What are you saving for? A motorcycle, a trip, an apartment down payment or an emergency fund. Here you see how much you have in total.',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Es el botón redondo con el micrófono, abajo a la derecha. Tócalo una vez y se abre el menú.': 'It\'s the round button with the microphone, at the bottom right. Tap it once and the menu opens.',
+  'Toca "Foto del recibo" y tómale una foto, o compártela desde otra app. La IA lee la tienda, el total y cada producto. Necesitas la IA conectada, que es gratis.': 'Tap "Receipt photo" and take a picture, or share it from another app. The AI reads the store, the total and each product. You need the AI connected, which is free.',
+  'Elige otra categoría si la IA no acertó.': 'Pick another category if the AI got it wrong.',
+  'Cambia la cuenta': 'Change the account',
+  'Si pagaste con otra tarjeta o cuenta, elígela aquí y su saldo se ajusta solo. Al terminar toca Guardar Cambios.': 'If you paid with another card or account, pick it here and its balance adjusts by itself. When you finish, tap Save Changes.',
 };

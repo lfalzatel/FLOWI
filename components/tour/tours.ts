@@ -200,10 +200,12 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   ],
   recibos: [
     { target: 'search', title: tr('Mis recibos'), text: tr('Tus compras escaneadas con todos sus productos. Busca por tienda o por producto.') },
-    { open: 'quick', target: 'quick-foto', title: tr('Cómo llegan aquí'), text: tr('Escanea un recibo con el botón + y "Foto del recibo", o comparte la foto desde otra app. Necesitas la IA conectada, que es gratis.'), cta: { label: tr('Activar la IA'), href: '/configuracion#ia' } },
+    { target: 'voice|add', title: tr('Toca el botón +'), text: tr('Es el botón redondo con el micrófono, abajo a la derecha. Tócalo una vez y se abre el menú.') },
+    { open: 'quick', target: 'quick-foto', title: tr('Foto del recibo'), text: tr('Toca "Foto del recibo" y tómale una foto, o compártela desde otra app. La IA lee la tienda, el total y cada producto. Necesitas la IA conectada, que es gratis.'), cta: { label: tr('Activar la IA'), href: '/configuracion#ia' } },
     { target: 'receipt-item|search', title: tr('Mira el detalle'), text: tr('Toca una compra para ver sus productos. Ahí está el botón Editar.') },
     { open: 'edit', target: 'exp-items', title: tr('Corrige los productos'), text: tr('Al tocar Editar se abre así. Toca la lista de productos para corregir un nombre o un precio.') },
-    { open: 'edit', target: 'exp-category', title: tr('Cambia la categoría'), text: tr('Elige otra categoría si la IA no acertó. Al terminar toca Guardar Cambios.') },
+    { open: 'edit', target: 'exp-category', title: tr('Cambia la categoría'), text: tr('Elige otra categoría si la IA no acertó.') },
+    { open: 'edit', target: 'exp-account', title: tr('Cambia la cuenta'), text: tr('Si pagaste con otra tarjeta o cuenta, elígela aquí y su saldo se ajusta solo. Al terminar toca Guardar Cambios.') },
   ],
   productos: [
     { target: 'search', title: tr('¿Cuánto gasto en…?'), text: tr('Busca un producto, como huevos, cerveza o gasolina, y mira cuánto se te va al mes.') },
