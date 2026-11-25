@@ -2,6 +2,7 @@ import type { ReceiptItem } from '@/lib/receiptItems';
 import { isFixedExpenseCategory } from './firestore';
 import { detectMerchantInText, normalizeText } from './categories';
 import { englishCategoryHints } from './voiceEnglish';
+import { speechText } from './speech';
 
 export interface ParsedVoiceResult {
   kind?: 'transaction';
@@ -72,7 +73,7 @@ export function speakText(text: string, lang: string = 'es-CO', onDone?: () => v
   }
   try {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(speechText(text, appSpeechLang() === 'en' ? 'en' : 'es'));
     // Con la app en inglés se habla en inglés (los textos ya vienen traducidos con tr)
     const voice = pickAppVoice();
     if (voice) utterance.voice = voice;

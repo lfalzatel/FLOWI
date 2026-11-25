@@ -20,6 +20,9 @@ const fix = [[/from ['"]\.\/firestore['"]/, "from './firestore.mjs'"], [/from ['
 transpile('lib/categories.ts', 'categories.mjs', []);
 transpile('lib/voiceEnglish.ts', 'voiceEnglish.mjs', []);
 transpile('lib/voiceParser.ts', 'voiceParser.mjs', fix);
+// lib/speech.ts (lo importa voiceParser): se copia y se enlaza aquí también
+fs.writeFileSync(path.join(outDir, 'speech.mjs'), ts.transpileModule(fs.readFileSync(path.join(root, 'lib/speech.ts'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } }).outputText);
+{ const vp = path.join(outDir, 'voiceParser.mjs'); fs.writeFileSync(vp, fs.readFileSync(vp, 'utf8').replace(/from ['"]\.\/speech['"]/, "from './speech.mjs'")); }
 transpile('lib/voiceCorrection.ts', 'voiceCorrection.mjs', fix);
 fs.writeFileSync(path.join(outDir, 'firestore.mjs'), 'export function isFixedExpenseCategory() { return false; }\n');
 

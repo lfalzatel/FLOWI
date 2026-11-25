@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { startOpenRouterConnect } from '@/lib/aiAssist';
+import { speechText } from '@/lib/speech';
 
 // Paso a paso (con voz del navegador, sin costo) para conectar la IA gratuita de OpenRouter.
 // Lo importante: OpenRouter puede pedir una tarjeta al crear la cuenta; no hace falta, se omite.
@@ -51,7 +52,7 @@ export function AiConnectGuide({ onClose }: { onClose: () => void }) {
     synth.cancel();
     if (!voice) return;
     const speak = () => {
-      const u = new SpeechSynthesisUtterance(`${step.title.replace(/^\d+\.\s*/, '')}. ${step.text}`);
+      const u = new SpeechSynthesisUtterance(speechText(`${step.title.replace(/^\d+\.\s*/, '')}. ${step.text}`, appSpeechLang() === 'en' ? 'en' : 'es'));
       const v = pickAppVoice();
       if (v) u.voice = v;
       u.lang = v?.lang || (appSpeechLang() === 'en' ? 'en-US' : 'es-CO');

@@ -9,6 +9,7 @@ import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Compass, Volume2, VolumeX, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { usePopupHold } from '@/lib/tourGate';
+import { speechText } from '@/lib/speech';
 
 // Recorrido guiado: primero cómo registrar, luego cómo leer cada parte de Inicio (marcadas con
 // data-tour="..."). Mientras dura, Inicio muestra datos de ejemplo que no se guardan. La voz usa
@@ -192,7 +193,7 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
     if (!voice) return;
     const speak = () => {
       // En mayúsculas la voz lo deletrea ("F, L, O…"); así lo lee como palabra
-      const u = new SpeechSynthesisUtterance(`${step.title}. ${step.text}`.replace(/FLOWI/g, 'Flowi'));
+      const u = new SpeechSynthesisUtterance(speechText(`${step.title.replace(/^\d+\.\s*/, '')}. ${step.text}`, appSpeechLang() === 'en' ? 'en' : 'es'));
       const v = pickAppVoice();
       if (v) u.voice = v;
       u.lang = v?.lang || (appSpeechLang() === 'en' ? 'en-US' : 'es-CO');
