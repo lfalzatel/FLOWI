@@ -268,7 +268,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
             )}
 
             {!renewing && !investment && (
-              <div>
+              <div data-tour="inv-shots">
                 <input ref={shotsRef} type="file" accept="image/*" multiple className="hidden"
                        onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; readShots(fs); }} />
                 {aiState === 'loading' && (
@@ -305,7 +305,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
               </div>
             )}
 
-            <div>
+            <div data-tour="inv-bank">
               <span className={labelClass}>{tr('Banco')}</span>
               <BankField value={bank} onClick={() => setBankSheet(true)} />
               {bankSheet && (
@@ -315,7 +315,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3" data-tour="inv-amount">
               <div>
                 <label htmlFor="inv-amount" className={labelClass}>{tr('Monto invertido')}</label>
                 <CalcAmountInput id="inv-amount" placeholder="$ 0" value={amount} label={tr('Monto invertido')}
@@ -328,7 +328,7 @@ function InvestmentFormModalInner({ investment, renewFrom, currency = 'COP', onC
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3" data-tour="inv-dates">
               <div>
                 <label htmlFor="inv-start" className={labelClass}>{renewing ? tr('Se renueva el') : tr('Fecha de apertura')}</label>
                 <input autoComplete="off" id="inv-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} required />

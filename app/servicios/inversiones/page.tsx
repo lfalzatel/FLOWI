@@ -1,4 +1,5 @@
 'use client';
+import { useTourAction } from '@/components/tour/useTourEdit';
 import { currentLocale, tr } from '@/lib/i18n';
 import { AnimatedNumber } from '@/components/dashboard/AnimatedNumber';
 import { useEffect, useMemo, useState } from 'react';
@@ -39,6 +40,9 @@ export default function InversionesPage() {
 
   const [choosingKind, setChoosingKind] = useState(false);
   const [newKind, setNewKind] = useState<InvestmentKind | null>(null);
+  // Tutorial: abre el menú de tipos y el formulario de un CDT para mostrarlos mientras los explica
+  useTourAction('inv-kind', () => { setChoosingKind(true); return true; }, () => setChoosingKind(false));
+  useTourAction('inv-form', () => { setNewKind('cdt'); return true; }, () => setNewKind(null));
   const [editing, setEditing] = useState<Investment | null>(null);
   const [renewing, setRenewing] = useState<Investment | null>(null);
   const [closing, setClosing] = useState<Investment | null>(null);
@@ -147,7 +151,7 @@ export default function InversionesPage() {
         )}
 
         {/* Resumen */}
-        <section className={`${card} p-5`}>
+        <section className={`${card} p-5`} data-tour="inv-summary">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-xl bg-accent/15 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-accent" /></div>
@@ -163,7 +167,7 @@ export default function InversionesPage() {
           )}
           {summary.active.length > 0 && (
             <div className={`mt-4 pt-4 border-t ${isTechTheme ? 'border-accent/20' : 'border-glass-border'} grid grid-cols-2 gap-3`}>
-              <div>
+              <div data-tour="inv-earned">
                 <p className="text-[11px] text-text-muted">{tr('Llevas ganado')}</p>
                 <p className={`font-bold ${summary.earnedToDate < 0 ? MONEY_TEXT.neg : MONEY_TEXT.save}`}>{summary.earnedToDate < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(summary.earnedToDate)} format={fmt} /></p>
               </div>
@@ -229,7 +233,7 @@ export default function InversionesPage() {
                   const pctGain = v.invested > 0 ? (v.earned / v.invested) * 100 : 0;
                   const loss = v.earned < 0;
                   return (
-                    <article key={inv.id} className={`${card} p-4`}>
+                    <article key={inv.id} data-tour="list-item" className={`${card} p-4`}>
                       {header(<>{k === 'fondo' && inv.assetType === 'acciones' ? 'Acciones' : KIND_INFO[k].short}{inv.note ? ` · ${inv.bank}` : ''}</>, k === 'ahorro' && inv.rateEA ? `${String(inv.rateEA).replace('.', ',')}% E.A.` : undefined)}
                       <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[12px]">
                         <div>
@@ -276,7 +280,7 @@ export default function InversionesPage() {
                 const pct = Math.round(s.progress * 100);
                 const soon = s.daysLeft <= 3;
                 return (
-                  <article key={inv.id} className={`${card} p-4`}>
+                  <article key={inv.id} data-tour="list-item" className={`${card} p-4`}>
                     {header(<><b className="text-text-primary"><AnimatedNumber value={inv.amount} format={fmt} /></b>&nbsp;· {tr('{n} días', { n: s.termDays })}</>, `${String(inv.rateEA).replace('.', ',')}% E.A.`)}
                     {inv.note && <p className="text-[11px] text-text-muted truncate mt-1">{inv.note}</p>}
 

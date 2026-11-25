@@ -11,7 +11,7 @@ export interface TourStep {
   text: string;
   cta?: { label: string; href: string };
   // Abre algo antes de señalar: el menú del botón + o el formulario de gasto (se cierra solo)
-  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit'; // 'edit': la página abre su ventana de editar (useTourEdit)
+  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit' | 'inv-kind' | 'inv-form'; // los demás los abre cada página (useTourAction)
   // Dibujo de ejemplo dentro del cuadro (p. ej. cómo compartir un comprobante desde el banco)
   illus?: 'share-1' | 'share-2' | 'share-3';
 }
@@ -146,12 +146,16 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { title: tr('Tu patrimonio neto'), text: tr('Arriba sumo lo que tienes en cuentas, ahorros e inversiones y le resto lo que debes. Toca el ícono de información para ver cómo se calcula.') },
   ],
   inversiones: [
-    { title: tr('Ahorro e inversiones'), text: tr('Donde tu plata crece: un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria.') },
+    { target: 'inv-summary', title: tr('Ahorro e inversiones'), text: tr('Aquí ves cuánto tienes ahorrado e invertido: un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria.') },
     ...PLUS_STEPS(tr('Nueva inversión o ahorro')),
-    { title: tr('Elige el tipo'), text: tr('Al tocarlo eliges qué es: CDT, ahorro que paga intereses (como Nu o Lulo), acciones y fondos, o pensión. Luego escribes el valor, la tasa y la fecha, o subes pantallazos del banco para que la IA los lea.') },
-    { title: tr('Lo que vas ganando'), text: tr('Con la tasa calculo los intereses día a día. Para un CDT te muestro lo que recibes al vencer, después de retención, y te aviso antes de que venza.') },
-    { title: tr('Fondos y acciones'), text: tr('No crecen con una tasa fija: anota su valor de vez en cuando y verás tu ganancia real. Te recuerdo si pasa mucho tiempo.') },
-    { title: tr('Ahorro, no gasto'), text: tr('Lo que pones aquí no cuenta como gasto: se aparta de lo que puedes gastar y suma a tu patrimonio.') },
+    { open: 'inv-kind', target: 'inv-kinds', title: tr('Elige el tipo'), text: tr('CDT, ahorro que paga intereses (como Nu o Lulo), acciones y fondos, o pensión voluntaria. Toca el que vas a registrar.') },
+    { open: 'inv-form', target: 'inv-shots', title: tr('Llénalo con capturas'), text: tr('Sube pantallazos del banco y la IA llena los datos por ti. También puedes dictarlo, por ejemplo "CDT de 5 millones en Bancolombia al 11 % a 6 meses".') },
+    { open: 'inv-form', target: 'inv-bank', title: tr('El banco'), text: tr('Elige dónde tienes la plata.') },
+    { open: 'inv-form', target: 'inv-amount', title: tr('Monto y tasa'), text: tr('Escribe cuánto invertiste y la tasa E.A. que te da el banco. Con la tasa calculo lo que vas ganando.') },
+    { open: 'inv-form', target: 'inv-dates', title: tr('Las fechas'), text: tr('La fecha de apertura y cuándo vence. Con los botones eliges 3, 6 o 12 meses de una. Te aviso antes de que venza.') },
+    { target: 'inv-earned|inv-summary', title: tr('Lo que vas ganando'), text: tr('Calculo los intereses día a día. Para un CDT te muestro lo que recibes al vencer, después de retención.') },
+    { target: 'list-item|inv-summary', title: tr('Cada inversión'), text: tr('Toca el lápiz para editarla. Los fondos y las acciones no crecen con una tasa fija: actualiza su valor de vez en cuando y verás tu ganancia real.') },
+    { target: 'inv-summary', title: tr('Ahorro, no gasto'), text: tr('Lo que pones aquí no cuenta como gasto: se aparta de lo que puedes gastar y suma a tu patrimonio.') },
   ],
   metas: [
     { title: tr('Metas'), text: tr('¿Para qué ahorras? Una moto, un viaje, la prima del apartamento o un fondo para emergencias.') },

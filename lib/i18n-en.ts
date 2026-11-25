@@ -2980,4 +2980,18 @@ export const EN: Record<string, string> = {
   'Toca Eliminar si fue un error (te pido confirmar), o pásalo a deuda si todavía no lo pagaste.': 'Tap Delete if it was a mistake (I\'ll ask you to confirm), or turn it into a debt if you haven\'t paid it yet.',
   'Toca una compra para ver sus productos. Ahí está el botón Editar.': 'Tap a purchase to see its products. The Edit button is there.',
   'Usa el buscador por categoría, descripción o valor para encontrar un gasto.': 'Use the search by category, description or amount to find an expense.',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Aquí ves cuánto tienes ahorrado e invertido: un CDT, una Cajita de Nu, Lulo, Trii, un fondo o tu pensión voluntaria.': 'Here you see how much you have saved and invested: a CDT, a Nu Cajita, Lulo, Trii, a fund or your voluntary pension.',
+  'CDT, ahorro que paga intereses (como Nu o Lulo), acciones y fondos, o pensión voluntaria. Toca el que vas a registrar.': 'CDT, savings that pay interest (like Nu or Lulo), stocks and funds, or voluntary pension. Tap the one you are going to record.',
+  'Cada inversión': 'Each investment',
+  'Calculo los intereses día a día. Para un CDT te muestro lo que recibes al vencer, después de retención.': 'I calculate interest day by day. For a CDT I show you what you get at maturity, after withholding.',
+  'El banco': 'The bank',
+  'Elige dónde tienes la plata.': 'Choose where your money is.',
+  'Escribe cuánto invertiste y la tasa E.A. que te da el banco. Con la tasa calculo lo que vas ganando.': 'Type how much you invested and the annual rate (E.A.) the bank gives you. With the rate I calculate what you are earning.',
+  'La fecha de apertura y cuándo vence. Con los botones eliges 3, 6 o 12 meses de una. Te aviso antes de que venza.': 'The opening date and when it matures. With the buttons you pick 3, 6 or 12 months right away. I\'ll remind you before it matures.',
+  'Las fechas': 'The dates',
+  'Llénalo con capturas': 'Fill it with screenshots',
+  'Monto y tasa': 'Amount and rate',
+  'Sube pantallazos del banco y la IA llena los datos por ti. También puedes dictarlo, por ejemplo "CDT de 5 millones en Bancolombia al 11 % a 6 meses".': 'Upload screenshots from your bank and the AI fills in the details for you. You can also dictate it, for example "CDT of 5 million at Bancolombia at 11% for 6 months".',
+  'Toca el lápiz para editarla. Los fondos y las acciones no crecen con una tasa fija: actualiza su valor de vez en cuando y verás tu ganancia real.': 'Tap the pencil to edit it. Funds and stocks don\'t grow at a fixed rate: update their value from time to time and you\'ll see your real gain.',
 };

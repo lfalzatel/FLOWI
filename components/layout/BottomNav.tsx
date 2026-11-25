@@ -110,7 +110,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     const manual = () => { setShowVoice(false); setReceipt(null); setParsedVoiceData(null); setShowSheet(false); setShowAdd(true); };
     // El tutorial abre el menú o el formulario de gasto para señalar sus botones, y luego los cierra
     const tourOpen = (e: Event) => {
-      const what = (e as CustomEvent<'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit'>).detail;
+      const what = (e as CustomEvent<string>).detail;
       setShowVoice(false); setShowAdd(false);
       if (what === 'quick') { setQuick(null); setShowSheet(true); return; }
       setShowSheet(false);

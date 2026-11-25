@@ -12,9 +12,9 @@ export const KIND_ICON: Record<InvestmentKind, any> = { cdt: Landmark, ahorro: P
 export function InvestmentKindSheet({ onPick, onClose }: { onPick: (k: InvestmentKind) => void; onClose: () => void }) {
   return (
     <Sheet title={tr('¿Qué vas a registrar?')} onClose={onClose}>
-      <div className="space-y-2">
+      <div className="space-y-2" data-tour="inv-kinds">
         {(Object.keys(KIND_INFO) as InvestmentKind[]).map(k => (
-          <OptionRow key={k} icon={KIND_ICON[k]} title={KIND_INFO[k].label} detail={KIND_INFO[k].examples} onClick={() => onPick(k)} />
+          <div key={k} data-tour={`inv-kind-${k}`}><OptionRow icon={KIND_ICON[k]} title={KIND_INFO[k].label} detail={KIND_INFO[k].examples} onClick={() => onPick(k)} /></div>
         ))}
       </div>
     </Sheet>
