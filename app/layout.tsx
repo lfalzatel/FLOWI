@@ -66,6 +66,7 @@ import { UsageTracker } from '@/components/layout/UsageTracker';
 import { InAppToastStack } from '@/components/layout/InAppToastStack';
 import { AppLock } from '@/components/security/AppLock';
 import { PlayStoreDetector } from '@/components/layout/PlayStoreDetector';
+import { MotionManager } from '@/components/layout/MotionManager';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -101,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <BootSplash />
               <LangSync />
               <PlayStoreDetector />
+              <MotionManager />
             </SharedLinksProvider>
             </FriendsProvider>
             </DataProvider>

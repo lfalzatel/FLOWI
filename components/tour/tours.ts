@@ -105,7 +105,7 @@ export const HOME_TOUR: TourStep[] = lazyT(() => ([
 export type PageTourId =
   | 'gastos' | 'ingresos' | 'deudas' | 'cuentas' | 'inversiones' | 'metas' | 'presupuestos'
   | 'amigos' | 'compartidos' | 'hormiga' | 'recordatorios' | 'recibos' | 'productos'
-  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar' | 'planes';
+  | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar' | 'planes' | 'animaciones';
 
 
 export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
@@ -213,6 +213,7 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { target: 'cfg-sonidos', title: tr('Sonidos y animaciones'), text: tr('Escoge el sonido de cada acción (gastos, ingresos, ediciones) o apágalos.') },
     { target: 'cfg-gestion', title: tr('Categorías'), text: tr('Cambia los colores e íconos de tus categorías, crea las tuyas o recupera las que ocultaste.') },
     { target: 'cfg-apariencia', title: tr('Apariencia e idioma'), text: tr('Elige el tema de colores y cuáles salen en el menú rápido de tu foto. También cambias el idioma entre español e inglés.') },
+    { target: 'motion-row', title: tr('Animaciones'), text: tr('Escoge animaciones completas, suaves o apagadas. Si tu celular se siente lento, elige Suaves.') },
     { target: '#ia', title: tr('Asistente con IA'), text: tr('Conecta la IA gratis para leer recibos con una foto y entender mejor lo que dictas. El botón "Ver paso a paso con voz" te guía en cada pantalla.') },
     { target: 'cfg-apoyar', title: tr('Apoyar a FLOWI'), text: tr('Si FLOWI te sirve, aquí ves cómo apoyar el proyecto. Es opcional.') },
     { target: 'cfg-finanzas', title: tr('Finanzas'), text: tr('Tu presupuesto mensual y la moneda en la que ves tus cifras.') },
@@ -225,6 +226,11 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { target: 'th-save', title: tr('Guarda'), text: tr('Toca Guardar cambios para que el menú rápido quede como lo dejaste.') },
   ],
   compartir: SHARE_STEPS(),
+  animaciones: [
+    { title: tr('Animaciones'), text: tr('Escoge cuánto movimiento quieres en FLOWI. Solo cambia la apariencia: tus datos y funciones son los mismos.') },
+    { target: 'motion-options', title: tr('Elige un nivel'), text: tr('Completas: las ventanas nacen del botón que tocas, con un pequeño rebote. Suaves: más livianas, ideales si tu celular se siente lento. Apagadas: todo aparece al instante.') },
+    { target: 'motion-options', title: tr('Se aplica al instante'), text: tr('Toca un nivel y pruébalo abriendo el menú del botón +. Se guarda en este celular, así que en otro celular puedes escoger otro.') },
+  ],
   planes: [
     { title: tr('Planes de FLOWI'), text: tr('FLOWI es gratis para siempre. Premium quita los límites del plan gratis y ayuda a que FLOWI siga creciendo.') },
     { target: 'plans-status', title: tr('Tu plan'), text: tr('Si ya tienes Premium, aquí ves hasta cuándo. Si renuevas antes de que se acabe, los días se suman.') },

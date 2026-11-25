@@ -50,7 +50,8 @@ export function GlitterParticles({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    // Quieto si el celular pide menos movimiento o si en FLOWI las animaciones están apagadas
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'off';
     let w = 0, h = 0, dpr = 1, parts: P[] = [], raf = 0, last = performance.now();
 
     const make = (): P => {

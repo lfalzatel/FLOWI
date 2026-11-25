@@ -13,6 +13,7 @@ import { ManageBudgetModal } from '@/components/forms/ManageBudgetModal';
 import { ManageSoundModal, SoundActionType } from '@/components/forms/ManageSoundModal';
 import { AiAssistantSettings } from '@/components/settings/AiAssistantSettings';
 import { PageTourButton } from '@/components/tour/PageTourButton';
+import { MotionSetting } from '@/components/settings/MotionSetting';
 import { SupportProject } from '@/components/settings/SupportProject';
 import { AppLockSettings } from '@/components/settings/AppLockSettings';
 import { removePushToken, syncPushToken } from '@/lib/push';
@@ -70,6 +71,9 @@ export default function ConfigPage() {
       if (target === 'apoyar' || target === 'ia') {
         setOpenSections(prev => ({ ...prev, [target]: true }));
         setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 300);
+      } else if (target === 'animaciones') {
+        setOpenSections(prev => ({ ...prev, apariencia: true }));
+        setTimeout(() => document.getElementById('animaciones')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 350);
       } else if (target === 'temas') {
         setIsThemesModalOpen(true);
         history.replaceState(null, '', window.location.pathname);
@@ -873,6 +877,8 @@ export default function ConfigPage() {
                 ))}
               </div>
             </div>
+
+            <MotionSetting isTech={isTechTheme} />
 
             {/* Tamaño de texto */}
             <div className="w-full flex items-center justify-between p-4 opacity-50 cursor-not-allowed">

@@ -157,7 +157,7 @@ export function CategoryPickerSheet({ type, categories, selected, recent, onSele
       <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/20' : 'bg-black/50'}`} onClick={onClose} aria-hidden="true" />
 
       {/* La animación de entrada va en el contenedor para no pisar el transform del arrastre */}
-      <div className="relative z-10 w-full sm:max-w-lg animate-fade-in-up">
+      <div data-drag-close className="relative z-10 w-full sm:max-w-lg animate-fade-in-up">
       <div
         role="dialog"
         aria-label={tr('Elegir categoría')}

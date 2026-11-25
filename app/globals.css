@@ -546,3 +546,20 @@ body {
 [data-theme='nova'] .voice-modal :is(.text-amber-300, .text-amber-400, .text-yellow-400) {
   color: #B45309 !important;
 }
+
+/* ── Nivel de animaciones (Configuración › Apariencia › Animaciones) ── */
+/* Apagadas: todo aparece al instante */
+[data-motion='off'] *,
+[data-motion='off'] *::before,
+[data-motion='off'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+/* Suaves: vidrio con menos desenfoque (es lo más pesado en celulares sencillos) */
+[data-motion='soft'] :is(.glass-card, .glass-dropdown, .glass-button, .bg-glass) {
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+}
