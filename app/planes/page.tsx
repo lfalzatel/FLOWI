@@ -158,7 +158,7 @@ export default function PlanesPage() {
         </div>
 
         {playStore && (
-          <p className={`text-xs text-center text-text-secondary leading-relaxed p-3 border border-glass-border ${isTech ? 'rounded-none' : 'rounded-2xl'}`}>
+          <p data-tour="plans-play" className={`text-xs text-center text-text-secondary leading-relaxed p-3 border border-glass-border ${isTech ? 'rounded-none' : 'rounded-2xl'}`}>
             {tr('En la app de Play Store todavía no se puede adquirir Premium. Si ya lo tienes, sigue activo en todos tus dispositivos.')}
           </p>
         )}

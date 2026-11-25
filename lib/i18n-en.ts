@@ -2744,4 +2744,6 @@ export const EN: Record<string, string> = {
   'Desde el comprobante de tu banco o Nequi, sin escribir nada.': 'From your bank or Nequi receipt, without typing anything.',
   'Ver cómo': 'See how',
   '¿Pagaste desde el banco? Compártelo a FLOWI': 'Paid from your bank? Share it to FLOWI',
+  'En la app de Play Store': 'In the Play Store app',
+  'Desde la app de Play Store todavía no se puede comprar Premium. Si ya lo tienes, sigue activo en todos tus dispositivos.': 'Premium cannot be bought from the Play Store app yet. If you already have it, it stays active on all your devices.',
 };
