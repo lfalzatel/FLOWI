@@ -42,8 +42,9 @@ export async function confirmPayment(id: string): Promise<string | null> {
 }
 
 export async function payPlan(plan: PlanOption['id'], email?: string | null): Promise<PayResult> {
-  const firmar = httpsCallable<{ plan: string }, Firma>(getFunctions(app, 'us-central1'), 'wompiFirma');
-  const [{ data }] = await Promise.all([firmar({ plan }), loadWidget()]);
+  const firmar = httpsCallable<{ plan: string; origin: string }, Firma>(getFunctions(app, 'us-central1'), 'wompiFirma');
+  // origin: al terminar, Wompi devuelve a esta misma dirección (vieja o nueva) donde está la sesión
+  const [{ data }] = await Promise.all([firmar({ plan, origin: window.location.origin }), loadWidget()]);
   return new Promise((resolve) => {
     const checkout = new (window as any).WidgetCheckout({
       currency: data.currency,

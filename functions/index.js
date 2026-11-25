@@ -48,9 +48,16 @@ exports.wompiFirma = onCall({ secrets: [WOMPI_INTEGRITY], region: 'us-central1' 
   return {
     reference, amountInCents, currency, signature,
     publicKey: WOMPI_PUBLIC_KEY.value(),
-    redirectUrl: `${APP_URL.value()}/planes`,
+    redirectUrl: `${returnOrigin(req.data?.origin)}/planes`,
   };
 });
+
+// Al terminar de pagar, Wompi devuelve a la dirección desde la que se pagó (la vieja o la nueva,
+// así nadie aterriza en un sitio donde no tiene la sesión abierta). Solo direcciones de FLOWI.
+function returnOrigin(origin) {
+  const allowed = [APP_URL.value(), 'https://flowi-9af82.web.app', 'https://flowi-gastos.web.app'];
+  return allowed.includes(String(origin || '')) ? String(origin) : APP_URL.value();
+}
 
 // Lee "transaction.id" dentro de body.data
 const pick = (obj, path) => path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
