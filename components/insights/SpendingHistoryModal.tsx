@@ -70,7 +70,7 @@ export function SpendingHistoryModal({ target, transactions, resolve, fmt, isTec
     <div className="fixed inset-0 z-[9000] flex items-center justify-center p-4" onClick={onClose}>
       {/* Mismo fondo que las demás ventanas: se opaca y las luces del tema pasan difuminadas */}
       <div className="ui-backdrop backdrop-blur-md" aria-hidden="true" />
-      <div onClick={e => e.stopPropagation()} data-drag-close
+      <div onClick={e => e.stopPropagation()}
            className={`relative w-full sm:max-w-lg glass-dropdown border border-glass-border max-h-[min(88dvh,calc(100dvh_-_2*max(1rem,env(safe-area-inset-top))))] flex flex-col animate-fade-in-up ${isTech ? 'rounded-none font-mono' : 'rounded-3xl'}`}>
         {/* Encabezado */}
         <div className="flex items-center gap-3 p-5 pb-3">

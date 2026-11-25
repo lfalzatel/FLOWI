@@ -174,11 +174,17 @@ export function MotionManager() {
       const { sheet, dy, t0 } = drag;
       drag = null;
       const speed = dy / Math.max(1, Date.now() - t0);
-      if (dy > 110 || (dy > 40 && speed > 0.6)) {
+      const snapBack = () => {
+        sheet.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
+        sheet.style.transform = '';
+      };
+      const backdrop = sheet.parentElement?.querySelector<HTMLElement>(':scope > .absolute.inset-0, :scope > .ui-backdrop');
+      if ((dy > 110 || (dy > 40 && speed > 0.6)) && backdrop) {
         sheet.style.transition = 'transform 200ms ease-in';
         sheet.style.transform = 'translateY(110%)';
-        const backdrop = sheet.parentElement?.querySelector<HTMLElement>(':scope > .absolute.inset-0');
-        setTimeout(() => backdrop?.click(), 180);
+        setTimeout(() => backdrop.click(), 180);
+        // Si la ventana no se cerró al tocar su fondo, vuelve a su lugar (antes quedaba corrida fuera de la pantalla)
+        setTimeout(() => { if (sheet.isConnected) snapBack(); }, 450);
       } else if (dy > 0) {
         sheet.style.transition = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
         sheet.style.transform = '';

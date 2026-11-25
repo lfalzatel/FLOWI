@@ -31,7 +31,7 @@ export function Sheet({ title, subtitle, onClose, children, variant = 'sheet', s
     <div className={`fixed inset-0 flex items-end sm:items-center justify-center ${dialog ? 'p-4' : ''}`} style={{ zIndex: z }}
          role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined}>
       <div className={`ui-backdrop ${dialog ? 'backdrop-blur-sm' : ''}`} onClick={onClose} aria-hidden="true" />
-      <div data-drag-close className={`${dialog ? 'ui-dialog glass-dropdown' : 'ui-sheet'} animate-fade-in-up ${className}`}>
+      <div data-drag-close={dialog ? undefined : true} className={`${dialog ? 'ui-dialog glass-dropdown' : 'ui-sheet'} animate-fade-in-up ${className}`}>
         {showClose && (
           <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="ui-close"><X className="w-5 h-5" /></button>
         )}
