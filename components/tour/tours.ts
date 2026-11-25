@@ -225,7 +225,7 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   calendario: [
     { title: tr('Calendario de tu plata'), text: tr('Te muestro cuánto tendrías cada día de hoy a fin de mes, para saber con tiempo si te alcanza.') },
     { target: 'cal-summary', title: tr('¿Te alcanza?'), text: tr('Aquí ves con cuánto terminarías el mes y, si en algún día te quedarías en rojo, cuál es ese día. Así puedes frenar o mover un pago a tiempo.') },
-    { target: 'cal-nav', title: tr('Mes, semana o día'), text: tr('Elige cómo verlo y muévete con las flechas a otros meses, semanas o días. El botón Hoy te devuelve a hoy.') },
+    { target: 'cal-nav', title: tr('Mes, semana o día'), text: tr('Arriba eliges Mes, Semana o Día. Muévete con las flechas, o toca la fecha del medio para saltar a cualquier día o mes. El botón Hoy te devuelve a hoy.') },
     { target: 'cal-days', title: tr('Cada día'), text: tr('Los días que ya pasaron muestran lo que entró y salió. Hoy y los que vienen muestran la plata que tendrías: el punto rojo es un pago y el verde un ingreso que esperas. Toca un día para ver el detalle.') },
     { target: 'cal-detail', title: tr('De dónde sale'), text: tr('Uso tu plata de hoy, tus pagos del mes, los ingresos del mes pasado que aún no llegan y tu gasto diario normal. Mientras más registres, más exacto.') },
   ],

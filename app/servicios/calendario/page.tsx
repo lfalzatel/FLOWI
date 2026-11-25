@@ -142,7 +142,15 @@ export default function CalendarioPage() {
               </div>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => move(-1)} aria-label={tr('Anterior')} className="p-2 text-text-secondary hover:text-accent"><ChevronLeft className="w-5 h-5" /></button>
-                <p className="flex-1 text-center text-sm font-bold text-text-primary first-letter:uppercase">{title}</p>
+                {/* Tocar el título abre el selector de fecha para saltar a cualquier día o mes */}
+                <label className="relative flex-1 flex items-center justify-center gap-1.5 text-sm font-bold text-text-primary cursor-pointer">
+                  <span className="first-letter:uppercase">{title}</span>
+                  <CalendarDays className="w-4 h-4 text-accent" />
+                  <input type="date" aria-label={tr('Escoger fecha')} value={dayKey(cursor)}
+                         onClick={e => { try { (e.currentTarget as any).showPicker?.(); } catch { /* navegador sin showPicker */ } }}
+                         onChange={e => { const [y, m, d] = e.target.value.split('-').map(Number); if (y && m && d) setCursor(new Date(y, m - 1, d)); }}
+                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                </label>
                 <button type="button" onClick={() => move(1)} aria-label={tr('Siguiente')} className="p-2 text-text-secondary hover:text-accent"><ChevronRight className="w-5 h-5" /></button>
                 {dayKey(cursor) !== dayKey(today) && (
                   <button type="button" onClick={() => setCursor(today)} className={`px-2.5 py-1 text-xs font-bold text-accent border border-accent/40 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>{tr('Hoy')}</button>

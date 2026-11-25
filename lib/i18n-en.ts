@@ -2874,4 +2874,7 @@ export const EN: Record<string, string> = {
   'Sin movimientos': 'No movements',
   'Sin movimientos ese día.': 'No movements that day.',
   'Solo tus gastos normales': 'Just your usual spending',
+  // ── Tutoriales (recorrido de Inicio y de cada página) y nuevas tarjetas de sugerencias ──
+  'Escoger fecha': 'Pick a date',
+  'Arriba eliges Mes, Semana o Día. Muévete con las flechas, o toca la fecha del medio para saltar a cualquier día o mes. El botón Hoy te devuelve a hoy.': 'At the top you choose Month, Week or Day. Move with the arrows, or tap the date in the middle to jump to any day or month. The Today button brings you back to today.',
 };
