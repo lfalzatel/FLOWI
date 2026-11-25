@@ -33,6 +33,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { createCategoryResolver } from '@/lib/categoryGroups';
 import { buildMonthSummary, shiftMonth } from '@/lib/monthSummary';
 import { getNextActions } from '@/lib/nextAction';
+import { detectUnusualSpending } from '@/lib/spendingAlerts';
 import { useGoals } from '@/hooks/useGoals';
 import { useInvestments } from '@/hooks/useInvestments';
 import { useRealMoney } from '@/hooks/useRealMoney';
@@ -295,6 +296,7 @@ export default function DashboardPage() {
       reminders: myReminders.length, seenTips, hasAi: !!getAiKey(), hasFriends: friendsReady ? friendList.length > 0 : undefined,
     },
     showSupport: !demo && !playStore && (profile?.activeDays ?? 0) >= 5,
+    unusual: demo ? [] : detectUnusualSpending(transactions, new Date(), (profile?.currency || 'COP') === 'COP' ? 30000 : 10),
     premiumEnd: demo || playStore ? null : premiumEndInfo(profile),
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
   });

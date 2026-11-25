@@ -2841,4 +2841,6 @@ export const EN: Record<string, string> = {
   'Tenías un recibo leído sin guardar': 'You had a read receipt that was not saved',
   'Sin internet: lo que registres se guarda en tu celular y se sube solo.': 'No internet: what you record is saved on your phone and uploads by itself.',
   'Conexión de vuelta: tus cambios se están subiendo.': 'Back online: your changes are uploading.',
+  'Llevas {a} % más en {b}': 'You are {a}% higher on {b}',
+  'Este mes van {a}; lo normal a esta altura es {b}. Toca para ver tus gastos.': 'This month it is {a}; by this point you usually spend {b}. Tap to see your expenses.',
 };

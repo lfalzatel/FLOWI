@@ -33,6 +33,8 @@ interface Input {
   summary?: { month: string; name: string; hint?: string } | null; // resumen del mes pasado listo (días 1 a 10)
   discover?: { hasAccounts: boolean; hasInvestments: boolean; reminders: number; seenTips: string[]; hasAi?: boolean; hasFriends?: boolean };
   showSupport?: boolean;
+  // Categorías en las que este mes va gastando bastante más de lo normal (lib/spendingAlerts.ts)
+  unusual?: { category: string; current: number; usual: number; pct: number }[];
   premiumEnd?: { until: Date; gift: boolean } | null; // fin del Premium (aviso para renovar)
   formatMoney: (n: number) => string;
   skipped?: string[];
@@ -45,7 +47,7 @@ function toDate(v: any): Date {
   return new Date(v);
 }
 
-export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], staleFunds = [], summary = null, discover, showSupport = false, premiumEnd = null, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
+export function getNextActions({ transactions, pending, today, hasGoals, notificationsOff = false, maturing = [], toReconcile = [], staleFunds = [], summary = null, discover, showSupport = false, unusual = [], premiumEnd = null, formatMoney, skipped = [], now = new Date() }: Input): NextAction[] {
   const out: NextAction[] = [];
 
   // Premium por vencer (5 días antes) o recién vencido (hasta 7 días después)
@@ -148,6 +150,15 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     });
   }
 
+  // 3b. Gasto raro: una categoría va bastante por encima de lo normal a esta altura del mes
+  for (const u of unusual) {
+    out.push({
+      id: `unusual:${u.category}:${month}`, kind: 'link', href: '/gastos', tone: 'alert',
+      title: tr('Llevas {a} % más en {b}', { a: u.pct, b: tr(u.category) }),
+      detail: tr('Este mes van {a}; lo normal a esta altura es {b}. Toca para ver tus gastos.', { a: formatMoney(u.current), b: formatMoney(u.usual) }),
+    });
+  }
+
   // 4. Sin metas: empezar por el fondo de emergencia
   if (!hasGoals) {
     out.push({
@@ -221,6 +232,7 @@ export function getNextActions({ transactions, pending, today, hasGoals, notific
     if (id.startsWith('premium:')) return a.tone === 'alert' ? 0 : 2;
     if (id === 'income') return 3;
     if (id === 'today-over') return 4;
+    if (id.startsWith('unusual:')) return 4;
     if (id.startsWith('review:')) return 5;
     if (id.startsWith('reconcile:')) return 6;
     if (id.startsWith('fund:')) return 7;
