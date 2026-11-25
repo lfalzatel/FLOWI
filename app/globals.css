@@ -596,16 +596,13 @@ body {
   -webkit-backdrop-filter: blur(18px) saturate(120%);
   /* Filo de luz arriba (como el borde de un cristal) y sombra profunda */
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 22px 44px -24px rgba(0, 0, 0, 0.95);
-  /* Destello: una franja de luz cruza la tarjeta una vez al aparecer */
+  /* Destello: una franja de luz cruza la tarjeta una vez al aparecer. La mueve MotionManager con
+     element.animate(): así no reemplaza la animación de entrada de cada tarjeta (algunas empiezan
+     invisibles y, si se les cambia la animación, se quedaban sin aparecer) */
   background-image: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.07) 50%, transparent 58%);
   background-size: 260% 100%;
   background-repeat: no-repeat;
   background-position: 160% 0;
-  animation: obsidiana-sheen 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s 1 both;
-}
-@keyframes obsidiana-sheen {
-  from { background-position: 160% 0; }
-  to   { background-position: -60% 0; }
 }
 [data-theme='obsidiana'] .glass-dropdown {
   background: rgba(14, 15, 19, 0.78) !important;

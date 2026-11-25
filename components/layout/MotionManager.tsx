@@ -52,17 +52,32 @@ export function MotionManager() {
       el.style.transformOrigin = `${ox}px ${oy}px`;
       el.animate(
         [
-          { transform: 'scale(0.55)', opacity: 0, filter: 'blur(6px)' },
-          { transform: 'scale(1.025)', opacity: 1, filter: 'blur(0)', offset: 0.65 },
+          // Sin filter: blur(): en algunos Android, animar un filtro sobre una ventana de vidrio
+          // (backdrop-filter) la dejaba invisible y la pantalla quedaba bloqueada
+          { transform: 'scale(0.55)', opacity: 0 },
+          { transform: 'scale(1.025)', opacity: 1, offset: 0.65 },
           { transform: 'scale(0.995)', offset: 0.85 },
-          { transform: 'scale(1)', opacity: 1, filter: 'blur(0)' },
+          { transform: 'scale(1)', opacity: 1 },
         ],
         { duration: 460, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
       );
     };
 
+    // Obsidiana: destello que cruza cada tarjeta de vidrio una vez al aparecer (animación aparte, que
+    // no pisa la animación de entrada propia de la tarjeta)
+    const sheen = (el: HTMLElement) => {
+      if (el.dataset.sheen) return;
+      el.dataset.sheen = '1';
+      if (document.documentElement.dataset.theme !== 'obsidiana' || currentMotion() !== 'full') return;
+      el.animate([{ backgroundPosition: '160% 0' }, { backgroundPosition: '-60% 0' }],
+        { duration: 1500, delay: 250, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+    };
+    setTimeout(() => document.querySelectorAll<HTMLElement>('.glass-card').forEach(sheen), 400); // cuando el tema ya está aplicado
+
     const scan = (node: Node) => {
       if (!(node instanceof HTMLElement)) return;
+      if (node.matches('.glass-card')) sheen(node);
+      node.querySelectorAll<HTMLElement>('.glass-card').forEach(sheen);
       if (node.matches('.animate-fade-in-up, .animate-scale-in')) animate(node);
       node.querySelectorAll<HTMLElement>('.animate-fade-in-up, .animate-scale-in').forEach(animate);
     };
