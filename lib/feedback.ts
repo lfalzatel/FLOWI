@@ -1,6 +1,7 @@
 // Comentarios y sugerencias: cada persona cuenta lo que le gusta, lo que no, ideas y fallas, por parte de la app.
 // El administrador ve todo con estadísticas para decidir qué mejorar (app/servicios/opiniones).
-import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where, limit } from 'firebase/firestore';
+import { collection, doc, onSnapshot, orderBy, query, serverTimestamp, where, limit } from 'firebase/firestore';
+import { addDoc, deleteDoc, updateDoc } from './db';
 import { db } from '@/lib/firebase';
 
 export type FeedbackType = 'gusta' | 'mejorar' | 'idea' | 'error';

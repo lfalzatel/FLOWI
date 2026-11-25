@@ -9,7 +9,8 @@
 //   description, category, date (ISO), share (lo que le toca al amigo)
 //   status: pending | accepted | rejected | deleted
 //   payments: [{ id, amount, at, by }]   removed: [ids de abonos borrados]   absorbed: lo que asumió quien pagó
-import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, serverTimestamp } from 'firebase/firestore';
+import { setDoc, updateDoc } from './db';
 import { db } from '@/lib/firebase';
 import type { SharedPayment } from '@/lib/shared';
 

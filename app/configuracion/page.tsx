@@ -25,7 +25,8 @@ import { MyDataRows } from '@/components/settings/MyDataRows';
 import { NotificationTest } from '@/components/settings/NotificationTest';
 import { PlanCard } from '@/components/plans/PlanCard';
 import { db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
+import { updateDoc } from '@/lib/db';
 import { CURRENCIES } from '@/lib/format';
 import { 
   ArrowLeft, Sun, Moon, Terminal, Layers, Zap, Palette,

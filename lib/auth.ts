@@ -1,5 +1,6 @@
 import { signInWithPopup, signOut as firebaseSignOut, signInAnonymously, linkWithPopup, signInWithCredential, GoogleAuthProvider, type AuthCredential } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { setDoc } from './db';
 import { auth, db, googleProvider } from './firebase';
 
 export interface KnownAccount {

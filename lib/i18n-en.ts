@@ -2839,4 +2839,6 @@ export const EN: Record<string, string> = {
   'Tenías un gasto a medio registrar': 'You had an expense halfway recorded',
   'Tenías un ingreso a medio registrar': 'You had an income halfway recorded',
   'Tenías un recibo leído sin guardar': 'You had a read receipt that was not saved',
+  'Sin internet: lo que registres se guarda en tu celular y se sube solo.': 'No internet: what you record is saved on your phone and uploads by itself.',
+  'Conexión de vuelta: tus cambios se están subiendo.': 'Back online: your changes are uploading.',
 };

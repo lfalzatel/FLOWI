@@ -1,6 +1,7 @@
 import { currentLocale } from '@/lib/i18n';
 // Tus datos: descargarlos (JSON completo y CSV de movimientos), borrar lo registrado o eliminar la cuenta.
-import { collection, deleteField, doc, getDoc, getDocs, query, Timestamp, updateDoc, where, writeBatch } from 'firebase/firestore';
+import { collection, deleteField, doc, getDoc, getDocs, query, Timestamp, where, writeBatch } from 'firebase/firestore';
+import { updateDoc } from './db';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, db } from '@/lib/firebase';
 import { getLocalDateString } from '@/lib/dateUtils';

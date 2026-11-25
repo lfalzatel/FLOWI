@@ -1,5 +1,6 @@
 'use client';
-import { addDoc, collection, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc } from './db';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, db } from '@/lib/firebase';
 import type { PlanOption } from '@/lib/plans';

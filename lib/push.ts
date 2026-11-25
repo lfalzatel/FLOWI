@@ -1,7 +1,8 @@
 // Suscripción a notificaciones push (Firebase Cloud Messaging, gratis) para avisar con la app
 // cerrada. Cada celular guarda su "token" en el perfil; la función enviarRecordatorios de
 // Firebase (functions/reminders.mjs) los usa para enviar los recordatorios.
-import { arrayRemove, arrayUnion, doc, setDoc } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, doc } from 'firebase/firestore';
+import { setDoc } from './db';
 import { db } from './firebase';
 import { pushOn } from './notifPrefs';
 import { ensureMainServiceWorker } from './swCleanup';

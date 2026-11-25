@@ -1,6 +1,7 @@
 'use client';
 import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
-import { arrayUnion, collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { arrayUnion, collection, doc, onSnapshot, query, where } from 'firebase/firestore';
+import { updateDoc } from '@/lib/db';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/components/DataProvider';

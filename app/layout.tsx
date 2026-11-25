@@ -67,6 +67,7 @@ import { InAppToastStack } from '@/components/layout/InAppToastStack';
 import { AppLock } from '@/components/security/AppLock';
 import { PlayStoreDetector } from '@/components/layout/PlayStoreDetector';
 import { MotionManager } from '@/components/layout/MotionManager';
+import { OfflineBanner } from '@/components/layout/OfflineBanner';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -102,6 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <LangSync />
               <PlayStoreDetector />
               <MotionManager />
+              <OfflineBanner />
             </SharedLinksProvider>
             </FriendsProvider>
             </DataProvider>

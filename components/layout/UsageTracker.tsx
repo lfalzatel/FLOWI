@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { doc, increment, updateDoc } from 'firebase/firestore';
+import { doc, increment } from 'firebase/firestore';
+import { updateDoc } from '@/lib/db';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/useAuth';
 import { useData } from '@/components/DataProvider';

@@ -4,9 +4,8 @@
 //  - fl_directory/{uid}: el mismo perfil con las palabras para buscarlo. Existe solo si la persona deja que la
 //    encuentren por su nombre (si lo apaga, se borra y solo la pueden agregar con su enlace)
 //  - fl_friend_requests/{de}_{para}: la solicitud; "accepted" = son amigos
-import {
-  collection, deleteDoc, doc, getDoc, getDocs, limit, query, serverTimestamp, setDoc, updateDoc, where,
-} from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, where } from 'firebase/firestore';
+import { deleteDoc, setDoc, updateDoc } from './db';
 import { db } from '@/lib/firebase';
 
 export const APP_URL = 'https://flowi-gastos.web.app';

@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { Firestore, getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -16,7 +16,18 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export { app };
 export const auth           = getAuth(app);
-export const db             = getFirestore(app);
+// Base de datos con memoria en el celular: sin internet se siguen viendo los datos y lo que se registra
+// queda en cola y se sube solo al volver la conexión (escrituras en lib/db.ts). Varias pestañas a la vez
+// comparten la misma memoria. Si el navegador no lo permite (o ya estaba creada), se usa la normal.
+function makeDb(): Firestore {
+  if (typeof window === 'undefined') return getFirestore(app);
+  try {
+    return initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+  } catch {
+    return getFirestore(app);
+  }
+}
+export const db             = makeDb();
 export const storage        = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 

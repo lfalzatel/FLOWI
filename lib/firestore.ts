@@ -2,7 +2,8 @@ import { db } from './firebase';
 import type { ReceiptItem } from '@/lib/receiptItems';
 import type { SharedInfo } from '@/lib/shared';
 import { BASE_CATEGORY_DEFS, EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS } from './categories';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, doc, updateDoc, deleteDoc, setDoc, arrayUnion, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, serverTimestamp, Timestamp, doc, arrayUnion, orderBy } from 'firebase/firestore';
+import { addDoc, updateDoc, deleteDoc, setDoc } from './db';
 
 export interface Transaction {
   id?: string;
