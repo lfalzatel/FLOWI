@@ -146,7 +146,7 @@ export default function RecordatoriosPage() {
 
         {/* Pestañas */}
         <div role="tablist" className={`grid grid-cols-2 p-1 bg-glass border border-glass-border ${isTechTheme ? 'rounded-none font-mono' : 'rounded-2xl'}`}>
-          {([['recordatorios', `Recordatorios${reminders.length ? ` (${reminders.length})` : ''}`], ['pagos', tr('Pagos del mes')]] as const).map(([k, label]) => (
+          {([['recordatorios', `${tr('Recordatorios')}${reminders.length ? ` (${reminders.length})` : ''}`], ['pagos', tr('Pagos del mes')]] as const).map(([k, label]) => (
             <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
                     className={`py-2 text-sm font-semibold transition-colors ${isTechTheme ? 'rounded-none uppercase text-xs' : 'rounded-xl'} ${
                       tab === k ? (isTechTheme ? 'bg-accent/15 text-accent border border-accent/50' : 'bg-accent text-black') : 'text-text-secondary hover:text-text-primary'}`}>
