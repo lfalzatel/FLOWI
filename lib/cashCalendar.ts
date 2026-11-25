@@ -97,3 +97,103 @@ export function buildCashCalendar(opts: {
     expectedIncome: incomes.map(i => ({ title: i.title, amount: i.amount, kind: 'ingreso' as const })),
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Calendario completo (vistas Mes / Semana / Día): días pasados con lo que realmente pasó y días
+// futuros con la plata proyectada, hasta `monthsAhead` meses adelante. En los meses siguientes al
+// actual se repiten los gastos fijos y los ingresos del último mes completo en su mismo día.
+
+export interface DayInfo {
+  date: Date;
+  past: boolean;               // día anterior a hoy: muestra lo que pasó
+  net: number;                 // pasado: entró − salió ese día
+  balance: number | null;      // hoy y futuro (dentro del límite): plata proyectada
+  events: CalEvent[];          // pasado: movimientos reales · futuro: pagos e ingresos esperados
+}
+
+export const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+/** Gastos fijos e ingresos del último mes completo, para repetirlos en los meses siguientes. */
+function recurringFromLastMonth(transactions: Transaction[], now: Date) {
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const out: { title: string; amount: number; day: number; kind: 'pago' | 'ingreso' }[] = [];
+  const seen = new Map<string, { title: string; amount: number; day: number; kind: 'pago' | 'ingreso' }>();
+  for (const t of transactions) {
+    const d = toDate(t.date);
+    if (!sameMonth(d, prev.getFullYear(), prev.getMonth())) continue;
+    if (t.type === 'gasto' && !t.isFixed) continue;
+    const kind = t.type === 'ingreso' ? 'ingreso' : 'pago';
+    const k = `${kind}|${t.category}`;
+    const e = seen.get(k) || { title: t.description?.trim() || t.category, amount: 0, day: d.getDate(), kind };
+    e.amount += Number(t.amount) || 0;
+    seen.set(k, e);
+  }
+  seen.forEach(v => out.push(v));
+  return out;
+}
+
+/** Información de cada día entre `from` y `to` (incluidos). */
+export function buildCalendarRange(opts: {
+  start: number; now: Date; from: Date; to: Date; monthsAhead?: number;
+  commitments: { title: string; dueDate: Date; amount: number | null }[];
+  transactions: Transaction[];
+}): Map<string, DayInfo> {
+  const { start, now, from, to, commitments, transactions, monthsAhead = 3 } = opts;
+  const today = dayStart(now);
+  const limit = new Date(now.getFullYear(), now.getMonth() + monthsAhead + 1, 0); // último día proyectado
+  const out = new Map<string, DayInfo>();
+
+  // Pasado: movimientos reales por día
+  const byDay = new Map<string, CalEvent[]>();
+  for (const t of transactions) {
+    const d = toDate(t.date);
+    if (d >= today) continue;
+    const k = dayKey(d);
+    const list = byDay.get(k) || [];
+    list.push({ title: t.description?.trim() || t.category, amount: t.type === 'ingreso' ? t.amount : -t.amount, kind: t.type === 'ingreso' ? 'ingreso' : 'pago' });
+    byDay.set(k, list);
+  }
+
+  // Futuro: proyección día a día desde hoy hasta el final del rango (o el límite)
+  const projEnd = new Date(Math.min(to.getTime(), limit.getTime()));
+  const projected = new Map<string, { balance: number; events: CalEvent[] }>();
+  if (projEnd >= today) {
+    const dailySpend = averageDailySpend(transactions, now);
+    const incomesNow = expectedIncomes(transactions, now);
+    const recurring = recurringFromLastMonth(transactions, now);
+    let balance = start;
+    for (let d = new Date(today); d <= projEnd; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+      const events: CalEvent[] = [];
+      const inThisMonth = sameMonth(d, today.getFullYear(), today.getMonth());
+      if (inThisMonth) {
+        for (const c of commitments) {
+          if (!c.amount) continue;
+          const due = dayStart(c.dueDate);
+          const day = due < today ? today.getDate() : sameMonth(due, d.getFullYear(), d.getMonth()) ? due.getDate() : -1;
+          if (day === d.getDate()) events.push({ title: c.title, amount: -c.amount, kind: 'pago' });
+        }
+        for (const i of incomesNow) if (i.day === d.getDate()) events.push({ title: i.title, amount: i.amount, kind: 'ingreso' });
+      } else {
+        const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        for (const r of recurring) if (Math.min(r.day, lastDay) === d.getDate()) events.push({ title: r.title, amount: r.kind === 'ingreso' ? r.amount : -r.amount, kind: r.kind });
+      }
+      balance += events.reduce((s, e) => s + e.amount, 0);
+      if (d > today) balance -= dailySpend;
+      projected.set(dayKey(d), { balance: Math.round(balance), events });
+    }
+  }
+
+  for (let d = dayStart(from); d <= to; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+    const k = dayKey(d);
+    const past = d < today;
+    const real = byDay.get(k) || [];
+    const p = projected.get(k);
+    out.set(k, {
+      date: new Date(d), past,
+      net: past ? real.reduce((s, e) => s + e.amount, 0) : 0,
+      balance: past ? null : p ? p.balance : null,
+      events: past ? real : p ? p.events : [],
+    });
+  }
+  return out;
+}

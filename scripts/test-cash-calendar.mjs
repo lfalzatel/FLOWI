@@ -38,4 +38,23 @@ const tx = (type, amount, when, category, extra = {}) => ({ userId: 'u', type, a
   eq('los gastos fijos no son gasto diario', r, 0);
 }
 
+{
+  // Calendario completo: pasado real, futuro proyectado y meses siguientes con lo fijo del mes pasado
+  const txs = [
+    tx('ingreso', 2000000, '2026-10-25T12:00:00', 'Sueldo', { description: 'Sueldo' }),
+    tx('gasto', 800000, '2026-10-03T12:00:00', 'Arriendo', { isFixed: true, description: 'Arriendo' }),
+    tx('gasto', 15000, '2026-11-10T12:00:00', 'Restaurantes', { description: 'Almuerzo' }),
+  ];
+  const r = C.buildCalendarRange({ start: 100000, now, transactions: txs, commitments: [],
+    from: new Date('2026-11-01'), to: new Date('2026-12-31') });
+  const k = (s) => C.dayKey(new Date(s + 'T12:00:00'));
+  eq('día pasado: lo que salió', r.get(k('2026-11-10')).net, -15000);
+  eq('día pasado: sin saldo proyectado', r.get(k('2026-11-10')).balance, null);
+  eq('hoy: saldo de hoy', r.get(k('2026-11-20')).balance, 100000);
+  eq('diciembre repite el arriendo fijo el 3', r.get(k('2026-12-03')).events.some(e => e.title === 'Arriendo' && e.amount === -800000), true);
+  eq('diciembre repite el sueldo el 25', r.get(k('2026-12-25')).events.some(e => e.kind === 'ingreso' && e.amount === 2000000), true);
+  const far = C.buildCalendarRange({ start: 0, now, transactions: [], commitments: [], from: new Date('2027-04-01'), to: new Date('2027-04-02'), monthsAhead: 3 });
+  eq('más allá de 3 meses no proyecta', far.get(C.dayKey(new Date('2027-04-01T12:00:00'))).balance, null);
+}
+
 done();
