@@ -31,6 +31,29 @@ export function MotionManager() {
     }
   }, []);
 
+  // Batería baja (menos de 20 % y sin cargar): animaciones suaves mientras tanto, sin cambiar lo que la
+  // persona eligió; al conectar el cargador (o subir la carga) vuelve a su nivel. Solo navegadores que
+  // dan el estado de la batería (Chrome en Android).
+  useEffect(() => {
+    const nav = navigator as any;
+    if (typeof nav.getBattery !== 'function') return;
+    let battery: any = null;
+    let saving = false;
+    const check = () => {
+      if (!battery) return;
+      const low = !battery.charging && battery.level < 0.2;
+      if (low && !saving && currentMotion() === 'full') { saving = true; applyMotion('soft'); }
+      else if (!low && saving) { saving = false; applyMotion(getSavedMotion() || (isSlowDevice() ? 'soft' : 'full')); }
+    };
+    nav.getBattery().then((b: any) => {
+      battery = b;
+      check();
+      b.addEventListener('levelchange', check);
+      b.addEventListener('chargingchange', check);
+    }).catch(() => {});
+    return () => { if (battery) { battery.removeEventListener('levelchange', check); battery.removeEventListener('chargingchange', check); } };
+  }, []);
+
   // Modales que nacen del toque
   useEffect(() => {
     let tap = { x: 0, y: 0, t: 0 };

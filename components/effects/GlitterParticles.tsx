@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { MOTION_EVENT } from '@/lib/motion';
 
 // Fondo de partículas brillantes (como polvo de luz azul flotando), dibujado con canvas.
 // Liviano: pocas partículas en el celular, se pausa si la pestaña no se ve y respeta "reducir movimiento".
@@ -53,9 +54,34 @@ export function GlitterParticles({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    // Quieto si el celular pide menos movimiento o si en FLOWI las animaciones están apagadas
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'off';
-    let w = 0, h = 0, dpr = 1, parts: P[] = [], raf = 0, last = performance.now();
+    // Ahorro de batería: cada punto se pinta UNA vez en una imagen pequeña (sprite) que luego solo se
+    // copia; antes se calculaba un degradado nuevo por punto en cada cuadro. Se anima a ~30 cuadros por
+    // segundo (se mueven despacio: no se nota) y con animaciones Suaves/Apagadas o batería baja
+    // (MotionManager) se dibuja una vez y se queda quieto. Se pausa si la app no se ve.
+    const still = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion !== 'full';
+    const FRAME_MS = 33;
+    let w = 0, h = 0, dpr = 1, parts: P[] = [], raf = 0, last = performance.now(), lastPaint = 0;
+
+    const sprites = new Map<string, HTMLCanvasElement>();
+    const SPRITE = 64; // tamaño de la imagen de cada punto (se escala al dibujar)
+    const sprite = (color: string, blur: boolean) => {
+      const key = `${color}|${blur ? 1 : 0}`;
+      let c = sprites.get(key);
+      if (c) return c;
+      c = document.createElement('canvas');
+      c.width = c.height = SPRITE;
+      const g = c.getContext('2d')!;
+      const half = SPRITE / 2;
+      const grad = g.createRadialGradient(half, half, 0, half, half, half);
+      grad.addColorStop(0, color); grad.addColorStop(1, 'transparent');
+      g.fillStyle = grad; g.beginPath(); g.arc(half, half, half, 0, Math.PI * 2); g.fill();
+      if (!blur) { // núcleo brillante del punto
+        g.fillStyle = light ? color : '#fff';
+        g.beginPath(); g.arc(half, half, half / 8, 0, Math.PI * 2); g.fill();
+      }
+      sprites.set(key, c);
+      return c;
+    };
 
     const make = (): P => {
       const blur = Math.random() < 0.18; // algunas grandes y desenfocadas (bokeh)
@@ -74,12 +100,12 @@ export function GlitterParticles({
       w = rect.width; h = rect.height;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const target = Math.min(260, Math.round((w * h / 10000) * density));
+      const target = Math.min(150, Math.round((w * h / 10000) * density));
       parts = Array.from({ length: target }, make);
+      paint(0);
     };
 
-    const draw = (now: number) => {
-      const dt = Math.min(50, now - last) / 16.67; last = now;
+    const paint = (dt: number) => {
       ctx.clearRect(0, 0, w, h);
       ctx.globalCompositeOperation = light ? 'source-over' : 'lighter';
       for (const p of parts) {
@@ -87,23 +113,39 @@ export function GlitterParticles({
         if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
         if (p.x < -10) p.x = w + 10; else if (p.x > w + 10) p.x = -10;
         const a = (p.blur ? 0.12 + 0.1 * Math.sin(p.tw) : 0.35 + 0.65 * Math.max(0, Math.sin(p.tw))) * (light ? 0.55 : 1);
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * (p.blur ? 3 : 4));
-        g.addColorStop(0, p.c); g.addColorStop(1, 'transparent');
+        const R = p.r * (p.blur ? 3 : 4);
         ctx.globalAlpha = a;
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (p.blur ? 3 : 4), 0, Math.PI * 2); ctx.fill();
-        if (!p.blur) { ctx.globalAlpha = Math.min(1, a + 0.2); ctx.fillStyle = light ? p.c : '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2); ctx.fill(); }
+        ctx.drawImage(sprite(p.c, p.blur), p.x - R, p.y - R, R * 2, R * 2);
       }
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-      if (!reduce) raf = requestAnimationFrame(draw);
+    };
+
+    const loop = (now: number) => {
+      raf = 0;
+      if (still() || document.hidden) return;
+      if (now - lastPaint >= FRAME_MS) {
+        const dt = Math.min(100, now - last) / 16.67; last = now; lastPaint = now;
+        paint(dt);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    const start = () => {
+      if (raf || still() || document.hidden) return;
+      last = performance.now();
+      raf = requestAnimationFrame(loop);
     };
 
     resize();
-    draw(performance.now());
+    start();
     const ro = new ResizeObserver(resize); ro.observe(canvas);
-    const vis = () => { cancelAnimationFrame(raf); if (!document.hidden && !reduce) { last = performance.now(); raf = requestAnimationFrame(draw); } };
+    const vis = () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else start(); };
     document.addEventListener('visibilitychange', vis);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); document.removeEventListener('visibilitychange', vis); };
+    window.addEventListener(MOTION_EVENT, start); // si vuelven a Completas, se reanuda
+    return () => {
+      cancelAnimationFrame(raf); ro.disconnect();
+      document.removeEventListener('visibilitychange', vis);
+      window.removeEventListener(MOTION_EVENT, start);
+    };
   }, [density, colors, light]);
 
   return (

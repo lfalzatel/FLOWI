@@ -667,3 +667,10 @@ textarea:-webkit-autofill {
 [data-theme='nova'] .flowi-sheen {
   background-image: linear-gradient(115deg, transparent 40%, rgb(var(--accent) / 0.14) 50%, transparent 60%);
 }
+
+/* Ahorro de batería: con animaciones Suaves (o batería baja) las ondas del encabezado se quedan
+   quietas y sin el brillo (drop-shadow), que es lo que más cuesta repintar */
+[data-motion='soft'] :is(.flow-lines-pulse, .flow-lines-coin, .flow-lines-drift),
+[data-motion='off'] :is(.flow-lines-pulse, .flow-lines-coin, .flow-lines-drift) { animation: none !important; }
+[data-motion='soft'] .flow-lines-coin, [data-motion='off'] .flow-lines-coin { filter: none; opacity: 0; }
+[data-motion='soft'] .animate-pulse-glow { animation: none; }
