@@ -62,6 +62,8 @@ export function SupportProject({ isTechTheme, open = true, onToggle }: { isTechT
       )}
       {(!onToggle || open) && (
       <div className={`p-4 space-y-4 ${isTechTheme ? 'border border-accent/20 rounded-none bg-deep' : 'glass-card rounded-2xl'}`}>
+        {/* En Configuración (sección que se abre y cierra) el botón del tutorial va aquí adentro */}
+        {onToggle && <div className="flex justify-end -mb-2"><PageTourButton id="apoyar" /></div>}
         <div className="flex items-start gap-3">
           <div className={`w-8 h-8 shrink-0 flex items-center justify-center ${isTechTheme ? 'border border-pink-500/30 rounded-none bg-pink-500/10' : 'rounded-xl bg-pink-500/15'}`}>
             <Heart className="w-4 h-4 text-pink-400" />
