@@ -5,9 +5,8 @@ import { findCatalogEntry } from '@/lib/categories';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, Clock, Edit2, Trash2, Pause, Check, Plus, Beaker, ChevronLeft } from 'lucide-react';
+import { Bell, Clock, Edit2, Trash2, Pause, Check, Plus, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useTheme } from '@/components/ThemeProvider';
 import { useReminders } from '@/hooks/useReminders';
 import { useExpenses } from '@/hooks/useExpenses';
@@ -16,7 +15,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ReminderFormModal } from '@/components/forms/ReminderFormModal';
 import { deleteReminder, updateReminder, Reminder } from '@/lib/firestore';
-import { requestNotificationPermission, scheduleNotificationViaSW, playNotificationSound } from '@/lib/notifications';
+import { requestNotificationPermission } from '@/lib/notifications';
 import { syncPushToken } from '@/lib/push';
 
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
@@ -33,7 +32,6 @@ export default function RecordatoriosPage() {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const router = useRouter();
-  const { push: pushInApp } = useInAppNotifications();
 
   // Estados locales
   const [showForm, setShowForm] = useState(false);
@@ -72,19 +70,6 @@ export default function RecordatoriosPage() {
     const granted = await requestNotificationPermission();
     setPermissionGranted(granted);
     if (granted && user) syncPushToken(user.uid);
-  };
-
-  const handleTestNotification = () => {
-    scheduleNotificationViaSW({
-      title: tr('¡Prueba de Notificación!'),
-      body: tr('Si ves esto, las notificaciones push locales están funcionando bien.'),
-      tag: 'test',
-    });
-    pushInApp({
-      title: tr('Prueba in-app'),
-      body: tr('Notificación en la campanita')
-    });
-    playNotificationSound();
   };
 
   const handleToggle = async (r: Reminder) => {
@@ -129,32 +114,22 @@ export default function RecordatoriosPage() {
       <main className="relative flex-1 max-w-2xl lg:max-w-6xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up">
         {/* Header de página */}
         <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0 flex items-center gap-3">
+          <div className="min-w-0 flex-1 flex items-center gap-3">
             <Link href="/servicios" className={`p-2 -ml-2 shrink-0 bg-glass border hover:bg-white/[0.05] transition-colors ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <h1 className={`${isTechTheme ? 'font-mono font-bold text-2xl leading-tight text-accent uppercase tracking-wider' : 'font-syne font-bold text-2xl leading-tight text-text-primary'} truncate`}>
+            <div className="min-w-0">
+              <h1 className={`${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl leading-tight text-accent uppercase tracking-wider' : 'font-syne font-bold text-xl sm:text-2xl leading-tight text-text-primary'} truncate`}>
                 {tr('Recordatorios')}
               </h1>
               <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>
                 {tr('Citas, fechas importantes y tus pagos del mes')}
               </p>
             </div>
-            <PageTourButton id="recordatorios" className="ml-auto" />
           </div>
-          <div className="flex gap-2 shrink-0">
-            {profile?.role === 'admin' && (
-              <button
-                onClick={handleTestNotification}
-                className={`flex items-center justify-center p-2.5 bg-glass border border-glass-border
-                            text-text-secondary hover:text-accent hover:bg-glass-hover active:scale-[0.97] transition-all
-                            ${isTechTheme ? 'rounded-none font-mono' : 'rounded-2xl'}`}
-                title={tr('Probar Notificaciones')}
-              >
-                <Beaker className="w-5 h-5" />
-              </button>
-            )}
+          {/* Tutorial y + juntos a la derecha (la prueba de avisos vive en Configuración › Notificaciones) */}
+          <div className="flex items-center gap-2 shrink-0">
+            <PageTourButton id="recordatorios" />
             <button
               onClick={() => { setEditingReminder(null); setShowForm(true); }}
               aria-label={tr('Nuevo recordatorio')} title={tr('Nuevo recordatorio')}
