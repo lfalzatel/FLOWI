@@ -2,12 +2,13 @@
 import { tr } from '@/lib/i18n';
 import { receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark, Wallet, Share2, Compass, MessageCircle, ArrowLeftRight } from 'lucide-react';
 import { useChats } from '@/components/ChatsProvider';
 import { useTheme } from '@/components/ThemeProvider';
 import { getAiKey } from '@/lib/aiAssist';
+import { PhotoSourceSheet, openPhotoPicker } from '@/components/forms/PhotoSourceSheet';
 
 export type QuickAction = 'voz' | 'gasto' | 'ingreso' | 'deuda' | 'recordatorio' | 'nota' | 'inversion' | 'extracto' | 'cuenta' | 'mover' | 'chat';
 // Página donde está la persona: el menú destaca lo de esa página
@@ -53,6 +54,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = (theme === 'light' || theme === 'nova');
   const fileRef = useRef<HTMLInputElement>(null);
+  const [photoAsk, setPhotoAsk] = useState(false); // ¿cámara o galería?
   const { unreadCount } = useChats();
 
   useEffect(() => {
@@ -99,6 +101,8 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
         </button>
 
         {/* Se pueden escoger varias fotos: un recibo largo puede venir en 2 o más partes */}
+        <PhotoSourceSheet open={photoAsk} isTech={isTechTheme} onClose={() => setPhotoAsk(false)}
+                          onPick={(src) => { setPhotoAsk(false); openPhotoPicker(fileRef.current, src); }} />
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
                onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; if (fs.length) onReceipt(fs.length > 1 ? fs : fs[0]); }} />
 
@@ -110,7 +114,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
                       if (a.id === 'foto') {
                         if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
                         // El selector se abre aquí mismo, dentro del toque, para que el celular lo permita
-                        if (getAiKey()) fileRef.current?.click(); else onReceipt('no-key');
+                        if (getAiKey()) setPhotoAsk(true); else onReceipt('no-key');
                         return;
                       }
                       onAction(a.id);

@@ -12,6 +12,7 @@ import { getLocalDateString } from '@/lib/dateUtils';
 import { addExpense, updateExpense, deleteExpense, addDebt, Transaction, isFixedExpenseCategory } from '@/lib/firestore';
 import { isBusinessCategory } from '@/lib/business';
 import { suggestTxCategory } from '@/lib/txSuggest';
+import { PhotoSourceSheet, openPhotoPicker } from '@/components/forms/PhotoSourceSheet';
 import {
   DEFAULT_FREQUENT, PAYMENT_METHODS, normalizeText, detectMerchantInText, findCatalogEntry, getFrequent, softHyphenate,
   getMerchantsForCategory, getRecent, recordUsage,
@@ -75,6 +76,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const { user, profile } = useAuth();
   const { canAdd } = usePlan();
   const shotRef = useRef<HTMLInputElement>(null);
+  const [photoAsk, setPhotoAsk] = useState(false); // ¿cámara o galería?
   const { expenseCategories, incomeCategories } = useCategories();
   const { transactions } = useData();
 
@@ -683,12 +685,14 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                         onClick={() => {
                           if (!canAdd('receipts', receiptsUsed(profile))) { onClose(); showLimit('receipts'); return; }
                           // El selector se abre dentro del mismo toque, para que el celular lo permita
-                          if (getAiKey()) shotRef.current?.click();
+                          if (getAiKey()) setPhotoAsk(true);
                           else { onClose(); window.dispatchEvent(new CustomEvent('flowi-open-voice', { detail: { file: 'no-key' } })); }
                         }}
                         className={`w-12 shrink-0 flex flex-col items-center justify-center gap-0.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent' : 'rounded-xl border-accent/30 text-accent bg-accent/5 hover:bg-accent/10'}`}>
                   <Camera className="w-4 h-4" /><span className="text-[9px] font-semibold normal-case leading-none">{t('Foto')}</span>
                 </button>
+                <PhotoSourceSheet open={photoAsk} isTech={isTechTheme} onClose={() => setPhotoAsk(false)}
+                                  onPick={(src) => { setPhotoAsk(false); openPhotoPicker(shotRef.current, src); }} />
                 <input ref={shotRef} type="file" accept="image/*" multiple className="hidden"
                        onChange={async (e) => {
                          const fs = Array.from(e.target.files || []).slice(0, 4);

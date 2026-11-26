@@ -2,6 +2,7 @@
 import { ModalBackdrop } from '@/components/effects/ModalBackdrop';
 import { MAX_LISTEN_MS, SILENCE_MS, transcriptFromEvent } from '@/lib/speechInput';
 import { currentLocale, tr } from '@/lib/i18n';
+import { PhotoSourceSheet, openPhotoPicker } from '@/components/forms/PhotoSourceSheet';
 
 import { ReceiptItemsList, ItemsByCategory } from '@/components/forms/ReceiptItemsList';
 import { groupByCategory, splitTotal } from '@/lib/receiptItems';
@@ -95,6 +96,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
   const processedTranscriptRef = useRef<string | null>(null);
   // Gasto por foto del recibo (usa la misma IA gratuita, con un modelo que lee imágenes)
   const receiptInputRef = useRef<HTMLInputElement>(null);
+  const [photoAsk, setPhotoAsk] = useState(false); // ¿cámara o galería?
   const [receiptStatus, setReceiptStatus] = useState<'idle' | 'loading' | 'done' | 'no-key' | 'error'>('idle');
   const [showAiGuide, setShowAiGuide] = useState(false); // tutorial de cómo conectar la IA
   const [receiptError, setReceiptError] = useState('');
@@ -815,6 +817,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         </div>
 
         {/* Selector de foto (sirve para la primera foto y para "Otra foto") */}
+        <PhotoSourceSheet open={photoAsk} isTech={isTechTheme} onClose={() => setPhotoAsk(false)}
+                          onPick={(src) => { setPhotoAsk(false); openPhotoPicker(receiptInputRef.current, src); }} />
         <input ref={receiptInputRef} type="file" accept="image/*" multiple className="hidden"
                onChange={(e) => { const retake = retakeNextRef.current; retakeNextRef.current = false; const fs = Array.from(e.target.files || []).slice(0, 4); handleReceiptFile(fs.length > 1 ? fs : fs[0], retake); e.target.value = ''; }} />
 
@@ -868,7 +872,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         {/* Gasto por foto del recibo */}
         <button
           type="button"
-          onClick={() => getAiKey() ? receiptInputRef.current?.click() : setReceiptStatus('no-key')}
+          onClick={() => getAiKey() ? setPhotoAsk(true) : setReceiptStatus('no-key')}
           className={`mb-1 px-4 py-2 text-xs font-semibold flex items-center gap-2 border transition-colors ${
             isTechTheme ? 'rounded-none border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase' : 'rounded-xl border-glass-border text-text-primary hover:bg-white/10'
           }`}
@@ -889,7 +893,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
                 {isListening ? tr('Escuchando…') : correcting === 'ai' ? tr('Corrigiendo…') : canCorrect ? tr('Corregir con la voz') : tr('Dictar de nuevo')}
               </button>
               <button type="button"
-                      onClick={() => { if (!getAiKey()) { setReceiptStatus('no-key'); return; } retakeNextRef.current = receiptStatus === 'done'; receiptInputRef.current?.click(); }}
+                      onClick={() => { if (!getAiKey()) { setReceiptStatus('no-key'); return; } retakeNextRef.current = receiptStatus === 'done'; setPhotoAsk(true); }}
                       className={`py-2.5 px-2 text-xs font-semibold flex items-center justify-center gap-1.5 border transition-colors ${isTechTheme ? 'rounded-none border-accent/40 text-accent hover:bg-accent/10 font-mono uppercase' : 'rounded-xl border-glass-border text-text-primary hover:bg-white/10'}`}>
                 <Camera className="w-4 h-4 text-accent" />
                 {receiptStatus === 'done' ? tr('Otra foto') : tr('Usar foto')}
