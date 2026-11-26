@@ -36,6 +36,7 @@ export function formatCurrency(amount: number, currencyCode: string = 'COP'): st
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currencyInfo.code,
+    currencyDisplay: 'narrowSymbol', // "$2,600,000" y no "COP 2,600,000" en inglés
     maximumFractionDigits: hasCents(currencyInfo.code) ? 2 : 0,
   }).format(amount);
 }
