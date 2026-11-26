@@ -11,10 +11,20 @@ export interface TourStep {
   text: string;
   cta?: { label: string; href: string };
   // Abre algo antes de señalar: el menú del botón + o el formulario de gasto (se cierra solo)
-  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit' | 'inv-kind' | 'inv-form' | 'debt-pay' | 'acc-expand' | 'goal-form' | 'goal-move' | 'rem-form'; // los demás los abre cada página (useTourAction)
+  open?: 'chat-options' | 'chat-report' | 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit' | 'inv-kind' | 'inv-form' | 'debt-pay' | 'acc-expand' | 'goal-form' | 'goal-move' | 'rem-form'; // los demás los abre cada página (useTourAction)
   // Dibujo de ejemplo dentro del cuadro (p. ej. cómo compartir un comprobante desde el banco)
   illus?: 'share-1' | 'share-2' | 'share-3';
 }
+
+// Pasos que abren las opciones del chat (una ventana de ejemplo: components/chat/ChatTourDemo.tsx)
+const CHAT_SAFETY_STEPS = (): TourStep[] => [
+  { open: 'chat-options', target: 'chat-opt-title', title: tr('1. Abre las opciones del chat'), text: tr('Dentro de una conversación, arriba a la derecha, toca los tres puntos ⋮. Se abre esta ventana con todo lo de ese chat. Aquí la ves con un amigo de ejemplo: no se guarda nada.') },
+  { open: 'chat-options', target: 'chat-opt-lock', title: tr('2. Bloquea el chat con tu PIN'), text: tr('Toca "Bloquear este chat". Desde ahí, para abrirlo te pide tu PIN o tu huella, y en los avisos sale "Mensaje en un chat bloqueado" en vez del texto. Sirve para que nadie que tome tu celular lea esa conversación. Necesitas tu PIN creado en Configuración › Seguridad.') },
+  { open: 'chat-options', target: 'chat-opt-ttl', title: tr('3. Mensajes temporales'), text: tr('Elige cuánto duran los mensajes nuevos: 24 horas, 7 días o 90 días. Pasado ese tiempo se borran solos para los dos. Tu amigo ve el aviso del cambio. Con "Desactivados" vuelven a quedarse.') },
+  { open: 'chat-options', target: 'chat-opt-block', title: tr('4. Bloquea a una persona'), text: tr('Si alguien te molesta, toca "Bloquear a…": ninguno le podrá escribir al otro y no se le avisa. Para quitarlo, vuelve aquí y toca "Desbloquear".') },
+  { open: 'chat-options', target: 'chat-opt-report', title: tr('5. Denuncia a una persona'), text: tr('Toca "Reportar a…" para denunciarla: se abre este formulario.') },
+  { open: 'chat-report', target: 'chat-opt-report-form', title: tr('6. Elige el motivo y envía'), text: tr('Marca el motivo (acoso, estafa, spam, contenido inapropiado u otro), cuenta qué pasó si quieres y toca "Enviar reporte". FLOWI revisa los últimos mensajes que te envió y puede suspender su cuenta. Deja marcado "Bloquear también" para que no te vuelva a escribir.') },
+];
 
 // Pasos que abren el menú del botón + y señalan sus opciones
 const QUICK_STEPS = (): TourStep[] => [
@@ -85,8 +95,7 @@ export const HOME_TOUR: TourStep[] = lazyT(() => ([
   { target: 'voice|add', title: tr('1. Registra lo que sea desde aquí'), text: tr('Toca el botón + para ver todo lo que puedes registrar. Si lo mantienes presionado, te escucho de una vez. Mira lo que tiene adentro.') },
   ...QUICK_STEPS(),
   { open: 'quick', target: 'quick-chat', title: tr('Chat con amigos'), text: tr('Desde aquí abres el chat con tus amigos de FLOWI: se escriben al instante y te llega un aviso aunque tengas la app cerrada. Solo ustedes dos ven los mensajes.') },
-  { title: tr('Chats con candado y mensajes que se borran'), text: tr('En cada conversación, toca los tres puntos ⋮: puedes bloquear ese chat para que pida tu PIN o tu huella (y sus mensajes no se vean en los avisos), y activar mensajes temporales que se borran solos en 24 horas, 7 días o 90 días.'), cta: { label: tr('Ir al chat'), href: '/amigos/chat' } },
-  { title: tr('Bloquea o denuncia a alguien'), text: tr('Si alguien te molesta, en los tres puntos ⋮ del chat puedes bloquearlo: ninguno le podrá escribir al otro y no se le avisa. También puedes denunciarlo con "Reportar": eliges el motivo y FLOWI revisa los últimos mensajes que te envió; quien no cumpla las reglas puede perder su cuenta.') },
+  ...CHAT_SAFETY_STEPS(),
   ...EXPENSE_STEPS(),
   ...SHARE_STEPS(),
   { title: tr('Agrega tus cuentas'), text: tr('Para que "Dinero disponible" sea la plata que de verdad tienes, ve a Servicios, Cuentas y patrimonio, y agrega tus cuentas: banco, Nequi, efectivo y tarjetas de crédito, con su saldo de hoy. Desde ahí cada gasto o ingreso mueve el saldo de su cuenta.'), cta: { label: tr('Agregar mis cuentas'), href: '/servicios/cuentas' } },
@@ -180,14 +189,13 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   chat: [
     { target: 'chat-list', title: tr('Tu chat con amigos'), text: tr('Aquí están tus amigos de FLOWI: los que te escribieron hace poco salen arriba, con un punto si tienen mensajes nuevos. Toca uno para escribirle. Solo ustedes dos ven los mensajes.') },
     { target: 'chat-search', title: tr('Busca un chat'), text: tr('Escribe el nombre o el @usuario de tu amigo para encontrar su chat rápido.') },
-    { title: tr('Bloquea un chat con tu PIN'), text: tr('Dentro de un chat toca los tres puntos ⋮ y elige "Bloquear este chat". Sirve para que nadie que tome tu celular lea esa conversación: para abrirla te pide tu PIN o tu huella, y en los avisos sale "Mensaje en un chat bloqueado" en vez del texto. Necesitas tu PIN creado en Configuración › Seguridad.') },
-    { title: tr('Mensajes temporales'), text: tr('En los mismos tres puntos ⋮ eliges cuánto duran los mensajes nuevos: 24 horas, 7 días o 90 días. Pasado ese tiempo se borran solos para los dos. Tu amigo ve el aviso del cambio y lo puede cambiar también. Los mensajes que ya estaban no se borran.') },
-    { title: tr('Bloquea o denuncia a alguien'), text: tr('Si alguien te molesta, en los tres puntos ⋮ del chat puedes bloquearlo: ninguno le podrá escribir al otro y no se le avisa. También puedes denunciarlo con "Reportar": eliges el motivo y FLOWI revisa los últimos mensajes que te envió; quien no cumpla las reglas puede perder su cuenta.') },
+    ...CHAT_SAFETY_STEPS(),
   ],
   amigos: [
     { title: tr('Amigos'), text: tr('Busca a tus amigos en FLOWI por nombre o @usuario y envíales una solicitud. Solo ven tu nombre y tu foto, nunca tus cuentas.') },
     { title: tr('Invita con un enlace'), text: tr('Si tu amigo aún no usa FLOWI, copia tu enlace y mándaselo. Al entrar quedan conectados.') },
-    { title: tr('Chatea con tus amigos'), text: tr('Toca "Ir al chat" o "Chat" junto a cada amigo para escribirle. Con los tres puntos ⋮ dentro del chat lo bloqueas con tu PIN, activas los mensajes temporales, o bloqueas y denuncias a alguien que te moleste.'), cta: { label: tr('Ir al chat'), href: '/amigos/chat' } },
+    { target: 'friends-chat', title: tr('Chatea con tus amigos'), text: tr('Toca "Ir al chat" o "Chat" junto a cada amigo para escribirle. Con los tres puntos ⋮ dentro del chat lo bloqueas con tu PIN, activas los mensajes temporales, o bloqueas y denuncias a alguien que te moleste.') },
+    ...CHAT_SAFETY_STEPS(),
     { target: 'friends-repeat', title: tr('La celebración'), text: tr('Cuando haces un amigo nuevo sale una celebración. Cada 20 días vuelve a salir con tu último amigo; si no la quieres, desmarca esta casilla. Un amigo nuevo la vuelve a activar.') },
     { open: 'expense', target: 'exp-shared', title: tr('Compartan gastos'), text: tr('Con amigos agregados, al registrar un gasto toca "Compartir este gasto" y elige con quién. A ellos les llega a su FLOWI y cada uno ve lo que debe.') },
   ],

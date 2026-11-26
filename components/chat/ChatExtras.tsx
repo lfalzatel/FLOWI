@@ -60,8 +60,10 @@ export function ChatLockGate({ uid, name, isTech, onUnlock }: { uid: string; nam
 }
 
 // Opciones de la conversación: bloquear el chat, la duración de los mensajes, bloquear al contacto y reportarlo
-export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, onLock, onTtl, onBlock, onReport, onClose }: {
+// demo: la abre el tutorial para mostrarla (nada se guarda); demoReport la muestra con el formulario de denuncia abierto
+export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, onLock, onTtl, onBlock, onReport, onClose, demo = false, demoReport = false }: {
   uid: string; peerName: string; locked: boolean; ttl: number; blocked: boolean; isTech: boolean;
+  demo?: boolean; demoReport?: boolean;
   onLock: (v: boolean) => Promise<void>; onTtl: (sec: number) => Promise<void>;
   onBlock: (v: boolean) => Promise<void>;
   onReport: (reason: string, details: string, alsoBlock: boolean) => Promise<void>;
@@ -69,16 +71,16 @@ export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, 
 }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const [reporting, setReporting] = useState(false);
+  const [reporting, setReporting] = useState(demoReport);
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [alsoBlock, setAlsoBlock] = useState(true);
   const [reported, setReported] = useState(false);
   const first = peerName.split(/\s+/)[0];
-  const hasPin = !!getLock(uid);
+  const hasPin = demo || !!getLock(uid);
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
   const run = async (f: () => Promise<void>) => {
-    if (busy) return;
+    if (busy || demo) return; // en el tutorial no se guarda nada
     setBusy(true); setMsg('');
     try { await f(); } catch { setMsg(tr('No se pudo guardar. Revisa tu conexión.')); } finally { setBusy(false); }
   };
@@ -87,13 +89,13 @@ export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, 
     <div className={`fixed inset-0 z-[120] flex items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('Opciones del chat')}>
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div className={`relative w-full max-w-md glass-dropdown max-h-[90dvh] overflow-y-auto p-5 space-y-4 animate-fade-in-up ${isTech ? 'rounded-none border border-accent/50' : 'rounded-[28px]'}`}>
-        <div className="flex items-center justify-between">
+        <div data-tour="chat-opt-title" className="flex items-center justify-between">
           <h2 className={`font-bold text-lg ${isTech ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('Opciones del chat')}</h2>
           <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 -mr-1 text-text-secondary"><X className="w-5 h-5" /></button>
         </div>
 
         {/* Bloqueo */}
-        <section className="space-y-2">
+        <section data-tour="chat-opt-lock" className="space-y-2">
           <button type="button" disabled={busy || (!locked && !hasPin)} onClick={() => run(() => onLock(!locked))}
                   className={`w-full flex items-center gap-3 p-3 border text-left disabled:opacity-60 ${box} ${locked ? 'border-accent bg-accent/10' : 'border-glass-border hover:bg-white/5'}`}>
             {locked ? <Lock className="w-5 h-5 text-accent shrink-0" /> : <LockOpen className="w-5 h-5 text-text-secondary shrink-0" />}
@@ -110,7 +112,7 @@ export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, 
         </section>
 
         {/* Mensajes temporales */}
-        <section className="space-y-2">
+        <section data-tour="chat-opt-ttl" className="space-y-2">
           <p className="flex items-center gap-2 text-sm font-semibold text-text-primary"><Timer className="w-4 h-4 text-accent" /> {tr('Mensajes temporales')}</p>
           <p className="text-[11px] text-text-muted">{tr('Los mensajes nuevos se borran solos después del tiempo elegido. Aplica para los dos y tu amigo verá el cambio.')}</p>
           <div className="grid grid-cols-2 gap-2">
@@ -124,7 +126,7 @@ export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, 
         </section>
         {/* Bloquear contacto y reportar (como en WhatsApp) */}
         <section className="space-y-2 pt-1 border-t border-glass-border">
-          <button type="button" disabled={busy} onClick={() => run(() => onBlock(!blocked))}
+          <button type="button" data-tour="chat-opt-block" disabled={busy} onClick={() => run(() => onBlock(!blocked))}
                   className={`w-full flex items-center gap-3 p-3 border text-left disabled:opacity-60 ${box} ${blocked ? 'border-red-400/50 bg-red-500/10' : 'border-glass-border hover:bg-white/5'}`}>
             <Ban className="w-5 h-5 text-red-400 shrink-0" />
             <span className="flex-1 min-w-0">
@@ -136,7 +138,7 @@ export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, 
           {reported ? (
             <p className={`p-3 text-xs text-text-primary border border-accent/40 bg-accent/10 ${box}`}>{tr('Gracias. Recibimos tu reporte y lo revisaremos. Si hay un peligro inmediato, comunícate con las autoridades.')}</p>
           ) : !reporting ? (
-            <button type="button" onClick={() => setReporting(true)}
+            <button type="button" data-tour="chat-opt-report" onClick={() => setReporting(true)}
                     className={`w-full flex items-center gap-3 p-3 border border-glass-border hover:bg-white/5 text-left ${box}`}>
               <Flag className="w-5 h-5 text-red-400 shrink-0" />
               <span className="flex-1 min-w-0">
@@ -145,7 +147,7 @@ export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, 
               </span>
             </button>
           ) : (
-            <div className={`p-3 space-y-2 border border-red-400/40 ${box}`}>
+            <div data-tour="chat-opt-report-form" className={`p-3 space-y-2 border border-red-400/40 ${box}`}>
               <p className="text-sm font-semibold text-text-primary">{tr('¿Por qué reportas a {a}?', { a: first })}</p>
               <div className="space-y-1">
                 {REPORT_REASONS.map(r => (

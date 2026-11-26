@@ -259,7 +259,7 @@ export default function AmigosPage() {
             <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('Mis amigos')} {friends.length ? `(${friends.length})` : ''}</h2>
             {/* Entrada visible a la página de Chat */}
             {friends.length > 0 && (
-              <Link href="/amigos/chat" className={`${btn} relative border-accent bg-accent/15 text-accent`}>
+              <Link href="/amigos/chat" data-tour="friends-chat" className={`${btn} relative border-accent bg-accent/15 text-accent`}>
                 <MessageCircle className="w-3.5 h-3.5" /> {tr('Ir al chat')}
                 {unreadCount > 0 && <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-accent text-black text-[9px] font-bold flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>}
               </Link>

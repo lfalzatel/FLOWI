@@ -52,6 +52,7 @@ export const viewport: Viewport = {
 import { DataProvider } from '@/components/DataProvider';
 import { FriendsProvider } from '@/components/FriendsProvider';
 import { ChatsProvider } from '@/components/ChatsProvider';
+import { ChatTourDemo } from '@/components/chat/ChatTourDemo';
 import { ThemedBackground } from '@/components/effects/ThemedBackground';
 import { BootSplash } from '@/components/layout/BootSplash';
 import { LangSync } from '@/components/layout/LangSync';
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SharedLinksProvider>
               {children}
               <InAppToastStack />
+              <ChatTourDemo />
               <ReminderWatcher />
               <NotificationPrompter />
               <UpdateWatcher />
