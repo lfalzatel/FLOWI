@@ -84,6 +84,8 @@ export const HOME_TOUR: TourStep[] = lazyT(() => ([
   { title: tr('¡Hola! Te muestro FLOWI'), text: tr('Te enseño a registrar tu plata, a conectar lo que hace que las cifras sean reales y a leer tu inicio. Lo que ves ahora son datos de ejemplo: tus datos no se tocan. Puedes omitir el recorrido cuando quieras.') },
   { target: 'voice|add', title: tr('1. Registra lo que sea desde aquí'), text: tr('Toca el botón + para ver todo lo que puedes registrar. Si lo mantienes presionado, te escucho de una vez. Mira lo que tiene adentro.') },
   ...QUICK_STEPS(),
+  { open: 'quick', target: 'quick-chat', title: tr('Chat con amigos'), text: tr('Desde aquí abres el chat con tus amigos de FLOWI: se escriben al instante y te llega un aviso aunque tengas la app cerrada. Solo ustedes dos ven los mensajes.') },
+  { title: tr('Chats con candado y mensajes que se borran'), text: tr('En cada conversación, toca los tres puntos ⋮: puedes bloquear ese chat para que pida tu PIN o tu huella (y sus mensajes no se vean en los avisos), y activar mensajes temporales que se borran solos en 24 horas, 7 días o 90 días.'), cta: { label: tr('Ir al chat'), href: '/amigos/chat' } },
   ...EXPENSE_STEPS(),
   ...SHARE_STEPS(),
   { title: tr('Agrega tus cuentas'), text: tr('Para que "Dinero disponible" sea la plata que de verdad tienes, ve a Servicios, Cuentas y patrimonio, y agrega tus cuentas: banco, Nequi, efectivo y tarjetas de crédito, con su saldo de hoy. Desde ahí cada gasto o ingreso mueve el saldo de su cuenta.'), cta: { label: tr('Agregar mis cuentas'), href: '/servicios/cuentas' } },
@@ -177,6 +179,7 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   amigos: [
     { title: tr('Amigos'), text: tr('Busca a tus amigos en FLOWI por nombre o @usuario y envíales una solicitud. Solo ven tu nombre y tu foto, nunca tus cuentas.') },
     { title: tr('Invita con un enlace'), text: tr('Si tu amigo aún no usa FLOWI, copia tu enlace y mándaselo. Al entrar quedan conectados.') },
+    { title: tr('Chatea con tus amigos'), text: tr('Toca el globo de arriba o "Chat" junto a cada amigo para escribirle. Con los tres puntos ⋮ dentro del chat lo bloqueas con tu PIN o activas los mensajes temporales.'), cta: { label: tr('Ir al chat'), href: '/amigos/chat' } },
     { target: 'friends-repeat', title: tr('La celebración'), text: tr('Cuando haces un amigo nuevo sale una celebración. Cada 20 días vuelve a salir con tu último amigo; si no la quieres, desmarca esta casilla. Un amigo nuevo la vuelve a activar.') },
     { open: 'expense', target: 'exp-shared', title: tr('Compartan gastos'), text: tr('Con amigos agregados, al registrar un gasto toca "Compartir este gasto" y elige con quién. A ellos les llega a su FLOWI y cada uno ve lo que debe.') },
   ],

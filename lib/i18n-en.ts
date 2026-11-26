@@ -3100,4 +3100,12 @@ export const EN: Record<string, string> = {
   'Desactivaste los mensajes temporales': 'You turned off disappearing messages',
   '{a} desactivó los mensajes temporales': '{a} turned off disappearing messages',
   '🔒 Mensaje en un chat bloqueado': '🔒 Message in a locked chat',
+  // Tutorial: chat con amigos
+  'Chat con amigos': 'Chat with friends',
+  'Desde aquí abres el chat con tus amigos de FLOWI: se escriben al instante y te llega un aviso aunque tengas la app cerrada. Solo ustedes dos ven los mensajes.': 'From here you open the chat with your FLOWI friends: you message each other instantly and you get a notification even with the app closed. Only the two of you see the messages.',
+  'Chats con candado y mensajes que se borran': 'Locked chats and messages that delete themselves',
+  'En cada conversación, toca los tres puntos ⋮: puedes bloquear ese chat para que pida tu PIN o tu huella (y sus mensajes no se vean en los avisos), y activar mensajes temporales que se borran solos en 24 horas, 7 días o 90 días.': 'In each conversation, tap the three dots ⋮: you can lock that chat so it asks for your PIN or fingerprint (and its messages are hidden in notifications), and turn on disappearing messages that delete themselves after 24 hours, 7 days or 90 days.',
+  'Ir al chat': 'Go to chat',
+  'Chatea con tus amigos': 'Chat with your friends',
+  'Toca el globo de arriba o "Chat" junto a cada amigo para escribirle. Con los tres puntos ⋮ dentro del chat lo bloqueas con tu PIN o activas los mensajes temporales.': 'Tap the bubble at the top or "Chat" next to each friend to message them. With the three dots ⋮ inside the chat you lock it with your PIN or turn on disappearing messages.',
 };
