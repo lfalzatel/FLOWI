@@ -21,7 +21,7 @@ interface ChatsCtx {
 const Ctx = createContext<ChatsCtx>({ chats: [], unreadCount: 0, unreadFrom: new Set(), unavailable: false });
 
 export function ChatsProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { friends } = useFriends();
   const { push } = useInAppNotifications();
   const [chats, setChats] = useState<Chat[]>([]);
@@ -29,6 +29,8 @@ export function ChatsProvider({ children }: { children: ReactNode }) {
   const seen = useRef<Map<string, number> | null>(null); // último mensaje ya conocido de cada conversación
   const names = useRef<Map<string, string>>(new Map());
   names.current = new Map(friends.map(f => [f.uid, f.name]));
+  const locked = useRef<string[]>([]);
+  locked.current = profile?.lockedChats || [];
 
   useEffect(() => {
     seen.current = null;
@@ -50,7 +52,8 @@ export function ChatsProvider({ children }: { children: ReactNode }) {
         const peer = chatPeer(c, uid);
         const name = (names.current.get(peer) || tr('Un amigo')).split(/\s+/)[0];
         const title = tr('{a} te escribió', { a: name });
-        const body = c.lastText || '';
+        // Chat bloqueado: el aviso no muestra el texto
+        const body = locked.current.includes(c.id) ? tr('🔒 Mensaje en un chat bloqueado') : (c.lastText || '');
         // Con FLOWI en pantalla: aviso dentro de la app con sonido. Si no, el servidor manda la notificación
         // al celular (functions/index.js · avisarMensajeChat), también con la app cerrada.
         if (document.visibilityState === 'visible') {

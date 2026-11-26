@@ -191,8 +191,13 @@ service cloud.firestore {
 
     // ── Chat entre amigos (lib/chat.ts) ──
     // id = "{a}_{b}" (los dos uid en orden). Solo los dos lo leen. Para escribir hay que ser amigos aceptados.
-    // Cada mensaje: { from, text, createdAt } y no se puede editar; quien lo escribió lo puede borrar.
-    function chatKeys() { return ['users', 'lastText', 'lastFrom', 'lastAt', 'read']; }
+    // Cada mensaje: { from, text, createdAt, expiresAt? } y no se puede editar; quien lo escribió lo puede borrar.
+    // ttl = duración de los mensajes temporales (0, 24 h, 7 días o 90 días); un cambio deja un aviso (kind 'ttl').
+    function chatKeys() { return ['users', 'lastText', 'lastFrom', 'lastAt', 'lastExpiresAt', 'read', 'ttl']; }
+    function validChatTtl(d) { return !('ttl' in d) || d.ttl in [0, 86400, 604800, 7776000]; }
+    function validChatLast(d) {
+      return !('lastFrom' in d) || (d.lastFrom == request.auth.uid && d.lastText is string && d.lastText.size() <= 140);
+    }
 
     match /fl_chats/{chatId} {
       allow read: if signedIn() && request.auth.uid in resource.data.users;
@@ -202,27 +207,32 @@ service cloud.firestore {
         && request.auth.uid in request.resource.data.users
         && request.resource.data.users[0] < request.resource.data.users[1]
         && chatId == request.resource.data.users[0] + '_' + request.resource.data.users[1]
-        && request.resource.data.lastFrom == request.auth.uid
-        && request.resource.data.lastText is string && request.resource.data.lastText.size() <= 140
+        && validChatLast(request.resource.data) && validChatTtl(request.resource.data)
         && friendsAccepted(request.resource.data.users[0], request.resource.data.users[1]);
       allow update: if signedIn() && request.auth.uid in resource.data.users
         && request.resource.data.keys().hasOnly(chatKeys())
         && request.resource.data.users == resource.data.users
-        && request.resource.data.read is map
-        // Marcar como leído: solo cambia "read". Un mensaje nuevo: lo escribe la persona y siguen siendo amigos.
+        && request.resource.data.get('read', {}) is map
+        && validChatTtl(request.resource.data)
+        // Marcar como leído: solo cambia "read". Mensaje nuevo o cambio de duración: lo hace la persona y siguen siendo amigos.
         && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
-            || (request.resource.data.lastFrom == request.auth.uid
-                && request.resource.data.lastText is string && request.resource.data.lastText.size() <= 140
+            || ((!request.resource.data.diff(resource.data).affectedKeys().hasAny(['lastFrom', 'lastText'])
+                 || request.resource.data.lastFrom == request.auth.uid)
+                && validChatLast(request.resource.data)
                 && friendsAccepted(resource.data.users[0], resource.data.users[1])));
 
       match /messages/{msgId} {
         allow read: if signedIn() && request.auth.uid in chatId.split('_');
         allow create: if signedIn()
           && request.auth.uid in chatId.split('_')
-          && request.resource.data.keys().hasOnly(['from', 'text', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['from', 'text', 'createdAt', 'expiresAt', 'kind', 'ttl'])
           && request.resource.data.from == request.auth.uid
-          && request.resource.data.text is string
-          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+          && request.resource.data.text is string && request.resource.data.text.size() <= 1000
+          // Un mensaje lleva texto; el aviso de cambio de duración no
+          && (request.resource.data.get('kind', '') == 'ttl'
+              ? (request.resource.data.text == '' && request.resource.data.ttl in [0, 86400, 604800, 7776000])
+              : (request.resource.data.text.size() > 0 && !('ttl' in request.resource.data)))
+          && (!('expiresAt' in request.resource.data) || request.resource.data.expiresAt is timestamp)
           && request.resource.data.createdAt == request.time
           && friendsAccepted(chatId.split('_')[0], chatId.split('_')[1]);
         allow delete: if signedIn() && resource.data.from == request.auth.uid;

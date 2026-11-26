@@ -15,6 +15,7 @@ const EN = {
   'un gasto compartido': 'a shared expense',
   'Alguien': 'Someone',
   '💬 {a} te escribió': '💬 {a} wrote to you',
+  '🔒 Mensaje en un chat bloqueado': '🔒 Message in a locked chat',
   // Recordatorios y resumen de la mañana (functions/reminders.mjs)
   'Pronto: {a}': 'Soon: {a}',
   'Recordatorio de Flowi': 'Reminder from Flowi',

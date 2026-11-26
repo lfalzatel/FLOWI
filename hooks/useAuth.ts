@@ -27,6 +27,7 @@ export interface UserProfile {
   lastActiveDay?: string;          // YYYY-MM-DD
   txCount?: number;                // cuántos movimientos tiene (para el admin, sin montos)
   lastTxDay?: string;              // fecha del último movimiento (YYYY-MM-DD)
+  lockedChats?: string[];          // chats con amigos que piden PIN o huella para abrirse (lib/chat.ts)
 }
 
 // Última sesión conocida: al cambiar de pantalla la nueva arranca con ella (sin ruedita ni parpadeo)

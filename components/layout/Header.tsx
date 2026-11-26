@@ -65,7 +65,7 @@ export function Header() {
   const { notifications } = useInAppNotifications();
   const { incoming: friendRequests, friends } = useFriends(); // solicitudes de amistad sin responder
   const { chats } = useChats();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { incoming: sharedIncoming, deletedForMe } = useSharedLinks(); // gastos que te compartieron
   const { reminders } = useReminders();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -103,7 +103,7 @@ export function Header() {
   const myUid = user?.uid || '';
   const unreadChats = chats.filter(c => myUid && isUnread(c, myUid)).map(c => {
     const peer = chatPeer(c, myUid);
-    return { id: c.id, peer, name: friends.find(f => f.uid === peer)?.name || tr('Un amigo'), photo: friends.find(f => f.uid === peer)?.photo, text: c.lastText || '' };
+    return { id: c.id, peer, name: friends.find(f => f.uid === peer)?.name || tr('Un amigo'), photo: friends.find(f => f.uid === peer)?.photo, text: profile?.lockedChats?.includes(c.id) ? tr('🔒 Mensaje en un chat bloqueado') : (c.lastText || '') };
   });
   const unread = notifications.length + upcomingReminders.length + friendRequests.length + sharedIncoming.length + deletedForMe.length + unreadChats.length;
 

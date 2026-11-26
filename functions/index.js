@@ -351,15 +351,20 @@ exports.avisarCambioCompartido = onDocumentUpdated({ document: 'fl_shared_links/
 exports.avisarMensajeChat = onDocumentCreated({ document: 'fl_chats/{chatId}/messages/{msgId}', region: 'us-central1' }, async (event) => {
   const m = event.data?.data();
   const { chatId } = event.params;
-  if (!m || !m.from || typeof m.text !== 'string') return;
+  if (!m || !m.from || typeof m.text !== 'string' || m.kind === 'ttl' || !m.text) return; // el cambio de duración no avisa
   const users = String(chatId).split('_');
   const to = users.find(u => u !== m.from);
   if (!to || users.length !== 2) return;
-  const sender = await db.collection('fl_profiles').doc(m.from).get().catch(() => null);
+  const [sender, receiver] = await Promise.all([
+    db.collection('fl_profiles').doc(m.from).get().catch(() => null),
+    db.collection('users').doc(to).get().catch(() => null),
+  ]);
   const name = sender?.exists ? sender.get('name') : '';
+  // Chat bloqueado por quien recibe: la notificación no muestra el texto
+  const locked = ((receiver?.exists && receiver.get('lockedChats')) || []).includes(chatId);
   await pushTo(to, (lang) => ({
     title: msg(lang, '💬 {a} te escribió', { a: firstName(name, lang) }),
-    body: m.text.slice(0, 140),
+    body: locked ? msg(lang, '🔒 Mensaje en un chat bloqueado') : m.text.slice(0, 140),
     url: `/amigos/chat?u=${m.from}`,
     tag: `chat-${chatId}`, // los mensajes seguidos de la misma persona se juntan en un solo aviso
   }));

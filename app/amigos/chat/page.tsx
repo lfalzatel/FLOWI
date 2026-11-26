@@ -3,7 +3,8 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { collection, limit, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { ChevronLeft, MessageCircle, Send, Users } from 'lucide-react';
+import { ChevronLeft, Lock, MessageCircle, MoreVertical, Send, Timer, Users } from 'lucide-react';
+import { ChatLockGate, ChatOptionsSheet } from '@/components/chat/ChatExtras';
 import { db } from '@/lib/firebase';
 import { currentLocale, tr } from '@/lib/i18n';
 import { useTheme } from '@/components/ThemeProvider';
@@ -15,7 +16,8 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { Avatar } from '@/components/friends/Avatar';
 import { PublicProfile, getPublicProfile } from '@/lib/friends';
 import {
-  ChatMessage, MAX_CHAT_TEXT, chatIdFor, chatPeer, chatTime, isUnread, markChatRead, sendChatMessage, setOpenChat,
+  ChatMessage, MAX_CHAT_TEXT, chatIdFor, chatPeer, chatTime, isUnread, lastExpired, markChatRead, msgExpired, sendChatMessage,
+  setChatLocked, setChatTtl, setOpenChat, ttlLabel,
 } from '@/lib/chat';
 
 // Chat con amigos: sin ?u= muestra las conversaciones; con ?u=<uid> abre la conversación con ese amigo.
@@ -61,9 +63,10 @@ function timeLabel(ms: number) {
 // ── Lista de conversaciones ──
 function ChatList() {
   const isTech = useIsTech();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { friends, ready } = useFriends();
   const { chats, unavailable } = useChats();
+  const lockedChats = profile?.lockedChats || [];
   const uid = user?.uid || '';
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
 
@@ -103,6 +106,7 @@ function ChatList() {
               <ul className={`glass-card px-3 divide-y divide-glass-border ${box}`}>
                 {rows.map(({ f, c }) => {
                   const unread = !!c && isUnread(c, uid);
+                  const isLocked = !!c && lockedChats.includes(c.id);
                   return (
                     <li key={f.uid}>
                       <Link href={`/amigos/chat?u=${f.uid}`} className="flex items-center gap-3 py-3">
@@ -110,10 +114,14 @@ function ChatList() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2">
                             <p className={`text-sm truncate flex-1 ${unread ? 'font-bold text-text-primary' : 'font-semibold text-text-primary'}`}>{f.name}</p>
+                            {isLocked && <Lock className="w-3.5 h-3.5 text-text-muted shrink-0" aria-label={tr('Chat bloqueado')} />}
                             {c && <span className={`text-[10px] shrink-0 ${unread ? 'text-accent font-semibold' : 'text-text-muted'}`}>{timeLabel(chatTime(c.lastAt))}</span>}
                           </div>
                           <p className={`text-xs truncate ${unread ? 'text-text-primary' : 'text-text-muted'}`}>
-                            {c ? `${c.lastFrom === uid ? `${tr('Tú')}: ` : ''}${c.lastText || ''}` : tr('Toca para escribirle')}
+                            {!c ? tr('Toca para escribirle')
+                              : isLocked ? tr('Chat bloqueado')
+                              : lastExpired(c) ? tr('Mensaje temporal vencido')
+                              : `${c.lastFrom === uid ? `${tr('Tú')}: ` : ''}${c.lastText || ''}`}
                           </p>
                         </div>
                         {unread && <span className="w-2.5 h-2.5 rounded-full bg-accent shrink-0" aria-label={tr('Mensaje nuevo')} />}
@@ -142,7 +150,7 @@ function Conversation({ peerUid }: { peerUid: string }) {
   const isTech = useIsTech();
   const { theme } = useTheme();
   const isLight = theme === 'light' || theme === 'nova';
-  const { user } = useAuth();
+  const { user, profile: myProfile } = useAuth();
   const { friends, ready } = useFriends();
   const { chats } = useChats();
   const uid = user?.uid || '';
@@ -155,6 +163,14 @@ function Conversation({ peerUid }: { peerUid: string }) {
   const [error, setError] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const chat = chats.find(c => c.id === chatId);
+  const ttl = chat?.ttl || 0;
+  const isLocked = !!myProfile?.lockedChats?.includes(chatId);
+  const [unlocked, setUnlocked] = useState(false);
+  const hidden = isLocked && !unlocked; // bloqueado: no se cargan ni se muestran los mensajes
+  const [showOptions, setShowOptions] = useState(false);
+  // Los mensajes temporales desaparecen apenas vencen (se revisa cada 30 segundos)
+  const [, setTick] = useState(0);
+  useEffect(() => { if (!ttl && !messages?.some(m => m.expiresAt)) return; const t = setInterval(() => setTick(n => n + 1), 30000); return () => clearInterval(t); }); // eslint-disable-line react-hooks/exhaustive-deps
 
   // La conversación ocupa justo la parte visible de la pantalla: al abrir el teclado se encoge (como en
   // WhatsApp) en vez de que el navegador corra la página y los mensajes queden fuera de la vista
@@ -191,7 +207,7 @@ function Conversation({ peerUid }: { peerUid: string }) {
 
   // Mensajes en vivo (los últimos 200)
   useEffect(() => {
-    if (!chatId || user?.isAnonymous) return;
+    if (!chatId || user?.isAnonymous || hidden) return;
     setMessages(null);
     const q = query(collection(db, 'fl_chats', chatId, 'messages'), orderBy('createdAt', 'desc'), limit(200));
     return onSnapshot(q, snap => {
@@ -200,20 +216,20 @@ function Conversation({ peerUid }: { peerUid: string }) {
       setMessages([]);
       if ((err as any)?.code === 'permission-denied') setError(tr('El chat todavía no está activado en la base de datos.'));
     });
-  }, [chatId, user?.isAnonymous]);
+  }, [chatId, user?.isAnonymous, hidden]);
 
   // Al llegar mensajes: bajar hasta el último y marcar como leído
   useEffect(() => {
     toBottom();
-    if (chat && uid && isUnread(chat, uid)) markChatRead(chatId, uid).catch(() => {});
-  }, [messages?.length, chat?.lastAt?.toMillis?.()]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!hidden && chat && uid && isUnread(chat, uid)) markChatRead(chatId, uid).catch(() => {});
+  }, [messages?.length, chat?.lastAt?.toMillis?.(), hidden]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const send = async () => {
     const t = text.trim();
     if (!t || sending || !uid) return;
     setSending(true); setError('');
     setText('');
-    try { await sendChatMessage(uid, peerUid, t); }
+    try { await sendChatMessage(uid, peerUid, t, ttl); }
     catch (e: any) {
       setText(t);
       setError(e?.code === 'permission-denied'
@@ -239,9 +255,22 @@ function Conversation({ peerUid }: { peerUid: string }) {
             <h1 className={`text-base font-bold leading-tight truncate ${isTech ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>{person.name}</h1>
             {person.username && <p className="text-[11px] text-text-muted truncate">@{person.username}</p>}
           </div>
+          {!user?.isAnonymous && !hidden && (
+            <button type="button" onClick={() => setShowOptions(true)} aria-label={tr('Opciones del chat')}
+                    className={`ml-auto p-2 -mr-2 shrink-0 text-text-secondary hover:text-accent ${isTech ? 'rounded-none' : 'rounded-full'}`}>
+              <MoreVertical className="w-5 h-5" />
+            </button>
+          )}
         </div>
+        {ttl > 0 && !hidden && (
+          <button type="button" onClick={() => setShowOptions(true)} className="shrink-0 -mt-1 mb-2 mx-auto flex items-center gap-1.5 px-3 py-1 text-[11px] text-accent border border-accent/30 bg-accent/5 rounded-full">
+            <Timer className="w-3.5 h-3.5" /> {tr('Mensajes temporales: {a}', { a: tr(ttlLabel(ttl)) })}
+          </button>
+        )}
 
-        {user?.isAnonymous ? <GuestNotice isTech={isTech} /> : (
+        {user?.isAnonymous ? <GuestNotice isTech={isTech} /> : hidden ? (
+          <div className="flex-1 min-h-0 overflow-y-auto"><ChatLockGate uid={uid} name={person.name} isTech={isTech} onUnlock={() => setUnlocked(true)} /></div>
+        ) : (
           <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain -mx-4 px-4" aria-live="polite">
           {/* Los mensajes se apilan desde abajo, junto a la barra para escribir */}
           <div className="min-h-full flex flex-col justify-end gap-1.5 pb-3">
@@ -253,10 +282,10 @@ function Conversation({ peerUid }: { peerUid: string }) {
                 <p className="text-sm text-text-primary">{tr('Escríbele a {a}', { a: person.name.split(/\s+/)[0] })}</p>
                 <p className="text-[11px] text-text-muted">{tr('Le llega al instante dentro de FLOWI.')}</p>
               </div>
-            ) : messages.map((m, i) => {
+            ) : messages.filter(m => !msgExpired(m)).map((m, i, shown) => {
               const mine = m.from === uid;
               const t = chatTime(m.createdAt);
-              const prevT = i ? chatTime(messages[i - 1].createdAt) : 0;
+              const prevT = i ? chatTime(shown[i - 1].createdAt) : 0;
               const newDay = !prevT || new Date(prevT).toDateString() !== new Date(t).toDateString();
               return (
                 <div key={m.id}>
@@ -265,6 +294,16 @@ function Conversation({ peerUid }: { peerUid: string }) {
                       {new Date(t).toLocaleDateString(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                   )}
+                  {m.kind === 'ttl' ? (
+                    <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-text-muted py-1.5">
+                      <Timer className="w-3.5 h-3.5 shrink-0" />
+                      {m.ttl
+                        ? (mine ? tr('Activaste los mensajes temporales: {b}', { b: tr(ttlLabel(m.ttl)) })
+                                : tr('{a} activó los mensajes temporales: {b}', { a: person.name.split(/\s+/)[0], b: tr(ttlLabel(m.ttl)) }))
+                        : (mine ? tr('Desactivaste los mensajes temporales')
+                                : tr('{a} desactivó los mensajes temporales', { a: person.name.split(/\s+/)[0] }))}
+                    </p>
+                  ) : (
                   <div className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] px-3 py-2 text-sm whitespace-pre-wrap break-words ${isTech ? 'rounded-none' : 'rounded-2xl'} ${mine
                       ? `bg-accent ${isLight ? 'text-white' : 'text-black'} ${isTech ? '' : 'rounded-br-md'}`
@@ -273,6 +312,7 @@ function Conversation({ peerUid }: { peerUid: string }) {
                       <span className={`block text-[9px] mt-0.5 text-right ${mine ? 'opacity-70' : 'text-text-muted'}`}>{t ? new Date(t).toLocaleTimeString(currentLocale(), { hour: 'numeric', minute: '2-digit' }) : ''}</span>
                     </div>
                   </div>
+                  )}
                 </div>
               );
             })}
@@ -282,7 +322,7 @@ function Conversation({ peerUid }: { peerUid: string }) {
       </main>
 
       {/* Barra para escribir, abajo (sube con el teclado) */}
-      {!user?.isAnonymous && (
+      {!user?.isAnonymous && !hidden && (
         <div className="shrink-0 bg-[color-mix(in_srgb,var(--bg-deep)_92%,transparent)] backdrop-blur-xl border-t border-glass-border"
              style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
           <div className="max-w-2xl mx-auto px-4 pt-3">
@@ -303,6 +343,12 @@ function Conversation({ peerUid }: { peerUid: string }) {
             )}
           </div>
         </div>
+      )}
+
+      {showOptions && uid && (
+        <ChatOptionsSheet uid={uid} locked={isLocked} ttl={ttl} isTech={isTech} onClose={() => setShowOptions(false)}
+          onLock={async (v) => { await setChatLocked(uid, chatId, v); if (v) setUnlocked(true); setShowOptions(false); }}
+          onTtl={async (sec) => { await setChatTtl(uid, peerUid, sec); setShowOptions(false); }} />
       )}
     </div>
   );
