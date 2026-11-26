@@ -324,9 +324,9 @@ export default function DashboardPage() {
         {/* Greeting */}
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            {/* Saludo y nombre en la misma línea y del mismo tamaño: el saludo suave, el nombre con el color del tema */}
+            {/* Saludo y nombre en la misma línea y del mismo tamaño: el saludo con el color de los títulos, el nombre con el color del tema */}
             <h1 className={`leading-tight break-words font-bold text-2xl md:text-3xl ${isTechTheme ? 'font-mono uppercase tracking-wider' : 'font-syne'}`}>
-              <span className={isTechTheme ? 'text-accent/70' : 'text-text-secondary'}>{greeting},</span>{' '}
+              <span className={isTechTheme ? 'text-accent' : 'text-text-primary'}>{greeting},</span>{' '}
               <span className="text-accent">{profile?.name === 'Invitado' ? tr('Invitado') : (profile?.name?.split(' ')[0] || tr('Usuario'))}</span>{' '}
               <WavingHand />
             </h1>

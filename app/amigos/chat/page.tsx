@@ -174,15 +174,25 @@ function Conversation({ peerUid }: { peerUid: string }) {
 
   // La conversación ocupa justo la parte visible de la pantalla: al abrir el teclado se encoge (como en
   // WhatsApp) en vez de que el navegador corra la página y los mensajes queden fuera de la vista
-  const [view, setView] = useState<{ h: number; top: number } | null>(null);
+  // El encabezado de la app queda fuera (como en las demás páginas, así su menú de perfil funciona):
+  // la conversación va justo debajo de él
+  const [view, setView] = useState<{ h: number; top: number; header: number } | null>(null);
   useEffect(() => {
     const vv = window.visualViewport;
-    const update = () => setView({ h: vv ? vv.height : window.innerHeight, top: vv ? vv.offsetTop : 0 });
+    const headerEl = document.querySelector('header');
+    const update = () => setView({
+      h: vv ? vv.height : window.innerHeight,
+      top: vv ? vv.offsetTop : 0,
+      header: headerEl ? Math.round(headerEl.getBoundingClientRect().height) : 64,
+    });
     update();
+    const ro = headerEl ? new ResizeObserver(update) : null;
+    if (headerEl) ro!.observe(headerEl);
     vv?.addEventListener('resize', update);
     vv?.addEventListener('scroll', update);
     window.addEventListener('resize', update);
     return () => {
+      ro?.disconnect();
       vv?.removeEventListener('resize', update);
       vv?.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
@@ -242,9 +252,10 @@ function Conversation({ peerUid }: { peerUid: string }) {
   const canWrite = !!friend;
 
   return (
-    <div className="fixed inset-x-0 z-[1] flex flex-col bg-deep overflow-hidden"
-         style={{ top: view?.top ?? 0, height: view ? view.h : '100dvh' }}>
-      <Header />
+    <>
+    <Header />
+    <div className="fixed inset-x-0 flex flex-col"
+         style={view ? { top: view.top + view.header, height: Math.max(200, view.h - view.header) } : { top: 64, height: 'calc(100dvh - 64px)' }}>
       <main className={`relative flex-1 min-h-0 max-w-2xl mx-auto w-full px-4 pt-2 flex flex-col ${isTech ? 'font-mono' : ''}`}>
         <div className="shrink-0 flex items-center gap-3 mb-3">
           <Link href="/amigos/chat" aria-label={tr('Volver')} className={`p-2 -ml-2 shrink-0 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
@@ -351,5 +362,6 @@ function Conversation({ peerUid }: { peerUid: string }) {
           onTtl={async (sec) => { await setChatTtl(uid, peerUid, sec); setShowOptions(false); }} />
       )}
     </div>
+    </>
   );
 }
