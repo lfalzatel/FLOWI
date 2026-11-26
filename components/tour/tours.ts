@@ -108,7 +108,7 @@ export const HOME_TOUR: TourStep[] = lazyT(() => ([
 // ── Tutoriales de cada página ──
 export type PageTourId =
   | 'gastos' | 'ingresos' | 'deudas' | 'cuentas' | 'inversiones' | 'metas' | 'presupuestos'
-  | 'amigos' | 'compartidos' | 'hormiga' | 'recordatorios' | 'recibos' | 'productos'
+  | 'amigos' | 'chat' | 'compartidos' | 'hormiga' | 'recordatorios' | 'recibos' | 'productos'
   | 'importar' | 'negocio' | 'resumen' | 'notas' | 'compartir' | 'configuracion' | 'temas' | 'apoyar' | 'planes' | 'animaciones'
   | 'calendario' | 'seguridad' | 'cfgCuenta' | 'cfgNotificaciones' | 'cfgApariencia' | 'cfgSonidos' | 'cfgIa' | 'cfgFinanzas' | 'cfgCategorias' | 'cfgPrivacidad';
 
@@ -175,6 +175,13 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
     { title: tr('Presupuestos'), text: tr('Decide cuánto quieres gastar en el mes y por categoría, y mira cuánto llevas.') },
     { title: tr('La guía 50/30/20'), text: tr('Una regla sencilla: la mitad de tus ingresos para necesidades, 30 % para gustos y 20 % para ahorro. Úsala como punto de partida y ajústala a tu vida.') },
     { title: tr('Antes de pasarte'), text: tr('Cuando una categoría se acerca a su límite, lo ves aquí y en Inicio, para que alcances a frenar a tiempo.') },
+  ],
+  chat: [
+    { target: 'chat-list', title: tr('Tu chat con amigos'), text: tr('Aquí están tus amigos de FLOWI: los que te escribieron hace poco salen arriba, con un punto si tienen mensajes nuevos. Toca uno para escribirle. Solo ustedes dos ven los mensajes.') },
+    { target: 'chat-search', title: tr('Busca un chat'), text: tr('Escribe el nombre o el @usuario de tu amigo para encontrar su chat rápido.') },
+    { title: tr('Bloquea un chat con tu PIN'), text: tr('Dentro de un chat toca los tres puntos ⋮ y elige "Bloquear este chat". Sirve para que nadie que tome tu celular lea esa conversación: para abrirla te pide tu PIN o tu huella, y en los avisos sale "Mensaje en un chat bloqueado" en vez del texto. Necesitas tu PIN creado en Configuración › Seguridad.') },
+    { title: tr('Mensajes temporales'), text: tr('En los mismos tres puntos ⋮ eliges cuánto duran los mensajes nuevos: 24 horas, 7 días o 90 días. Pasado ese tiempo se borran solos para los dos. Tu amigo ve el aviso del cambio y lo puede cambiar también. Los mensajes que ya estaban no se borran.') },
+    { title: tr('Bloquear o reportar a alguien'), text: tr('Si alguien te molesta, en los tres puntos ⋮ puedes bloquearlo: ninguno le podrá escribir al otro y no se le avisa. También puedes reportarlo: FLOWI revisa los últimos mensajes que te envió y puede suspender su cuenta.') },
   ],
   amigos: [
     { title: tr('Amigos'), text: tr('Busca a tus amigos en FLOWI por nombre o @usuario y envíales una solicitud. Solo ven tu nombre y tu foto, nunca tus cuentas.') },

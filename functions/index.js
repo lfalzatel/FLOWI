@@ -370,6 +370,22 @@ exports.avisarMensajeChat = onDocumentCreated({ document: 'fl_chats/{chatId}/mes
   }));
 });
 
+// Reporte de un usuario desde el chat (lib/chatSafety.ts): aviso a los administradores para revisarlo
+exports.avisarReporte = onDocumentCreated({ document: 'fl_reports/{id}', region: 'us-central1' }, async (event) => {
+  const r = event.data?.data();
+  if (!r) return;
+  const reasons = { acoso: 'acoso', estafa: 'estafa', spam: 'spam', inapropiado: 'contenido inapropiado', otro: 'otro motivo' };
+  const admins = await db.collection('users').where('role', '==', 'admin').get();
+  for (const a of admins.docs) {
+    await pushTo(a.id, {
+      title: `🚩 Reporte en el chat: ${reasons[r.reason] || 'otro motivo'}`,
+      body: `${firstName(r.reporterName)} reportó a ${String(r.reportedName || 'alguien').slice(0, 40)}. Toca para revisarlo.`,
+      url: '/servicios/opiniones',
+      tag: `reporte-${event.params.id}`,
+    });
+  }
+});
+
 // Comentario o sugerencia nueva (app/servicios/opiniones): aviso a los administradores
 exports.avisarComentario = onDocumentCreated({ document: 'fl_feedback/{id}', region: 'us-central1' }, async (event) => {
   const f = event.data?.data();
@@ -447,6 +463,23 @@ exports.eliminarMiCuenta = onCall({ region: 'us-central1', timeoutSeconds: 300 }
     links.docs.forEach((d) => batch.delete(d.ref));
     await batch.commit();
     removed += links.size;
+  }
+  // Chats con amigos (las conversaciones y todos sus mensajes) y los contactos que bloqueó
+  for (;;) {
+    const chats = await db.collection('fl_chats').where('users', 'array-contains', uid).limit(50).get();
+    if (chats.empty) break;
+    for (const c of chats.docs) {
+      await db.recursiveDelete(c.ref);
+      removed += 1;
+    }
+  }
+  for (;;) {
+    const blocks = await db.collection('fl_blocks').where('blocker', '==', uid).limit(400).get();
+    if (blocks.empty) break;
+    const batch = db.batch();
+    blocks.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    removed += blocks.size;
   }
   await db.collection('fl_profiles').doc(uid).delete().catch(() => {});
   await db.collection('fl_directory').doc(uid).delete().catch(() => {});

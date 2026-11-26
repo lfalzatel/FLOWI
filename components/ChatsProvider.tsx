@@ -16,9 +16,10 @@ interface ChatsCtx {
   unreadCount: number;            // conversaciones con mensajes sin leer
   unreadFrom: Set<string>;        // uid de los amigos que escribieron y no se ha leído
   unavailable: boolean;           // la base de datos todavía no tiene las reglas del chat
+  blocked: Set<string>;           // contactos que bloqueé (no nos podemos escribir)
 }
 
-const Ctx = createContext<ChatsCtx>({ chats: [], unreadCount: 0, unreadFrom: new Set(), unavailable: false });
+const Ctx = createContext<ChatsCtx>({ chats: [], unreadCount: 0, unreadFrom: new Set(), unavailable: false, blocked: new Set() });
 
 export function ChatsProvider({ children }: { children: ReactNode }) {
   const { user, profile } = useAuth();
@@ -26,6 +27,14 @@ export function ChatsProvider({ children }: { children: ReactNode }) {
   const { push } = useInAppNotifications();
   const [chats, setChats] = useState<Chat[]>([]);
   const [unavailable, setUnavailable] = useState(false);
+  const [blocked, setBlocked] = useState<Set<string>>(new Set());
+
+  // Contactos que bloqueé (lib/chatSafety.ts)
+  useEffect(() => {
+    if (!user || user.isAnonymous) { setBlocked(new Set()); return; }
+    const q = query(collection(db, 'fl_blocks'), where('blocker', '==', user.uid));
+    return onSnapshot(q, snap => setBlocked(new Set(snap.docs.map(d => d.get('blocked') as string))), () => {});
+  }, [user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
   const seen = useRef<Map<string, number> | null>(null); // último mensaje ya conocido de cada conversación
   const names = useRef<Map<string, string>>(new Map());
   names.current = new Map(friends.map(f => [f.uid, f.name]));
@@ -72,8 +81,8 @@ export function ChatsProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ChatsCtx>(() => {
     const uid = user?.uid || '';
     const unread = chats.filter(c => isUnread(c, uid));
-    return { chats, unreadCount: unread.length, unreadFrom: new Set(unread.map(c => chatPeer(c, uid))), unavailable };
-  }, [chats, user?.uid, unavailable]);
+    return { chats, unreadCount: unread.length, unreadFrom: new Set(unread.map(c => chatPeer(c, uid))), unavailable, blocked };
+  }, [chats, user?.uid, unavailable, blocked]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

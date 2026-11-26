@@ -9,7 +9,7 @@ import { UI_EN, UPDATED_EN, privacyEn, termsEn } from './content-en';
 // Política de tratamiento de datos (Ley 1581 de 2012 y Decreto 1377 de 2013) y términos de uso.
 // Página pública: se puede leer sin iniciar sesión (la enlaza la portada antes de entrar).
 
-const UPDATED = '9 de noviembre de 2026';
+const UPDATED = '26 de noviembre de 2026';
 const WHATSAPP = 'https://wa.me/573104604592';
 const EMAIL = 'soporteflowiapp@gmail.com';
 
@@ -30,6 +30,8 @@ const PRIVACY: Block[] = [
       'Lo que tú registras: gastos, ingresos, deudas, cuentas (nombre del banco y saldo, nunca números de cuenta), inversiones y ahorros, metas, presupuestos, recordatorios, notas y ventas de tu negocio.',
       'Datos de uso: los días en que abres la app y tu racha, para mostrártelos y entender cómo se usa FLOWI.',
       'Notificaciones: un identificador de tu celular para enviarte recordatorios, si los activas.',
+      'Amigos y chat: tu nombre, foto y @usuario (lo único que ven otras personas), tus amigos, los mensajes que envías y recibes en el chat, los chats que bloqueas con PIN, la duración de los mensajes temporales y los contactos que bloqueas.',
+      'Reportes: si reportas a alguien, guardamos el motivo, lo que escribas y los últimos mensajes que esa persona te envió, para revisarlo.',
       'Pagos: referencia, plan, valor, fecha y estado. FLOWI no ve ni guarda los datos de tu tarjeta o de tu cuenta bancaria; esos los maneja Wompi.',
       'Comprobantes de transferencia: si pagas por transferencia, guardamos la imagen que subes para poder verificar el pago.',
     ]],
@@ -47,6 +49,7 @@ const PRIVACY: Block[] = [
     title: '4. Quién más puede verlos',
     body: [
       'Cada cuenta ve únicamente su propia información. El administrador de FLOWI puede consultar la información de las cuentas solo para dar soporte, revisar pagos y corregir errores, y la trata con total confidencialidad.',
+      'Los mensajes del chat solo los ven las dos personas de la conversación. El administrador solo ve los mensajes que alguien le envía al hacer un reporte.',
       'Usamos estos proveedores, que tratan los datos por encargo nuestro:',
       [
         'Google Firebase: inicio de sesión, almacenamiento de los datos y notificaciones. Sus servidores pueden estar fuera de Colombia (por ejemplo, en Estados Unidos), lo que implica una transferencia internacional de datos que autorizas al usar FLOWI.',
@@ -74,11 +77,12 @@ const PRIVACY: Block[] = [
     title: '6. Cuánto tiempo los guardamos y cómo borrar tu cuenta',
     body: [
       'Mientras tengas tu cuenta en FLOWI. Si pides borrarla, eliminamos tus datos en máximo 15 días hábiles, salvo el registro de los pagos realizados, que se conserva el tiempo que exige la ley.',
+      'Los mensajes temporales se borran solos cuando vence el tiempo elegido. Los reportes del chat se conservan mientras se revisan y para prevenir abusos.',
       'Para eliminar tu cuenta de FLOWI tú mismo:',
       [
         'Abre FLOWI e inicia sesión.',
         'Ve a Configuración → Datos y Privacidad.',
-        'Toca "Eliminar mi cuenta" y confírmalo. Se borran al instante tu perfil, tus gastos, ingresos, deudas, cuentas, metas, ahorros, recordatorios y recibos.',
+        'Toca "Eliminar mi cuenta" y confírmalo. Se borran al instante tu perfil, tus gastos, ingresos, deudas, cuentas, metas, ahorros, recordatorios, recibos, tus amigos y tus chats con todos sus mensajes.',
       ],
       'También puedes pedirlo sin entrar a la app escribiendo al correo ' + EMAIL + ' desde el correo con el que te registraste. Solo se conserva el registro de los pagos de Premium (fecha, valor y plan), sin tus otros datos, por el tiempo que exige la ley.',
     ],
@@ -158,7 +162,17 @@ const TERMS: Block[] = [
   },
   {
     title: '9. Uso adecuado',
-    body: ['No uses FLOWI para actividades ilegales ni intentes acceder a información de otras personas o afectar el funcionamiento de la app. Si pasa, podemos suspender la cuenta.'],
+    body: [
+      'No uses FLOWI para actividades ilegales ni intentes acceder a información de otras personas o afectar el funcionamiento de la app. Si pasa, podemos suspender la cuenta.',
+      'Reglas del chat con amigos. No está permitido enviar:',
+      [
+        'Acoso, insultos, amenazas o discursos de odio.',
+        'Estafas, cobros falsos, enlaces engañosos o pedidos de contraseñas o códigos.',
+        'Contenido sexual, violento o que involucre a menores de edad.',
+        'Spam, publicidad o cadenas.',
+      ],
+      'Puedes bloquear a cualquier persona (ninguno le podrá escribir al otro) y reportarla desde los tres puntos ⋮ del chat. Revisamos cada reporte y podemos borrar mensajes y suspender o eliminar la cuenta de quien no cumpla estas reglas. Si hay un peligro inmediato, comunícate con las autoridades.',
+    ],
   },
   {
     title: '10. Cambios y ley aplicable',

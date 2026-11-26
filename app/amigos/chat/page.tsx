@@ -3,7 +3,9 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { collection, limit, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { ChevronLeft, Lock, MessageCircle, MoreVertical, Send, Timer, Users } from 'lucide-react';
+import { Ban, ChevronLeft, Lock, MessageCircle, MoreVertical, Search, Send, Timer, Users, X } from 'lucide-react';
+import { PageTourButton } from '@/components/tour/PageTourButton';
+import { blockUser, reportUser, unblockUser } from '@/lib/chatSafety';
 import { ChatLockGate, ChatOptionsSheet } from '@/components/chat/ChatExtras';
 import { db } from '@/lib/firebase';
 import { currentLocale, tr } from '@/lib/i18n';
@@ -65,8 +67,10 @@ function ChatList() {
   const isTech = useIsTech();
   const { user, profile } = useAuth();
   const { friends, ready } = useFriends();
-  const { chats, unavailable } = useChats();
+  const { chats, unavailable, blocked } = useChats();
   const lockedChats = profile?.lockedChats || [];
+  const [q, setQ] = useState('');
+  const norm = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const uid = user?.uid || '';
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
 
@@ -76,8 +80,12 @@ function ChatList() {
     const withChat = friends.filter(f => byPeer.has(f.uid))
       .sort((a, b) => chatTime(byPeer.get(b.uid)!.lastAt) - chatTime(byPeer.get(a.uid)!.lastAt));
     const rest = friends.filter(f => !byPeer.has(f.uid));
-    return [...withChat, ...rest].map(f => ({ f, c: byPeer.get(f.uid) }));
-  }, [chats, friends, uid]);
+    // Buscador: por nombre o @usuario (sin importar tildes)
+    const words = norm(q.trim().replace(/^@/, '')).split(/\s+/).filter(Boolean);
+    return [...withChat, ...rest]
+      .filter(f => !words.length || words.every(w => norm(`${f.name} ${f.username}`).includes(w)))
+      .map(f => ({ f, c: byPeer.get(f.uid) }));
+  }, [chats, friends, uid, q]);
 
   return (
     <div className="relative min-h-screen flex flex-col bg-deep">
@@ -91,6 +99,7 @@ function ChatList() {
             <h1 className={`text-xl sm:text-2xl font-bold leading-tight truncate ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Chat')}</h1>
             <p className="text-xs text-text-muted">{tr('Habla con tus amigos de FLOWI. Solo ustedes dos ven los mensajes.')}</p>
           </div>
+          <PageTourButton id="chat" className="ml-auto shrink-0" />
         </div>
 
         {user?.isAnonymous ? <GuestNotice isTech={isTech} /> : (
@@ -100,10 +109,21 @@ function ChatList() {
                 {tr('El chat todavía no está activado en la base de datos. Muy pronto vas a poder escribirles a tus amigos.')}
               </p>
             )}
+            {/* Buscador de chats */}
+            {friends.length > 0 && (
+              <div data-tour="chat-search" className={`flex items-center gap-2 px-3 py-2.5 bg-glass border ${isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>
+                <Search className="w-4 h-4 text-text-muted shrink-0" />
+                <input autoComplete="off" value={q} onChange={e => setQ(e.target.value)} placeholder={tr('Buscar un chat')}
+                       aria-label={tr('Buscar un chat')} className="flex-1 min-w-0 bg-transparent text-sm text-text-primary placeholder-text-muted focus:outline-none" />
+                {q && <button type="button" onClick={() => setQ('')} aria-label={tr('Borrar búsqueda')} className="text-text-muted"><X className="w-4 h-4" /></button>}
+              </div>
+            )}
             {!ready ? (
               <div className="flex justify-center py-6"><div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" /></div>
+            ) : q && !rows.length ? (
+              <p className="text-center text-xs text-text-muted py-4">{tr('No hay chats con «{q}».', { q: q.trim() })}</p>
             ) : rows.length ? (
-              <ul className={`glass-card px-3 divide-y divide-glass-border ${box}`}>
+              <ul data-tour="chat-list" className={`glass-card px-3 divide-y divide-glass-border ${box}`}>
                 {rows.map(({ f, c }) => {
                   const unread = !!c && isUnread(c, uid);
                   const isLocked = !!c && lockedChats.includes(c.id);
@@ -115,6 +135,7 @@ function ChatList() {
                           <div className="flex items-baseline gap-2">
                             <p className={`text-sm truncate flex-1 ${unread ? 'font-bold text-text-primary' : 'font-semibold text-text-primary'}`}>{f.name}</p>
                             {isLocked && <Lock className="w-3.5 h-3.5 text-text-muted shrink-0" aria-label={tr('Chat bloqueado')} />}
+                            {blocked.has(f.uid) && <Ban className="w-3.5 h-3.5 text-red-400 shrink-0" aria-label={tr('Contacto bloqueado')} />}
                             {c && <span className={`text-[10px] shrink-0 ${unread ? 'text-accent font-semibold' : 'text-text-muted'}`}>{timeLabel(chatTime(c.lastAt))}</span>}
                           </div>
                           <p className={`text-xs truncate ${unread ? 'text-text-primary' : 'text-text-muted'}`}>
@@ -152,7 +173,8 @@ function Conversation({ peerUid }: { peerUid: string }) {
   const isLight = theme === 'light' || theme === 'nova';
   const { user, profile: myProfile } = useAuth();
   const { friends, ready } = useFriends();
-  const { chats } = useChats();
+  const { chats, blocked } = useChats();
+  const isBlocked = blocked.has(peerUid);
   const uid = user?.uid || '';
   const chatId = uid ? chatIdFor(uid, peerUid) : '';
   const friend = friends.find(f => f.uid === peerUid);
@@ -249,7 +271,7 @@ function Conversation({ peerUid }: { peerUid: string }) {
   };
 
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
-  const canWrite = !!friend;
+  const canWrite = !!friend && !isBlocked;
 
   return (
     <>
@@ -349,6 +371,13 @@ function Conversation({ peerUid }: { peerUid: string }) {
                   <Send className="w-5 h-5" />
                 </button>
               </form>
+            ) : isBlocked ? (
+              <div className="flex items-center gap-2 pb-1">
+                <Ban className="w-4 h-4 text-red-400 shrink-0" />
+                <p className="flex-1 text-xs text-text-muted">{tr('Bloqueaste a {a}. No pueden escribirse.', { a: person.name.split(/\s+/)[0] })}</p>
+                <button type="button" onClick={() => unblockUser(uid, peerUid).catch(() => setError(tr('No se pudo guardar. Revisa tu conexión.')))}
+                        className="shrink-0 text-xs font-semibold text-accent">{tr('Desbloquear')}</button>
+              </div>
             ) : (
               <p className="text-xs text-text-muted text-center pb-1">{tr('Ya no son amigos en FLOWI: puedes leer la conversación, pero no escribir.')}</p>
             )}
@@ -357,7 +386,13 @@ function Conversation({ peerUid }: { peerUid: string }) {
       )}
 
       {showOptions && uid && (
-        <ChatOptionsSheet uid={uid} locked={isLocked} ttl={ttl} isTech={isTech} onClose={() => setShowOptions(false)}
+        <ChatOptionsSheet uid={uid} peerName={person.name} locked={isLocked} ttl={ttl} blocked={isBlocked} isTech={isTech} onClose={() => setShowOptions(false)}
+          onBlock={async (v) => { if (v) await blockUser(uid, peerUid); else await unblockUser(uid, peerUid); setShowOptions(false); }}
+          onReport={async (reason, details, alsoBlock) => {
+            await reportUser({ myUid: uid, myName: myProfile?.name || user?.displayName || '', otherUid: peerUid, otherName: person.name,
+              chatId, reason, details, messages: messages || [] });
+            if (alsoBlock) await blockUser(uid, peerUid);
+          }}
           onLock={async (v) => { await setChatLocked(uid, chatId, v); if (v) setUnlocked(true); setShowOptions(false); }}
           onTtl={async (sec) => { await setChatTtl(uid, peerUid, sec); setShowOptions(false); }} />
       )}

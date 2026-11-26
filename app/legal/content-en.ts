@@ -5,7 +5,7 @@ import { formatCurrency } from '@/lib/format';
 
 export type Block = { title: string; body: (string | string[])[] };
 
-export const UPDATED_EN = 'November 9, 2026';
+export const UPDATED_EN = 'November 26, 2026';
 
 export function privacyEn(email: string): Block[] {
   return [
@@ -23,6 +23,8 @@ export function privacyEn(email: string): Block[] {
         'What you record: expenses, income, debts, accounts (bank name and balance, never account numbers), investments and savings, goals, budgets, reminders, notes and your business sales.',
         'Usage data: the days you open the app and your streak, to show them to you and understand how FLOWI is used.',
         'Notifications: an identifier of your phone to send you reminders, if you turn them on.',
+        'Friends and chat: your name, photo and @username (the only things other people see), your friends, the messages you send and receive in the chat, the chats you lock with a PIN, the duration of disappearing messages and the contacts you block.',
+        'Reports: if you report someone, we keep the reason, what you write and the latest messages that person sent you, so we can review it.',
         'Payments: reference, plan, amount, date and status. FLOWI does not see or store your card or bank account details; Wompi handles those.',
         'Transfer receipts: if you pay by bank transfer, we keep the image you upload so we can verify the payment.',
       ]],
@@ -40,6 +42,7 @@ export function privacyEn(email: string): Block[] {
       title: '4. Who else can see it',
       body: [
         'Each account only sees its own information. The FLOWI administrator can look at account information only to give support, review payments and fix errors, and keeps it strictly confidential.',
+        'Chat messages are only seen by the two people in the conversation. The administrator only sees the messages someone sends along with a report.',
         'We use these providers, which handle data on our behalf:',
         [
           'Google Firebase: sign-in, data storage and notifications. Its servers may be outside Colombia (for example, in the United States), which means an international data transfer that you authorize by using FLOWI.',
@@ -67,11 +70,12 @@ export function privacyEn(email: string): Block[] {
       title: '6. How long we keep it and how to delete your account',
       body: [
         'For as long as you have your FLOWI account. If you ask us to delete it, we erase your data within 15 business days, except the record of payments made, which is kept for the time the law requires.',
+        'Disappearing messages delete themselves when the chosen time runs out. Chat reports are kept while they are reviewed and to prevent abuse.',
         'To delete your FLOWI account yourself:',
         [
           'Open FLOWI and sign in.',
           'Go to Settings → Data and privacy.',
-          'Tap "Delete my account" and confirm. Your profile, expenses, income, debts, accounts, goals, savings, reminders and receipts are deleted right away.',
+          'Tap "Delete my account" and confirm. Your profile, expenses, income, debts, accounts, goals, savings, reminders, receipts, your friends and your chats with all their messages are deleted right away.',
         ],
         `You can also ask for it without opening the app by writing to ${email} from the email you signed up with. Only the record of Premium payments (date, amount and plan) is kept, without your other data, for the time the law requires.`,
       ],
@@ -154,7 +158,17 @@ export function termsEn(email: string): Block[] {
     },
     {
       title: '9. Proper use',
-      body: ['Do not use FLOWI for illegal activities or try to access other people’s information or disrupt the app. If that happens, we may suspend the account.'],
+      body: [
+        'Do not use FLOWI for illegal activities or try to access other people’s information or disrupt the app. If that happens, we may suspend the account.',
+        'Rules for the friends chat. You may not send:',
+        [
+          'Harassment, insults, threats or hate speech.',
+          'Scams, fake charges, misleading links or requests for passwords or codes.',
+          'Sexual or violent content, or content involving minors.',
+          'Spam, advertising or chain messages.',
+        ],
+        'You can block anyone (neither of you will be able to write to the other) and report them from the three dots ⋮ in the chat. We review every report and may delete messages and suspend or delete the account of anyone who breaks these rules. If there is immediate danger, contact the authorities.',
+      ],
     },
     {
       title: '10. Changes and governing law',

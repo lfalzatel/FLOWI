@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Check, Lock, LockOpen, Timer, X } from 'lucide-react';
+import { Ban, Check, Flag, Lock, LockOpen, Timer, X } from 'lucide-react';
+import { REPORT_REASONS } from '@/lib/chatSafety';
 import { tr } from '@/lib/i18n';
 import { checkPin, getLock, verifyBiometric } from '@/lib/appLock';
 import { PinPad } from '@/components/security/PinPad';
@@ -58,13 +59,22 @@ export function ChatLockGate({ uid, name, isTech, onUnlock }: { uid: string; nam
   );
 }
 
-// Opciones de la conversación: bloquear el chat y la duración de los mensajes
-export function ChatOptionsSheet({ uid, locked, ttl, isTech, onLock, onTtl, onClose }: {
-  uid: string; locked: boolean; ttl: number; isTech: boolean;
-  onLock: (v: boolean) => Promise<void>; onTtl: (sec: number) => Promise<void>; onClose: () => void;
+// Opciones de la conversación: bloquear el chat, la duración de los mensajes, bloquear al contacto y reportarlo
+export function ChatOptionsSheet({ uid, peerName, locked, ttl, blocked, isTech, onLock, onTtl, onBlock, onReport, onClose }: {
+  uid: string; peerName: string; locked: boolean; ttl: number; blocked: boolean; isTech: boolean;
+  onLock: (v: boolean) => Promise<void>; onTtl: (sec: number) => Promise<void>;
+  onBlock: (v: boolean) => Promise<void>;
+  onReport: (reason: string, details: string, alsoBlock: boolean) => Promise<void>;
+  onClose: () => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const [reporting, setReporting] = useState(false);
+  const [reason, setReason] = useState('');
+  const [details, setDetails] = useState('');
+  const [alsoBlock, setAlsoBlock] = useState(true);
+  const [reported, setReported] = useState(false);
+  const first = peerName.split(/\s+/)[0];
   const hasPin = !!getLock(uid);
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
   const run = async (f: () => Promise<void>) => {
@@ -111,6 +121,57 @@ export function ChatOptionsSheet({ uid, locked, ttl, isTech, onLock, onTtl, onCl
               </button>
             ))}
           </div>
+        </section>
+        {/* Bloquear contacto y reportar (como en WhatsApp) */}
+        <section className="space-y-2 pt-1 border-t border-glass-border">
+          <button type="button" disabled={busy} onClick={() => run(() => onBlock(!blocked))}
+                  className={`w-full flex items-center gap-3 p-3 border text-left disabled:opacity-60 ${box} ${blocked ? 'border-red-400/50 bg-red-500/10' : 'border-glass-border hover:bg-white/5'}`}>
+            <Ban className="w-5 h-5 text-red-400 shrink-0" />
+            <span className="flex-1 min-w-0">
+              <span className="block text-sm font-semibold text-red-400">{blocked ? tr('Desbloquear a {a}', { a: first }) : tr('Bloquear a {a}', { a: first })}</span>
+              <span className="block text-[11px] text-text-muted">{blocked ? tr('Podrán volver a escribirse.') : tr('Ninguno de los dos podrá escribirle al otro. No se le avisa.')}</span>
+            </span>
+          </button>
+
+          {reported ? (
+            <p className={`p-3 text-xs text-text-primary border border-accent/40 bg-accent/10 ${box}`}>{tr('Gracias. Recibimos tu reporte y lo revisaremos. Si hay un peligro inmediato, comunícate con las autoridades.')}</p>
+          ) : !reporting ? (
+            <button type="button" onClick={() => setReporting(true)}
+                    className={`w-full flex items-center gap-3 p-3 border border-glass-border hover:bg-white/5 text-left ${box}`}>
+              <Flag className="w-5 h-5 text-red-400 shrink-0" />
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-semibold text-red-400">{tr('Reportar a {a}', { a: first })}</span>
+                <span className="block text-[11px] text-text-muted">{tr('FLOWI revisa los últimos mensajes que te envió.')}</span>
+              </span>
+            </button>
+          ) : (
+            <div className={`p-3 space-y-2 border border-red-400/40 ${box}`}>
+              <p className="text-sm font-semibold text-text-primary">{tr('¿Por qué reportas a {a}?', { a: first })}</p>
+              <div className="space-y-1">
+                {REPORT_REASONS.map(r => (
+                  <label key={r.id} className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer py-1">
+                    <input type="radio" name="report-reason" checked={reason === r.id} onChange={() => setReason(r.id)} className="w-4 h-4 accent-[var(--accent)]" />
+                    {tr(r.label)}
+                  </label>
+                ))}
+              </div>
+              <textarea value={details} onChange={e => setDetails(e.target.value.slice(0, 500))} rows={2}
+                        placeholder={tr('Cuéntanos qué pasó (opcional)')} aria-label={tr('Detalles del reporte')}
+                        className={`w-full resize-none px-3 py-2 bg-glass border border-glass-border text-xs text-text-primary placeholder-text-muted focus:outline-none ${box}`} />
+              {!blocked && (
+                <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
+                  <input type="checkbox" checked={alsoBlock} onChange={e => setAlsoBlock(e.target.checked)} className="w-4 h-4 accent-[var(--accent)]" />
+                  {tr('Bloquear también a {a}', { a: first })}
+                </label>
+              )}
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setReporting(false)} className={`flex-1 py-2 text-xs font-semibold border border-glass-border text-text-secondary ${box}`}>{tr('Cancelar')}</button>
+                <button type="button" disabled={!reason || busy}
+                        onClick={() => run(async () => { await onReport(reason, details, alsoBlock && !blocked); setReported(true); setReporting(false); })}
+                        className={`flex-1 py-2 text-xs font-semibold border border-red-400/60 bg-red-500/15 text-red-400 disabled:opacity-50 ${box}`}>{busy ? tr('Enviando…') : tr('Enviar reporte')}</button>
+              </div>
+            </div>
+          )}
         </section>
         {msg && <p className="text-xs text-amber-300">{msg}</p>}
       </div>

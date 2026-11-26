@@ -255,7 +255,16 @@ export default function AmigosPage() {
 
         {/* Mis amigos */}
         <section className="space-y-2">
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('Mis amigos')} {friends.length ? `(${friends.length})` : ''}</h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{tr('Mis amigos')} {friends.length ? `(${friends.length})` : ''}</h2>
+            {/* Entrada visible a la página de Chat */}
+            {friends.length > 0 && (
+              <Link href="/amigos/chat" className={`${btn} relative border-accent bg-accent/15 text-accent`}>
+                <MessageCircle className="w-3.5 h-3.5" /> {tr('Ir al chat')}
+                {unreadCount > 0 && <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-accent text-black text-[9px] font-bold flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+              </Link>
+            )}
+          </div>
           {!ready ? (
             <div className="flex justify-center py-6"><div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" /></div>
           ) : friends.length ? (

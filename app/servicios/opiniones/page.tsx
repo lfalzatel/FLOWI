@@ -8,6 +8,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { ReportsAdmin } from '@/components/chat/ReportsAdmin';
 import { getAllUsers } from '@/lib/firestore';
 import {
   FEEDBACK_AREAS, FEEDBACK_TYPES, Feedback, FeedbackType, deleteFeedback, sendFeedback, updateFeedback, watchAllFeedback, watchMyFeedback,
@@ -128,6 +129,7 @@ export default function OpinionesPage() {
           </section>
         )}
 
+        {isAdmin && <ReportsAdmin isTech={isTech} />}
         {isAdmin && <AdminPanel isTech={isTech} />}
       </main>
       <BottomNav />
