@@ -405,22 +405,23 @@ export default function ConfigPage() {
             <button onClick={backToTiles} aria-label={tr('Volver a Configuración')} className={`p-2 -ml-2 rounded-xl transition-colors ${isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-secondary hover:bg-glass'}`}>
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <div className="min-w-0">
-              <span className={`text-xs font-medium uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{tr('Configuración')}</span>
-              <h1 className={`truncate ${isTechTheme ? 'font-mono font-bold text-2xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-2xl text-text-primary'}`}>{tr(CFG_TITLE[active])}</h1>
+            {/* Como en las demás páginas: título arriba y la descripción debajo */}
+            <div className="min-w-0 flex-1">
+              <h1 className={`truncate leading-tight ${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl text-accent uppercase tracking-wider' : 'font-syne font-bold text-xl sm:text-2xl text-text-primary'}`}>{tr(CFG_TITLE[active])}</h1>
+              <p className={`mt-1 truncate ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>{tr('Configuración')}</p>
             </div>
-            <PageTourButton id={CFG_TOUR[active]} className="ml-auto" />
+            <PageTourButton id={CFG_TOUR[active]} className="shrink-0" />
           </div>
         ) : (
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className={`p-2 -ml-2 rounded-xl transition-colors ${isTechTheme ? 'text-accent hover:bg-accent/10' : 'text-text-secondary hover:bg-glass'}`}>
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <div>
-            <span className={`text-xs font-medium uppercase tracking-wider ${isTechTheme ? 'font-mono text-accent/70' : 'text-text-muted'}`}>{tr('Centro de Control')}</span>
-            <h1 className={`${isTechTheme ? 'font-mono font-bold text-3xl text-accent uppercase tracking-widest' : 'font-syne font-bold text-3xl text-text-primary'}`}>{tr('Configuración')}</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className={`truncate leading-tight ${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl text-accent uppercase tracking-wider' : 'font-syne font-bold text-xl sm:text-2xl text-text-primary'}`}>{tr('Configuración')}</h1>
+            <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>{tr('Tu cuenta, seguridad, apariencia y más')}</p>
           </div>
-          <PageTourButton id="configuracion" className="ml-auto" />
+          <PageTourButton id="configuracion" className="shrink-0" />
         </div>
         )}
 

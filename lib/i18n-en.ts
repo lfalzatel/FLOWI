@@ -258,6 +258,7 @@ export const EN: Record<string, string> = {
   'Suscripciones y gastos hormiga': 'Subscriptions & small habits',
   'Lo pequeño que se repite y cuánto suma al año': 'Small repeated spending and how much it adds up to in a year',
   'Recordatorios': 'Reminders',
+  'Tu cuenta, seguridad, apariencia y más': 'Your account, security, appearance and more',
   'Citas, fechas importantes y tus pagos del mes': 'Appointments, important dates and your monthly bills',
   'Resumen y estadísticas': 'Summary & stats',
   'Qué pasó este mes y en qué se te va la plata': 'What happened this month and where your money goes',
