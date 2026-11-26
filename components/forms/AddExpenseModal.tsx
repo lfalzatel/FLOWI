@@ -89,6 +89,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const [merchant, setMerchant] = useState(restoreDraft?.merchant || '');
   const [items, setItems] = useState<ReceiptItem[] | undefined>(undefined); // productos de la compra (undefined = sin lista)
   const [autoSum, setAutoSum] = useState(false); // el monto sigue a la suma de los productos
+  // Mientras se agrega un producto, el pie muestra solo "Siguiente" (lo da ReceiptItemsList)
+  const [draftNext, setDraftNext] = useState<(() => void) | null>(null);
   const [split, setSplit] = useState(false);     // un recibo es una sola compra: no se reparte en varios gastos
   const [paymentMethod, setPaymentMethod] = useState(restoreDraft?.paymentMethod || '');
   const [isFixed, setIsFixed] = useState(restoreDraft?.isFixed ?? (initialVoiceParsed?.isFixed || false));
@@ -803,6 +805,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                                   categories={typedCategories} recent={recentCategories} fallbackCategory={category || 'Otros'}
                                   suggest={(n) => suggestItemCategory(n, transactions, typedCategories)}
                                   onChange={changeItems}
+                                  onDraftActive={(fn) => setDraftNext(() => fn)}
                                   onUseSum={(s) => { setAmount(String(s)); setAutoSum(true); }}
                                   onAutoSum={(on) => { setAutoSum(on); if (on) { const t = itemsSum(items); setAmount(t ? String(t) : ''); } }}
                                   onAddToTotal={(v) => setAmount(String(amountNum + v))} />
@@ -1054,6 +1057,15 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 </button>
               </div>
             )}
+            {draftNext ? (
+              // Agregando un producto: un solo botón que salta al siguiente campo (nombre → cantidad → precio → agregar)
+              <div className="flex justify-end">
+                <button type="button" onClick={() => draftNext()}
+                        className={`px-6 py-2.5 text-sm font-bold transition-all active:scale-[0.98] ${isTechTheme ? 'rounded-none bg-accent/20 border border-accent text-accent uppercase' : 'rounded-xl bg-accent text-white hover:bg-accent/90'}`}>
+                  {t('Siguiente')} →
+                </button>
+              </div>
+            ) : (
             <div className="flex gap-2">
               <button
                 type="submit" data-tour="exp-save"
@@ -1071,6 +1083,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 </button>
               )}
             </div>
+            )}
           </div>}
           {step === 'amount' && (
             <div data-tour="exp-keypad"><AmountKeypad value={amount} isTech={isTechTheme} decimals={cents} nextLabel={t('Siguiente')}

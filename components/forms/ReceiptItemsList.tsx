@@ -1,11 +1,12 @@
 'use client';
 import { currentLocale, tr } from '@/lib/i18n';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { ChevronDown, ReceiptText, Plus, Trash2, Check, Lightbulb } from 'lucide-react';
 import { ReceiptItem, itemsCheck, formatQty, groupByCategory, shortCategory } from '@/lib/receiptItems';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
-import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
+import { CalcAmountInput, type CalcAmountHandle } from '@/components/forms/CalcAmountInput';
 import type { CategoryOption } from '@/hooks/useCategories';
 
 const money = (n: number) => `$ ${Math.round(n).toLocaleString(currentLocale())}`;
@@ -19,7 +20,7 @@ const pesosText = (n?: number) => (n ? n.toLocaleString(currentLocale()) : '');
  * `autoSum`: el monto sigue a la suma (gasto escrito a mano), así que no hay aviso de "no cuadra".
  */
 export function ReceiptItemsList({
-  items, total, isTech, defaultOpen = false, onChange, categories, recent = [], fallbackCategory, onUseSum, suggest, autoSum = false, onAutoSum, onAddToTotal,
+  items, total, isTech, defaultOpen = false, onChange, categories, recent = [], fallbackCategory, onUseSum, suggest, autoSum = false, onAutoSum, onAddToTotal, onDraftActive,
 }: {
   items: ReceiptItem[];
   total: number | null | undefined;
@@ -34,6 +35,8 @@ export function ReceiptItemsList({
   autoSum?: boolean;
   onAutoSum?: (on: boolean) => void; // interruptor siempre visible: el total sigue (o no) la suma de los productos
   onAddToTotal?: (amount: number) => void; // sumar el producto nuevo al total del gasto (otro recibo de la misma compra)
+  // Mientras se agrega un producto: recibe la función "Siguiente" (nombre → cantidad → precio → agregar); null al terminar
+  onDraftActive?: (next: (() => void) | null) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [editing, setEditing] = useState<number | null>(null);
@@ -43,6 +46,11 @@ export function ReceiptItemsList({
   const [draft, setDraft] = useState({ name: '', qty: '1', price: '' });
   const [draftCat, setDraftCat] = useState<string | null>(null); // elegida a mano para el nuevo
   const nameRef = useRef<HTMLInputElement>(null);
+  const qtyRef = useRef<CalcAmountHandle>(null);
+  const priceRef = useRef<CalcAmountHandle>(null);
+  // En qué campo va el producto nuevo, para que "Siguiente" sepa a dónde saltar
+  const step = useRef<'name' | 'qty' | 'price'>('name');
+  const [draftError, setDraftError] = useState('');
   // La fila para agregar está escondida detrás de un botón (abierta de una vez si la lista está vacía)
   const [adding, setAdding] = useState(!items?.length);
   // ¿El producto nuevo se suma al total? Si la suma ya cuadra, lo nuevo es algo extra (otro recibo): sí.
@@ -74,9 +82,14 @@ export function ReceiptItemsList({
   const remove = (k: number) => { onChange?.(items.filter((_, i) => i !== k)); setEditing(null); };
   const addDraft = () => {
     const name = draft.name.trim();
-    const qty = toNum(draft.qty) > 0 ? Math.round(toNum(draft.qty) * 1000) / 1000 : 1;
+    const qtyN = toNum(draft.qty);
+    const qty = Math.round(qtyN * 1000) / 1000;
     const price = toPesos(draft.price);
-    if (!name || !price) { nameRef.current?.focus(); return; }
+    // Con nombre, la cantidad y el precio no pueden quedar en cero
+    if (!name) { setDraftError(tr('Escribe el nombre del producto.')); goName(); return; }
+    if (!(qty > 0)) { setDraftError(tr('La cantidad no puede ser 0.')); goQty(); return; }
+    if (!price) { setDraftError(tr('Escribe el precio.')); goPrice(); return; }
+    setDraftError('');
     const lineTotal = Math.round(qty * price);
     onChange?.([...(items || []), { name: name.slice(0, 50), qty, price, total: lineTotal, category: newCat }]);
     if (canAddToTotal && sumIt) onAddToTotal?.(lineTotal);
@@ -87,6 +100,24 @@ export function ReceiptItemsList({
     (document.activeElement as HTMLElement | null)?.blur?.();
   };
   const onEnter = (e: React.KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); addDraft(); } };
+  // Saltos entre campos: la flecha del teclado, el botón grande de la calculadora y "Siguiente" hacen lo mismo
+  function goName() { step.current = 'name'; nameRef.current?.focus(); }
+  function goQty() { step.current = 'qty'; nameRef.current?.blur(); qtyRef.current?.open(); }
+  function goPrice() { step.current = 'price'; priceRef.current?.open(); }
+  const next = () => {
+    if (step.current === 'name') { if (draft.name.trim()) goQty(); else goName(); }
+    else if (step.current === 'qty') goPrice();
+    else addDraft();
+  };
+  const nextRef = useRef(next);
+  nextRef.current = next;
+  useEffect(() => {
+    if (!onDraftActive) return;
+    onDraftActive(editable && adding ? () => nextRef.current() : null);
+  }, [adding, editable]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => onDraftActive?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Abrir el cuadro y poner el cursor en el nombre en el MISMO toque (si no, el celular no abre el teclado)
+  const startAdding = () => { flushSync(() => setAdding(true)); step.current = 'name'; setDraftError(''); nameRef.current?.focus(); };
 
   const chip = (cat: string, onClick?: () => void, title?: string) => {
     const meta = catMeta.get(cat);
@@ -181,7 +212,7 @@ export function ReceiptItemsList({
 
           {/* Agregar: escondido detrás de un botón; al abrirlo, nombre arriba y cantidad, precio y ＋ abajo */}
           {editable && !adding && (
-            <button type="button" onClick={() => { setAdding(true); setTimeout(() => nameRef.current?.focus(), 50); }}
+            <button type="button" onClick={startAdding}
                     className={`mt-2 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-accent border border-dashed border-accent/50 hover:bg-accent/10 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
               <Plus className="w-3.5 h-3.5" /> {items?.length ? tr('Agregar otro producto') : tr('Agregar producto')}
             </button>
@@ -191,18 +222,26 @@ export function ReceiptItemsList({
               <div>
                 <label className={lbl}>{tr('Producto')}</label>
                 <input autoComplete="off" ref={nameRef} className={field} placeholder={tr('Ej. Arroz Diana')} value={draft.name} enterKeyHint="next"
-                       onChange={e => { setDraft(d => ({ ...d, name: e.target.value })); setDraftCat(null); }} onKeyDown={onEnter} />
+                       onFocus={() => { step.current = 'name'; }}
+                       onChange={e => { setDraft(d => ({ ...d, name: e.target.value })); setDraftCat(null); setDraftError(''); }}
+                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (draft.name.trim()) goQty(); } }} />
               </div>
               <div className="flex items-end gap-1.5">
                 <div className="w-16 shrink-0">
                   <label className={lbl}>{tr('Cant.')}</label>
-                  <input autoComplete="off" className={field} inputMode="decimal" value={draft.qty} onChange={e => setDraft(d => ({ ...d, qty: e.target.value }))} onKeyDown={onEnter} />
+                  <CalcAmountInput ref={qtyRef} className={field} prefix="" decimals replace placeholder="1" isTech={isTech} enterKeyHint="next"
+                                   label={draft.name ? `${draft.name} · ${tr('Cantidad')}` : tr('Cantidad')} nextLabel={tr('Siguiente')} onNext={goPrice}
+                                   value={draft.qty} toNum={toNum}
+                                   onType={raw => { setDraft(d => ({ ...d, qty: raw })); setDraftError(''); }}
+                                   onValue={n => { setDraft(d => ({ ...d, qty: n ? String(n) : '' })); setDraftError(''); }}
+                                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); goPrice(); } }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <label className={lbl}>{tr('Precio c/u')}</label>
-                  <CalcAmountInput className={field} placeholder="$" isTech={isTech} label={draft.name ? `${draft.name} · ${tr('Precio c/u')}` : tr('Precio c/u')}
+                  <CalcAmountInput ref={priceRef} className={field} placeholder="$" isTech={isTech} label={draft.name ? `${draft.name} · ${tr('Precio c/u')}` : tr('Precio c/u')}
+                                   nextLabel={tr('Agregar')} onNext={addDraft} enterKeyHint="done"
                                    value={draft.price ? toPesos(draft.price).toLocaleString(currentLocale()) : ''}
-                                   onType={raw => setDraft(d => ({ ...d, price: raw }))} onValue={n => setDraft(d => ({ ...d, price: n ? String(n) : '' }))}
+                                   onType={raw => { setDraft(d => ({ ...d, price: raw })); setDraftError(''); }} onValue={n => { setDraft(d => ({ ...d, price: n ? String(n) : '' })); setDraftError(''); }}
                                    toNum={toPesos} onKeyDown={onEnter} />
                 </div>
                 <button type="button" onClick={addDraft} aria-label={tr('Agregar producto')}
@@ -210,6 +249,7 @@ export function ReceiptItemsList({
                   <Plus className="w-3.5 h-3.5" /> {tr('Agregar')}
                 </button>
               </div>
+              {draftError && <p className="text-[11px] font-semibold text-money-neg">{draftError}</p>}
               {showChips && draft.name.trim().length >= 3 && (
                 <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
                   <Lightbulb className="w-3 h-3 text-accent shrink-0" />
