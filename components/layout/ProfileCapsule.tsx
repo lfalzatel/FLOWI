@@ -179,9 +179,11 @@ export function ProfileCapsule() {
 
   if (!user) return null;
  
-  const displayName = profile?.name || user.displayName || tr('Usuario');
+  // "Invitado" y "Usuario" se guardan en español en el perfil: se traducen al mostrarlos
+  const savedName = profile?.name || user.displayName;
+  const displayName = !savedName ? tr('Usuario') : (savedName === 'Invitado' && user.isAnonymous ? tr('Invitado') : savedName);
   const photoURL = profile?.photoURL || user.photoURL || '/default-avatar.png';
-  const role = profile?.role || tr('Usuario');
+  const role = tr(profile?.role || 'Usuario');
   const email = profile?.email || user.email || '';
 
   const handleShare = () => {

@@ -1,3 +1,5 @@
+import { currentLang } from '@/lib/i18n';
+
 export const CURRENCIES = [
   { code: 'COP', name: 'Peso Colombiano', locale: 'es-CO' },
   { code: 'USD', name: 'Dólar Estadounidense', locale: 'en-US' },
@@ -29,7 +31,9 @@ export function roundMoney(amount: number, currencyCode: string = 'COP'): number
 export function formatCurrency(amount: number, currencyCode: string = 'COP'): string {
   const currencyInfo = CURRENCIES.find(c => c.code === currencyCode) || CURRENCIES[0];
 
-  return new Intl.NumberFormat(currencyInfo.locale, {
+  // Con la app en inglés los miles van con coma (2,600,000), aunque la moneda sea pesos
+  const locale = currentLang() === 'en' ? 'en-US' : currencyInfo.locale;
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currencyInfo.code,
     maximumFractionDigits: hasCents(currencyInfo.code) ? 2 : 0,

@@ -1,5 +1,5 @@
 'use client';
-import { currentLocale, tr } from '@/lib/i18n';
+import { currentLang, currentLocale, tr } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
@@ -208,6 +208,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
     { id: 'once', label: 'Una vez' }, { id: 'monthly', label: 'Mensual' }, { id: 'yearly', label: 'Anual' },
     { id: 'weekly', label: 'Semanal' }, { id: 'daily', label: 'Diario' }, { id: 'budget_alert', label: 'Presupuesto' },
   ];
+  const WEEK_EN: Record<number, string> = { 1: 'M', 2: 'T', 3: 'W', 4: 'T', 5: 'F', 6: 'S', 0: 'S' };
   const WEEK = [[1, 'L'], [2, 'M'], [3, 'X'], [4, 'J'], [5, 'V'], [6, 'S'], [0, 'D']] as const;
   const UNITS: { id: ReminderAlert['unit']; label: string }[] = [{ id: 'minutes', label: 'min' }, { id: 'hours', label: 'horas' }, { id: 'days', label: 'días' }];
   const hasAmount = type !== 'daily' && type !== 'budget_alert';
@@ -317,7 +318,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
             <div>
               <span className={lbl}>{tr('Frecuencia')}</span>
               <div className="grid grid-cols-3 gap-1.5">
-                {TYPES.map(t => <button key={t.id} type="button" onClick={() => setType(t.id)} className={chip(type === t.id)}>{t.label}</button>)}
+                {TYPES.map(t => <button key={t.id} type="button" onClick={() => setType(t.id)} className={chip(type === t.id)}>{tr(t.label)}</button>)}
               </div>
             </div>
 
@@ -336,7 +337,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
               <div className="space-y-2">
                 <span className={lbl}>{tr('Día de la semana')}</span>
                 <div className="grid grid-cols-7 gap-1">
-                  {WEEK.map(([d, l]) => <button key={d} type="button" onClick={() => setDayOfWeek(d)} className={`${chip(dayOfWeek === d)} px-0`}>{l}</button>)}
+                  {WEEK.map(([d, l]) => <button key={d} type="button" onClick={() => setDayOfWeek(d)} className={`${chip(dayOfWeek === d)} px-0`}>{currentLang() === 'en' ? WEEK_EN[d] : l}</button>)}
                 </div>
                 <div className="w-1/2"><span className={lbl}>{tr('Hora')}</span>{timeInput}</div>
               </div>
@@ -404,7 +405,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
                            onChange={e => updateAlert(alert.id, 'value', Number(e.target.value))}
                            className={`${field} !w-16 text-center px-1`} aria-label={tr('Cantidad')} />
                     {UNITS.map(u => (
-                      <button key={u.id} type="button" onClick={() => updateAlert(alert.id, 'unit', u.id)} className={`${chip(alert.unit === u.id)} flex-1 px-0`}>{u.label}</button>
+                      <button key={u.id} type="button" onClick={() => updateAlert(alert.id, 'unit', u.id)} className={`${chip(alert.unit === u.id)} flex-1 px-0`}>{tr(u.label)}</button>
                     ))}
                     <button type="button" onClick={() => removeAlert(alert.id)} aria-label={tr('Quitar aviso')} className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                   </div>
