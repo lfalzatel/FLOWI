@@ -50,7 +50,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   // Menú del botón flotante y el formulario que se abrió desde él
   const [showSheet, setShowSheet] = useState(false);
   const [pageTour, setPageTour] = useState<PageTourId | null>(null); // tutorial corto pedido desde el menú o una tarjeta
-  const [quick, setQuick] = useState<Exclude<QuickAction, 'voz' | 'extracto'> | null>(null);
+  const [quick, setQuick] = useState<Exclude<QuickAction, 'voz' | 'extracto' | 'chat' | 'mover'> | null>(null);
   const [receipt, setReceipt] = useState<File | File[] | 'no-key' | null>(null);
   // Lo que se retoma después de una recarga (components/layout/DraftRecovery)
   const [voiceRestore, setVoiceRestore] = useState<VoiceDraft | null>(null);
@@ -70,6 +70,12 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
     setShowSheet(false);
     if (a === 'voz') openVoice();
     else if (a === 'extracto') router.push('/servicios/importar');
+    else if (a === 'chat') router.push('/amigos/chat');
+    else if (a === 'mover') {
+      // Pasar plata entre cuentas: la página de Cuentas abre su ventana de transferencia
+      if (pathname.startsWith('/servicios/cuentas')) window.dispatchEvent(new Event('flowi-new-transfer'));
+      else router.push('/servicios/cuentas?mover=1');
+    }
     else if (a === 'cuenta') {
       // La página de Cuentas abre su propio formulario; desde otra página se va allá
       if (pathname.startsWith('/servicios/cuentas')) window.dispatchEvent(new Event('flowi-new-account'));

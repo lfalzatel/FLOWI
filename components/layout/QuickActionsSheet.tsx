@@ -4,11 +4,12 @@ import { receiptsUsed, showLimit, usePlan } from '@/lib/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark, Wallet, Share2, Compass } from 'lucide-react';
+import { Mic, X, TrendingDown, TrendingUp, Camera, FileSpreadsheet, CreditCard, Bell, StickyNote, Landmark, Wallet, Share2, Compass, MessageCircle, ArrowLeftRight } from 'lucide-react';
+import { useChats } from '@/components/ChatsProvider';
 import { useTheme } from '@/components/ThemeProvider';
 import { getAiKey } from '@/lib/aiAssist';
 
-export type QuickAction = 'voz' | 'gasto' | 'ingreso' | 'deuda' | 'recordatorio' | 'nota' | 'inversion' | 'extracto' | 'cuenta';
+export type QuickAction = 'voz' | 'gasto' | 'ingreso' | 'deuda' | 'recordatorio' | 'nota' | 'inversion' | 'extracto' | 'cuenta' | 'mover' | 'chat';
 // Página donde está la persona: el menú destaca lo de esa página
 export type QuickContext = 'gasto' | 'ingreso' | 'deuda' | 'inversion' | 'cuenta' | 'recordatorio' | 'nota';
 
@@ -21,6 +22,8 @@ const ACTIONS: { id: Exclude<QuickAction, 'voz'> | 'foto'; label: string; icon: 
   { id: 'recordatorio', label: 'Recordatorio',     icon: Bell,            color: 'text-pink-400 bg-pink-500/10' },
   { id: 'nota',         label: 'Nota',             icon: StickyNote,      color: 'text-blue-400 bg-blue-500/10' },
   { id: 'inversion',    label: 'Inversión',        icon: Landmark,        color: 'text-teal-400 bg-teal-500/10' },
+  { id: 'mover',        label: 'Mover plata',      icon: ArrowLeftRight,  color: 'text-lime-500 bg-lime-500/10' },
+  { id: 'chat',         label: 'Chat amigos',      icon: MessageCircle,   color: 'text-cyan-400 bg-cyan-500/10' },
 ];
 
 // Lo que se destaca arriba según la página donde está la persona
@@ -50,6 +53,7 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = (theme === 'light' || theme === 'nova');
   const fileRef = useRef<HTMLInputElement>(null);
+  const { unreadCount } = useChats();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -98,7 +102,8 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
                onChange={(e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; if (fs.length) onReceipt(fs.length > 1 ? fs : fs[0]); }} />
 
-        <div className="grid grid-cols-4 gap-2">
+        {/* 5 columnas: 10 opciones en dos filas parejas */}
+        <div className="grid grid-cols-5 gap-1">
           {ACTIONS.filter(a => a.id !== featured?.id).map(a => (
             <button key={a.id} type="button" data-tour={`quick-${a.id}`}
                     onClick={() => {
@@ -110,9 +115,12 @@ export function QuickActionsSheet({ context = null, onClose, onAction, onReceipt
                       }
                       onAction(a.id);
                     }}
-                    className={`flex flex-col items-center gap-1.5 py-3 px-1 transition-all active:scale-95 hover:bg-white/5 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
-              <span className={`w-11 h-11 flex items-center justify-center ${a.color} ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
+                    className={`flex flex-col items-center gap-1.5 py-3 px-0.5 min-w-0 transition-all active:scale-95 hover:bg-white/5 ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
+              <span className={`relative w-11 h-11 flex items-center justify-center ${a.color} ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
                 <a.icon className="w-5 h-5" />
+                {a.id === 'chat' && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-accent text-black text-[9px] font-bold flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                )}
               </span>
               <span className={`text-[11px] leading-tight text-center ${isTechTheme ? 'text-accent uppercase text-[9px]' : 'text-text-secondary font-medium'}`}>{tr(a.label)}</span>
             </button>

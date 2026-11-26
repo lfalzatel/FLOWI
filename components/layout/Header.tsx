@@ -9,6 +9,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { useFriends } from '@/components/FriendsProvider';
+import { useChats } from '@/components/ChatsProvider';
+import { useAuth } from '@/hooks/useAuth';
+import { chatPeer, isUnread } from '@/lib/chat';
 import { GuestBanner } from '@/components/layout/GuestBanner';
 import { useSharedLinks } from '@/components/SharedLinksProvider';
 import { IncomingShared } from '@/components/shared/IncomingShared';
@@ -60,7 +63,9 @@ export function Header() {
   }, [showLogoModal]);
 
   const { notifications } = useInAppNotifications();
-  const { incoming: friendRequests } = useFriends(); // solicitudes de amistad sin responder
+  const { incoming: friendRequests, friends } = useFriends(); // solicitudes de amistad sin responder
+  const { chats } = useChats();
+  const { user } = useAuth();
   const { incoming: sharedIncoming, deletedForMe } = useSharedLinks(); // gastos que te compartieron
   const { reminders } = useReminders();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -94,7 +99,13 @@ export function Header() {
   // (un gasto ya registrado de esa categoría cerca del vencimiento cuenta como pagado)
   const { transactions } = useData();
   const upcomingReminders = getPendingDues(reminders, new Date(), transactions).slice(0, 6);
-  const unread = notifications.length + upcomingReminders.length + friendRequests.length + sharedIncoming.length + deletedForMe.length;
+  // Mensajes de amigos sin leer (una fila por conversación)
+  const myUid = user?.uid || '';
+  const unreadChats = chats.filter(c => myUid && isUnread(c, myUid)).map(c => {
+    const peer = chatPeer(c, myUid);
+    return { id: c.id, peer, name: friends.find(f => f.uid === peer)?.name || tr('Un amigo'), photo: friends.find(f => f.uid === peer)?.photo, text: c.lastText || '' };
+  });
+  const unread = notifications.length + upcomingReminders.length + friendRequests.length + sharedIncoming.length + deletedForMe.length + unreadChats.length;
 
   // Dynamic colors for the logo based on theme
   let logoOuterColor = '#10B981'; // Default / Dark theme
@@ -322,7 +333,7 @@ export function Header() {
                 <Link href="/servicios/recordatorios" onClick={() => setShowDropdown(false)} className={`text-[11px] text-accent hover:underline uppercase tracking-wider font-semibold ${isTechTheme ? 'font-mono' : ''}`}>{tr('Ver ajustes')}</Link>
               </div>
 
-              {notifications.length === 0 && upcomingReminders.length === 0 && friendRequests.length === 0 && !sharedIncoming.length && !deletedForMe.length ? (
+              {notifications.length === 0 && upcomingReminders.length === 0 && friendRequests.length === 0 && !sharedIncoming.length && !deletedForMe.length && !unreadChats.length ? (
                 <div className="py-6 text-center">
                   <Bell className="w-8 h-8 text-text-muted/30 mx-auto mb-2" />
                   <p className={`text-text-secondary text-sm ${isTechTheme ? 'font-mono' : ''}`}>{tr('Al día. Nada por aquí.')}</p>
@@ -331,6 +342,18 @@ export function Header() {
                 <div className="space-y-1">
                   {/* Gastos que un amigo te compartió */}
                   <IncomingShared isTech={isTechTheme} compact />
+                  {/* Mensajes nuevos de amigos */}
+                  {unreadChats.map(c => (
+                    <Link key={c.id} href={`/amigos/chat?u=${c.peer}`} onClick={() => setShowDropdown(false)}
+                          className={`p-3 mb-2 flex gap-3 items-center border border-accent/30 bg-accent/5 hover:bg-accent/10 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>
+                      <Avatar p={{ name: c.name, photo: c.photo }} size={32} isTech={isTechTheme} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm text-text-primary leading-snug truncate ${isTechTheme ? 'font-mono' : ''}`}><b>{c.name.split(/\s+/)[0]}</b> {tr('te escribió')}</p>
+                        <p className={`text-xs text-text-secondary truncate ${isTechTheme ? 'font-mono' : ''}`}>{c.text}</p>
+                      </div>
+                      <MessageCircle className="w-4 h-4 text-accent shrink-0" />
+                    </Link>
+                  ))}
                   {/* Solicitudes de amistad */}
                   {friendRequests.map(r => (
                     <div key={r.id} className={`p-3 mb-2 flex gap-3 items-center border border-accent/30 bg-accent/5 ${isTechTheme ? 'rounded-none' : 'rounded-xl'}`}>

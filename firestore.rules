@@ -189,6 +189,46 @@ service cloud.firestore {
       return (exists(ab) && get(ab).data.status == 'accepted') || (exists(ba) && get(ba).data.status == 'accepted');
     }
 
+    // ── Chat entre amigos (lib/chat.ts) ──
+    // id = "{a}_{b}" (los dos uid en orden). Solo los dos lo leen. Para escribir hay que ser amigos aceptados.
+    // Cada mensaje: { from, text, createdAt } y no se puede editar; quien lo escribió lo puede borrar.
+    function chatKeys() { return ['users', 'lastText', 'lastFrom', 'lastAt', 'read']; }
+
+    match /fl_chats/{chatId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.users;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(chatKeys())
+        && request.resource.data.users is list && request.resource.data.users.size() == 2
+        && request.auth.uid in request.resource.data.users
+        && request.resource.data.users[0] < request.resource.data.users[1]
+        && chatId == request.resource.data.users[0] + '_' + request.resource.data.users[1]
+        && request.resource.data.lastFrom == request.auth.uid
+        && request.resource.data.lastText is string && request.resource.data.lastText.size() <= 140
+        && friendsAccepted(request.resource.data.users[0], request.resource.data.users[1]);
+      allow update: if signedIn() && request.auth.uid in resource.data.users
+        && request.resource.data.keys().hasOnly(chatKeys())
+        && request.resource.data.users == resource.data.users
+        && request.resource.data.read is map
+        // Marcar como leído: solo cambia "read". Un mensaje nuevo: lo escribe la persona y siguen siendo amigos.
+        && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+            || (request.resource.data.lastFrom == request.auth.uid
+                && request.resource.data.lastText is string && request.resource.data.lastText.size() <= 140
+                && friendsAccepted(resource.data.users[0], resource.data.users[1])));
+
+      match /messages/{msgId} {
+        allow read: if signedIn() && request.auth.uid in chatId.split('_');
+        allow create: if signedIn()
+          && request.auth.uid in chatId.split('_')
+          && request.resource.data.keys().hasOnly(['from', 'text', 'createdAt'])
+          && request.resource.data.from == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+          && request.resource.data.createdAt == request.time
+          && friendsAccepted(chatId.split('_')[0], chatId.split('_')[1]);
+        allow delete: if signedIn() && resource.data.from == request.auth.uid;
+      }
+    }
+
     match /fl_shared_links/{id} {
       allow read: if signedIn() && request.auth.uid in resource.data.users;
       allow create: if signedIn()

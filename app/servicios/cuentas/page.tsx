@@ -68,6 +68,13 @@ export default function CuentasPage() {
       open();
     }
     window.addEventListener('flowi-new-account', open);
+    // "Mover plata" desde el menú del botón + (aquí mismo o desde otra página con ?mover=1)
+    const move = () => setTransferFrom('');
+    if (new URLSearchParams(window.location.search).get('mover') === '1') {
+      window.history.replaceState(null, '', window.location.pathname);
+      move();
+    }
+    window.addEventListener('flowi-new-transfer', move);
     // El tutorial abre el formulario para mostrarlo y lo cierra al pasar de paso o terminar
     let byTour = false;
     const tourOpen = (e: Event) => { if ((e as CustomEvent).detail === 'account') { byTour = true; open(); } };
@@ -76,6 +83,7 @@ export default function CuentasPage() {
     window.addEventListener('flowi-tour-close', tourClose);
     return () => {
       window.removeEventListener('flowi-new-account', open);
+      window.removeEventListener('flowi-new-transfer', move);
       window.removeEventListener('flowi-tour-open', tourOpen);
       window.removeEventListener('flowi-tour-close', tourClose);
     };

@@ -24,7 +24,7 @@ const SERVICES: ServiceItem[] = [
     icon: Wallet, href: '/servicios/cuentas', color: 'text-lime-500', bgColor: 'bg-lime-500/10', isNew: true },
   { id: 'hormiga', group: 'Lo más usado', title: 'Suscripciones y gastos hormiga', description: 'Lo pequeño que se repite y cuánto suma al año',
     icon: Bug, href: '/servicios/hormiga', color: 'text-rose-500', bgColor: 'bg-rose-500/10', isNew: true },
-  { id: 'amigos', group: 'Lo más usado', title: 'Amigos', description: 'Busca a tus amigos en FLOWI y compartan gastos',
+  { id: 'amigos', group: 'Lo más usado', title: 'Amigos', description: 'Busca a tus amigos en FLOWI, chatea con ellos y compartan gastos',
     icon: UserPlus, href: '/amigos', color: 'text-cyan-500', bgColor: 'bg-cyan-500/10', isNew: true },
   { id: 'recordatorios', group: 'Lo más usado', title: 'Recordatorios', description: 'Citas, fechas importantes y tus pagos del mes',
     icon: Bell, href: '/servicios/recordatorios', color: 'text-pink-500', bgColor: 'bg-pink-500/10' },

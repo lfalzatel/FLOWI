@@ -8,6 +8,7 @@ import { ChevronLeft, Search, UserPlus, Check, X, MessageCircle, Share2, Clock, 
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useFriends } from '@/components/FriendsProvider';
+import { useChats } from '@/components/ChatsProvider';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
@@ -26,6 +27,7 @@ export default function AmigosPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { me, friends, incoming, outgoing, all, ready, unavailable, setSearchable } = useFriends();
+  const { unreadFrom, unreadCount } = useChats();
   // Repetir la celebración del último amigo cada 20 días (en este celular)
   const [repeatOn, setRepeatOn] = useState(true);
   useEffect(() => { setRepeatOn(friendRepeatOn()); }, []);
@@ -90,12 +92,20 @@ export default function AmigosPage() {
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
   const btn = `px-3 py-1.5 text-xs font-semibold border inline-flex items-center gap-1.5 shrink-0 ${isTech ? 'rounded-none' : 'rounded-full'}`;
 
+  // Abre la conversación con ese amigo (con un punto si escribió y no se ha leído)
+  const ChatButton = ({ uid }: { uid: string }) => (
+    <Link href={`/amigos/chat?u=${uid}`} className={`${btn} relative border-accent/40 text-accent`}>
+      <MessageCircle className="w-3.5 h-3.5" /> {tr('Chat')}
+      {unreadFrom.has(uid) && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-accent ring-2 ring-[var(--bg-deep)]" aria-label={tr('Mensaje nuevo')} />}
+    </Link>
+  );
+
   const ActionFor = ({ p }: { p: PublicProfile }) => {
     const rel = relation(p.uid);
     if (rel.kind === 'friend') return (
       <span className="flex gap-1.5">
         <span className={`${btn} border-accent/40 text-accent`}><Check className="w-3.5 h-3.5" /> {tr('Amigos')}</span>
-        <button type="button" disabled title={tr('Muy pronto')} className={`${btn} border-glass-border text-text-muted opacity-60`}><MessageCircle className="w-3.5 h-3.5" /> {tr('Chat')}</button>
+        <ChatButton uid={p.uid} />
       </span>
     );
     if (rel.kind === 'outgoing') return <span className={`${btn} border-glass-border text-text-muted`}><Clock className="w-3.5 h-3.5" /> {tr('Enviada')}</span>;
@@ -161,11 +171,17 @@ export default function AmigosPage() {
           <Link href="/" aria-label={tr('Volver')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <div>
+          <div className="min-w-0">
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Amigos')}</h1>
-            <p className="text-xs text-text-muted">{tr('Busca a tus amigos para compartir gastos. Solo ven tu nombre y tu foto.')}</p>
+            <p className="text-xs text-text-muted">{tr('Busca a tus amigos para chatear y compartir gastos. Solo ven tu nombre y tu foto.')}</p>
           </div>
-          <PageTourButton id="amigos" className="ml-auto" />
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+            <Link href="/amigos/chat" aria-label={tr('Chats')} className={`relative w-10 h-10 flex items-center justify-center bg-glass border text-accent ${isTech ? 'border-accent/30 rounded-none' : 'border-glass-border rounded-full'}`}>
+              <MessageCircle className="w-5 h-5" />
+              {unreadCount > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-accent text-black text-[9px] font-bold flex items-center justify-center">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+            </Link>
+            <PageTourButton id="amigos" />
+          </div>
         </div>
 
         {noRules && (
@@ -247,7 +263,7 @@ export default function AmigosPage() {
               {friends.map(f => (
                 <PersonRow key={f.uid} p={f}>
                   <span className="flex gap-1.5">
-                    <button type="button" disabled title={tr('Muy pronto')} className={`${btn} border-glass-border text-text-muted opacity-60`}><MessageCircle className="w-3.5 h-3.5" /> {tr('Chat')}</button>
+                    <ChatButton uid={f.uid} />
                     <button type="button" onClick={() => setRemoving({ id: f.requestId, name: f.name })} aria-label={`Eliminar a ${f.name}`}
                             className={`${btn} border-glass-border text-text-muted`}><UserMinus className="w-3.5 h-3.5" /></button>
                   </span>
