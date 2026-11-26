@@ -62,7 +62,9 @@ export default function DeudasPage() {
   // Tarjetas de crédito: también son deudas. Lo que debes en cada una (con los préstamos vinculados adentro)
   const { accounts, transfers } = useAccounts();
   const { investments } = useInvestments();
-  const cardStates = accountStates(accounts, transactions, transfers, investments, debts)
+  const allStates = accountStates(accounts, transactions, transfers, investments, debts);
+  const balances = Object.fromEntries(allStates.map(st => [st.account.id!, st.balance]));
+  const cardStates = allStates
     .filter(s => s.account.kind === 'credito' && s.balance < 0);
   const inCard = new Set(cardStates.flatMap(s => s.movements.filter(m => m.kind === 'debt').map(m => (m as { debt: Debt }).debt.id)));
   const cardsOwed = cardStates.reduce((sum, s) => sum - s.balance, 0);
@@ -255,7 +257,7 @@ export default function DeudasPage() {
             ))}
           </ul>
         )}
-        {payingCard && <TransferModal accounts={accounts} payCard={payingCard.account.id} owed={Math.max(0, -payingCard.balance - payingCard.movements.filter(m => m.kind === 'debt').reduce((s, m) => s - m.amount, 0))} currency={profile?.currency || 'COP'} onClose={() => setPayingCard(null)} />}
+        {payingCard && <TransferModal accounts={accounts} balances={balances} payCard={payingCard.account.id} owed={Math.max(0, -payingCard.balance - payingCard.movements.filter(m => m.kind === 'debt').reduce((s, m) => s - m.amount, 0))} currency={profile?.currency || 'COP'} onClose={() => setPayingCard(null)} />}
         {sharedPay && <SharedPaymentModal tx={sharedPay.tx} index={sharedPay.index} onClose={() => setSharedPay(null)} />}
         </div>
 

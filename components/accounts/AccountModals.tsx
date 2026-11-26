@@ -27,6 +27,7 @@ export function parseMoneyInput(value: string): number {
   return isNaN(n) ? 0 : Math.round(n * 100) / 100;
 }
 import { formatCurrency } from '@/lib/format';
+import { MONEY_TEXT, toneOf } from '@/lib/moneyTone';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { CalcAmountInput } from '@/components/forms/CalcAmountInput';
 import { displayExpr, evalAmount, hasOperator } from '@/lib/amountExpr';
@@ -327,8 +328,32 @@ export function AdjustBalanceModal({ account, current, currency = 'COP', onClose
 // ── Transferir entre mis cuentas ─────────────────────────────────────────
 // Con payCard (id de una tarjeta de crédito) funciona como "Abonar a la tarjeta": la tarjeta queda fija como destino,
 // sale de la cuenta principal y la fecha es la de hoy con la hora del momento.
-export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editing, currency = 'COP', onClose }: {
-  accounts: Account[]; initialFrom?: string; payCard?: string; owed?: number; editing?: Transfer; currency?: string; onClose: () => void;
+/** Saldo corto para tarjetas pequeñas: desde un millón se abrevia ($ 1,2 M / $1.2M); si no, completo. */
+export function shortMoney(n: number, currency = 'COP') {
+  const v = Math.abs(n);
+  try {
+    return new Intl.NumberFormat(currentLocale(), {
+      style: 'currency', currency, currencyDisplay: 'narrowSymbol', ...(v >= 1_000_000 ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 0 }),
+    }).format(v);
+  } catch { return formatCurrency(v, currency); }
+}
+
+/** Saldo de una cuenta con los mismos colores de Cuentas (verde lo que tienes, rojo si está negativa, amarillo "Debes" en tarjetas de crédito, azul si es de ahorro). */
+function BalanceTag({ acc, balance, currency, className = '' }: { acc: Account; balance?: number; currency: string; className?: string }) {
+  if (balance === undefined) return null;
+  const owes = acc.kind === 'credito' && balance < 0;
+  const cls = owes ? MONEY_TEXT.debt : MONEY_TEXT[toneOf(balance, acc.purpose === 'ahorro' ? 'save' : 'pos')];
+  return (
+    <span className={`text-[11px] font-semibold tabular-nums truncate max-w-full ${cls} ${className}`}>
+      {owes ? `${tr('Debes')} ` : balance < -0.5 ? '−' : ''}{shortMoney(balance, currency)}
+    </span>
+  );
+}
+
+export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editing, currency = 'COP', balances, onClose }: {
+  accounts: Account[]; initialFrom?: string; payCard?: string; owed?: number; editing?: Transfer; currency?: string;
+  balances?: Record<string, number>; // saldo de hoy de cada cuenta (se muestra debajo de cada una)
+  onClose: () => void;
 }) {
   const s = useStyles();
   const { user } = useAuth();
@@ -382,6 +407,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
               className={`w-full flex flex-col items-center gap-1.5 px-2 py-3 bg-glass border transition-colors ${s.isTech ? 'rounded-none border-accent/30 hover:border-accent' : 'rounded-2xl border-glass-border hover:border-accent/60'}`}>
         {acc ? <AccountIcon account={acc} className="w-8 h-8 text-2xl flex items-center justify-center" /> : <span className="w-8 h-8 rounded-full border border-dashed border-glass-border" />}
         <span className={`text-xs font-semibold truncate max-w-full ${acc ? 'text-text-primary' : 'text-text-muted'}`}>{acc ? acc.name : tr('Elegir')}</span>
+        {acc && <BalanceTag acc={acc} balance={balances?.[acc.id!]} currency={currency} />}
       </button>
     );
   };
@@ -399,6 +425,7 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
           ? <div className={`w-full flex flex-col items-center gap-1.5 px-2 py-3 bg-glass border ${s.isTech ? 'rounded-none border-accent/30' : 'rounded-2xl border-glass-border'}`}>
               {toAcc && <AccountIcon account={toAcc} className="w-8 h-8 text-2xl flex items-center justify-center" />}
               <span className="text-xs font-semibold truncate max-w-full text-text-primary">{toAcc?.name}</span>
+              {toAcc && <BalanceTag acc={toAcc} balance={balances?.[toAcc.id!]} currency={currency} />}
             </div>
           : accField(to, 'to')}</div>
       </div>
@@ -415,8 +442,11 @@ export function TransferModal({ accounts, initialFrom, payCard, owed = 0, editin
                           onClick={() => { if (choosing === 'from') { setFrom(a.id!); if (a.id === to) setTo(''); } else setTo(a.id!); setChoosing(null); }}
                           className={`w-full flex items-center gap-3 p-3 border text-left ${s.isTech ? 'rounded-none' : 'rounded-2xl'} ${on ? 'border-accent bg-accent/10' : 'border-glass-border hover:bg-white/5'}`}>
                     <AccountIcon account={a} className="w-7 h-7 text-xl flex items-center justify-center" />
-                    <span className="flex-1 text-sm text-text-primary">{a.name}</span>
-                    <span className="text-[11px] text-text-muted">{tr(KIND_LABEL[a.kind])}</span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm text-text-primary truncate">{a.name}</span>
+                      <span className="block text-[11px] text-text-muted">{tr(KIND_LABEL[a.kind])}</span>
+                    </span>
+                    <BalanceTag acc={a} balance={balances?.[a.id!]} currency={currency} className="shrink-0 text-xs" />
                   </button>
                 );
               })}

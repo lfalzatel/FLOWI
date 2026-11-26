@@ -94,6 +94,7 @@ export default function CuentasPage() {
   }, [authLoading, user, router]);
 
   const states = useMemo(() => accountStates(accounts, transactions, transfers, investments, debts), [accounts, transactions, transfers, investments, debts]);
+  const balances = useMemo(() => Object.fromEntries(states.map(st => [st.account.id!, st.balance])), [states]);
   // Tutorial: despliega la primera cuenta para mostrar Ajustar saldo, Mover y Editar
   useTourAction('acc-expand', () => { const id = states[0]?.account.id; if (!id) return false; setExpanded(id); return true; }, () => setExpanded(null));
   // Parte del saldo que es plata del negocio (ventas − costos por esa cuenta); el resto es personal
@@ -359,10 +360,10 @@ export default function CuentasPage() {
                           onDelete={(a) => { setShowForm(false); setDeleting(a); }} />
       )}
       {adjusting && <AdjustBalanceModal account={adjusting.account} current={adjusting.balance} currency={currency} onClose={() => setAdjusting(null)} />}
-      {editingTransfer && <TransferModal accounts={accounts} editing={editingTransfer} currency={currency} onClose={() => setEditingTransfer(null)} />}
+      {editingTransfer && <TransferModal accounts={accounts} balances={balances} editing={editingTransfer} currency={currency} onClose={() => setEditingTransfer(null)} />}
       {openDebt && <AddDebtModal debtToEdit={openDebt} onClose={() => setOpenDebt(null)} onSuccess={() => refreshDebts()} />}
-      {paying && <TransferModal accounts={accounts} payCard={paying.account.id} owed={Math.max(0, -paying.balance)} currency={currency} onClose={() => setPaying(null)} />}
-      {transferFrom !== null && <TransferModal accounts={accounts} initialFrom={transferFrom || undefined} currency={currency} onClose={() => setTransferFrom(null)} />}
+      {paying && <TransferModal accounts={accounts} balances={balances} payCard={paying.account.id} owed={Math.max(0, -paying.balance)} currency={currency} onClose={() => setPaying(null)} />}
+      {transferFrom !== null && <TransferModal accounts={accounts} balances={balances} initialFrom={transferFrom || undefined} currency={currency} onClose={() => setTransferFrom(null)} />}
       <ConfirmDialog
         isOpen={!!deleting}
         title={tr('Eliminar cuenta')}
