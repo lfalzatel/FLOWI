@@ -3148,4 +3148,7 @@ export const EN: Record<string, string> = {
   'reportó a': 'reported',
   'Marcar como revisado': 'Mark as reviewed',
   'Cargando…': 'Loading…',
+  'Bloquea o denuncia a alguien': 'Block or report someone',
+  'Si alguien te molesta, en los tres puntos ⋮ del chat puedes bloquearlo: ninguno le podrá escribir al otro y no se le avisa. También puedes denunciarlo con "Reportar": eliges el motivo y FLOWI revisa los últimos mensajes que te envió; quien no cumpla las reglas puede perder su cuenta.': 'If someone bothers you, in the three dots ⋮ of the chat you can block them: neither of you will be able to write to the other and they are not notified. You can also report them with "Report": you pick the reason and FLOWI reviews the latest messages they sent you; anyone who breaks the rules may lose their account.',
+  'Toca "Ir al chat" o "Chat" junto a cada amigo para escribirle. Con los tres puntos ⋮ dentro del chat lo bloqueas con tu PIN, activas los mensajes temporales, o bloqueas y denuncias a alguien que te moleste.': 'Tap "Go to chat" or "Chat" next to each friend to message them. With the three dots ⋮ inside the chat you lock it with your PIN, turn on disappearing messages, or block and report someone who bothers you.',
 };
