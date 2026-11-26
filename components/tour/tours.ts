@@ -18,12 +18,12 @@ export interface TourStep {
 
 // Pasos que abren las opciones del chat (una ventana de ejemplo: components/chat/ChatTourDemo.tsx)
 const CHAT_SAFETY_STEPS = (): TourStep[] => [
-  { open: 'chat-options', target: 'chat-opt-title', title: tr('1. Abre las opciones del chat'), text: tr('Dentro de una conversación, arriba a la derecha, toca los tres puntos ⋮. Se abre esta ventana con todo lo de ese chat. Aquí la ves con un amigo de ejemplo: no se guarda nada.') },
-  { open: 'chat-options', target: 'chat-opt-lock', title: tr('2. Bloquea el chat con tu PIN'), text: tr('Toca "Bloquear este chat". Desde ahí, para abrirlo te pide tu PIN o tu huella, y en los avisos sale "Mensaje en un chat bloqueado" en vez del texto. Sirve para que nadie que tome tu celular lea esa conversación. Necesitas tu PIN creado en Configuración › Seguridad.') },
+  { open: 'chat-options', target: 'chat-opt-title', title: tr('1. Abre las opciones del chat'), text: tr('En una conversación, toca los tres puntos ⋮ de arriba a la derecha y se abre esta ventana. Aquí la ves con una amiga de ejemplo: no se guarda nada.') },
+  { open: 'chat-options', target: 'chat-opt-lock', title: tr('2. Bloquea el chat con tu PIN'), text: tr('Toca "Bloquear este chat": para abrirlo te pedirá tu PIN o tu huella y los avisos no mostrarán el texto. Así nadie que tome tu celular la lee. Primero crea tu PIN en Configuración › Seguridad.') },
   { open: 'chat-options', target: 'chat-opt-ttl', title: tr('3. Mensajes temporales'), text: tr('Elige cuánto duran los mensajes nuevos: 24 horas, 7 días o 90 días. Pasado ese tiempo se borran solos para los dos. Tu amigo ve el aviso del cambio. Con "Desactivados" vuelven a quedarse.') },
   { open: 'chat-options', target: 'chat-opt-block', title: tr('4. Bloquea a una persona'), text: tr('Si alguien te molesta, toca "Bloquear a…": ninguno le podrá escribir al otro y no se le avisa. Para quitarlo, vuelve aquí y toca "Desbloquear".') },
   { open: 'chat-options', target: 'chat-opt-report', title: tr('5. Denuncia a una persona'), text: tr('Toca "Reportar a…" para denunciarla: se abre este formulario.') },
-  { open: 'chat-report', target: 'chat-opt-report-form', title: tr('6. Elige el motivo y envía'), text: tr('Marca el motivo (acoso, estafa, spam, contenido inapropiado u otro), cuenta qué pasó si quieres y toca "Enviar reporte". FLOWI revisa los últimos mensajes que te envió y puede suspender su cuenta. Deja marcado "Bloquear también" para que no te vuelva a escribir.') },
+  { open: 'chat-report', target: 'chat-opt-report-form', title: tr('6. Elige el motivo y envía'), text: tr('Marca el motivo, cuenta qué pasó si quieres y toca "Enviar reporte". FLOWI revisa sus últimos mensajes y puede suspender su cuenta. Con "Bloquear también" no te vuelve a escribir.') },
 ];
 
 // Pasos que abren el menú del botón + y señalan sus opciones

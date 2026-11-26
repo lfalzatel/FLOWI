@@ -151,7 +151,8 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
 
   // Mide el cuadro después de pintarlo, para ubicarlo sin tapar la parte explicada
   useLayoutEffect(() => {
-    const h = cardRef.current?.offsetHeight;
+    // Altura completa del cuadro (aunque esté recortado con su texto desplazable), para no saltar de lugar
+    const h = cardRef.current?.scrollHeight;
     if (h && Math.abs(h - cardH) > 2) setCardH(h);
   });
 
@@ -246,12 +247,24 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
     // Debajo si cabe, si no encima; si no cabe en ninguno, del lado con más espacio
     const below = rect.bottom + pad + 12;
     const above = rect.top - pad - 12 - cardH;
-    const top = below + cardH + 12 <= vh ? below
-      : above >= 12 ? above
-      : (vh - rect.bottom > rect.top ? vh - cardH - 12 : 12);
     const left = Math.min(Math.max(16, rect.left + rect.width / 2 - cardW / 2), vw - cardW - 16);
-    // Seguro: el cuadro siempre queda dentro de la pantalla (si no, se veía solo el fondo oscuro)
-    cardStyle = { top: Math.min(Math.max(12, top), Math.max(12, vh - cardH - 12)), left, width: cardW };
+    if (below + cardH + 12 <= vh) cardStyle = { top: below, left, width: cardW };
+    else if (above >= 12) cardStyle = { top: above, left, width: cardW };
+    else {
+      // No cabe completo ni arriba ni abajo (celular pequeño o una parte alta): va del lado con más
+      // espacio, más bajito y con su texto desplazable, para no tapar nunca lo que está explicando
+      const spaceBelow = vh - below - 12;
+      const spaceAbove = rect.top - pad - 12 - 12;
+      const roomy = Math.max(spaceBelow, spaceAbove);
+      if (roomy >= 150) {
+        cardStyle = spaceBelow >= spaceAbove
+          ? { top: below, left, width: cardW, maxHeight: spaceBelow, overflowY: 'auto' }
+          : { top: 12, left, width: cardW, maxHeight: spaceAbove, overflowY: 'auto' };
+      } else {
+        // La parte ocupa casi toda la pantalla: el cuadro va abajo y dentro de la pantalla
+        cardStyle = { top: Math.max(12, vh - cardH - 12), left, width: cardW };
+      }
+    }
   } else {
     // Posición explícita: la animación de entrada usa transform y anularía un translate de centrado
     cardStyle = { top: Math.max(16, (vh - cardH) / 2), left: (vw - cardW) / 2, width: cardW };
