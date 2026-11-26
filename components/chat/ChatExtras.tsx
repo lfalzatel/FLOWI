@@ -74,10 +74,9 @@ export function ChatOptionsSheet({ uid, locked, ttl, isTech, onLock, onTtl, onCl
   };
   if (typeof document === 'undefined') return null;
   return createPortal(
-    <div className={`fixed inset-0 z-[120] flex items-end md:items-center justify-center ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('Opciones del chat')}>
+    <div className={`fixed inset-0 z-[120] flex items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('Opciones del chat')}>
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
-      <div className={`relative w-full max-w-md glass-dropdown p-5 pb-8 space-y-4 animate-fade-in-up ${isTech ? 'rounded-none border-t border-accent/50' : 'rounded-t-[28px] md:rounded-[28px]'}`}
-           style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+      <div className={`relative w-full max-w-md glass-dropdown max-h-[90dvh] overflow-y-auto p-5 space-y-4 animate-fade-in-up ${isTech ? 'rounded-none border border-accent/50' : 'rounded-[28px]'}`}>
         <div className="flex items-center justify-between">
           <h2 className={`font-bold text-lg ${isTech ? 'text-accent uppercase' : 'font-syne text-text-primary'}`}>{tr('Opciones del chat')}</h2>
           <button type="button" onClick={onClose} aria-label={tr('Cerrar')} className="p-1 -mr-1 text-text-secondary"><X className="w-5 h-5" /></button>
