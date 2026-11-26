@@ -11,7 +11,7 @@ export interface TourStep {
   text: string;
   cta?: { label: string; href: string };
   // Abre algo antes de señalar: el menú del botón + o el formulario de gasto (se cierra solo)
-  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit' | 'inv-kind' | 'inv-form' | 'debt-pay' | 'acc-expand' | 'goal-form' | 'goal-move'; // los demás los abre cada página (useTourAction)
+  open?: 'quick' | 'expense' | 'income' | 'debt' | 'account' | 'edit' | 'inv-kind' | 'inv-form' | 'debt-pay' | 'acc-expand' | 'goal-form' | 'goal-move' | 'rem-form'; // los demás los abre cada página (useTourAction)
   // Dibujo de ejemplo dentro del cuadro (p. ej. cómo compartir un comprobante desde el banco)
   illus?: 'share-1' | 'share-2' | 'share-3';
 }
@@ -195,7 +195,8 @@ export const PAGE_TOURS: Record<PageTourId, TourStep[]> = lazyT(() => ({
   recordatorios: [
     { title: tr('Recordatorios'), text: tr('Tus pagos del mes, pero también citas, fechas importantes y tareas.') },
     ...PLUS_STEPS(tr('Nuevo recordatorio'), tr('"recuérdame pagar el internet el 15"')),
-    { title: tr('Llena el recordatorio'), text: tr('Ponle nombre y fecha, y si se repite (cada mes, cada semana). Si es un pago, escribe el valor: se aparta de lo que puedes gastar.') },
+    { open: 'rem-form', target: 'rem-voice', title: tr('Dictarlo aquí mismo'), text: tr('Dentro del formulario toca "Dictar el recordatorio" y di algo como "pagar el internet 90 mil el 15 de cada mes": se llenan el nombre, el valor, la fecha y si se repite. Revisa y guarda.') },
+    { open: 'rem-form', title: tr('Llena el recordatorio'), text: tr('Ponle nombre y fecha, y si se repite (cada mes, cada semana). Si es un pago, escribe el valor: se aparta de lo que puedes gastar.') },
     { title: tr('Te aviso a tiempo'), text: tr('Activa las notificaciones y te aviso antes, aunque FLOWI esté cerrada. Los pagos con valor se apartan de lo que puedes gastar.') },
   ],
   recibos: [

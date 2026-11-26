@@ -641,6 +641,10 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
               description: cmd.rawText,
               type: cmd.frequency || 'once',
               date: cmd.dueDate || undefined,
+              // Mensual o semanal: se repite el día que se dijo ("el 15" → cada 15)
+              ...(cmd.dueDate && cmd.frequency === 'monthly' ? { dayOfMonth: new Date(cmd.dueDate + 'T12:00').getDate() } : {}),
+              ...(cmd.dueDate && cmd.frequency === 'weekly' ? { dayOfWeek: new Date(cmd.dueDate + 'T12:00').getDay() } : {}),
+              ...(cmd.amount ? { amount: cmd.amount } : {}),
               time: cmd.time || '08:00',
               sound: true,
               pushEnabled: true,

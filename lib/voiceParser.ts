@@ -487,11 +487,93 @@ export function cleanReminderTitle(raw: string): string {
 
   // Limpiar espacios extras y conectores sobrantes al inicio/fin
   text = text.replace(/^\s*(?:de|para|a|en|que)\s+/gi, '');
-  text = text.replace(/\s*(?:de|para|a|en)\s*$/gi, '');
+  text = text.replace(/\s+(?:de|para|a|en)\s*$/gi, ''); // palabra suelta al final (no la "a" de "tarjeta")
   text = text.trim();
 
   if (!text) return raw.trim();
   return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+export interface ReminderSpeech {
+  title: string;
+  amount: number | null;
+  frequency: 'once' | 'daily' | 'weekly' | 'monthly';
+  dueDate: string;      // AAAA-MM-DD (hoy si no se dijo fecha)
+  dateSaid: boolean;    // ¿se dijo una fecha?
+  time?: string;        // HH:MM, solo si se dijo una hora
+}
+
+const REM_MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+/**
+ * Entiende un recordatorio dictado: "recuérdame pagar el internet el 15", "arriendo 1.200.000 cada mes el 5",
+ * "cita con el odontólogo el 3 de diciembre a las 4 de la tarde". "El 15" es el DÍA 15 (no las 3 p. m.):
+ * la hora solo cuenta con "a las…", am/pm o "de la mañana/tarde/noche".
+ */
+export function parseReminderSpeech(raw: string, now = new Date()): ReminderSpeech {
+  const ymd = (d: Date) => d.toLocaleDateString('en-CA');
+  let t = ' ' + raw
+    .replace(/^\s*(?:(?:crear|crea|agrega|agregar|pon|poner)\s+)?(?:un\s+)?(?:nuevo\s+)?(?:recordatorio|recordarme|recuérdame|recuerdame|recordar)\b\s*(?:de\s+|que\s+)?/i, '')
+    .trim() + ' ';
+  const cut = (m: RegExpMatchArray) => { t = t.replace(m[0], ' '); };
+
+  let frequency: ReminderSpeech['frequency'] = 'once';
+  if (/\b(?:diario|diaria|cada d[íi]a|todos los d[íi]as)\b/i.test(t)) frequency = 'daily';
+  else if (/\b(?:semanal|cada semana|todas las semanas)\b/i.test(t)) frequency = 'weekly';
+  else if (/\b(?:mensual|cada mes|todos los meses|de cada mes)\b/i.test(t)) frequency = 'monthly';
+
+  // Hora: primero, para que "a las 4" no se confunda con una fecha
+  let time: string | undefined;
+  let m = t.match(/\ba\s+las?\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?\s?m\.?|p\.?\s?m\.?|de\s+la\s+mañana|de\s+la\s+tarde|de\s+la\s+noche)?/i)
+    || t.match(/\b(\d{1,2})(?::(\d{2}))?\s*(a\.?\s?m\.?|p\.?\s?m\.?|de\s+la\s+mañana|de\s+la\s+tarde|de\s+la\s+noche)/i)
+    || t.match(/\b(\d{1,2}):(\d{2})\b()/);
+  if (m) {
+    let hour = parseInt(m[1], 10);
+    const min = m[2] ? parseInt(m[2], 10) : 0;
+    const p = (m[3] || '').toLowerCase().replace(/[\s.]/g, '');
+    if ((p.startsWith('p') || p.includes('tarde') || p.includes('noche')) && hour < 12) hour += 12;
+    else if ((p.startsWith('a') || p.includes('mañana')) && hour === 12) hour = 0;
+    if (hour <= 23 && min <= 59) { time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`; cut(m); }
+  }
+
+  // Fecha
+  let due: Date | null = null;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+  if ((m = t.match(new RegExp(`\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+(${REM_MONTHS.join('|')})(?:\\s+(?:de\\s+)?(\\d{4}))?\\b`, 'i')))) {
+    const day = parseInt(m[1], 10), mi = REM_MONTHS.indexOf(m[2].toLowerCase());
+    let d = new Date(m[3] ? parseInt(m[3], 10) : today.getFullYear(), mi, day, 12);
+    if (!m[3] && d < today) d = new Date(today.getFullYear() + 1, mi, day, 12);
+    if (d.getMonth() === mi) { due = d; cut(m); }
+  } else if ((m = t.match(/\bpasado\s+mañana\b/i))) {
+    due = new Date(today); due.setDate(due.getDate() + 2); cut(m);
+  } else if ((m = t.match(/\b(?:para\s+)?mañana\b/i))) {
+    due = new Date(today); due.setDate(due.getDate() + 1); cut(m);
+  } else if ((m = t.match(/\b(?:para\s+)?hoy\b/i))) {
+    due = new Date(today); cut(m);
+  } else if ((m = t.match(/\b(?:el\s+d[íi]a|el|los|cada)\s+(\d{1,2})(?:\s+de\s+cada\s+mes)?\b(?!\s*(?:mil|millon|millón|millones|%|:))/i))) {
+    const day = parseInt(m[1], 10);
+    if (day >= 1 && day <= 31) {
+      // La próxima vez que llegue ese día (este mes si no ha pasado; si no, el otro)
+      let d = new Date(today.getFullYear(), today.getMonth(), day, 12);
+      if (d < today || d.getDate() !== day) d = new Date(today.getFullYear(), today.getMonth() + 1, day, 12);
+      if (d.getDate() !== day) d = new Date(today.getFullYear(), today.getMonth() + 2, 0, 12); // 31 en mes corto: último día
+      due = d; cut(m);
+      if (/de\s+cada\s+mes/i.test(m[0]) || /^cada/i.test(m[0])) frequency = 'monthly';
+    }
+  }
+
+  const amounts = extractAllAmounts(t);
+  const amount = amounts.length ? amounts[0] : null;
+  if (amount !== null) t = t.replace(/\$?\s*\d[\d.,]*\s*(?:mil(?:lones|lón|lon)?|millones|millón|millon)?(?:\s+de)?(?:\s+pesos)?/i, ' ');
+
+  return {
+    title: cleanReminderTitle(t.replace(/\s+/g, ' ').trim()),
+    amount,
+    frequency,
+    dueDate: ymd(due || today),
+    dateSaid: !!due,
+    time,
+  };
 }
 
 /**
@@ -557,43 +639,12 @@ export function detectVoiceCommand(text: string): ParsedVoiceCommand | null {
   const reminderMatch = clean.match(/^\s*(?:(?:crear|crea|agrega|agregar|pon|poner)\s+)?(?:un\s+)?(?:nuevo\s+)?(?:recordatorio|recordarme|recuérdame|recuerdame)\s+(.+)/i);
   if (reminderMatch) {
     const reminderText = reminderMatch[1].trim();
-    const amounts = extractAllAmounts(reminderText);
-    const mainAmount = amounts.length > 0 ? amounts[0] : null;
-
-    let frequency: 'once' | 'daily' | 'weekly' | 'monthly' = 'once';
-    if (/\b(?:diario|diaria|cada día|todos los días)\b/i.test(reminderText)) {
-      frequency = 'daily';
-    } else if (/\b(?:semanal|cada semana|todas las semanas)\b/i.test(reminderText)) {
-      frequency = 'weekly';
-    } else if (/\b(?:mensual|cada mes|todos los meses)\b/i.test(reminderText)) {
-      frequency = 'monthly';
-    }
-
-    let dueDate = new Date().toISOString().split('T')[0];
-    if (/\bmañana\b/i.test(reminderText)) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      dueDate = tomorrow.toISOString().split('T')[0];
-    }
-
-    // Detección de Hora por Voz
-    let time = '08:00';
-    const timeMatch = reminderText.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm|de la mañana|de la tarde|de la noche)?\b/i);
-    if (timeMatch) {
-      let hour = parseInt(timeMatch[1], 10);
-      const min = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
-      const period = timeMatch[3]?.toLowerCase();
-      if (period && (period.includes('pm') || period.includes('tarde') || period.includes('noche')) && hour < 12) {
-        hour += 12;
-      } else if (period && (period.includes('am') || period.includes('mañana')) && hour === 12) {
-        hour = 0;
-      }
-      if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59) {
-        time = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
-      }
-    }
-
-    const cleanTitle = cleanReminderTitle(reminderText);
+    const r = parseReminderSpeech(reminderText);
+    const mainAmount = r.amount;
+    const frequency = r.frequency;
+    const dueDate = r.dueDate;
+    const time = r.time || '08:00';
+    const cleanTitle = r.title;
 
     return {
       kind: 'command',

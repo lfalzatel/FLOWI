@@ -14,7 +14,8 @@ import { useData } from '@/components/DataProvider';
 import { suggestReminderCategory, suggestReminderMerchant } from '@/lib/reminderSuggest';
 import { findCatalogEntry, getMerchantsForCategory } from '@/lib/categories';
 import { useMemo } from 'react';
-import { speakText } from '@/lib/voiceParser';
+import { parseReminderSpeech, speakText } from '@/lib/voiceParser';
+import { DictateButton } from '@/components/forms/DictateButton';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { askForNotifications } from '@/lib/notifPrompt';
 import { triggerPowerAnimation, triggerConfettiWithSynth } from '@/components/dashboard/PowerAnimation';
@@ -186,7 +187,25 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
     setAlerts(alerts.map(a => a.id === id ? { ...a, [field]: value } : a));
   };
 
-  const isPaymentNow = paymentChoice ?? (Number(amountText.replace(/\D/g, '')) > 0 || !!category || !!merchant);
+  // Lo dictado llena título, valor, frecuencia, fecha y hora; la persona revisa antes de guardar
+  const applySpeech = (text: string) => {
+    const r = parseReminderSpeech(text);
+    const filled: string[] = [];
+    if (r.title) { setTitle(r.title); filled.push(tr('título')); }
+    if (r.amount) { setAmountText(r.amount.toLocaleString(currentLocale())); filled.push(tr('valor')); }
+    if (r.frequency !== 'once') { setType(r.frequency); filled.push(tr('frecuencia')); }
+    if (r.dateSaid) {
+      const d = new Date(r.dueDate + 'T12:00');
+      if (r.frequency === 'monthly') setDayOfMonth(d.getDate());
+      else if (r.frequency === 'weekly') setDayOfWeek(d.getDay());
+      else setDate(r.dueDate);
+      filled.push(tr('fecha'));
+    } else if (r.frequency === 'once' && !date) setDate(r.dueDate);
+    if (r.time) { setTime(r.time); filled.push(tr('hora')); }
+    return filled.length ? tr('Llené: {a}. Revisa antes de guardar.', { a: filled.join(', ') }) : tr('No entendí los datos. Prueba con el ejemplo o escríbelos.');
+  };
+
+  const isPaymentNow = paymentChoice ??(Number(amountText.replace(/\D/g, '')) > 0 || !!category || !!merchant);
   const selectedCategoryData = allCategories.find(c => c.label === category);
   // Sugerencia de categoría según el título (historial propio y reglas del dictado), sin IA
   const suggestion = useMemo(
@@ -230,6 +249,11 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
 
         <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-4">
+            {/* Dictar el recordatorio completo */}
+            {!reminder && (
+              <div data-tour="rem-voice"><DictateButton isTech={isTechTheme} onText={applySpeech} label={tr('Dictar el recordatorio')}
+                             example={tr('"Pagar el internet 90 mil el 15 de cada mes"')} /></div>
+            )}
             {/* Título + sugerencia de categoría */}
             <div>
               <label className={lbl} htmlFor="rem-title">{tr('Título')}</label>

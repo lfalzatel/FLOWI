@@ -26,6 +26,7 @@ import { speakText } from '@/lib/voiceParser';
 import { CommitmentsView } from '@/components/payments/CommitmentsView';
 
 import { PageTourButton } from '@/components/tour/PageTourButton';
+import { useTourAction } from '@/components/tour/useTourEdit';
 export default function RecordatoriosPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { reminders, loading: remindersLoading, refresh } = useReminders();
@@ -36,6 +37,8 @@ export default function RecordatoriosPage() {
   // Estados locales
   const [showForm, setShowForm] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
+  // El tutorial abre el formulario vacío para mostrar el botón de dictar
+  useTourAction('rem-form', () => { setEditingReminder(null); setShowForm(true); return true; }, () => setShowForm(false));
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [deletingReminderId, setDeletingReminderId] = useState<string | null>(null);
   const [payingDue, setPayingDue] = useState<ReminderDue | null>(null);
