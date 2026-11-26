@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import { useTheme } from '@/components/ThemeProvider';
 import { X, LayoutGrid, Plus, BellPlus, Mic, Camera } from 'lucide-react';
 import { getAiKey } from '@/lib/aiAssist';
@@ -816,7 +816,11 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                 )}
               </div>
             ) : (
-              <button type="button" data-tour="exp-items" onClick={() => { setItems([]); setAutoSum(!amountNum); }}
+              <button type="button" data-tour="exp-items" onClick={() => {
+                // En el mismo toque: se abre el cuadro y el cursor queda en el nombre del producto (abre el teclado)
+                flushSync(() => { setItems([]); setAutoSum(!amountNum); });
+                (document.getElementById('receipt-draft-name') as HTMLInputElement | null)?.focus();
+              }}
                       className={`mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent ${isTechTheme ? 'font-mono' : ''}`}>
                 <ReceiptText className="w-4 h-4" /> {t('Agregar productos (opcional)')}
               </button>

@@ -221,7 +221,7 @@ export function ReceiptItemsList({
             <div className={`mt-1.5 p-2 border border-dashed border-accent/40 space-y-1.5 ${isTech ? 'rounded-none' : 'rounded-lg'}`}>
               <div>
                 <label className={lbl}>{tr('Producto')}</label>
-                <input autoComplete="off" ref={nameRef} className={field} placeholder={tr('Ej. Arroz Diana')} value={draft.name} enterKeyHint="next"
+                <input autoComplete="off" id="receipt-draft-name" ref={nameRef} className={field} placeholder={tr('Ej. Arroz Diana')} value={draft.name} enterKeyHint="next"
                        onFocus={() => { step.current = 'name'; }}
                        onChange={e => { setDraft(d => ({ ...d, name: e.target.value })); setDraftCat(null); setDraftError(''); }}
                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (draft.name.trim()) goQty(); } }} />
