@@ -153,8 +153,27 @@ function Conversation({ peerUid }: { peerUid: string }) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
-  const endRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const chat = chats.find(c => c.id === chatId);
+
+  // La conversación ocupa justo la parte visible de la pantalla: al abrir el teclado se encoge (como en
+  // WhatsApp) en vez de que el navegador corra la página y los mensajes queden fuera de la vista
+  const [view, setView] = useState<{ h: number; top: number } | null>(null);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const update = () => setView({ h: vv ? vv.height : window.innerHeight, top: vv ? vv.offsetTop : 0 });
+    update();
+    vv?.addEventListener('resize', update);
+    vv?.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    return () => {
+      vv?.removeEventListener('resize', update);
+      vv?.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+  const toBottom = () => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; };
+  useEffect(toBottom, [view?.h]); // al abrir o cerrar el teclado, se sigue viendo lo último
 
   // Si ya no son amigos se sigue viendo la conversación (con el nombre de su perfil público)
   useEffect(() => {
@@ -185,7 +204,7 @@ function Conversation({ peerUid }: { peerUid: string }) {
 
   // Al llegar mensajes: bajar hasta el último y marcar como leído
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: 'end' });
+    toBottom();
     if (chat && uid && isUnread(chat, uid)) markChatRead(chatId, uid).catch(() => {});
   }, [messages?.length, chat?.lastAt?.toMillis?.()]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -207,10 +226,11 @@ function Conversation({ peerUid }: { peerUid: string }) {
   const canWrite = !!friend;
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-deep">
+    <div className="fixed inset-x-0 z-[1] flex flex-col bg-deep overflow-hidden"
+         style={{ top: view?.top ?? 0, height: view ? view.h : '100dvh' }}>
       <Header />
-      <main className={`relative flex-1 max-w-2xl mx-auto w-full px-4 pt-2 pb-28 flex flex-col ${isTech ? 'font-mono' : ''}`}>
-        <div className="flex items-center gap-3 mb-3">
+      <main className={`relative flex-1 min-h-0 max-w-2xl mx-auto w-full px-4 pt-2 flex flex-col ${isTech ? 'font-mono' : ''}`}>
+        <div className="shrink-0 flex items-center gap-3 mb-3">
           <Link href="/amigos/chat" aria-label={tr('Volver')} className={`p-2 -ml-2 shrink-0 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
@@ -222,7 +242,9 @@ function Conversation({ peerUid }: { peerUid: string }) {
         </div>
 
         {user?.isAnonymous ? <GuestNotice isTech={isTech} /> : (
-          <div className="flex-1 space-y-1.5" aria-live="polite">
+          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain -mx-4 px-4" aria-live="polite">
+          {/* Los mensajes se apilan desde abajo, junto a la barra para escribir */}
+          <div className="min-h-full flex flex-col justify-end gap-1.5 pb-3">
             {messages === null ? (
               <div className="flex justify-center py-6"><div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" /></div>
             ) : !messages.length ? (
@@ -254,14 +276,14 @@ function Conversation({ peerUid }: { peerUid: string }) {
                 </div>
               );
             })}
-            <div ref={endRef} />
+          </div>
           </div>
         )}
       </main>
 
-      {/* Barra para escribir, fija abajo */}
+      {/* Barra para escribir, abajo (sube con el teclado) */}
       {!user?.isAnonymous && (
-        <div className="fixed inset-x-0 bottom-0 z-[70] bg-[color-mix(in_srgb,var(--bg-deep)_92%,transparent)] backdrop-blur-xl border-t border-glass-border"
+        <div className="shrink-0 bg-[color-mix(in_srgb,var(--bg-deep)_92%,transparent)] backdrop-blur-xl border-t border-glass-border"
              style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
           <div className="max-w-2xl mx-auto px-4 pt-3">
             {error && <p className="text-xs text-amber-300 mb-2">{error}</p>}
