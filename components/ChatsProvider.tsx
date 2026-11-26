@@ -6,11 +6,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFriends } from '@/components/FriendsProvider';
 import { useInAppNotifications } from '@/hooks/useInAppNotifications';
 import { Chat, chatPeer, chatTime, getOpenChat, isUnread } from '@/lib/chat';
-import { playNotificationSound, scheduleNotificationViaSW } from '@/lib/notifications';
+import { playNotificationSound } from '@/lib/notifications';
 import { tr } from '@/lib/i18n';
 
 // Conversaciones de la persona en vivo: cuántas tienen mensajes sin leer y aviso al instante cuando
-// un amigo escribe (dentro de la app; y en la barra del celular si la app está abierta pero en segundo plano).
+// un amigo escribe (dentro de la app; con la app en segundo plano o cerrada avisa el servidor).
 interface ChatsCtx {
   chats: Chat[];
   unreadCount: number;            // conversaciones con mensajes sin leer
@@ -51,11 +51,11 @@ export function ChatsProvider({ children }: { children: ReactNode }) {
         const name = (names.current.get(peer) || tr('Un amigo')).split(/\s+/)[0];
         const title = tr('{a} te escribió', { a: name });
         const body = c.lastText || '';
+        // Con FLOWI en pantalla: aviso dentro de la app con sonido. Si no, el servidor manda la notificación
+        // al celular (functions/index.js · avisarMensajeChat), también con la app cerrada.
         if (document.visibilityState === 'visible') {
           push({ title, body });
           playNotificationSound();
-        } else {
-          scheduleNotificationViaSW({ title, body, tag: `chat-${c.id}`, data: { url: `/amigos/chat?u=${peer}` } }).catch(() => {});
         }
       }
       seen.current = next;

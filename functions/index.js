@@ -346,6 +346,25 @@ exports.avisarCambioCompartido = onDocumentUpdated({ document: 'fl_shared_links/
   }
 });
 
+// Chat entre amigos (lib/chat.ts): mensaje nuevo → aviso al celular de la otra persona, también con la app cerrada.
+// Si tiene FLOWI abierto en pantalla, el celular no lo muestra (worker/index.js): ahí sale el aviso dentro de la app.
+exports.avisarMensajeChat = onDocumentCreated({ document: 'fl_chats/{chatId}/messages/{msgId}', region: 'us-central1' }, async (event) => {
+  const m = event.data?.data();
+  const { chatId } = event.params;
+  if (!m || !m.from || typeof m.text !== 'string') return;
+  const users = String(chatId).split('_');
+  const to = users.find(u => u !== m.from);
+  if (!to || users.length !== 2) return;
+  const sender = await db.collection('fl_profiles').doc(m.from).get().catch(() => null);
+  const name = sender?.exists ? sender.get('name') : '';
+  await pushTo(to, (lang) => ({
+    title: msg(lang, '💬 {a} te escribió', { a: firstName(name, lang) }),
+    body: m.text.slice(0, 140),
+    url: `/amigos/chat?u=${m.from}`,
+    tag: `chat-${chatId}`, // los mensajes seguidos de la misma persona se juntan en un solo aviso
+  }));
+});
+
 // Comentario o sugerencia nueva (app/servicios/opiniones): aviso a los administradores
 exports.avisarComentario = onDocumentCreated({ document: 'fl_feedback/{id}', region: 'us-central1' }, async (event) => {
   const f = event.data?.data();

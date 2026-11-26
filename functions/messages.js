@@ -14,6 +14,7 @@ const EN = {
   'De {a}.': 'For {a}.',
   'un gasto compartido': 'a shared expense',
   'Alguien': 'Someone',
+  '💬 {a} te escribió': '💬 {a} wrote to you',
   // Recordatorios y resumen de la mañana (functions/reminders.mjs)
   'Pronto: {a}': 'Soon: {a}',
   'Recordatorio de Flowi': 'Reminder from Flowi',

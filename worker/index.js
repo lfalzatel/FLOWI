@@ -12,16 +12,21 @@ self.addEventListener('push', (event) => {
   const note = caches.open('flowi-diag')
     .then(c => c.put('/__last-push', new Response(JSON.stringify({ at: Date.now(), tag: data.tag || '' }))))
     .catch(() => {});
-  event.waitUntil(Promise.all([note, self.registration.showNotification(title, {
-      body: data.body || '',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
-      tag: data.tag || `flowi-${Date.now()}`,
-      renotify: true,
-      vibrate: [200, 100, 200],
-      data: { url: data.url || '/' },
-    })])
-  );
+  const show = () => self.registration.showNotification(title, {
+    body: data.body || '',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    tag: data.tag || `flowi-${Date.now()}`,
+    renotify: true,
+    vibrate: [200, 100, 200],
+    data: { url: data.url || '/' },
+  });
+  // Mensajes del chat: si FLOWI está en pantalla, la app ya muestra su propio aviso (con sonido); no se repite aquí
+  const shown = String(data.tag || '').startsWith('chat-')
+    ? self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then(list => list.some(c => c.focused && c.url.startsWith(self.location.origin)) ? null : show())
+    : show();
+  event.waitUntil(Promise.all([note, shown]));
 });
 
 // Tocar la notificación abre FLOWI (o la trae al frente) en la pantalla indicada
