@@ -109,6 +109,31 @@ function TodayContent({ today, currency, isTechTheme }: { today: DailyBudget; cu
         </p>
       </div>
 
+      {/* En qué se fue la plata de hoy (sobre todo si te pasaste: así ves por qué) */}
+      {today.todayItems?.length > 0 && (
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">{tr('Lo que gastaste hoy')}</p>
+          <div className={`divide-y divide-glass-border border border-glass-border ${isTechTheme ? 'rounded-none' : 'rounded-2xl'}`}>
+            {today.todayItems.map((it, i) => (
+              <div key={i} className="flex items-center gap-2 px-3 py-2">
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm text-text-primary truncate">{it.description || tr(it.category)}</span>
+                  <span className="block text-[11px] text-text-muted truncate">
+                    {it.description ? `${tr(it.category)} · ` : ''}{it.at.toLocaleTimeString(currentLocale(), { hour: 'numeric', minute: '2-digit' })}
+                  </span>
+                </span>
+                <span className="text-sm font-semibold text-money-neg shrink-0">−{f(it.amount)}</span>
+              </div>
+            ))}
+            <div className="flex items-center justify-between px-3 py-2">
+              <span className="text-xs font-semibold text-text-secondary">{tr('Total de hoy')}</span>
+              <span className={`text-sm font-bold ${over ? 'text-red-400' : 'text-text-primary'}`}>{f(today.spentToday)}</span>
+            </div>
+          </div>
+          <p className="text-[10px] text-text-muted mt-1">{tr('Los gastos fijos (arriendo, servicios…) no cuentan en la cuota del día.')}</p>
+        </div>
+      )}
+
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">{tr('Así se calcula')}</p>
         {today.mode === 'cuentas' ? (

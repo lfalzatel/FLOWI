@@ -8,6 +8,9 @@ import { getLocalDateString, getLocalMonthString } from './dateUtils';
 //  - Modo "cuentas" (con cuentas para gastar): la plata real de esas cuentas − lo que se debe en
 //    tarjetas − compromisos por pagar, hasta el día del próximo ingreso.
 
+/** Un gasto variable de hoy (los fijos, como el arriendo, no cuentan en la cuota del día). */
+export interface TodayItem { description: string; category: string; amount: number; at: Date }
+
 export interface DailyBudget {
   hasBase: boolean;      // hay ingresos o presupuesto con qué calcular
   base: number;           // ingresos del mes, o el presupuesto si no hay ingresos
@@ -18,6 +21,7 @@ export interface DailyBudget {
   freeAtStartOfDay: number; // lo libre para repartir desde hoy hasta fin de mes
   todayAllowance: number; // cuota para hoy al empezar el día
   spentToday: number;     // gastos variables de hoy
+  todayItems: TodayItem[]; // esos gastos, uno por uno (para ver en qué se fue la plata de hoy)
   remainingToday: number; // negativo = se pasó hoy
   daysLeft: number;       // incluye hoy
   tomorrowAllowance: number | null; // cuota de cada día desde mañana con lo que va hoy (null el último día)
@@ -68,13 +72,17 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
   const month = getLocalMonthString(now);
   const today = getLocalDateString(now);
   let ingresos = 0, gastos = 0, spentToday = 0;
+  const todayItems: TodayItem[] = [];
   for (const t of transactions) {
     const day = getLocalDateString(toDate(t.date));
     if (!day.startsWith(month)) continue;
     if (t.type === 'ingreso') ingresos += t.amount;
     else {
       gastos += t.amount;
-      if (day === today && !isFixedTx(t)) spentToday += t.amount;
+      if (day === today && !isFixedTx(t)) {
+        spentToday += t.amount;
+        todayItems.push({ description: t.description || '', category: t.category, amount: t.amount, at: toDate(t.date) });
+      }
     }
   }
 
@@ -86,7 +94,7 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
     const todayAllowance = Math.max(0, freeAtStartOfDay / daysLeft);
     return {
       hasBase: true, base: real.cash, baseIsBudget: false, spentMonth: gastos, pendingCommitments, savedMonth: 0,
-      freeAtStartOfDay, todayAllowance, spentToday, remainingToday: todayAllowance - spentToday, daysLeft,
+      freeAtStartOfDay, todayAllowance, spentToday, todayItems: todayItems.sort((a, b) => b.amount - a.amount), remainingToday: todayAllowance - spentToday, daysLeft,
       tomorrowAllowance: daysLeft > 1 ? Math.max(0, (freeAtStartOfDay - spentToday) / (daysLeft - 1)) : null,
       mode: 'cuentas', cash: real.cash, cardDebt: real.cardDebt, cardOwed: real.cardOwed, anyFixed: real.anyFixed, nextIncome: real.nextIncome,
     };
@@ -108,6 +116,7 @@ export function getDailyBudget(transactions: Transaction[], budget = 0, pendingC
     freeAtStartOfDay,
     todayAllowance,
     spentToday,
+    todayItems: todayItems.sort((a, b) => b.amount - a.amount),
     remainingToday: todayAllowance - spentToday,
     daysLeft,
     tomorrowAllowance: daysLeft > 1 ? Math.max(0, (freeAtStartOfDay - spentToday) / (daysLeft - 1)) : null,

@@ -11,7 +11,7 @@ import {
   Download, BookOpen, ShieldCheck
 } from 'lucide-react';
 import { 
-  PieChart as RechartsPieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer
+  PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts';
 
 import { Header } from '@/components/layout/Header';
@@ -167,6 +167,11 @@ export default function PresupuestosPage() {
       }))
       .sort((a, b) => b.value - a.value);
   }, [filteredTransactions, chartGrouping, resolveCategory]);
+  // Parte de la gráfica que se muestra en el centro: la tocada, o la más grande
+  const [activeSlice, setActiveSlice] = useState<number | null>(null);
+  useEffect(() => { setActiveSlice(null); }, [chartGrouping, filterType, filterValue]);
+  const selectedSlice = pieChartData.length ? (activeSlice !== null && activeSlice < pieChartData.length ? activeSlice : 0) : null;
+  const selected = selectedSlice !== null ? pieChartData[selectedSlice] : null;
 
   // Cálculo de días restantes en el mes para el presupuesto diario sugerido
   const daysInMonth = useMemo(() => {
@@ -399,40 +404,44 @@ export default function PresupuestosPage() {
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-full md:w-1/2 h-56">
+              {/* Al tocar una parte (o una fila de la lista) se ve en el centro su nombre, valor y porcentaje.
+                  Antes salía un globo encima de la gráfica, con letra oscura sobre fondo oscuro */}
+              <div className="relative w-full md:w-1/2 h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsPieChart>
                     <Pie
                       data={pieChartData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={55}
-                      outerRadius={80}
+                      innerRadius={62}
+                      outerRadius={86}
                       paddingAngle={4}
                       dataKey="value"
+                      onClick={(_: unknown, i: number) => setActiveSlice(i)}
+                      isAnimationActive={false}
                     >
                       {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke={isTechTheme ? '#000' : 'rgba(255,255,255,0.1)'} />
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke={isTechTheme ? '#000' : 'rgba(255,255,255,0.1)'}
+                              style={{ cursor: 'pointer', outline: 'none' }}
+                              opacity={selectedSlice === null || selectedSlice === index ? 1 : 0.35} />
                       ))}
                     </Pie>
-                    <RechartsTooltip
-                      formatter={(val: number) => formatCurrency(val, currency)}
-                      contentStyle={{
-                        backgroundColor: isTechTheme ? '#000' : '#1e1e24',
-                        borderColor: isTechTheme ? '#f5a623' : 'rgba(255,255,255,0.1)',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        color: '#fff'
-                      }}
-                    />
                   </RechartsPieChart>
                 </ResponsiveContainer>
+                {selected && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-[30%]">
+                    <span className={`text-[11px] leading-tight line-clamp-2 ${isTechTheme ? 'text-accent/80' : 'text-text-secondary'}`}>{tr(selected.name)}</span>
+                    <span className={`text-base font-bold leading-tight ${isTechTheme ? 'text-accent font-mono' : 'text-text-primary font-syne'}`}>{formatCurrency(selected.value, currency)}</span>
+                    <span className="text-[11px] font-semibold" style={{ color: selected.color }}>{Math.round(selected.percentage)}%</span>
+                  </div>
+                )}
               </div>
 
               {/* Leyenda de Categorías / Subcategorías */}
               <div className="w-full md:w-1/2 space-y-2 max-h-56 overflow-y-auto scrollbar-thin">
-                {pieChartData.map(item => (
-                  <div key={item.name} className="flex items-center justify-between text-xs p-2 rounded-xl bg-white/5 border border-white/5">
+                {pieChartData.map((item, index) => (
+                  <button type="button" key={item.name} onClick={() => setActiveSlice(index)}
+                          className={`w-full text-left flex items-center justify-between text-xs p-2 rounded-xl bg-white/5 border transition-colors ${selectedSlice === index ? 'border-accent/60' : 'border-white/5'}`}>
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                       <span className={`font-semibold ${isTechTheme ? 'text-accent' : 'text-text-primary'}`}>{tr(item.name)}</span>
@@ -443,7 +452,7 @@ export default function PresupuestosPage() {
                         <AnimatedNumber value={item.value} format={(n: number) => formatCurrency(n, currency)} />
                       </strong>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>

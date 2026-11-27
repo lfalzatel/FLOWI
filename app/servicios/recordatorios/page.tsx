@@ -122,7 +122,7 @@ export default function RecordatoriosPage() {
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div className="min-w-0">
-              <h1 className={`${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl leading-tight text-accent uppercase tracking-wider' : 'font-syne font-bold text-xl sm:text-2xl leading-tight text-text-primary'} truncate`}>
+              <h1 className={`${isTechTheme ? 'font-mono font-bold text-xl sm:text-2xl leading-tight text-accent uppercase tracking-wider' : 'font-syne font-bold text-xl sm:text-2xl leading-tight text-text-primary'} break-words`}>
                 {tr('Recordatorios')}
               </h1>
               <p className={`mt-1 ${isTechTheme ? 'font-mono text-accent/70 tracking-wide text-[10px] sm:text-xs uppercase' : 'text-text-secondary text-xs sm:text-sm'}`}>
@@ -132,7 +132,7 @@ export default function RecordatoriosPage() {
           </div>
           {/* Tutorial y + juntos a la derecha (la prueba de avisos vive en Configuración › Notificaciones) */}
           <div className="flex items-center gap-2 shrink-0">
-            <PageTourButton id="recordatorios" />
+            <PageTourButton id="recordatorios" compact />
             <button
               onClick={() => { setEditingReminder(null); setShowForm(true); }}
               aria-label={tr('Nuevo recordatorio')} title={tr('Nuevo recordatorio')}

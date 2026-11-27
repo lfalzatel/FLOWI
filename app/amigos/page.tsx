@@ -9,6 +9,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/hooks/useAuth';
 import { useFriends } from '@/components/FriendsProvider';
 import { useChats } from '@/components/ChatsProvider';
+import { prevPath } from '@/components/layout/NavTracker';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
@@ -168,9 +169,11 @@ export default function AmigosPage() {
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTech ? 'font-mono' : ''}`}>
         <div className="flex items-center gap-3">
-          <Link href="/" aria-label={tr('Volver')} className={`p-2 -ml-2 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+          {/* Atrás: a la página de donde vino (Servicios, Inicio…); si se abrió directo con un enlace, a Servicios */}
+          <button type="button" onClick={() => { if (prevPath()) router.back(); else router.push('/servicios'); }}
+                  aria-label={tr('Volver')} className={`p-2 -ml-2 shrink-0 bg-glass border ${isTech ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
             <ChevronLeft className="w-5 h-5" />
-          </Link>
+          </button>
           <div className="min-w-0">
             <h1 className={`text-2xl font-bold leading-tight ${isTech ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Amigos')}</h1>
             <p className="text-xs text-text-muted">{tr('Busca a tus amigos para chatear y compartir gastos. Solo ven tu nombre y tu foto.')}</p>

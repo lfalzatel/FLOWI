@@ -687,3 +687,8 @@ input, textarea, [contenteditable='true'], .voice-modal input, .voice-modal text
   user-select: text;
   -webkit-touch-callout: default;
 }
+
+/* Gráficas (recharts): al tocar una parte el navegador dibujaba un recuadro blanco de foco */
+.recharts-wrapper *:focus,
+.recharts-wrapper *:focus-visible,
+.recharts-surface:focus { outline: none !important; }

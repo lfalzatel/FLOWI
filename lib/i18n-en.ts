@@ -3167,4 +3167,9 @@ export const EN: Record<string, string> = {
   'Ana': 'Ana',
   'Estabas editando un ingreso': 'You were editing an income',
   'Estabas editando un gasto': 'You were editing an expense',
+  'Lo que gastaste hoy': 'What you spent today',
+  'Total de hoy': "Today's total",
+  'Los gastos fijos (arriendo, servicios…) no cuentan en la cuota del día.': "Fixed expenses (rent, utilities…) don't count toward the daily allowance.",
+  'En cada cuenta': 'In each account',
+  'Ver Cuentas y patrimonio': 'See Accounts & net worth',
 };

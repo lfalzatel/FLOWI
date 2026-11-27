@@ -133,15 +133,14 @@ export default function InversionesPage() {
     <div className="relative min-h-screen flex flex-col bg-deep">
       <Header />
       <main className={`relative flex-1 max-w-2xl mx-auto w-full p-4 pb-32 space-y-5 animate-fade-in-up ${isTechTheme ? 'font-mono' : ''}`}>
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
-            <h1 className={`text-2xl font-bold leading-tight truncate ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Ahorro e inversiones')}</h1>
-            <PageTourButton id="inversiones" className="ml-auto" />
-          </div>
-          {investments.length > 0 && <button onClick={() => setChoosingKind(true)} className={primaryBtn}><Plus className="w-4 h-4" /> {tr('Nueva')}</button>}
+        {/* El título se ve completo (si no cabe, baja a una segunda línea); los botones a la derecha */}
+        <div className="flex items-center gap-2">
+          <Link href="/servicios" aria-label={tr('Volver a Servicios')} className={`p-2 -ml-2 shrink-0 bg-glass border ${isTechTheme ? 'border-accent/30 rounded-none text-accent' : 'border-glass-border rounded-full text-text-primary'}`}>
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+          <h1 className={`flex-1 min-w-0 text-xl sm:text-2xl font-bold leading-tight break-words ${isTechTheme ? 'text-accent uppercase tracking-wider' : 'font-syne text-text-primary'}`}>{tr('Ahorro e inversiones')}</h1>
+          <PageTourButton id="inversiones" compact />
+          {investments.length > 0 && <button onClick={() => setChoosingKind(true)} className={`${primaryBtn} shrink-0`}><Plus className="w-4 h-4" /> {tr('Nueva')}</button>}
         </div>
 
         {error === 'permission-denied' && (
