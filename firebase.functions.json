@@ -2,6 +2,7 @@
   "functions": {
     "source": "functions",
     "runtime": "nodejs22",
-    "ignore": ["node_modules", ".git", "*.local"]
+    "ignore": ["node_modules", ".git", "*.local"],
+    "disallowLegacyRuntimeConfig": true
   }
 }
