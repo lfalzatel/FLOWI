@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.flowi.gastos",
       "sha256_cert_fingerprints": [
-        "C3:CE:F9:C0:59:1A:B3:0C:89:66:AC:AB:A5:70:A3:F0:02:AF:CD:58:36:50:C0:D2:85:51:80:72:CE:A6:01:F7"
+        "C3:CE:F9:C0:59:1A:B3:0C:89:66:AC:AB:A5:70:A3:F0:02:AF:CD:58:36:50:C0:D2:85:51:80:72:CE:A6:01:F7",
+        "DB:AF:D2:73:DB:B0:02:F8:5E:46:7C:E5:49:05:1E:4A:17:E7:E1:EC:36:71:AA:4F:F8:4D:9A:0D:70:17:2C:1F"
       ]
     }
   }
