@@ -23,7 +23,7 @@ import { AccountState, KIND_LABEL, accountPeriod, accountStates, netWorth } from
 import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
 import { getLocalMonthString } from '@/lib/dateUtils';
 import { businessMoneyByAccount } from '@/lib/business';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 
 import { MONEY_TEXT, toneOf } from '@/lib/moneyTone';
 import { PageTourButton } from '@/components/tour/PageTourButton';
@@ -36,13 +36,13 @@ export default function CuentasPage() {
   const { transactions } = useExpenses();
   const { investments } = useInvestments();
   const { debts, refresh: refreshDebts } = useDebts();
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   // Las cuentas pueden tener centavos (como en la app del banco): se muestran solo si los hay
   const fmt = (n: number) => {
     const v = Math.round(n * 100) / 100;
     const cents = Math.abs(v % 1) > 0.004;
     try {
-      return new Intl.NumberFormat('es-CO', { style: 'currency', currency, minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: 2 }).format(v);
+      return new Intl.NumberFormat(currentLocale(), { style: 'currency', currency, currencyDisplay: 'narrowSymbol', minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: 2 }).format(v);
     } catch { return formatCurrency(v, currency); }
   };
 

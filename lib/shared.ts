@@ -277,12 +277,13 @@ export function chargeMessage<T extends TxLike>(
   person: PersonBalance<T>,
   fmt: (n: number) => string,
   myName?: string,
+  locale: string = 'es-CO',
 ): string {
   const pending = person.entries.filter(e => e.toMe && !e.settled);
   const first = person.name.split(/\s+/)[0];
   const lines = pending.slice(0, 10).map(e => {
     const what = e.tx.description?.trim() || e.tx.category;
-    const when = e.date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+    const when = e.date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
     // Con quién más se compartió (sin contar a esta persona)
     const others = (e.tx.shared?.people || []).filter((_, i) => i !== e.index).map(p => p.name.split(/\s+/)[0]).filter(Boolean);
     const withWho = others.length ? ` · también con ${others.slice(0, 3).join(', ')}` : '';

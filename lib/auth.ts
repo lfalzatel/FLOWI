@@ -2,6 +2,8 @@ import { signInWithPopup, signOut as firebaseSignOut, signInAnonymously, linkWit
 import { doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { setDoc } from './db';
 import { auth, db, googleProvider } from './firebase';
+import { detectLang } from './i18n';
+import { defaultCurrency } from './format';
 
 export interface KnownAccount {
   uid: string;
@@ -59,7 +61,7 @@ export async function processGoogleUser(user: any) {
       photoURL:  user.photoURL || '',
       // El rol de administrador se asigna desde "Gestionar usuarios" y queda guardado en el perfil
       role:      'Usuario',
-      currency:  'COP',
+      currency:  defaultCurrency(detectLang()),
       createdAt: serverTimestamp(),
     });
   } else {

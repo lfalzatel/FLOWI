@@ -66,7 +66,7 @@ export function DraftRecovery({ onVoice, onPhotos, onExpense }: {
     else onExpense(f.draft);
   };
 
-  const money = (n: number) => formatCurrency(n, profile?.currency || 'COP');
+  const money = (n: number) => formatCurrency(n, profile?.currency);
   let title = '', text = '';
   if (found.kind === 'voice') {
     const n = found.draft.results.length;

@@ -38,7 +38,7 @@ import { findRepeatedPayment, repeatedPaymentText } from '@/lib/repeatedPayment'
 import { ReceiptText, Users } from 'lucide-react';
 import { SharedExpenseEditor, SharedDraft, emptySharedDraft, draftAmounts } from '@/components/forms/SharedExpenseEditor';
 import { SharedInfo, equalShares, knownPeople, personKey } from '@/lib/shared';
-import { formatCurrency, hasCents, roundMoney } from '@/lib/format';
+import { defaultCurrency, formatCurrency, hasCents, roundMoney } from '@/lib/format';
 import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { useFriends } from '@/components/FriendsProvider';
 import { useSharedLinks } from '@/components/SharedLinksProvider';
@@ -402,8 +402,8 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     }
   }, [transactionToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const fmt = (n: number) => formatCurrency(n, profile?.currency || 'COP');
-  const currency = profile?.currency || 'COP';
+  const fmt = (n: number) => formatCurrency(n, profile?.currency);
+  const currency = profile?.currency || defaultCurrency();
   const cents = hasCents(currency);
   const amountNum = roundMoney(evalAmount(amount) ?? 0, currency);
   const amountHasOp = hasOperator(amount);

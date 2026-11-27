@@ -11,7 +11,7 @@ import { CommitmentsCard } from '@/components/dashboard/CommitmentsCard';
 import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
 import { CategoryIcon } from '@/components/CategoryIcon';
 import { findCatalogEntry } from '@/lib/categories';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { CommitmentsSummary, PaidCommitment, getCommitmentsForMonth, monthKey } from '@/lib/commitments';
 import { getDateFromISOWeek, getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 
@@ -30,7 +30,7 @@ export function CommitmentsView({ onOpenReminders }: { onOpenReminders: () => vo
   const { reminders, loading: remLoading } = useReminders();
   const { debts } = useDebts();
   const skips = profile?.commitmentSkips;
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const fmt = (n: number) => formatCurrency(n, currency);
 
   const [filterType, setFilterType] = useState<FilterType>('month');

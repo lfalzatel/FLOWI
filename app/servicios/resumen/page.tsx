@@ -19,7 +19,7 @@ import { createCategoryResolver } from '@/lib/categoryGroups';
 import { findCatalogEntry } from '@/lib/categories';
 import { buildMonthSummary, shiftMonth } from '@/lib/monthSummary';
 import { getLocalMonthString } from '@/lib/dateUtils';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 
 import { PageTourButton } from '@/components/tour/PageTourButton';
 export default function ResumenPage() {
@@ -30,7 +30,7 @@ export default function ResumenPage() {
   const { transactions, loadingTransactions } = useData();
   const { allCategories } = useCategories();
   const resolve = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const fmt = (n: number) => formatCurrency(n, currency);
 
   // Por defecto el mes pasado (el resumen "cerrado"); se puede ir a cualquier mes

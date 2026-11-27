@@ -33,7 +33,7 @@ export function TransactionList({ transactions, limit, onEdit, animationKey, col
   const { theme } = useTheme();
   const { allCategories } = useCategories();
   const { profile } = useAuth();
-  const money = (n: number) => formatCurrency(n, profile?.currency || 'COP');
+  const money = (n: number) => formatCurrency(n, profile?.currency);
   const isCyberpunk = theme === 'cyberpunk' || theme === 'kiloCode';
   const items = limit ? transactions.slice(0, limit) : transactions;
 

@@ -22,7 +22,7 @@ import { InvestmentMovements } from '@/components/investments/InvestmentMovement
 import { SavingsFormModal } from '@/components/investments/SavingsFormModal';
 import { InvestmentKindSheet, KIND_ICON } from '@/components/investments/InvestmentKindSheet';
 import { Investment, InvestmentKind, addExpense, deleteInvestment, updateInvestment } from '@/lib/firestore';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { KIND_INFO, dayKey, formatDay, investmentStatus, investmentValue, kindOf, parseDay, portfolioSummary, whenText } from '@/lib/investments';
 
 
@@ -36,7 +36,7 @@ export default function InversionesPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
   const { investments, loading, error } = useInvestments();
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
 
   const [choosingKind, setChoosingKind] = useState(false);
   const [newKind, setNewKind] = useState<InvestmentKind | null>(null);

@@ -1,35 +1,32 @@
+import { currentLang } from '@/lib/i18n';
+import { defaultCurrency } from '@/lib/format';
+
 /**
  * Helper para detección inteligente de idioma de voz y moneda según
- * la región, zona horaria y configuración del navegador del usuario.
+ * el idioma de la app, la región, zona horaria y configuración del navegador.
  */
 
 export interface LocaleInfo {
-  language: string;  // p.ej. 'es-CO', 'es-ES', 'en-US'
+  language: string;  // p.ej. 'es-CO', 'es-ES', 'en-US', 'pt-PT'
   currency: string;  // p.ej. 'COP', 'EUR', 'USD', 'MXN'
 }
 
 export function detectUserLocaleAndCurrency(profileCurrency?: string): LocaleInfo {
-  let language = 'es-CO';
-  let currency = profileCurrency || 'COP';
+  const appLang = currentLang();
+  let language = appLang === 'en' ? 'en-US' : appLang === 'pt' ? 'pt-PT' : appLang === 'es-ES' ? 'es-ES' : 'es-CO';
+  let currency = profileCurrency || defaultCurrency(appLang);
 
   if (typeof window !== 'undefined') {
-    // 1. Detectar idioma del navegador/dispositivo
     const navLang = navigator.language || (navigator as any).userLanguage || 'es-CO';
-    if (navLang.startsWith('es-ES') || navLang.startsWith('es-EU')) {
-      language = 'es-ES';
-    } else if (navLang.startsWith('es-MX')) {
-      language = 'es-MX';
-    } else if (navLang.startsWith('en')) {
-      language = 'en-US';
-    } else {
-      language = navLang;
+    if (appLang === 'es') {
+      if (navLang.startsWith('es-MX')) language = 'es-MX';
+      else if (navLang.startsWith('es-')) language = navLang;
     }
 
-    // 2. Si el perfil no especifica moneda, inferirla por la zona horaria o locale
-    if (!profileCurrency) {
+    if (!profileCurrency && appLang !== 'es-ES' && appLang !== 'pt') {
       try {
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-        if (timeZone.startsWith('Europe/')) {
+        if (timeZone.startsWith('Europe/') || timeZone === 'Atlantic/Azores' || timeZone === 'Atlantic/Madeira' || timeZone === 'Atlantic/Canary') {
           currency = 'EUR';
         } else if (timeZone.includes('Bogota')) {
           currency = 'COP';
@@ -37,7 +34,7 @@ export function detectUserLocaleAndCurrency(profileCurrency?: string): LocaleInf
           currency = 'MXN';
         } else if (timeZone.startsWith('America/New_York') || timeZone.startsWith('America/Chicago') || timeZone.startsWith('America/Los_Angeles')) {
           currency = 'USD';
-        } else if (navLang.includes('ES')) {
+        } else if (navLang.toLowerCase().startsWith('es-es') || navLang.toLowerCase().startsWith('pt')) {
           currency = 'EUR';
         }
       } catch (e) {

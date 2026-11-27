@@ -6,7 +6,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { useDebts } from '@/hooks/useDebts';
 import { calculateDebtInterest, deleteDebt, monthlyInsuranceOf, nextDebtPaymentDate, updateDebt, type Debt } from '@/lib/firestore';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CreditCard, Plus, Check, Clock, Download, Calendar } from 'lucide-react';
@@ -257,7 +257,7 @@ export default function DeudasPage() {
             ))}
           </ul>
         )}
-        {payingCard && <TransferModal accounts={accounts} balances={balances} payCard={payingCard.account.id} owed={Math.max(0, -payingCard.balance - payingCard.movements.filter(m => m.kind === 'debt').reduce((s, m) => s - m.amount, 0))} currency={profile?.currency || 'COP'} onClose={() => setPayingCard(null)} />}
+        {payingCard && <TransferModal accounts={accounts} balances={balances} payCard={payingCard.account.id} owed={Math.max(0, -payingCard.balance - payingCard.movements.filter(m => m.kind === 'debt').reduce((s, m) => s - m.amount, 0))} currency={profile?.currency || defaultCurrency()} onClose={() => setPayingCard(null)} />}
         {sharedPay && <SharedPaymentModal tx={sharedPay.tx} index={sharedPay.index} onClose={() => setSharedPay(null)} />}
         </div>
 

@@ -17,7 +17,7 @@ import { SpendingHistoryModal } from '@/components/insights/SpendingHistoryModal
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { createCategoryResolver } from '@/lib/categoryGroups';
 import { findCatalogEntry } from '@/lib/categories';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import type { Transaction } from '@/lib/firestore';
 import { PageTourButton } from '@/components/tour/PageTourButton';
@@ -35,7 +35,7 @@ export default function HormigaPage() {
   const { transactions, loadingTransactions } = useData();
   const { allCategories } = useCategories();
   const resolve = useMemo(() => createCategoryResolver(allCategories), [allCategories]);
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const fmt = (n: number) => formatCurrency(n, currency);
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 

@@ -16,7 +16,7 @@ import { ConfirmDialog } from '@/components/layout/ConfirmDialog';
 import { GoalFormModal } from '@/components/goals/GoalFormModal';
 import { GoalMovementSheet } from '@/components/goals/GoalMovementSheet';
 import { Goal, deleteGoal } from '@/lib/firestore';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { PageTourButton } from '@/components/tour/PageTourButton';
 import {
   PRIORITY_LABEL, allocateCapacity, formatMonthYear, formatMonthsText,
@@ -30,7 +30,7 @@ export default function MetasPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions } = useExpenses();
   const { goals, loading, error } = useGoals();
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Goal | null>(null);

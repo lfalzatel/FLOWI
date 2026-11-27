@@ -28,7 +28,7 @@ import { BudgetProjection } from '@/components/dashboard/BudgetProjection';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { getUserTransactions, Transaction } from '@/lib/firestore';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { getLocalDateString, getLocalMonthString, getISOWeekString } from '@/lib/dateUtils';
 
 import { PageTourButton } from '@/components/tour/PageTourButton';
@@ -96,7 +96,7 @@ export default function PresupuestosPage() {
   }, [filteredTransactions]);
 
   const globalBudget = profile?.budget || 0;
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const percentageSpent = globalBudget > 0 ? Math.min(Math.round((totalSpentFiltered / globalBudget) * 100), 100) : 0;
   const isOverGlobalBudget = globalBudget > 0 && totalSpentFiltered > globalBudget;
   const globalRemaining = globalBudget - totalSpentFiltered;

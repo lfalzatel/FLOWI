@@ -12,7 +12,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { addExpense } from '@/lib/firestore';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { Cell, ColumnMap, StatementRow, buildRows, guessColumns, rowToTransaction } from '@/lib/statementImport';
 import { readPdfTable } from '@/lib/pdfTable';
 
@@ -26,7 +26,7 @@ export default function ImportarPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, refresh } = useExpenses();
   const { allCategories, expenseCategories, incomeCategories } = useCategories();
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const fmt = (n: number) => formatCurrency(n, currency);
 
   const fileRef = useRef<HTMLInputElement>(null);

@@ -52,11 +52,11 @@ export default function PlanesPage() {
   const { lang } = useT();
   const intlAvailable = paddleReady();
   const [intl, setIntl] = useState(false);
-  useEffect(() => { if (intlAvailable && profile) setIntl((profile.currency && profile.currency !== 'COP') || lang === 'en'); }, [intlAvailable, profile?.currency, lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (intlAvailable && profile) setIntl((profile.currency && profile.currency !== 'COP') || lang !== 'es'); }, [intlAvailable, profile?.currency, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const [intlSelected, setIntlSelected] = useState<'mensual' | 'anual'>('anual');
   const intlPlan = INTL_PLANS.find(p => p.id === intlSelected)!;
   // Euros como en Europa (4,99 € / €4.99); dólares según el idioma (US$ 4,99 / $4.99)
-  const money = (n: number, c: 'EUR' | 'USD') => new Intl.NumberFormat(c === 'EUR' ? (lang === 'en' ? 'en-IE' : 'es-ES') : currentLocale(), { style: 'currency', currency: c }).format(n);
+  const money = (n: number, c: 'EUR' | 'USD') => new Intl.NumberFormat(c === 'EUR' ? (lang === 'en' ? 'en-IE' : lang === 'pt' ? 'pt-PT' : 'es-ES') : currentLocale(), { style: 'currency', currency: c }).format(n);
   const payIntl = async () => {
     if (user?.isAnonymous) { setNeedLink(true); return; }
     if (!user) return;
@@ -64,7 +64,7 @@ export default function PlanesPage() {
     setMessage(null);
     try {
       await openPaddleCheckout({
-        plan: intlSelected, uid: user.uid, email: user.email, lang: lang === 'en' ? 'en' : 'es',
+        plan: intlSelected, uid: user.uid, email: user.email, lang: lang === 'en' ? 'en' : lang === 'pt' ? 'pt' : 'es',
         onDone: () => setMessage({ ok: true, text: tr('¡Pago recibido! Premium se activa en unos segundos.') }),
       });
     } catch (e) {

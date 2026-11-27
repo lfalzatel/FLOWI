@@ -47,7 +47,7 @@ function loadPaddle(onEvent: (e: any) => void): Promise<any> {
  * Abre la ventana de pago de Paddle. `onDone` se llama cuando el pago termina en Paddle; Premium lo activa
  * el servidor unos segundos después (cuando le llega el aviso firmado de Paddle).
  */
-export async function openPaddleCheckout(opts: { plan: IntlPlanId; uid: string; email?: string | null; lang: 'es' | 'en'; onDone: () => void; onClose?: () => void }) {
+export async function openPaddleCheckout(opts: { plan: IntlPlanId; uid: string; email?: string | null; lang: 'es' | 'en' | 'pt'; onDone: () => void; onClose?: () => void }) {
   const P = await loadPaddle((e) => {
     if (e?.name === 'checkout.completed') opts.onDone();
     if (e?.name === 'checkout.closed') opts.onClose?.();

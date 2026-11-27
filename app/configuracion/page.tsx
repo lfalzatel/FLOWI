@@ -27,7 +27,7 @@ import { PlanCard } from '@/components/plans/PlanCard';
 import { db } from '@/lib/firebase';
 import { doc } from 'firebase/firestore';
 import { updateDoc } from '@/lib/db';
-import { CURRENCIES } from '@/lib/format';
+import { CURRENCIES, defaultCurrency } from '@/lib/format';
 import { 
   ArrowLeft, Sun, Moon, Terminal, Layers, Zap, Palette,
   User, Wallet, Bell, Shield, ShieldCheck, RefreshCw, Sparkles,
@@ -1007,7 +1007,7 @@ export default function ConfigPage() {
                 </div>
               </div>
               <select
-                value={profile?.currency || 'COP'}
+                value={profile?.currency || defaultCurrency()}
                 onChange={async (e) => {
                   if (user) {
                     await updateDoc(doc(db, 'users', user.uid), { currency: e.target.value });

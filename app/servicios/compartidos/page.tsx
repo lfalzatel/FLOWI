@@ -26,7 +26,7 @@ export default function CompartidosPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loadingTransactions } = useData();
-  const fmt = (n: number) => formatCurrency(n, profile?.currency || 'COP');
+  const fmt = (n: number) => formatCurrency(n, profile?.currency);
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 
   const [open, setOpen] = useState<string | null>(null);
@@ -130,7 +130,7 @@ export default function CompartidosPage() {
             <div className="flex flex-wrap gap-2 pt-1">
               {pendingToMe.length > 0 && (
                 <>
-                  {owes && <a href={whatsappUrl(chargeMessage(b, fmt, profile?.name))} target="_blank" rel="noopener noreferrer"
+                  {owes && <a href={whatsappUrl(chargeMessage(b, fmt, profile?.name, currentLocale()))} target="_blank" rel="noopener noreferrer"
                      className={`flex-1 min-w-[8rem] py-2 text-xs font-semibold bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 inline-flex items-center justify-center gap-1.5 ${btn}`}>
                     <MessageCircle className="w-3.5 h-3.5" /> Cobrar {fmt(b.net)} por WhatsApp
                   </a>}

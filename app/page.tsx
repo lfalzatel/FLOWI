@@ -44,7 +44,7 @@ import { isGoalDone } from '@/lib/goals';
 import { buildDemoData } from '@/lib/demoData';
 import { askForNotifications, CHANGED_EVENT, notificationsState } from '@/lib/notifPrompt';
 import { getCommitments } from '@/lib/commitments';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { AppTour, TourOffer, TOUR_DONE_KEY, readTourVoicePref } from '@/components/tour/AppTour';
 import { AddExpenseModal } from '@/components/forms/AddExpenseModal';
 import { ExportReportModal } from '@/components/forms/ExportReportModal';
@@ -296,7 +296,7 @@ export default function DashboardPage() {
       reminders: myReminders.length, seenTips, hasAi: !!getAiKey(), hasFriends: friendsReady ? friendList.length > 0 : undefined,
     },
     showSupport: !demo && !playStore && (profile?.activeDays ?? 0) >= 5,
-    unusual: demo ? [] : detectUnusualSpending(transactions, new Date(), (profile?.currency || 'COP') === 'COP' ? 30000 : 10),
+    unusual: demo ? [] : detectUnusualSpending(transactions, new Date(), (profile?.currency || defaultCurrency()) === 'COP' ? 30000 : 10),
     premiumEnd: demo || playStore ? null : premiumEndInfo(profile),
     formatMoney: (n) => formatCurrency(n, profile?.currency), skipped: skippedActions,
   });

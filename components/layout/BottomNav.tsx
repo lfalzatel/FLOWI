@@ -23,6 +23,7 @@ import { InvestmentKindSheet } from '@/components/investments/InvestmentKindShee
 import type { InvestmentKind } from '@/lib/firestore';
 import { QuickAction, QuickActionsSheet, QuickContext } from '@/components/layout/QuickActionsSheet';
 import { DraftRecovery } from '@/components/layout/DraftRecovery';
+import { defaultCurrency } from '@/lib/format';
 import { useData } from '@/components/DataProvider';
 import type { Transaction } from '@/lib/firestore';
 import type { ExpenseDraft, VoiceDraft } from '@/lib/drafts';
@@ -297,7 +298,7 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       {quick === 'nota' && <NoteModal note={null} onClose={closeQuick} onSuccess={closeQuick} />}
       {/* Inversión: primero se elige el tipo (CDT, ahorro con intereses, acciones y fondos o pensión) */}
       {quick === 'inversion' && !investKind && <InvestmentKindSheet onPick={setInvestKind} onClose={closeQuick} />}
-      {quick === 'inversion' && investKind === 'cdt' && <InvestmentFormModal currency={profile?.currency || 'COP'} onClose={closeQuick} />}
+      {quick === 'inversion' && investKind === 'cdt' && <InvestmentFormModal currency={profile?.currency || defaultCurrency()} onClose={closeQuick} />}
       {quick === 'inversion' && investKind && investKind !== 'cdt' && <SavingsFormModal kind={investKind} onClose={closeQuick} />}
 
       {/* Modal Tradicional o Pre-llenado por Voz */}

@@ -32,7 +32,7 @@ export default function RecibosPage() {
   const router = useRouter();
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loadingTransactions } = useData();
-  const fmt = (n: number) => formatCurrency(n, profile?.currency || 'COP');
+  const fmt = (n: number) => formatCurrency(n, profile?.currency);
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);
 
   const [query, setQuery] = useState('');

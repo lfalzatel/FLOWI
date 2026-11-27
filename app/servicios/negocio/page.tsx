@@ -17,7 +17,7 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { costLabel } from '@/components/forms/SaleCostsEditor';
 import { monthNameOf, shiftMonth } from '@/lib/monthSummary';
 import { getLocalMonthString } from '@/lib/dateUtils';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { usePlan } from '@/lib/plans';
 import type { Transaction } from '@/lib/firestore';
 
@@ -31,7 +31,7 @@ export default function NegocioPage() {
   const { user, profile, loading: authLoading } = useAuth();
   const { transactions, loadingTransactions } = useData();
   const { premium } = usePlan();
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const fmt = (n: number) => formatCurrency(n, currency);
 
   const thisMonth = getLocalMonthString();

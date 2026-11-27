@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { getLock, LOCK_EVENT } from '@/lib/appLock';
 import { getAiKey } from '@/lib/aiAssist';
+import { defaultCurrency } from '@/lib/format';
 import { usePlayStore } from '@/hooks/usePlayStore';
 
 // Inicio de Configuración: estado de seguridad, buscador y un mosaico por sección. Cada mosaico abre su
@@ -52,7 +53,7 @@ export function SettingsHub({ onOpen, isTech }: { onOpen: (k: CfgKey) => void; i
       { key: 'cuenta', icon: User, color: 'text-cyan-400 bg-cyan-500/10', title: tr('Cuenta y perfil'),
         status: profile?.name || user?.displayName || tr('Tu perfil'), words: 'cuenta perfil nombre foto telefono tutorial' },
       { key: 'finanzas', icon: Wallet, color: 'text-lime-400 bg-lime-500/10', title: tr('Finanzas'),
-        status: `${tr('Moneda')}: ${profile?.currency || 'COP'}`, words: 'moneda presupuesto finanzas mes' },
+        status: `${tr('Moneda')}: ${profile?.currency || defaultCurrency()}`, words: 'moneda presupuesto finanzas mes' },
       { key: 'sonidos', icon: Volume2, color: 'text-pink-400 bg-pink-500/10', title: tr('Sonidos y animaciones'),
         status: tr('Sonidos de cada acción'), words: 'sonidos voz efectos confeti' },
       { key: 'gestion', icon: LayoutGrid, color: 'text-orange-400 bg-orange-500/10', title: tr('Categorías'),

@@ -1,5 +1,5 @@
 'use client';
-import { tr } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSharedLinks } from '@/components/SharedLinksProvider';
@@ -13,7 +13,7 @@ export function IncomingShared({ isTech, compact = false }: { isTech: boolean; c
   const { profile } = useAuth();
   const { incoming, deletedForMe, accept, reject } = useSharedLinks();
   const [busy, setBusy] = useState<string | null>(null);
-  const fmt = (n: number) => formatCurrency(n, profile?.currency || 'COP');
+  const fmt = (n: number) => formatCurrency(n, profile?.currency);
   if (!incoming.length && !deletedForMe.length) return null;
   const btn = `px-2.5 py-1 text-[11px] font-semibold border ${isTech ? 'rounded-none' : 'rounded-full'}`;
   const card = `p-3 border ${isTech ? 'rounded-none' : 'rounded-xl'}`;
@@ -27,7 +27,7 @@ export function IncomingShared({ isTech, compact = false }: { isTech: boolean; c
     <div className={compact ? 'space-y-2 mb-2' : 'space-y-2'}>
       {incoming.map(l => {
         const who = l.ownerName.split(/\s+/)[0];
-        const when = new Date(l.date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+        const when = new Date(l.date).toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
         return (
           <div key={l.id} className={`${card} border-accent/40 bg-accent/5`}>
             <p className="text-sm text-text-primary leading-snug">

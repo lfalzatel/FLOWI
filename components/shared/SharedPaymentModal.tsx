@@ -1,5 +1,5 @@
 'use client';
-import { tr } from '@/lib/i18n';
+import { currentLocale, tr } from '@/lib/i18n';
 import { useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Shell, useStyles } from '@/components/accounts/AccountModals';
@@ -7,7 +7,7 @@ import { AmountKeypad } from '@/components/forms/AmountKeypad';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useAuth } from '@/hooks/useAuth';
 import { updateExpense, type Transaction } from '@/lib/firestore';
-import { formatCurrency, hasCents } from '@/lib/format';
+import { defaultCurrency, formatCurrency, hasCents } from '@/lib/format';
 import { displayExpr, evalAmount } from '@/lib/amountExpr';
 import { getLocalDateString } from '@/lib/dateUtils';
 import { paidOf, remainingOf, withAbsorbed, withPayment, withoutPayment } from '@/lib/shared';
@@ -29,7 +29,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
   const s = useStyles();
   const { profile } = useAuth();
   const { accounts } = useAccounts();
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const cents = hasCents(currency);
   const fmt = (n: number) => formatCurrency(n, currency);
   const shared = tx.shared!;
@@ -101,7 +101,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
           const others = shared.people.filter((_, i) => i !== index).map(p => p.name.split(/\s+/)[0]).filter(Boolean);
           return (
             <div className="text-[11px] text-text-muted mt-1 space-y-0.5">
-              <p>{d.toLocaleString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })} · {tx.category}</p>
+              <p>{d.toLocaleString(currentLocale(), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })} · {tx.category}</p>
               <p>{toMe ? 'Pagaste' : `Pagó ${first}`} <b className="text-text-secondary">{fmt(shared.total)}</b>
                 {toMe && (payAcc || tx.paymentMethod) ? <> con <b className="text-text-secondary">{payAcc?.name || tx.paymentMethod}</b></> : null}</p>
               {others.length > 0 && <p>También compartido con {others.join(', ')}</p>}
@@ -174,7 +174,7 @@ export function SharedPaymentModal({ tx, index, initialAmount, initialWhen, onCl
             {person.payments.map((x, j) => (
               <li key={j} className="flex items-center gap-2 text-xs">
                 <span className="text-text-muted flex-1 min-w-0 truncate">
-                  {new Date(x.at).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
+                  {new Date(x.at).toLocaleString(currentLocale(), { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}
                   {x.accountId ? ` · ${active.find(a => a.id === x.accountId)?.name || 'cuenta'}` : ''}
                 </span>
                 <span className="font-semibold text-accent tabular-nums">{fmt(x.amount)}</span>

@@ -12,7 +12,7 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { PageTourButton } from '@/components/tour/PageTourButton';
 import { Card, useThemeKind } from '@/components/ui';
-import { formatCurrency } from '@/lib/format';
+import { defaultCurrency, formatCurrency } from '@/lib/format';
 import { formatCompactCOP } from '@/lib/chartFormat';
 import { getDateFromISOWeek, getISOWeekString, getLocalDateString, getLocalMonthString } from '@/lib/dateUtils';
 import { DateFilter, FilterType } from '@/components/dashboard/DateFilter';
@@ -34,7 +34,7 @@ export default function CalendarioPage() {
   const { transactions, loadingTransactions } = useData();
   const commitments = useCommitments(transactions);
   const real = useRealMoney();
-  const currency = profile?.currency || 'COP';
+  const currency = profile?.currency || defaultCurrency();
   const fmt = (n: number) => formatCurrency(n, currency);
   const compact = (n: number) => (currency === 'COP' ? formatCompactCOP(n) : fmt(n));
   useEffect(() => { if (!authLoading && !user) router.push('/login'); }, [authLoading, user, router]);

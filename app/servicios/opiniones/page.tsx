@@ -1,5 +1,5 @@
 'use client';
-import { tr, lazyT } from '@/lib/i18n';
+import { currentLocale, tr, lazyT } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -119,7 +119,7 @@ export default function OpinionesPage() {
             <ul className="space-y-2">
               {mine.map(f => (
                 <li key={f.id} className={`glass-card p-3 text-xs space-y-1 ${box}`}>
-                  <p className="text-text-muted">{typeOf(f.type).emoji} {tr(typeOf(f.type).label)} · {tr(f.area)}{f.createdAt ? ` · ${f.createdAt.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}` : ''}
+                  <p className="text-text-muted">{typeOf(f.type).emoji} {tr(typeOf(f.type).label)} · {tr(f.area)}{f.createdAt ? ` · ${f.createdAt.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}` : ''}
                     {f.status === 'hecho' ? tr(' · ✅ Resuelto') : f.status === 'visto' ? tr(' · 👀 Visto') : ''}</p>
                   <p className="text-text-primary whitespace-pre-wrap">{f.text}</p>
                   {f.reply && <p className="text-accent">💬 FLOWI: {f.reply}</p>}
@@ -249,7 +249,7 @@ function AdminPanel({ isTech }: { isTech: boolean }) {
             {shown.map(f => (
               <li key={f.id} className={`glass-card p-3 text-xs space-y-1.5 ${box}`}>
                 <p className="text-text-muted">{typeOf(f.type).emoji} {tr(typeOf(f.type).label)} · <b className="text-text-secondary">{tr(f.area)}</b> · {f.userName}
-                  {f.rating ? ` · ${'⭐'.repeat(f.rating)}` : ''}{f.createdAt ? ` · ${f.createdAt.toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}` : ''}</p>
+                  {f.rating ? ` · ${'⭐'.repeat(f.rating)}` : ''}{f.createdAt ? ` · ${f.createdAt.toLocaleString(currentLocale(), { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}` : ''}</p>
                 <p className="text-text-primary whitespace-pre-wrap">{f.text}</p>
                 {f.reply && <p className="text-accent">💬 {f.reply}</p>}
                 {replying?.id === f.id ? (
