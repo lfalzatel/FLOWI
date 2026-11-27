@@ -4,9 +4,9 @@
 // - "12000+3500" se leía raro ("tres, cinco, cero, cero"): se dice "12000 más 3500".
 // - Los puntos o comas de miles ("50.480", "1,500,000") se quitan para que lea el número entero.
 // - "%" y "50/30/20" se dicen con palabras.
-export function speechText(text: string, lang: 'es' | 'en' = 'es'): string {
-  const plus = lang === 'en' ? ' plus ' : ' más ';
-  const pct = lang === 'en' ? ' percent' : ' por ciento';
+export function speechText(text: string, lang: 'es' | 'en' | 'pt' = 'es'): string {
+  const plus = lang === 'en' ? ' plus ' : lang === 'pt' ? ' mais ' : ' más ';
+  const pct = lang === 'en' ? ' percent' : lang === 'pt' ? ' por cento' : ' por ciento';
   return text
     .replace(/\bFLOWI\b/g, 'Flowi')
     .replace(/(\d)\s*\+\s*(?=\d)/g, `$1${plus}`)

@@ -1,5 +1,5 @@
 'use client';
-import { pickAppVoice, appSpeechLang } from '@/lib/voiceParser';
+import { pickAppVoice, appSpeechLang, appSpeechLocale } from '@/lib/voiceParser';
 import { tr, lazyT } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -52,10 +52,10 @@ export function AiConnectGuide({ onClose }: { onClose: () => void }) {
     synth.cancel();
     if (!voice) return;
     const speak = () => {
-      const u = new SpeechSynthesisUtterance(speechText(`${step.title.replace(/^\d+\.\s*/, '')}. ${step.text}`, appSpeechLang() === 'en' ? 'en' : 'es'));
+      const u = new SpeechSynthesisUtterance(speechText(`${step.title.replace(/^\d+\.\s*/, '')}. ${step.text}`, appSpeechLang()));
       const v = pickAppVoice();
       if (v) u.voice = v;
-      u.lang = v?.lang || (appSpeechLang() === 'en' ? 'en-US' : 'es-CO');
+      u.lang = v?.lang || appSpeechLocale();
       u.rate = 1;
       synth.speak(u);
     };

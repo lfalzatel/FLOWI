@@ -1,5 +1,5 @@
 'use client';
-import { pickAppVoice, appSpeechLang } from '@/lib/voiceParser';
+import { pickAppVoice, appSpeechLang, appSpeechLocale } from '@/lib/voiceParser';
 import { tr } from '@/lib/i18n';
 import Link from 'next/link';
 import { HOME_TOUR, TourStep } from './tours';
@@ -198,10 +198,10 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
     if (!voice) return;
     const speak = () => {
       // En mayúsculas la voz lo deletrea ("F, L, O…"); así lo lee como palabra
-      const u = new SpeechSynthesisUtterance(speechText(`${step.title.replace(/^\d+\.\s*/, '')}. ${step.text}`, appSpeechLang() === 'en' ? 'en' : 'es'));
+      const u = new SpeechSynthesisUtterance(speechText(`${step.title.replace(/^\d+\.\s*/, '')}. ${step.text}`, appSpeechLang()));
       const v = pickAppVoice();
       if (v) u.voice = v;
-      u.lang = v?.lang || (appSpeechLang() === 'en' ? 'en-US' : 'es-CO');
+      u.lang = v?.lang || appSpeechLocale();
       u.rate = 1;
       synth.speak(u);
     };

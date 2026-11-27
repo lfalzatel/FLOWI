@@ -2,6 +2,7 @@
 import { tr, useT } from '@/lib/i18n';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { LangMenu } from './LangMenu';
 import { ProfileCapsule } from './ProfileCapsule';
 import { X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -31,7 +32,6 @@ export function Header() {
   const headerRef = useRef<HTMLElement>(null);
   const [showLogoModal, setShowLogoModal] = useState(false);
   const { theme } = useTheme();
-  const { lang, setLang } = useT();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   // Publica la altura del encabezado (--header-h) para que los filtros fijos queden justo debajo
@@ -286,18 +286,8 @@ export function Header() {
           </svg>
         </a>
 
-        {/* Cambio rápido de idioma (español ↔ inglés); muestra el idioma actual */}
-        <button
-          type="button"
-          onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
-          className={`relative w-9 h-9 bg-glass border border-glass-border flex items-center justify-center
-                     hover:bg-glass-hover transition-colors text-[11px] font-bold tracking-wide text-text-secondary
-                     rounded-xl ${isTechTheme ? 'font-mono' : ''}`}
-          title={lang === 'es' ? 'Switch to English' : 'Cambiar a español'}
-          aria-label={lang === 'es' ? 'Switch to English' : 'Cambiar a español'}
-        >
-          {lang === 'es' ? 'ES' : 'EN'}
-        </button>
+        {/* Cambio rápido de idioma: menú con los cuatro idiomas; muestra el actual */}
+        <LangMenu isTech={isTechTheme} />
 
         {/* Notification bell */}
         <div className="relative">

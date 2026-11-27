@@ -43,9 +43,16 @@ export interface ParsedVoiceCommand {
 /**
  * Síntesis de voz nativa del navegador para responder al usuario en voz alta
  */
-/** Idioma de la app (lo pone LanguageProvider en <html lang>): 'en' o 'es'. */
-export function appSpeechLang(): 'en' | 'es' {
-  return typeof document !== 'undefined' && document.documentElement.lang === 'en' ? 'en' : 'es';
+/** Idioma de la app (lo pone LanguageProvider en <html lang>): 'en', 'pt' o 'es' (también es-ES). */
+export function appSpeechLang(): 'en' | 'es' | 'pt' {
+  const l = typeof document !== 'undefined' ? document.documentElement.lang : 'es';
+  return l === 'en' ? 'en' : l.startsWith('pt') ? 'pt' : 'es';
+}
+
+/** Idioma para la voz y el dictado: en-US, pt-PT, es-ES o el que se pida (por defecto es-CO). */
+export function appSpeechLocale(fallback: string = 'es-CO'): string {
+  const l = typeof document !== 'undefined' ? document.documentElement.lang : '';
+  return l === 'en' ? 'en-US' : l.startsWith('pt') ? 'pt-PT' : l === 'es-ES' ? 'es-ES' : fallback;
 }
 
 /**
@@ -73,11 +80,11 @@ export function speakText(text: string, lang: string = 'es-CO', onDone?: () => v
   }
   try {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(speechText(text, appSpeechLang() === 'en' ? 'en' : 'es'));
+    const utterance = new SpeechSynthesisUtterance(speechText(text, appSpeechLang()));
     // Con la app en inglés se habla en inglés (los textos ya vienen traducidos con tr)
     const voice = pickAppVoice();
     if (voice) utterance.voice = voice;
-    utterance.lang = voice?.lang || (appSpeechLang() === 'en' ? 'en-US' : lang);
+    utterance.lang = voice?.lang || appSpeechLocale(lang);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
 

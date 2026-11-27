@@ -34,7 +34,7 @@ import {
   ChevronRight, ChevronDown, ChevronUp, Lock, Key, Globe, Type, 
   Calendar, PieChart, Download, Trash2, 
   FileText, Settings, Volume2, Smartphone, MessageSquare, Music, Compass, Languages } from 'lucide-react';
-import { useT, tr, trTech } from '@/lib/i18n';
+import { useT, tr, trTech, LANGS, LANG_NAMES } from '@/lib/i18n';
 
 // Título y tutorial de cada sección de Configuración
 const CFG_TITLE: Record<CfgKey, string> = {
@@ -937,8 +937,8 @@ export default function ConfigPage() {
                   <p className={`text-[10px] normal-case ${isTechTheme ? 'font-mono text-accent/60' : 'text-text-muted'}`}>{t('Se guarda en este celular')}</p>
                 </div>
               </div>
-              <div className="flex shrink-0 gap-1">
-                {([['es', 'Español'], ['en', 'English']] as const).map(([code, name]) => (
+              <div className="grid grid-cols-2 shrink-0 gap-1">
+                {LANGS.map(code => [code, LANG_NAMES[code]] as const).map(([code, name]) => (
                   <button key={code} type="button" onClick={() => setLang(code)} aria-pressed={lang === code}
                           className={`px-2.5 py-1.5 text-xs font-semibold border normal-case ${isTechTheme ? 'rounded-none' : 'rounded-lg'} ${lang === code ? 'border-accent bg-accent/15 text-accent' : 'border-glass-border text-text-secondary'}`}>
                     {name}

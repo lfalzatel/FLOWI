@@ -64,7 +64,7 @@ export default function PlanesPage() {
     setMessage(null);
     try {
       await openPaddleCheckout({
-        plan: intlSelected, uid: user.uid, email: user.email, lang,
+        plan: intlSelected, uid: user.uid, email: user.email, lang: lang === 'en' ? 'en' : 'es',
         onDone: () => setMessage({ ok: true, text: tr('¡Pago recibido! Premium se activa en unos segundos.') }),
       });
     } catch (e) {
