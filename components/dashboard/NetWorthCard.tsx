@@ -43,7 +43,9 @@ export function NetWorthCard({ transactions, currency = 'COP', variant = 'row' }
 
   const tile = (
     <button type="button" onClick={() => setOpen(true)} data-tour="networth"
-            className="glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 transition-all duration-300 min-w-0">
+            // Misma entrada animada que Gastos, Ingresos y Deudas (aparece justo después de Deudas)
+            className="glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 animate-card-mix transition-all duration-300 min-w-0"
+            style={{ animationDelay: '0.45s' }}>
       <div className="flex items-center gap-2 mb-2">
         <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
           <Wallet className="w-3 h-3 text-accent" />
