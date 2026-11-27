@@ -130,14 +130,22 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   // Hora local "HH:MM"; por defecto la actual y editable para gastos pasados o futuros
   const [time, setTime] = useState(() => restoreDraft?.time || toTimeString(new Date()));
 
-  // Borrador: si la app se recarga mientras se llena un gasto nuevo, se puede recuperar al volver.
-  // Al cerrar el formulario (guardar o cancelar) el borrador se borra.
+  // Borrador: si la app se recarga mientras se llena un gasto o ingreso (nuevo o editando uno que ya
+  // existía), se puede recuperar al volver. Al cerrar el formulario (guardar o cancelar) se borra.
+  // Al editar, solo se guarda si se cambió algo (editBase = como estaba al abrirlo).
+  const editBase = useRef<string | null>(null);
   useEffect(() => {
-    if (editTarget) return;
+    const now: ExpenseDraft = { type, amount, description, category, merchant, paymentMethod, isFixed, date, time };
+    if (editTarget) {
+      if (editBase.current === null || !transactionToEdit?.id) return; // todavía cargando los datos
+      if (JSON.stringify(now) === editBase.current) { clearDraft('expense'); return; }
+      saveDraft<ExpenseDraft>('expense', { ...now, editId: transactionToEdit.id });
+      return;
+    }
     if (!amount && !description.trim()) { clearDraft('expense'); return; }
-    saveDraft<ExpenseDraft>('expense', { type, amount, description, category, merchant, paymentMethod, isFixed, date, time });
-  }, [editTarget, type, amount, description, category, merchant, paymentMethod, isFixed, date, time]);
-  useEffect(() => () => { if (!editTarget) clearDraft('expense'); }, [editTarget]);
+    saveDraft<ExpenseDraft>('expense', now);
+  }, [editTarget, type, amount, description, category, merchant, paymentMethod, isFixed, date, time]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => clearDraft('expense'), []);
   const [loading, setLoading] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [showAllMerchants, setShowAllMerchants] = useState(false);
@@ -368,13 +376,31 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
       }
       setIsBusiness(transactionToEdit.business ?? isBusinessCategory(transactionToEdit.category, transactionToEdit.type));
 
+      let d0 = date, t0 = time;
       if (transactionToEdit.date) {
         const d = transactionToEdit.date instanceof Date ? transactionToEdit.date : transactionToEdit.date.toDate();
-        setDate(getLocalDateString(d));
-        setTime(toTimeString(d));
+        d0 = getLocalDateString(d); t0 = toTimeString(d);
+        setDate(d0);
+        setTime(t0);
+      }
+      // Cómo estaba al abrirlo (para saber si se cambió algo y guardar borrador)
+      const sh0 = transactionToEdit.type === 'gasto' ? transactionToEdit.shared : null;
+      editBase.current = JSON.stringify({
+        type: transactionToEdit.type,
+        amount: sh0 ? String(sh0.paidByMe ? sh0.total : transactionToEdit.amount) : transactionToEdit.amount.toString(),
+        description: transactionToEdit.description || '', category: transactionToEdit.category,
+        merchant: transactionToEdit.merchant || '', paymentMethod: transactionToEdit.paymentMethod || '',
+        isFixed: transactionToEdit.isFixed !== undefined ? transactionToEdit.isFixed : isFixedExpenseCategory(transactionToEdit.category),
+        date: d0, time: t0,
+      } as ExpenseDraft);
+      // Cambios que se estaban haciendo antes de una recarga
+      if (restoreDraft?.editId && restoreDraft.editId === transactionToEdit.id) {
+        setType(restoreDraft.type); setAmount(restoreDraft.amount); setDescription(restoreDraft.description);
+        setCategory(restoreDraft.category); setMerchant(restoreDraft.merchant); setPaymentMethod(restoreDraft.paymentMethod);
+        setIsFixed(restoreDraft.isFixed); setDate(restoreDraft.date); setTime(restoreDraft.time);
       }
     }
-  }, [transactionToEdit]);
+  }, [transactionToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fmt = (n: number) => formatCurrency(n, profile?.currency || 'COP');
   const currency = profile?.currency || 'COP';

@@ -7,8 +7,24 @@ import { tr } from '@/lib/i18n';
 // Mantiene la app instalada al día. El service worker nuevo se activa solo (skipWaiting), pero la
 // página abierta sigue con el código viejo hasta recargar. Aquí:
 //  - se busca una versión nueva al volver a la app y cada 30 minutos;
-//  - si llega una y la app está en segundo plano, se recarga sola;
+//  - si llega una y la app está en segundo plano, se recarga sola, SALVO que haya un formulario o una
+//    ventana abierta (p. ej. registrando un ingreso y saliste a mirar el valor en el banco): entonces
+//    espera y, al volver, se ofrece "Actualizar" para que la persona termine primero;
 //  - si está en primer plano, se ofrece "Actualizar" (para no perder lo que se esté escribiendo).
+// ¿Hay un formulario o una ventana abierta? (campos dentro de algo fijo en pantalla, como los
+// formularios de gasto, ingreso, deuda, recordatorio o el chat, o una ventana con role="dialog")
+function formInProgress() {
+  const fields = Array.from(document.querySelectorAll<HTMLElement>('input:not([type=hidden]), textarea, select'));
+  return fields.some(el => {
+    if (!el.getClientRects().length) return false; // oculto
+    for (let p: HTMLElement | null = el; p && p !== document.body; p = p.parentElement) {
+      if (p.getAttribute('role') === 'dialog' || p.getAttribute('aria-modal') === 'true') return true;
+      if (getComputedStyle(p).position === 'fixed') return true;
+    }
+    return false;
+  });
+}
+
 export function UpdateWatcher() {
   const [ready, setReady] = useState(false);
   const busy = usePopupBusy(); // no tapar el tutorial: el aviso aparece al terminar
@@ -17,7 +33,12 @@ export function UpdateWatcher() {
     if (!('serviceWorker' in navigator)) return;
     const hadController = !!navigator.serviceWorker.controller;
     let reloaded = false;
-    const reload = () => { if (!reloaded) { reloaded = true; window.location.reload(); } };
+    const reload = () => {
+      if (reloaded) return;
+      if (formInProgress()) { setReady(true); return; } // se recarga cuando la persona toque "Actualizar"
+      reloaded = true;
+      window.location.reload();
+    };
 
     const onChange = () => {
       if (!hadController) return; // primera instalación: no hay versión vieja que reemplazar

@@ -14,6 +14,7 @@ export type DraftKind = 'voice' | 'expense';
 export interface ExpenseDraft {
   type: 'gasto' | 'ingreso'; amount: string; description: string; category: string;
   merchant: string; paymentMethod: string; isFixed: boolean; date: string; time: string;
+  editId?: string; // si se estaba editando un movimiento que ya existía, su id
 }
 
 /** Lo que la IA leyó de un recibo o de los movimientos del banco, con las correcciones hechas. */

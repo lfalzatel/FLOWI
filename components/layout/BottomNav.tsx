@@ -23,6 +23,8 @@ import { InvestmentKindSheet } from '@/components/investments/InvestmentKindShee
 import type { InvestmentKind } from '@/lib/firestore';
 import { QuickAction, QuickActionsSheet, QuickContext } from '@/components/layout/QuickActionsSheet';
 import { DraftRecovery } from '@/components/layout/DraftRecovery';
+import { useData } from '@/components/DataProvider';
+import type { Transaction } from '@/lib/firestore';
 import type { ExpenseDraft, VoiceDraft } from '@/lib/drafts';
 import { AppTour, readTourVoicePref } from '@/components/tour/AppTour';
 import { PAGE_TOURS, PageTourId } from '@/components/tour/tours';
@@ -56,8 +58,10 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
   const [voiceRestore, setVoiceRestore] = useState<VoiceDraft | null>(null);
   const [resumeRead, setResumeRead] = useState(false);
   const [expenseRestore, setExpenseRestore] = useState<ExpenseDraft | null>(null);
+  const [editRestoreTx, setEditRestoreTx] = useState<Transaction | null>(null); // movimiento que se estaba editando
   const router = useRouter();
   const { profile, user } = useAuth();
+  const { transactions } = useData();
   // Mantener presionado = hablar directo (como antes)
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressed = useRef(false);
@@ -265,7 +269,13 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
       <DraftRecovery
         onVoice={(d) => { setParsedVoiceData(null); setReceipt(null); setVoiceRestore(d); setShowVoice(true); }}
         onPhotos={(files) => { setVoiceRestore(null); setResumeRead(true); setReceipt(files); setShowVoice(true); }}
-        onExpense={(d) => { setExpenseRestore(d); setQuick(d.type === 'ingreso' ? 'ingreso' : 'gasto'); }}
+        onExpense={(d) => {
+          // Si se estaba editando uno que ya existía, se abre ese mismo con los cambios; si ya no existe, como nuevo
+          const tx = d.editId ? transactions.find(t => t.id === d.editId) : undefined;
+          setExpenseRestore(d.editId && !tx ? { ...d, editId: undefined } : d);
+          setEditRestoreTx(tx || null);
+          setQuick(d.type === 'ingreso' ? 'ingreso' : 'gasto');
+        }}
       />
 
       {showSheet && (
@@ -279,7 +289,8 @@ export function BottomNav({ onSuccess }: { onSuccess?: () => void }) {
 
       {/* Formularios abiertos desde el menú del botón */}
       {(quick === 'gasto' || quick === 'ingreso') && (
-        <AddExpenseModal initialType={quick} restoreDraft={expenseRestore} onClose={() => { setExpenseRestore(null); closeQuick(); }} onSuccess={onSuccess} />
+        <AddExpenseModal initialType={quick} restoreDraft={expenseRestore} transactionToEdit={editRestoreTx || undefined}
+          onClose={() => { setExpenseRestore(null); setEditRestoreTx(null); closeQuick(); }} onSuccess={onSuccess} />
       )}
       {quick === 'deuda' && <AddDebtModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} initialShots={debtFiles} />}
       {quick === 'recordatorio' && <ReminderFormModal onClose={closeQuick} onSuccess={onSuccess || (() => {})} />}

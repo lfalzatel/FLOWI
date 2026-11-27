@@ -3165,4 +3165,6 @@ export const EN: Record<string, string> = {
   '6. Elige el motivo y envía': '6. Pick the reason and send',
   'Marca el motivo, cuenta qué pasó si quieres y toca "Enviar reporte". FLOWI revisa sus últimos mensajes y puede suspender su cuenta. Con "Bloquear también" no te vuelve a escribir.': "Mark the reason, tell us what happened if you want and tap \"Send report\". FLOWI reviews their latest messages and may suspend their account. With \"Also block\" they can't write to you again.",
   'Ana': 'Ana',
+  'Estabas editando un ingreso': 'You were editing an income',
+  'Estabas editando un gasto': 'You were editing an expense',
 };

@@ -79,7 +79,9 @@ export function DraftRecovery({ onVoice, onPhotos, onExpense }: {
     title = tr('Se interrumpió la lectura de tu recibo');
     text = tr('La foto quedó guardada. ¿La leo otra vez? No cuenta como un recibo más de hoy.');
   } else {
-    title = found.draft.type === 'ingreso' ? tr('Tenías un ingreso a medio registrar') : tr('Tenías un gasto a medio registrar');
+    title = found.draft.editId
+      ? (found.draft.type === 'ingreso' ? tr('Estabas editando un ingreso') : tr('Estabas editando un gasto'))
+      : (found.draft.type === 'ingreso' ? tr('Tenías un ingreso a medio registrar') : tr('Tenías un gasto a medio registrar'));
     const amt = Number(String(found.draft.amount).replace(/[^\d.]/g, '')) || 0;
     text = [amt ? money(amt) : '', found.draft.category, found.draft.description].filter(Boolean).join(' · ');
   }
