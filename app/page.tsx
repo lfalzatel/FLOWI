@@ -410,7 +410,8 @@ export default function DashboardPage() {
                          currency={profile?.currency}
                          real={isCurrentMonthView && !demo ? realMoney : null}
                          pendingCommitments={pendingCommitments}
-                         today={isCurrentMonthView ? todayBudget : null} />
+                         today={isCurrentMonthView ? todayBudget : null}
+                         extra={!demo ? <NetWorthCard variant="tile" transactions={transactions} currency={profile?.currency} /> : undefined} />
             <div data-tour="projection"><BudgetProjection filterType={filterType} filterValue={filterValue} transactions={filteredTransactions} onRefresh={refresh}
                               pendingCommitments={commitments.loading ? 0 : commitments.pendingTotal} /></div>
             {/* Celular: la gráfica del mes va justo después de las cifras del día (cómo vas → qué falta pagar).
@@ -426,7 +427,6 @@ export default function DashboardPage() {
         {/* Meta de ahorro principal */}
         <div data-tour="goals"><GoalsSummaryCard currency={profile?.currency} demoGoals={demo?.goals} /></div>
         {!demo && <FriendsCard currency={profile?.currency} />}
-        {!demo && <NetWorthCard transactions={transactions} currency={profile?.currency} />}
         {!demo && <InvestmentsSummaryCard currency={profile?.currency} />}
         </div>
 

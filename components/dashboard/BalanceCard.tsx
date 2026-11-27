@@ -17,11 +17,12 @@ interface Props {
   totalGastos:   number;
   totalIngresos: number;
   totalDeudas:   number;
+  extra?: React.ReactNode; // va al lado de Deudas Pendientes (la tarjeta de patrimonio neto)
   today?:        DailyBudget | null; // solo al mirar el mes actual
   currency?:     string;
 }
 
-export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos, totalDeudas, today, currency, real, pendingCommitments = 0 }: Props) {
+export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos, totalDeudas, today, currency, real, pendingCommitments = 0, extra }: Props) {
   // Con cuentas para gastar, el disponible es la plata que de verdad hay en ellas
   const balance = real ? real.cash : periodBalance;
   const [showMoney, setShowMoney] = useState(false);
@@ -188,13 +189,13 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
           </p>
         </div>
         
-        {/* Tarjeta de Deudas a lo ancho */}
+        {/* Tarjeta de Deudas: a lo ancho, o media si al lado va el patrimonio neto */}
         <button
           type="button"
           onClick={() => setInfo('debts')}
           data-tour="debts"
           id="total-deudas-card" 
-          className={`glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 col-span-2 animate-card-mix transition-all duration-300 ${
+          className={`glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 col-span-2 [&:has(+*)]:col-span-1 animate-card-mix transition-all duration-300 ${
             absorbingId === 'total-deudas-card' ? 'scale-105 border-yellow-500/80 shadow-[0_0_35px_rgba(245,158,11,0.7)]' : ''
           }`} 
           style={{ animationDelay: '0.35s' }}
@@ -210,6 +211,7 @@ export function BalanceCard({ balance: periodBalance, totalGastos, totalIngresos
           </p>
           <p className={`text-[10px] mt-0.5 ${isCyberpunk ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Toca para ver el detalle')}</p>
         </button>
+        {extra}
 
       </div>
 

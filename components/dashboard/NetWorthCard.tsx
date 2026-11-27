@@ -17,7 +17,8 @@ import { Transaction } from '@/lib/firestore';
 
 // Tarjeta de Inicio con el patrimonio neto; solo aparece cuando hay cuentas registradas.
 // Al tocarla se abre el resumen: cuánto hay en cada cuenta (con los colores de Cuentas) y los totales.
-export function NetWorthCard({ transactions, currency = 'COP' }: { transactions: Transaction[]; currency?: string }) {
+// variant 'tile': cuadro pequeño al lado de Deudas Pendientes, con el mismo estilo de Gastos e Ingresos
+export function NetWorthCard({ transactions, currency = 'COP', variant = 'row' }: { transactions: Transaction[]; currency?: string; variant?: 'row' | 'tile' }) {
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
   const isLight = theme === 'light' || theme === 'nova';
@@ -40,9 +41,25 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
   // Primero las cuentas con más plata; las tarjetas de crédito al final
   const sorted = [...states].sort((a, b) => (a.account.kind === 'credito' ? 1 : 0) - (b.account.kind === 'credito' ? 1 : 0) || b.balance - a.balance);
 
+  const tile = (
+    <button type="button" onClick={() => setOpen(true)} data-tour="networth"
+            className="glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 transition-all duration-300 min-w-0">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
+          <Wallet className="w-3 h-3 text-accent" />
+        </div>
+        <span className={`text-[11px] font-medium truncate ${isTech ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>{tr('Patrimonio neto')}</span>
+      </div>
+      <p className={`font-bold text-[clamp(12px,5vw,18px)] truncate ${worth.total < 0 ? 'text-money-neg' : 'text-money-pos'} ${isTech ? 'font-mono tracking-wider' : 'font-syne'}`}>
+        {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
+      </p>
+      <p className={`text-[10px] mt-0.5 ${isTech ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Toca para ver cada cuenta')}</p>
+    </button>
+  );
+
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} data-tour="networth"
+      {variant === 'tile' ? tile : <button type="button" onClick={() => setOpen(true)} data-tour="networth"
               className={`${card} w-full text-left flex items-center gap-3 p-4 hover:-translate-y-0.5 transition-transform`}>
         <div className="w-9 h-9 rounded-xl bg-accent/15 flex items-center justify-center shrink-0"><Wallet className="w-5 h-5 text-accent" /></div>
         <div className="flex-1 min-w-0">
@@ -55,7 +72,7 @@ export function NetWorthCard({ transactions, currency = 'COP' }: { transactions:
           </p>
         </div>
         <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />
-      </button>
+      </button>}
 
       {open && typeof document !== 'undefined' && createPortal(
         <div className={`fixed inset-0 z-[110] flex items-center justify-center p-4 ${isTech ? 'font-mono' : ''}`} role="dialog" aria-modal="true" aria-label={tr('Tu patrimonio neto')}>

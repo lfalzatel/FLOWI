@@ -3172,4 +3172,6 @@ export const EN: Record<string, string> = {
   'Los gastos fijos (arriendo, servicios…) no cuentan en la cuota del día.': "Fixed expenses (rent, utilities…) don't count toward the daily allowance.",
   'En cada cuenta': 'In each account',
   'Ver Cuentas y patrimonio': 'See Accounts & net worth',
+  'Patrimonio neto': 'Net worth',
+  'Toca para ver cada cuenta': 'Tap to see each account',
 };
