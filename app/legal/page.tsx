@@ -5,6 +5,7 @@ import { FREE_LIMITS, PLANS } from '@/lib/plans';
 import { formatCurrency } from '@/lib/format';
 import { useT } from '@/lib/i18n';
 import { UI_EN, UPDATED_EN, privacyEn, termsEn } from './content-en';
+import { UI_PT, UPDATED_PT, privacyPt, termsPt } from './content-pt';
 
 // Política de tratamiento de datos (Ley 1581 de 2012 y Decreto 1377 de 2013) y términos de uso.
 // Página pública: se puede leer sin iniciar sesión (la enlaza la portada antes de entrar).
@@ -211,10 +212,10 @@ function Section({ id, icon: Icon, title, intro, blocks, updated }: { id: string
 
 export default function LegalPage() {
   const { lang } = useT();
-  const en = lang === 'en';
-  const privacy = en ? privacyEn(EMAIL) : PRIVACY;
-  const terms = en ? termsEn(EMAIL) : TERMS;
-  const updated = en ? UI_EN.updated(UPDATED_EN) : `Actualizada el ${UPDATED}`;
+  const ui = lang === 'en' ? UI_EN : lang === 'pt' ? UI_PT : null;
+  const privacy = lang === 'en' ? privacyEn(EMAIL) : lang === 'pt' ? privacyPt(EMAIL) : PRIVACY;
+  const terms = lang === 'en' ? termsEn(EMAIL) : lang === 'pt' ? termsPt(EMAIL) : TERMS;
+  const updated = lang === 'en' ? UI_EN.updated(UPDATED_EN) : lang === 'pt' ? UI_PT.updated(UPDATED_PT) : `Actualizada el ${UPDATED}`;
   const back = () => {
     if (window.history.length > 1) window.history.back();
     else window.location.href = '/';
@@ -224,40 +225,40 @@ export default function LegalPage() {
     <div className="min-h-screen bg-[#050B14] text-white">
       <main className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-5">
         <div className="flex items-center gap-2">
-          <button type="button" onClick={back} aria-label={en ? UI_EN.back : 'Volver'}
+          <button type="button" onClick={back} aria-label={ui ? ui.back : 'Volver'}
                   className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold font-syne">{en ? UI_EN.heading : 'Privacidad y términos'}</h1>
+          <h1 className="text-lg font-bold font-syne">{ui ? ui.heading : 'Privacidad y términos'}</h1>
         </div>
 
         <nav className="grid grid-cols-2 gap-2 text-sm">
           <a href="#privacidad" className="rounded-2xl bg-white/5 hover:bg-white/10 px-4 py-3 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" /> {en ? UI_EN.privacy : 'Política de privacidad'}
+            <ShieldCheck className="w-4 h-4 text-emerald-400" /> {ui ? ui.privacy : 'Política de privacidad'}
           </a>
           <a href="#terminos" className="rounded-2xl bg-white/5 hover:bg-white/10 px-4 py-3 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-emerald-400" /> {en ? UI_EN.terms : 'Términos de uso'}
+            <FileText className="w-4 h-4 text-emerald-400" /> {ui ? ui.terms : 'Términos de uso'}
           </a>
         </nav>
 
-        {en && <p className="text-xs text-white/50 px-1">{UI_EN.note}</p>}
+        {ui && <p className="text-xs text-white/50 px-1">{ui.note}</p>}
 
-        <Section id="privacidad" icon={ShieldCheck} title={en ? UI_EN.privacy : 'Política de privacidad'} updated={updated}
-                 intro={en ? UI_EN.privacyIntro : 'Así cuidamos tus datos personales, según la Ley 1581 de 2012 y el Decreto 1377 de 2013 de Colombia. Al crear tu cuenta en FLOWI autorizas el tratamiento de tus datos para lo que se explica aquí.'}
+        <Section id="privacidad" icon={ShieldCheck} title={ui ? ui.privacy : 'Política de privacidad'} updated={updated}
+                 intro={ui ? ui.privacyIntro : 'Así cuidamos tus datos personales, según la Ley 1581 de 2012 y el Decreto 1377 de 2013 de Colombia. Al crear tu cuenta en FLOWI autorizas el tratamiento de tus datos para lo que se explica aquí.'}
                  blocks={privacy} />
 
-        <Section id="terminos" icon={FileText} title={en ? UI_EN.terms : 'Términos de uso'} updated={updated}
-                 intro={en ? UI_EN.termsIntro : 'Las reglas para usar FLOWI y su plan Premium. Al usar la app aceptas estos términos.'}
+        <Section id="terminos" icon={FileText} title={ui ? ui.terms : 'Términos de uso'} updated={updated}
+                 intro={ui ? ui.termsIntro : 'Las reglas para usar FLOWI y su plan Premium. Al usar la app aceptas estos términos.'}
                  blocks={terms} />
 
         <footer className="text-center text-xs text-white/40 space-y-2 pb-6">
           <p>
-            {en ? UI_EN.questions : '¿Preguntas sobre tus datos o tu plan?'}{' '}
-            <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="text-emerald-400/80 hover:text-emerald-300">{en ? UI_EN.whatsapp : 'Escríbenos por WhatsApp'}</a>
-            {en ? UI_EN.orEmail : ' o al correo '}
+            {ui ? ui.questions : '¿Preguntas sobre tus datos o tu plan?'}{' '}
+            <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="text-emerald-400/80 hover:text-emerald-300">{ui ? ui.whatsapp : 'Escríbenos por WhatsApp'}</a>
+            {ui ? ui.orEmail : ' o al correo '}
             <a href={`mailto:${EMAIL}`} className="text-emerald-400/80 hover:text-emerald-300">{EMAIL}</a>
           </p>
-          <p><Link href="/" className="hover:text-white/70">{en ? UI_EN.backToApp : 'Volver a FLOWI'}</Link></p>
+          <p><Link href="/" className="hover:text-white/70">{ui ? ui.backToApp : 'Volver a FLOWI'}</Link></p>
         </footer>
       </main>
     </div>
