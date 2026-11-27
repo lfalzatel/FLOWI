@@ -1,7 +1,15 @@
 # Ficha de FLOWI en Google Play
 
 **Idioma principal: inglés (Estados Unidos) – en-US** (decidido por Luis el 2026-11-25).
-Traducción agregada: **español (Latinoamérica) – es-419**. La versión en inglés está al final de este archivo.
+Traducciones incluidas en este archivo:
+- **Español (Latinoamérica) – es-419**
+- **Español (España) – es-ES**
+- **Português (Portugal) – pt-PT**
+- **English (United States) – en-US** (al final)
+
+> Nota sobre videos promocionales por idioma: ver [nota-videos.md](./nota-videos.md).
+
+---
 
 # Español (es-419)
 
@@ -26,6 +34,7 @@ Qué puedes hacer con FLOWI:
 • Recordatorios: pagos, citas y tareas para que nada se te pase.
 • Fondo de emergencia y metas de ahorro, con tu avance en porcentaje.
 • Inversiones y notas.
+• Disponible en español, inglés y portugués.
 
 Tus datos son tuyos: entras con tu cuenta de Google, la información se guarda de forma segura y solo tú la ves. No vendemos tus datos.
 
@@ -36,14 +45,88 @@ Hecho en Colombia, pensado para tu día a día.
 ## Otros datos
 - Categoría: Finanzas
 - Correo de contacto: soporteflowiapp@gmail.com
-- Sitio web: https://flowi-9af82.web.app
-- Política de privacidad: https://flowi-9af82.web.app/legal
+- Sitio web: https://flowi-gastos.web.app
+- Política de privacidad: https://flowi-gastos.web.app/legal
 - Etiquetas sugeridas: Presupuesto, Gastos, Finanzas personales
 
-## Imágenes
+## Imágenes (store/play/)
 - Ícono 512x512: store/play-icon-512.png (listo)
 - Gráfico de funciones 1024x500: store/play/grafico-1024x500.png (listo)
 - Capturas de teléfono 812x1624 (en este orden): store/play/captura-1-inicio.png, captura-2-registrar.png, captura-3-compartir.png, captura-4-recordatorios.png (listas)
+
+---
+
+# Español (España) – es-ES
+
+## Nombre de la app (máx. 30)
+FLOWI: Gastos y presupuesto
+
+## Descripción breve (máx. 80)
+Apunta tus gastos hablando y sabe cuánto puedes gastar hoy. Fácil y en euros.
+
+## Descripción completa (máx. 4000)
+FLOWI es la forma más fácil de organizar tu dinero. Solo dile "Gasté 12 euros en la comida" y FLOWI lo apunta por ti.
+
+Qué puedes hacer con FLOWI:
+
+• Registrar hablando: dicta uno o varios gastos a la vez, sin escribir.
+• Foto del tique: haz una foto al recibo y FLOWI rellena el importe, el comercio y la fecha.
+• Importar extracto: sube el Excel, CSV o PDF de tu banco y trae tus movimientos.
+• Comparte el justificante: ¿pagaste desde la app de tu banco o Revolut? Compártelo con FLOWI y queda registrado.
+• Cuánto puedes gastar hoy: FLOWI calcula tu cuota diaria según tus ingresos, gastos y pagos fijos del mes.
+• Todas tus cuentas en un solo sitio: banco, Revolut, efectivo, cuentas remuneradas y tarjetas de crédito.
+• Deudas y pagos: controla lo que debes, tus préstamos y lo que te deben tus amigos.
+• Recordatorios: recibos, alquiler, suscripciones, citas y tareas con avisos en tu móvil.
+• Fondo de emergencia y metas de ahorro, con tu avance en porcentaje.
+• Depósitos, fondos, inversiones y notas.
+• Funciona en español (España y Latinoamérica), inglés y portugués.
+
+Tus datos son solo tuyos: entras con tu cuenta de Google, la información se guarda cifrada y nadie más la ve. Sin anuncios y sin vender tus datos.
+
+¿Dudas o sugerencias? Escríbenos a soporteflowiapp@gmail.com
+
+## Imágenes (store/play-es-es/)
+- Ícono 512x512: store/play-icon-512.png (el mismo)
+- Gráfico de funciones 1024x500: store/play-es-es/grafico-1024x500.png
+- Capturas de teléfono 812x1624 (en este orden): store/play-es-es/captura-1-inicio.png, captura-2-registrar.png, captura-3-compartir.png, captura-4-recordatorios.png
+
+---
+
+# Português (Portugal) – pt-PT
+
+## Nome da aplicação (máx. 30)
+FLOWI: Despesas e orçamento
+
+## Breve descrição (máx. 80)
+Regista despesas a falar e sabe quanto podes gastar hoje. Simples e em euros.
+
+## Descrição completa (máx. 4000)
+A FLOWI é a forma mais simples de organizar o teu dinheiro. Basta dizeres "Gastei 12 euros no almoço" e a FLOWI regista tudo por ti.
+
+O que podes fazer com a FLOWI:
+
+• Registar com a voz: dita uma ou várias despesas de uma só vez, sem escrever.
+• Foto do recibo: tira uma foto ao talão e a FLOWI preenche o montante, a loja e a data.
+• Importar extrato: carrega o ficheiro do teu banco e traz os teus movimentos num instante.
+• Partilhar o comprovativo: pagaste pela app do banco, MB WAY ou Revolut? Partilha para a FLOWI e fica registado.
+• Quanto podes gastar hoje: a FLOWI calcula o teu limite diário com base nas tuas receitas, despesas e contas fixas do mês.
+• Todas as tuas contas num só lugar: contas bancárias, MB WAY, Revolut, dinheiro vivo e cartões de crédito.
+• Dívidas e acertos: acompanha o que deves, créditos e despesas partilhadas com amigos.
+• Lembretes: renda, luz, internet, consultas e tarefas com avisos no telemóvel.
+• Fundo de emergência e metas de poupança, com o teu progresso em percentagem.
+• Depósitos a prazo, fundos, investimentos e notas.
+• Disponível em português, espanhol e inglês.
+
+Os teus dados são só teus: entras com a tua conta Google, a informação fica guardada de forma segura e só tu a vês. Sem anúncios e sem venda de dados.
+
+Dúvidas ou ideias? Escreve-nos para soporteflowiapp@gmail.com
+
+## Imagens (store/play-pt/)
+- Ícone 512x512: store/play-icon-512.png (o mesmo)
+- Gráfico de destaque 1024x500: store/play-pt/grafico-1024x500.png
+- Capturas de ecrã de telemóvel 812x1624 (nesta ordem): store/play-pt/captura-1-inicio.png, captura-2-registrar.png, captura-3-compartir.png, captura-4-recordatorios.png
+
+---
 
 # English (en-US) — idioma principal
 
@@ -68,7 +151,7 @@ What you can do with FLOWI:
 • Reminders: bills, appointments and tasks, so nothing slips by.
 • Emergency fund and savings goals, with your progress in percent.
 • Investments and notes.
-• Works in English and Spanish.
+• Works in English, Spanish and Portuguese.
 
 Your data is yours: sign in with your Google account, your information is stored securely and only you can see it. We don't sell your data.
 
