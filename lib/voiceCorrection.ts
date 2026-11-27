@@ -63,11 +63,15 @@ export function applyVoiceCorrection(
     set('description', d.charAt(0).toUpperCase() + d.slice(1));
   }
 
-  // Monto: si dice un número (y no es solo el día de la fecha)
+  // Monto: si dice un número (y no es solo el día de la fecha). Acepta montos pequeños en euros/dólares ("eran 25 euros")
   if (!desc) {
     const withoutDate = n.replace(/\b(?:el|del|dia)\s+\d{1,2}(?:\s+de\s+[a-z]+)?\b/g, ' ').replace(/\b\d{1,2}\s+de\s+[a-z]+\b/g, ' ');
-    const amounts = extractAllAmounts(withoutDate).filter(a => a >= 50);
+    const amounts = extractAllAmounts(withoutDate);
     if (amounts.length) set('amount', amounts[amounts.length - 1]);
+    else {
+      const bare = withoutDate.match(/\b(?:eran|fueron|son)\s+(\d+(?:[.,]\d{1,2})?)\b/);
+      if (bare) set('amount', parseFloat(bare[1].replace(',', '.')));
+    }
   }
 
   // Categoría: "categoría X", "es de X", "ponlo en X" o simplemente el nombre de una categoría

@@ -19,10 +19,12 @@ const transpile = (file, out, replaceImports) => {
 };
 transpile('lib/categories.ts', 'categories.mjs', []);
 transpile('lib/voiceEnglish.ts', 'voiceEnglish.mjs', []);
+transpile('lib/voicePortuguese.ts', 'voicePortuguese.mjs', []);
 transpile('lib/voiceParser.ts', 'voiceParser.mjs', [
   [/from ['"]\.\/firestore['"]/, "from './firestore.mjs'"],
   [/from ['"]\.\/categories['"]/, "from './categories.mjs'"],
   [/from ['"]\.\/voiceEnglish['"]/, "from './voiceEnglish.mjs'"],
+  [/from ['"]\.\/voicePortuguese['"]/, "from './voicePortuguese.mjs'"],
 ]);
 // lib/speech.ts (lo importa voiceParser): se copia y se enlaza aquí también
 fs.writeFileSync(path.join(outDir, 'speech.mjs'), ts.transpileModule(fs.readFileSync(path.join(root, 'lib/speech.ts'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } }).outputText);

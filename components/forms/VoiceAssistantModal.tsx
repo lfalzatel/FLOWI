@@ -31,8 +31,9 @@ import confetti from 'canvas-confetti';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/useCategories';
 import { detectUserLocaleAndCurrency } from '@/lib/geoUtils';
-import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle, appSpeechLang } from '@/lib/voiceParser';
+import { parseMultiVoiceTransaction, ParsedVoiceResult, ParsedVoiceItem, ParsedVoiceCommand, speakText, cleanReminderTitle, appSpeechLang, appSpeechLocale } from '@/lib/voiceParser';
 import { englishDescription, englishToParserText, setVoiceEnglish } from '@/lib/voiceEnglish';
+import { portugueseDescription, portugueseToParserText, setVoicePortuguese } from '@/lib/voicePortuguese';
 import { addExpense, addDebt, addNote, addReminder } from '@/lib/firestore';
 import { correctWithAi, getAiKey, improveWithAi, needsAiHelp, readReceiptWithAi } from '@/lib/aiAssist';
 import { formatCurrency } from '@/lib/format';
@@ -216,8 +217,8 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
     const rec = new SpeechRecognition();
     rec.continuous = false;
     rec.interimResults = true;
-    // Con la app en inglés, el micrófono escucha en inglés
-    rec.lang = appSpeechLang() === 'en' ? 'en-US' : (locale.language || 'es-CO');
+    // El micrófono escucha en el idioma activo de la app (en-US, pt-PT, es-ES o es-CO)
+    rec.lang = appSpeechLocale(locale.language || 'es-CO');
 
     // En iPhone el micrófono no se cierra solo: se cierra tras un silencio corto (o a los 15 s).
     // Cuando termina, se ignora todo lo que llegue después (en iPhone seguía llegando texto y
@@ -366,14 +367,22 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       const heard = transcript.trim();
       if (processedTranscriptRef.current === heard) return;
       processedTranscriptRef.current = heard;
-      // Dictado en inglés: se pasa a la forma que entiende el analizador (montos, verbos, fechas en español)
-      const english = appSpeechLang() === 'en';
+      // Dictado en inglés o portugués: se pasa a la forma que entiende el analizador (montos, verbos, fechas en español)
+      const speechLang = appSpeechLang();
+      const english = speechLang === 'en';
+      const portuguese = speechLang === 'pt';
       setVoiceEnglish(english);
-      const text = english ? englishToParserText(heard) : heard;
-      const fromEnglish = (rs: ParsedVoiceItem[]): ParsedVoiceItem[] => !english ? rs : rs.map(r => {
+      setVoicePortuguese(portuguese);
+      const text = english ? englishToParserText(heard) : portuguese ? portugueseToParserText(heard) : heard;
+      const localizeResults = (rs: ParsedVoiceItem[]): ParsedVoiceItem[] => (!english && !portuguese) ? rs : rs.map(r => {
         if ('kind' in r && r.kind !== 'transaction') return r;
         const tx = r as ParsedVoiceResult;
-        return { ...tx, description: tx.description === tx.category ? tr(tx.category) : englishDescription(tx.description) };
+        return {
+          ...tx,
+          description: tx.description === tx.category
+            ? tr(tx.category)
+            : english ? englishDescription(tx.description) : portugueseDescription(tx.description),
+        };
       });
 
       if (correctingRef.current) {
@@ -385,7 +394,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
       // Si había un estado conversacional pendiente (creación de recordatorio, nota, ingreso o gasto):
       if (pendingAction) {
         if (pendingAction === 'create_income') {
-          const results = fromEnglish(parseMultiVoiceTransaction(text, allCategories));
+          const results = localizeResults(parseMultiVoiceTransaction(text, allCategories));
           results.forEach(r => {
             if (!('kind' in r) || r.kind === 'transaction') {
               const tx = r as ParsedVoiceResult;
@@ -403,7 +412,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
 
         if (pendingAction === 'create_expense') {
-          const results = fromEnglish(parseMultiVoiceTransaction(text, allCategories));
+          const results = localizeResults(parseMultiVoiceTransaction(text, allCategories));
           results.forEach(r => {
             if (!('kind' in r) || r.kind === 'transaction') {
               const tx = r as ParsedVoiceResult;
@@ -509,7 +518,7 @@ export function VoiceAssistantModal({ onClose, onSelectParsed, onOpenManual, onS
         }
       }
 
-      const results = fromEnglish(parseMultiVoiceTransaction(text, allCategories, context === 'ingreso' ? 'ingreso' : 'gasto'));
+      const results = localizeResults(parseMultiVoiceTransaction(text, allCategories, context === 'ingreso' ? 'ingreso' : 'gasto'));
       setParsedResults(results);
 
       const requestId = ++aiRequestRef.current;

@@ -119,7 +119,7 @@ export function parseDebtSpeech(text: string, now = new Date()): DebtSpeech {
   r = takeRate(n); if (r.rate) { out.rate = r.rate; out.rateUnit = r.unit; } n = r.rest;
   r = takeTerm(n); if (r.months) out.termMonths = r.months; n = r.rest;
   r = takeDate(n, now); if (r.date) out.date = r.date; n = r.rest;
-  const amounts = extractAllAmounts(n).filter(a => a >= 1000);
+  const amounts = extractAllAmounts(n).filter(a => a >= 50);
   if (amounts.length) out.amount = Math.max(...amounts);
   return out;
 }
@@ -143,6 +143,9 @@ const BANKS: [RegExp, string][] = [
   [/colpatria|scotiabank/, 'Scotiabank Colpatria'], [/occidente/, 'Banco de Occidente'], [/\bmibanco\b/, 'Mibanco'],
   [/nequi/, 'Nequi'], [/daviplata/, 'Daviplata'], [/ualá|uala/, 'Ualá'], [/\bpibank\b/, 'Pibank'], [/coltefinanciera/, 'Coltefinanciera'],
   [/porvenir/, 'Porvenir'], [/proteccion/, 'Protección'], [/colfondos/, 'Colfondos'], [/skandia/, 'Skandia'], [/trii/, 'Trii'],
+  [/santander/, 'Santander'], [/caixabank/, 'CaixaBank'], [/caixa geral|\bcgd\b/, 'Caixa Geral'], [/millennium/, 'Millennium bcp'],
+  [/novo banco/, 'Novo Banco'], [/\bbpi\b/, 'BPI'], [/activobank/, 'ActivoBank'], [/revolut/, 'Revolut'],
+  [/bankinter/, 'Bankinter'], [/sabadell/, 'Sabadell'], [/\bing\b/, 'ING'], [/openbank/, 'Openbank'],
 ];
 
 export function parseInvestmentSpeech(text: string, now = new Date()): InvestmentSpeech {
@@ -156,7 +159,7 @@ export function parseInvestmentSpeech(text: string, now = new Date()): Investmen
   const vence = n.match(/\b(?:vence|vencimiento|hasta)\b(.*)$/);
   if (vence) { const d = takeDate(vence[1], new Date(now.getFullYear() + 5, 0, 1)); if (d.date) { out.maturityDate = d.date; n = n.replace(vence[0], ' '); } }
   r = takeDate(n, now); if (r.date) out.startDate = r.date; n = r.rest;
-  const amounts = extractAllAmounts(n).filter(a => a >= 1000);
+  const amounts = extractAllAmounts(n).filter(a => a >= 50);
   if (amounts.length) out.amount = Math.max(...amounts);
   // Vencimiento a partir del plazo (si no se dijo la fecha)
   if (!out.maturityDate && (out.termMonths || out.termDays)) {

@@ -107,8 +107,8 @@ const EXPENSE_LABELS = BASE_CATEGORY_DEFS.filter(c => c.type === 'gasto').map(c 
 const INCOME_LABELS = BASE_CATEGORY_DEFS.filter(c => c.type === 'ingreso').map(c => c.label);
 
 function buildPrompt(customLabels: string[]) {
-  return `Eres un asistente que convierte frases dictadas en español de Colombia en movimientos de dinero.
-Responde SOLO con un JSON: {"movimientos":[{"type":"gasto"|"ingreso"|"deuda","amount":numero_en_pesos,"category":"...","description":"texto corto, en el mismo idioma en que habla la persona (si dicta en inglés, en inglés)","merchant":"comercio o null","debtDirection":"debo"|"me_deben"|null,"debtPerson":"nombre o null"}]}
+  return `Eres un asistente que convierte frases dictadas (en español, inglés o portugués) en movimientos de dinero.
+Responde SOLO con un JSON: {"movimientos":[{"type":"gasto"|"ingreso"|"deuda","amount":numero,"category":"...","description":"texto corto, en el mismo idioma en que habla la persona (si dicta en inglés o portugués, en ese idioma)","merchant":"comercio o null","debtDirection":"debo"|"me_deben"|null,"debtPerson":"nombre o null"}]}
 Reglas:
 - Cada monto con su concepto es un movimiento distinto. Solo suma si la persona dice "en total".
 - "mil" = 1000, "millón" = 1000000, "1,5 millones" = 1500000. Cantidad × precio unitario cuando dice "a X cada uno".

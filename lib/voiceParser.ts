@@ -2,6 +2,7 @@ import type { ReceiptItem } from '@/lib/receiptItems';
 import { isFixedExpenseCategory } from './firestore';
 import { detectMerchantInText, normalizeText } from './categories';
 import { englishCategoryHints } from './voiceEnglish';
+import { portugueseCategoryHints } from './voicePortuguese';
 import { speechText } from './speech';
 
 export interface ParsedVoiceResult {
@@ -224,7 +225,7 @@ export function wordsToDigits(text: string): string {
 
 interface MoneyMatch { value: number; start: number; end: number; isMoney: boolean; hasScale: boolean; scale: number }
 
-const MONEY_RE = /(\$\s*)?(\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d{1,2})?)(?:\s*(mil(?:es)?|k|mill[oó]n(?:es)?|millones|mm)(?![a-záéíóúñü]))?(\s+(?:de\s+)?pesos\b)?/gi;
+const MONEY_RE = /(\$\s*)?(\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d{1,2})?)(?:\s*(mil(?:es)?|k|mill[oó]n(?:es)?|millones|mm)(?![a-záéíóúñü]))?(\s+(?:de\s+)?(?:pesos|euros?|d[oó]lares?)\b|\s*€)?/gi;
 
 function findMoney(text: string): MoneyMatch[] {
   const found: MoneyMatch[] = [];
@@ -244,7 +245,7 @@ function findMoney(text: string): MoneyMatch[] {
     let scale = 1;
     if (/^mill/.test(scaleWord) || scaleWord === 'mm') scale = 1_000_000;
     else if (scaleWord) scale = 1000;
-    value = Math.round(value * scale);
+    value = scale > 1 ? Math.round(value * scale) : Math.round(value * 100) / 100;
     if (!value) continue;
 
     const hasScale = scale > 1;
@@ -400,9 +401,9 @@ function matchesLabel(normalized: string, label: string) {
 }
 
 function detectCategory(rawNormalized: string, type: TxType, categories: VoiceCategory[]): { category: string; merchant?: string } {
-  // Dictado en inglés: palabras en español solo para encontrar la categoría ("lunch" → almuerzo)
-  // (las pistas van primero: así ganan sobre una palabra en inglés que en español es otra cosa, como "gas")
-  const hints = englishCategoryHints(rawNormalized);
+  // Dictado en inglés o portugués: palabras en español solo para encontrar la categoría ("lunch"/"almoço" → almuerzo)
+  // (las pistas van primero: así ganan sobre una palabra extranjera que en español es otra cosa, como "gas")
+  const hints = `${englishCategoryHints(rawNormalized)}${portugueseCategoryHints(rawNormalized)}`;
   const normalized = hints ? `${hints.trim()} ${rawNormalized}` : rawNormalized;
   const merchant = type === 'gasto' ? detectMerchantInText(normalized) : undefined;
   const usable = categories
@@ -444,11 +445,11 @@ const LEADING_FILLERS = new Set([
   'un', 'una', 'y', 'e', 'que', 'con', 'para', 'mi', 'mis', 'pagaron', 'ingresaron', 'consignaron', 'depositaron',
   'transfirieron', 'dieron', 'recibi', 'ingreso', 'ingresos', 'debo', 'debe', 'deben', 'preste', 'prestaron', 'presto',
   'tambien', 'ademas', 'luego', 'despues', 'pero', 'hoy', 'ayer', 'costo', 'cobraron', 'gane', 'cobre', 'vendi',
-  'al', 'a', 'total', 'todo', 'fue', 'sali', 'salio', 'pesos', 'cada', 'uno', 'quedo', 'debiendo',
-  // relleno del dictado en inglés
-  'the', 'my', 'some', 'an', 'of', 'i', 'just', 'it', 'was',
+  'al', 'a', 'total', 'todo', 'fue', 'sali', 'salio', 'pesos', 'euro', 'euros', 'dolar', 'dolares', 'cada', 'uno', 'quedo', 'debiendo',
+  // relleno del dictado en inglés y portugués
+  'the', 'my', 'some', 'an', 'of', 'i', 'just', 'it', 'was', 'um', 'uma', 'meu', 'minha',
 ]);
-const TRAILING_FILLERS = new Set(['de', 'del', 'en', 'por', 'el', 'la', 'los', 'las', 'a', 'al', 'y', 'e', 'con', 'para', 'cada', 'uno', 'una', 'que', 'pesos', 'me', 'le', 'the', 'my', 'of', 'hoy', 'ayer', 'anoche', 'antier']);
+const TRAILING_FILLERS = new Set(['de', 'del', 'en', 'por', 'el', 'la', 'los', 'las', 'a', 'al', 'y', 'e', 'con', 'para', 'cada', 'uno', 'una', 'que', 'pesos', 'euro', 'euros', 'dolar', 'dolares', 'me', 'le', 'the', 'my', 'of', 'hoy', 'ayer', 'anoche', 'antier']);
 
 function cleanDescription(text: string): string {
   let words = text
@@ -462,12 +463,12 @@ function cleanDescription(text: string): string {
   return result ? result.charAt(0).toUpperCase() + result.slice(1) : '';
 }
 
-const NOT_A_PERSON = new Set(['la', 'el', 'los', 'las', 'un', 'una', 'mi', 'mis', 'su', 'sus', 'me', 'le', 'que', 'pesos', 'mil', 'cada', 'credito', 'interes']);
+const NOT_A_PERSON = new Set(['la', 'el', 'los', 'las', 'un', 'una', 'mi', 'mis', 'su', 'sus', 'me', 'le', 'que', 'pesos', 'euro', 'euros', 'mil', 'cada', 'credito', 'interes']);
 
 function detectPerson(segment: string, direction: 'debo' | 'me_deben'): string {
   const patterns = direction === 'me_deben'
-    ? [/^([a-záéíóúñ]+)\s+me\s+(?:debe|deben|quedo|quedaron|tiene)/i, /\bpresté\s+(?:\S+\s+){0,4}?(?:a|al)\s+([a-záéíóúñ]+)/i, /\b(?:a|al)\s+([a-záéíóúñ]+)/i]
-    : [/^([a-záéíóúñ]+)\s+me\s+prest/i, /\bme\s+prest[oó]\s+([a-záéíóúñ]+)/i, /\b(?:a|al|con)\s+([a-záéíóúñ]+)/i];
+    ? [/^([a-záàâãéêíóôõúñç]+)\s+me\s+(?:debe|deben|quedo|quedaron|tiene)/i, /\bpresté\s+(?:\S+\s+){0,4}?(?:a|al)\s+([a-záàâãéêíóôõúñç]+)/i, /\b(?:a|al)\s+([a-záàâãéêíóôõúñç]+)/i]
+    : [/^([a-záàâãéêíóôõúñç]+)\s+me\s+prest/i, /\bme\s+prest[oó]\s+([a-záàâãéêíóôõúñç]+)/i, /\b(?:a|al|con)\s+([a-záàâãéêíóôõúñç]+)/i];
   for (const re of patterns) {
     const m = segment.match(re);
     if (m && !NOT_A_PERSON.has(wordKey(m[1])) && !/^\d/.test(m[1])) {

@@ -1,7 +1,8 @@
 'use client';
 import { tr } from '@/lib/i18n';
-import { appSpeechLang } from '@/lib/voiceParser';
+import { appSpeechLang, appSpeechLocale } from '@/lib/voiceParser';
 import { englishToParserText } from '@/lib/voiceEnglish';
+import { portugueseToParserText } from '@/lib/voicePortuguese';
 import { useEffect, useRef, useState } from 'react';
 import { MAX_LISTEN_MS, SILENCE_MS, transcriptFromEvent } from '@/lib/speechInput';
 import { Mic, MicOff } from 'lucide-react';
@@ -27,7 +28,7 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
     if (!SR) { setMsg(tr('Este navegador no permite dictar. Escríbelo en los campos.')); return; }
     try { window.speechSynthesis?.cancel(); } catch { /* nada */ }
     const rec = new SR();
-    rec.lang = appSpeechLang() === 'en' ? 'en-US' : 'es-CO';
+    rec.lang = appSpeechLocale();
     rec.continuous = false;
     rec.interimResults = true;
     textRef.current = '';
@@ -60,8 +61,9 @@ export function DictateButton({ onText, isTech, example, label = 'Dictarlo' }: {
       if (done) return;
       done = true;
       const heardText = textRef.current.trim();
-      // En inglés se pasa a la forma que entienden los formularios (montos, fechas y verbos en español)
-      const t = appSpeechLang() === 'en' ? englishToParserText(heardText) : heardText;
+      // En inglés o portugués se pasa a la forma que entienden los formularios (montos, fechas y verbos en español)
+      const speechLang = appSpeechLang();
+      const t = speechLang === 'en' ? englishToParserText(heardText) : speechLang === 'pt' ? portugueseToParserText(heardText) : heardText;
       if (!t) return;
       const summary = onText(t);
       setMsg(summary || tr('Listo. Revisa los datos antes de guardar.'));
