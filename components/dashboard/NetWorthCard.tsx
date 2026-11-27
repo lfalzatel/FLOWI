@@ -26,6 +26,10 @@ export function NetWorthCard({ transactions, currency = 'COP', variant = 'row' }
   const { investments } = useInvestments();
   const { debts } = useDebts();
   const [open, setOpen] = useState(false);
+  // Si la persona ya tenía cuentas, el cuadro aparece desde el principio (mientras cargan los datos), así
+  // entra en cascada con Gastos, Ingresos y Deudas en vez de saltar solo cuando ya terminó la animación
+  const HAS_KEY = 'flowi-has-accounts';
+  const [hadAccounts] = useState(() => { try { return localStorage.getItem(HAS_KEY) === '1'; } catch { return false; } });
   const states = useMemo(() => accountStates(accounts, transactions, transfers, investments, debts), [accounts, transactions, transfers, investments, debts]);
   const worth = useMemo(() => netWorth(states, investments, debts), [states, investments, debts]);
   useEffect(() => {
@@ -34,7 +38,12 @@ export function NetWorthCard({ transactions, currency = 'COP', variant = 'row' }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
-  if (loading || error || !states.length) return null;
+  useEffect(() => {
+    if (loading || error) return;
+    try { localStorage.setItem(HAS_KEY, states.length ? '1' : '0'); } catch { /* sin almacenamiento */ }
+  }, [loading, error, states.length]);
+  const waiting = loading && hadAccounts && variant === 'tile';
+  if (error || (!states.length && !waiting)) return null;
   const fmt = (n: number) => formatCurrency(n, currency);
   const card = isTech ? 'bg-glass border border-accent/25 rounded-none' : 'glass-card rounded-3xl';
   const box = isTech ? 'rounded-none' : 'rounded-2xl';
@@ -42,7 +51,7 @@ export function NetWorthCard({ transactions, currency = 'COP', variant = 'row' }
   const sorted = [...states].sort((a, b) => (a.account.kind === 'credito' ? 1 : 0) - (b.account.kind === 'credito' ? 1 : 0) || b.balance - a.balance);
 
   const tile = (
-    <button type="button" onClick={() => setOpen(true)} data-tour="networth"
+    <button type="button" onClick={() => { if (!waiting) setOpen(true); }} data-tour="networth"
             // Misma entrada animada que Gastos, Ingresos y Deudas (aparece justo después de Deudas)
             className="glass-card p-4 rounded-2xl text-left active:scale-[0.98] hover:-translate-y-0.5 animate-card-mix transition-all duration-300 min-w-0"
             style={{ animationDelay: '0.45s' }}>
@@ -53,7 +62,7 @@ export function NetWorthCard({ transactions, currency = 'COP', variant = 'row' }
         <span className={`text-[11px] font-medium truncate ${isTech ? 'font-mono text-accent/70 uppercase tracking-wider' : 'text-text-secondary'}`}>{tr('Patrimonio neto')}</span>
       </div>
       <p className={`font-bold text-[clamp(12px,5vw,18px)] truncate ${worth.total < 0 ? 'text-money-neg' : 'text-money-pos'} ${isTech ? 'font-mono tracking-wider' : 'font-syne'}`}>
-        {worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} />
+        {waiting ? <span className="inline-block h-[1em] w-24 max-w-full rounded bg-glass animate-pulse align-middle" /> : <>{worth.total < 0 ? '−' : ''}<AnimatedNumber value={Math.abs(worth.total)} format={fmt} /></>}
       </p>
       <p className={`text-[10px] mt-0.5 ${isTech ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{tr('Toca para ver cada cuenta')}</p>
     </button>
