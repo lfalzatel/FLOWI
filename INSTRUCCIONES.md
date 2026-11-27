@@ -723,3 +723,14 @@ NEXTAUTH_SECRET=genera-uno-con-openssl-rand-base64-32
 * `/presupuesto`: Límites por categoría con barra de progreso
 * `/reportes`: Gráficas mensuales con Recharts
 * `/ajustes`: Perfil, notificaciones, exportar datos
+
+## Publicar las funciones del servidor
+GitHub solo publica la página web. Las funciones de `functions/` (notificaciones, pagos, recordatorios) se
+publican con:
+
+```
+npm run deploy:functions
+```
+
+Corre las pruebas de los mensajes, fuerza IPv4 (`scripts/dns4.cjs`) y reintenta hasta 3 veces. Detalles y
+reglas para asistentes de código en `AGENTS.md`.
