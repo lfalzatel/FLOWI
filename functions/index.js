@@ -266,7 +266,7 @@ async function pushTo(uid, make) {
   const user = await ref.get();
   const tokens = ((user.exists && user.get('pushTokens')) || []).filter(Boolean);
   if (!tokens.length) return;
-  const lang = (user.exists && user.get('lang')) === 'en' ? 'en' : 'es';
+  const lang = normalizeLang(user.exists && user.get('lang'));
   const data = typeof make === 'function' ? make(lang) : make;
   const res = await admin.messaging().sendEachForMulticast({ tokens, data, webpush: { headers: { Urgency: 'high', TTL: '86400' } } });
   const dead = tokens.filter((_, i) => {
@@ -275,7 +275,7 @@ async function pushTo(uid, make) {
   });
   if (dead.length) await ref.update({ pushTokens: admin.firestore.FieldValue.arrayRemove(...dead) });
 }
-const { t: msg, locale: msgLocale } = require('./messages');
+const { t: msg, locale: msgLocale, normalizeLang } = require('./messages');
 const firstName = (n, lang = 'es') => String(n || msg(lang, 'Alguien')).trim().split(/\s+/)[0];
 
 // Alguien te envió una solicitud de amistad

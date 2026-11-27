@@ -16,8 +16,8 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import messages from './messages.js'; // textos en el idioma de cada persona (users/{uid}.lang)
-const { t: msg, locale: msgLocale } = messages;
-const langOf = (u) => (u?.get?.('lang') === 'en' ? 'en' : 'es');
+const { t: msg, locale: msgLocale, normalizeLang, money: fmtMoney } = messages;
+const langOf = (u) => normalizeLang(u?.get?.('lang'));
 
 const OFFSET_HOURS = -5;          // Colombia (sin horario de verano)
 const SUMMARY_HOUR = 7;           // resumen diario de pagos y fechas
@@ -109,7 +109,7 @@ function isCoveredByExpense(r, occDate, expenses, shared) {
   });
 }
 
-async function morningSummary(uid, reminders, investments, todayLocal, lang = 'es') {
+async function morningSummary(uid, reminders, investments, todayLocal, lang = 'es', currency = undefined) {
   const today = Date.UTC(todayLocal.getUTCFullYear(), todayLocal.getUTCMonth(), todayLocal.getUTCDate());
   // Solo pagos (no eventos ni tareas): igual que isPaymentReminder en lib/reminderDue.ts
   const isPayment = (r) => typeof r.isPayment === 'boolean' ? r.isPayment : ((r.amount || 0) > 0 || !!r.category || !!r.merchant);
@@ -118,11 +118,12 @@ async function morningSummary(uid, reminders, investments, todayLocal, lang = 'e
 
   let expenses = null;
   const items = [];
+  const cdtWord = lang === 'pt' || lang === 'es-ES' ? 'Depósito' : 'CDT';
   for (const inv of investments) {
     const [y, m, d] = String(inv.maturityDate || '').split('-').map(Number);
     if (!y) continue;
     const daysLeft = Math.round((Date.UTC(y, m - 1, d) - today) / DAY);
-    if (daysLeft === 0 || daysLeft === 1 || daysLeft === 3) items.push({ title: `CDT ${inv.bank}`, daysLeft, isCdt: true });
+    if (daysLeft === 0 || daysLeft === 1 || daysLeft === 3) items.push({ title: `${cdtWord} ${inv.bank}`, daysLeft, isCdt: true });
   }
   for (const r of candidates) {
     const isPayment = r.type === 'monthly' || !!r.category;
@@ -142,7 +143,7 @@ async function morningSummary(uid, reminders, investments, todayLocal, lang = 'e
           if (isCoveredByExpense(r, fromLocalParts(y, m, d), expenses, shared)) continue;
         }
       }
-      items.push({ title: r.amount ? `${r.title} $${Number(r.amount).toLocaleString(msgLocale(lang))}` : r.title, daysLeft, isPayment });
+      items.push({ title: r.amount ? `${r.title} ${fmtMoney(r.amount, lang, currency)}` : r.title, daysLeft, isPayment });
       break;
     }
   }
@@ -163,7 +164,7 @@ async function morningSummary(uid, reminders, investments, todayLocal, lang = 'e
 }
 
 // Resumen del mes que terminó: gastos, cambio frente al anterior y la categoría que más se llevó
-async function monthlyRecap(uid, todayLocal, lang = 'es') {
+async function monthlyRecap(uid, todayLocal, lang = 'es', currency = undefined) {
   const y = todayLocal.getUTCFullYear(), m = todayLocal.getUTCMonth();
   const key = (yy, mm) => { const d = new Date(Date.UTC(yy, mm, 1)); return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`; };
   const last = key(y, m - 1), before = key(y, m - 2);
@@ -180,7 +181,7 @@ async function monthlyRecap(uid, todayLocal, lang = 'es') {
     } else if (k === before && t.type === 'gasto') prevGastos += t.amount;
   }
   if (!gastos && !ingresos) return null;
-  const money = (n) => `$${Math.round(n).toLocaleString(msgLocale(lang))}`;
+  const money = (n) => fmtMoney(n, lang, currency);
   const monthName = new Date(Date.UTC(y, m - 1, 15)).toLocaleDateString(msgLocale(lang), { month: 'long', timeZone: 'UTC' });
   const parts = [msg(lang, 'Gastaste {a}', { a: money(gastos) })];
   if (prevGastos > 0) {
@@ -304,10 +305,11 @@ export async function runReminders({ now = new Date(), dryRun = false, credentia
       const invSnap = await db.collection('fl_investments').where('userId', '==', u.id).get();
       const investments = invSnap.docs.map(d => d.data()).filter(i => i.status === 'activo');
       const lang = langOf(u);
-      const summary = await morningSummary(u.id, reminders, investments, todayLocal, lang);
+      const currency = u.get('currency');
+      const summary = await morningSummary(u.id, reminders, investments, todayLocal, lang, currency);
       if (summary) sent += await send(u.id, tokens, summary);
       if (todayLocal.getUTCDate() === 1) {
-        const recap = await monthlyRecap(u.id, todayLocal, lang);
+        const recap = await monthlyRecap(u.id, todayLocal, lang, currency);
         if (recap) sent += await send(u.id, tokens, recap);
       }
       const renew = premiumNotice(u, todayLocal);
