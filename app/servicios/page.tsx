@@ -65,26 +65,41 @@ export default function ServiciosPage() {
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Al volver de una tarjeta (Comentarios, Metas…) la página queda donde ibas, no arriba del todo.
-  // Se guarda la posición mientras se baja y se vuelve a poner al regresar (en esta pestaña).
+  // La posición se guarda al tocar algo y mientras se baja, nunca al salir: al abrir la tarjeta la página
+  // nueva es más corta y el navegador sube el scroll antes, así que se guardaba una posición equivocada.
   useEffect(() => {
     const KEY = 'flowi-servicios-scroll';
+    const here = () => window.location.pathname.replace(/\/$/, '') === '/servicios';
+    const save = () => { if (here()) sessionStorage.setItem(KEY, String(Math.round(window.scrollY))); };
     const saved = Number(sessionStorage.getItem(KEY) || 0);
     // Solo al volver de una tarjeta; desde las pestañas de abajo (Inicio, Gastos, Ingresos, Deudas) se entra arriba
     const from = comingFrom();
     const fromCard = !!from && from !== '/servicios' && !['/', '/gastos', '/ingresos', '/deudas'].includes(from);
+    let alive = true;
     if (saved > 0 && fromCard) {
-      // Las tarjetas tardan un momento en aparecer: se intenta hasta que la página sea lo bastante alta
+      // Las tarjetas tardan en aparecer (orden guardado, datos): se intenta hasta 4 segundos
       let tries = 0;
       const go = () => {
-        if (document.documentElement.scrollHeight - window.innerHeight >= saved - 4 || tries++ > 20) window.scrollTo(0, saved);
+        if (!alive) return;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        if (max >= saved - 4 || tries++ > 80) window.scrollTo(0, Math.min(saved, Math.max(0, max)));
         else setTimeout(go, 50);
       };
       requestAnimationFrame(go);
     }
     let t: ReturnType<typeof setTimeout> | undefined;
-    const onScroll = () => { clearTimeout(t); t = setTimeout(() => sessionStorage.setItem(KEY, String(Math.round(window.scrollY))), 120); };
+    const onScroll = () => { clearTimeout(t); t = setTimeout(save, 120); };
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { clearTimeout(t); sessionStorage.setItem(KEY, String(Math.round(window.scrollY))); window.removeEventListener('scroll', onScroll); };
+    // Al tocar una tarjeta se guarda en ese mismo instante (antes de que cambie de página)
+    document.addEventListener('pointerdown', save, true);
+    document.addEventListener('click', save, true);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('pointerdown', save, true);
+      document.removeEventListener('click', save, true);
+    };
   }, []);
 
 
