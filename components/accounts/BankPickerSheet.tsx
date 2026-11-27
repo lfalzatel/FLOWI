@@ -1,17 +1,17 @@
 'use client';
-import { tr } from '@/lib/i18n';
+import { tr, useT } from '@/lib/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Search, Check, ChevronDown } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { CategoryIcon } from '@/components/CategoryIcon';
-import { PAYMENT_METHODS, findCatalogEntry, normalizeText } from '@/lib/categories';
+import { PAYMENT_METHODS, getPaymentMethodsForLang, findCatalogEntry, normalizeText } from '@/lib/categories';
 
 // Selector de bancos, billeteras y medios de pago con su logo: un campo que abre una hoja con
 // buscador y cuadrícula, en vez de decenas de botones ocupando el formulario.
 
-const WALLETS = ['Nequi', 'Daviplata', 'RappiPay'];
-const OTHERS = ['Efectivo', 'Tarjeta débito', 'Tarjeta crédito', 'Transferencia', 'Addi', 'Sistecrédito'];
+const WALLETS = ['Nequi', 'Daviplata', 'RappiPay', 'Bizum', 'MB WAY', 'PayPal', 'Apple Pay', 'Google Pay', 'Venmo', 'Zelle', 'Cash App', 'Moey!'];
+const OTHERS = ['Efectivo', 'Tarjeta débito', 'Tarjeta crédito', 'Transferencia', 'Multibanco', 'Addi', 'Sistecrédito'];
 
 export function bankMeta(label: string): { icon: string; label: string } | null {
   const k = normalizeText(label);
@@ -41,6 +41,7 @@ interface SheetProps {
 }
 
 export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, onlyBanks, extra = [], favorites = [], disabled = {}, allowCustom, onChange, onClose }: SheetProps) {
+  const { lang } = useT();
   const { theme } = useTheme();
   const isTech = theme === 'cyberpunk' || theme === 'kiloCode';
   const surface = isTech ? 'bg-deep' : 'bg-card';
@@ -56,10 +57,12 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
   }, [onClose]);
 
   const sections = useMemo(() => {
-    const all = Array.from(new Set([...PAYMENT_METHODS.map(p => p.label), ...extra]));
-    const base = onlyBanks ? all.filter(l => !WALLETS.includes(l) && !OTHERS.includes(l)) : all;
     const q = normalizeText(query);
-    const match = (l: string) => !q || normalizeText(l).includes(q);
+    // Sin búsqueda: solo los del país actual (+ generales). Si la persona escribe en el buscador, puede encontrar cualquier banco o medio de otro país.
+    const pool = q ? PAYMENT_METHODS : getPaymentMethodsForLang(lang);
+    const all = Array.from(new Set([...pool.map(p => p.label), ...extra]));
+    const base = onlyBanks ? all.filter(l => !WALLETS.includes(l) && !OTHERS.includes(l)) : all;
+    const match = (l: string) => !q || normalizeText(l).includes(q) || normalizeText(tr(l)).includes(q);
     // Tus cuentas salen todas, aunque su medio de pago no esté en el catálogo (tarjetas o nombres propios)
     const fav = Array.from(new Set(favorites)).filter(f => (base.includes(f) || !onlyBanks) && match(f));
     const rest = base.filter(l => !fav.includes(l) && match(l));
@@ -72,7 +75,7 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
     const others = rest.filter(l => OTHERS.includes(l));
     if (others.length) out.push({ name: tr('Efectivo, tarjetas y otros'), items: others });
     return out;
-  }, [query, extra, favorites, onlyBanks]);
+  }, [query, extra, favorites, onlyBanks, lang]);
 
   const anyMatch = sections.some(s => s.items.length);
   const toggle = (label: string) => {
@@ -111,7 +114,7 @@ export function BankPickerSheet({ title = 'Elige el banco', selected, multiple, 
                             className={`relative flex flex-col items-center gap-1.5 px-1 py-3 border transition-all active:scale-95 disabled:opacity-35 ${isTech ? 'rounded-none' : 'rounded-2xl'} ${
                               on ? 'border-accent bg-accent/15' : 'border-glass-border hover:bg-white/5'}`}>
                       <BankLogo label={label} className="w-8 h-8 text-2xl flex items-center justify-center" />
-                      <span className={`text-[11px] leading-tight text-center ${on ? 'text-accent font-semibold' : 'text-text-secondary'}`}>{label}</span>
+                      <span className={`text-[11px] leading-tight text-center ${on ? 'text-accent font-semibold' : 'text-text-secondary'}`}>{tr(label)}</span>
                       {on && <Check className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-accent" />}
                     </button>
                   );

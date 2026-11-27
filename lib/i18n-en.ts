@@ -925,6 +925,8 @@ export const EN: Record<string, string> = {
   'Banco': 'Bank',
   'Billetera digital': 'Digital wallet',
   'Efectivo': 'Cash',
+  'Tarjeta débito': 'Debit card',
+  'Tarjeta crédito': 'Credit card',
   'Probar animaciones y sonidos': 'Try animations and sounds',
   // ── Etapa 2: asistente de voz y fotos, compartidos, amigos, comentarios ──
   'A favor y en contra por parte de la app': 'For and against, by part of the app',

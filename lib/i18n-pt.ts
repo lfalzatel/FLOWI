@@ -903,6 +903,8 @@ export const PT: Record<string, string> = {
   'Banco': 'Banco',
   'Billetera digital': 'Carteira digital',
   'Efectivo': 'Dinheiro',
+  'Tarjeta débito': 'Cartão de débito',
+  'Tarjeta crédito': 'Cartão de crédito',
   'Probar animaciones y sonidos': 'Testar animações e sons',
   'A favor y en contra por parte de la app': 'A favor e contra por parte da app',
   'A paz y salvo': 'Contas saldadas',

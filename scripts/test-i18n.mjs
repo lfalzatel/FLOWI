@@ -34,4 +34,24 @@ eq('lazyT: objeto, llaves', Object.keys(R), ['a', 'b']);
 eq('lazyT: objeto, entradas', Object.entries(R)[0], ['a', 'Gastos']);
 eq('lazyT: acceso directo', R.b, 'x');
 
+// Catálogo por país: botones sin mezclar países, búsqueda y reconocimiento globales
+const C = await loadTs('lib/categories.ts');
+const m = (cat, lang) => C.getMerchantsForCategory(cat, lang).map(x => x.label);
+const p = (lang) => C.getPaymentMethodsForLang(lang).map(x => x.label);
+const has = (arr, ...xs) => xs.every(x => arr.includes(x));
+const none = (arr, ...xs) => xs.every(x => !arr.includes(x));
+eq('Mercado es: Éxito, sin otros países', [has(m('Mercado', 'es'), 'Éxito'), none(m('Mercado', 'es'), 'Mercadona', 'Continente', 'Walmart')], [true, true]);
+eq('Mercado es-ES: Mercadona, sin Éxito/Walmart', [has(m('Mercado', 'es-ES'), 'Mercadona'), none(m('Mercado', 'es-ES'), 'Éxito', 'Walmart')], [true, true]);
+eq('Mercado pt: Continente y Pingo Doce, sin Éxito', [has(m('Mercado', 'pt'), 'Continente', 'Pingo Doce'), none(m('Mercado', 'pt'), 'Éxito')], [true, true]);
+eq('Mercado en: Walmart y Costco, sin Éxito', [has(m('Mercado', 'en'), 'Walmart', 'Costco'), none(m('Mercado', 'en'), 'Éxito')], [true, true]);
+eq('Netflix global en los 4 idiomas', ['es', 'es-ES', 'pt', 'en'].map(l => m('Suscripciones', l).includes('Netflix')), [true, true, true, true]);
+eq('sin idioma = todo el catálogo', has(m('Mercado'), 'Éxito', 'Mercadona', 'Continente', 'Walmart'), true);
+eq('pagos es: Nequi, sin MB WAY/Zelle', [has(p('es'), 'Nequi'), none(p('es'), 'MB WAY', 'Zelle')], [true, true]);
+eq('pagos es-ES: Bizum, sin Nequi', [has(p('es-ES'), 'Bizum'), none(p('es-ES'), 'Nequi')], [true, true]);
+eq('pagos pt: MB WAY, sin Bizum', [has(p('pt'), 'MB WAY'), none(p('pt'), 'Bizum')], [true, true]);
+eq('pagos en: Zelle y Venmo', has(p('en'), 'Zelle', 'Venmo'), true);
+eq('Efectivo en todos', ['es', 'es-ES', 'pt', 'en'].map(l => p(l).includes('Efectivo')), [true, true, true, true]);
+eq('reconoce comercios de cualquier país', ['Mercadona', 'Continente', 'Walmart'].map(x => !!C.findCatalogEntry(x)), [true, true, true]);
+eq('detecta Mercadona en texto', C.detectMerchantInText('compras en mercadona')?.label, 'Mercadona');
+
 done();

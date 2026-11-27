@@ -14,8 +14,8 @@ import { isBusinessCategory } from '@/lib/business';
 import { suggestTxCategory } from '@/lib/txSuggest';
 import { PhotoSourceSheet, openPhotoPicker } from '@/components/forms/PhotoSourceSheet';
 import {
-  DEFAULT_FREQUENT, PAYMENT_METHODS, normalizeText, detectMerchantInText, findCatalogEntry, getFrequent, softHyphenate,
-  getMerchantsForCategory, getRecent, recordUsage,
+  DEFAULT_FREQUENT, MERCHANTS, normalizeText, detectMerchantInText, findCatalogEntry, getFrequent, softHyphenate,
+  getMerchantsForCategory, getPaymentMethodsForLang, getRecent, recordUsage,
 } from '@/lib/categories';
 import { ManageCategoriesModal } from '@/components/forms/ManageCategoriesModal';
 import { CategoryPickerSheet } from '@/components/forms/CategoryPickerSheet';
@@ -166,7 +166,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
   const [categoriesInitialView, setCategoriesInitialView] = useState<'list' | 'form'>('list');
 
   const { theme } = useTheme();
-  const { t, locale } = useT();
+  const { t, locale, lang } = useT();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
 
   useEffect(() => {
@@ -221,12 +221,13 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
 
   const merchantSuggestions = useMemo(() => {
     if (type !== 'gasto' || !category) return [];
-    const catalog = getMerchantsForCategory(category).map(m => m.label);
+    // Botones: solo comercios globales y del país del idioma (los de otros países se encuentran escribiendo)
+    const catalog = getMerchantsForCategory(category, lang).map(m => m.label);
     const used = getFrequent(`merchant-${category}`);
     const labels = Array.from(new Set([...used, ...catalog]));
     if (merchant && !labels.includes(merchant)) labels.unshift(merchant);
     return labels;
-  }, [type, category, merchant, usageVersion]);
+  }, [type, category, merchant, usageVersion, lang]);
 
   // Cuentas: los medios de pago que tienen cuenta salen primero, y al elegir uno que no tiene
   // cuenta se ofrece crearla (para que el movimiento sume o reste en Cuentas y patrimonio)
@@ -259,19 +260,19 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
     const k = norm(m);
     if (k === 'efectivo') return 'efectivo';
     if (/tarjeta credito|addi|sistecredito/.test(k)) return 'credito';
-    if (/nequi|daviplata|rappipay/.test(k)) return 'billetera';
+    if (/nequi|daviplata|rappipay|bizum|mb way|paypal|apple pay|google pay|venmo|zelle|cash app|moey/.test(k)) return 'billetera';
     return 'banco';
   };
 
   const paymentOptions = useMemo(() => {
     // Primero tus cuentas (la principal de primera, una opción por cuenta), luego las más usadas y el catálogo
     const byAccount = [...activeAccounts].sort((a, b) => Number(!!b.isDefault) - Number(!!a.isDefault)).map(a => a.methods[0]).filter(Boolean);
-    const labels = Array.from(new Set([...byAccount, ...accountMethods, ...getFrequent('payment'), ...PAYMENT_METHODS.map(p => p.label)]));
+    const labels = Array.from(new Set([...byAccount, ...accountMethods, ...getFrequent('payment'), ...getPaymentMethodsForLang(lang).map(p => p.label)]));
     if (paymentMethod && !labels.slice(0, VISIBLE_PAYMENTS).includes(paymentMethod)) {
       return [paymentMethod, ...labels.filter(l => l !== paymentMethod)];
     }
     return labels;
-  }, [paymentMethod, usageVersion, accountMethods.join('|')]);
+  }, [paymentMethod, usageVersion, accountMethods.join('|'), lang]);
 
   // Productos: si el monto se suma solo, sigue a la suma
   const changeItems = (next: ReceiptItem[]) => {
@@ -968,8 +969,10 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   </button>
                 )}
                 {isTypingMerchant ? (
+                  <>
                   <input autoComplete="off"
                     autoFocus
+                    list={merchantDraft.trim().length >= 2 ? 'flowi-all-merchants' : undefined}
                     value={merchantDraft}
                     onChange={(e) => setMerchantDraft(e.target.value)}
                     onBlur={commitMerchantDraft}
@@ -977,6 +980,13 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                     placeholder={t('Nombre del lugar')}
                     className={`px-3 py-1.5 text-xs bg-glass border border-accent text-text-primary focus:outline-none w-36 ${isTechTheme ? 'rounded-none' : 'rounded-full'}`}
                   />
+                  {/* Al escribir se sugieren comercios de todos los países */}
+                  {merchantDraft.trim().length >= 2 && (
+                    <datalist id="flowi-all-merchants">
+                      {MERCHANTS.map(m => <option key={m.label} value={m.label} />)}
+                    </datalist>
+                  )}
+                  </>
                 ) : (
                   <button type="button" onClick={() => setIsTypingMerchant(true)} className={`${chipClass(false)} normal-case border-dashed`}>
                     <Plus className="w-3.5 h-3.5" /> {t('Otro')}
@@ -1000,7 +1010,7 @@ export function AddExpenseModal({ onClose, onSuccess, transactionToEdit: editTar
                   <button key={label} type="button" onClick={() => choosePayment(paymentMethod === label ? '' : label)} className={`${chipClass(paymentMethod === label)} normal-case`}>
                     {meta ? <CategoryIcon icon={meta.icon} label={label} className="w-4 h-4 text-sm flex items-center justify-center" />
                           : <BankLogo label={label} className="w-4 h-4 text-sm flex items-center justify-center" />}
-                    {label}
+                    {tr(label)}
                   </button>
                 );
               })}

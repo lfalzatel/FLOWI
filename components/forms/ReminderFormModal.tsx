@@ -216,7 +216,7 @@ export function ReminderFormModal({ onClose, onSuccess, reminder, prefill }: Pro
   const merchantSuggestion = useMemo(() => suggestReminderMerchant(title), [title]);
   const suggestionData = suggestion ? allCategories.find(c => c.label === suggestion) : undefined;
   const merchantMeta = merchant ? findCatalogEntry(merchant) : undefined;
-  const merchantOptions2 = category ? getMerchantsForCategory(category).map(m => m.label) : [];
+  const merchantOptions2 = category ? getMerchantsForCategory(category, currentLang()).map(m => m.label) : [];
 
   // ── Estilos y piezas del formulario compacto ──
   const lbl = `block text-[11px] uppercase tracking-wider mb-1.5 ${isTechTheme ? 'text-accent/70' : 'text-text-muted'}`;
