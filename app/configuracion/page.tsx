@@ -82,9 +82,12 @@ export default function ConfigPage() {
   // de otras partes (menú de perfil, avisos) llegan directo. #temas abre la ventana de temas y
   // #animaciones abre Apariencia en la fila de animaciones.
   const [active, setActive] = useState<CfgKey | null>(null);
+  const TILES_SCROLL = 'flowi-cfg-tiles-scroll';
   useEffect(() => {
     const keys: CfgKey[] = ['cuenta', 'seguridad', 'notificaciones', 'apariencia', 'sonidos', 'ia', 'finanzas', 'gestion', 'privacidad', 'apoyar'];
-    const open = () => {
+    // back = viene del botón atrás (cambio de #); al entrar a la página no se recupera una posición vieja
+    const open = (e?: Event) => {
+      const back = !!e;
       const target = window.location.hash.slice(1);
       const only = (k: CfgKey) => {
         setActive(k);
@@ -101,7 +104,21 @@ export default function ConfigPage() {
       } else if (target === 'temas') {
         setIsThemesModalOpen(true);
         history.replaceState(null, '', window.location.pathname);
-      } else setActive(null);
+      } else {
+        setActive(null);
+        // De vuelta a los mosaicos: a la posición donde estaba al abrir la sección (no arriba del todo)
+        const y = Number(sessionStorage.getItem(TILES_SCROLL) || 0);
+        if (!back) sessionStorage.removeItem(TILES_SCROLL);
+        else if (y > 0) {
+          let tries = 0;
+          const go = () => {
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            if (max >= y - 4 || tries++ > 40) window.scrollTo(0, Math.min(y, Math.max(0, max)));
+            else setTimeout(go, 50);
+          };
+          requestAnimationFrame(go);
+        }
+      }
     };
     open();
     window.addEventListener('hashchange', open);
@@ -110,7 +127,8 @@ export default function ConfigPage() {
   // Si se entró a la sección desde un mosaico, volver usa el historial (igual que el botón atrás del
   // celular); si se llegó con un enlace directo, se quita el #sección y se muestran los mosaicos
   const fromTile = useRef(false);
-  const openTile = (k: CfgKey) => { fromTile.current = true; window.location.hash = k; };
+  // Se guarda dónde estaban los mosaicos al abrir una sección, para volver ahí mismo
+  const openTile = (k: CfgKey) => { sessionStorage.setItem(TILES_SCROLL, String(Math.round(window.scrollY))); fromTile.current = true; window.location.hash = k; };
   const backToTiles = () => {
     if (fromTile.current) { fromTile.current = false; window.history.back(); }
     else { history.replaceState(null, '', window.location.pathname); setActive(null); }
