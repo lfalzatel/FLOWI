@@ -9,7 +9,8 @@ import { useState, useEffect } from 'react';
 import { X, Shield, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useTheme } from '@/components/ThemeProvider';
-import { getAllUsers, updateUserProfile, UserProfile } from '@/lib/firestore';
+import { updateUserProfile } from '@/lib/firestore';
+import { loadAdminUsers, type AdminUser } from '@/lib/adminUsers';
 
 interface Props {
   onClose: () => void;
@@ -19,10 +20,11 @@ interface Props {
 export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
   const { theme } = useTheme();
   const isTechTheme = theme === 'cyberpunk' || theme === 'kiloCode';
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [fromAuth, setFromAuth] = useState(true);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   
   const [userStats, setUserStats] = useState<{gastos: number, ingresos: number, deudas: number, loading: boolean, error?: boolean, txCount?: number, txDays?: number, firstTx?: Date | null, lastTx?: Date | null}>({
     gastos: 0, ingresos: 0, deudas: 0, loading: false
@@ -39,8 +41,9 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
 
   const loadUsers = async () => {
     try {
-      const data = await getAllUsers();
+      const { users: data, fromAuth: ok } = await loadAdminUsers();
       setUsers(data);
+      setFromAuth(ok);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -89,7 +92,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
     }
   };
 
-  const handleSelectUser = (u: UserProfile) => {
+  const handleSelectUser = (u: AdminUser) => {
     setSelectedUser(u);
     loadUserStats(u.id!); // el administrador puede leer los totales de cada usuario
   };
@@ -174,10 +177,14 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                     for (const [k, v] of Object.entries(us)) sum[k] = (sum[k] || 0) + (v || 0);
                   }
                   const topUse = Object.entries(sum).sort((a, b) => b[1] - a[1]).slice(0, 8);
-                  const guests = (users as any[]).filter(u => u.name === 'Invitado' && !u.email).length;
-                  if (!topUse.length && !guests) return null;
+                  const guests = users.filter(u => u.isGuest).length;
+                  const accounts = users.length - guests;
                   return (
                     <div className={`p-3 text-xs ${isTechTheme ? 'border border-accent/20 rounded-none font-mono' : 'bg-glass border border-glass-border rounded-xl'}`}>
+                      <p className="font-semibold text-text-primary mb-1.5">
+                        {accounts} {accounts === 1 ? tr('cuenta') : tr('cuentas')} · {guests} {guests === 1 ? tr('invitado') : tr('invitados')}
+                      </p>
+                      {!fromAuth && <p className="text-amber-500 mb-1.5 leading-snug">{tr('No se pudo leer la lista completa de cuentas: se muestran solo los perfiles guardados.')}</p>}
                       {topUse.length > 0 && (
                         <>
                           <p className="font-semibold text-text-primary mb-1">Lo más usado en Servicios ({people} {people === 1 ? 'persona' : 'personas'})</p>
@@ -186,12 +193,11 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                           </div>
                         </>
                       )}
-                      {guests > 0 && <p className="text-text-muted mt-1.5">👤 {guests} {guests === 1 ? 'invitado' : 'invitados'} sin vincular cuenta</p>}
                     </div>
                   );
                 })()}
                 {users.map(u => {
-                  const displayName = u.name || (u.email ? u.email.split('@')[0] : tr('Usuario'));
+                  const displayName = u.isGuest ? tr('Invitado') : (u.name || (u.email ? u.email.split('@')[0] : tr('Usuario')));
                   const initials = displayName
                     .split(' ')
                     .map(n => n[0])
@@ -220,14 +226,16 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                       
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-semibold truncate ${isTechTheme ? 'font-mono text-white' : 'text-text-primary'}`}>{displayName}</p>
-                        <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{u.email}</p>
+                        <p className={`text-[10px] truncate ${isTechTheme ? 'font-mono text-accent/50' : 'text-text-muted'}`}>{u.isGuest ? tr('Sin cuenta de Google') : u.email}</p>
                         {(u.activeDays ?? 0) > 0 && (
                           <p className={`text-[10px] ${isTechTheme ? 'font-mono text-accent' : 'text-accent'}`}>📅 {u.activeDays} {u.activeDays === 1 ? 'día' : 'días'} de uso{typeof u.txCount === 'number' ? ` · ${u.txCount} registros` : ''}{u.lastActiveDay ? ` · último: ${new Date(u.lastActiveDay + 'T12:00:00').toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' })}` : ''}</p>
                         )}
                       </div>
 
                       <div className="flex-shrink-0">
-                        {u.email === currentUserEmail ? (
+                        {u.isGuest ? (
+                          <span className={`text-[10px] px-2 py-1 uppercase tracking-widest ${isTechTheme ? 'font-mono border border-amber-400/40 text-amber-300' : 'border border-amber-400/40 text-amber-500 rounded-lg'}`}>{tr('Invitado')}</span>
+                        ) : u.email === currentUserEmail ? (
                           <span className={`text-[10px] px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>{tr('Tú')}</span>
                         ) : (
                           <span className={`text-[10px] px-2 py-1 uppercase tracking-widest ${isTechTheme ? 'font-mono border border-accent/30 text-accent' : 'bg-glass border border-glass-border text-text-primary rounded-lg'}`}>
@@ -244,7 +252,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
         ) : (
           <>
             {(() => {
-              const displayName = selectedUser.name || (selectedUser.email ? selectedUser.email.split('@')[0] : tr('Usuario'));
+              const displayName = selectedUser.isGuest ? tr('Invitado') : (selectedUser.name || (selectedUser.email ? selectedUser.email.split('@')[0] : tr('Usuario')));
               const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
               const colors = ['bg-[#FF5B5B]/20 text-[#FF5B5B]', 'bg-[#F5A623]/20 text-[#F5A623]', 'bg-[#A855F7]/20 text-[#A855F7]', 'bg-[#00E5A0]/20 text-[#00E5A0]', 'bg-[#3B82F6]/20 text-[#3B82F6]', 'bg-[#EC4899]/20 text-[#EC4899]'];
               const avatarColorClass = colors[displayName.length % colors.length];
@@ -280,7 +288,9 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                   {/* Rol con botones (sin la lista blanca del sistema) */}
                   <div className={`${box} flex items-center justify-between gap-2`}>
                     <span className={lbl}>{tr('Rol')}</span>
-                    {isMe ? (
+                    {selectedUser.noProfile ? (
+                      <span className="text-[11px] text-text-muted text-right leading-snug">{tr('Aún no tiene perfil en FLOWI (no ha terminado de entrar).')}</span>
+                    ) : isMe ? (
                       <span className={`text-xs px-2 py-1 uppercase tracking-widest font-bold ${isTechTheme ? 'font-mono text-black bg-accent rounded-none' : 'rounded-full bg-accent text-black'}`}>{tr('Tú (Administrador)')}</span>
                     ) : (
                       <div className="flex gap-1.5">

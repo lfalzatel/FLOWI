@@ -6,6 +6,7 @@ import { auth, db } from '@/lib/firebase';
 
 // Varios componentes usan useAuth a la vez: el perfil faltante se crea una sola vez
 let creatingProfile = false;
+let healedProfile = false;
 
 export interface UserProfile {
   name: string;
@@ -50,6 +51,15 @@ export function useAuth() {
             setProfile(snap.data() as UserProfile);
             lastAuth = { user: firebaseUser, profile: snap.data() as UserProfile };
             setLoading(false);
+            // Empezó como invitado y ya vinculó Google, pero el perfil sigue diciendo "Invitado" o sin
+            // foto: se pone su nombre, foto y correo de Google (una vez por sesión)
+            const d = snap.data() as UserProfile;
+            if (!firebaseUser.isAnonymous && !healedProfile && (d.name === 'Invitado' || !d.name || !d.photoURL || !d.email)
+                && firebaseUser.providerData.some(p => p.providerId === 'google.com')) {
+              healedProfile = true;
+              import('@/lib/auth').then(({ processGoogleUser }) => processGoogleUser(firebaseUser))
+                .catch((e) => console.error('No se pudo poner el nombre de Google en el perfil:', e));
+            }
           } else {
             setProfile(null);
             // Cuenta de Google sin perfil: pasa cuando la ventana de Google recarga la página (en el

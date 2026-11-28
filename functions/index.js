@@ -231,6 +231,38 @@ exports.revisarPagoManual = onCall({ region: 'us-central1' }, async (req) => {
 });
 
 
+// Gestión de usuarios (Configuración, solo administrador): las cuentas de inicio de sesión de
+// Firebase con su nombre, foto y si son invitados de verdad (anónimos, sin Google). La lista de la
+// app se armaba solo con los perfiles de Firestore (users/{uid}), que pueden faltar o tener el nombre
+// "Invitado" aunque la persona ya haya entrado con Google; con esto se cruzan las dos fuentes.
+exports.listarUsuarios = onCall({ region: 'us-central1', timeoutSeconds: 120 }, async (req) => {
+  if (!req.auth) throw new HttpsError('unauthenticated', 'Inicia sesión.');
+  const me = await db.collection('users').doc(req.auth.uid).get();
+  if (!me.exists || me.data().role !== 'admin') throw new HttpsError('permission-denied', 'Solo el administrador ve los usuarios.');
+  const out = [];
+  let token;
+  do {
+    const page = await admin.auth().listUsers(1000, token);
+    for (const u of page.users) {
+      const google = u.providerData.find(p => p.providerId === 'google.com');
+      const named = google || u.providerData.find(p => p.displayName || p.email) || {};
+      out.push({
+        uid: u.uid,
+        name: u.displayName || named.displayName || '',
+        email: u.email || named.email || '',
+        photoURL: u.photoURL || named.photoURL || '',
+        providers: u.providerData.map(p => p.providerId),
+        // Invitado = entró con "Probar sin cuenta" y nunca vinculó Google (sin proveedores ni correo)
+        anonymous: u.providerData.length === 0 && !u.email,
+        createdAt: u.metadata.creationTime || null,
+        lastSignIn: u.metadata.lastSignInTime || u.metadata.lastRefreshTime || null,
+      });
+    }
+    token = page.pageToken;
+  } while (token);
+  return { users: out };
+});
+
 // Aviso al administrador (notificación push) cada vez que alguien envía un comprobante
 exports.avisarComprobante = onDocumentCreated({ document: 'fl_manual_payments/{id}', region: 'us-central1' }, async (event) => {
   const p = event.data?.data();
