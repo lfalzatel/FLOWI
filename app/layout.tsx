@@ -60,6 +60,7 @@ import { LangSync } from '@/components/layout/LangSync';
 import { SharedLinksProvider } from '@/components/SharedLinksProvider';
 import { InAppNotificationProvider } from '@/hooks/useInAppNotifications';
 import { ReminderWatcher } from '@/components/reminders/ReminderWatcher';
+import { SmartAlertWatcher } from '@/components/alerts/SmartAlertWatcher';
 import { NotificationPrompter } from '@/components/notifications/NotificationPrompter';
 import { UpdateWatcher } from '@/components/layout/UpdateWatcher';
 import { LimitPrompter } from '@/components/plans/LimitPrompter';
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ChatTourDemo />
               <NavTracker />
               <ReminderWatcher />
+              <SmartAlertWatcher />
               <NotificationPrompter />
               <UpdateWatcher />
               <LimitPrompter />
