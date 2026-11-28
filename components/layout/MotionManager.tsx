@@ -45,13 +45,18 @@ export function MotionManager() {
       if (low && !saving && currentMotion() === 'full') { saving = true; applyMotion('soft'); }
       else if (!low && saving) { saving = false; applyMotion(getSavedMotion() || (isSlowDevice() ? 'soft' : 'full')); }
     };
+    // Algunos celulares entregan un objeto de batería incompleto (sin addEventListener o sin
+    // removeEventListener): antes eso tumbaba toda la app al cambiar de pantalla. Si falta, se ignora.
     nav.getBattery().then((b: any) => {
+      if (!b || typeof b.addEventListener !== 'function' || typeof b.removeEventListener !== 'function') return;
       battery = b;
       check();
       b.addEventListener('levelchange', check);
       b.addEventListener('chargingchange', check);
     }).catch(() => {});
-    return () => { if (battery) { battery.removeEventListener('levelchange', check); battery.removeEventListener('chargingchange', check); } };
+    return () => {
+      try { battery?.removeEventListener('levelchange', check); battery?.removeEventListener('chargingchange', check); } catch { /* batería incompleta */ }
+    };
   }, []);
 
   // Modales que nacen del toque

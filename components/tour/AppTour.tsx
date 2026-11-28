@@ -206,8 +206,10 @@ export function AppTour({ voice: initialVoice, demo = false, steps: source = HOM
       synth.speak(u);
     };
     if (synth.getVoices().length) speak();
-    else synth.addEventListener('voiceschanged', speak, { once: true });
-    return () => { synth.removeEventListener('voiceschanged', speak); synth.cancel(); };
+    // En navegadores viejos la voz no trae add/removeEventListener: se lee sin esperar las voces
+    else if (typeof synth.addEventListener === 'function') synth.addEventListener('voiceschanged', speak, { once: true });
+    else speak();
+    return () => { try { synth.removeEventListener?.('voiceschanged', speak); synth.cancel(); } catch { /* navegador viejo */ } };
   }, [index, voice, canSpeak, step]);
 
   useEffect(() => {
