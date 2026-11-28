@@ -1,26 +1,26 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check } from 'lucide-react';
 import { LANGS, LANG_NAMES, LANG_SHORT, useT } from '@/lib/i18n';
 
 // Cambio rápido de idioma del encabezado: muestra la sigla del idioma actual y, al tocarlo, la lista de los
 // cuatro (cada uno escrito en su propio idioma, así se encuentra aunque la app esté en otro).
+// El desplegable copia el del perfil (ProfileCapsule): mismo fondo glass-dropdown, borde, sombra, radio,
+// filas y capa de fondo en un portal que cierra al tocar fuera.
 export function LangMenu({ isTech }: { isTech: boolean }) {
   const { lang, setLang } = useT();
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    const close = (e: PointerEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('pointerdown', close);
     document.addEventListener('keydown', esc);
-    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', esc); };
+    return () => document.removeEventListener('keydown', esc);
   }, [open]);
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
@@ -34,20 +34,37 @@ export function LangMenu({ isTech }: { isTech: boolean }) {
       >
         {LANG_SHORT[lang]}
       </button>
+
+      {open && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 transition-opacity" onClick={() => setOpen(false)} aria-hidden="true" />,
+        document.body
+      )}
       {open && (
         <div role="menu"
-             className={`absolute right-0 top-11 z-50 min-w-[190px] p-1 bg-bg-card border border-glass-border shadow-xl
-                        ${isTech ? 'rounded-none font-mono' : 'rounded-xl'}`}>
-          {LANGS.map(code => (
-            <button key={code} type="button" role="menuitemradio" aria-checked={lang === code}
-                    onClick={() => { setLang(code); setOpen(false); }}
-                    className={`w-full flex items-center justify-between gap-3 px-3 py-2 text-sm text-left
-                               ${isTech ? 'rounded-none' : 'rounded-lg'}
-                               ${lang === code ? 'bg-accent/15 text-accent font-semibold' : 'text-text-primary hover:bg-glass-hover'}`}>
-              <span><span className="inline-block w-8 text-[11px] font-bold text-text-muted">{LANG_SHORT[code]}</span>{LANG_NAMES[code]}</span>
-              {lang === code && <Check className="w-4 h-4 shrink-0" />}
-            </button>
-          ))}
+             className={`absolute right-0 top-full mt-2.5 shadow-2xl shadow-black/10 animate-slide-down origin-top-right
+                        overflow-y-auto z-50 glass-dropdown p-1.5
+                        ${isTech ? 'rounded-none border border-accent/50' : 'rounded-2xl border border-glass-border/50'}`}
+             style={{ width: '232px' }}>
+          {LANGS.map(code => {
+            const active = lang === code;
+            return (
+              <button key={code} type="button" role="menuitemradio" aria-checked={active}
+                      onClick={() => { setLang(code); setOpen(false); }}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left transition-colors
+                                 ${active ? 'text-text-primary bg-glass' : 'text-text-secondary hover:text-text-primary hover:bg-glass'}`}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-bold transition-colors
+                                  ${isTech ? 'font-mono' : ''} ${active ? 'bg-accent/25 text-accent' : 'bg-glass-strong'}`}>
+                    {LANG_SHORT[code]}
+                  </div>
+                  <span className={`text-sm truncate ${isTech ? 'font-mono text-accent uppercase tracking-wide' : active ? 'font-semibold' : ''}`}>
+                    {LANG_NAMES[code]}
+                  </span>
+                </div>
+                {active && <Check className="w-4 h-4 shrink-0 text-accent" />}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
