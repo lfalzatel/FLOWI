@@ -143,6 +143,7 @@ export default function AmigosPage() {
     } catch { /* la persona canceló */ }
   };
 
+  const pendingSent = useMemo(() => outgoing.length, [outgoing]);
   const noRules = unavailable || error === 'unavailable';
   // Los invitados no tienen perfil público: para Amigos hace falta vincular la cuenta
   if (user?.isAnonymous) {
@@ -162,7 +163,6 @@ export default function AmigosPage() {
       </div>
     );
   }
-  const pendingSent = useMemo(() => outgoing.length, [outgoing]);
 
   return (
     <div className="relative min-h-screen flex flex-col bg-deep">
