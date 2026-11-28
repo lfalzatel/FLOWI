@@ -63,3 +63,4 @@ flowi-9af82-*.json
 /android/app/build/
 /android/.gradle/
 /android/local.properties
+public/fallback-*.js
