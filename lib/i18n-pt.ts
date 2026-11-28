@@ -3100,4 +3100,7 @@ export const PT: Record<string, string> = {
   'Ver Cuentas y patrimonio': 'Ver Contas e património',
   'Patrimonio neto': 'Património líquido',
   'Toca para ver cada cuenta': 'Toca para ver cada conta',
+  'Algo falló en FLOWI': 'Algo falhou no FLOWI',
+  'Tus datos están a salvo. Toma una captura de esta pantalla y envíasela al soporte para arreglarlo.': 'Os teus dados estão seguros. Faz uma captura deste ecrã e envia-a ao suporte para o corrigirmos.',
+  'Volver a abrir FLOWI': 'Voltar a abrir o FLOWI',
 };

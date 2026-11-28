@@ -3176,4 +3176,7 @@ export const EN: Record<string, string> = {
   'Ver Cuentas y patrimonio': 'See Accounts & net worth',
   'Patrimonio neto': 'Net worth',
   'Toca para ver cada cuenta': 'Tap to see each account',
+  'Algo falló en FLOWI': 'Something went wrong in FLOWI',
+  'Tus datos están a salvo. Toma una captura de esta pantalla y envíasela al soporte para arreglarlo.': 'Your data is safe. Take a screenshot of this screen and send it to support so we can fix it.',
+  'Volver a abrir FLOWI': 'Open FLOWI again',
 };
