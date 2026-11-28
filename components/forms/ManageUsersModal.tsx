@@ -5,12 +5,34 @@ import { DateFilter, type FilterType } from '@/components/dashboard/DateFilter';
 import { getISOWeekString, getLocalDateString } from '@/lib/dateUtils';
 import { formatCurrency } from '@/lib/format';
 import type { Transaction } from '@/lib/firestore';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { X, Shield, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useTheme } from '@/components/ThemeProvider';
 import { updateUserProfile } from '@/lib/firestore';
 import { loadAdminUsers, type AdminUser } from '@/lib/adminUsers';
+
+// Nombre visible de cada sección de Servicios (mismo texto de su tarjeta) para el resumen de uso
+const SERVICE_LABEL: Record<string, string> = {
+  cuentas: 'Cuentas y patrimonio',
+  hormiga: 'Suscripciones y gastos hormiga',
+  amigos: 'Amigos',
+  recordatorios: 'Recordatorios',
+  calendario: 'Calendario de tu plata',
+  resumen: 'Resumen y estadísticas',
+  presupuestos: 'Presupuestos',
+  metas: 'Metas',
+  inversiones: 'Ahorro e inversiones',
+  negocio: 'Mi negocio',
+  productos: '¿Cuánto gasto en…?',
+  recibos: 'Mis recibos',
+  importar: 'Importar extracto',
+  notas: 'Notas',
+  compartidos: 'Gastos compartidos',
+  opiniones: 'Comentarios y sugerencias',
+  configuracion: 'Configuración',
+  perfil: 'Mi perfil',
+};
 
 interface Props {
   onClose: () => void;
@@ -92,7 +114,16 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
     }
   };
 
+  // Al abrir un usuario se guarda dónde estaba la lista y al volver se regresa ahí (no al inicio)
+  const scrollBoxRef = useRef<HTMLDivElement>(null);
+  const listScrollRef = useRef(0);
+  useLayoutEffect(() => {
+    const box = scrollBoxRef.current;
+    if (box) box.scrollTop = selectedUser ? 0 : listScrollRef.current;
+  }, [selectedUser?.id, loading]);
+
   const handleSelectUser = (u: AdminUser) => {
+    listScrollRef.current = scrollBoxRef.current?.scrollTop ?? 0;
     setSelectedUser(u);
     loadUserStats(u.id!); // el administrador puede leer los totales de cada usuario
   };
@@ -130,6 +161,7 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isTechTheme ? 'font-mono uppercase text-sm' : ''}`}>
       <div className={`absolute inset-0 ${(theme === 'light' || theme === 'nova') ? 'bg-black/10 backdrop-blur-[2px]' : 'bg-black/40 backdrop-blur-sm'}`} onClick={onClose} aria-hidden="true" />
       <div 
+        ref={scrollBoxRef}
         className={`w-full max-w-md relative z-10 animate-fade-in-up max-h-[95vh] overflow-y-auto p-6 glass-dropdown ${isTechTheme ? 'rounded-none border border-accent/50' : 'rounded-3xl'}`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -187,9 +219,9 @@ export function ManageUsersModal({ onClose, currentUserEmail }: Props) {
                       {!fromAuth && <p className="text-amber-500 mb-1.5 leading-snug">{tr('No se pudo leer la lista completa de cuentas: se muestran solo los perfiles guardados.')}</p>}
                       {topUse.length > 0 && (
                         <>
-                          <p className="font-semibold text-text-primary mb-1">Lo más usado en Servicios ({people} {people === 1 ? 'persona' : 'personas'})</p>
+                          <p className="font-semibold text-text-primary mb-1">{tr('Secciones de Servicios más abiertas')} <span className="font-normal text-text-muted">({people} {people === 1 ? tr('persona') : tr('personas')})</span></p>
                           <div className="flex flex-wrap gap-1.5">
-                            {topUse.map(([k, v]) => <span key={k} className="px-2 py-0.5 rounded-full bg-accent/10 text-accent">{k} · {v}</span>)}
+                            {topUse.map(([k, v]) => <span key={k} className="px-2 py-0.5 rounded-full bg-accent/10 text-accent">{tr(SERVICE_LABEL[k] || (k.charAt(0).toUpperCase() + k.slice(1)))} · {v} {v === 1 ? tr('vez') : tr('veces')}</span>)}
                           </div>
                         </>
                       )}

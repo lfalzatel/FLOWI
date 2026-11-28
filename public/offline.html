@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05202E">
+<title>FLOWI · Sin conexión</title>
+<!-- Pantalla propia cuando no hay internet y la página pedida no está guardada en el celular.
+     Archivo suelto (sin la app) para que siempre abra; el service worker la guarda al instalarse. -->
+<style>
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(120% 80% at 50% 0%,#0B3A4E 0%,#05202E 55%,#03141D 100%);color:#E2E8F0;
+       font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;
+       padding:24px;box-sizing:border-box;text-align:center}
+  .box{max-width:360px;width:100%}
+  img{width:84px;height:84px;border-radius:22px;box-shadow:0 10px 30px rgba(34,211,238,.18)}
+  .wifi{margin:22px auto 6px;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+        background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.25)}
+  h1{font-size:22px;margin:10px 0 8px}
+  p{font-size:15px;line-height:1.45;opacity:.8;margin:0 0 24px}
+  button{display:block;width:100%;border:0;border-radius:14px;padding:14px 20px;font-size:16px;font-weight:700;cursor:pointer}
+  .main{background:#22D3EE;color:#05202E;margin-bottom:10px}
+  .main[disabled]{opacity:.7}
+  .sec{background:rgba(255,255,255,.07);color:#E2E8F0}
+</style>
+</head>
+<body>
+<div class="box">
+  <img src="/icons/icon-192.png" alt="FLOWI">
+  <div class="wifi" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 2l20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/>
+      <path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/><path d="M5 13a10 10 0 0 1 5.24-2.76"/><path d="M12 20h.01"/>
+    </svg>
+  </div>
+  <h1 id="t">Sin conexión</h1>
+  <p id="d">FLOWI necesita internet para abrir esta pantalla. Revisa tu Wi-Fi o datos y vuelve a intentar.</p>
+  <button class="main" id="r">Reintentar</button>
+  <button class="sec" id="h">Ir al inicio</button>
+</div>
+<script>
+(function(){
+  var T={
+    en:["You're offline","FLOWI needs internet to open this screen. Check your Wi-Fi or mobile data and try again.","Try again","Go to home","Checking…"],
+    pt:["Sem conexão","O FLOWI precisa de internet para abrir esta tela. Verifique seu Wi-Fi ou dados móveis e tente de novo.","Tentar de novo","Ir para o início","Verificando…"],
+    es:["Sin conexión","FLOWI necesita internet para abrir esta pantalla. Revisa tu Wi-Fi o datos y vuelve a intentar.","Reintentar","Ir al inicio","Revisando…"]
+  };
+  var l='es';
+  try{ l=(localStorage.getItem('flowi-lang')||navigator.language||'es').slice(0,2).toLowerCase(); }catch(e){}
+  var s=T[l]||T.es;
+  document.documentElement.lang=T[l]?l:'es';
+  document.getElementById('t').textContent=s[0];
+  document.getElementById('d').textContent=s[1];
+  var r=document.getElementById('r'); r.textContent=s[2];
+  document.getElementById('h').textContent=s[3];
+  r.onclick=function(){ r.disabled=true; r.textContent=s[4]; location.reload(); };
+  document.getElementById('h').onclick=function(){ location.href='/'; };
+  // Si vuelve el internet, recarga sola la pantalla que se quería abrir
+  window.addEventListener('online',function(){ location.reload(); });
+})();
+</script>
+</body>
+</html>
