@@ -8,6 +8,7 @@ import {
 import { SplashScreen } from '@/components/layout/SplashScreen';
 import { FlowLines } from '@/components/FlowLines';
 import { useT, tr } from '@/lib/i18n';
+import { guestModeAvailable } from '@/lib/guest';
 
 // Página de entrada (landing): explica qué hace FLOWI y deja entrar con Google.
 // Todas las pantallas mandan aquí a quien no ha iniciado sesión.
@@ -68,14 +69,23 @@ function GoogleButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-// Usar FLOWI sin cuenta (modo invitado): los datos quedan en este celular hasta vincular Google
+// Usar FLOWI sin cuenta (modo invitado): los datos quedan en este celular hasta vincular Google.
+// Mientras está apagado (ver lib/guest.ts) el botón se ve, pero avisa que no está disponible.
 function GuestButton({ onClick }: { onClick: () => void }) {
+  const [closed, setClosed] = useState(false);
+  const handle = () => (guestModeAvailable() ? onClick() : setClosed(true));
   return (
     <div className="mt-3 text-center">
-      <button onClick={onClick} className="text-sm font-semibold text-white/80 underline underline-offset-4 hover:text-white">
+      <button onClick={handle} className="text-sm font-semibold text-white/80 underline underline-offset-4 hover:text-white">
         {tr('Probar sin cuenta')}
       </button>
-      <p className="mt-1 text-[11px] text-white/40">{tr('Tus datos se guardan solo en este celular hasta que vincules tu cuenta.')}</p>
+      {closed ? (
+        <p role="status" className="mt-2 mx-auto max-w-xs text-xs text-amber-200 bg-amber-400/10 border border-amber-400/40 rounded-xl px-3 py-2">
+          {tr('Entrar sin cuenta no está disponible en esta versión de prueba. Por ahora entra con tu cuenta de Google.')}
+        </p>
+      ) : (
+        <p className="mt-1 text-[11px] text-white/40">{tr('Tus datos se guardan solo en este celular hasta que vincules tu cuenta.')}</p>
+      )}
     </div>
   );
 }
@@ -227,6 +237,7 @@ export default function LoginPage() {
   };
 
   const handleGuest = async () => {
+    if (!guestModeAvailable()) return;
     try {
       sessionStorage.setItem('login_in_progress', 'true');
       setMode('login');

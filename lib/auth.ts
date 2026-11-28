@@ -51,14 +51,20 @@ export async function processGoogleUser(user: any) {
   const snap    = await getDoc(userRef);
 
   let isNewUser = false;
+  // En una cuenta que empezó como invitado y luego vinculó Google, el nombre, la foto y el correo
+  // pueden estar solo en los datos de Google (user.displayName queda vacío)
+  const g = (user.providerData || []).find((p: any) => p?.providerId === 'google.com') || {};
+  const gName = user.displayName || g.displayName || '';
+  const gEmail = user.email || g.email || '';
+  const gPhoto = user.photoURL || g.photoURL || '';
 
   if (!snap.exists()) {
     isNewUser = true;
     await setDoc(userRef, {
       // Invitado (modo sin cuenta): sin nombre ni correo hasta que vincule su cuenta de Google
-      name:      user.isAnonymous ? 'Invitado' : user.displayName,
-      email:     user.email || '',
-      photoURL:  user.photoURL || '',
+      name:      user.isAnonymous ? 'Invitado' : gName,
+      email:     gEmail,
+      photoURL:  gPhoto,
       // El rol de administrador se asigna desde "Gestionar usuarios" y queda guardado en el perfil
       role:      'Usuario',
       currency:  defaultCurrency(detectLang()),
@@ -66,10 +72,12 @@ export async function processGoogleUser(user: any) {
     });
   } else {
     const data = snap.data();
+    // Si ya entró con Google, el "Invitado" que quedó del modo sin cuenta se cambia por su nombre
+    const oldName = data.name === 'Invitado' && !user.isAnonymous ? '' : data.name;
     const updates: any = {
-      name: user.displayName || data.name || '',
-      email: user.email || data.email || '',
-      photoURL: user.photoURL || data.photoURL || '',
+      name: gName || oldName || '',
+      email: gEmail || data.email || '',
+      photoURL: gPhoto || data.photoURL || '',
     };
     await setDoc(userRef, updates, { merge: true });
   }
